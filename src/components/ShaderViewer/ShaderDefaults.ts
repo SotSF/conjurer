@@ -1,10 +1,14 @@
-
+// defaultVertexShader is basically a noop shader that doesn't transform
+// positions passed to it.  It is used to render the fragment shader as a pixel
+// shader.
 export const defaultVertexShader = `
 void main() {
   gl_Position = vec4( position, 1.0 );
 }
 `
 
+// defaultFragmentShader is a simple placeholder shader that just renders a
+// centered dot that fades back and forth between black and white
 export const defaultFragmentShader = `
 uniform vec2 u_resolution;
 uniform float u_time;

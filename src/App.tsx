@@ -1,5 +1,5 @@
 import './App.css';
-import ShaderViewer from './components/Shader';
+import ShaderViewer from './components/ShaderViewer/ShaderViewer';
 
 function App() {
   return (
