@@ -1,8 +1,6 @@
 import { MutableRefObject, ReactNode, useEffect, useRef, useState } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 
-import { Box } from "@chakra-ui/react"
-
 import * as THREE from 'three'
 
 import { defaultVertexShader, defaultFragmentShader } from './ShaderDefaults'
@@ -86,19 +84,16 @@ const ShaderViewer = ({shaderSrc}: {
     u_time: { type: "f", value: 1.0 },
     u_resolution: { type: "v2", value: new THREE.Vector2(0, 0) },
     u_mouse: { type: "v2", value: new THREE.Vector2() },
-    u_sine: { type: "b", value: false }
   })
 
-  console.log("omg")
-
   return <div>
-    <Box ref={paneRef} padding={4} display="flex" style={{gap: "20px"}}>
-      <Box >
+    <div ref={paneRef}>
+      <div >
         <Canvas ref={canvasRef} style={{width:shaderSrc.width, height:shaderSrc.height}}>
           <ShaderMesh canvasRef={canvasRef} shaderSrc={shaderSrc} uniforms={uniforms}/>
         </Canvas>
-      </Box>
-    </Box>
+      </div>
+    </div>
   </div>
 }
 

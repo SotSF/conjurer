@@ -1,8 +1,5 @@
-import React from 'react';
-import logo from './logo.svg';
 import './App.css';
 import ShaderViewer from './components/Shader';
-import { defaultFragmentShader } from './components/ShaderDefaults';
 
 function App() {
   return (

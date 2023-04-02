@@ -1,8 +1,6 @@
 import { MutableRefObject, ReactNode, useEffect, useRef, useState } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 
-import { Box } from "@chakra-ui/react"
-
 import * as THREE from 'three'
 
 import { defaultVertexShader, defaultFragmentShader } from './ShaderDefaults'
@@ -50,7 +48,7 @@ function ShaderMesh(props: ShaderMeshProps) {
       window.removeEventListener('resize', resizeListener)
     }
 
-  }, [])
+  }, [canvasRef.clientHeight, canvasRef.clientWidth, gl.domElement, uniforms])
 
   // Subscribe this component to the render-loop
   useFrame(({gl, scene, camera}, delta) => {
@@ -90,14 +88,14 @@ const ShaderViewer = ({shaderSrc}: {
   })
 
   return <div>
-    <Box ref={paneRef} padding={4} display="flex" style={{gap: "20px"}}>
-      <Box >
+    <div ref={paneRef}>
+      <div >
         <Canvas ref={canvasRef} style={{width:shaderSrc.width, height:shaderSrc.height}}>
           <ShaderMesh canvasRef={canvasRef} shaderSrc={shaderSrc} uniforms={uniforms}/>
         </Canvas>
-      </Box>
+      </div>
       {/* <ShaderControls shaderSrc={shaderSrc} uniforms={uniforms}/> */}
-    </Box>
+    </div>
   </div>
 }
 
