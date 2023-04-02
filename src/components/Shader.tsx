@@ -10,6 +10,7 @@ type ShaderMeshProps = {
     canvasRef: MutableRefObject<HTMLCanvasElement>
     shaderSrc: ShaderSrc
     uniforms: MutableRefObject<Uniforms>
+    playing: boolean
 }
 
 function ShaderMesh(props: ShaderMeshProps) {
@@ -52,8 +53,10 @@ function ShaderMesh(props: ShaderMeshProps) {
 
   // Subscribe this component to the render-loop
   useFrame(({gl, scene, camera}, delta) => {
-    uniforms.current.u_time.value += delta
-    gl.render(scene, camera)
+    if (props.playing) {
+      uniforms.current.u_time.value += delta
+      gl.render(scene, camera)
+    }
   }, 1)
    
   return (
@@ -80,6 +83,9 @@ const ShaderViewer = ({shaderSrc}: {
   const canvasRef = useRef<HTMLCanvasElement>() as MutableRefObject<HTMLCanvasElement>
   const paneRef = useRef(null)
 
+  const [playing, setPlaying] = useState(true)
+  const togglePlaying = () => setPlaying((s) => !s);
+
   const uniforms = useRef({
     u_time: { type: "f", value: 1.0 },
     u_resolution: { type: "v2", value: new THREE.Vector2(0, 0) },
@@ -88,9 +94,9 @@ const ShaderViewer = ({shaderSrc}: {
   })
 
   return <div>
-    <div ref={paneRef}style={{position: "relative", overflow:"hidden", width:shaderSrc.width, height:shaderSrc.height}} id="lol">
-        <Canvas ref={canvasRef} style={{position: "absolute", overflow:"hidden", width:shaderSrc.width, height:shaderSrc.height}} id="omg">
-          <ShaderMesh canvasRef={canvasRef} shaderSrc={shaderSrc} uniforms={uniforms}/>
+    <div ref={paneRef} style={{width:shaderSrc.width, height:shaderSrc.height}} id="lol" onClick={togglePlaying}>
+        <Canvas ref={canvasRef} >
+          <ShaderMesh canvasRef={canvasRef} shaderSrc={shaderSrc} uniforms={uniforms} playing={playing}/>
         </Canvas>
     </div>
   </div>
