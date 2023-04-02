@@ -8,8 +8,8 @@ function App() {
         <ShaderViewer shaderSrc={{
             name: 'lol',
             src: '/shaders/default.frag',
-            width: '100px',
-            height: '100px',
+            width: '600px',
+            height: '600px',
             parameters: []
           }} />
       </div>

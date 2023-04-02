@@ -58,7 +58,7 @@ function ShaderMesh(props: ShaderMeshProps) {
    
   return (
     <mesh {...props} ref={mesh}>
-      <planeBufferGeometry args={[2,3]} />
+      <planeGeometry args={[2,2]} />
       <shaderMaterial
         vertexShader={defaultVertexShader}
         fragmentShader={shader}
@@ -88,13 +88,10 @@ const ShaderViewer = ({shaderSrc}: {
   })
 
   return <div>
-    <div ref={paneRef}>
-      <div >
-        <Canvas ref={canvasRef} style={{width:shaderSrc.width, height:shaderSrc.height}}>
+    <div ref={paneRef}style={{position: "relative", overflow:"hidden", width:shaderSrc.width, height:shaderSrc.height}} id="lol">
+        <Canvas ref={canvasRef} style={{position: "absolute", overflow:"hidden", width:shaderSrc.width, height:shaderSrc.height}} id="omg">
           <ShaderMesh canvasRef={canvasRef} shaderSrc={shaderSrc} uniforms={uniforms}/>
         </Canvas>
-      </div>
-      {/* <ShaderControls shaderSrc={shaderSrc} uniforms={uniforms}/> */}
     </div>
   </div>
 }
