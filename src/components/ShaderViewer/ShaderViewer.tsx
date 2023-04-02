@@ -12,7 +12,6 @@ const ShaderViewer = ({shaderSrc}: {
     children?: ReactNode
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>() as MutableRefObject<HTMLCanvasElement>
-  const paneRef = useRef(null)
 
   const [playing, setPlaying] = useState(true)
   const togglePlaying = () => setPlaying((s) => !s);
@@ -21,11 +20,10 @@ const ShaderViewer = ({shaderSrc}: {
     u_time: { type: "f", value: 1.0 },
     u_resolution: { type: "v2", value: new THREE.Vector2(0, 0) },
     u_mouse: { type: "v2", value: new THREE.Vector2() },
-    u_sine: { type: "b", value: false }
   })
 
   return <div>
-    <div ref={paneRef} style={{width:shaderSrc.width, height:shaderSrc.height}} id="lol" onClick={togglePlaying}>
+    <div style={{width:shaderSrc.width, height:shaderSrc.height}} onClick={togglePlaying}>
         <Canvas ref={canvasRef} >
           <ShaderMesh canvasRef={canvasRef} shaderSrc={shaderSrc} uniforms={uniforms} playing={playing}/>
         </Canvas>

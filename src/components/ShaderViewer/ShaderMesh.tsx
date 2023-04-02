@@ -1,7 +1,11 @@
-import { MutableRefObject, useEffect, useRef, useState } from 'react';
+import { MutableRefObject, useEffect, useMemo, useRef, useState } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
-import { defaultVertexShader, defaultFragmentShader } from './ShaderDefaults';
+import { defaultFragmentShader } from './ShaderDefaults';
 import { ShaderSrc, Uniforms } from './ShaderTypes';
+import { BufferAttribute, BufferGeometry, DoubleSide, DynamicDrawUsage, Float32BufferAttribute, TextureLoader } from 'three';
+
+import { OrbitControls, Stats } from "@react-three/drei";
+
 
 export type ShaderMeshProps = {
     canvasRef: MutableRefObject<HTMLCanvasElement>
@@ -21,7 +25,7 @@ export function ShaderMesh(props: ShaderMeshProps) {
 
   const canvasRef = props.canvasRef.current;
   const uniforms = props.uniforms;
-  const gl = useThree((state) => state.gl);
+  const {gl, camera} = useThree();
 
   // On mount, set up the resolution uniform and fetch the shader.
   useEffect(() => {
@@ -59,22 +63,75 @@ export function ShaderMesh(props: ShaderMeshProps) {
   useFrame(({ gl, scene, camera }, delta) => {
     if (props.playing) {
       uniforms.current.u_time.value += delta;
+      // (boxRef.current as Mesh).rotation.x += 0.005;
+      // (boxRef.current as Mesh).rotation.y += 0.01;
       gl.render(scene, camera);
     }
   });
 
   return (
-    <mesh {...props} ref={mesh}>
-      <planeGeometry args={[2, 2]} />
-      <shaderMaterial
-        vertexShader={defaultVertexShader}
-        fragmentShader={shader}
-        uniforms={uniforms.current}
-        onUpdate={(a) => {
-          // Hack: the material doesn't seem to update when i change the shader.
-          // Should only get called twice.
-          a.needsUpdate = true;
-        }} />
-    </mesh>
+    <>
+      <Stars i={350} j={350} />
+      <OrbitControls />
+      <Stats />
+    </>
+  )
+}
+
+function BufferPoints({ count = 1000 }) {
+  const points = useMemo(() => {
+    const p = new Array(count).fill(0).map((v) => (0.5 - Math.random()) * 7.5);
+    return new BufferAttribute(new Float32Array(p), 3);
+  }, [count]);
+
+  return (
+    <points>
+      <bufferGeometry>
+        <bufferAttribute attach={"attributes-position"} {...points} />
+      </bufferGeometry>
+      <pointsMaterial
+        size={0.1}
+        // threshold={0.1}
+        alphaTest={0.1}
+        opacity={1.0}
+        color={0xff00ff}
+        sizeAttenuation={true}
+      />
+    </points>
   );
 }
+
+
+const Stars = ({ i, j }: {i: number, j: number}) => {
+  const geometry = new BufferGeometry();
+  const vertices = [];
+
+  const sprite = new TextureLoader().load("/star.png");
+
+  for (let count = 0; count < 10000; count++) {
+    const x = 2000 * Math.random() - 1000;
+    const y = 2000 * Math.random() - 1000;
+    const z = 2000 * Math.random() - 1000;
+
+    vertices.push(x, y, z);
+  }
+
+  geometry.setAttribute(
+    "position",
+    new Float32BufferAttribute(vertices, 3)
+  );
+
+  return (
+    <points args={[geometry]}>
+      <pointsMaterial
+        size={35}
+        sizeAttenuation={true}
+        // map={sprite}
+        color={0xff00ff}
+        opacity={1.0}
+        alphaTest={0.5}
+        transparent={false}
+      />
+    </points>
+  );
+};
