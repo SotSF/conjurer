@@ -36,7 +36,7 @@
     "splines": "jonathanlurie/splines",
     "three": "^0.151.2",
     "use-debounce": "^9.0.4",
-    "wavesurfer.js": "^7.0.0-alpha.44"
+    "wavesurfer.js": "^7.0.0-alpha.45"
   },
   "devDependencies": {
     "@types/node": "^18.16.3",
