@@ -12,6 +12,10 @@ export class ExperienceStore {
     makeAutoObservable(this);
   }
 
+  loadFromString = (experienceString: string) => {
+    this.rootStore.deserialize(this.parseExperience(experienceString));
+  };
+
   loadInitialExperience = () => {
     // load initial experience from file. if you would like to change this, click the clipboard
     // button in the UI and paste the contents into the data/initialExperience.json file.
