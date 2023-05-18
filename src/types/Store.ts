@@ -26,8 +26,6 @@ export class Store {
   audioStore = new AudioStore(this.timer);
   experienceStore = new ExperienceStore(this);
 
-  user = "";
-
   patternBlocks: Block[] = [];
   selectedBlocks: Set<Block> = new Set();
 
@@ -68,6 +66,17 @@ export class Store {
     return lastBlock.endTime;
   }
 
+  _user = "";
+
+  get user(): string {
+    return this._user;
+  }
+
+  set user(value: string) {
+    this._user = value;
+    localStorage.setItem("user", value);
+  }
+
   constructor() {
     makeAutoObservable(this, {
       _lastComputedCurrentBlock: false, // don't make this observable, since it's just a cache
@@ -76,6 +85,10 @@ export class Store {
 
   initialize = () => {
     this.experienceStore.loadInitialExperience();
+
+    // check for a username in local storage
+    const username = localStorage.getItem("user");
+    if (username) this._user = username;
 
     // set up an autosave interval
     setInterval(() => {

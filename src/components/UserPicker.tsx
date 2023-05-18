@@ -1,5 +1,5 @@
 import useAxios from "axios-hooks";
-import { memo, useState } from "react";
+import { useState } from "react";
 import {
   Button,
   HStack,
@@ -19,18 +19,17 @@ import {
 import { FaUser } from "react-icons/fa";
 import { useStore } from "@/src/types/StoreContext";
 import { action } from "mobx";
+import { observer } from "mobx-react-lite";
 
-export const UserPicker = memo(function UserPicker() {
+export const UserPicker = observer(function UserPicker() {
   const store = useStore();
 
   const { isOpen, onOpen, onClose } = useDisclosure({});
 
   const [newUser, setNewUser] = useState("");
 
-  const [{ data, loading, error }, refetch] = useAxios(
-    {
-      url: "/api/users",
-    },
+  const [{ data, loading }, refetch] = useAxios(
+    { url: "/api/users" },
     { useCache: false, manual: true }
   );
 
@@ -96,11 +95,7 @@ export const UserPicker = memo(function UserPicker() {
                 onClick={action(async () => {
                   if (!newUser) return;
 
-                  await createUser({
-                    data: {
-                      name: newUser,
-                    },
-                  });
+                  await createUser({ data: { name: newUser } });
 
                   onClose();
                 })}
