@@ -15,6 +15,7 @@ export class UIStore {
   displayingCanopy = true;
   showingPerformance = false;
   showingWaveformOverlay = false;
+  openExperienceModalShowing = true;
 
   pixelsPerSecond = INITIAL_PIXELS_PER_SECOND; // the zoom of the timeline
   beatLength = 1; // length of a beat in seconds

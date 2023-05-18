@@ -10,9 +10,9 @@ import { ImLoop } from "react-icons/im";
 import { useStore } from "@/src/types/StoreContext";
 import { action, runInAction } from "mobx";
 import {
-  AUDIO_BUCKET_NAME,
-  AUDIO_BUCKET_PREFIX,
-  AUDIO_BUCKET_REGION,
+  ASSET_BUCKET_NAME,
+  AUDIO_ASSET_PREFIX,
+  ASSET_BUCKET_REGION,
 } from "@/src/utils/audio";
 
 export const AudioControls = observer(function AudioControls() {
@@ -31,11 +31,11 @@ export const AudioControls = observer(function AudioControls() {
         clientConfig: { region: "us-east-2" },
         identityPoolId: "us-east-2:343f9a70-6bf5-40f3-b21d-1376f65bb4be",
       }),
-      region: AUDIO_BUCKET_REGION,
+      region: ASSET_BUCKET_REGION,
     });
     const listObjectsCommand = new ListObjectsCommand({
-      Bucket: AUDIO_BUCKET_NAME,
-      Prefix: AUDIO_BUCKET_PREFIX,
+      Bucket: ASSET_BUCKET_NAME,
+      Prefix: AUDIO_ASSET_PREFIX,
     });
     s3.send(listObjectsCommand).then(
       action((data) => {
