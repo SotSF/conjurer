@@ -1,8 +1,16 @@
 import { makeAutoObservable } from "mobx";
 import initialExperience from "@/src/data/initialExperience.json";
+import { GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
+import {
+  ASSET_BUCKET_NAME,
+  EXPERIENCE_ASSET_PREFIX,
+  getS3,
+} from "@/src/utils/assets";
 
 // Define a new RootStore interface here so that we avoid circular dependencies
 interface RootStore {
+  user: string;
+  experienceName: string;
   serialize: () => any;
   deserialize: (data: any) => void;
 }
@@ -11,6 +19,28 @@ export class ExperienceStore {
   constructor(readonly rootStore: RootStore) {
     makeAutoObservable(this);
   }
+
+  saveToS3 = () => {
+    const experienceFilename = `${this.rootStore.user}-${
+      this.rootStore.experienceName || "untitled"
+    }`;
+    const putObjectCommand = new PutObjectCommand({
+      Bucket: ASSET_BUCKET_NAME,
+      Key: `${EXPERIENCE_ASSET_PREFIX}${experienceFilename}.json`,
+      Body: this.stringifyExperience(),
+    });
+    return getS3().send(putObjectCommand);
+  };
+
+  loadFromS3 = async (experienceFilename: string) => {
+    const getObjectCommand = new GetObjectCommand({
+      Bucket: ASSET_BUCKET_NAME,
+      Key: `${EXPERIENCE_ASSET_PREFIX}${experienceFilename}.json`,
+    });
+    const experienceData = await getS3().send(getObjectCommand);
+    const experienceString = await experienceData.Body?.transformToString();
+    if (experienceString) this.loadFromString(experienceString);
+  };
 
   loadFromString = (experienceString: string) => {
     this.rootStore.deserialize(this.parseExperience(experienceString));

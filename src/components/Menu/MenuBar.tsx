@@ -16,7 +16,8 @@ import { OpenExperienceModal } from "@/src/components/Menu/OpenExperienceModal";
 import { SaveExperienceModal } from "@/src/components/Menu/SaveExperienceModal";
 
 export const MenuBar = observer(function MenuBar() {
-  const { experienceStore, uiStore } = useStore();
+  const store = useStore();
+  const { experienceStore, uiStore } = store;
 
   return (
     <>
@@ -70,9 +71,7 @@ export const MenuBar = observer(function MenuBar() {
           <MenuItem
             icon={<FiSave size={17} />}
             command="⌘S"
-            onClick={() => {
-              // TODO:
-            }}
+            onClick={experienceStore.saveToS3}
           >
             Save
           </MenuItem>

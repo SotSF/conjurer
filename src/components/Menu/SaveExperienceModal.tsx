@@ -12,18 +12,11 @@ import {
   ModalOverlay,
   Spinner,
   Text,
-  VStack,
 } from "@chakra-ui/react";
 import { useStore } from "@/src/types/StoreContext";
 import { useExperiences } from "@/src/hooks/experiences";
-import {
-  ASSET_BUCKET_NAME,
-  EXPERIENCE_ASSET_PREFIX,
-  getS3,
-} from "@/src/utils/assets";
-import { PutObjectCommand } from "@aws-sdk/client-s3";
 import { useEffect, useRef, useState } from "react";
-import { action } from "mobx";
+import { action, runInAction } from "mobx";
 
 export const SaveExperienceModal = observer(function SaveExperienceModal() {
   const store = useStore();
@@ -36,7 +29,7 @@ export const SaveExperienceModal = observer(function SaveExperienceModal() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [saving, setSaving] = useState(false);
   const [experienceName, setExperienceName] = useState("");
-  const fullExperienceName = `${store.user}-${experienceName}`;
+  const experienceFilename = `${store.user}-${experienceName}`;
 
   useEffect(() => {
     if (inputRef.current && !loading) inputRef.current.focus();
@@ -48,12 +41,10 @@ export const SaveExperienceModal = observer(function SaveExperienceModal() {
 
   const onSaveExperience = async () => {
     setSaving(true);
-    const putObjectCommand = new PutObjectCommand({
-      Bucket: ASSET_BUCKET_NAME,
-      Key: `${EXPERIENCE_ASSET_PREFIX}${fullExperienceName}.json`,
-      Body: experienceStore.stringifyExperience(),
+    runInAction(() => {
+      store.experienceName = experienceName;
     });
-    await getS3().send(putObjectCommand);
+    await experienceStore.saveToS3();
     setSaving(false);
     onClose();
   };
@@ -89,7 +80,7 @@ export const SaveExperienceModal = observer(function SaveExperienceModal() {
                   <Text
                     key={experience}
                     color={
-                      experience === fullExperienceName
+                      experience === experienceFilename
                         ? "orange.400"
                         : "chakra-body-text"
                     }

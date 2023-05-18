@@ -77,6 +77,17 @@ export class Store {
     localStorage.setItem("user", value);
   }
 
+  _experienceName = "";
+
+  get experienceName(): string {
+    return this._experienceName;
+  }
+
+  set experienceName(value: string) {
+    this._experienceName = value;
+    localStorage.setItem("experienceName", value);
+  }
+
   constructor() {
     makeAutoObservable(this, {
       _lastComputedCurrentBlock: false, // don't make this observable, since it's just a cache

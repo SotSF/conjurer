@@ -6,7 +6,7 @@ import { useEffect } from "react";
 
 export const Keyboard = observer(function Keyboard() {
   const store = useStore();
-  const { timer, uiStore } = store;
+  const { timer, uiStore, experienceStore } = store;
 
   useEffect(() => {
     const handleKeyDown = action((e: KeyboardEvent) => {
@@ -30,7 +30,7 @@ export const Keyboard = observer(function Keyboard() {
         uiStore.showingSaveExperienceModal = true;
         e.preventDefault();
       } else if (e.key === "s" && (e.ctrlKey || e.metaKey)) {
-        // TODO: save experience
+        experienceStore.saveToS3();
         e.preventDefault();
       } else if (e.key === "a" && (e.ctrlKey || e.metaKey)) {
         store.selectAllBlocks();
@@ -71,7 +71,7 @@ export const Keyboard = observer(function Keyboard() {
       window.removeEventListener("copy", handleCopy);
       window.removeEventListener("paste", handlePaste);
     };
-  }, [store, timer, uiStore]);
+  }, [store, timer, uiStore, experienceStore]);
 
   return (
     <VStack textAlign={"center"}>
