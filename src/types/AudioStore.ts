@@ -3,7 +3,6 @@ import { makeAutoObservable } from "mobx";
 import type { RegionParams } from "wavesurfer.js/dist/plugins/regions";
 
 export class AudioStore {
-  timer: Timer;
   audioInitialized = false;
   availableAudioFiles: string[] = [];
   selectedAudioFile: string = "cloudkicker-explorebecurious.mp3";
@@ -13,9 +12,8 @@ export class AudioStore {
 
   selectedRegion: RegionParams | null = null;
 
-  constructor(timer: Timer) {
+  constructor(readonly timer: Timer) {
     makeAutoObservable(this);
-    this.timer = timer;
     this.timer.addTickListener(this.onTick);
   }
 

@@ -7,7 +7,6 @@ import { DEFAULT_BLOCK_DURATION } from "@/src/utils/time";
 import { patterns } from "@/src/patterns/patterns";
 import { makeAutoObservable, configure } from "mobx";
 import { AudioStore } from "@/src/types/AudioStore";
-import initialExperience from "@/src/data/initialExperience.json";
 import { Variation } from "@/src/types/Variations/Variation";
 import { ExperienceStore } from "@/src/types/ExperienceStore";
 
@@ -76,13 +75,12 @@ export class Store {
   }
 
   initialize = () => {
-    // load initial experience from file. if you would like to change this, click the clipboard
-    // button in the UI and paste the contents into the data/initialExperience.json file.
-    this.deserialize(initialExperience);
+    this.experienceStore.loadInitialExperience();
 
     // set up an autosave interval
     setInterval(() => {
-      if (!this.timer.playing) this.saveToLocalStorage("autosave");
+      if (!this.timer.playing)
+        this.experienceStore.saveToLocalStorage("autosave");
     }, 60 * 1000);
 
     this.initialized = true;
@@ -427,24 +425,6 @@ export class Store {
     this.selectedVariation = variation;
     this.selectedVariationUniformName = uniformName;
     this.selectedVariationBlock = block;
-  };
-
-  saveToLocalStorage = (key: string) => {
-    if (typeof window === "undefined") return;
-    window.localStorage.setItem(
-      key,
-      JSON.stringify(this.serialize(), (key, val) =>
-        val.toFixed ? Number(val.toFixed(4)) : val
-      )
-    );
-  };
-
-  loadFromLocalStorage = (key: string) => {
-    if (typeof window === "undefined") return;
-    const arrangement = window.localStorage.getItem(key);
-    if (arrangement) {
-      this.deserialize(JSON.parse(arrangement));
-    }
   };
 
   serialize = () => ({

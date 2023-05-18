@@ -11,8 +11,7 @@ import { TimerReadout } from "@/src/components/TimerReadout";
 import { AudioControls } from "@/src/components/AudioControls";
 
 export const Controls = observer(function Controls() {
-  const store = useStore();
-  const { uiStore } = store;
+  const { uiStore, experienceStore } = useStore();
 
   return (
     <HStack my={2} width="100%" overflowX="clip">
@@ -25,30 +24,28 @@ export const Controls = observer(function Controls() {
         title="Copy to clipboard"
         height={6}
         icon={<FaRegClipboard size={17} />}
-        onClick={() =>
-          navigator.clipboard.writeText(JSON.stringify(store.serialize()))
-        }
+        onClick={experienceStore.copyToClipboard}
       />
       <IconButton
         aria-label="Save"
         title="Save"
         height={6}
         icon={<FiSave size={17} />}
-        onClick={() => store.saveToLocalStorage("arrangement")}
+        onClick={() => experienceStore.saveToLocalStorage("arrangement")}
       />
       <IconButton
         aria-label="Open last saved"
         title="Open"
         height={6}
         icon={<FaFolderOpen size={17} />}
-        onClick={() => store.loadFromLocalStorage("arrangement")}
+        onClick={() => experienceStore.loadFromLocalStorage("arrangement")}
       />
       <IconButton
         aria-label="Open last auto saved"
         title="Open last auto saved"
         height={6}
         icon={<BiTimer size={18} />}
-        onClick={() => store.loadFromLocalStorage("autosave")}
+        onClick={() => experienceStore.loadFromLocalStorage("autosave")}
       />
       <IconButton
         aria-label="Zoom in"
