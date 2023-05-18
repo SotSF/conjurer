@@ -1,10 +1,9 @@
-import { ListObjectsCommand, S3Client } from "@aws-sdk/client-s3";
-import { fromCognitoIdentityPool } from "@aws-sdk/credential-providers";
+import { ListObjectsCommand } from "@aws-sdk/client-s3";
 import {
   ASSET_BUCKET_NAME,
-  ASSET_BUCKET_REGION,
   EXPERIENCE_ASSET_PREFIX,
-} from "@/src/utils/audio";
+  getS3,
+} from "@/src/utils/assets";
 import { observer } from "mobx-react-lite";
 import {
   Button,
@@ -15,6 +14,7 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
+  Spinner,
   Text,
 } from "@chakra-ui/react";
 import { useStore } from "@/src/types/StoreContext";
@@ -24,36 +24,40 @@ export const OpenExperienceModal = observer(function OpenExperienceModal() {
   const store = useStore();
   const { experienceStore, uiStore } = store;
 
+  const [loading, setLoading] = useState(true);
   const [experiences, setExperiences] = useState<string[]>([]);
 
   useEffect(() => {
-    if (!uiStore.openExperienceModalShowing) return;
+    if (!uiStore.openExperienceModalShowing || !store.user) return;
+
+    setLoading(true);
 
     // get list of objects from s3 bucket using aws sdk
-    const s3 = new S3Client({
-      credentials: fromCognitoIdentityPool({
-        clientConfig: { region: "us-east-2" },
-        identityPoolId: "us-east-2:343f9a70-6bf5-40f3-b21d-1376f65bb4be",
-      }),
-      region: ASSET_BUCKET_REGION,
-    });
     const listObjectsCommand = new ListObjectsCommand({
       Bucket: ASSET_BUCKET_NAME,
       Prefix: EXPERIENCE_ASSET_PREFIX,
     });
-    s3.send(listObjectsCommand).then((data) => {
-      console.log(data);
-      const experienceFiles =
-        data.Contents?.map((object) => object.Key?.split("/")[1] ?? "").filter(
-          (e) => !!e
-        ) ?? [];
-      setExperiences(experienceFiles);
-    });
-  }, [uiStore.openExperienceModalShowing]);
+    getS3()
+      .send(listObjectsCommand)
+      .then((data) => {
+        const experienceFiles =
+          // get the names of all experience files
+          data.Contents?.map((object) => object.Key?.split("/")[1] ?? "")
+            // filter down to only this user's experiences
+            .filter((e) => e.startsWith(store.user))
+            // remove .json extension
+            .map((e) => e.replaceAll(".json", "")) ?? [];
+        setExperiences(experienceFiles);
+        setLoading(false);
+      });
+  }, [uiStore.openExperienceModalShowing, store.user]);
 
-  const onOpenExperience = () => {};
   const onClose = () => {
     uiStore.openExperienceModalShowing = false;
+  };
+  const onOpenExperience = (experience: string) => {
+    // TODO: load experience
+    onClose();
   };
   return (
     <>
@@ -67,15 +71,33 @@ export const OpenExperienceModal = observer(function OpenExperienceModal() {
           <ModalHeader>Open experience</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            <Text>Viewing {store.user || "anonymous"}&apos;s experiences:</Text>
-            {experiences.map((experience) => (
-              <Button variant="ghost" key={experience}>
-                {experience}
-              </Button>
-            ))}
+            {store.user ? (
+              loading ? (
+                <Spinner />
+              ) : (
+                <>
+                  <Text>
+                    Viewing {store.user}&apos;s experiences. Click to open.
+                  </Text>
+                  {experiences.map((experience) => (
+                    <Button
+                      key={experience}
+                      variant="ghost"
+                      onClick={() => onOpenExperience(experience)}
+                    >
+                      {experience}
+                    </Button>
+                  ))}
+                  {experiences.length === 0 && (
+                    <Text color="gray.400">(no saved experiences yet)</Text>
+                  )}
+                </>
+              )
+            ) : (
+              <Text>Please log in first!</Text>
+            )}
           </ModalBody>
           <ModalFooter>
-            <Button onClick={onOpenExperience}>Open</Button>
             <Button onClick={onClose}>Close</Button>
           </ModalFooter>
         </ModalContent>

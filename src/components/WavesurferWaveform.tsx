@@ -14,7 +14,7 @@ import {
   ASSET_BUCKET_NAME,
   AUDIO_ASSET_PREFIX,
   ASSET_BUCKET_REGION,
-} from "@/src/utils/audio";
+} from "@/src/utils/assets";
 import { action } from "mobx";
 
 // https://wavesurfer-js.org/docs/options.html

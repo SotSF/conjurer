@@ -23,6 +23,10 @@ export const Keyboard = observer(function Keyboard() {
         e.preventDefault();
       } else if (e.key === "ArrowLeft") timer.skipBackward();
       else if (e.key === "ArrowRight") timer.skipForward();
+      else if (e.key === "o" && (e.ctrlKey || e.metaKey)) {
+        uiStore.openExperienceModalShowing = true;
+        e.preventDefault();
+      }
       // else if (e.key === "z" && e.ctrlKey) store.undo();
       // else if (e.key === "y" && e.ctrlKey) store.redo();
       else if (e.key === "a" && (e.ctrlKey || e.metaKey)) {
@@ -74,6 +78,12 @@ export const Keyboard = observer(function Keyboard() {
       </Text>
       <Text fontSize={9} userSelect="none">
         <Kbd>+</Kbd>/<Kbd>-</Kbd>: zoom in/out
+      </Text>
+      <Text fontSize={9} userSelect="none">
+        <Kbd>cmd</Kbd>+<Kbd>s</Kbd>: save
+      </Text>
+      <Text fontSize={9} userSelect="none">
+        <Kbd>cmd</Kbd>+<Kbd>o</Kbd>: open
       </Text>
       <Text fontSize={9} userSelect="none">
         <Kbd>cmd</Kbd>+<Kbd>a</Kbd>: select all blocks
