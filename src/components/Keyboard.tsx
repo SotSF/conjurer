@@ -26,10 +26,13 @@ export const Keyboard = observer(function Keyboard() {
       else if (e.key === "o" && (e.ctrlKey || e.metaKey)) {
         uiStore.showingOpenExperienceModal = true;
         e.preventDefault();
-      }
-      // else if (e.key === "z" && e.ctrlKey) store.undo();
-      // else if (e.key === "y" && e.ctrlKey) store.redo();
-      else if (e.key === "a" && (e.ctrlKey || e.metaKey)) {
+      } else if (e.key === "s" && e.shiftKey && (e.ctrlKey || e.metaKey)) {
+        uiStore.showingSaveExperienceModal = true;
+        e.preventDefault();
+      } else if (e.key === "s" && (e.ctrlKey || e.metaKey)) {
+        // TODO: save experience
+        e.preventDefault();
+      } else if (e.key === "a" && (e.ctrlKey || e.metaKey)) {
         store.selectAllBlocks();
         e.preventDefault();
       } else if (e.key === "Escape") store.deselectAllBlocks();
@@ -40,6 +43,8 @@ export const Keyboard = observer(function Keyboard() {
         e.preventDefault();
       } else if (e.key === "+" || e.key === "=") uiStore.zoomIn();
       else if (e.key === "-") uiStore.zoomOut();
+      // else if (e.key === "z" && e.ctrlKey) store.undo();
+      // else if (e.key === "y" && e.ctrlKey) store.redo();
     });
     window.addEventListener("keydown", handleKeyDown);
 
@@ -81,6 +86,9 @@ export const Keyboard = observer(function Keyboard() {
       </Text>
       <Text fontSize={9} userSelect="none">
         <Kbd>cmd</Kbd>+<Kbd>s</Kbd>: save
+      </Text>
+      <Text fontSize={9} userSelect="none">
+        <Kbd>cmd</Kbd>+<Kbd>shift</Kbd>+<Kbd>s</Kbd>: save as
       </Text>
       <Text fontSize={9} userSelect="none">
         <Kbd>cmd</Kbd>+<Kbd>o</Kbd>: open

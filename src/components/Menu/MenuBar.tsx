@@ -80,7 +80,7 @@ export const MenuBar = observer(function MenuBar() {
             icon={<FiSave size={17} />}
             command="⌘⇧S"
             onClick={() => {
-              // TODO:
+              uiStore.showingSaveExperienceModal = true;
             }}
           >
             Save as...

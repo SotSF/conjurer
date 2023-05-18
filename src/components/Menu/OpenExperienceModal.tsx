@@ -1,4 +1,4 @@
-import { GetObjectCommand, ListObjectsCommand } from "@aws-sdk/client-s3";
+import { GetObjectCommand } from "@aws-sdk/client-s3";
 import {
   ASSET_BUCKET_NAME,
   EXPERIENCE_ASSET_PREFIX,
@@ -18,39 +18,15 @@ import {
   Text,
 } from "@chakra-ui/react";
 import { useStore } from "@/src/types/StoreContext";
-import { useEffect, useState } from "react";
+import { useExperiences } from "@/src/hooks/experiences";
 
 export const OpenExperienceModal = observer(function OpenExperienceModal() {
   const store = useStore();
   const { experienceStore, uiStore } = store;
 
-  const [loading, setLoading] = useState(true);
-  const [experiences, setExperiences] = useState<string[]>([]);
-
-  useEffect(() => {
-    if (!uiStore.showingOpenExperienceModal || !store.user) return;
-
-    setLoading(true);
-
-    // get list of objects from s3 bucket using aws sdk
-    const listObjectsCommand = new ListObjectsCommand({
-      Bucket: ASSET_BUCKET_NAME,
-      Prefix: EXPERIENCE_ASSET_PREFIX,
-    });
-    getS3()
-      .send(listObjectsCommand)
-      .then((data) => {
-        const experienceFiles =
-          // get the names of all experience files
-          data.Contents?.map((object) => object.Key?.split("/")[1] ?? "")
-            // filter down to only this user's experiences
-            .filter((e) => e.startsWith(store.user))
-            // remove .json extension
-            .map((e) => e.replaceAll(".json", "")) ?? [];
-        setExperiences(experienceFiles);
-        setLoading(false);
-      });
-  }, [uiStore.showingOpenExperienceModal, store.user]);
+  const { loading, experiences } = useExperiences(
+    uiStore.showingOpenExperienceModal
+  );
 
   const onClose = () => {
     uiStore.showingOpenExperienceModal = false;
