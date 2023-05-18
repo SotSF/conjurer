@@ -14,6 +14,7 @@ import { useStore } from "@/src/types/StoreContext";
 import { RxCaretDown } from "react-icons/rx";
 import { OpenExperienceModal } from "@/src/components/Menu/OpenExperienceModal";
 import { SaveExperienceModal } from "@/src/components/Menu/SaveExperienceModal";
+import { action } from "mobx";
 
 export const MenuBar = observer(function MenuBar() {
   const store = useStore();
@@ -37,7 +38,7 @@ export const MenuBar = observer(function MenuBar() {
           File
         </MenuButton>
         <MenuList zIndex={12}>
-          <MenuItem
+          {/* <MenuItem
             command="⌘N"
             onClick={() => {
               // TODO:
@@ -45,13 +46,13 @@ export const MenuBar = observer(function MenuBar() {
           >
             New experience
           </MenuItem>
-          <MenuDivider />
+          <MenuDivider /> */}
           <MenuItem
             icon={<FaFolderOpen size={17} />}
             command="⌘O"
-            onClick={() => {
+            onClick={action(() => {
               uiStore.showingOpenExperienceModal = true;
-            }}
+            })}
           >
             Open...
           </MenuItem>
@@ -78,9 +79,9 @@ export const MenuBar = observer(function MenuBar() {
           <MenuItem
             icon={<FiSave size={17} />}
             command="⌘⇧S"
-            onClick={() => {
+            onClick={action(() => {
               uiStore.showingSaveExperienceModal = true;
-            }}
+            })}
           >
             Save as...
           </MenuItem>

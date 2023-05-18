@@ -54,7 +54,7 @@ export const OpenExperienceModal = observer(function OpenExperienceModal() {
                     {store.user} has no saved experiences yet!
                   </Text>
                 )}
-                <VStack>
+                <VStack align="flex-start" spacing={0}>
                   {experiences.map((experience) => (
                     <Button
                       key={experience}
