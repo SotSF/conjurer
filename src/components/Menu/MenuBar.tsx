@@ -13,6 +13,7 @@ import { FiSave } from "react-icons/fi";
 import { useStore } from "@/src/types/StoreContext";
 import { RxCaretDown } from "react-icons/rx";
 import { OpenExperienceModal } from "@/src/components/Menu/OpenExperienceModal";
+import { SaveExperienceModal } from "@/src/components/Menu/SaveExperienceModal";
 
 export const MenuBar = observer(function MenuBar() {
   const { experienceStore, uiStore } = useStore();
@@ -20,6 +21,7 @@ export const MenuBar = observer(function MenuBar() {
   return (
     <>
       <OpenExperienceModal />
+      <SaveExperienceModal />
       <Menu>
         <MenuButton
           as={Button}
