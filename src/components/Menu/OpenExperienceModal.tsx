@@ -28,7 +28,7 @@ export const OpenExperienceModal = observer(function OpenExperienceModal() {
   const [experiences, setExperiences] = useState<string[]>([]);
 
   useEffect(() => {
-    if (!uiStore.openExperienceModalShowing || !store.user) return;
+    if (!uiStore.showingOpenExperienceModal || !store.user) return;
 
     setLoading(true);
 
@@ -50,10 +50,10 @@ export const OpenExperienceModal = observer(function OpenExperienceModal() {
         setExperiences(experienceFiles);
         setLoading(false);
       });
-  }, [uiStore.openExperienceModalShowing, store.user]);
+  }, [uiStore.showingOpenExperienceModal, store.user]);
 
   const onClose = () => {
-    uiStore.openExperienceModalShowing = false;
+    uiStore.showingOpenExperienceModal = false;
   };
   const onOpenExperience = async (experience: string) => {
     // get object from s3 bucket using aws sdk
@@ -70,7 +70,7 @@ export const OpenExperienceModal = observer(function OpenExperienceModal() {
   return (
     <Modal
       onClose={onClose}
-      isOpen={uiStore.openExperienceModalShowing}
+      isOpen={uiStore.showingOpenExperienceModal}
       isCentered
     >
       <ModalOverlay />
@@ -83,9 +83,11 @@ export const OpenExperienceModal = observer(function OpenExperienceModal() {
               <Spinner />
             ) : (
               <>
-                <Text>
-                  Viewing {store.user}&apos;s experiences. Click to open.
-                </Text>
+                {experiences.length === 0 && (
+                  <Text color="gray.400">
+                    {store.user} has no saved experiences yet!
+                  </Text>
+                )}
                 {experiences.map((experience) => (
                   <Button
                     key={experience}
@@ -95,9 +97,6 @@ export const OpenExperienceModal = observer(function OpenExperienceModal() {
                     {experience}
                   </Button>
                 ))}
-                {experiences.length === 0 && (
-                  <Text color="gray.400">(no saved experiences yet)</Text>
-                )}
               </>
             )
           ) : (

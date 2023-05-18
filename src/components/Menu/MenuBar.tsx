@@ -47,7 +47,7 @@ export const MenuBar = observer(function MenuBar() {
             icon={<FaFolderOpen size={17} />}
             command="⌘O"
             onClick={() => {
-              uiStore.openExperienceModalShowing = true;
+              uiStore.showingOpenExperienceModal = true;
             }}
           >
             Open...

@@ -96,7 +96,7 @@ export const UserPicker = observer(function UserPicker() {
                   if (!newUser) return;
 
                   await createUser({ data: { name: newUser } });
-
+                  store.user = newUser;
                   onClose();
                 })}
               >

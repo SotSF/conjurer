@@ -24,7 +24,7 @@ export const Keyboard = observer(function Keyboard() {
       } else if (e.key === "ArrowLeft") timer.skipBackward();
       else if (e.key === "ArrowRight") timer.skipForward();
       else if (e.key === "o" && (e.ctrlKey || e.metaKey)) {
-        uiStore.openExperienceModalShowing = true;
+        uiStore.showingOpenExperienceModal = true;
         e.preventDefault();
       }
       // else if (e.key === "z" && e.ctrlKey) store.undo();
