@@ -7,7 +7,6 @@ uniform vec3 u_view_vector;
 varying vec2 v_uv;
 varying float v_intensity;
 
-
 void main() {
     // Pass the intensity to the fragment shader.
 

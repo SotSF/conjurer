@@ -31,14 +31,14 @@ export const Controls = observer(function Controls() {
         title="Save"
         height={6}
         icon={<FiSave size={17} />}
-        onClick={() => experienceStore.saveToLocalStorage("arrangement")}
+        onClick={() => experienceStore.saveToLocalStorage("experience")}
       />
       <IconButton
         aria-label="Open last saved"
         title="Open"
         height={6}
         icon={<FaFolderOpen size={17} />}
-        onClick={() => experienceStore.loadFromLocalStorage("arrangement")}
+        onClick={() => experienceStore.loadFromLocalStorage("experience")}
       />
       <IconButton
         aria-label="Open last auto saved"

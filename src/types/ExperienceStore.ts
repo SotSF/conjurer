@@ -1,6 +1,7 @@
 import { makeAutoObservable } from "mobx";
 import initialExperience from "@/src/data/initialExperience.json";
 
+// Define a new RootStore interface here so that we avoid circular dependencies
 interface RootStore {
   serialize: () => any;
   deserialize: (data: any) => void;
@@ -17,30 +18,28 @@ export class ExperienceStore {
     this.rootStore.deserialize(initialExperience);
   };
 
+  stringifyExperience = (): string =>
+    JSON.stringify(this.rootStore.serialize(), (_, val) =>
+      // round numbers to 4 decimal places, which saves space and is probably enough precision
+      val.toFixed ? Number(val.toFixed(4)) : val
+    );
+
+  parseExperience = (experience: string): any => JSON.parse(experience);
+
   copyToClipboard = () => {
     if (typeof window === "undefined") return;
-    navigator.clipboard.writeText(
-      JSON.stringify(this.rootStore.serialize(), (key, val) =>
-        val.toFixed ? Number(val.toFixed(4)) : val
-      )
-    );
+    navigator.clipboard.writeText(this.stringifyExperience());
   };
 
   saveToLocalStorage = (key: string) => {
     if (typeof window === "undefined") return;
-    window.localStorage.setItem(
-      key,
-      JSON.stringify(this.rootStore.serialize(), (key, val) =>
-        val.toFixed ? Number(val.toFixed(4)) : val
-      )
-    );
+    window.localStorage.setItem(key, this.stringifyExperience());
   };
 
   loadFromLocalStorage = (key: string) => {
     if (typeof window === "undefined") return;
-    const arrangement = window.localStorage.getItem(key);
-    if (arrangement) {
-      this.rootStore.deserialize(JSON.parse(arrangement));
-    }
+    const experience = window.localStorage.getItem(key);
+    if (experience)
+      this.rootStore.deserialize(this.parseExperience(experience));
   };
 }
