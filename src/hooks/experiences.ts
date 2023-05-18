@@ -5,15 +5,20 @@ import {
   getS3,
 } from "@/src/utils/assets";
 import { ListObjectsCommand } from "@aws-sdk/client-s3";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
-export function useExperiences(shouldLoadExperiences: boolean) {
+export function useExperiences(
+  shouldLoadExperiences: boolean,
+  forLoggedInUserOnly = true
+) {
   const store = useStore();
   const [loading, setLoading] = useState(true);
   const [experiences, setExperiences] = useState<string[]>([]);
+  const [fetchCount, setFetchCount] = useState(0);
+  const refetch = useCallback(() => setFetchCount((c) => c + 1), []);
 
   useEffect(() => {
-    if (!shouldLoadExperiences || !store.user) return;
+    if (!shouldLoadExperiences || (forLoggedInUserOnly && !store.user)) return;
 
     setLoading(true);
 
@@ -28,14 +33,14 @@ export function useExperiences(shouldLoadExperiences: boolean) {
         const experienceFilenames =
           // get the names of all experience files
           data.Contents?.map((object) => object.Key?.split("/")[1] ?? "")
-            // filter down to only this user's experiences
-            .filter((e) => e.startsWith(store.user))
+            // filter down to only the desired user's experiences
+            .filter((e) => e.startsWith(forLoggedInUserOnly ? store.user : ""))
             // remove .json extension
             .map((e) => e.replaceAll(".json", "")) ?? [];
         setExperiences(experienceFilenames);
         setLoading(false);
       });
-  }, [shouldLoadExperiences, store.user]);
+  }, [shouldLoadExperiences, store.user, forLoggedInUserOnly, fetchCount]);
 
-  return { loading, experiences };
+  return { loading, experiences, refetch };
 }

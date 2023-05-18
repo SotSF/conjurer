@@ -1,4 +1,3 @@
-import useAxios from "axios-hooks";
 import { useState } from "react";
 import {
   Button,
@@ -20,6 +19,7 @@ import { FaUser } from "react-icons/fa";
 import { useStore } from "@/src/types/StoreContext";
 import { action } from "mobx";
 import { observer } from "mobx-react-lite";
+import { useExperiences } from "@/src/hooks/experiences";
 
 export const UserPicker = observer(function UserPicker() {
   const store = useStore();
@@ -28,21 +28,11 @@ export const UserPicker = observer(function UserPicker() {
 
   const [newUser, setNewUser] = useState("");
 
-  const [{ data, loading }, refetch] = useAxios(
-    { url: "/api/users" },
-    { useCache: false, manual: true }
-  );
-
-  let users: string[] = [];
-  if (data) users = data.users.map((row: any) => row.name);
-
-  const [, createUser] = useAxios(
-    {
-      url: "/api/users",
-      method: "POST",
-    },
-    { manual: true }
-  );
+  const { loading, experiences, refetch } = useExperiences(true, false);
+  const usersWithDuplicates = experiences
+    .map((experience) => experience.split("-")[0] || "")
+    .filter((user) => !!user);
+  const users = Array.from(new Set(usersWithDuplicates));
 
   return (
     <>
@@ -91,11 +81,8 @@ export const UserPicker = observer(function UserPicker() {
                 onChange={(e) => setNewUser(e.target.value)}
               />
               <Button
-                disabled={!newUser}
-                onClick={action(async () => {
-                  if (!newUser) return;
-
-                  await createUser({ data: { name: newUser } });
+                isDisabled={!newUser}
+                onClick={action(() => {
                   store.user = newUser;
                   onClose();
                 })}
