@@ -16,9 +16,12 @@ import {
   ModalOverlay,
   Spinner,
   Text,
+  VStack,
 } from "@chakra-ui/react";
 import { useStore } from "@/src/types/StoreContext";
 import { useExperiences } from "@/src/hooks/experiences";
+import { FaVideoSlash } from "react-icons/fa";
+import { action } from "mobx";
 
 export const OpenExperienceModal = observer(function OpenExperienceModal() {
   const store = useStore();
@@ -28,9 +31,10 @@ export const OpenExperienceModal = observer(function OpenExperienceModal() {
     uiStore.showingOpenExperienceModal
   );
 
-  const onClose = () => {
+  const onClose = action(() => {
     uiStore.showingOpenExperienceModal = false;
-  };
+  });
+
   const onOpenExperience = async (experience: string) => {
     // get object from s3 bucket using aws sdk
     const getObjectCommand = new GetObjectCommand({
@@ -43,6 +47,7 @@ export const OpenExperienceModal = observer(function OpenExperienceModal() {
 
     onClose();
   };
+
   return (
     <Modal
       onClose={onClose}
@@ -64,15 +69,17 @@ export const OpenExperienceModal = observer(function OpenExperienceModal() {
                     {store.user} has no saved experiences yet!
                   </Text>
                 )}
-                {experiences.map((experience) => (
-                  <Button
-                    key={experience}
-                    variant="ghost"
-                    onClick={() => onOpenExperience(experience)}
-                  >
-                    {experience}
-                  </Button>
-                ))}
+                <VStack>
+                  {experiences.map((experience) => (
+                    <Button
+                      key={experience}
+                      variant="ghost"
+                      onClick={() => onOpenExperience(experience)}
+                    >
+                      {experience}
+                    </Button>
+                  ))}
+                </VStack>
               </>
             )
           ) : (

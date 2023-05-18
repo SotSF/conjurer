@@ -12,9 +12,18 @@ import {
   ModalOverlay,
   Spinner,
   Text,
+  VStack,
 } from "@chakra-ui/react";
 import { useStore } from "@/src/types/StoreContext";
 import { useExperiences } from "@/src/hooks/experiences";
+import {
+  ASSET_BUCKET_NAME,
+  EXPERIENCE_ASSET_PREFIX,
+  getS3,
+} from "@/src/utils/assets";
+import { PutObjectCommand } from "@aws-sdk/client-s3";
+import { useEffect, useRef, useState } from "react";
+import { action } from "mobx";
 
 export const SaveExperienceModal = observer(function SaveExperienceModal() {
   const store = useStore();
@@ -24,13 +33,31 @@ export const SaveExperienceModal = observer(function SaveExperienceModal() {
     uiStore.showingSaveExperienceModal
   );
 
-  const onClose = () => {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [saving, setSaving] = useState(false);
+  const [experienceName, setExperienceName] = useState("");
+  const fullExperienceName = `${store.user}-${experienceName}`;
+
+  useEffect(() => {
+    if (inputRef.current && !loading) inputRef.current.focus();
+  }, [loading]);
+
+  const onClose = action(() => {
     uiStore.showingSaveExperienceModal = false;
-  };
+  });
+
   const onSaveExperience = async () => {
-    // TODO: save experience
-    // onClose();
+    setSaving(true);
+    const putObjectCommand = new PutObjectCommand({
+      Bucket: ASSET_BUCKET_NAME,
+      Key: `${EXPERIENCE_ASSET_PREFIX}${fullExperienceName}.json`,
+      Body: experienceStore.stringifyExperience(),
+    });
+    await getS3().send(putObjectCommand);
+    setSaving(false);
+    onClose();
   };
+
   return (
     <Modal
       onClose={onClose}
@@ -49,13 +76,25 @@ export const SaveExperienceModal = observer(function SaveExperienceModal() {
               <>
                 <HStack mb={2} spacing={0}>
                   <Text>{store.user}-</Text>
-                  <Input></Input>
+                  <Input
+                    ref={inputRef}
+                    onChange={(e) => setExperienceName(e.target.value)}
+                    value={experienceName}
+                  />
                 </HStack>
                 {experiences.length > 0 && (
                   <Text>Careful not to overwrite an existing experience:</Text>
                 )}
                 {experiences.map((experience) => (
-                  <Text key={experience} fontWeight="bold">
+                  <Text
+                    key={experience}
+                    color={
+                      experience === fullExperienceName
+                        ? "orange.400"
+                        : "chakra-body-text"
+                    }
+                    fontWeight="bold"
+                  >
                     {experience}
                   </Text>
                 ))}
@@ -66,7 +105,12 @@ export const SaveExperienceModal = observer(function SaveExperienceModal() {
           )}
         </ModalBody>
         <ModalFooter>
-          <Button onClick={() => onSaveExperience()}>Save</Button>
+          <Button
+            isDisabled={saving || !experienceName}
+            onClick={() => onSaveExperience()}
+          >
+            {saving ? <Spinner /> : "Save"}
+          </Button>
         </ModalFooter>
       </ModalContent>
     </Modal>
