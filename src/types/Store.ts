@@ -9,6 +9,7 @@ import { makeAutoObservable, configure } from "mobx";
 import { AudioStore } from "@/src/types/AudioStore";
 import initialExperience from "@/src/data/initialExperience.json";
 import { Variation } from "@/src/types/Variations/Variation";
+import { ExperienceStore } from "@/src/types/ExperienceStore";
 
 // Enforce MobX strict mode, which can make many noisy console warnings, but can help use learn MobX better.
 // Feel free to comment out the following if you want to silence the console messages.
@@ -23,7 +24,8 @@ export class Store {
   initialized = false;
   timer = new Timer();
   uiStore = new UIStore();
-  audioStore: AudioStore;
+  audioStore = new AudioStore(this.timer);
+  experienceStore = new ExperienceStore(this);
 
   user = "";
 
@@ -68,8 +70,6 @@ export class Store {
   }
 
   constructor() {
-    this.audioStore = new AudioStore(this.timer);
-
     makeAutoObservable(this, {
       _lastComputedCurrentBlock: false, // don't make this observable, since it's just a cache
     });
