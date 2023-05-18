@@ -6,7 +6,7 @@ import { useEffect } from "react";
 
 export const Keyboard = observer(function Keyboard() {
   const store = useStore();
-  const { timer, uiStore } = store;
+  const { timer, uiStore, experienceStore } = store;
 
   useEffect(() => {
     const handleKeyDown = action((e: KeyboardEvent) => {
@@ -23,9 +23,16 @@ export const Keyboard = observer(function Keyboard() {
         e.preventDefault();
       } else if (e.key === "ArrowLeft") timer.skipBackward();
       else if (e.key === "ArrowRight") timer.skipForward();
-      // else if (e.key === "z" && e.ctrlKey) store.undo();
-      // else if (e.key === "y" && e.ctrlKey) store.redo();
-      else if (e.key === "a" && (e.ctrlKey || e.metaKey)) {
+      else if (e.key === "o" && (e.ctrlKey || e.metaKey)) {
+        uiStore.showingOpenExperienceModal = true;
+        e.preventDefault();
+      } else if (e.key === "s" && e.shiftKey && (e.ctrlKey || e.metaKey)) {
+        uiStore.showingSaveExperienceModal = true;
+        e.preventDefault();
+      } else if (e.key === "s" && (e.ctrlKey || e.metaKey)) {
+        experienceStore.saveToS3();
+        e.preventDefault();
+      } else if (e.key === "a" && (e.ctrlKey || e.metaKey)) {
         store.selectAllBlocks();
         e.preventDefault();
       } else if (e.key === "Escape") store.deselectAllBlocks();
@@ -36,6 +43,8 @@ export const Keyboard = observer(function Keyboard() {
         e.preventDefault();
       } else if (e.key === "+" || e.key === "=") uiStore.zoomIn();
       else if (e.key === "-") uiStore.zoomOut();
+      // else if (e.key === "z" && e.ctrlKey) store.undo();
+      // else if (e.key === "y" && e.ctrlKey) store.redo();
     });
     window.addEventListener("keydown", handleKeyDown);
 
@@ -62,7 +71,7 @@ export const Keyboard = observer(function Keyboard() {
       window.removeEventListener("copy", handleCopy);
       window.removeEventListener("paste", handlePaste);
     };
-  }, [store, timer, uiStore]);
+  }, [store, timer, uiStore, experienceStore]);
 
   return (
     <VStack textAlign={"center"}>
@@ -74,6 +83,15 @@ export const Keyboard = observer(function Keyboard() {
       </Text>
       <Text fontSize={9} userSelect="none">
         <Kbd>+</Kbd>/<Kbd>-</Kbd>: zoom in/out
+      </Text>
+      <Text fontSize={9} userSelect="none">
+        <Kbd>cmd</Kbd>+<Kbd>s</Kbd>: save
+      </Text>
+      <Text fontSize={9} userSelect="none">
+        <Kbd>cmd</Kbd>+<Kbd>shift</Kbd>+<Kbd>s</Kbd>: save as
+      </Text>
+      <Text fontSize={9} userSelect="none">
+        <Kbd>cmd</Kbd>+<Kbd>o</Kbd>: open
       </Text>
       <Text fontSize={9} userSelect="none">
         <Kbd>cmd</Kbd>+<Kbd>a</Kbd>: select all blocks

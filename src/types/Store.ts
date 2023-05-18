@@ -7,8 +7,8 @@ import { DEFAULT_BLOCK_DURATION } from "@/src/utils/time";
 import { patterns } from "@/src/patterns/patterns";
 import { makeAutoObservable, configure } from "mobx";
 import { AudioStore } from "@/src/types/AudioStore";
-import initialExperience from "@/src/data/initialExperience.json";
 import { Variation } from "@/src/types/Variations/Variation";
+import { ExperienceStore } from "@/src/types/ExperienceStore";
 
 // Enforce MobX strict mode, which can make many noisy console warnings, but can help use learn MobX better.
 // Feel free to comment out the following if you want to silence the console messages.
@@ -23,9 +23,8 @@ export class Store {
   initialized = false;
   timer = new Timer();
   uiStore = new UIStore();
-  audioStore: AudioStore;
-
-  user = "";
+  audioStore = new AudioStore(this.timer);
+  experienceStore = new ExperienceStore(this);
 
   patternBlocks: Block[] = [];
   selectedBlocks: Set<Block> = new Set();
@@ -67,22 +66,45 @@ export class Store {
     return lastBlock.endTime;
   }
 
-  constructor() {
-    this.audioStore = new AudioStore(this.timer);
+  _user = "";
 
+  get user(): string {
+    return this._user;
+  }
+
+  set user(value: string) {
+    this._user = value;
+    localStorage.setItem("user", value);
+  }
+
+  _experienceName = "";
+
+  get experienceName(): string {
+    return this._experienceName;
+  }
+
+  set experienceName(value: string) {
+    this._experienceName = value;
+    localStorage.setItem("experienceName", value);
+  }
+
+  constructor() {
     makeAutoObservable(this, {
       _lastComputedCurrentBlock: false, // don't make this observable, since it's just a cache
     });
   }
 
   initialize = () => {
-    // load initial experience from file. if you would like to change this, click the clipboard
-    // button in the UI and paste the contents into the data/initialExperience.json file.
-    this.deserialize(initialExperience);
+    this.experienceStore.loadInitialExperience();
+
+    // check for a username in local storage
+    const username = localStorage.getItem("user");
+    if (username) this._user = username;
 
     // set up an autosave interval
     setInterval(() => {
-      if (!this.timer.playing) this.saveToLocalStorage("autosave");
+      if (!this.timer.playing)
+        this.experienceStore.saveToLocalStorage("autosave");
     }, 60 * 1000);
 
     this.initialized = true;
@@ -427,24 +449,6 @@ export class Store {
     this.selectedVariation = variation;
     this.selectedVariationUniformName = uniformName;
     this.selectedVariationBlock = block;
-  };
-
-  saveToLocalStorage = (key: string) => {
-    if (typeof window === "undefined") return;
-    window.localStorage.setItem(
-      key,
-      JSON.stringify(this.serialize(), (key, val) =>
-        val.toFixed ? Number(val.toFixed(4)) : val
-      )
-    );
-  };
-
-  loadFromLocalStorage = (key: string) => {
-    if (typeof window === "undefined") return;
-    const arrangement = window.localStorage.getItem(key);
-    if (arrangement) {
-      this.deserialize(JSON.parse(arrangement));
-    }
   };
 
   serialize = () => ({

@@ -13,6 +13,30 @@ import {
 import { useStore } from "@/src/types/StoreContext";
 import { action } from "mobx";
 
+// not currently used
+// previous implementation:
+/* <Popover
+        placement="bottom"
+        isLazy
+        returnFocusOnClose={false}
+        openDelay={0}
+        closeDelay={0}
+      >
+        <PopoverTrigger>
+          <IconButton
+            aria-label="Tempo"
+            title="Tempo"
+            height={6}
+            icon={<FaDrum size={17} />}
+          />
+        </PopoverTrigger>
+        <Portal>
+          <PopoverContent>
+            <TempoControls />
+          </PopoverContent>
+        </Portal>
+      </Popover> */
+
 export const SnapSettings = observer(function SnapSettings() {
   const store = useStore();
   const { uiStore } = store;

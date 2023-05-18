@@ -1,12 +1,20 @@
 {
   "audioStore": {
-    "selectedAudioFile": "Ott. - Skylon - 02 The Queen Of All Everything.mp3"
+    "selectedAudioFile": "Ott. - Skylon - 02 The Queen Of All Everything.mp3",
+    "audioMuted": false
   },
   "blocks": [
     {
-      "pattern": "Pulse",
+      "pattern": "Tunnel",
       "startTime": 0,
-      "duration": 38,
+      "duration": 12.4474,
+      "parameterVariations": {},
+      "effectBlocks": []
+    },
+    {
+      "pattern": "Pulse",
+      "startTime": 12.4474,
+      "duration": 25.5526,
       "parameterVariations": {
         "u_wave_amplitude": [{ "type": "flat", "duration": 2, "value": 0.4 }],
         "u_wave_period": [{ "type": "flat", "duration": 2, "value": 0.125 }]
@@ -29,9 +37,9 @@
         "u_color": [
           {
             "type": "linear4",
-            "duration": 19.46875,
-            "from": [0, 0.17647058823529413, 0.01568627450980392, 1],
-            "to": [0.0196078431372549, 0.5098039215686274, 0, 1]
+            "duration": 19.4688,
+            "from": [0, 0.1765, 0.0157, 1],
+            "to": [0.0196, 0.5098, 0, 1]
           }
         ]
       },
@@ -55,16 +63,11 @@
     {
       "pattern": "Sun Cycle",
       "startTime": 61.75,
-      "duration": 80.79713888888888,
+      "duration": 80.7971,
       "parameterVariations": {
         "u_time_factor": [{ "type": "flat", "duration": 2, "value": 0 }],
         "u_time_offset": [
-          {
-            "type": "linear",
-            "duration": 79.14088888888888,
-            "from": 3,
-            "to": 0
-          }
+          { "type": "linear", "duration": 79.1409, "from": 3, "to": 0 }
         ]
       },
       "effectBlocks": [
@@ -74,18 +77,8 @@
           "duration": 5,
           "parameterVariations": {
             "u_tiling": [
-              {
-                "type": "linear",
-                "duration": 34.14088888888888,
-                "from": 1,
-                "to": 16
-              },
-              {
-                "type": "linear",
-                "duration": 28.611111111111114,
-                "from": 16,
-                "to": 2
-              }
+              { "type": "linear", "duration": 34.1409, "from": 1, "to": 16 },
+              { "type": "linear", "duration": 28.6111, "from": 16, "to": 2 }
             ],
             "u_rotation": [
               { "type": "linear", "duration": 76.252, "from": 0, "to": 20 }
@@ -93,16 +86,18 @@
             "u_circle_size": [
               {
                 "type": "spline",
-                "duration": 43.033249999999995,
+                "duration": 43.0332,
                 "points": [
                   { "x": 0, "y": 0 },
                   { "x": 0.1, "y": 0.4 },
                   { "x": 0.3, "y": 0.45 },
-                  { "x": 0.44111046622454947, "y": 0.29137973127693967 },
-                  { "x": 0.5809727144725026, "y": 0.20517283472521552 },
-                  { "x": 0.8053888887551541, "y": 0.3172418002424569 },
-                  { "x": 1, "y": 0.06551703091325431 }
-                ]
+                  { "x": 0.4411, "y": 0.2914 },
+                  { "x": 0.581, "y": 0.2052 },
+                  { "x": 0.8054, "y": 0.3172 },
+                  { "x": 1, "y": 0.0655 }
+                ],
+                "domainMin": 0,
+                "domainMax": 1
               },
               { "type": "flat", "duration": 2, "value": 0 }
             ],
@@ -112,21 +107,23 @@
                 "duration": 74.627,
                 "points": [
                   { "x": 0, "y": 0 },
-                  { "x": 0.023198718465695434, "y": 0.4804603313577586 },
-                  { "x": 0.10000000000000002, "y": 0.4 },
-                  { "x": 0.20326089435377884, "y": 0.6540232691271551 },
+                  { "x": 0.0232, "y": 0.4805 },
+                  { "x": 0.1, "y": 0.4 },
+                  { "x": 0.2033, "y": 0.654 },
                   { "x": 0.3, "y": 0.45 },
-                  { "x": 0.375673906268353, "y": 0.6689653067753233 },
-                  { "x": 0.4150363354159806, "y": 0.1172411688442888 },
-                  { "x": 0.47114873441366234, "y": 0.6517239274649784 },
-                  { "x": 0.5389861123063822, "y": 0.5310342722925646 },
-                  { "x": 0.5748589601421774, "y": 0.45689655172413796 },
-                  { "x": 0.6209213772298267, "y": 0.6120689655172413 },
-                  { "x": 0.6862462596450384, "y": 0.4224137931034483 },
-                  { "x": 0.7931296789339607, "y": 0.903448696794181 },
-                  { "x": 0.8296073910518567, "y": 0.6620693864493534 },
+                  { "x": 0.3757, "y": 0.669 },
+                  { "x": 0.415, "y": 0.1172 },
+                  { "x": 0.4711, "y": 0.6517 },
+                  { "x": 0.539, "y": 0.531 },
+                  { "x": 0.5749, "y": 0.4569 },
+                  { "x": 0.6209, "y": 0.6121 },
+                  { "x": 0.6862, "y": 0.4224 },
+                  { "x": 0.7931, "y": 0.9034 },
+                  { "x": 0.8296, "y": 0.6621 },
                   { "x": 1, "y": 0.6 }
-                ]
+                ],
+                "domainMin": 0,
+                "domainMax": 1
               }
             ],
             "u_brick_offset_x": [
@@ -136,14 +133,14 @@
               { "type": "flat", "duration": 2, "value": 1 }
             ],
             "u_brick_offset_y": [
-              { "type": "flat", "duration": 29.72222222222222, "value": 0 },
+              { "type": "flat", "duration": 29.7222, "value": 0 },
               { "type": "flat", "duration": 2, "value": 1 }
             ],
             "u_box_smooth": [
-              { "type": "flat", "duration": 43.15625, "value": 0.3 },
+              { "type": "flat", "duration": 43.1563, "value": 0.3 },
               {
                 "type": "sine",
-                "duration": 29.82838888888888,
+                "duration": 29.8284,
                 "amplitude": 0.5,
                 "frequency": 0.5,
                 "phase": 0,
@@ -186,10 +183,11 @@
     }
   ],
   "uiStore": {
-    "showingPerformance": false,
+    "horizontalLayout": true,
     "displayingCanopy": true,
+    "showingPerformance": false,
     "pixelsPerSecond": 38,
     "beatLength": 1
   },
-  "user": ""
+  "user": "ben"
 }

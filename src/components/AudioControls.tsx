@@ -1,6 +1,5 @@
 import { useEffect } from "react";
-import { ListObjectsCommand, S3Client } from "@aws-sdk/client-s3";
-import { fromCognitoIdentityPool } from "@aws-sdk/credential-providers";
+import { ListObjectsCommand } from "@aws-sdk/client-s3";
 import { observer } from "mobx-react-lite";
 import { IconButton, Select, Tooltip } from "@chakra-ui/react";
 import { BsSoundwave } from "react-icons/bs";
@@ -10,10 +9,10 @@ import { ImLoop } from "react-icons/im";
 import { useStore } from "@/src/types/StoreContext";
 import { action, runInAction } from "mobx";
 import {
-  AUDIO_BUCKET_NAME,
-  AUDIO_BUCKET_PREFIX,
-  AUDIO_BUCKET_REGION,
-} from "@/src/utils/audio";
+  ASSET_BUCKET_NAME,
+  AUDIO_ASSET_PREFIX,
+  getS3,
+} from "@/src/utils/assets";
 
 export const AudioControls = observer(function AudioControls() {
   const store = useStore();
@@ -26,25 +25,20 @@ export const AudioControls = observer(function AudioControls() {
     });
 
     // get list of objects from s3 bucket using aws sdk
-    const s3 = new S3Client({
-      credentials: fromCognitoIdentityPool({
-        clientConfig: { region: "us-east-2" },
-        identityPoolId: "us-east-2:343f9a70-6bf5-40f3-b21d-1376f65bb4be",
-      }),
-      region: AUDIO_BUCKET_REGION,
-    });
     const listObjectsCommand = new ListObjectsCommand({
-      Bucket: AUDIO_BUCKET_NAME,
-      Prefix: AUDIO_BUCKET_PREFIX,
+      Bucket: ASSET_BUCKET_NAME,
+      Prefix: AUDIO_ASSET_PREFIX,
     });
-    s3.send(listObjectsCommand).then(
-      action((data) => {
-        data.Contents?.forEach((object) => {
-          const audioFile = object.Key?.split("/")[1];
-          if (audioFile) audioStore.availableAudioFiles.push(audioFile);
-        });
-      })
-    );
+    getS3()
+      .send(listObjectsCommand)
+      .then(
+        action((data) => {
+          data.Contents?.forEach((object) => {
+            const audioFile = object.Key?.split("/")[1];
+            if (audioFile) audioStore.availableAudioFiles.push(audioFile);
+          });
+        })
+      );
   }, [audioStore]);
 
   return (

@@ -11,10 +11,10 @@ import type { TimelinePluginOptions } from "wavesurfer.js/dist/plugins/timeline"
 import type RegionsPlugin from "wavesurfer.js/dist/plugins/regions";
 import type { RegionParams } from "wavesurfer.js/dist/plugins/regions";
 import {
-  AUDIO_BUCKET_NAME,
-  AUDIO_BUCKET_PREFIX,
-  AUDIO_BUCKET_REGION,
-} from "@/src/utils/audio";
+  ASSET_BUCKET_NAME,
+  AUDIO_ASSET_PREFIX,
+  ASSET_BUCKET_REGION,
+} from "@/src/utils/assets";
 import { action } from "mobx";
 
 // https://wavesurfer-js.org/docs/options.html
@@ -99,7 +99,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
 
       // Load selected audio file
       await wavesurferRef.current.load(
-        `https://${AUDIO_BUCKET_NAME}.s3.${AUDIO_BUCKET_REGION}.amazonaws.com/${AUDIO_BUCKET_PREFIX}${audioStore.selectedAudioFile}`
+        `https://${ASSET_BUCKET_NAME}.s3.${ASSET_BUCKET_REGION}.amazonaws.com/${AUDIO_ASSET_PREFIX}${audioStore.selectedAudioFile}`
       );
       wavesurferRef.current?.zoom(uiStore.pixelsPerSecond);
 
@@ -139,7 +139,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
         );
         wavesurferRef.current.registerPlugin(timelinePlugin.current);
         await wavesurferRef.current.load(
-          `https://${AUDIO_BUCKET_NAME}.s3.${AUDIO_BUCKET_REGION}.amazonaws.com/${AUDIO_BUCKET_PREFIX}${audioStore.selectedAudioFile}`
+          `https://${ASSET_BUCKET_NAME}.s3.${ASSET_BUCKET_REGION}.amazonaws.com/${AUDIO_ASSET_PREFIX}${audioStore.selectedAudioFile}`
         );
         wavesurferRef.current.seekTo(0);
         timer.lastCursorPosition = 0;
