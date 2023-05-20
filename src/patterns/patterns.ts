@@ -8,6 +8,9 @@ import { Pulse } from "@/src/patterns/Pulse";
 import { Fire } from "@/src/patterns/Fire";
 import { Melt } from "@/src/patterns/Melt";
 import { Tunnel } from "@/src/patterns/Tunnel";
+import { Rainbow } from "@/src/patterns/Rainbow";
+import { Starfield } from "@/src/patterns/Starfield";
+import { Globules } from "@/src/patterns/Globules";
 
 const patterns: Pattern[] = [
   Pulse(),
@@ -19,6 +22,9 @@ const patterns: Pattern[] = [
   Fire(),
   Melt(),
   Disc(),
+  Rainbow(),
+  Starfield(),
+  Globules(),
 ];
 
 const patternMap: { [key: string]: Pattern } = {};
