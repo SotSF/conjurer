@@ -16,6 +16,8 @@ export const CameraControls = memo(function CameraControls({
         ref={cameraRef}
         makeDefault
         position={initialPosition}
+        near={0.1}
+        far={100}
       />
       <OrbitControls camera={cameraRef.current} />
     </>
