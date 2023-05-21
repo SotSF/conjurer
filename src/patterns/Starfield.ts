@@ -11,4 +11,16 @@ export const Starfield = () =>
       name: "Time Offset",
       value: 0,
     },
+    u_meander_rate: {
+      name: "Meander Rate",
+      value: 0,
+    },
+    u_saturation: {
+      name: "Saturation",
+      value: 1.0,
+    },
+    u_intensity: {
+      name: "Intensity",
+      value: 1.0,
+    },
   });
