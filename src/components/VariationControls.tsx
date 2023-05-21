@@ -7,6 +7,8 @@ import {
   NumberInput,
   NumberInputField,
   NumberInputStepper,
+  Radio,
+  RadioGroup,
   Switch,
   Text,
   VStack,
@@ -19,7 +21,10 @@ import { BiDuplicate } from "react-icons/bi";
 import { Block } from "@/src/types/Block";
 import { FlatVariation } from "@/src/types/Variations/FlatVariation";
 import { LinearVariation } from "@/src/types/Variations/LinearVariation";
-import { PeriodicVariation } from "@/src/types/Variations/PeriodicVariation";
+import {
+  PeriodicVariation,
+  PeriodicVariationType,
+} from "@/src/types/Variations/PeriodicVariation";
 import { LinearVariation4 } from "@/src/types/Variations/LinearVariation4";
 import { HexColorPicker } from "react-colorful";
 import { hexToRgb, vector4ToHex } from "@/src/utils/color";
@@ -56,7 +61,7 @@ export const VariationControls = function VariationControls(
     );
   } else if (variation instanceof PeriodicVariation) {
     controls = (
-      <SineVariationControls
+      <PeriodicVariationControls
         uniformName={uniformName}
         block={block}
         variation={variation}
@@ -263,17 +268,18 @@ function LinearVariationControls({
   );
 }
 
-type SineVariationControlsProps = {
+type PeriodicVariationControlsProps = {
   uniformName: string;
   variation: PeriodicVariation;
   block: Block;
 };
 
-function SineVariationControls({
+function PeriodicVariationControls({
   uniformName,
   variation,
   block,
-}: SineVariationControlsProps) {
+}: PeriodicVariationControlsProps) {
+  const [periodicType, setPeriodicType] = useState(variation.periodicType);
   const [amplitude, setAmplitude] = useState(variation.amplitude.toString());
   const [frequency, setFrequency] = useState(variation.frequency.toString());
   const [phase, setPhase] = useState(variation.phase.toString());
@@ -286,7 +292,21 @@ function SineVariationControls({
 
   return (
     <>
-      <Text>Sine</Text>
+      <Text>Periodic</Text>
+      <RadioGroup
+        onChange={(type: PeriodicVariationType) => {
+          setPeriodicType(type);
+          variation.periodicType = type;
+          block.triggerVariationReactions(uniformName);
+        }}
+        value={periodicType}
+      >
+        <HStack>
+          <Radio value="sine">Sine</Radio>
+          <Radio value="square">Square</Radio>
+          <Radio value="triangle">Triangle</Radio>
+        </HStack>
+      </RadioGroup>
       <HStack m={1}>
         <Text>Min/max mode:</Text>
         <Switch

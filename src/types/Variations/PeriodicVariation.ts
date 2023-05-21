@@ -1,6 +1,6 @@
 import { Variation } from "@/src/types/Variations/Variation";
 
-type PeriodicVariationType = "sine" | "square" | "sawtooth";
+export type PeriodicVariationType = "sine" | "square" | "triangle";
 
 export class PeriodicVariation extends Variation<number> {
   periodicType: PeriodicVariationType = "sine";
@@ -60,6 +60,20 @@ export class PeriodicVariation extends Variation<number> {
         );
         const sign = magnitude > 0 ? 1 : -1;
         return sign * this.amplitude + this.offset;
+      case "triangle":
+        // source: https://www.wikiwand.com/en/Triangle_wave
+        return (
+          4 *
+            this.amplitude *
+            this.frequency *
+            Math.abs(
+              ((time - 0.25 / this.frequency + this.offset) %
+                (1 / this.frequency)) -
+                0.5 / this.frequency
+            ) -
+          this.amplitude +
+          this.offset
+        );
       default:
         return 0;
     }
