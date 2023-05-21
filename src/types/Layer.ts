@@ -1,17 +1,34 @@
 import { Block } from "@/src/types/Block";
-import { Pattern } from "@/src/types/Pattern";
 import { Timer } from "@/src/types/Timer";
-import { UIStore } from "@/src/types/UIStore";
 import { binarySearchForBlockAtTime } from "@/src/utils/algorithm";
 import { DEFAULT_BLOCK_DURATION } from "@/src/utils/time";
 import { patterns } from "@/src/patterns/patterns";
-import { makeAutoObservable, configure, runInAction } from "mobx";
-import { AudioStore } from "@/src/types/AudioStore";
-import { Variation } from "@/src/types/Variations/Variation";
-import { ExperienceStore } from "@/src/types/ExperienceStore";
+import { makeAutoObservable, runInAction } from "mobx";
 
 export class Layer {
   patternBlocks: Block[] = [];
+
+  _lastComputedCurrentBlock: Block | null = null;
+
+  // returns the block that the global time is inside of, or null if none
+  // runs every frame, so we keep this performant with caching + a binary search
+  get currentBlock(): Block | null {
+    if (
+      this._lastComputedCurrentBlock &&
+      this._lastComputedCurrentBlock.startTime <= this.timer.globalTime &&
+      this.timer.globalTime < this._lastComputedCurrentBlock.endTime
+    ) {
+      return this._lastComputedCurrentBlock;
+    }
+
+    const currentBlockIndex = binarySearchForBlockAtTime(
+      this.patternBlocks,
+      this.timer.globalTime
+    );
+    this._lastComputedCurrentBlock =
+      this.patternBlocks[currentBlockIndex] ?? null;
+    return this._lastComputedCurrentBlock;
+  }
 
   get endTime() {
     if (this.patternBlocks.length === 0) return 0;
@@ -20,8 +37,10 @@ export class Layer {
     return lastBlock.endTime;
   }
 
-  constructor() {
-    makeAutoObservable(this);
+  constructor(readonly timer: Timer) {
+    makeAutoObservable(this, {
+      _lastComputedCurrentBlock: false, // don't make this observable, since it's just a cache
+    });
 
     runInAction(this.initialize);
   }

@@ -1,7 +1,7 @@
 import { WebGLRenderTarget } from "three";
 import black from "@/src/patterns/shaders/black.frag";
 import { useFrame } from "@react-three/fiber";
-import { memo, useMemo, useRef } from "react";
+import { memo } from "react";
 import { BlockRenderNode } from "@/src/components/RenderPipeline/BlockRenderNode";
 import { useStore } from "@/src/types/StoreContext";
 import { Layer } from "@/src/types/Layer";
@@ -24,8 +24,8 @@ export const LayerRenderNode = memo(function LayerRenderNode({
   renderTargetIn,
   renderTargetOut,
 }: LayerRenderNodeProps) {
-  const { currentBlock, timer } = useStore();
-  const targetBlock = block ?? currentBlock;
+  const { timer } = useStore();
+  const targetBlock = block ?? layer?.currentBlock;
 
   const layerPriority = priority * 100;
 

@@ -27,7 +27,7 @@ export class Store {
   audioStore = new AudioStore(this.timer);
   experienceStore = new ExperienceStore(this);
 
-  layers: Layer[] = [new Layer()];
+  layers: Layer[] = [new Layer(this.timer)];
 
   patternBlocks: Block[] = [];
   selectedBlocks: Set<Block> = new Set();
