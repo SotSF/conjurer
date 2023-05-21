@@ -281,7 +281,7 @@ function PeriodicVariationControls({
 }: PeriodicVariationControlsProps) {
   const [periodicType, setPeriodicType] = useState(variation.periodicType);
   const [amplitude, setAmplitude] = useState(variation.amplitude.toString());
-  const [frequency, setFrequency] = useState(variation.frequency.toString());
+  const [period, setPeriod] = useState(variation.period.toString());
   const [phase, setPhase] = useState(variation.phase.toString());
   const [offset, setOffset] = useState(variation.offset.toString());
 
@@ -406,16 +406,16 @@ function PeriodicVariationControls({
         </>
       )}
       <HStack m={1}>
-        <Text>Frequency:</Text>
+        <Text>Period:</Text>
         <NumberInput
           size="md"
           step={0.1}
           onChange={(valueString) => {
-            variation.frequency = parseFloat(valueString);
-            setFrequency(valueString);
+            variation.period = parseFloat(valueString);
+            setPeriod(valueString);
             block.triggerVariationReactions(uniformName);
           }}
-          value={frequency}
+          value={period}
         >
           <NumberInputField />
           <NumberInputStepper>

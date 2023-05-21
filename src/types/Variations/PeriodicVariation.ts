@@ -5,7 +5,7 @@ export type PeriodicVariationType = "sine" | "square" | "triangle";
 export class PeriodicVariation extends Variation<number> {
   periodicType: PeriodicVariationType = "sine";
   amplitude: number;
-  frequency: number;
+  period: number;
   phase: number;
   offset: number;
 
@@ -33,7 +33,7 @@ export class PeriodicVariation extends Variation<number> {
     duration: number,
     periodicType: PeriodicVariationType,
     amplitude: number,
-    frequency: number,
+    period: number,
     phase: number,
     offset: number
   ) {
@@ -41,7 +41,7 @@ export class PeriodicVariation extends Variation<number> {
 
     this.periodicType = periodicType;
     this.amplitude = amplitude;
-    this.frequency = frequency;
+    this.period = period;
     this.phase = phase;
     this.offset = offset;
   }
@@ -50,26 +50,25 @@ export class PeriodicVariation extends Variation<number> {
     switch (this.periodicType) {
       case "sine":
         return (
-          Math.sin(time * this.frequency * 2 * Math.PI + this.phase) *
+          Math.sin((time / this.period) * 2 * Math.PI + this.phase) *
             this.amplitude +
           this.offset
         );
       case "square":
         const magnitude = Math.sin(
-          time * this.frequency * 2 * Math.PI + this.phase
+          (time / this.period) * 2 * Math.PI + this.phase
         );
         const sign = magnitude > 0 ? 1 : -1;
         return sign * this.amplitude + this.offset;
       case "triangle":
         // source: https://www.wikiwand.com/en/Triangle_wave
         return (
-          4 *
-            this.amplitude *
-            this.frequency *
+          ((4 * this.amplitude) / this.period) *
             Math.abs(
-              ((time - 0.25 / this.frequency + this.offset) %
-                (1 / this.frequency)) -
-                0.5 / this.frequency
+              ((((time - 0.25 * this.period + this.phase) % this.period) +
+                this.period) %
+                this.period) -
+                0.5 * this.period
             ) -
           this.amplitude +
           this.offset
@@ -86,7 +85,7 @@ export class PeriodicVariation extends Variation<number> {
     ];
 
   computeSampledData = (duration: number) => {
-    const samplingFrequency = 8 * this.frequency;
+    const samplingFrequency = 8 / this.period;
     const totalSamples = Math.ceil(duration * samplingFrequency);
 
     const data = [];
@@ -103,7 +102,7 @@ export class PeriodicVariation extends Variation<number> {
       this.duration,
       this.periodicType,
       this.amplitude,
-      this.frequency,
+      this.period,
       this.phase,
       this.offset
     );
@@ -113,7 +112,7 @@ export class PeriodicVariation extends Variation<number> {
     duration: this.duration,
     periodicType: this.periodicType,
     amplitude: this.amplitude,
-    frequency: this.frequency,
+    period: this.period,
     phase: this.phase,
     offset: this.offset,
   });
@@ -123,7 +122,7 @@ export class PeriodicVariation extends Variation<number> {
       data.duration,
       data.periodicType,
       data.amplitude,
-      data.frequency,
+      data.period,
       data.phase,
       data.offset
     );

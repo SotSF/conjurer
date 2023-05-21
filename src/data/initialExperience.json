@@ -124,7 +124,7 @@
                 "type": "periodic",
                 "duration": 29.8284,
                 "amplitude": 0.5,
-                "frequency": 0.5,
+                "period": 2,
                 "phase": 0,
                 "offset": 0.5
               }
@@ -156,7 +156,7 @@
             "periodicType": "square",
             "duration": 19.25,
             "amplitude": 0.7,
-            "frequency": 0.5,
+            "period": 2,
             "phase": 0,
             "offset": 1
           }

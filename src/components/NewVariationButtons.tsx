@@ -124,7 +124,7 @@ export const NewVariationButtons = memo(function NewVariationButtons({
               DEFAULT_VARIATION_DURATION,
               "sine",
               0.5,
-              0.5,
+              2,
               0,
               0.5
             )
