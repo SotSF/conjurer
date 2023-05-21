@@ -19,7 +19,6 @@ export class UIStore {
   showingSaveExperienceModal = false;
 
   pixelsPerSecond = INITIAL_PIXELS_PER_SECOND; // the zoom of the timeline
-  beatLength = 1; // length of a beat in seconds
 
   constructor() {
     makeAutoObservable(this);
@@ -68,7 +67,6 @@ export class UIStore {
     displayingCanopy: this.displayingCanopy,
     showingPerformance: this.showingPerformance,
     pixelsPerSecond: this.pixelsPerSecond,
-    beatLength: this.beatLength,
   });
 
   deserialize = (data: any) => {
@@ -77,6 +75,5 @@ export class UIStore {
     this.showingPerformance =
       data?.showingPerformance ?? this.showingPerformance;
     this.pixelsPerSecond = data?.pixelsPerSecond ?? this.pixelsPerSecond;
-    this.beatLength = data?.beatLength ?? 1;
   };
 }

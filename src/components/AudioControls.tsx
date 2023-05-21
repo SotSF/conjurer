@@ -44,8 +44,8 @@ export const AudioControls = observer(function AudioControls() {
   return (
     <>
       <IconButton
-        aria-label="Loop audio"
-        title="Loop audio"
+        aria-label="Loop time range"
+        title="Loop time range"
         height={6}
         icon={<ImLoop size={17} />}
         bgColor={audioStore.audioLooping ? "orange.700" : undefined}

@@ -5,60 +5,18 @@
   },
   "blocks": [
     {
-      "pattern": "Tunnel",
+      "pattern": "Starfield",
       "startTime": 0,
-      "duration": 12.4474,
+      "duration": 30.9474,
       "parameterVariations": {},
       "effectBlocks": []
     },
     {
-      "pattern": "Pulse",
-      "startTime": 12.4474,
-      "duration": 25.5526,
-      "parameterVariations": {
-        "u_wave_amplitude": [{ "type": "flat", "duration": 2, "value": 0.4 }],
-        "u_wave_period": [{ "type": "flat", "duration": 2, "value": 0.125 }]
-      },
-      "effectBlocks": [
-        {
-          "pattern": "Rotate",
-          "startTime": 0,
-          "duration": 5,
-          "parameterVariations": {},
-          "effectBlocks": []
-        }
-      ]
-    },
-    {
-      "pattern": "Clouds",
-      "startTime": 38,
-      "duration": 23.75,
-      "parameterVariations": {
-        "u_color": [
-          {
-            "type": "linear4",
-            "duration": 19.4688,
-            "from": [0, 0.1765, 0.0157, 1],
-            "to": [0.0196, 0.5098, 0, 1]
-          }
-        ]
-      },
-      "effectBlocks": [
-        {
-          "pattern": "Leaf",
-          "startTime": 0,
-          "duration": 5,
-          "parameterVariations": {
-            "u_time_offset": [],
-            "u_time_factor": [{ "type": "flat", "duration": 2, "value": 1 }],
-            "u_tiling": [{ "type": "flat", "duration": 2, "value": 1 }],
-            "u_coordinate_offset": [
-              { "type": "flat", "duration": 2, "value": 0.5 }
-            ]
-          },
-          "effectBlocks": []
-        }
-      ]
+      "pattern": "Tunnel",
+      "startTime": 30.9474,
+      "duration": 30.8026,
+      "parameterVariations": { "u_max_depth_spacing": [] },
+      "effectBlocks": []
     },
     {
       "pattern": "Sun Cycle",
@@ -139,10 +97,10 @@
             "u_box_smooth": [
               { "type": "flat", "duration": 43.1563, "value": 0.3 },
               {
-                "type": "sine",
+                "type": "periodic",
                 "duration": 29.8284,
                 "amplitude": 0.5,
-                "frequency": 0.5,
+                "period": 2,
                 "phase": 0,
                 "offset": 0.5
               }
@@ -170,10 +128,11 @@
         "u_hue_width": [
           { "type": "flat", "duration": 2, "value": 0 },
           {
-            "type": "sine",
+            "type": "periodic",
             "duration": 19.25,
+            "periodicType": "square",
             "amplitude": 0.7,
-            "frequency": 0.5,
+            "period": 2,
             "phase": 0,
             "offset": 1
           }
@@ -186,8 +145,7 @@
     "horizontalLayout": true,
     "displayingCanopy": true,
     "showingPerformance": false,
-    "pixelsPerSecond": 38,
-    "beatLength": 1
+    "pixelsPerSecond": 38
   },
   "user": "ben"
 }

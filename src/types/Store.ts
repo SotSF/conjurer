@@ -77,7 +77,7 @@ export class Store {
     localStorage.setItem("user", value);
   }
 
-  _experienceName = "";
+  _experienceName = "untitled";
 
   get experienceName(): string {
     return this._experienceName;
@@ -87,6 +87,8 @@ export class Store {
     this._experienceName = value;
     localStorage.setItem("experienceName", value);
   }
+
+  experienceLastSavedAt = 0;
 
   constructor() {
     makeAutoObservable(this, {

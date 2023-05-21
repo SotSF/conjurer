@@ -8,7 +8,7 @@ import { Block } from "@/src/types/Block";
 import { action } from "mobx";
 import { FlatVariation } from "@/src/types/Variations/FlatVariation";
 import { LinearVariation } from "@/src/types/Variations/LinearVariation";
-import { SineVariation } from "@/src/types/Variations/SineVariation";
+import { PeriodicVariation } from "@/src/types/Variations/PeriodicVariation";
 import { Vector4 } from "three";
 import { LinearVariation4 } from "@/src/types/Variations/LinearVariation4";
 import { DEFAULT_VARIATION_DURATION } from "@/src/utils/time";
@@ -120,7 +120,14 @@ export const NewVariationButtons = memo(function NewVariationButtons({
         onClick={action(() =>
           block.addVariation(
             uniformName,
-            new SineVariation(DEFAULT_VARIATION_DURATION, 0.5, 0.5, 0, 0.5)
+            new PeriodicVariation(
+              DEFAULT_VARIATION_DURATION,
+              "sine",
+              0.5,
+              2,
+              0,
+              0.5
+            )
           )
         )}
       />
