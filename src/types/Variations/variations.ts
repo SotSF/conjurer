@@ -1,7 +1,7 @@
 import { FlatVariation } from "@/src/types/Variations/FlatVariation";
 import { LinearVariation } from "@/src/types/Variations/LinearVariation";
 import { LinearVariation4 } from "@/src/types/Variations/LinearVariation4";
-import { SineVariation } from "@/src/types/Variations/SineVariation";
+import { PeriodicVariation } from "@/src/types/Variations/PeriodicVariation";
 import { SplineVariation } from "@/src/types/Variations/SplineVariation";
 import { Variation } from "@/src/types/Variations/Variation";
 
@@ -11,8 +11,8 @@ export const deserializeVariation = (data: any): Variation => {
       return FlatVariation.deserialize(data);
     case "linear":
       return LinearVariation.deserialize(data);
-    case "sine":
-      return SineVariation.deserialize(data);
+    case "periodic":
+      return PeriodicVariation.deserialize(data);
     case "spline":
       return SplineVariation.deserialize(data);
     case "linear4":

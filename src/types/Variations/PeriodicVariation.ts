@@ -1,6 +1,9 @@
 import { Variation } from "@/src/types/Variations/Variation";
 
-export class SineVariation extends Variation<number> {
+type PeriodicVariationType = "sine" | "square" | "sawtooth";
+
+export class PeriodicVariation extends Variation<number> {
+  periodicType: PeriodicVariationType = "sine";
   amplitude: number;
   frequency: number;
   phase: number;
@@ -28,23 +31,39 @@ export class SineVariation extends Variation<number> {
 
   constructor(
     duration: number,
+    periodicType: PeriodicVariationType,
     amplitude: number,
     frequency: number,
     phase: number,
     offset: number
   ) {
-    super("sine", duration);
+    super("periodic", duration);
 
+    this.periodicType = periodicType;
     this.amplitude = amplitude;
     this.frequency = frequency;
     this.phase = phase;
     this.offset = offset;
   }
 
-  valueAtTime = (time: number) =>
-    Math.sin(time * this.frequency * 2 * Math.PI + this.phase) *
-      this.amplitude +
-    this.offset;
+  valueAtTime = (time: number) => {
+    switch (this.periodicType) {
+      case "sine":
+        return (
+          Math.sin(time * this.frequency * 2 * Math.PI + this.phase) *
+            this.amplitude +
+          this.offset
+        );
+      case "square":
+        const magnitude = Math.sin(
+          time * this.frequency * 2 * Math.PI + this.phase
+        );
+        const sign = magnitude > 0 ? 1 : -1;
+        return sign * this.amplitude + this.offset;
+      default:
+        return 0;
+    }
+  };
 
   computeDomain = () =>
     [-this.amplitude + this.offset, this.amplitude + this.offset] as [
@@ -66,8 +85,9 @@ export class SineVariation extends Variation<number> {
   };
 
   clone = () =>
-    new SineVariation(
+    new PeriodicVariation(
       this.duration,
+      this.periodicType,
       this.amplitude,
       this.frequency,
       this.phase,
@@ -77,6 +97,7 @@ export class SineVariation extends Variation<number> {
   serialize = () => ({
     type: this.type,
     duration: this.duration,
+    periodicType: this.periodicType,
     amplitude: this.amplitude,
     frequency: this.frequency,
     phase: this.phase,
@@ -84,8 +105,9 @@ export class SineVariation extends Variation<number> {
   });
 
   static deserialize = (data: any) =>
-    new SineVariation(
+    new PeriodicVariation(
       data.duration,
+      data.periodicType,
       data.amplitude,
       data.frequency,
       data.phase,

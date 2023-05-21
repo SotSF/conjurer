@@ -7,27 +7,9 @@
     {
       "pattern": "Tunnel",
       "startTime": 0,
-      "duration": 12.4474,
+      "duration": 38,
       "parameterVariations": {},
       "effectBlocks": []
-    },
-    {
-      "pattern": "Pulse",
-      "startTime": 12.4474,
-      "duration": 25.5526,
-      "parameterVariations": {
-        "u_wave_amplitude": [{ "type": "flat", "duration": 2, "value": 0.4 }],
-        "u_wave_period": [{ "type": "flat", "duration": 2, "value": 0.125 }]
-      },
-      "effectBlocks": [
-        {
-          "pattern": "Rotate",
-          "startTime": 0,
-          "duration": 5,
-          "parameterVariations": {},
-          "effectBlocks": []
-        }
-      ]
     },
     {
       "pattern": "Clouds",
@@ -139,7 +121,7 @@
             "u_box_smooth": [
               { "type": "flat", "duration": 43.1563, "value": 0.3 },
               {
-                "type": "sine",
+                "type": "periodic",
                 "duration": 29.8284,
                 "amplitude": 0.5,
                 "frequency": 0.5,
@@ -170,7 +152,8 @@
         "u_hue_width": [
           { "type": "flat", "duration": 2, "value": 0 },
           {
-            "type": "sine",
+            "type": "periodic",
+            "periodicType": "square",
             "duration": 19.25,
             "amplitude": 0.7,
             "frequency": 0.5,
@@ -186,8 +169,7 @@
     "horizontalLayout": true,
     "displayingCanopy": true,
     "showingPerformance": false,
-    "pixelsPerSecond": 38,
-    "beatLength": 1
+    "pixelsPerSecond": 38
   },
   "user": "ben"
 }

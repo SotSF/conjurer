@@ -19,7 +19,7 @@ import { BiDuplicate } from "react-icons/bi";
 import { Block } from "@/src/types/Block";
 import { FlatVariation } from "@/src/types/Variations/FlatVariation";
 import { LinearVariation } from "@/src/types/Variations/LinearVariation";
-import { SineVariation } from "@/src/types/Variations/SineVariation";
+import { PeriodicVariation } from "@/src/types/Variations/PeriodicVariation";
 import { LinearVariation4 } from "@/src/types/Variations/LinearVariation4";
 import { HexColorPicker } from "react-colorful";
 import { hexToRgb, vector4ToHex } from "@/src/utils/color";
@@ -54,7 +54,7 @@ export const VariationControls = function VariationControls(
         variation={variation}
       />
     );
-  } else if (variation instanceof SineVariation) {
+  } else if (variation instanceof PeriodicVariation) {
     controls = (
       <SineVariationControls
         uniformName={uniformName}
@@ -265,7 +265,7 @@ function LinearVariationControls({
 
 type SineVariationControlsProps = {
   uniformName: string;
-  variation: SineVariation;
+  variation: PeriodicVariation;
   block: Block;
 };
 

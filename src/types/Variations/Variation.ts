@@ -1,10 +1,6 @@
 import { ParamType } from "@/src/types/PatternParams";
 
-type VariationType = "flat" | "linear" | "sine" | "spline" | "linear4";
-// | "random"
-// | "saw"
-// | "square"
-// | "triangle";
+type VariationType = "flat" | "linear" | "periodic" | "spline" | "linear4";
 
 export abstract class Variation<T extends ParamType = ParamType> {
   id: string = Math.random().toString(16).slice(2); // unique id
