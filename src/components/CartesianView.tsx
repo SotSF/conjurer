@@ -1,8 +1,8 @@
 import { WebGLRenderTarget } from "three";
 import { useFrame } from "@react-three/fiber";
 import { useRef } from "react";
-import vert from "@/src/patterns/shaders/default.vert";
-import fromTexture from "@/src/patterns/shaders/fromTexture.frag";
+import vert from "@/src/shaders/default.vert";
+import fromTexture from "@/src/shaders/fromTexture.frag";
 
 type CartesianViewProps = {
   renderTarget: WebGLRenderTarget;

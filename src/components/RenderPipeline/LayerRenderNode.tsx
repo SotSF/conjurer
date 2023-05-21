@@ -1,5 +1,5 @@
 import { WebGLRenderTarget } from "three";
-import black from "@/src/patterns/shaders/black.frag";
+import black from "@/src/shaders/black.frag";
 import { useFrame } from "@react-three/fiber";
 import { memo } from "react";
 import { BlockRenderNode } from "@/src/components/RenderPipeline/BlockRenderNode";

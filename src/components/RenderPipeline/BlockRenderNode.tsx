@@ -1,7 +1,7 @@
 import { WebGLRenderTarget } from "three";
 import { useFrame } from "@react-three/fiber";
 import { memo, useRef } from "react";
-import vert from "@/src/patterns/shaders/default.vert";
+import vert from "@/src/shaders/default.vert";
 
 type BlockRenderNodeProps = {
   shaderMaterialKey?: string;
