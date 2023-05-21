@@ -6,6 +6,8 @@ import { Block } from "@/src/types/Block";
 import { NewVariationButtons } from "@/src/components/NewVariationButtons";
 import { ParameterVariations } from "@/src/components/ParameterVariations";
 import { observer } from "mobx-react-lite";
+import { useStore } from "@/src/types/StoreContext";
+import { ParameterValue } from "@/src/components/ParameterValue";
 
 type ParameterProps = {
   uniformName: string;
@@ -20,8 +22,13 @@ export const ParameterView = observer(function ParameterView({
   block,
   expandMode,
 }: ParameterProps) {
+  const store = useStore();
   const variations = block.parameterVariations[uniformName] ?? [];
   const [isExpanded, setExpanded] = useState(expandMode === "expanded");
+
+  const isCurrentBlock = [block, block.parentBlock].includes(
+    store.currentBlock
+  );
 
   const headerColor = variations.length ? "orange.400" : "gray.300";
   return (
@@ -47,6 +54,13 @@ export const ParameterView = observer(function ParameterView({
             color={headerColor}
           >
             {patternParam.name}
+            {isCurrentBlock && (
+              <ParameterValue
+                uniformName={uniformName}
+                patternParam={patternParam}
+                block={block}
+              />
+            )}
           </Text>
           {isExpanded ? (
             <BsCaretUp key={headerColor} size={10} color={headerColor} />
