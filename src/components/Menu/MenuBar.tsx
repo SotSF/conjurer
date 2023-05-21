@@ -30,7 +30,7 @@ export const MenuBar = observer(function MenuBar() {
       top={0}
       left={0}
       alignItems="flex-start"
-      zIndex={1}
+      zIndex={2}
       spacing={1}
       mx={2}
     >

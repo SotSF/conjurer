@@ -1,3 +1,4 @@
+import styles from "@/styles/Display.module.css";
 import { Box, Heading, VStack } from "@chakra-ui/react";
 import { DisplayCanvas } from "@/src/components/DisplayCanvas";
 import { DisplayControls } from "@/src/components/DisplayControls";
@@ -18,7 +19,9 @@ export const Display = observer(function Display() {
     >
       <MenuBar />
       <VStack position="absolute" width="100%" marginY="2" zIndex={1}>
-        <Heading>Conjurer</Heading>
+        <Heading className={styles.fadeOut} userSelect="none">
+          Conjurer
+        </Heading>
       </VStack>
       <VStack p={2} position="absolute" top={0} right={0} zIndex={1}>
         <UserPicker />
