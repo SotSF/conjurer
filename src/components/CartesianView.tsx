@@ -20,7 +20,7 @@ export const CartesianView = function CartesianView({
 
     gl.setRenderTarget(null);
     gl.render(outputMesh.current, camera);
-  }, 101);
+  }, 1001);
 
   return (
     <mesh ref={outputMesh}>

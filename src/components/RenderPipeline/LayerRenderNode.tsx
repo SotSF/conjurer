@@ -1,38 +1,33 @@
 import { WebGLRenderTarget } from "three";
-import { useFrame } from "@react-three/fiber";
-import { useMemo } from "react";
-import { observer } from "mobx-react-lite";
-import { useStore } from "@/src/types/StoreContext";
 import black from "@/src/patterns/shaders/black.frag";
-import { RenderNode } from "@/src/components/RenderNode";
+import { useFrame } from "@react-three/fiber";
+import { memo, useMemo, useRef } from "react";
+import { BlockRenderNode } from "@/src/components/RenderPipeline/BlockRenderNode";
+import { useStore } from "@/src/types/StoreContext";
+import { Layer } from "@/src/types/Layer";
 import { Block } from "@/src/types/Block";
 
-// This size greatly affects performance. Somewhat arbitrarily chosen for now. We can lower this as
-// needed in the future.
-const RENDER_TARGET_SIZE = 256;
-
-type RenderPipelineProps = {
+type LayerRenderNodeProps = {
   autorun?: boolean;
+  priority: number;
   block?: Block;
-  children: (renderTarget: WebGLRenderTarget) => JSX.Element;
+  layer?: Layer;
+  renderTargetIn: WebGLRenderTarget;
+  renderTargetOut: WebGLRenderTarget;
 };
 
-export const RenderPipeline = observer(function RenderPipeline({
+export const LayerRenderNode = memo(function LayerRenderNode({
   autorun,
+  priority,
   block,
-  children,
-}: RenderPipelineProps) {
-  const renderTargetA = useMemo(
-    () => new WebGLRenderTarget(RENDER_TARGET_SIZE, RENDER_TARGET_SIZE),
-    []
-  );
-  const renderTargetB = useMemo(
-    () => new WebGLRenderTarget(RENDER_TARGET_SIZE, RENDER_TARGET_SIZE),
-    []
-  );
-
+  layer,
+  renderTargetIn,
+  renderTargetOut,
+}: LayerRenderNodeProps) {
   const { currentBlock, timer } = useStore();
   const targetBlock = block ?? currentBlock;
+
+  const layerPriority = priority * 100;
 
   // initial pass: update parameters (uniforms)
   useFrame(({ clock }) => {
@@ -51,34 +46,33 @@ export const RenderPipeline = observer(function RenderPipeline({
     } else {
       targetBlock.updateParameters(globalTime - startTime, globalTime);
     }
-  }, 0);
+  }, layerPriority);
 
   const numberEffects = targetBlock?.effectBlocks.length ?? 0;
   const evenNumberOfEffects = numberEffects % 2 === 0;
   return (
     <>
-      <RenderNode
-        priority={1}
+      <BlockRenderNode
+        priority={layerPriority + 1}
         shaderMaterialKey={targetBlock?.id}
         uniforms={targetBlock?.pattern.params}
         fragmentShader={targetBlock?.pattern.src ?? black}
-        renderTargetOut={evenNumberOfEffects ? renderTargetB : renderTargetA}
+        renderTargetOut={evenNumberOfEffects ? renderTargetOut : renderTargetIn}
       />
       {targetBlock?.effectBlocks.map((effect, i) => {
         const isEven = i % 2 === 0;
         const swap = isEven && evenNumberOfEffects;
         return (
-          <RenderNode
+          <BlockRenderNode
             key={effect.id}
-            priority={i + 2}
+            priority={layerPriority + i + 2}
             uniforms={effect.pattern.params}
             fragmentShader={effect.pattern.src}
-            renderTargetIn={swap ? renderTargetB : renderTargetA}
-            renderTargetOut={swap ? renderTargetA : renderTargetB}
+            renderTargetIn={swap ? renderTargetOut : renderTargetIn}
+            renderTargetOut={swap ? renderTargetIn : renderTargetOut}
           />
         );
       })}
-      {children(renderTargetB)}
     </>
   );
 });

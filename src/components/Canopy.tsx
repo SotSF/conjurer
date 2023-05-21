@@ -73,7 +73,7 @@ export const Canopy = function Canopy({ renderTarget }: CanopyViewProps) {
   }, [effectComposer, camera]);
 
   // render the effect composer, including the canopy render pass and bloom effect
-  useFrame(() => effectComposer.render(), 100);
+  useFrame(() => effectComposer.render(), 1000);
 
   return (
     <scene ref={scene}>

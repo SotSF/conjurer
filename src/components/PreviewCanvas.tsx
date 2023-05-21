@@ -2,7 +2,7 @@ import { Block } from "../types/Block";
 import { Canvas } from "@react-three/fiber";
 import { useStore } from "@/src/types/StoreContext";
 import { observer } from "mobx-react-lite";
-import { RenderPipeline } from "@/src/components/RenderPipeline";
+import { RenderPipeline } from "@/src/components/RenderPipeline/RenderPipeline";
 import { RenderingGate } from "@/src/components/RenderingGate";
 import { Canopy } from "@/src/components/Canopy";
 import { CameraControls } from "@/src/components/CameraControls";
