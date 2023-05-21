@@ -49,6 +49,15 @@ export const SaveExperienceModal = observer(function SaveExperienceModal() {
     onClose();
   };
 
+  const onExperienceNameChange = (newValue: string) => {
+    // sanitize file name for s3
+    newValue = newValue.replace(/[^a-z0-9]/gi, "-").toLowerCase();
+    setExperienceName(newValue);
+  };
+
+  const willOverwriteExistingExperience =
+    experiences.includes(experienceFilename);
+
   return (
     <Modal
       onClose={onClose}
@@ -66,15 +75,17 @@ export const SaveExperienceModal = observer(function SaveExperienceModal() {
             ) : (
               <>
                 <HStack mb={2} spacing={0}>
-                  <Text>{store.user}-</Text>
+                  <Text fontWeight="bold">{store.user}-</Text>
                   <Input
                     ref={inputRef}
-                    onChange={(e) => setExperienceName(e.target.value)}
+                    onChange={(e) => onExperienceNameChange(e.target.value)}
                     value={experienceName}
                   />
                 </HStack>
                 {experiences.length > 0 && (
-                  <Text>Careful not to overwrite an existing experience:</Text>
+                  <Text mb={4}>
+                    Be aware that you may overwrite an existing experience:
+                  </Text>
                 )}
                 {experiences.map((experience) => (
                   <Text
@@ -99,8 +110,15 @@ export const SaveExperienceModal = observer(function SaveExperienceModal() {
           <Button
             isDisabled={saving || !experienceName}
             onClick={() => onSaveExperience()}
+            colorScheme={willOverwriteExistingExperience ? "red" : "gray"}
           >
-            {saving ? <Spinner /> : "Save"}
+            {saving ? (
+              <Spinner />
+            ) : willOverwriteExistingExperience ? (
+              "Overwrite"
+            ) : (
+              "Save"
+            )}
           </Button>
         </ModalFooter>
       </ModalContent>
