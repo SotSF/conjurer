@@ -1,19 +1,25 @@
 import { observer } from "mobx-react-lite";
-import { HStack, IconButton } from "@chakra-ui/react";
+import { HStack, IconButton, VStack } from "@chakra-ui/react";
 import { RiZoomInLine, RiZoomOutLine } from "react-icons/ri";
 import { useStore } from "@/src/types/StoreContext";
 import { action } from "mobx";
 import { TimerControls } from "@/src/components/TimerControls";
 import { TimerReadout } from "@/src/components/TimerReadout";
 import { AudioControls } from "@/src/components/AudioControls";
-import { MenuBar } from "@/src/components/Menu/MenuBar";
 
 export const Controls = observer(function Controls() {
-  const { uiStore } = useStore();
+  const store = useStore();
+  const { uiStore } = store;
 
   return (
-    <HStack my={2} width="100%" overflowX="clip">
-      <MenuBar />
+    <HStack
+      py={2}
+      spacing={1}
+      overflowX="clip"
+      borderColor="black"
+      // borderWidth={1}
+      // backgroundColor="gray.500"
+    >
       <TimerReadout />
       <TimerControls />
       <AudioControls />

@@ -88,6 +88,8 @@ export class Store {
     localStorage.setItem("experienceName", value);
   }
 
+  experienceLastSavedAt = 0;
+
   constructor() {
     makeAutoObservable(this, {
       _lastComputedCurrentBlock: false, // don't make this observable, since it's just a cache

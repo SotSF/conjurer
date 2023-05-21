@@ -11,6 +11,7 @@ import {
 interface RootStore {
   user: string;
   experienceName: string;
+  experienceLastSavedAt: number;
   serialize: () => any;
   deserialize: (data: any) => void;
 }
@@ -21,6 +22,7 @@ export class ExperienceStore {
   }
 
   saveToS3 = () => {
+    this.rootStore.experienceLastSavedAt = Date.now();
     const experienceFilename = `${this.rootStore.user}-${
       this.rootStore.experienceName || "untitled"
     }`;
@@ -33,6 +35,7 @@ export class ExperienceStore {
   };
 
   loadFromS3 = async (experienceFilename: string) => {
+    this.rootStore.experienceLastSavedAt = Date.now();
     const getObjectCommand = new GetObjectCommand({
       Bucket: ASSET_BUCKET_NAME,
       Key: `${EXPERIENCE_ASSET_PREFIX}${experienceFilename}.json`,

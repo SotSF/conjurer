@@ -5,42 +5,18 @@
   },
   "blocks": [
     {
-      "pattern": "Tunnel",
+      "pattern": "Starfield",
       "startTime": 0,
-      "duration": 38,
+      "duration": 30.9474,
       "parameterVariations": {},
       "effectBlocks": []
     },
     {
-      "pattern": "Clouds",
-      "startTime": 38,
-      "duration": 23.75,
-      "parameterVariations": {
-        "u_color": [
-          {
-            "type": "linear4",
-            "duration": 19.4688,
-            "from": [0, 0.1765, 0.0157, 1],
-            "to": [0.0196, 0.5098, 0, 1]
-          }
-        ]
-      },
-      "effectBlocks": [
-        {
-          "pattern": "Leaf",
-          "startTime": 0,
-          "duration": 5,
-          "parameterVariations": {
-            "u_time_offset": [],
-            "u_time_factor": [{ "type": "flat", "duration": 2, "value": 1 }],
-            "u_tiling": [{ "type": "flat", "duration": 2, "value": 1 }],
-            "u_coordinate_offset": [
-              { "type": "flat", "duration": 2, "value": 0.5 }
-            ]
-          },
-          "effectBlocks": []
-        }
-      ]
+      "pattern": "Tunnel",
+      "startTime": 30.9474,
+      "duration": 30.8026,
+      "parameterVariations": { "u_max_depth_spacing": [] },
+      "effectBlocks": []
     },
     {
       "pattern": "Sun Cycle",
@@ -153,8 +129,8 @@
           { "type": "flat", "duration": 2, "value": 0 },
           {
             "type": "periodic",
-            "periodicType": "square",
             "duration": 19.25,
+            "periodicType": "square",
             "amplitude": 0.7,
             "period": 2,
             "phase": 0,
