@@ -42,7 +42,7 @@ export const MenuBar = observer(function MenuBar() {
           })}
           cursor="pointer"
         >
-          {store.experienceName || "Untitled"}
+          {store.experienceName}
         </Heading>
         <Text fontSize="sm" color="gray.500" userSelect="none">
           {store.experienceLastSavedAt

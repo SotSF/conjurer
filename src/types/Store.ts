@@ -77,7 +77,7 @@ export class Store {
     localStorage.setItem("user", value);
   }
 
-  _experienceName = "";
+  _experienceName = "untitled";
 
   get experienceName(): string {
     return this._experienceName;

@@ -13,18 +13,18 @@ import { Starfield } from "@/src/patterns/Starfield";
 import { Globules } from "@/src/patterns/Globules";
 
 const patterns: Pattern[] = [
-  Pulse(),
-  Barcode(),
   LogSpirals(),
+  Barcode(),
   Clouds(),
-  SunCycle(),
-  Tunnel(),
-  Fire(),
-  Melt(),
   Disc(),
+  Fire(),
+  Globules(),
+  Melt(),
+  Pulse(),
   Rainbow(),
   Starfield(),
-  Globules(),
+  SunCycle(),
+  Tunnel(),
 ];
 
 const patternMap: { [key: string]: Pattern } = {};
