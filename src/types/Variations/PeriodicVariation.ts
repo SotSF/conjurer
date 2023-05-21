@@ -85,7 +85,7 @@ export class PeriodicVariation extends Variation<number> {
     ];
 
   computeSampledData = (duration: number) => {
-    const samplingFrequency = 8 / this.period;
+    const samplingFrequency = 16 / this.period;
     const totalSamples = Math.ceil(duration * samplingFrequency);
 
     const data = [];
