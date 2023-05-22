@@ -2,34 +2,37 @@ import { WebGLRenderTarget } from "three";
 import black from "@/src/shaders/black.frag";
 import { useFrame } from "@react-three/fiber";
 import { memo } from "react";
-import { BlockRenderNode } from "@/src/components/RenderPipeline/BlockRenderNode";
+import { BlockNode } from "@/src/components/RenderPipeline/BlockNode";
 import { useStore } from "@/src/types/StoreContext";
 import { Layer } from "@/src/types/Layer";
 import { Block } from "@/src/types/Block";
 
-type LayerRenderNodeProps = {
+type LayerNodeProps = {
   autorun?: boolean;
   priority: number;
+
+  // this could be improved: you either supply a block or a layer to this component, but not both.
   block?: Block;
   layer?: Layer;
   renderTargetIn: WebGLRenderTarget;
   renderTargetOut: WebGLRenderTarget;
 };
 
-export const LayerRenderNode = memo(function LayerRenderNode({
+export const LayerNode = memo(function LayerNode({
   autorun,
   priority,
   block,
   layer,
   renderTargetIn,
   renderTargetOut,
-}: LayerRenderNodeProps) {
+}: LayerNodeProps) {
   const { timer } = useStore();
   const targetBlock = block ?? layer?.currentBlock;
 
   const layerPriority = priority * 100;
 
-  // initial pass: update parameters (uniforms)
+  // initial pass of layer: update parameters (uniforms). BlockNodes will use these parameters to
+  // render the pattern + effects in later priority useFrame calls
   useFrame(({ clock }) => {
     if (!targetBlock) return;
 
@@ -52,7 +55,7 @@ export const LayerRenderNode = memo(function LayerRenderNode({
   const evenNumberOfEffects = numberEffects % 2 === 0;
   return (
     <>
-      <BlockRenderNode
+      <BlockNode
         priority={layerPriority + 1}
         shaderMaterialKey={targetBlock?.id}
         uniforms={targetBlock?.pattern.params}
@@ -63,7 +66,7 @@ export const LayerRenderNode = memo(function LayerRenderNode({
         const isEven = i % 2 === 0;
         const swap = isEven && evenNumberOfEffects;
         return (
-          <BlockRenderNode
+          <BlockNode
             key={effect.id}
             priority={layerPriority + i + 2}
             uniforms={effect.pattern.params}

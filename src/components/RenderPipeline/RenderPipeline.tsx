@@ -1,20 +1,15 @@
 import { WebGLRenderTarget } from "three";
-import { memo, useMemo } from "react";
-import { Block } from "@/src/types/Block";
-import { LayerRenderNode } from "@/src/components/RenderPipeline/LayerRenderNode";
+import { LayerNode } from "@/src/components/RenderPipeline/LayerNode";
 import { useStore } from "@/src/types/StoreContext";
-import { LayerMergeNode } from "@/src/components/RenderPipeline/LayerMergeNode";
+import { MergeNode } from "@/src/components/RenderPipeline/MergeNode";
 import { useRenderTarget } from "@/src/hooks/renderTarget";
+import { observer } from "mobx-react-lite";
 
 type RenderPipelineProps = {
-  autorun?: boolean;
-  block?: Block;
   children: (renderTarget: WebGLRenderTarget) => JSX.Element;
 };
 
-export const RenderPipeline = memo(function RenderPipeline({
-  autorun,
-  block,
+export const RenderPipeline = observer(function RenderPipeline({
   children,
 }: RenderPipelineProps) {
   const store = useStore();
@@ -24,29 +19,13 @@ export const RenderPipeline = memo(function RenderPipeline({
   const renderTargetC = useRenderTarget();
   const renderTargetD = useRenderTarget();
 
-  if (block) {
-    // when a single block is supplied, we only need to render one layer
-    return (
-      <>
-        <LayerRenderNode
-          autorun={autorun}
-          block={block}
-          priority={0}
-          renderTargetIn={renderTargetA}
-          renderTargetOut={renderTargetB}
-        />
-        {children(renderTargetB)}
-      </>
-    );
-  }
-
   const activeLayers = store.layers.filter((layer) => !!layer.currentBlock);
 
   // TODO: fix this brute force approach: key={activeLayers.length}
   return (
     <group key={activeLayers.length}>
       {activeLayers.map((layer, index) => (
-        <LayerRenderNode
+        <LayerNode
           key={index}
           priority={index}
           layer={layer}
@@ -55,7 +34,7 @@ export const RenderPipeline = memo(function RenderPipeline({
         />
       ))}
       {activeLayers.length === 2 && (
-        <LayerMergeNode
+        <MergeNode
           priority={10000}
           renderTargetIn1={renderTargetB}
           renderTargetIn2={renderTargetD}

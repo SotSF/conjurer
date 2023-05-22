@@ -67,7 +67,7 @@ export class Layer {
 
   removeBlock = (block: Block) => {
     this.patternBlocks = this.patternBlocks.filter((b) => b !== block);
-    // this._lastComputedCurrentBlock = null;
+    this._lastComputedCurrentBlock = null;
   };
 
   /**
@@ -278,5 +278,6 @@ export class Layer {
     this.patternBlocks = data.patternBlocks.map((b: any) =>
       Block.deserialize(b)
     );
+    this._lastComputedCurrentBlock = null;
   };
 }

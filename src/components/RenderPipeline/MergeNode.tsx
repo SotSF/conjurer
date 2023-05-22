@@ -3,24 +3,20 @@ import merge from "@/src/shaders/merge.frag";
 import { WebGLRenderTarget } from "three";
 import { useFrame } from "@react-three/fiber";
 import { memo, useMemo, useRef } from "react";
-import { BlockRenderNode } from "@/src/components/RenderPipeline/BlockRenderNode";
-import { useStore } from "@/src/types/StoreContext";
-import { Layer } from "@/src/types/Layer";
-import { Block } from "@/src/types/Block";
 
-type LayerMergeNodeProps = {
+type MergeNodeProps = {
   priority: number;
   renderTargetIn1: WebGLRenderTarget;
   renderTargetIn2: WebGLRenderTarget;
   renderTargetOut: WebGLRenderTarget;
 };
 
-export const LayerMergeNode = memo(function LayerMergeNode({
+export const MergeNode = memo(function MergeNode({
   priority,
   renderTargetIn1,
   renderTargetIn2,
   renderTargetOut,
-}: LayerMergeNodeProps) {
+}: MergeNodeProps) {
   const mesh = useRef<THREE.Mesh>(null);
   const uniforms = useMemo(
     () => ({
