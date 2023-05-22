@@ -111,8 +111,9 @@ export class Layer {
     }
 
     // fromTime is after last block
-    if (fromTime >= this.endTime) {
-      return { startTime: fromTime };
+    const lastBlock = blocks[blocks.length - 1];
+    if (fromTime >= lastBlock.endTime) {
+      return { startTime: fromTime, duration: Infinity };
     }
 
     // fromTime is in between start of first block and end of last block
@@ -148,7 +149,6 @@ export class Layer {
       }
     }
 
-    const lastBlock = blocks[blocks.length - 1];
     return { startTime: lastBlock.endTime };
   };
 
