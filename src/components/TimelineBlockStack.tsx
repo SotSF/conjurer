@@ -94,7 +94,6 @@ export const TimelineBlockStack = observer(function TimelineBlockStack({
         top={0}
         left={uiStore.timeToXPixels(patternBlock.startTime)}
         width={uiStore.timeToXPixels(patternBlock.duration)}
-        minHeight="100%"
         border="solid"
         borderColor={isSelected ? "blue.500" : "white"}
         borderWidth={3}

@@ -6,7 +6,7 @@ import { useRef } from "react";
 import { useWheelZooming } from "@/src/hooks/wheelZooming";
 import { WavesurferWaveform } from "@/src/components/WavesurferWaveform";
 import { MAX_TIME } from "@/src/utils/time";
-import { TimelineBlockStacks } from "@/src/components/TimelineBlockStacks";
+import { TimelineLayer } from "@/src/components/TimelineLayer";
 
 export const Timeline = observer(function Timeline() {
   const store = useStore();
@@ -34,7 +34,9 @@ export const Timeline = observer(function Timeline() {
         <WavesurferWaveform />
         <PlayHead />
       </Box>
-      <TimelineBlockStacks />
+      {store.layers.map((layer, index) => (
+        <TimelineLayer key={index} index={index} layer={layer} />
+      ))}
     </Box>
   );
 });

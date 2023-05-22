@@ -148,6 +148,17 @@
           "effectBlocks": []
         }
       ]
+    },
+    {
+      "patternBlocks": [
+        {
+          "pattern": "Tunnel",
+          "startTime": 0,
+          "duration": 30.9474,
+          "parameterVariations": { "u_max_depth_spacing": [] },
+          "effectBlocks": []
+        }
+      ]
     }
   ],
   "uiStore": {
