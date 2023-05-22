@@ -28,6 +28,7 @@ export class Store {
   experienceStore = new ExperienceStore(this);
 
   layers: Layer[] = [new Layer(this.timer, 0), new Layer(this.timer, 1)];
+  // layers: Layer[] = [new Layer(this.timer, 0), new Layer(this.timer, 1)];
 
   patternBlocks: Block[] = [];
   selectedBlocks: Set<Block> = new Set();

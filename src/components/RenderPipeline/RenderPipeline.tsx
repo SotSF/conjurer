@@ -1,14 +1,10 @@
 import { WebGLRenderTarget } from "three";
-import { useMemo } from "react";
-import { observer } from "mobx-react-lite";
+import { memo, useMemo } from "react";
 import { Block } from "@/src/types/Block";
 import { LayerRenderNode } from "@/src/components/RenderPipeline/LayerRenderNode";
 import { useStore } from "@/src/types/StoreContext";
 import { LayerMergeNode } from "@/src/components/RenderPipeline/LayerMergeNode";
-
-// This size greatly affects performance. Somewhat arbitrarily chosen for now. We can lower this as
-// needed in the future.
-const RENDER_TARGET_SIZE = 256;
+import { useRenderTarget } from "@/src/hooks/renderTarget";
 
 type RenderPipelineProps = {
   autorun?: boolean;
@@ -16,29 +12,17 @@ type RenderPipelineProps = {
   children: (renderTarget: WebGLRenderTarget) => JSX.Element;
 };
 
-export const RenderPipeline = observer(function RenderPipeline({
+export const RenderPipeline = memo(function RenderPipeline({
   autorun,
   block,
   children,
 }: RenderPipelineProps) {
   const store = useStore();
 
-  const renderTargetA = useMemo(
-    () => new WebGLRenderTarget(RENDER_TARGET_SIZE, RENDER_TARGET_SIZE),
-    []
-  );
-  const renderTargetB = useMemo(
-    () => new WebGLRenderTarget(RENDER_TARGET_SIZE, RENDER_TARGET_SIZE),
-    []
-  );
-  const renderTargetC = useMemo(
-    () => new WebGLRenderTarget(RENDER_TARGET_SIZE, RENDER_TARGET_SIZE),
-    []
-  );
-  const renderTargetD = useMemo(
-    () => new WebGLRenderTarget(RENDER_TARGET_SIZE, RENDER_TARGET_SIZE),
-    []
-  );
+  const renderTargetA = useRenderTarget();
+  const renderTargetB = useRenderTarget();
+  const renderTargetC = useRenderTarget();
+  const renderTargetD = useRenderTarget();
 
   if (block) {
     // when a single block is supplied, we only need to render one layer
@@ -56,9 +40,12 @@ export const RenderPipeline = observer(function RenderPipeline({
     );
   }
 
+  const activeLayers = store.layers.filter((layer) => !!layer.currentBlock);
+
+  // TODO: fix this brute force approach: key={activeLayers.length}
   return (
-    <>
-      {store.layers.map((layer, index) => (
+    <group key={activeLayers.length}>
+      {activeLayers.map((layer, index) => (
         <LayerRenderNode
           key={index}
           priority={index}
@@ -67,13 +54,15 @@ export const RenderPipeline = observer(function RenderPipeline({
           renderTargetOut={index === 0 ? renderTargetB : renderTargetD}
         />
       ))}
-      <LayerMergeNode
-        priority={10000}
-        renderTargetIn1={renderTargetB}
-        renderTargetIn2={renderTargetD}
-        renderTargetOut={renderTargetA}
-      />
-      {children(renderTargetA)}
-    </>
+      {activeLayers.length === 2 && (
+        <LayerMergeNode
+          priority={10000}
+          renderTargetIn1={renderTargetB}
+          renderTargetIn2={renderTargetD}
+          renderTargetOut={renderTargetA}
+        />
+      )}
+      {children(activeLayers.length === 2 ? renderTargetA : renderTargetB)}
+    </group>
   );
 });

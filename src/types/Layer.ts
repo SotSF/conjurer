@@ -48,7 +48,7 @@ export class Layer {
   initialize = () => {
     // temporarily hard code a block
     const newBlock = new Block(patterns[this.seed === 0 ? 5 : 9].clone());
-    newBlock.setTiming({ startTime: 0, duration: 360 });
+    newBlock.setTiming({ startTime: 0, duration: this.seed === 0 ? 360 : 3 });
     this.addBlock(newBlock);
   };
 
