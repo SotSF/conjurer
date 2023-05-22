@@ -37,7 +37,6 @@ export class Store {
 
   patterns: Pattern[] = patterns;
   selectedPattern: Pattern = patterns[0];
-  draggingPattern: boolean = false;
 
   _user = "";
 
