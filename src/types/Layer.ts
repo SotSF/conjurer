@@ -2,8 +2,8 @@ import { Block } from "@/src/types/Block";
 import { Timer } from "@/src/types/Timer";
 import { binarySearchForBlockAtTime } from "@/src/utils/algorithm";
 import { DEFAULT_BLOCK_DURATION } from "@/src/utils/time";
-import { patterns } from "@/src/patterns/patterns";
-import { makeAutoObservable, runInAction } from "mobx";
+import { makeAutoObservable } from "mobx";
+import { Pattern } from "@/src/types/Pattern";
 
 export class Layer {
   patternBlocks: Block[] = [];
@@ -37,18 +37,16 @@ export class Layer {
     return lastBlock.endTime;
   }
 
-  constructor(readonly timer: Timer, readonly seed: number) {
+  constructor(readonly timer: Timer) {
     makeAutoObservable(this, {
       _lastComputedCurrentBlock: false, // don't make this observable, since it's just a cache
     });
-
-    runInAction(this.initialize);
   }
 
-  initialize = () => {
-    // temporarily hard code a block
-    const newBlock = new Block(patterns[this.seed === 0 ? 5 : 9].clone());
-    newBlock.setTiming({ startTime: 0, duration: this.seed === 0 ? 360 : 3 });
+  insertCloneOfPattern = (pattern: Pattern) => {
+    const newBlock = new Block(pattern.clone());
+    const nextGap = this.nextFiniteGap(this.timer.globalTime);
+    newBlock.setTiming(nextGap);
     this.addBlock(newBlock);
   };
 
@@ -274,10 +272,11 @@ export class Layer {
     patternBlocks: this.patternBlocks.map((b) => b.serialize()),
   });
 
-  deserialize = (data: any) => {
-    this.patternBlocks = data.patternBlocks.map((b: any) =>
+  static deserialize = (data: any, timer: Timer) => {
+    const layer = new Layer(timer);
+    layer.patternBlocks = data.patternBlocks.map((b: any) =>
       Block.deserialize(b)
     );
-    this._lastComputedCurrentBlock = null;
+    return layer;
   };
 }
