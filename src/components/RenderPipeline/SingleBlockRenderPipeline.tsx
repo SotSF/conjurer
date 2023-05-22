@@ -1,12 +1,12 @@
 import { WebGLRenderTarget } from "three";
-import { memo, useMemo } from "react";
+import { memo } from "react";
 import { Block } from "@/src/types/Block";
-import { LayerNode } from "@/src/components/RenderPipeline/LayerNode";
 import { useRenderTarget } from "@/src/hooks/renderTarget";
+import { BlockStackNode } from "@/src/components/RenderPipeline/BlockStackNode";
 
 type SingleBlockRenderPipelineProps = {
   autorun?: boolean;
-  block?: Block;
+  block: Block | null;
   children: (renderTarget: WebGLRenderTarget) => JSX.Element;
 };
 
@@ -21,10 +21,10 @@ export const SingleBlockRenderPipeline = memo(
 
     return (
       <>
-        <LayerNode
+        <BlockStackNode
           autorun={autorun}
-          block={block}
-          priority={0}
+          basePriority={0}
+          parentBlock={block}
           renderTargetIn={renderTargetA}
           renderTargetOut={renderTargetB}
         />

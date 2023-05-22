@@ -9,6 +9,7 @@ type RenderPipelineProps = {
   children: (renderTarget: WebGLRenderTarget) => JSX.Element;
 };
 
+// TODO: generalize approach here for more than two layers
 export const RenderPipeline = observer(function RenderPipeline({
   children,
 }: RenderPipelineProps) {
