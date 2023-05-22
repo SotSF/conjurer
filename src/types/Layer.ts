@@ -61,10 +61,12 @@ export class Layer {
     }
 
     this.patternBlocks.splice(index, 0, block);
+    block.layer = this;
   };
 
   removeBlock = (block: Block) => {
     this.patternBlocks = this.patternBlocks.filter((b) => b !== block);
+    block.layer = null;
     this._lastComputedCurrentBlock = null;
   };
 
@@ -277,6 +279,7 @@ export class Layer {
     layer.patternBlocks = data.patternBlocks.map((b: any) =>
       Block.deserialize(b)
     );
+    layer.patternBlocks.forEach((b) => (b.layer = layer));
     return layer;
   };
 }

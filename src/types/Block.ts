@@ -6,6 +6,7 @@ import { MINIMUM_VARIATION_DURATION } from "@/src/utils/time";
 import { patternMap } from "@/src/patterns/patterns";
 import { deserializeVariation } from "@/src/types/Variations/variations";
 import { effectMap } from "@/src/effects/effects";
+import { Layer } from "@/src/types/Layer";
 
 type SerializedBlock = {
   pattern: string;
@@ -25,6 +26,8 @@ export class Block<T extends ExtraParams = {}> {
 
   startTime: number = 0; // global time that block starts playing at in seconds
   duration: number = 5; // duration that block plays for in seconds
+
+  layer: Layer | null = null; // the layer that this block is in
 
   get endTime() {
     return this.startTime + this.duration;
@@ -211,6 +214,7 @@ export class Block<T extends ExtraParams = {}> {
   addCloneOfEffect = (effect: Pattern) => {
     const newBlock = new Block(effect.clone());
     newBlock.parentBlock = this;
+    newBlock.layer = this.layer;
     this.effectBlocks.push(newBlock);
   };
 
