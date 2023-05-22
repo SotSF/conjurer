@@ -4,6 +4,7 @@ import { useStore } from "@/src/types/StoreContext";
 import { Box } from "@chakra-ui/react";
 import { MAX_TIME } from "@/src/utils/time";
 import { Layer } from "@/src/types/Layer";
+import { action } from "mobx";
 
 type TimelineLayerProps = {
   index: number;
@@ -14,7 +15,8 @@ export const TimelineLayer = observer(function TimelineLayer({
   index,
   layer,
 }: TimelineLayerProps) {
-  const { uiStore, selectedLayer } = useStore();
+  const store = useStore();
+  const { uiStore, selectedLayer } = store;
 
   return (
     <Box
@@ -22,10 +24,12 @@ export const TimelineLayer = observer(function TimelineLayer({
       width={uiStore.timeToXPixels(MAX_TIME)}
       // TODO: figure out how to size the height of the layers automatically
       height="400px"
-      // zebra stripe based on index
-      bgColor={index % 2 === 0 ? "gray.400" : "gray.300"}
+      bgColor={selectedLayer === layer ? "gray.300" : "gray.400"} // zebra stripe based on index
       boxSizing="border-box"
       border="1px solid gray"
+      onClick={action((e) => {
+        store.selectedLayer = layer;
+      })}
     >
       {layer.patternBlocks.map((block) => (
         <TimelineBlockStack key={block.id} patternBlock={block} />

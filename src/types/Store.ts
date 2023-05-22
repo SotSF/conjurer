@@ -26,8 +26,8 @@ export class Store {
   audioStore = new AudioStore(this.timer);
   experienceStore = new ExperienceStore(this);
 
-  selectedLayer: Layer | null = null;
-  layers: Layer[] = [];
+  layers: Layer[] = [new Layer(this.timer), new Layer(this.timer)];
+  selectedLayer: Layer = this.layers[0]; // a layer is always selected
 
   selectedBlocks: Set<Block> = new Set();
 
@@ -134,7 +134,7 @@ export class Store {
     const blocksData = JSON.parse(clipboardData.getData("text/plain"));
     if (!blocksData || !blocksData.length) return;
 
-    const layerToPasteInto = this.selectedLayer || this.layers[0];
+    const layerToPasteInto = this.selectedLayer;
     if (!layerToPasteInto) return;
 
     const blocksToPaste = blocksData.map((b: any) => Block.deserialize(b));
@@ -153,7 +153,7 @@ export class Store {
   // TODO: better generalize for multiple layers
   duplicateSelected = () => {
     if (this.selectedBlocks.size > 0) {
-      const layerToPasteInto = this.selectedLayer || this.layers[0];
+      const layerToPasteInto = this.selectedLayer;
       if (!layerToPasteInto) return;
 
       const selectedBlocks = Array.from(this.selectedBlocks);
@@ -208,5 +208,6 @@ export class Store {
     this.audioStore.deserialize(data.audioStore);
     this.uiStore.deserialize(data.uiStore);
     this.layers = data.layers.map((l: any) => Layer.deserialize(l, this.timer));
+    this.selectedLayer = this.layers[0];
   };
 }

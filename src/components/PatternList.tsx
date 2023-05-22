@@ -42,12 +42,7 @@ export const PatternList = observer(function PatternList() {
             key={p.name}
             pattern={p}
             selected={p === selectedPattern}
-            onInsert={action(() =>
-              // TODO: generalize better for multiple layers
-              store.selectedLayer
-                ? store.selectedLayer.insertCloneOfPattern(p)
-                : store.layers[0]?.insertCloneOfPattern(p)
-            )}
+            onInsert={action(() => store.selectedLayer.insertCloneOfPattern(p))}
           />
         ))}
       </VStack>
