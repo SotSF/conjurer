@@ -39,8 +39,8 @@ export const BlockRenderNode = memo(function BlockRenderNode({
       <shaderMaterial
         key={shaderMaterialKey}
         uniforms={uniforms}
-        fragmentShader={fragmentShader}
         vertexShader={vert}
+        fragmentShader={fragmentShader}
       />
     </mesh>
   );

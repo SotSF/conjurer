@@ -37,7 +37,7 @@ export class Layer {
     return lastBlock.endTime;
   }
 
-  constructor(readonly timer: Timer) {
+  constructor(readonly timer: Timer, readonly seed: number) {
     makeAutoObservable(this, {
       _lastComputedCurrentBlock: false, // don't make this observable, since it's just a cache
     });
@@ -47,7 +47,7 @@ export class Layer {
 
   initialize = () => {
     // temporarily hard code a block
-    const newBlock = new Block(patterns[5].clone());
+    const newBlock = new Block(patterns[this.seed === 0 ? 5 : 9].clone());
     newBlock.setTiming({ startTime: 0, duration: 360 });
     this.addBlock(newBlock);
   };
