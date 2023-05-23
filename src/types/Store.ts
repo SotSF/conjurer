@@ -79,6 +79,8 @@ export class Store {
         this.experienceStore.saveToLocalStorage("autosave");
     }, 60 * 1000);
 
+    this.uiStore.initialize();
+
     this.initialized = true;
   };
 
