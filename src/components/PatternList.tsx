@@ -1,24 +1,21 @@
-import { Box, Heading, Text, VStack } from "@chakra-ui/react";
+import { Box, Text, VStack } from "@chakra-ui/react";
 import { useMemo } from "react";
 import { Block } from "../types/Block";
-import { LED_COUNTS } from "@/src/utils/size";
 import { SelectablePattern } from "@/src/components/SelectablePattern";
 import { useStore } from "@/src/types/StoreContext";
 import { observer } from "mobx-react-lite";
-import { Keyboard } from "@/src/components/Keyboard";
 import { action } from "mobx";
 import { PreviewCanvas } from "@/src/components/PreviewCanvas";
 
-const PATTERN_PREVIEW_DISPLAY_FACTOR = 1.5;
+const PATTERN_PREVIEW_DISPLAY_SIZE = 300;
 
 export const PatternList = observer(function PatternList() {
   const store = useStore();
-  const { patterns, selectedPattern } = store;
+  const { patterns, selectedPattern, uiStore } = store;
   const block = useMemo(() => new Block(selectedPattern), [selectedPattern]);
 
   return (
-    <VStack mt={6}>
-      <Heading size="md">Pattern List</Heading>
+    <VStack>
       <Text userSelect="none" fontSize="xs">
         previewing
       </Text>
@@ -26,8 +23,8 @@ export const PatternList = observer(function PatternList() {
         {selectedPattern.name}
       </Text>
       <Box
-        width={`${LED_COUNTS.x * PATTERN_PREVIEW_DISPLAY_FACTOR}px`}
-        height={`${LED_COUNTS.y * PATTERN_PREVIEW_DISPLAY_FACTOR}px`}
+        width={`${PATTERN_PREVIEW_DISPLAY_SIZE}px`}
+        height={`${PATTERN_PREVIEW_DISPLAY_SIZE}px`}
       >
         <PreviewCanvas block={block} />
       </Box>
@@ -42,11 +39,13 @@ export const PatternList = observer(function PatternList() {
             key={p.name}
             pattern={p}
             selected={p === selectedPattern}
-            onInsert={action(() => store.selectedLayer.insertCloneOfPattern(p))}
+            onInsert={action(() => {
+              store.selectedLayer.insertCloneOfPattern(p);
+              uiStore.patternDrawerOpen = false;
+            })}
           />
         ))}
       </VStack>
-      <Keyboard />
     </VStack>
   );
 });

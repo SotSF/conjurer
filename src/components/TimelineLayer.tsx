@@ -24,7 +24,7 @@ export const TimelineLayer = observer(function TimelineLayer({
       position="relative"
       width={uiStore.timeToXPixels(MAX_TIME)}
       // TODO: figure out how to size the height of the layers automatically
-      height="400px"
+      height="450px"
       bgColor={selectedLayer === layer ? "gray.300" : "gray.400"} // zebra stripe based on index
       boxSizing="border-box"
       border="1px solid gray"

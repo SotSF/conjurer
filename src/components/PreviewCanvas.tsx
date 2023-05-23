@@ -18,12 +18,10 @@ export const PreviewCanvas = observer(function PreviewCanvas({
 }: PreviewCanvasProps) {
   const { timer } = useStore();
 
-  const initialPosition = useMemo(() => new Vector3(0, 0, 32), []);
-
   return (
     <Canvas frameloop="demand">
       <RenderingGate shouldRender={!timer.playing} />
-      <CameraControls initialPosition={initialPosition} />
+      <CameraControls />
       <SingleBlockRenderPipeline block={block} autorun>
         {(renderTarget) => <Canopy renderTarget={renderTarget} />}
       </SingleBlockRenderPipeline>

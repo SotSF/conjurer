@@ -98,6 +98,7 @@ export const TimelineBlockStack = observer(function TimelineBlockStack({
         borderColor={isSelected ? "blue.500" : "white"}
         borderWidth={3}
         alignItems="center"
+        onClick={(e: ReactMouseEvent) => e.stopPropagation()}
       >
         <TimelineBlockBound block={patternBlock} leftBound />
         <TimelineBlockBound block={patternBlock} rightBound />
