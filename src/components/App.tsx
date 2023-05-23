@@ -6,6 +6,7 @@ import { useStore } from "@/src/types/StoreContext";
 import { observer } from "mobx-react-lite";
 import { PatternDrawer } from "@/src/components/PatternDrawer";
 import { KeyboardControls } from "@/src/components/KeyboardControls";
+import { AddPatternButton } from "@/src/components/AddPatternButton";
 
 export const App = observer(function App() {
   const store = useStore();
@@ -52,6 +53,7 @@ export const App = observer(function App() {
           {gridItems}
         </Grid>
       )}
+      <AddPatternButton />
     </Box>
   );
 });

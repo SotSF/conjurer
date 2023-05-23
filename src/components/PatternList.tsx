@@ -7,7 +7,7 @@ import { observer } from "mobx-react-lite";
 import { action } from "mobx";
 import { PreviewCanvas } from "@/src/components/PreviewCanvas";
 
-const PATTERN_PREVIEW_DISPLAY_SIZE = 300;
+const PATTERN_PREVIEW_DISPLAY_SIZE = 400;
 
 export const PatternList = observer(function PatternList() {
   const store = useStore();
