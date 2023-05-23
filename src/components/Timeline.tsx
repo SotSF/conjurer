@@ -35,7 +35,7 @@ export const Timeline = observer(function Timeline() {
         <PlayHead />
       </Box>
       {store.layers.map((layer, index) => (
-        <TimelineLayer key={index} index={index} layer={layer} />
+        <TimelineLayer key={index} layer={layer} />
       ))}
     </Box>
   );
