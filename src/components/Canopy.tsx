@@ -6,8 +6,8 @@ import {
 } from "three";
 import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
-import canopyVert from "@/src/patterns/shaders/canopy.vert";
-import fromTextureWithIntensity from "@/src/patterns/shaders/fromTextureWithIntensity.frag";
+import canopyVert from "@/src/shaders/canopy.vert";
+import fromTextureWithIntensity from "@/src/shaders/fromTextureWithIntensity.frag";
 import canopyGeometry from "@/src/data/canopyGeometry.json";
 import {
   BloomEffect,
@@ -73,7 +73,7 @@ export const Canopy = function Canopy({ renderTarget }: CanopyViewProps) {
   }, [effectComposer, camera]);
 
   // render the effect composer, including the canopy render pass and bloom effect
-  useFrame(() => effectComposer.render(), 100);
+  useFrame(() => effectComposer.render(), 1000);
 
   return (
     <scene ref={scene}>

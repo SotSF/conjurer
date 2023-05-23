@@ -1,10 +1,12 @@
 import { Arrangement } from "@/src/components/Arrangement";
 import { Box, Grid, GridItem } from "@chakra-ui/react";
 import { Display } from "@/src/components/Display";
-import { PatternList } from "@/src/components/PatternList";
 import { useEffect, useRef } from "react";
 import { useStore } from "@/src/types/StoreContext";
 import { observer } from "mobx-react-lite";
+import { PatternDrawer } from "@/src/components/PatternDrawer";
+import { KeyboardControls } from "@/src/components/KeyboardControls";
+import { AddPatternButton } from "@/src/components/AddPatternButton";
 
 export const App = observer(function App() {
   const store = useStore();
@@ -18,9 +20,6 @@ export const App = observer(function App() {
 
   const gridItems = (
     <>
-      <GridItem px="2" area="patterns" bgColor="gray.600">
-        <PatternList />
-      </GridItem>
       <GridItem area="display">
         <Display />
       </GridItem>
@@ -31,12 +30,14 @@ export const App = observer(function App() {
   );
 
   return (
-    <Box w="100vw" h="100vh">
+    <Box position="relative" w="100vw" h="100vh">
+      <KeyboardControls />
+      <PatternDrawer />
       {uiStore.horizontalLayout ? (
         <Grid
-          templateAreas={`"patterns display"
-                        "patterns arrangement"`}
-          gridTemplateColumns="165px calc(100vw - 165px)"
+          templateAreas={`"display"
+                        "arrangement"`}
+          gridTemplateColumns="100vw"
           gridTemplateRows="min-content 1fr"
           height="100vh"
         >
@@ -44,14 +45,15 @@ export const App = observer(function App() {
         </Grid>
       ) : (
         <Grid
-          templateAreas={`"patterns arrangement display"`}
-          gridTemplateColumns="165px calc(60vw - 165px) calc(40vw)"
+          templateAreas={`"arrangement display"`}
+          gridTemplateColumns="60vw 40vw"
           gridTemplateRows="100vh"
           height="100vh"
         >
           {gridItems}
         </Grid>
       )}
+      <AddPatternButton />
     </Box>
   );
 });

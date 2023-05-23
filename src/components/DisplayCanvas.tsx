@@ -3,7 +3,7 @@ import { Canopy } from "@/src/components/Canopy";
 import { Perf } from "r3f-perf";
 import { observer } from "mobx-react-lite";
 import { useStore } from "@/src/types/StoreContext";
-import { RenderPipeline } from "@/src/components/RenderPipeline";
+import { RenderPipeline } from "@/src/components/RenderPipeline/RenderPipeline";
 import { CartesianView } from "@/src/components/CartesianView";
 import { CameraControls } from "@/src/components/CameraControls";
 
@@ -12,7 +12,7 @@ export const DisplayCanvas = observer(function DisplayCanvas() {
 
   return (
     <Canvas
-      // trigger a re-render of the canvas when the layout changes
+      // trigger a re-instantiation of the canvas when the layout changes
       key={`canopy-${uiStore.horizontalLayout ? "horizontal" : "vertical"}`}
     >
       {uiStore.showingPerformance && <Perf />}

@@ -8,8 +8,16 @@ import {
   MenuDivider,
   MenuItem,
   MenuList,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
   Text,
   VStack,
+  useDisclosure,
 } from "@chakra-ui/react";
 import { BiTimer } from "react-icons/bi";
 import { FaFolderOpen, FaRegClipboard } from "react-icons/fa";
@@ -18,10 +26,17 @@ import { useStore } from "@/src/types/StoreContext";
 import { OpenExperienceModal } from "@/src/components/Menu/OpenExperienceModal";
 import { SaveExperienceModal } from "@/src/components/Menu/SaveExperienceModal";
 import { action } from "mobx";
+import { KeyboardShortcuts } from "@/src/components/KeyboardShortcuts";
 
 export const MenuBar = observer(function MenuBar() {
   const store = useStore();
   const { experienceStore, uiStore } = store;
+
+  const {
+    isOpen: isKeyboardShortcutsOpen,
+    onOpen: onOpenKeyboardShortcuts,
+    onClose: onCloseKeyboardShortcuts,
+  } = useDisclosure();
 
   return (
     <VStack
@@ -34,6 +49,29 @@ export const MenuBar = observer(function MenuBar() {
       spacing={1}
       mx={2}
     >
+      <Modal
+        isOpen={isKeyboardShortcutsOpen}
+        onClose={onCloseKeyboardShortcuts}
+      >
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Keyboard shortcuts</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <KeyboardShortcuts />
+          </ModalBody>
+
+          <ModalFooter>
+            <Button
+              colorScheme="blue"
+              mr={3}
+              onClick={onCloseKeyboardShortcuts}
+            >
+              Close
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
       <HStack>
         <Heading
           size="md"
@@ -148,10 +186,23 @@ export const MenuBar = observer(function MenuBar() {
             Help
           </MenuButton>
           <MenuList zIndex={12}>
-            {/* TODO */}
-            <MenuItem>About Conjurer</MenuItem>
-            <MenuItem>Keyboard shortcuts</MenuItem>
-            <MenuItem>Report an issue</MenuItem>
+            <MenuItem
+              as="a"
+              href="https://github.com/SotSF/conjurer"
+              target="_blank"
+            >
+              About Conjurer
+            </MenuItem>
+            <MenuItem onClick={onOpenKeyboardShortcuts}>
+              Keyboard shortcuts
+            </MenuItem>
+            <MenuItem
+              as="a"
+              href="https://github.com/SotSF/conjurer/issues/new/choose"
+              target="_blank"
+            >
+              Report an issue
+            </MenuItem>
           </MenuList>
         </Menu>
       </HStack>

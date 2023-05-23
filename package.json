@@ -17,7 +17,7 @@
     "@emotion/styled": "^11.10.6",
     "@hello-pangea/dnd": "^16.2.0",
     "@react-three/drei": "^9.68.3",
-    "@react-three/fiber": "^8.12.0",
+    "@react-three/fiber": "^8.13.0",
     "@types/recharts": "^1.8.24",
     "CanvasSpliner": "jonathanlurie/CanvasSpliner",
     "axios": "^1.4.0",

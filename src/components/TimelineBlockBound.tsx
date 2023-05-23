@@ -28,8 +28,8 @@ export const TimelineBlockBound = observer(function TimelineBlockBound({
   };
 
   const changeBound = (delta: number) => {
-    if (leftBound) store.resizeBlockLeftBound(block, delta);
-    else if (rightBound) store.resizeBlockRightBound(block, delta);
+    if (leftBound) block.layer?.resizeBlockLeftBound(block, delta);
+    else if (rightBound) block.layer?.resizeBlockRightBound(block, delta);
   };
   const handleStop = action(() => {
     changeBound(uiStore.xToTime(position.x));

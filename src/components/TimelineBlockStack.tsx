@@ -38,13 +38,14 @@ export const TimelineBlockStack = observer(function TimelineBlockStack({
   // handle moving a block to a new start time
   const handleDragStop = action((e: DraggableEvent, data: DraggableData) => {
     if (Math.abs(position.x) < 1) return;
+    if (!patternBlock.layer) return;
 
     // prevent block overlaps for now by snapping to nearest valid start time
-    const validTimeDelta = store.nearestValidStartTimeDelta(
+    const validTimeDelta = patternBlock.layer.nearestValidStartTimeDelta(
       patternBlock,
       uiStore.xToTime(position.x)
     );
-    store.changeBlockStartTime(
+    patternBlock.layer.changeBlockStartTime(
       patternBlock,
       patternBlock.startTime + validTimeDelta
     );
@@ -93,11 +94,11 @@ export const TimelineBlockStack = observer(function TimelineBlockStack({
         top={0}
         left={uiStore.timeToXPixels(patternBlock.startTime)}
         width={uiStore.timeToXPixels(patternBlock.duration)}
-        minHeight="100%"
         border="solid"
         borderColor={isSelected ? "blue.500" : "white"}
         borderWidth={3}
         alignItems="center"
+        onClick={(e: ReactMouseEvent) => e.stopPropagation()}
       >
         <TimelineBlockBound block={patternBlock} leftBound />
         <TimelineBlockBound block={patternBlock} rightBound />
