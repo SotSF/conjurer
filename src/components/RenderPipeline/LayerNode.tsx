@@ -1,7 +1,7 @@
 import { WebGLRenderTarget } from "three";
-import { memo } from "react";
 import { Layer } from "@/src/types/Layer";
 import { BlockStackNode } from "@/src/components/RenderPipeline/BlockStackNode";
+import { observer } from "mobx-react-lite";
 
 type LayerNodeProps = {
   priority: number;
@@ -10,7 +10,7 @@ type LayerNodeProps = {
   renderTargetOut: WebGLRenderTarget;
 };
 
-export const LayerNode = memo(function LayerNode({
+export const LayerNode = observer(function LayerNode({
   priority,
   layer,
   renderTargetIn,
