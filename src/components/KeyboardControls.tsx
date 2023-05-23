@@ -1,10 +1,9 @@
 import { useStore } from "@/src/types/StoreContext";
-import { Kbd, Text, VStack } from "@chakra-ui/react";
 import { action } from "mobx";
 import { observer } from "mobx-react-lite";
 import { useEffect } from "react";
 
-export const Keyboard = observer(function Keyboard() {
+export const KeyboardControls = observer(function KeyboardControls() {
   const store = useStore();
   const { timer, uiStore, experienceStore } = store;
 
@@ -73,43 +72,5 @@ export const Keyboard = observer(function Keyboard() {
     };
   }, [store, timer, uiStore, experienceStore]);
 
-  return (
-    <VStack textAlign={"center"}>
-      <Text fontSize={9} userSelect="none">
-        <Kbd>spacebar</Kbd>: play/pause
-      </Text>
-      <Text fontSize={9} userSelect="none">
-        <Kbd>←</Kbd>/<Kbd>→</Kbd>: scan backward/forward
-      </Text>
-      <Text fontSize={9} userSelect="none">
-        <Kbd>+</Kbd>/<Kbd>-</Kbd>: zoom in/out
-      </Text>
-      <Text fontSize={9} userSelect="none">
-        <Kbd>cmd</Kbd>+<Kbd>s</Kbd>: save
-      </Text>
-      <Text fontSize={9} userSelect="none">
-        <Kbd>cmd</Kbd>+<Kbd>shift</Kbd>+<Kbd>s</Kbd>: save as
-      </Text>
-      <Text fontSize={9} userSelect="none">
-        <Kbd>cmd</Kbd>+<Kbd>o</Kbd>: open
-      </Text>
-      <Text fontSize={9} userSelect="none">
-        <Kbd>cmd</Kbd>+<Kbd>a</Kbd>: select all blocks
-      </Text>
-      <Text fontSize={9} userSelect="none">
-        <Kbd>cmd</Kbd>+<Kbd>c</Kbd>: copy block(s)
-      </Text>
-      <Text fontSize={9} userSelect="none">
-        <Kbd>cmd</Kbd>+<Kbd>v</Kbd>: paste block(s)
-      </Text>
-      <Text fontSize={9} userSelect="none">
-        <Kbd>cmd</Kbd>+<Kbd>d</Kbd>: duplicate selected block(s)/variation(s)
-      </Text>
-      <Text fontSize={9} userSelect="none">
-        <Kbd>delete</Kbd>: delete selected block(s)/variation(s)
-      </Text>
-      {/* <Text>cmd+z: undo</Text> */}
-      {/* <Text>cmd+shift+z: redo</Text> */}
-    </VStack>
-  );
+  return null;
 });
