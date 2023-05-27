@@ -1,4 +1,4 @@
-# Conjurer
+# [Conjurer](https://canopyconjurer.vercel.app)
 
 Conjurer is a web app that allows one to design audiovisual experiences for the [Canopy of Luminous Conjury](https://se.cretfi.re/canopy/), a large LED art piece by [The Servants of the Secret Fire](https://se.cretfi.re/).
 
@@ -49,7 +49,9 @@ yarn dev
 
 ## Todos
 
-Captured in the "Road to Minimum Viable Magical Product" [issue](https://github.com/SotSF/conjurer/issues/26).
+Must do's captured in the "Road to Minimum Viable Magical Product" [issue](https://github.com/SotSF/conjurer/issues/26).
+
+Other to do's captured in the [wiki](https://github.com/SotSF/conjurer/wiki).
 
 ### Performance notes
 
