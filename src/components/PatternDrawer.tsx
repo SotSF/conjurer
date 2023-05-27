@@ -8,8 +8,9 @@ import {
 } from "@chakra-ui/react";
 import { useStore } from "@/src/types/StoreContext";
 import { observer } from "mobx-react-lite";
-import { PatternList } from "@/src/components/PatternList";
 import { action } from "mobx";
+import { PatternPlayground } from "@/src/components/PatternPlayground/PatternPlayground";
+import Link from "next/link";
 
 export const PatternDrawer = observer(function PatternDrawer() {
   const store = useStore();
@@ -18,7 +19,7 @@ export const PatternDrawer = observer(function PatternDrawer() {
 
   return (
     <Drawer
-      size="md"
+      size="full"
       isOpen={patternDrawerOpen}
       placement="left"
       onClose={action(() => {
@@ -26,12 +27,15 @@ export const PatternDrawer = observer(function PatternDrawer() {
       })}
     >
       <DrawerOverlay />
-      <DrawerContent bgColor="gray.600">
+      <DrawerContent bgColor="gray.700">
         <DrawerCloseButton />
-        <DrawerHeader>Pattern List</DrawerHeader>
-
+        <DrawerHeader>
+          <Link href="/playground" target="_blank">
+            Pattern Playground
+          </Link>
+        </DrawerHeader>
         <DrawerBody>
-          <PatternList />
+          <PatternPlayground />
         </DrawerBody>
       </DrawerContent>
     </Drawer>

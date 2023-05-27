@@ -8,7 +8,11 @@
 precision mediump float;
 #endif
 
-// TODO: add uniforms
+// float u_time_factor = 1.0;
+// float u_time_offset = 0.0;
+
+uniform float u_time_factor;
+uniform float u_time_offset;
 
 uniform vec2 u_resolution;
 uniform float u_time;
@@ -67,12 +71,13 @@ void main() {
     float y = r * sin(theta) * 0.5 + 0.5;
     st = vec2(x, y) * 2.0 - 1.0;
 
-    st *= 2.0;
+    float time = u_time * u_time_factor + u_time_offset;
 
+    st *= 2.0;
     for (int i = 0; i < 8; i ++) {
-        vec2 newp = vec2(st.y + cos(st.x + u_time) - sin(st.y * cos(u_time * 0.2)), st.x - sin(st.y - u_time) - cos(st.x * sin(u_time * 0.3)));
+        vec2 newp = vec2(st.y + cos(st.x + time) - sin(st.y * cos(time * 0.2)), st.x - sin(st.y - time) - cos(st.x * sin(time * 0.3)));
         st = newp;
     }
 
-    gl_FragColor = vec4(spectral_colour(st.y * 50.0 + 500.0 + sin(u_time * 0.6)), 1.0);
+    gl_FragColor = vec4(spectral_colour(st.y * 50.0 + 500.0 + sin(time * 0.6)), 1.0);
 }

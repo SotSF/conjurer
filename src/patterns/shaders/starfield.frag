@@ -10,13 +10,15 @@ precision mediump float;
 
 // float u_time_factor = 1.0;
 // float u_time_offset = 0.0;
-// float u_meander_rate = 0.0;
+// float u_meander_factor = 0.;
+// float u_meander_offset = 1.0;
 // float u_saturation = 1.0;
 // float u_intensity = 1.0;
 
 uniform float u_time_factor;
 uniform float u_time_offset;
-uniform float u_meander_rate;
+uniform float u_meander_factor;
+uniform float u_meander_offset;
 uniform float u_saturation;
 uniform float u_intensity;
 
@@ -48,7 +50,7 @@ void main() {
 
     vec3 v = vec3(st, 1.0 - length(st) * 0.2);
 
-    float ta = u_time * 0.1 * u_meander_rate;
+    float ta = u_time * 0.1 * u_meander_factor + u_meander_offset;
     mat3 m = mat3(0.0, 1.0, 0.0, - sin(ta), 0.0, cos(ta), cos(ta), 0.0, sin(ta));
     m *= m * m;
     m *= m;
