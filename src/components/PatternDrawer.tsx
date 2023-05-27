@@ -10,6 +10,7 @@ import { useStore } from "@/src/types/StoreContext";
 import { observer } from "mobx-react-lite";
 import { action } from "mobx";
 import { PatternPlayground } from "@/src/components/PatternPlayground/PatternPlayground";
+import Link from "next/link";
 
 export const PatternDrawer = observer(function PatternDrawer() {
   const store = useStore();
@@ -26,10 +27,13 @@ export const PatternDrawer = observer(function PatternDrawer() {
       })}
     >
       <DrawerOverlay />
-      <DrawerContent bgColor="gray.600">
+      <DrawerContent bgColor="gray.700">
         <DrawerCloseButton />
-        <DrawerHeader>Pattern Playground</DrawerHeader>
-
+        <DrawerHeader>
+          <Link href="/playground" target="_blank">
+            Pattern Playground
+          </Link>
+        </DrawerHeader>
         <DrawerBody>
           <PatternPlayground />
         </DrawerBody>
