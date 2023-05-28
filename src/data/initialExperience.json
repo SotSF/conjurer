@@ -3,6 +3,7 @@
     "selectedAudioFile": "Ott. - Skylon - 02 The Queen Of All Everything.mp3",
     "audioMuted": false
   },
+  "uiStore": { "pixelsPerSecond": 38 },
   "layers": [
     {
       "patternBlocks": [
@@ -149,23 +150,8 @@
         }
       ]
     },
-    {
-      "patternBlocks": [
-        {
-          "pattern": "Tunnel",
-          "startTime": 0,
-          "duration": 30.9474,
-          "parameterVariations": { "u_max_depth_spacing": [] },
-          "effectBlocks": []
-        }
-      ]
-    }
+    { "patternBlocks": [] }
   ],
-  "uiStore": {
-    "horizontalLayout": true,
-    "displayingCanopy": true,
-    "showingPerformance": false,
-    "pixelsPerSecond": 38
-  },
-  "user": "ben"
+  "user": "ben",
+  "savedAt": 1685266700614
 }
