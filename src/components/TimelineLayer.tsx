@@ -1,12 +1,17 @@
 import { observer } from "mobx-react-lite";
 import { TimelineBlockStack } from "@/src/components/TimelineBlockStack";
 import { useStore } from "@/src/types/StoreContext";
-import { Box, HStack, Heading, IconButton, VStack } from "@chakra-ui/react";
+import { Box, HStack, Text, VStack, useToken } from "@chakra-ui/react";
 import { MAX_TIME } from "@/src/utils/time";
 import { Layer } from "@/src/types/Layer";
 import { action } from "mobx";
 import { useRef } from "react";
-import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
+import { TimelineLayerHeader } from "@/src/components/TimelineLayerHeader";
+import { Line, LineChart, YAxis } from "recharts";
+import { VARIATION_BOUND_WIDTH } from "@/src/utils/layout";
+import { ParameterView } from "@/src/components/ParameterView";
+import { NewVariationButtons } from "@/src/components/NewVariationButtons";
+import { ParameterVariations } from "@/src/components/ParameterVariations";
 
 type TimelineLayerProps = {
   index: number;
@@ -19,12 +24,14 @@ export const TimelineLayer = observer(function TimelineLayer({
 }: TimelineLayerProps) {
   const store = useStore();
   const { uiStore, timer, selectedLayer } = store;
+
   const boxRef = useRef<HTMLDivElement>(null);
 
   const bgColor = selectedLayer === layer ? "gray.300" : "gray.400";
 
   return (
     <HStack
+      position="relative"
       height={`${layer.height}px`}
       alignItems="flex-start"
       spacing={0}
@@ -32,47 +39,7 @@ export const TimelineLayer = observer(function TimelineLayer({
         store.selectedLayer = layer;
       })}
     >
-      <VStack
-        position="sticky"
-        left={0}
-        width="150px"
-        height="100%"
-        flexShrink={0}
-        spacing={0}
-        zIndex={11}
-        boxSizing="border-box"
-        borderRightWidth={1}
-        borderBottomWidth={1}
-        borderColor="black"
-        bgColor={bgColor}
-      >
-        <HStack width="100%" justify="center" m={1} spacing={0}>
-          <Heading color="black" fontSize={16} userSelect="none">
-            Layer {index + 1}
-          </Heading>
-          <IconButton
-            position="absolute"
-            right={1}
-            width={6}
-            height={6}
-            variant="ghost"
-            color="gray.500"
-            aria-label="Loop time range"
-            title="Loop time range"
-            icon={
-              layer.visible ? (
-                <AiFillEye size={17} />
-              ) : (
-                <AiFillEyeInvisible size={17} />
-              )
-            }
-            onClick={action((e) => {
-              layer.visible = !layer.visible;
-              e.stopPropagation();
-            })}
-          />
-        </HStack>
-      </VStack>
+      <TimelineLayerHeader index={index} layer={layer} />
       <Box
         ref={boxRef}
         id={`timeline-layer-${layer.id}`}
@@ -99,6 +66,38 @@ export const TimelineLayer = observer(function TimelineLayer({
           <TimelineBlockStack key={block.id} patternBlock={block} />
         ))}
       </Box>
+      {layer.showingOpacityControls && (
+        <VStack
+          position="absolute"
+          bottom={0}
+          left={150}
+          width="100%"
+          height="60px"
+          align="flex-start"
+          bgColor="gray.700"
+          boxSizing="border-box"
+          borderColor="gray.300"
+          borderTopWidth={1}
+        >
+          {layer.opacityBlock.parameterVariations["u_opacity"]?.length ??
+          0 > 0 ? (
+            <ParameterVariations
+              uniformName={"u_opacity"}
+              block={layer.opacityBlock}
+            />
+          ) : (
+            <HStack ml={2}>
+              <Text py={2} fontSize={10}>
+                Click to add a variation:
+              </Text>
+              <NewVariationButtons
+                uniformName={"u_opacity"}
+                block={layer.opacityBlock}
+              />
+            </HStack>
+          )}
+        </VStack>
+      )}
     </HStack>
   );
 });

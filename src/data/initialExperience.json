@@ -148,7 +148,14 @@
           },
           "effectBlocks": []
         }
-      ]
+      ],
+      "opacityBlock": {
+        "pattern": "Opacity",
+        "startTime": 0,
+        "duration": 3600,
+        "parameterVariations": {},
+        "effectBlocks": []
+      }
     },
     {
       "patternBlocks": [
@@ -159,9 +166,16 @@
           "parameterVariations": { "u_max_depth_spacing": [] },
           "effectBlocks": []
         }
-      ]
+      ],
+      "opacityBlock": {
+        "pattern": "Opacity",
+        "startTime": 0,
+        "duration": 3600,
+        "parameterVariations": {},
+        "effectBlocks": []
+      }
     }
   ],
   "user": "ben",
-  "savedAt": 1685345935738
+  "savedAt": 1685352059187
 }

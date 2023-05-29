@@ -4,10 +4,14 @@ import { binarySearchForBlockAtTime } from "@/src/utils/algorithm";
 import { DEFAULT_BLOCK_DURATION } from "@/src/utils/time";
 import { makeAutoObservable } from "mobx";
 import { Pattern } from "@/src/types/Pattern";
+import { Opacity } from "@/src/patterns/Opacity";
+import { ExtraParams } from "@/src/types/PatternParams";
 
 export class Layer {
   id: string = Math.random().toString(16).slice(2); // unique id
   patternBlocks: Block[] = [];
+
+  opacityBlock: Block<ExtraParams> = new Block(Opacity());
 
   visible = true;
   showingOpacityControls = true;
@@ -294,6 +298,7 @@ export class Layer {
   serialize = () => ({
     id: this.id,
     patternBlocks: this.patternBlocks.map((b) => b.serialize()),
+    opacityBlock: this.opacityBlock.serialize(),
   });
 
   static deserialize = (data: any, timer: Timer) => {
@@ -303,6 +308,7 @@ export class Layer {
       Block.deserialize(b)
     );
     layer.patternBlocks.forEach((b) => (b.layer = layer));
+    layer.opacityBlock = Block.deserialize(data.opacityBlock);
     return layer;
   };
 }
