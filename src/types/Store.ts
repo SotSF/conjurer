@@ -26,7 +26,7 @@ export class Store {
   audioStore = new AudioStore(this.timer);
   experienceStore = new ExperienceStore(this);
 
-  layers: Layer[] = [new Layer(this.timer), new Layer(this.timer)];
+  layers: Layer[] = [];
   selectedLayer: Layer = this.layers[0]; // a layer is always selected
 
   selectedBlocks: Set<Block> = new Set();

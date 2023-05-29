@@ -1,7 +1,7 @@
 import { observer } from "mobx-react-lite";
 import { TimelineBlockStack } from "@/src/components/TimelineBlockStack";
 import { useStore } from "@/src/types/StoreContext";
-import { Box, HStack, IconButton, Text, VStack } from "@chakra-ui/react";
+import { Box, HStack, Heading, IconButton, VStack } from "@chakra-ui/react";
 import { MAX_TIME } from "@/src/utils/time";
 import { Layer } from "@/src/types/Layer";
 import { action } from "mobx";
@@ -28,7 +28,7 @@ export const TimelineLayer = observer(function TimelineLayer({
       height={`${layer.height}px`}
       alignItems="flex-start"
       spacing={0}
-      onClick={action((e) => {
+      onClick={action(() => {
         store.selectedLayer = layer;
       })}
     >
@@ -42,21 +42,21 @@ export const TimelineLayer = observer(function TimelineLayer({
         zIndex={11}
         boxSizing="border-box"
         borderRightWidth={1}
-        borderTopWidth={1}
+        borderBottomWidth={1}
         borderColor="black"
         bgColor={bgColor}
       >
-        <HStack position="relative" width="100%" justify="center" spacing={0}>
-          <Text color="black" fontSize={16} userSelect="none">
+        <HStack width="100%" justify="center" m={1} spacing={0}>
+          <Heading color="black" fontSize={16} userSelect="none">
             Layer {index + 1}
-          </Text>
+          </Heading>
           <IconButton
             position="absolute"
-            right={0}
+            right={1}
             width={6}
             height={6}
             variant="ghost"
-            color={layer.visible ? "green.500" : "gray.500"}
+            color="gray.500"
             aria-label="Loop time range"
             title="Loop time range"
             icon={
@@ -81,7 +81,9 @@ export const TimelineLayer = observer(function TimelineLayer({
         height="100%"
         boxSizing="border-box"
         bgColor={bgColor}
-        border="1px solid gray"
+        borderBottomWidth={1}
+        borderColor="black"
+        borderStyle="dotted"
         onClick={action((e) =>
           timer.setTime(
             Math.max(

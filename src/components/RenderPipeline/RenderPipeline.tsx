@@ -20,7 +20,9 @@ export const RenderPipeline = observer(function RenderPipeline({
   const renderTargetC = useRenderTarget();
   const renderTargetD = useRenderTarget();
 
-  const activeLayers = store.layers.filter((layer) => !!layer.currentBlock);
+  const activeLayers = store.layers.filter(
+    (layer) => layer.visible && !!layer.currentBlock
+  );
 
   // TODO: fix this brute force approach: key={activeLayers.length}
   return (

@@ -8,7 +8,10 @@ import { Pattern } from "@/src/types/Pattern";
 export class Layer {
   id: string = Math.random().toString(16).slice(2); // unique id
   patternBlocks: Block[] = [];
+
   visible = true;
+  showingOpacityControls = true;
+
   height = 350;
 
   _lastComputedCurrentBlock: Block | null = null;
@@ -289,11 +292,13 @@ export class Layer {
   };
 
   serialize = () => ({
+    id: this.id,
     patternBlocks: this.patternBlocks.map((b) => b.serialize()),
   });
 
   static deserialize = (data: any, timer: Timer) => {
     const layer = new Layer(timer);
+    layer.id = data.id;
     layer.patternBlocks = data.patternBlocks.map((b: any) =>
       Block.deserialize(b)
     );
