@@ -25,8 +25,7 @@ export const TimelineLayer = observer(function TimelineLayer({
 
   return (
     <HStack
-      // TODO: figure out how to size the height of the layers automatically
-      height="350px"
+      height={`${layer.height}px`}
       alignItems="flex-start"
       spacing={0}
       onClick={action((e) => {
@@ -76,6 +75,7 @@ export const TimelineLayer = observer(function TimelineLayer({
       </VStack>
       <Box
         ref={boxRef}
+        id={`timeline-layer-${layer.id}`}
         position="relative"
         width={uiStore.timeToXPixels(MAX_TIME)}
         height="100%"

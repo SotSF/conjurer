@@ -6,8 +6,10 @@ import { makeAutoObservable } from "mobx";
 import { Pattern } from "@/src/types/Pattern";
 
 export class Layer {
+  id: string = Math.random().toString(16).slice(2); // unique id
   patternBlocks: Block[] = [];
   visible = true;
+  height = 350;
 
   _lastComputedCurrentBlock: Block | null = null;
 
@@ -269,6 +271,21 @@ export class Layer {
     }
 
     block.duration += delta;
+  };
+
+  recomputeHeight = () => {
+    const element = document.getElementById("timeline-layer-" + this.id);
+    const blockstackElements = element?.children;
+
+    if (!blockstackElements || blockstackElements.length === 0) return;
+
+    let maxHeight = 0;
+    for (const blockstackElement of blockstackElements) {
+      const blockElement = blockstackElement.children[0];
+      const blockHeight = blockElement.clientHeight;
+      maxHeight = Math.max(maxHeight, blockHeight);
+    }
+    this.height = maxHeight + 6; // to account for border
   };
 
   serialize = () => ({

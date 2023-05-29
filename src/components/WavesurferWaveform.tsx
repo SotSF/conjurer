@@ -34,7 +34,7 @@ const DEFAULT_TIMELINE_OPTIONS: TimelinePluginOptions = {
   insertPosition: "beforebegin" as const,
   timeInterval: 0.25,
   primaryLabelInterval: 5,
-  secondaryLabelInterval: 0,
+  secondaryLabelInterval: 1,
   style: {
     fontSize: "14px",
     color: "#000000",

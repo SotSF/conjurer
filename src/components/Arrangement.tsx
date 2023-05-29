@@ -8,10 +8,11 @@ export const Arrangement = memo(function Arrangement() {
   return (
     <Grid
       width="100%"
+      height="100%"
       templateAreas={`"timerControls  controls"
                       "timeline       timeline"`}
       gridTemplateColumns="150px 1fr"
-      gridTemplateRows="auto"
+      gridTemplateRows="auto minmax(0,1fr)"
     >
       <GridItem area="timerControls">
         <TimerControls />
