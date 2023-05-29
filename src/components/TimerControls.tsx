@@ -11,7 +11,6 @@ export const TimerControls = observer(function TimerControls() {
   return (
     <HStack
       width="100%"
-      // height={10}
       justify="center"
       py={2}
       spacing={1}

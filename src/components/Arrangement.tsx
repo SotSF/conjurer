@@ -1,20 +1,19 @@
-import { Box, Grid, GridItem } from "@chakra-ui/react";
+import { Grid, GridItem } from "@chakra-ui/react";
 import { MainControls } from "@/src/components/MainControls";
 import { Timeline } from "@/src/components/Timeline";
 import { memo } from "react";
 import { TimerControls } from "@/src/components/TimerControls";
-import { TimerReadout } from "@/src/components/TimerReadout";
 
 export const Arrangement = memo(function Arrangement() {
   return (
     <Grid
-      height="100%"
-      templateAreas={`"timer controls"
-                      "timeline timeline"`}
-      gridTemplateColumns="165px 100%"
+      width="100%"
+      templateAreas={`"timerControls  controls"
+                      "timeline       timeline"`}
+      gridTemplateColumns="150px 1fr"
       gridTemplateRows="auto"
     >
-      <GridItem area="timer">
+      <GridItem area="timerControls">
         <TimerControls />
       </GridItem>
       <GridItem area="controls">

@@ -20,7 +20,7 @@ export const TimerReadout = observer(function TimerReadout() {
       top={0}
       left={0}
       height={10}
-      width="165px"
+      width="150px"
       flexShrink={0}
       zIndex={11}
       bgColor="gray.500"
@@ -30,7 +30,12 @@ export const TimerReadout = observer(function TimerReadout() {
       borderBottomWidth={1}
       borderColor="black"
     >
-      <Text color="black" fontSize={20} userSelect="none">
+      <Text
+        color="black"
+        fontSize={18}
+        fontFamily="monospace"
+        userSelect="none"
+      >
         {formatTime(timer.globalTimeRounded)}
       </Text>
     </VStack>

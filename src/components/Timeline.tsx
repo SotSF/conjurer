@@ -33,18 +33,22 @@ export const Timeline = observer(function Timeline() {
         zIndex={12}
       >
         <TimerReadout />
-        <Box height={10} width="100%" bgColor="gray.500">
+        <Box
+          position="sticky"
+          top={0}
+          height={10}
+          width="100%"
+          bgColor="gray.500"
+        >
           <WavesurferWaveform />
           <PlayHead />
         </Box>
       </HStack>
-      <HStack alignItems="flex-start" spacing={0}>
-        <VStack spacing={0}>
-          {store.layers.map((layer, index) => (
-            <TimelineLayer key={index} index={index} layer={layer} />
-          ))}
-        </VStack>
-      </HStack>
+      <VStack alignItems="flex-start" spacing={0}>
+        {store.layers.map((layer, index) => (
+          <TimelineLayer key={index} index={index} layer={layer} />
+        ))}
+      </VStack>
     </Box>
   );
 });
