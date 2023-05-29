@@ -1,5 +1,5 @@
 import { observer } from "mobx-react-lite";
-import { IconButton } from "@chakra-ui/react";
+import { HStack, IconButton } from "@chakra-ui/react";
 import { FaPlay, FaPause, FaStepForward, FaStepBackward } from "react-icons/fa";
 import { MAX_TIME } from "@/src/utils/time";
 import { useStore } from "@/src/types/StoreContext";
@@ -9,7 +9,15 @@ export const TimerControls = observer(function TimerControls() {
   const { timer } = useStore();
 
   return (
-    <>
+    <HStack
+      width="100%"
+      // height={10}
+      justify="center"
+      py={2}
+      spacing={1}
+      overflowX="clip"
+      borderColor="black"
+    >
       <IconButton
         aria-label="Backward"
         title="Backward"
@@ -35,6 +43,6 @@ export const TimerControls = observer(function TimerControls() {
           timer.playing = false;
         })}
       />
-    </>
+    </HStack>
   );
 });

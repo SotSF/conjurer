@@ -15,8 +15,22 @@ export const TimerReadout = observer(function TimerReadout() {
   const { timer } = useStore();
 
   return (
-    <VStack pl={2} justify="center" width="100px">
-      <Text color="gray.200" textAlign="center" fontSize={18} userSelect="none">
+    <VStack
+      position="sticky"
+      top={0}
+      left={0}
+      height={10}
+      width="165px"
+      flexShrink={0}
+      zIndex={11}
+      bgColor="gray.500"
+      justify="center"
+      boxSizing="border-box"
+      borderRightWidth={1}
+      borderBottomWidth={1}
+      borderColor="black"
+    >
+      <Text color="black" fontSize={20} userSelect="none">
         {formatTime(timer.globalTimeRounded)}
       </Text>
     </VStack>
