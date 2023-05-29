@@ -12,14 +12,14 @@ type ParameterProps = {
   uniformName: string;
   patternParam: PatternParam;
   block: Block<ExtraParams>;
-  expandMode: "expanded" | "collapsed";
+  expandMode?: "expanded" | "collapsed";
 };
 
 export const ParameterView = observer(function ParameterView({
   uniformName,
   patternParam,
   block,
-  expandMode,
+  expandMode = "collapsed",
 }: ParameterProps) {
   const variations = block.parameterVariations[uniformName] ?? [];
   const [isExpanded, setExpanded] = useState(expandMode === "expanded");
@@ -70,7 +70,7 @@ export const ParameterView = observer(function ParameterView({
 
       {isExpanded &&
         (variations.length === 0 ? (
-          <HStack width="100%" justify="center">
+          <HStack ml={2} width="100%">
             <Text py={2} fontSize={10}>
               Click to add a variation:
             </Text>

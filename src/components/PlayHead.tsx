@@ -1,6 +1,5 @@
 import { observer } from "mobx-react-lite";
 import { Box } from "@chakra-ui/react";
-import { FaLongArrowAltDown } from "react-icons/fa";
 import { useStore } from "@/src/types/StoreContext";
 import styles from "@/styles/TimeMarker.module.css";
 import classNames from "classnames";
@@ -38,17 +37,13 @@ export const PlayHead = observer(function PlayHead() {
       zIndex={10}
       pointerEvents="none"
     >
-      <FaLongArrowAltDown
-        style={{ position: "absolute", top: "14px", left: "-12px" }}
-        size={25}
-        color="red"
-      />
       <Box
         position="absolute"
-        top="40px"
+        top="0"
+        left="150"
         bgColor="red"
         width="1px"
-        height="80vh"
+        height="100vh"
       />
     </Box>
   );

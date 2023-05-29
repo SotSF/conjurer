@@ -148,10 +148,45 @@
           },
           "effectBlocks": []
         }
-      ]
+      ],
+      "opacityBlock": {
+        "pattern": "Opacity",
+        "startTime": 0,
+        "duration": 3600,
+        "parameterVariations": {
+          "u_opacity": [
+            { "type": "flat", "duration": 20.7368, "value": 1 },
+            { "type": "linear", "duration": 10.2632, "from": 1, "to": 0 },
+            { "type": "linear", "duration": 13.9474, "from": 0, "to": 1 }
+          ]
+        },
+        "effectBlocks": []
+      }
     },
-    { "patternBlocks": [] }
+    {
+      "patternBlocks": [
+        {
+          "pattern": "Tunnel",
+          "startTime": 20.6579,
+          "duration": 30.9474,
+          "parameterVariations": { "u_max_depth_spacing": [] },
+          "effectBlocks": []
+        }
+      ],
+      "opacityBlock": {
+        "pattern": "Opacity",
+        "startTime": 0,
+        "duration": 3600,
+        "parameterVariations": {
+          "u_opacity": [
+            { "type": "flat", "duration": 20.8158, "value": 0 },
+            { "type": "linear", "duration": 10.1053, "from": 0, "to": 1 }
+          ]
+        },
+        "effectBlocks": []
+      }
+    }
   ],
   "user": "ben",
-  "savedAt": 1685266700614
+  "savedAt": 1685356483802
 }

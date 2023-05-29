@@ -20,9 +20,10 @@ export const RenderPipeline = observer(function RenderPipeline({
   const renderTargetC = useRenderTarget();
   const renderTargetD = useRenderTarget();
 
-  const activeLayers = store.layers.filter((layer) => !!layer.currentBlock);
+  const activeLayers = store.layers.filter(
+    (layer) => layer.visible && !!layer.currentBlock
+  );
 
-  // TODO: fix this brute force approach: key={activeLayers.length}
   return (
     <group key={activeLayers.length}>
       {activeLayers.map((layer, index) => (
@@ -38,7 +39,9 @@ export const RenderPipeline = observer(function RenderPipeline({
         <MergeNode
           priority={10000}
           renderTargetIn1={renderTargetB}
+          opacity1={activeLayers[0].opacityParameter}
           renderTargetIn2={renderTargetD}
+          opacity2={activeLayers[1].opacityParameter}
           renderTargetOut={renderTargetA}
         />
       )}

@@ -38,7 +38,7 @@ export const App = observer(function App() {
           templateAreas={`"display"
                         "arrangement"`}
           gridTemplateColumns="100vw"
-          gridTemplateRows="min-content 1fr"
+          gridTemplateRows="auto minmax(0,1fr)"
           height="100vh"
         >
           {gridItems}

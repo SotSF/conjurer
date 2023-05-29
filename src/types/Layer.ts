@@ -4,9 +4,23 @@ import { binarySearchForBlockAtTime } from "@/src/utils/algorithm";
 import { DEFAULT_BLOCK_DURATION } from "@/src/utils/time";
 import { makeAutoObservable } from "mobx";
 import { Pattern } from "@/src/types/Pattern";
+import { Opacity } from "@/src/patterns/Opacity";
+import { ExtraParams, PatternParam } from "@/src/types/PatternParams";
 
 export class Layer {
+  id: string = Math.random().toString(16).slice(2); // unique id
   patternBlocks: Block[] = [];
+
+  opacityBlock: Block<ExtraParams> = new Block(Opacity());
+
+  get opacityParameter() {
+    return this.opacityBlock.pattern.params.u_opacity as PatternParam<number>;
+  }
+
+  visible = true;
+  showingOpacityControls = false;
+
+  height = 350;
 
   _lastComputedCurrentBlock: Block | null = null;
 
@@ -270,16 +284,35 @@ export class Layer {
     block.duration += delta;
   };
 
+  recomputeHeight = () => {
+    const element = document.getElementById("timeline-layer-" + this.id);
+    const blockstackElements = element?.children;
+
+    if (!blockstackElements || blockstackElements.length === 0) return;
+
+    let maxHeight = 0;
+    for (const blockstackElement of blockstackElements) {
+      const blockElement = blockstackElement.children[0];
+      const blockHeight = blockElement.clientHeight;
+      maxHeight = Math.max(maxHeight, blockHeight);
+    }
+    this.height = maxHeight + 6; // to account for border
+  };
+
   serialize = () => ({
+    id: this.id,
     patternBlocks: this.patternBlocks.map((b) => b.serialize()),
+    opacityBlock: this.opacityBlock.serialize(),
   });
 
   static deserialize = (data: any, timer: Timer) => {
     const layer = new Layer(timer);
+    layer.id = data.id;
     layer.patternBlocks = data.patternBlocks.map((b: any) =>
       Block.deserialize(b)
     );
     layer.patternBlocks.forEach((b) => (b.layer = layer));
+    layer.opacityBlock = Block.deserialize(data.opacityBlock);
     return layer;
   };
 }

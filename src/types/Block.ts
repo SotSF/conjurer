@@ -7,6 +7,7 @@ import { patternMap } from "@/src/patterns/patterns";
 import { deserializeVariation } from "@/src/types/Variations/variations";
 import { effectMap } from "@/src/effects/effects";
 import { Layer } from "@/src/types/Layer";
+import { Opacity } from "@/src/patterns/Opacity";
 
 type SerializedBlock = {
   pattern: string;
@@ -174,7 +175,8 @@ export class Block<T extends ExtraParams = {}> {
     // use the parent block's duration if this is an effect block
     const duration = this.parentBlock?.duration ?? this.duration;
     if (totalVariationDuration < duration) {
-      variation.duration += duration - totalVariationDuration;
+      const maxVariationDurationDelta = duration - totalVariationDuration;
+      variation.duration += Math.min(maxVariationDurationDelta, 120);
       this.triggerVariationReactions(uniformName);
     }
   };
@@ -241,11 +243,15 @@ export class Block<T extends ExtraParams = {}> {
   });
 
   static deserialize = (data: any, effect?: boolean, parentBlock?: Block) => {
-    const block = new Block<ExtraParams>(
-      effect
-        ? effectMap[data.pattern].clone()
-        : patternMap[data.pattern].clone()
-    );
+    const block =
+      data.pattern === "Opacity"
+        ? // TODO: make opacity less of a special case
+          new Block<ExtraParams>(Opacity())
+        : new Block<ExtraParams>(
+            effect
+              ? effectMap[data.pattern].clone()
+              : patternMap[data.pattern].clone()
+          );
 
     block.setTiming({
       startTime: data.startTime,

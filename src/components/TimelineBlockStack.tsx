@@ -7,6 +7,7 @@ import { observer } from "mobx-react-lite";
 import {
   MouseEvent as ReactMouseEvent,
   useCallback,
+  useEffect,
   useRef,
   useState,
 } from "react";
@@ -27,6 +28,12 @@ export const TimelineBlockStack = observer(function TimelineBlockStack({
   const { selectedBlocks, uiStore } = store;
 
   const dragNodeRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    if (!dragNodeRef.current) return;
+    new ResizeObserver(() => patternBlock.layer?.recomputeHeight()).observe(
+      dragNodeRef.current
+    );
+  }, [dragNodeRef, patternBlock.layer]);
 
   const lastMouseDown = useRef(0);
 

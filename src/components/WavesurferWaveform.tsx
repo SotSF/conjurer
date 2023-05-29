@@ -21,7 +21,7 @@ import { action } from "mobx";
 const DEFAULT_WAVESURFER_OPTIONS: Partial<WaveSurferOptions> = {
   waveColor: "#ddd",
   progressColor: "#0178FF",
-  cursorColor: "#00000000",
+  cursorColor: "#FF0000FF",
   height: 40,
   hideScrollbar: true,
   fillParent: false,
@@ -34,7 +34,7 @@ const DEFAULT_TIMELINE_OPTIONS: TimelinePluginOptions = {
   insertPosition: "beforebegin" as const,
   timeInterval: 0.25,
   primaryLabelInterval: 5,
-  secondaryLabelInterval: 0,
+  secondaryLabelInterval: 1,
   style: {
     fontSize: "14px",
     color: "#000000",
@@ -249,13 +249,13 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
   };
 
   return (
-    <>
+    <Box width="100%" height={10} bgColor="gray.500">
       <Box position="absolute" top={0} id="waveform" ref={waveformRef} />
       {uiStore.showingWaveformOverlay && (
         <Box position="absolute" top="80px" id="waveform2" pointerEvents="none">
           <canvas ref={overlayCanvas} className="waveformClone" />
         </Box>
       )}
-    </>
+    </Box>
   );
 });

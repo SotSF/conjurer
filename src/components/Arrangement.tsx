@@ -1,22 +1,26 @@
 import { Grid, GridItem } from "@chakra-ui/react";
-import { Controls } from "@/src/components/Controls";
+import { MainControls } from "@/src/components/MainControls";
 import { Timeline } from "@/src/components/Timeline";
 import { memo } from "react";
+import { TimerControls } from "@/src/components/TimerControls";
 
 export const Arrangement = memo(function Arrangement() {
   return (
     <Grid
+      width="100%"
       height="100%"
-      templateAreas={`"controls"
-                      "right"`}
-      gridTemplateColumns="100%"
-      gridTemplateRows="auto 1fr"
-      fontWeight="bold"
+      templateAreas={`"timerControls  controls"
+                      "timeline       timeline"`}
+      gridTemplateColumns="150px 1fr"
+      gridTemplateRows="auto minmax(0,1fr)"
     >
-      <GridItem area="controls">
-        <Controls />
+      <GridItem area="timerControls">
+        <TimerControls />
       </GridItem>
-      <GridItem area="right" bgColor="gray.400">
+      <GridItem area="controls">
+        <MainControls />
+      </GridItem>
+      <GridItem area="timeline" bgColor="gray.400">
         <Timeline />
       </GridItem>
     </Grid>
