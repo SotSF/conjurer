@@ -7,6 +7,7 @@ import { Pattern } from "@/src/types/Pattern";
 
 export class Layer {
   patternBlocks: Block[] = [];
+  visible = true;
 
   _lastComputedCurrentBlock: Block | null = null;
 
