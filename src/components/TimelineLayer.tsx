@@ -75,10 +75,9 @@ export const TimelineLayer = observer(function TimelineLayer({
           height="80px"
           justify="center"
           align="flex-start"
-          bgColor="gray.700"
-          boxSizing="border-box"
-          borderColor="gray.300"
+          bgColor="blue.800"
           borderTopWidth={1}
+          borderColor="gray.300"
         >
           {layer.opacityBlock.parameterVariations["u_opacity"]?.length ??
           0 > 0 ? (

@@ -5,7 +5,7 @@ import { DEFAULT_BLOCK_DURATION } from "@/src/utils/time";
 import { makeAutoObservable } from "mobx";
 import { Pattern } from "@/src/types/Pattern";
 import { Opacity } from "@/src/patterns/Opacity";
-import { ExtraParams } from "@/src/types/PatternParams";
+import { ExtraParams, PatternParam } from "@/src/types/PatternParams";
 
 export class Layer {
   id: string = Math.random().toString(16).slice(2); // unique id
@@ -13,8 +13,12 @@ export class Layer {
 
   opacityBlock: Block<ExtraParams> = new Block(Opacity());
 
+  get opacityParameter() {
+    return this.opacityBlock.pattern.params.u_opacity as PatternParam<number>;
+  }
+
   visible = true;
-  showingOpacityControls = true;
+  showingOpacityControls = false;
 
   height = 350;
 

@@ -175,7 +175,8 @@ export class Block<T extends ExtraParams = {}> {
     // use the parent block's duration if this is an effect block
     const duration = this.parentBlock?.duration ?? this.duration;
     if (totalVariationDuration < duration) {
-      variation.duration += duration - totalVariationDuration;
+      const maxVariationDurationDelta = duration - totalVariationDuration;
+      variation.duration += Math.min(maxVariationDurationDelta, 120);
       this.triggerVariationReactions(uniformName);
     }
   };

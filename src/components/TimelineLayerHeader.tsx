@@ -74,16 +74,20 @@ export const TimelineLayerHeader = observer(function TimelineLayerHeader({
         spacing={0}
       >
         <Button
-          color="black"
+          color={layer.showingOpacityControls ? "white" : "black"}
           size="sm"
-          fontSize={12}
+          fontSize={11}
           variant="ghost"
+          bgColor={layer.showingOpacityControls ? "blue.800" : "transparent"}
+          _hover={{
+            bgColor: layer.showingOpacityControls ? "blue.800" : "transparent",
+          }}
           onClick={action((e) => {
             layer.showingOpacityControls = !layer.showingOpacityControls;
             e.stopPropagation();
           })}
         >
-          {layer.showingOpacityControls ? "Hide" : "Show"} opacity controls
+          {layer.showingOpacityControls ? "Editing" : "Edit"} layer opacity
         </Button>
       </HStack>
     </VStack>
