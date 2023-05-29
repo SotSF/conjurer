@@ -51,8 +51,8 @@ export const TimelineLayerHeader = observer(function TimelineLayerHeader({
           height={6}
           variant="ghost"
           color={layer.visible ? "gray.500" : "red.600"}
-          aria-label="Loop time range"
-          title="Loop time range"
+          aria-label="Toggle layer visibility"
+          title="Toggle layer visibility"
           icon={
             layer.visible ? (
               <AiFillEye size={17} />
