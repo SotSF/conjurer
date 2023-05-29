@@ -163,11 +163,29 @@ export const MenuBar = observer(function MenuBar() {
             >
               Save locally
             </MenuItem>
+          </MenuList>
+        </Menu>
+        <Menu>
+          <MenuButton
+            as={Button}
+            px={1}
+            py={0}
+            variant="ghost"
+            size="sm"
+            transition="all 0.2s"
+            borderRadius="md"
+            _hover={{ bg: "gray.500" }}
+            _focus={{ boxShadow: "outline" }}
+          >
+            Edit
+          </MenuButton>
+          <MenuList zIndex={12}>
+            {" "}
             <MenuItem
               icon={<FaRegClipboard size={17} />}
               onClick={experienceStore.copyToClipboard}
             >
-              Save to clipboard
+              Copy experience JSON to clipboard
             </MenuItem>
           </MenuList>
         </Menu>
@@ -188,7 +206,7 @@ export const MenuBar = observer(function MenuBar() {
           <MenuList zIndex={12}>
             <MenuItem
               as="a"
-              href="https://github.com/SotSF/conjurer"
+              href="https://github.com/SotSF/conjurer#conjurer"
               target="_blank"
             >
               About Conjurer

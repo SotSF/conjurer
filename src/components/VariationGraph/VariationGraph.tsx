@@ -52,7 +52,7 @@ export const VariationGraph = function VariationGraph({
 
   return (
     <Popover
-      placement="bottom"
+      placement="right"
       isLazy
       returnFocusOnClose={false}
       openDelay={0}
@@ -62,7 +62,7 @@ export const VariationGraph = function VariationGraph({
         <Box>{variationGraph}</Box>
       </PopoverTrigger>
       <Portal>
-        <PopoverContent>
+        <PopoverContent zIndex={40}>
           <PopoverArrow />
           <VariationControls
             variation={variation}

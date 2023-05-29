@@ -70,7 +70,7 @@ export const ParameterView = observer(function ParameterView({
 
       {isExpanded &&
         (variations.length === 0 ? (
-          <HStack width="100%">
+          <HStack ml={2} width="100%">
             <Text py={2} fontSize={10}>
               Click to add a variation:
             </Text>

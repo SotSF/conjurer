@@ -34,7 +34,13 @@ export const TimelineLayerHeader = observer(function TimelineLayerHeader({
       borderColor="black"
       bgColor={bgColor}
     >
-      <HStack width="100%" justify="center" m={1} spacing={0}>
+      <HStack
+        position="relative"
+        width="100%"
+        justify="center"
+        m={3}
+        spacing={0}
+      >
         <Heading color="black" fontSize={16} userSelect="none">
           Layer {index + 1}
         </Heading>
@@ -44,7 +50,7 @@ export const TimelineLayerHeader = observer(function TimelineLayerHeader({
           width={6}
           height={6}
           variant="ghost"
-          color="gray.500"
+          color={layer.visible ? "gray.500" : "red.600"}
           aria-label="Loop time range"
           title="Loop time range"
           icon={
@@ -60,19 +66,26 @@ export const TimelineLayerHeader = observer(function TimelineLayerHeader({
           })}
         />
       </HStack>
-      <Button
-        mt={2}
-        color="black"
-        size="sm"
-        fontSize={12}
-        variant="ghost"
-        onClick={action((e) => {
-          layer.showingOpacityControls = !layer.showingOpacityControls;
-          e.stopPropagation();
-        })}
+      <HStack
+        position="absolute"
+        bottom={0}
+        height="80px"
+        justify="center"
+        spacing={0}
       >
-        {layer.showingOpacityControls ? "Hide" : "Show"} opacity controls
-      </Button>
+        <Button
+          color="black"
+          size="sm"
+          fontSize={12}
+          variant="ghost"
+          onClick={action((e) => {
+            layer.showingOpacityControls = !layer.showingOpacityControls;
+            e.stopPropagation();
+          })}
+        >
+          {layer.showingOpacityControls ? "Hide" : "Show"} opacity controls
+        </Button>
+      </HStack>
     </VStack>
   );
 });
