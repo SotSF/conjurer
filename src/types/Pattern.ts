@@ -15,10 +15,6 @@ export class Pattern<T extends ExtraParams = ExtraParams> {
         name: "Time",
         value: 0,
       },
-      u_global_time: {
-        name: "Global Time",
-        value: 0,
-      },
       u_texture: {
         name: "Input Texture",
         value: null,

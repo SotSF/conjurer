@@ -1,22 +1,33 @@
 import { HStack } from "@chakra-ui/react";
 import { SelectablePattern } from "@/src/components/PatternPlayground/SelectablePattern";
 import { useStore } from "@/src/types/StoreContext";
-import { observer } from "mobx-react-lite";
 import { action } from "mobx";
+import { Block } from "@/src/types/Block";
+import { patterns } from "@/src/patterns/patterns";
+import { memo } from "react";
 
-export const PatternList = observer(function PatternList() {
+type Props = {
+  selectedBlock: Block;
+  setSelectedBlockIndex: (index: number) => void;
+};
+
+export const PatternList = memo(function PatternList({
+  selectedBlock,
+  setSelectedBlockIndex,
+}: Props) {
   const store = useStore();
-  const { patterns, selectedPattern, uiStore } = store;
+  const { uiStore } = store;
 
   return (
     <HStack height="100%" flexWrap="wrap" gap={1} spacing={0}>
-      {patterns.map((p) => (
+      {patterns.map((p, index) => (
         <SelectablePattern
           key={p.name}
           pattern={p}
-          selected={p === selectedPattern}
+          selected={p === selectedBlock.pattern}
+          onSelect={() => setSelectedBlockIndex(index)}
           onInsert={action(() => {
-            store.selectedLayer.insertCloneOfPattern(p);
+            store.selectedLayer.insertCloneOfBlock(selectedBlock);
             uiStore.patternDrawerOpen = false;
           })}
         />

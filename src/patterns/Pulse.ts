@@ -3,6 +3,14 @@ import pulse from "./shaders/pulse.frag";
 
 export const Pulse = () =>
   new Pattern("Pulse", pulse, {
+    u_time_factor: {
+      name: "Time Factor",
+      value: 0.4,
+    },
+    u_time_offset: {
+      name: "Time Offset",
+      value: 0,
+    },
     u_hue_start: {
       name: "Hue Start",
       value: 0,
@@ -15,13 +23,9 @@ export const Pulse = () =>
       name: "Duty Cycle",
       value: 0.5,
     },
-    u_time_factor: {
-      name: "Time Factor",
-      value: 0.4,
-    },
-    u_time_offset: {
-      name: "Time Offset",
-      value: 0,
+    u_scale: {
+      name: "Scale",
+      value: 1,
     },
     u_wave_period: {
       name: "Wave Period",

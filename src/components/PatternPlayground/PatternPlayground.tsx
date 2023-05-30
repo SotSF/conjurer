@@ -1,32 +1,36 @@
 import { Box, Grid, GridItem, VStack } from "@chakra-ui/react";
-import { useStore } from "@/src/types/StoreContext";
-import { observer } from "mobx-react-lite";
 import { PatternList } from "@/src/components/PatternPlayground/PatternList";
 import { PreviewCanvas } from "@/src/components/PatternPlayground/PreviewCanvas";
-import { useMemo } from "react";
+import { memo, useMemo, useState } from "react";
 import { Block } from "@/src/types/Block";
 import { ParameterControls } from "@/src/components/PatternPlayground/ParameterControls";
+import { patterns } from "@/src/patterns/patterns";
 
 const PATTERN_PREVIEW_DISPLAY_SIZE = 600;
 
-export const PatternPlayground = observer(function PatternPlayground() {
-  const store = useStore();
-  const { selectedPattern } = store;
-  const block = useMemo(() => new Block(selectedPattern), [selectedPattern]);
-
+export const PatternPlayground = memo(function PatternPlayground() {
+  const playgroundBlocks = useMemo(
+    () => patterns.map((pattern) => new Block(pattern), []),
+    []
+  );
+  const [selectedBlockIndex, setSelectedBlockIndex] = useState(0);
+  const selectedBlock = playgroundBlocks[selectedBlockIndex];
   return (
     <Grid
       height="100%"
       templateAreas={`"patterns patterns"
-                            "controls preview"`}
+                      "controls preview"`}
       gridTemplateColumns="50% 50%"
       gridTemplateRows="auto 1fr"
     >
       <GridItem area="patterns">
-        <PatternList />
+        <PatternList
+          selectedBlock={selectedBlock}
+          setSelectedBlockIndex={setSelectedBlockIndex}
+        />
       </GridItem>
       <GridItem area="controls">
-        <ParameterControls block={block} />
+        <ParameterControls block={selectedBlock} />
       </GridItem>
       <GridItem area="preview">
         <VStack
@@ -40,7 +44,7 @@ export const PatternPlayground = observer(function PatternPlayground() {
             width={`${PATTERN_PREVIEW_DISPLAY_SIZE}px`}
             height={`${PATTERN_PREVIEW_DISPLAY_SIZE}px`}
           >
-            <PreviewCanvas block={block} />
+            <PreviewCanvas block={selectedBlock} />
           </Box>
         </VStack>
       </GridItem>

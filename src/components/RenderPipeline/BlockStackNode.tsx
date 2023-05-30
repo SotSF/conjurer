@@ -37,9 +37,9 @@ export const BlockStackNode = memo(function BlockStackNode({
     if (autorun) {
       // Don't let the elapsed time go over five minutes
       const elapsedTime = clock.elapsedTime % (1000 * 60 * 5);
-      parentBlock.updateParameters(elapsedTime, elapsedTime);
+      parentBlock.updateParameters(elapsedTime);
     } else {
-      parentBlock.updateParameters(globalTime - startTime, globalTime);
+      parentBlock.updateParameters(globalTime - startTime);
     }
   }, basePriority);
 

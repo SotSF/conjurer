@@ -25,6 +25,7 @@ export const RenderPipeline = observer(function RenderPipeline({
   );
 
   return (
+    // TODO: do something better than using key here?
     <group key={activeLayers.length}>
       {activeLayers.map((layer, index) => (
         <LayerNode

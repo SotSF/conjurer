@@ -24,9 +24,9 @@ export const ParameterView = observer(function ParameterView({
   const variations = block.parameterVariations[uniformName] ?? [];
   const [isExpanded, setExpanded] = useState(expandMode === "expanded");
 
-  const isCurrentBlock = [block, block.parentBlock].includes(
-    block.layer?.currentBlock ?? null
-  );
+  const isCurrentBlock =
+    block.layer?.currentBlock &&
+    [block, block.parentBlock].includes(block.layer.currentBlock);
 
   const headerColor = variations.length ? "orange.400" : "gray.300";
   return (

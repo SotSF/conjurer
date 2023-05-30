@@ -1,28 +1,27 @@
-// Author @patriciogv - 2015
-// Title: Truchet - 10 print
-
 #ifdef GL_ES
 precision mediump float;
 #endif
 
 #define PI 3.14159265358979323846
 
+uniform float u_time_factor;
+uniform float u_time_offset;
 uniform float u_hue_start;
 uniform float u_hue_width;
 uniform float u_duty_cycle;
-uniform float u_time_factor;
-uniform float u_time_offset;
+uniform float u_scale;
 uniform float u_wave_period;
 uniform float u_wave_amplitude;
 uniform float u_number_colors;
 
+// #define u_time_factor 0.4
+// #define u_time_offset 0.0
 // #define u_hue_start 0.
 // #define u_hue_width 0.8
 // #define u_duty_cycle .5
-// #define u_time_factor 0.4
-// #define u_time_offset 0.0
+// #define u_scale 1.
 // #define u_wave_period 1.
-// #define u_wave_amplitude 0.5
+// #define u_wave_amplitude 0.
 // #define u_number_colors 5.
 
 uniform vec2 u_resolution;
@@ -63,6 +62,8 @@ void main() {
     st.y += sin(st.x * PI * 2. / u_wave_period) * u_wave_amplitude;
     // move the cells over time
     st.y += u_time_offset - u_time * u_time_factor;
+    // scale the cells
+    st.y *= u_scale;
 
     // divide the infinite domain into color cells
     float color_cell = floor(mod(st.y, u_number_colors));

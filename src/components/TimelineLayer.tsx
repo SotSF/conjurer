@@ -1,17 +1,13 @@
 import { observer } from "mobx-react-lite";
 import { TimelineBlockStack } from "@/src/components/TimelineBlockStack";
 import { useStore } from "@/src/types/StoreContext";
-import { Box, HStack, Text, VStack, useToken } from "@chakra-ui/react";
+import { Box, HStack } from "@chakra-ui/react";
 import { MAX_TIME } from "@/src/utils/time";
 import { Layer } from "@/src/types/Layer";
 import { action } from "mobx";
 import { useRef } from "react";
 import { TimelineLayerHeader } from "@/src/components/TimelineLayerHeader";
-import { Line, LineChart, YAxis } from "recharts";
-import { VARIATION_BOUND_WIDTH } from "@/src/utils/layout";
-import { ParameterView } from "@/src/components/ParameterView";
-import { NewVariationButtons } from "@/src/components/NewVariationButtons";
-import { ParameterVariations } from "@/src/components/ParameterVariations";
+import { LayerOpacityVariations } from "@/src/components/LayerOpacityVariations";
 
 type TimelineLayerProps = {
   index: number;
@@ -66,38 +62,7 @@ export const TimelineLayer = observer(function TimelineLayer({
           <TimelineBlockStack key={block.id} patternBlock={block} />
         ))}
       </Box>
-      {layer.showingOpacityControls && (
-        <VStack
-          position="absolute"
-          bottom={0}
-          left={150}
-          width="100%"
-          height="80px"
-          justify="center"
-          align="flex-start"
-          bgColor="blue.800"
-          borderTopWidth={1}
-          borderColor="gray.300"
-        >
-          {layer.opacityBlock.parameterVariations["u_opacity"]?.length ??
-          0 > 0 ? (
-            <ParameterVariations
-              uniformName={"u_opacity"}
-              block={layer.opacityBlock}
-            />
-          ) : (
-            <HStack ml={2}>
-              <Text py={2} fontSize={10}>
-                Click to add a variation:
-              </Text>
-              <NewVariationButtons
-                uniformName={"u_opacity"}
-                block={layer.opacityBlock}
-              />
-            </HStack>
-          )}
-        </VStack>
-      )}
+      <LayerOpacityVariations layer={layer} />
     </HStack>
   );
 });

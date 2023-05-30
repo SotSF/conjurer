@@ -4,7 +4,7 @@ import { ParameterView } from "@/src/components/ParameterView";
 import { VStack } from "@chakra-ui/react";
 import { memo } from "react";
 
-const uniformNamesToExclude = ["u_time", "u_global_time", "u_texture"];
+const uniformNamesToExclude = ["u_time", "u_texture"];
 
 type ParametersListProps = {
   block: Block<ExtraParams>;

@@ -97,7 +97,7 @@ export const NewVariationButtons = memo(function NewVariationButtons({
         onClick={action(() => {
           // grab the last scalar value from the previous variation if it exists
           const lastValue = block.getLastParameterValue(uniformName);
-          if (lastValue && typeof lastValue === "number") {
+          if (typeof lastValue === "number") {
             block.addVariation(
               uniformName,
               new LinearVariation(DEFAULT_VARIATION_DURATION, lastValue, 1)

@@ -57,14 +57,16 @@ export class Layer {
     });
   }
 
-  insertCloneOfPattern = (pattern: Pattern) => {
-    const newBlock = new Block(pattern.clone());
+  insertCloneOfBlock = (block: Block) => {
+    const newBlock = block.clone();
     const nextGap = this.nextFiniteGap(this.timer.globalTime);
     newBlock.setTiming(nextGap);
     this.addBlock(newBlock);
   };
 
   addBlock = (block: Block) => {
+    block.layer = this;
+
     // insert block in sorted order
     const index = this.patternBlocks.findIndex(
       (b) => b.startTime > block.startTime
@@ -75,7 +77,6 @@ export class Layer {
     }
 
     this.patternBlocks.splice(index, 0, block);
-    block.layer = this;
   };
 
   removeBlock = (block: Block) => {
@@ -307,7 +308,7 @@ export class Layer {
 
   static deserialize = (data: any, timer: Timer) => {
     const layer = new Layer(timer);
-    layer.id = data.id;
+    if (data.id) layer.id = data.id;
     layer.patternBlocks = data.patternBlocks.map((b: any) =>
       Block.deserialize(b)
     );

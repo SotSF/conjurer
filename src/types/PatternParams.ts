@@ -12,10 +12,6 @@ export type StandardParams = {
     name: "Time";
     value: number;
   };
-  readonly u_global_time: {
-    name: "Global Time";
-    value: number;
-  };
   // for effects
   readonly u_texture: {
     name: "Input Texture";

@@ -7,6 +7,13 @@ import {
   getS3,
 } from "@/src/utils/assets";
 
+// Filename format: <user>-<experienceName>.json
+const extractExperienceNameFromFileName = (filename: string): string => {
+  const parts = filename.split("-");
+  if (parts.length < 2) return "untitled";
+  return parts.slice(1).join("-");
+};
+
 // Define a new RootStore interface here so that we avoid circular dependencies
 interface RootStore {
   user: string;
@@ -35,6 +42,8 @@ export class ExperienceStore {
   };
 
   loadFromS3 = async (experienceFilename: string) => {
+    this.rootStore.experienceName =
+      extractExperienceNameFromFileName(experienceFilename);
     this.rootStore.experienceLastSavedAt = Date.now();
     const getObjectCommand = new GetObjectCommand({
       Bucket: ASSET_BUCKET_NAME,
