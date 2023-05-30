@@ -56,7 +56,7 @@ export class Block<T extends ExtraParams = {}> {
     this.duration = duration;
   };
 
-  updateParameters = (time: number, globalTime: number) => {
+  updateParameters = (time: number) => {
     this.pattern.params.u_time.value = time;
 
     for (const parameter of Object.keys(this.parameterVariations)) {
@@ -64,7 +64,7 @@ export class Block<T extends ExtraParams = {}> {
     }
 
     for (const effect of this.effectBlocks) {
-      effect.updateParameters(time, globalTime);
+      effect.updateParameters(time);
     }
   };
 

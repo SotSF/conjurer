@@ -20,7 +20,7 @@ import { FlatVariation } from "@/src/types/Variations/FlatVariation";
 import { DEFAULT_VARIATION_DURATION } from "@/src/utils/time";
 import { runInAction } from "mobx";
 
-const uniformNamesToExclude = ["u_time", "u_global_time", "u_texture"];
+const uniformNamesToExclude = ["u_time", "u_texture"];
 
 const labelStyles = {
   mt: -3,
