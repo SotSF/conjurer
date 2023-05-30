@@ -5,7 +5,7 @@ import type { RegionParams } from "wavesurfer.js/dist/plugins/regions";
 export class AudioStore {
   audioInitialized = false;
   availableAudioFiles: string[] = [];
-  selectedAudioFile: string = "cloudkicker-explorebecurious.mp3";
+  selectedAudioFile: string = "";
 
   audioMuted = false;
   audioLooping = false;

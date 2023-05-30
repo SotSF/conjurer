@@ -128,6 +128,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
         wavesurferConstructors.current.TimelinePlugin &&
         lastAudioLoaded.current !== audioStore.selectedAudioFile
       ) {
+        ready.current = false;
         lastAudioLoaded.current = audioStore.selectedAudioFile;
         wavesurferRef.current.stop();
         timer.playing = false;

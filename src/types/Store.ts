@@ -67,11 +67,16 @@ export class Store {
   }
 
   initialize = () => {
-    this.experienceStore.loadInitialExperience();
-
     // check for a username in local storage
     const username = localStorage.getItem("user");
     if (username) this._user = username;
+
+    // check for an experience name in local storage
+    const experienceName = localStorage.getItem("experienceName");
+    if (experienceName) {
+      this._experienceName = experienceName;
+      this.experienceStore.loadFromS3(`${this.user}-${experienceName}`);
+    } else this.experienceStore.loadInitialExperience();
 
     // set up an autosave interval
     setInterval(() => {
