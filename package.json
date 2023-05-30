@@ -35,7 +35,7 @@
     "react-dom": "18.2.0",
     "react-draggable": "^4.4.5",
     "react-icons": "^4.8.0",
-    "recharts": "^2.5.0",
+    "recharts": "^2.6.2",
     "splines": "jonathanlurie/splines",
     "three": "^0.152.2",
     "ts-node": "^10.9.1",
