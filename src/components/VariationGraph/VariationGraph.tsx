@@ -51,6 +51,7 @@ export const VariationGraph = function VariationGraph({
   if (variation instanceof SplineVariation) return variationGraph;
 
   return (
+    // TODO: use something else here
     <Popover
       placement="right"
       isLazy
