@@ -6,6 +6,7 @@
   "uiStore": { "pixelsPerSecond": 38 },
   "layers": [
     {
+      "id": "62ae8350cb53c",
       "patternBlocks": [
         {
           "pattern": "Starfield",
@@ -164,6 +165,7 @@
       }
     },
     {
+      "id": "11a41b90c480b8",
       "patternBlocks": [
         {
           "pattern": "Tunnel",
@@ -188,5 +190,5 @@
     }
   ],
   "user": "ben",
-  "savedAt": 1685356483802
+  "savedAt": 1685410130161
 }

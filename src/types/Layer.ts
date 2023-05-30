@@ -308,7 +308,7 @@ export class Layer {
 
   static deserialize = (data: any, timer: Timer) => {
     const layer = new Layer(timer);
-    layer.id = data.id;
+    if (data.id) layer.id = data.id;
     layer.patternBlocks = data.patternBlocks.map((b: any) =>
       Block.deserialize(b)
     );
