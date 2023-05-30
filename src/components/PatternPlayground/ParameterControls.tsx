@@ -18,6 +18,7 @@ import { Block } from "@/src/types/Block";
 import { ExtraParams } from "@/src/types/PatternParams";
 import { FlatVariation } from "@/src/types/Variations/FlatVariation";
 import { DEFAULT_VARIATION_DURATION } from "@/src/utils/time";
+import { runInAction } from "mobx";
 
 const uniformNamesToExclude = ["u_time", "u_global_time", "u_texture"];
 
@@ -39,12 +40,16 @@ export const ParameterControls = memo(function ParameterControls({
     setParameters({ ...parameters, [name]: value });
     block.pattern.params[name].value = value;
 
-    // Also insert a flat variation so that this parameter value is serializable
-    if (!block.parameterVariations[name]) block.parameterVariations[name] = [];
-    block.parameterVariations[name]![0] = new FlatVariation(
-      DEFAULT_VARIATION_DURATION,
-      value
-    );
+    runInAction(() => {
+      // Also insert a flat variation so that this parameter value is serializable
+      if (!block.parameterVariations[name])
+        block.parameterVariations[name] = [];
+
+      block.parameterVariations[name]![0] = new FlatVariation(
+        DEFAULT_VARIATION_DURATION,
+        value
+      );
+    });
   };
 
   return (

@@ -1,26 +1,20 @@
 import { Card, Text, VStack } from "@chakra-ui/react";
 import { memo } from "react";
 import { Pattern } from "@/src/types/Pattern";
-import { useStore } from "@/src/types/StoreContext";
-import { action } from "mobx";
 
 type SelectablePatternProps = {
   pattern: Pattern;
   selected: boolean;
+  onSelect: () => void;
   onInsert: () => void;
 };
 
 export const SelectablePattern = memo(function SelectablePattern({
   pattern,
   selected,
+  onSelect,
   onInsert,
 }: SelectablePatternProps) {
-  const store = useStore();
-
-  const handleSelect = action(() => {
-    store.selectedPattern = pattern;
-  });
-
   return (
     <Card
       border="solid"
@@ -28,7 +22,7 @@ export const SelectablePattern = memo(function SelectablePattern({
       zIndex={2}
       alignItems="center"
       cursor="pointer"
-      onClick={handleSelect}
+      onClick={onSelect}
       onDoubleClick={onInsert}
       role="button"
     >
