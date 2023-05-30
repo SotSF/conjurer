@@ -74,6 +74,8 @@ export const TimelineBlockStack = observer(function TimelineBlockStack({
       } else {
         store.selectBlock(patternBlock);
       }
+
+      if (patternBlock.layer) store.selectedLayer = patternBlock.layer;
       e.stopPropagation();
     },
     [store, patternBlock, selectedBlocks]

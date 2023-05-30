@@ -65,6 +65,8 @@ export class Layer {
   };
 
   addBlock = (block: Block) => {
+    block.layer = this;
+
     // insert block in sorted order
     const index = this.patternBlocks.findIndex(
       (b) => b.startTime > block.startTime
@@ -75,7 +77,6 @@ export class Layer {
     }
 
     this.patternBlocks.splice(index, 0, block);
-    block.layer = this;
   };
 
   removeBlock = (block: Block) => {
