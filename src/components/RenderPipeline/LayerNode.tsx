@@ -32,7 +32,7 @@ export const LayerNode = observer(function LayerNode({
     const { globalTime } = timer;
     const { startTime } = opacityBlock;
 
-    opacityBlock.updateParameters(globalTime - startTime, globalTime);
+    opacityBlock.updateParameters(globalTime - startTime);
   }, layerPriority);
 
   return (
