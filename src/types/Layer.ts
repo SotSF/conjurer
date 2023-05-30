@@ -57,8 +57,8 @@ export class Layer {
     });
   }
 
-  insertCloneOfPattern = (pattern: Pattern) => {
-    const newBlock = new Block(pattern.clone());
+  insertCloneOfBlock = (block: Block) => {
+    const newBlock = block.clone();
     const nextGap = this.nextFiniteGap(this.timer.globalTime);
     newBlock.setTiming(nextGap);
     this.addBlock(newBlock);

@@ -52,7 +52,3 @@ yarn dev
 Must do's captured in the "Road to Minimum Viable Magical Product" [issue](https://github.com/SotSF/conjurer/issues/26).
 
 Other to do's captured in the [wiki](https://github.com/SotSF/conjurer/wiki).
-
-### Performance notes
-
-- In general, be wary of memory leaks. They can be caused by nextjs hot reloading.

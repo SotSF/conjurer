@@ -12,18 +12,19 @@ const PATTERN_PREVIEW_DISPLAY_SIZE = 600;
 export const PatternPlayground = observer(function PatternPlayground() {
   const store = useStore();
   const { selectedPattern } = store;
+  // TODO: keep the block around to preserve parameter variations
   const block = useMemo(() => new Block(selectedPattern), [selectedPattern]);
 
   return (
     <Grid
       height="100%"
       templateAreas={`"patterns patterns"
-                            "controls preview"`}
+                      "controls preview"`}
       gridTemplateColumns="50% 50%"
       gridTemplateRows="auto 1fr"
     >
       <GridItem area="patterns">
-        <PatternList />
+        <PatternList selectedBlock={block} />
       </GridItem>
       <GridItem area="controls">
         <ParameterControls block={block} />

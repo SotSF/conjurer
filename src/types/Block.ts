@@ -220,7 +220,24 @@ export class Block<T extends ExtraParams = {}> {
     this.effectBlocks.push(newBlock);
   };
 
-  clone = () => new Block(this.pattern.clone());
+  clone = () => {
+    const newBlock = new Block(this.pattern.clone());
+    newBlock.startTime = this.startTime;
+    newBlock.duration = this.duration;
+    newBlock.layer = this.layer;
+
+    newBlock.parameterVariations = { ...this.parameterVariations };
+    Object.entries(newBlock.parameterVariations).forEach(([key, value]) => {
+      newBlock.parameterVariations[key as keyof T] =
+        value?.map((variation) => variation.clone()) ?? [];
+    });
+
+    newBlock.parentBlock = this.parentBlock;
+    newBlock.effectBlocks = this.effectBlocks.map((effectBlock) =>
+      effectBlock.clone()
+    );
+    return newBlock;
+  };
 
   serializeParameterVariations = () => {
     const serialized: { [K in keyof T]?: any[] } = {};
