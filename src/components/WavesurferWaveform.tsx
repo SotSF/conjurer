@@ -45,6 +45,7 @@ const DEFAULT_TIMELINE_OPTIONS: TimelinePluginOptions = {
 export const WavesurferWaveform = observer(function WavesurferWaveform() {
   const didInitialize = useRef(false);
   const ready = useRef(false);
+  const lastAudioLoaded = useRef("");
 
   const wavesurferConstructors = useRef<{
     WaveSurfer: typeof WaveSurfer | null;
@@ -98,17 +99,18 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
       wavesurferRef.current = WaveSurfer.create(options);
 
       // Load selected audio file
-      await wavesurferRef.current.load(
-        `https://${ASSET_BUCKET_NAME}.s3.${ASSET_BUCKET_REGION}.amazonaws.com/${AUDIO_ASSET_PREFIX}${audioStore.selectedAudioFile}`
-      );
-      wavesurferRef.current?.zoom(uiStore.pixelsPerSecond);
+      if (audioStore.selectedAudioFile) {
+        await wavesurferRef.current.load(
+          `https://${ASSET_BUCKET_NAME}.s3.${ASSET_BUCKET_REGION}.amazonaws.com/${AUDIO_ASSET_PREFIX}${audioStore.selectedAudioFile}`
+        );
+        wavesurferRef.current?.zoom(uiStore.pixelsPerSecond);
+        ready.current = true;
+      }
 
       wavesurferRef.current.on("interaction", () => {
         if (!wavesurferRef.current) return;
         timer.setTime(Math.max(0, wavesurferRef.current.getCurrentTime()));
       });
-
-      ready.current = true;
 
       cloneCanvas();
     };
@@ -117,15 +119,19 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
   }, [audioStore, audioStore.selectedAudioFile, uiStore.pixelsPerSecond, timer]);
 
   useEffect(() => {
-    if (!didInitialize.current || !ready.current) return;
+    if (!didInitialize.current) return;
 
     const changeAudioFile = async () => {
       if (
         didInitialize.current &&
         wavesurferRef.current &&
-        wavesurferConstructors.current.TimelinePlugin
+        wavesurferConstructors.current.TimelinePlugin &&
+        lastAudioLoaded.current !== audioStore.selectedAudioFile
       ) {
+        lastAudioLoaded.current = audioStore.selectedAudioFile;
         wavesurferRef.current.stop();
+        timer.playing = false;
+        timer.setTime(0);
 
         // Destroy the old timeline plugin
         timelinePlugin.current?.destroy();
@@ -141,13 +147,14 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
         await wavesurferRef.current.load(
           `https://${ASSET_BUCKET_NAME}.s3.${ASSET_BUCKET_REGION}.amazonaws.com/${AUDIO_ASSET_PREFIX}${audioStore.selectedAudioFile}`
         );
+        wavesurferRef.current.zoom(uiStore.pixelsPerSecond);
         wavesurferRef.current.seekTo(0);
-        timer.lastCursorPosition = 0;
+        ready.current = true;
       }
     };
     changeAudioFile();
     cloneCanvas();
-  }, [audioStore.selectedAudioFile, timer]);
+  }, [audioStore.selectedAudioFile, timer, uiStore.pixelsPerSecond]);
 
   useEffect(() => {
     if (!didInitialize.current || !ready.current) return;
@@ -195,6 +202,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
   }, [audioStore, audioStore.audioLooping, timer]);
 
   useEffect(() => {
+    if (!didInitialize.current || !ready.current) return;
     if (timer.playing) {
       wavesurferRef.current?.play();
     } else {
@@ -208,8 +216,10 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
   }, [audioStore.audioMuted]);
 
   const zoomDebounced = useDebouncedCallback((pixelsPerSecond: number) => {
-    wavesurferRef.current?.zoom(pixelsPerSecond);
-    cloneCanvas();
+    if (ready.current && wavesurferRef.current) {
+      wavesurferRef.current.zoom(pixelsPerSecond);
+      cloneCanvas();
+    }
   }, 5);
 
   useEffect(() => {
