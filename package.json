@@ -10,7 +10,7 @@
     "generateCanopy": "ts-node --project tsconfig.script.json src/scripts/generateCanopy.ts"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.316.0",
+    "@aws-sdk/client-s3": "^3.341.0",
     "@aws-sdk/credential-providers": "^3.316.0",
     "@chakra-ui/react": "^2.5.5",
     "@emotion/react": "^11.11.0",
