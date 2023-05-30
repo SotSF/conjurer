@@ -1,0 +1,6 @@
+.waveformClone {
+  position: absolute;
+  height: 220px;
+  opacity: 0.4;
+  pointer-events: none;
+}
