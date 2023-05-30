@@ -25,7 +25,16 @@ export class Store {
   experienceStore = new ExperienceStore(this);
 
   layers: Layer[] = [];
-  selectedLayer: Layer = this.layers[0]; // a layer is always selected
+
+  private _selectedLayer: Layer = this.layers[0]; // a layer is always selected
+
+  get selectedLayer() {
+    return this._selectedLayer;
+  }
+
+  set selectedLayer(value: Layer) {
+    this._selectedLayer = value;
+  }
 
   selectedBlocks: Set<Block> = new Set();
 
@@ -33,7 +42,7 @@ export class Store {
   selectedVariationUniformName: string = "";
   selectedVariation: Variation | null = null;
 
-  _user = "";
+  private _user = "";
 
   get user(): string {
     return this._user;
@@ -44,7 +53,7 @@ export class Store {
     localStorage.setItem("user", value);
   }
 
-  _experienceName = "untitled";
+  private _experienceName = "untitled";
 
   get experienceName(): string {
     return this._experienceName;
