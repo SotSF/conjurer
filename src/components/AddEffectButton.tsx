@@ -7,6 +7,7 @@ import {
   MenuButton,
   MenuItem,
   MenuList,
+  Portal,
   Text,
 } from "@chakra-ui/react";
 import { action } from "mobx";
@@ -44,16 +45,18 @@ export const AddEffectButton = memo(function AddEffectButton({
             </Text>
           </HStack>
         </MenuButton>
-        <MenuList>
-          {effects.map((effect) => (
-            <MenuItem
-              key={effect.name}
-              onClick={action(() => block.addCloneOfEffect(effect))}
-            >
-              {effect.name}
-            </MenuItem>
-          ))}
-        </MenuList>
+        <Portal>
+          <MenuList>
+            {effects.map((effect) => (
+              <MenuItem
+                key={effect.name}
+                onClick={action(() => block.addCloneOfEffect(effect))}
+              >
+                {effect.name}
+              </MenuItem>
+            ))}
+          </MenuList>
+        </Portal>
       </Menu>
     </Box>
   );
