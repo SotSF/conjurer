@@ -1,7 +1,7 @@
 import { useStore } from "@/src/types/StoreContext";
 import { Box } from "@chakra-ui/react";
 import { observer } from "mobx-react-lite";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useCallback } from "react";
 import { clamp } from "three/src/math/MathUtils";
 import { useDebouncedCallback } from "use-debounce";
 import type WaveSurfer from "wavesurfer.js";
@@ -16,6 +16,7 @@ import {
   ASSET_BUCKET_REGION,
 } from "@/src/utils/assets";
 import { action } from "mobx";
+import styles from "@/styles/WavesurferWaveform.module.css";
 
 // https://wavesurfer-js.org/docs/options.html
 const DEFAULT_WAVESURFER_OPTIONS: Partial<WaveSurferOptions> = {
@@ -58,9 +59,36 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
 
   const wavesurferRef = useRef<WaveSurfer | null>(null);
   const waveformRef = useRef<HTMLDivElement>(null);
-  const overlayCanvas = useRef<HTMLCanvasElement>(null);
+  const clonedWaveformRef = useRef<HTMLDivElement>(null);
 
   const { audioStore, timer, uiStore } = useStore();
+
+  const cloneCanvas = useCallback(() => {
+    if (!clonedWaveformRef.current || !uiStore.showingWaveformOverlay) return;
+
+    const shadowRoot = document.querySelector("#waveform div")?.shadowRoot;
+    const sourceCanvases = shadowRoot?.querySelectorAll(
+      ".canvases > canvas"
+    ) as NodeListOf<HTMLCanvasElement>;
+
+    if (!sourceCanvases) return;
+
+    const destinationCanvases = [];
+    for (const sourceCanvas of sourceCanvases) {
+      const destinationCanvas = document.createElement("canvas");
+      destinationCanvas.width = sourceCanvas.width;
+      destinationCanvas.height = sourceCanvas.height;
+      destinationCanvas.classList.add(styles.waveformClone);
+      destinationCanvas.style.left = sourceCanvas.style.left;
+      destinationCanvas.style.width = sourceCanvas.style.width;
+      const destCtx = destinationCanvas.getContext("2d")!;
+      destCtx.drawImage(sourceCanvas, 0, 0);
+      destinationCanvases.push(destinationCanvas);
+    }
+
+    const destinationContainer = clonedWaveformRef.current;
+    destinationContainer.replaceChildren(...destinationCanvases);
+  }, [uiStore.showingWaveformOverlay]);
 
   useEffect(() => {
     if (didInitialize.current) return;
@@ -116,7 +144,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
     };
 
     create();
-  }, [audioStore, audioStore.selectedAudioFile, uiStore.pixelsPerSecond, timer]);
+  }, [audioStore, audioStore.selectedAudioFile, uiStore.pixelsPerSecond, timer, cloneCanvas]);
 
   useEffect(() => {
     if (!didInitialize.current) return;
@@ -155,7 +183,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
     };
     changeAudioFile();
     cloneCanvas();
-  }, [audioStore.selectedAudioFile, timer, uiStore.pixelsPerSecond]);
+  }, [audioStore.selectedAudioFile, timer, uiStore.pixelsPerSecond, cloneCanvas]);
 
   useEffect(() => {
     if (!didInitialize.current || !ready.current) return;
@@ -238,34 +266,18 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
 
   useEffect(() => {
     if (uiStore.showingWaveformOverlay) cloneCanvas();
-  }, [uiStore.showingWaveformOverlay]);
-
-  const cloneCanvas = () => {
-    if (!overlayCanvas.current) return;
-
-    // This is all a bit brittle...
-    const shadowRoot = document.querySelector("#waveform div")?.shadowRoot;
-    const sourceCanvas = shadowRoot?.querySelector(
-      "canvas"
-    ) as HTMLCanvasElement;
-
-    if (!sourceCanvas) return;
-
-    const destinationCanvas = overlayCanvas.current;
-    destinationCanvas.width = sourceCanvas.width;
-    destinationCanvas.height = sourceCanvas.height;
-
-    const destCtx = destinationCanvas.getContext("2d")!;
-    destCtx.drawImage(sourceCanvas, 0, 0);
-  };
+  }, [uiStore.showingWaveformOverlay, cloneCanvas]);
 
   return (
     <Box width="100%" height={10} bgColor="gray.500">
       <Box position="absolute" top={0} id="waveform" ref={waveformRef} />
       {uiStore.showingWaveformOverlay && (
-        <Box position="absolute" top="80px" id="waveform2" pointerEvents="none">
-          <canvas ref={overlayCanvas} className="waveformClone" />
-        </Box>
+        <Box
+          ref={clonedWaveformRef}
+          position="absolute"
+          top="80px"
+          pointerEvents="none"
+        />
       )}
     </Box>
   );

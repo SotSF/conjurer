@@ -31,7 +31,7 @@ export const AddEffectButton = memo(function AddEffectButton({
       borderColor={isSelected ? "blue.500" : "white"}
       borderStyle="solid"
     >
-      <Menu>
+      <Menu placement="bottom">
         <MenuButton as={Button} variant="ghost" width="100%" textAlign="center">
           <HStack
             userSelect="none"
