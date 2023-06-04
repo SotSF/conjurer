@@ -127,11 +127,24 @@ export class Store {
       return;
     }
 
-    if (this.selectedVariation) {
-      this.selectedVariationBlock?.removeVariation(
+    if (this.selectedVariation && this.selectedVariationBlock)
+      this.deleteVariation(
+        this.selectedVariationBlock,
         this.selectedVariationUniformName,
         this.selectedVariation
       );
+  };
+
+  deleteVariation = (
+    block: Block,
+    uniformName: string,
+    variation: Variation
+  ) => {
+    block.removeVariation(uniformName, variation);
+    if (this.selectedVariation === variation) {
+      this.selectedVariationBlock = null;
+      this.selectedVariationUniformName = "";
+      this.selectedVariation = null;
     }
   };
 

@@ -31,6 +31,7 @@ import { hexToRgb, vector4ToHex } from "@/src/utils/color";
 import { HexColorInput } from "react-colorful";
 import { SplineVariation } from "@/src/types/Variations/SplineVariation";
 import { ExtraParams } from "@/src/types/PatternParams";
+import { useStore } from "@/src/types/StoreContext";
 
 type VariationControlsProps = {
   uniformName: string;
@@ -43,6 +44,7 @@ export const VariationControls = function VariationControls({
   variation,
   block,
 }: VariationControlsProps) {
+  const store = useStore();
   const controlsProps = { uniformName, block };
   const controls =
     variation instanceof FlatVariation ? (
@@ -90,7 +92,9 @@ export const VariationControls = function VariationControls({
           fontSize={8}
           color="gray.400"
           leftIcon={<FaTrashAlt size={12} />}
-          onClick={action(() => block.removeVariation(uniformName, variation))}
+          onClick={action(() =>
+            store.deleteVariation(block, uniformName, variation)
+          )}
         >
           Delete
         </Button>
