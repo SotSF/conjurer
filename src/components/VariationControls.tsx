@@ -30,11 +30,12 @@ import { HexColorPicker } from "react-colorful";
 import { hexToRgb, vector4ToHex } from "@/src/utils/color";
 import { HexColorInput } from "react-colorful";
 import { SplineVariation } from "@/src/types/Variations/SplineVariation";
+import { ExtraParams } from "@/src/types/PatternParams";
 
 type VariationControlsProps = {
   uniformName: string;
   variation: Variation;
-  block: Block;
+  block: Block<ExtraParams>;
 };
 
 export const VariationControls = function VariationControls({
@@ -42,76 +43,58 @@ export const VariationControls = function VariationControls({
   variation,
   block,
 }: VariationControlsProps) {
-  let controls = <Text>Needs implementation!</Text>;
+  const controlsProps = { uniformName, block };
+  const controls =
+    variation instanceof FlatVariation ? (
+      <FlatVariationControls variation={variation} {...controlsProps} />
+    ) : variation instanceof LinearVariation ? (
+      <LinearVariationControls variation={variation} {...controlsProps} />
+    ) : variation instanceof PeriodicVariation ? (
+      <PeriodicVariationControls variation={variation} {...controlsProps} />
+    ) : variation instanceof SplineVariation ? (
+      <SplineVariationControls variation={variation} {...controlsProps} />
+    ) : variation instanceof LinearVariation4 ? (
+      <LinearVariation4Controls variation={variation} {...controlsProps} />
+    ) : (
+      <Text>Needs implementation!</Text>
+    );
 
-  if (variation instanceof FlatVariation) {
-    controls = (
-      <FlatVariationControls
-        uniformName={uniformName}
-        block={block}
-        variation={variation}
-      />
-    );
-  } else if (variation instanceof LinearVariation) {
-    controls = (
-      <LinearVariationControls
-        uniformName={uniformName}
-        block={block}
-        variation={variation}
-      />
-    );
-  } else if (variation instanceof PeriodicVariation) {
-    controls = (
-      <PeriodicVariationControls
-        uniformName={uniformName}
-        block={block}
-        variation={variation}
-      />
-    );
-  } else if (variation instanceof SplineVariation) {
-    controls = (
-      <SplineVariationControls
-        uniformName={uniformName}
-        block={block}
-        variation={variation}
-      />
-    );
-  } else if (variation instanceof LinearVariation4) {
-    controls = (
-      <LinearVariation4Controls
-        uniformName={uniformName}
-        block={block}
-        variation={variation}
-      />
-    );
-  }
+  const parameterName = block.pattern.params[uniformName].name;
 
   return (
-    <VStack bgColor="gray.700" fontSize={10} m={1}>
-      <Text>{variation.displayName} Variation</Text>
+    <VStack p={1} bgColor="gray.700" fontSize={10} m={1} borderRadius={3}>
+      <VStack spacing={0}>
+        <Text>{parameterName}</Text>
+        <Text>{variation.displayName} Variation</Text>
+      </VStack>
+
       {controls}
-      <Button
-        aria-label="Duplicate"
-        variant="ghost"
-        size="xs"
-        fontSize={9}
-        color="gray.400"
-        leftIcon={<BiDuplicate size={14} />}
-        onClick={action(() => block.duplicateVariation(uniformName, variation))}
-      >
-        Duplicate
-      </Button>
-      <Button
-        aria-label="Delete"
-        variant="ghost"
-        size="xs"
-        fontSize={9}
-        color="gray.400"
-        leftIcon={<FaTrashAlt size={12} />}
-        onClick={action(() => block.removeVariation(uniformName, variation))}
-      >
-        Delete
-      </Button>
+      <HStack spacing={0}>
+        <Button
+          aria-label="Duplicate"
+          variant="ghost"
+          size="xs"
+          fontSize={8}
+          color="gray.400"
+          leftIcon={<BiDuplicate size={14} />}
+          onClick={action(() =>
+            block.duplicateVariation(uniformName, variation)
+          )}
+        >
+          Duplicate
+        </Button>
+        <Button
+          aria-label="Delete"
+          variant="ghost"
+          size="xs"
+          fontSize={8}
+          color="gray.400"
+          leftIcon={<FaTrashAlt size={12} />}
+          onClick={action(() => block.removeVariation(uniformName, variation))}
+        >
+          Delete
+        </Button>
+      </HStack>
     </VStack>
   );
 };
@@ -132,7 +115,7 @@ function FlatVariationControls({
   return (
     <>
       <HStack m={1}>
-        <Text>Value:</Text>
+        <Text>Value</Text>
         <NumberInput
           size="xs"
           step={0.1}
@@ -224,7 +207,7 @@ function LinearVariationControls({
   return (
     <>
       <HStack m={1}>
-        <Text>From:</Text>
+        <Text>From</Text>
         <NumberInput
           size="xs"
           step={0.1}
@@ -243,7 +226,7 @@ function LinearVariationControls({
         </NumberInput>
       </HStack>
       <HStack m={1}>
-        <Text>To:</Text>
+        <Text>To</Text>
         <NumberInput
           size="xs"
           step={0.1}
@@ -323,7 +306,7 @@ function PeriodicVariationControls({
       {showingMinMax ? (
         <>
           <HStack m={1}>
-            <Text>Min:</Text>
+            <Text>Min</Text>
             <NumberInput
               size="xs"
               step={0.1}
@@ -342,7 +325,7 @@ function PeriodicVariationControls({
             </NumberInput>
           </HStack>
           <HStack m={1}>
-            <Text>Max:</Text>
+            <Text>Max</Text>
             <NumberInput
               size="xs"
               step={0.1}
@@ -364,7 +347,7 @@ function PeriodicVariationControls({
       ) : (
         <>
           <HStack m={1}>
-            <Text>Offset:</Text>
+            <Text>Offset</Text>
             <NumberInput
               size="xs"
               step={0.1}
@@ -383,7 +366,7 @@ function PeriodicVariationControls({
             </NumberInput>
           </HStack>
           <HStack m={1}>
-            <Text>Amplitude:</Text>
+            <Text>Amplitude</Text>
             <NumberInput
               size="xs"
               step={0.1}
@@ -404,7 +387,7 @@ function PeriodicVariationControls({
         </>
       )}
       <HStack m={1}>
-        <Text>Period:</Text>
+        <Text>Period</Text>
         <NumberInput
           size="xs"
           step={0.1}
@@ -462,7 +445,7 @@ function SplineVariationControls({
   return (
     <>
       <HStack m={1}>
-        <Text>Min:</Text>
+        <Text>Min</Text>
         <NumberInput
           size="xs"
           step={0.1}
@@ -481,7 +464,7 @@ function SplineVariationControls({
         </NumberInput>
       </HStack>
       <HStack m={1}>
-        <Text>Max:</Text>
+        <Text>Max</Text>
         <NumberInput
           size="xs"
           step={0.1}
