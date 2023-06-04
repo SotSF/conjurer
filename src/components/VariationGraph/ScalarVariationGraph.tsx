@@ -6,6 +6,7 @@ import { memo } from "react";
 import { VARIATION_BOUND_WIDTH } from "@/src/utils/layout";
 import { SplineVariation } from "@/src/types/Variations/SplineVariation";
 import { SplineVariationGraph } from "@/src/components/VariationGraph/SplineVariationGraph";
+import { useStore } from "@/src/types/StoreContext";
 
 type ScalarVariationGraphProps = {
   uniformName: string;
@@ -22,6 +23,7 @@ export const ScalarVariationGraph = memo(function ScalarVariationGraph({
   domain,
   block,
 }: ScalarVariationGraphProps) {
+  const store = useStore();
   const orange = useToken("colors", "orange.400");
   if (variation instanceof SplineVariation)
     return (
@@ -37,7 +39,12 @@ export const ScalarVariationGraph = memo(function ScalarVariationGraph({
 
   const data = variation.computeSampledData(variation.duration);
   return (
-    <Box py={1} bgColor="gray.600" _hover={{ bgColor: "gray.500" }}>
+    <Box
+      py={1}
+      bgColor="gray.600"
+      _hover={{ bgColor: "gray.500" }}
+      onClick={() => store.selectVariation(block, uniformName, variation)}
+    >
       <LineChart
         width={width - VARIATION_BOUND_WIDTH}
         height={50}
