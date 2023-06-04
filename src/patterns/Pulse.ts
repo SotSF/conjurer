@@ -35,6 +35,10 @@ export const Pulse = () =>
       name: "Wave Amplitude",
       value: 0,
     },
+    u_waviness: {
+      name: "Waviness",
+      value: 1,
+    },
     u_number_colors: {
       name: "Number of Colors",
       value: 4,
