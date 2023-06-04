@@ -2,11 +2,6 @@ import {
   Box,
   Button,
   HStack,
-  NumberDecrementStepper,
-  NumberIncrementStepper,
-  NumberInput,
-  NumberInputField,
-  NumberInputStepper,
   Radio,
   RadioGroup,
   Switch,
@@ -32,6 +27,7 @@ import { HexColorInput } from "react-colorful";
 import { SplineVariation } from "@/src/types/Variations/SplineVariation";
 import { ExtraParams } from "@/src/types/PatternParams";
 import { useStore } from "@/src/types/StoreContext";
+import { ScalarInput } from "@/src/components/ScalarInput";
 
 type VariationControlsProps = {
   uniformName: string;
@@ -45,6 +41,9 @@ export const VariationControls = function VariationControls({
   block,
 }: VariationControlsProps) {
   const store = useStore();
+
+  const [duration, setDuration] = useState(variation.duration.toString());
+
   const controlsProps = { uniformName, block };
   const controls =
     variation instanceof FlatVariation ? (
@@ -64,13 +63,23 @@ export const VariationControls = function VariationControls({
   const parameterName = block.pattern.params[uniformName].name;
 
   return (
-    <VStack p={1} bgColor="gray.700" fontSize={10} m={1} borderRadius={3}>
+    <VStack p={1} bgColor="gray.700" fontSize={10} m={1} borderRadius={6}>
       <VStack spacing={0}>
-        <Text>{parameterName}</Text>
+        <Text fontWeight="bold">{parameterName}</Text>
         <Text>{variation.displayName} Variation</Text>
       </VStack>
-
-      {controls}
+      <VStack spacing={1}>
+        {controls}
+        <ScalarInput
+          name="Duration"
+          onChange={(valueString, valueNumber) => {
+            variation.duration = valueNumber;
+            setDuration(valueString);
+            block.triggerVariationReactions(uniformName);
+          }}
+          value={duration}
+        />
+      </VStack>
       <HStack spacing={0}>
         <Button
           aria-label="Duplicate"
@@ -117,27 +126,15 @@ function FlatVariationControls({
   const [value, setValue] = useState(variation.value.toString());
 
   return (
-    <>
-      <HStack m={1}>
-        <Text>Value</Text>
-        <NumberInput
-          size="xs"
-          step={0.1}
-          onChange={(valueString) => {
-            variation.value = parseFloat(valueString);
-            setValue(valueString);
-            block.triggerVariationReactions(uniformName);
-          }}
-          value={value}
-        >
-          <NumberInputField />
-          <NumberInputStepper>
-            <NumberIncrementStepper />
-            <NumberDecrementStepper />
-          </NumberInputStepper>
-        </NumberInput>
-      </HStack>
-    </>
+    <ScalarInput
+      name="Value"
+      onChange={(valueString, valueNumber) => {
+        variation.value = valueNumber;
+        setValue(valueString);
+        block.triggerVariationReactions(uniformName);
+      }}
+      value={value}
+    />
   );
 }
 
@@ -210,44 +207,24 @@ function LinearVariationControls({
 
   return (
     <>
-      <HStack m={1}>
-        <Text>From</Text>
-        <NumberInput
-          size="xs"
-          step={0.1}
-          onChange={(valueString) => {
-            variation.from = parseFloat(valueString);
-            setFrom(valueString);
-            block.triggerVariationReactions(uniformName);
-          }}
-          value={from}
-        >
-          <NumberInputField />
-          <NumberInputStepper>
-            <NumberIncrementStepper />
-            <NumberDecrementStepper />
-          </NumberInputStepper>
-        </NumberInput>
-      </HStack>
-      <HStack m={1}>
-        <Text>To</Text>
-        <NumberInput
-          size="xs"
-          step={0.1}
-          onChange={(valueString) => {
-            variation.to = parseFloat(valueString);
-            setTo(valueString);
-            block.triggerVariationReactions(uniformName);
-          }}
-          value={to}
-        >
-          <NumberInputField />
-          <NumberInputStepper>
-            <NumberIncrementStepper />
-            <NumberDecrementStepper />
-          </NumberInputStepper>
-        </NumberInput>
-      </HStack>
+      <ScalarInput
+        name="From"
+        onChange={(valueString, valueNumber) => {
+          variation.from = valueNumber;
+          setFrom(valueString);
+          block.triggerVariationReactions(uniformName);
+        }}
+        value={from}
+      />
+      <ScalarInput
+        name="To"
+        onChange={(valueString, valueNumber) => {
+          variation.to = valueNumber;
+          setTo(valueString);
+          block.triggerVariationReactions(uniformName);
+        }}
+        value={to}
+      />
     </>
   );
 }
@@ -309,125 +286,65 @@ function PeriodicVariationControls({
       </HStack>
       {showingMinMax ? (
         <>
-          <HStack m={1}>
-            <Text>Min</Text>
-            <NumberInput
-              size="xs"
-              step={0.1}
-              onChange={(valueString) => {
-                variation.min = parseFloat(valueString);
-                setMin(valueString);
-                block.triggerVariationReactions(uniformName);
-              }}
-              value={min}
-            >
-              <NumberInputField />
-              <NumberInputStepper>
-                <NumberIncrementStepper />
-                <NumberDecrementStepper />
-              </NumberInputStepper>
-            </NumberInput>
-          </HStack>
-          <HStack m={1}>
-            <Text>Max</Text>
-            <NumberInput
-              size="xs"
-              step={0.1}
-              onChange={(valueString) => {
-                variation.max = parseFloat(valueString);
-                setMax(valueString);
-                block.triggerVariationReactions(uniformName);
-              }}
-              value={max}
-            >
-              <NumberInputField />
-              <NumberInputStepper>
-                <NumberIncrementStepper />
-                <NumberDecrementStepper />
-              </NumberInputStepper>
-            </NumberInput>
-          </HStack>
+          <ScalarInput
+            name="Min"
+            onChange={(valueString, valueNumber) => {
+              variation.min = valueNumber;
+              setMin(valueString);
+              block.triggerVariationReactions(uniformName);
+            }}
+            value={min}
+          />
+          <ScalarInput
+            name="Max"
+            onChange={(valueString, valueNumber) => {
+              variation.max = valueNumber;
+              setMax(valueString);
+              block.triggerVariationReactions(uniformName);
+            }}
+            value={max}
+          />
         </>
       ) : (
         <>
-          <HStack m={1}>
-            <Text>Offset</Text>
-            <NumberInput
-              size="xs"
-              step={0.1}
-              onChange={(valueString) => {
-                variation.offset = parseFloat(valueString);
-                setOffset(valueString);
-                block.triggerVariationReactions(uniformName);
-              }}
-              value={offset}
-            >
-              <NumberInputField />
-              <NumberInputStepper>
-                <NumberIncrementStepper />
-                <NumberDecrementStepper />
-              </NumberInputStepper>
-            </NumberInput>
-          </HStack>
-          <HStack m={1}>
-            <Text>Amplitude</Text>
-            <NumberInput
-              size="xs"
-              step={0.1}
-              onChange={(valueString) => {
-                variation.amplitude = parseFloat(valueString);
-                setAmplitude(valueString);
-                block.triggerVariationReactions(uniformName);
-              }}
-              value={amplitude}
-            >
-              <NumberInputField />
-              <NumberInputStepper>
-                <NumberIncrementStepper />
-                <NumberDecrementStepper />
-              </NumberInputStepper>
-            </NumberInput>
-          </HStack>
+          <ScalarInput
+            name="Offset"
+            onChange={(valueString, valueNumber) => {
+              variation.offset = valueNumber;
+              setOffset(valueString);
+              block.triggerVariationReactions(uniformName);
+            }}
+            value={offset}
+          />
+          <ScalarInput
+            name="Amplitude"
+            onChange={(valueString, valueNumber) => {
+              variation.amplitude = valueNumber;
+              setAmplitude(valueString);
+              block.triggerVariationReactions(uniformName);
+            }}
+            value={amplitude}
+          />
         </>
       )}
-      <HStack m={1}>
-        <Text>Period</Text>
-        <NumberInput
-          size="xs"
-          step={0.1}
-          onChange={(valueString) => {
-            variation.period = parseFloat(valueString);
-            setPeriod(valueString);
-            block.triggerVariationReactions(uniformName);
-          }}
-          value={period}
-        >
-          <NumberInputField />
-          <NumberInputStepper>
-            <NumberIncrementStepper />
-            <NumberDecrementStepper />
-          </NumberInputStepper>
-        </NumberInput>
-      </HStack>
-      <HStack m={1}>
-        <Text>Phase:</Text>
-        <NumberInput
-          size="xs"
-          step={0.1}
-          onChange={(valueString) => {
-            variation.phase = parseFloat(valueString);
-            setPhase(valueString);
-            block.triggerVariationReactions(uniformName);
-          }}
-          value={phase}
-        >
-          <NumberInputField />
-          <NumberInputStepper>
-            <NumberIncrementStepper />
-            <NumberDecrementStepper />
-          </NumberInputStepper>
-        </NumberInput>
-      </HStack>
+      <ScalarInput
+        name="Period"
+        onChange={(valueString, valueNumber) => {
+          variation.period = valueNumber;
+          setPeriod(valueString);
+          block.triggerVariationReactions(uniformName);
+        }}
+        value={period}
+      />
+      <ScalarInput
+        name="Phase"
+        onChange={(valueString, valueNumber) => {
+          variation.phase = valueNumber;
+          setPhase(valueString);
+          block.triggerVariationReactions(uniformName);
+        }}
+        value={phase}
+      />
     </>
   );
 }
@@ -448,44 +365,24 @@ function SplineVariationControls({
 
   return (
     <>
-      <HStack m={1}>
-        <Text>Min</Text>
-        <NumberInput
-          size="xs"
-          step={0.1}
-          onChange={(valueString) => {
-            variation.domainMin = parseFloat(valueString);
-            setMin(valueString);
-            block.triggerVariationReactions(uniformName);
-          }}
-          value={min}
-        >
-          <NumberInputField />
-          <NumberInputStepper>
-            <NumberIncrementStepper />
-            <NumberDecrementStepper />
-          </NumberInputStepper>
-        </NumberInput>
-      </HStack>
-      <HStack m={1}>
-        <Text>Max</Text>
-        <NumberInput
-          size="xs"
-          step={0.1}
-          onChange={(valueString) => {
-            variation.domainMax = parseFloat(valueString);
-            setMax(valueString);
-            block.triggerVariationReactions(uniformName);
-          }}
-          value={max}
-        >
-          <NumberInputField />
-          <NumberInputStepper>
-            <NumberIncrementStepper />
-            <NumberDecrementStepper />
-          </NumberInputStepper>
-        </NumberInput>
-      </HStack>
+      <ScalarInput
+        name="Min"
+        onChange={(valueString, valueNumber) => {
+          variation.domainMin = valueNumber;
+          setMin(valueString);
+          block.triggerVariationReactions(uniformName);
+        }}
+        value={min}
+      />
+      <ScalarInput
+        name="Max"
+        onChange={(valueString, valueNumber) => {
+          variation.domainMax = valueNumber;
+          setMax(valueString);
+          block.triggerVariationReactions(uniformName);
+        }}
+        value={max}
+      />
     </>
   );
 }
