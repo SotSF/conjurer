@@ -2,6 +2,7 @@ import { Variation } from "@/src/types/Variations/Variation";
 import { lerp } from "three/src/math/MathUtils";
 
 export class LinearVariation extends Variation<number> {
+  displayName = "Linear";
   from: number;
   to: number;
 

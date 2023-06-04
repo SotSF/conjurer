@@ -4,6 +4,7 @@ import { Button, HStack, Heading, IconButton, VStack } from "@chakra-ui/react";
 import { Layer } from "@/src/types/Layer";
 import { action } from "mobx";
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
+import { VariationControls } from "@/src/components/VariationControls";
 
 type Props = {
   index: number;
@@ -66,14 +67,27 @@ export const TimelineLayerHeader = observer(function TimelineLayerHeader({
           })}
         />
       </HStack>
+      <VStack justify="center" flexGrow={1}>
+        {store.selectedVariationBlock &&
+          store.selectedVariation &&
+          store.selectedLayer === layer && (
+            <VariationControls
+              key={store.selectedVariation.id}
+              block={store.selectedVariationBlock}
+              uniformName={store.selectedVariationUniformName}
+              variation={store.selectedVariation}
+            />
+          )}
+      </VStack>
       <HStack
-        position="absolute"
-        bottom={0}
-        height="80px"
+        // position="absolute"
+        // bottom={0}
+        // height="40px"
         justify="center"
         spacing={0}
       >
         <Button
+          mb={2}
           color={layer.showingOpacityControls ? "white" : "black"}
           size="sm"
           fontSize={11}

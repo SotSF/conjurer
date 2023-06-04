@@ -1,6 +1,7 @@
 import { Variation } from "@/src/types/Variations/Variation";
 
 export class FlatVariation extends Variation<number> {
+  displayName = "Flat";
   value: number;
 
   constructor(duration: number, value: number) {

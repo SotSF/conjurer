@@ -28,7 +28,16 @@ export class Block<T extends ExtraParams = {}> {
   startTime: number = 0; // global time that block starts playing at in seconds
   duration: number = 5; // duration that block plays for in seconds
 
-  layer: Layer | null = null; // the layer that this block is in
+  private _layer: Layer | null = null; // the layer that this block is in
+
+  get layer() {
+    return this._layer;
+  }
+
+  set layer(layer: Layer | null) {
+    this._layer = layer;
+    this.effectBlocks.forEach((effectBlock) => (effectBlock.layer = layer));
+  }
 
   get endTime() {
     return this.startTime + this.duration;

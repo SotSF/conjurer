@@ -17,6 +17,7 @@ import {
   SplineVariation,
 } from "@/src/types/Variations/SplineVariation";
 import { isVector4 } from "@/src/utils/object";
+import { useStore } from "@/src/types/StoreContext";
 
 type NewVariationButtonsProps = {
   uniformName: string;
@@ -27,6 +28,7 @@ export const NewVariationButtons = memo(function NewVariationButtons({
   uniformName,
   block,
 }: NewVariationButtonsProps) {
+  const store = useStore();
   const newVariationButtons = isVector4(
     block.pattern.params[uniformName].value
   ) ? (
@@ -41,7 +43,8 @@ export const NewVariationButtons = memo(function NewVariationButtons({
           // grab the last color from the previous variation if it exists
           const lastValue = block.getLastParameterValue(uniformName);
           if (lastValue && lastValue instanceof Vector4) {
-            block.addVariation(
+            store.addVariation(
+              block,
               uniformName,
               new LinearVariation4(
                 DEFAULT_VARIATION_DURATION,
@@ -52,7 +55,8 @@ export const NewVariationButtons = memo(function NewVariationButtons({
             return;
           }
 
-          block.addVariation(
+          store.addVariation(
+            block,
             uniformName,
             new LinearVariation4(
               DEFAULT_VARIATION_DURATION,
@@ -75,14 +79,16 @@ export const NewVariationButtons = memo(function NewVariationButtons({
           // grab the last scalar value from the previous variation if it exists
           const lastValue = block.getLastParameterValue(uniformName);
           if (lastValue && typeof lastValue === "number") {
-            block.addVariation(
+            store.addVariation(
+              block,
               uniformName,
               new FlatVariation(DEFAULT_VARIATION_DURATION, lastValue)
             );
             return;
           }
 
-          block.addVariation(
+          store.addVariation(
+            block,
             uniformName,
             new FlatVariation(DEFAULT_VARIATION_DURATION, 1)
           );
@@ -98,14 +104,16 @@ export const NewVariationButtons = memo(function NewVariationButtons({
           // grab the last scalar value from the previous variation if it exists
           const lastValue = block.getLastParameterValue(uniformName);
           if (typeof lastValue === "number") {
-            block.addVariation(
+            store.addVariation(
+              block,
               uniformName,
               new LinearVariation(DEFAULT_VARIATION_DURATION, lastValue, 1)
             );
             return;
           }
 
-          block.addVariation(
+          store.addVariation(
+            block,
             uniformName,
             new LinearVariation(DEFAULT_VARIATION_DURATION, 1, 2)
           );
@@ -118,7 +126,8 @@ export const NewVariationButtons = memo(function NewVariationButtons({
         height={6}
         icon={<TbWaveSine size={17} />}
         onClick={action(() =>
-          block.addVariation(
+          store.addVariation(
+            block,
             uniformName,
             new PeriodicVariation(
               DEFAULT_VARIATION_DURATION,
@@ -143,14 +152,16 @@ export const NewVariationButtons = memo(function NewVariationButtons({
           if (lastValue && typeof lastValue === "number") {
             const points = DEFAULT_SPLINE_POINTS;
             points[0].y = lastValue;
-            block.addVariation(
+            store.addVariation(
+              block,
               uniformName,
               new SplineVariation(DEFAULT_VARIATION_DURATION, points)
             );
             return;
           }
 
-          block.addVariation(
+          store.addVariation(
+            block,
             uniformName,
             new SplineVariation(DEFAULT_VARIATION_DURATION)
           );

@@ -43,6 +43,25 @@
             ]
           },
           "effectBlocks": []
+        },
+        {
+          "pattern": "Pulse",
+          "startTime": 149.9537,
+          "duration": 33.512,
+          "parameterVariations": {
+            "u_number_colors": [{ "type": "flat", "duration": 2, "value": 3 }],
+            "u_duty_cycle": [{ "type": "flat", "duration": 2, "value": 0.15 }],
+            "u_time_factor": [{ "type": "flat", "duration": 2, "value": 1.1 }],
+            "u_scale": [{ "type": "flat", "duration": 2, "value": 0.8 }],
+            "u_time_offset": [
+              { "type": "flat", "duration": 2, "value": -0.88 }
+            ],
+            "u_wave_amplitude": [
+              { "type": "flat", "duration": 7.4111, "value": 0 },
+              { "type": "linear", "duration": 2, "from": 0, "to": 0.5 }
+            ]
+          },
+          "effectBlocks": []
         }
       ],
       "opacityBlock": {
@@ -50,7 +69,11 @@
         "startTime": 0,
         "duration": 3600,
         "parameterVariations": {
-          "u_opacity": [{ "type": "flat", "duration": 20.7368, "value": 1 }]
+          "u_opacity": [
+            { "type": "flat", "duration": 41.8257, "value": 1 },
+            { "type": "linear", "duration": 8.8333, "from": 1, "to": 0 },
+            { "type": "flat", "duration": 122, "value": 1 }
+          ]
         },
         "effectBlocks": []
       }
@@ -96,6 +119,81 @@
             "u_time_offset": [{ "type": "flat", "duration": 2, "value": -0.88 }]
           },
           "effectBlocks": []
+        },
+        {
+          "pattern": "Globules",
+          "startTime": 41.7067,
+          "duration": 128.5556,
+          "parameterVariations": {
+            "u_time_factor": [{ "type": "flat", "duration": 2, "value": 1 }]
+          },
+          "effectBlocks": [
+            {
+              "pattern": "Shaper",
+              "startTime": 0,
+              "duration": 5,
+              "parameterVariations": {
+                "u_tiling": [
+                  { "type": "flat", "duration": 2, "value": 1 },
+                  { "type": "linear", "duration": 66, "from": 1, "to": 8 }
+                ],
+                "u_rotation": [{ "type": "flat", "duration": 2, "value": 2 }],
+                "u_circle_size": [
+                  { "type": "flat", "duration": 16.8111, "value": 1 },
+                  {
+                    "type": "periodic",
+                    "duration": 81.1889,
+                    "periodicType": "sine",
+                    "amplitude": 0.75,
+                    "period": 5,
+                    "phase": 0,
+                    "offset": 1.25
+                  }
+                ],
+                "u_box_size": [{ "type": "flat", "duration": 2, "value": 0 }],
+                "u_circle_smooth": [
+                  { "type": "flat", "duration": 17, "value": 0.2 },
+                  {
+                    "type": "periodic",
+                    "duration": 81,
+                    "periodicType": "sine",
+                    "amplitude": 0.15,
+                    "period": 4.5,
+                    "phase": 0,
+                    "offset": 0.35
+                  }
+                ],
+                "u_brick_offset_y": [
+                  { "type": "flat", "duration": 57.1333, "value": 0 },
+                  { "type": "flat", "duration": 2, "value": 1 }
+                ]
+              },
+              "effectBlocks": []
+            },
+            {
+              "pattern": "Rotate",
+              "startTime": 0,
+              "duration": 5,
+              "parameterVariations": {
+                "u_speed": [
+                  { "type": "flat", "duration": 80.8778, "value": 0 },
+                  {
+                    "type": "spline",
+                    "duration": 17.6778,
+                    "points": [
+                      { "x": 0, "y": 0 },
+                      { "x": 0.4587, "y": 0.5052 },
+                      { "x": 0.5987, "y": 0.6603 },
+                      { "x": 1, "y": 0.6 }
+                    ],
+                    "domainMin": 0,
+                    "domainMax": 1
+                  }
+                ]
+              },
+              "effectBlocks": []
+            }
+          ]
         }
       ],
       "opacityBlock": {
@@ -109,7 +207,9 @@
             { "type": "flat", "duration": 6.4638, "value": 0 },
             { "type": "linear", "duration": 5.735, "from": 1, "to": 0 },
             { "type": "linear", "duration": 14.7667, "from": 1, "to": 1 },
-            { "type": "linear", "duration": 1, "from": 1, "to": 0 }
+            { "type": "linear", "duration": 1, "from": 1, "to": 0 },
+            { "type": "flat", "duration": 2.7667, "value": 0 },
+            { "type": "linear", "duration": 8.7778, "from": 0, "to": 1 }
           ]
         },
         "effectBlocks": []
@@ -117,5 +217,5 @@
     }
   ],
   "user": "ben",
-  "savedAt": 1685424943421
+  "savedAt": 1685605956617
 }

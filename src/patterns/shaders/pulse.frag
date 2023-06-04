@@ -12,6 +12,7 @@ uniform float u_duty_cycle;
 uniform float u_scale;
 uniform float u_wave_period;
 uniform float u_wave_amplitude;
+uniform float u_waviness;
 uniform float u_number_colors;
 
 // #define u_time_factor 0.4
@@ -20,8 +21,9 @@ uniform float u_number_colors;
 // #define u_hue_width 0.8
 // #define u_duty_cycle .5
 // #define u_scale 1.
-// #define u_wave_period 1.
-// #define u_wave_amplitude 0.
+// #define u_wave_period 0.25
+// #define u_wave_amplitude 0.5
+// #define u_waviness 0.
 // #define u_number_colors 5.
 
 uniform vec2 u_resolution;
@@ -54,12 +56,24 @@ float random(in float x) {
     return fract(sin(x) * 43758.5453123);
 }
 
+float triangleWave(in float x) {
+    return 2. / PI * asin(sin(x));
+}
+
+float plot(vec2 st, float pct) {
+    return smoothstep(pct - 0.02, pct, st.y) -
+        smoothstep(pct, pct + 0.02, st.y);
+}
+
 void main() {
     vec2 st = v_uv;
     // vec2 st = gl_FragCoord.xy / u_resolution.xy;
 
     // vary the shape of the wave over x
-    st.y += sin(st.x * PI * 2. / u_wave_period) * u_wave_amplitude;
+    float sinusoid = sin(st.x * PI * 2. / u_wave_period) * u_wave_amplitude;
+    float triangle = triangleWave(st.x * PI * 2. / u_wave_period) * u_wave_amplitude;
+    st.y += mix(triangle, sinusoid, u_waviness);
+
     // move the cells over time
     st.y += u_time_offset - u_time * u_time_factor;
     // scale the cells

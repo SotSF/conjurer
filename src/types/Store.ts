@@ -33,7 +33,9 @@ export class Store {
   }
 
   set selectedLayer(value: Layer) {
+    if (this._selectedLayer === value) return;
     this._selectedLayer = value;
+    this.deselectVariation();
   }
 
   selectedBlocks: Set<Block> = new Set();
@@ -125,11 +127,44 @@ export class Store {
       return;
     }
 
-    if (this.selectedVariation) {
-      this.selectedVariationBlock?.removeVariation(
+    if (this.selectedVariation && this.selectedVariationBlock)
+      this.deleteVariation(
+        this.selectedVariationBlock,
         this.selectedVariationUniformName,
         this.selectedVariation
       );
+  };
+
+  addVariation = (block: Block, uniformName: string, variation: Variation) => {
+    block.addVariation(uniformName, variation);
+    if (block.layer) this._selectedLayer = block.layer;
+    this.selectedVariationBlock = block;
+    this.selectedVariationUniformName = uniformName;
+    this.selectedVariation = variation;
+  };
+
+  duplicateVariation = (
+    block: Block,
+    uniformName: string,
+    variation: Variation
+  ) => {
+    block.duplicateVariation(uniformName, variation);
+    if (block.layer) this._selectedLayer = block.layer;
+    this.selectedVariationBlock = block;
+    this.selectedVariationUniformName = uniformName;
+    this.selectedVariation = variation;
+  };
+
+  deleteVariation = (
+    block: Block,
+    uniformName: string,
+    variation: Variation
+  ) => {
+    block.removeVariation(uniformName, variation);
+    if (this.selectedVariation === variation) {
+      this.selectedVariationBlock = null;
+      this.selectedVariationUniformName = "";
+      this.selectedVariation = null;
     }
   };
 
@@ -182,8 +217,9 @@ export class Store {
       return;
     }
 
-    if (this.selectedVariation) {
-      this.selectedVariationBlock?.duplicateVariation(
+    if (this.selectedVariation && this.selectedVariationBlock) {
+      this.duplicateVariation(
+        this.selectedVariationBlock,
         this.selectedVariationUniformName,
         this.selectedVariation
       );
@@ -195,16 +231,16 @@ export class Store {
     uniformName: string,
     variation: Variation
   ) => {
-    if (this.selectedVariation?.id === variation.id) {
-      this.selectedVariation = null;
-      this.selectedVariationUniformName = "";
-      this.selectedVariationBlock = null;
-      return;
-    }
-
     this.selectedVariation = variation;
     this.selectedVariationUniformName = uniformName;
     this.selectedVariationBlock = block;
+    if (block.layer) this._selectedLayer = block.layer;
+  };
+
+  deselectVariation = () => {
+    this.selectedVariation = null;
+    this.selectedVariationUniformName = "";
+    this.selectedVariationBlock = null;
   };
 
   serialize = () => ({

@@ -7,6 +7,8 @@ export abstract class Variation<T extends ParamType = ParamType> {
   type: VariationType;
   duration: number;
 
+  abstract displayName: string;
+
   constructor(type: VariationType, duration: number) {
     this.type = type;
     this.duration = duration;

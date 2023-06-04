@@ -79,6 +79,7 @@ export const ParameterVariations = observer(function ParameterVariations({
                       cursor="grab"
                       role="button"
                       onClick={(e) => {
+                        if (block.layer) store.selectedLayer = block.layer;
                         store.selectVariation(block, uniformName, variation);
                         e.stopPropagation();
                       }}

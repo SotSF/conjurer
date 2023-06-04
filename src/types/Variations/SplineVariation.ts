@@ -10,6 +10,7 @@ export const DEFAULT_SPLINE_POINTS = [
 ];
 
 export class SplineVariation extends Variation<number> {
+  displayName = "Spline";
   private _points: { x: number; y: number }[] = [];
   spline: any;
   domainMin: number;

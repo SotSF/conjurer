@@ -2,6 +2,7 @@ import { Variation } from "@/src/types/Variations/Variation";
 import { Vector4 } from "three";
 
 export class LinearVariation4 extends Variation<Vector4> {
+  displayName = "Color";
   from: Vector4;
   to: Vector4;
 
