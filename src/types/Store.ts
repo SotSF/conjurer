@@ -213,6 +213,7 @@ export class Store {
     this.selectedVariation = variation;
     this.selectedVariationUniformName = uniformName;
     this.selectedVariationBlock = block;
+    if (block.layer) this._selectedLayer = block.layer;
   };
 
   deselectVariation = () => {

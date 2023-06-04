@@ -167,15 +167,17 @@ function LinearVariation4Controls({
   };
 
   return (
-    <>
+    <VStack className="colorPickerContainer">
       <HStack width="100%" justify="space-around">
+        <Box width={6} height={6} bgColor={fromColor} />
         <HexColorInput
           className="hexColorInput"
           color={fromColor}
           onChange={onFromColorChange}
         />
-        <Box width={6} height={6} bgColor={fromColor} />
-        <Text>→</Text>
+      </HStack>
+      <HexColorPicker color={fromColor} onChange={onFromColorChange} />
+      <HStack width="100%" justify="space-around">
         <Box width={6} height={6} bgColor={toColor} />
         <HexColorInput
           className="hexColorInput"
@@ -183,11 +185,8 @@ function LinearVariation4Controls({
           onChange={onToColorChange}
         />
       </HStack>
-      <HStack m={1} className="colorPickerContainer">
-        <HexColorPicker color={fromColor} onChange={onFromColorChange} />
-        <HexColorPicker color={toColor} onChange={onToColorChange} />
-      </HStack>
-    </>
+      <HexColorPicker color={toColor} onChange={onToColorChange} />
+    </VStack>
   );
 }
 
