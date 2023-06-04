@@ -52,8 +52,7 @@ export const ScalarVariationGraph = memo(function ScalarVariationGraph({
           stroke={orange}
           yAxisId={0}
         />
-        {/* Unfortunately this Tooltip is messing with the popover component... */}
-        {/* <Tooltip isAnimationActive={false} content={<ScalarValueTooltip />} /> */}
+        <Tooltip isAnimationActive={false} content={<ScalarValueTooltip />} />
         <YAxis type="number" domain={domain} hide allowDataOverflow={false} />
       </LineChart>
     </Box>

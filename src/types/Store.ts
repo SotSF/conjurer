@@ -33,7 +33,9 @@ export class Store {
   }
 
   set selectedLayer(value: Layer) {
+    if (this._selectedLayer === value) return;
     this._selectedLayer = value;
+    this.deselectVariation();
   }
 
   selectedBlocks: Set<Block> = new Set();
@@ -195,16 +197,15 @@ export class Store {
     uniformName: string,
     variation: Variation
   ) => {
-    if (this.selectedVariation?.id === variation.id) {
-      this.selectedVariation = null;
-      this.selectedVariationUniformName = "";
-      this.selectedVariationBlock = null;
-      return;
-    }
-
     this.selectedVariation = variation;
     this.selectedVariationUniformName = uniformName;
     this.selectedVariationBlock = block;
+  };
+
+  deselectVariation = () => {
+    this.selectedVariation = null;
+    this.selectedVariationUniformName = "";
+    this.selectedVariationBlock = null;
   };
 
   serialize = () => ({

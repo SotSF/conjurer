@@ -68,13 +68,16 @@ export const TimelineLayerHeader = observer(function TimelineLayerHeader({
         />
       </HStack>
       <VStack justify="center" flexGrow={1}>
-        {layer.currentBlock && store.selectedVariation && (
-          <VariationControls
-            block={layer.currentBlock}
-            uniformName={store.selectedVariationUniformName}
-            variation={store.selectedVariation}
-          />
-        )}
+        {store.selectedVariationBlock &&
+          store.selectedVariation &&
+          store.selectedLayer === layer && (
+            <VariationControls
+              key={store.selectedVariation.id}
+              block={store.selectedVariationBlock}
+              uniformName={store.selectedVariationUniformName}
+              variation={store.selectedVariation}
+            />
+          )}
       </VStack>
       <HStack
         position="absolute"
