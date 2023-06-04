@@ -89,7 +89,7 @@ export const VariationControls = function VariationControls({
           color="gray.400"
           leftIcon={<BiDuplicate size={14} />}
           onClick={action(() =>
-            block.duplicateVariation(uniformName, variation)
+            store.duplicateVariation(block, uniformName, variation)
           )}
         >
           Duplicate

@@ -135,6 +135,26 @@ export class Store {
       );
   };
 
+  addVariation = (block: Block, uniformName: string, variation: Variation) => {
+    block.addVariation(uniformName, variation);
+    if (block.layer) this._selectedLayer = block.layer;
+    this.selectedVariationBlock = block;
+    this.selectedVariationUniformName = uniformName;
+    this.selectedVariation = variation;
+  };
+
+  duplicateVariation = (
+    block: Block,
+    uniformName: string,
+    variation: Variation
+  ) => {
+    block.duplicateVariation(uniformName, variation);
+    if (block.layer) this._selectedLayer = block.layer;
+    this.selectedVariationBlock = block;
+    this.selectedVariationUniformName = uniformName;
+    this.selectedVariation = variation;
+  };
+
   deleteVariation = (
     block: Block,
     uniformName: string,
@@ -197,8 +217,9 @@ export class Store {
       return;
     }
 
-    if (this.selectedVariation) {
-      this.selectedVariationBlock?.duplicateVariation(
+    if (this.selectedVariation && this.selectedVariationBlock) {
+      this.duplicateVariation(
+        this.selectedVariationBlock,
         this.selectedVariationUniformName,
         this.selectedVariation
       );

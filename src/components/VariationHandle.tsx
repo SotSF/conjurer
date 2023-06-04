@@ -41,7 +41,7 @@ export const VariationHandle = observer(function VariationHandle({
         height={6}
         icon={<BiDuplicate size={12} />}
         onClick={(e) => {
-          block.duplicateVariation(uniformName, variation);
+          store.duplicateVariation(block, uniformName, variation);
           e.stopPropagation();
         }}
         color="gray.300"

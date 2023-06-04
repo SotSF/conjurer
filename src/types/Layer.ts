@@ -3,7 +3,6 @@ import { Timer } from "@/src/types/Timer";
 import { binarySearchForBlockAtTime } from "@/src/utils/algorithm";
 import { DEFAULT_BLOCK_DURATION } from "@/src/utils/time";
 import { makeAutoObservable } from "mobx";
-import { Pattern } from "@/src/types/Pattern";
 import { Opacity } from "@/src/patterns/Opacity";
 import { ExtraParams, PatternParam } from "@/src/types/PatternParams";
 
