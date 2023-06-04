@@ -3,6 +3,7 @@ import { Variation } from "@/src/types/Variations/Variation";
 export type PeriodicVariationType = "sine" | "square" | "triangle";
 
 export class PeriodicVariation extends Variation<number> {
+  displayName = "Periodic";
   periodicType: PeriodicVariationType = "sine";
   amplitude: number;
   period: number;

@@ -37,12 +37,13 @@ type VariationControlsProps = {
   block: Block;
 };
 
-export const VariationControls = function VariationControls(
-  props: VariationControlsProps
-) {
-  const { uniformName, variation, block } = props;
-
+export const VariationControls = function VariationControls({
+  uniformName,
+  variation,
+  block,
+}: VariationControlsProps) {
   let controls = <Text>Needs implementation!</Text>;
+
   if (variation instanceof FlatVariation) {
     controls = (
       <FlatVariationControls
@@ -86,32 +87,31 @@ export const VariationControls = function VariationControls(
   }
 
   return (
-    <VStack m={1}>
+    <VStack bgColor="gray.700" fontSize={10} m={1}>
+      <Text>{variation.displayName} Variation</Text>
       {controls}
-      <HStack>
-        <Button
-          aria-label="Duplicate"
-          variant="ghost"
-          size="xs"
-          color="gray.400"
-          leftIcon={<BiDuplicate size={17} />}
-          onClick={action(() =>
-            block.duplicateVariation(uniformName, variation)
-          )}
-        >
-          Duplicate
-        </Button>
-        <Button
-          aria-label="Delete"
-          variant="ghost"
-          size="xs"
-          color="gray.400"
-          leftIcon={<FaTrashAlt size={15} />}
-          onClick={action(() => block.removeVariation(uniformName, variation))}
-        >
-          Delete
-        </Button>
-      </HStack>
+      <Button
+        aria-label="Duplicate"
+        variant="ghost"
+        size="xs"
+        fontSize={9}
+        color="gray.400"
+        leftIcon={<BiDuplicate size={14} />}
+        onClick={action(() => block.duplicateVariation(uniformName, variation))}
+      >
+        Duplicate
+      </Button>
+      <Button
+        aria-label="Delete"
+        variant="ghost"
+        size="xs"
+        fontSize={9}
+        color="gray.400"
+        leftIcon={<FaTrashAlt size={12} />}
+        onClick={action(() => block.removeVariation(uniformName, variation))}
+      >
+        Delete
+      </Button>
     </VStack>
   );
 };
@@ -131,11 +131,10 @@ function FlatVariationControls({
 
   return (
     <>
-      <Text>Flat</Text>
       <HStack m={1}>
         <Text>Value:</Text>
         <NumberInput
-          size="md"
+          size="xs"
           step={0.1}
           onChange={(valueString) => {
             variation.value = parseFloat(valueString);
@@ -185,7 +184,6 @@ function LinearVariation4Controls({
 
   return (
     <>
-      <Text>Color Variation</Text>
       <HStack width="100%" justify="space-around">
         <HexColorInput
           className="hexColorInput"
@@ -225,11 +223,10 @@ function LinearVariationControls({
 
   return (
     <>
-      <Text>Linear</Text>
       <HStack m={1}>
         <Text>From:</Text>
         <NumberInput
-          size="md"
+          size="xs"
           step={0.1}
           onChange={(valueString) => {
             variation.from = parseFloat(valueString);
@@ -248,7 +245,7 @@ function LinearVariationControls({
       <HStack m={1}>
         <Text>To:</Text>
         <NumberInput
-          size="md"
+          size="xs"
           step={0.1}
           onChange={(valueString) => {
             variation.to = parseFloat(valueString);
@@ -292,7 +289,6 @@ function PeriodicVariationControls({
 
   return (
     <>
-      <Text>Periodic</Text>
       <RadioGroup
         onChange={(type: PeriodicVariationType) => {
           setPeriodicType(type);
@@ -300,16 +296,18 @@ function PeriodicVariationControls({
           block.triggerVariationReactions(uniformName);
         }}
         value={periodicType}
+        size="xs"
       >
-        <HStack>
+        <VStack spacing={0}>
           <Radio value="sine">Sine</Radio>
           <Radio value="square">Square</Radio>
           <Radio value="triangle">Triangle</Radio>
-        </HStack>
+        </VStack>
       </RadioGroup>
       <HStack m={1}>
-        <Text>Min/max mode:</Text>
+        <Text>Min/max mode</Text>
         <Switch
+          size="sm"
           m={1}
           onChange={(event: ChangeEvent<HTMLInputElement>) => {
             setShowingMinMax(event.target.checked);
@@ -327,7 +325,7 @@ function PeriodicVariationControls({
           <HStack m={1}>
             <Text>Min:</Text>
             <NumberInput
-              size="md"
+              size="xs"
               step={0.1}
               onChange={(valueString) => {
                 variation.min = parseFloat(valueString);
@@ -346,7 +344,7 @@ function PeriodicVariationControls({
           <HStack m={1}>
             <Text>Max:</Text>
             <NumberInput
-              size="md"
+              size="xs"
               step={0.1}
               onChange={(valueString) => {
                 variation.max = parseFloat(valueString);
@@ -368,7 +366,7 @@ function PeriodicVariationControls({
           <HStack m={1}>
             <Text>Offset:</Text>
             <NumberInput
-              size="md"
+              size="xs"
               step={0.1}
               onChange={(valueString) => {
                 variation.offset = parseFloat(valueString);
@@ -387,7 +385,7 @@ function PeriodicVariationControls({
           <HStack m={1}>
             <Text>Amplitude:</Text>
             <NumberInput
-              size="md"
+              size="xs"
               step={0.1}
               onChange={(valueString) => {
                 variation.amplitude = parseFloat(valueString);
@@ -408,7 +406,7 @@ function PeriodicVariationControls({
       <HStack m={1}>
         <Text>Period:</Text>
         <NumberInput
-          size="md"
+          size="xs"
           step={0.1}
           onChange={(valueString) => {
             variation.period = parseFloat(valueString);
@@ -427,7 +425,7 @@ function PeriodicVariationControls({
       <HStack m={1}>
         <Text>Phase:</Text>
         <NumberInput
-          size="md"
+          size="xs"
           step={0.1}
           onChange={(valueString) => {
             variation.phase = parseFloat(valueString);
@@ -463,11 +461,10 @@ function SplineVariationControls({
 
   return (
     <>
-      <Text>Spline</Text>
       <HStack m={1}>
         <Text>Min:</Text>
         <NumberInput
-          size="md"
+          size="xs"
           step={0.1}
           onChange={(valueString) => {
             variation.domainMin = parseFloat(valueString);
@@ -486,7 +483,7 @@ function SplineVariationControls({
       <HStack m={1}>
         <Text>Max:</Text>
         <NumberInput
-          size="md"
+          size="xs"
           step={0.1}
           onChange={(valueString) => {
             variation.domainMax = parseFloat(valueString);
