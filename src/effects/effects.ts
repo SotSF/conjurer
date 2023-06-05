@@ -4,6 +4,7 @@ import { Shaper } from "@/src/effects/Shaper";
 import { Leaf } from "@/src/effects/Leaf";
 import { Pattern } from "@/src/types/Pattern";
 import { Rotate } from "./Rotate";
+import { ChromaticAberration } from "./ChromaticAberration";
 
 const effects: Pattern[] = [
   Shaper(),
@@ -11,6 +12,7 @@ const effects: Pattern[] = [
   ColorTint(),
   CartesianProjection(),
   Rotate(),
+  ChromaticAberration(),
 ];
 
 const effectMap: { [key: string]: Pattern } = {};
