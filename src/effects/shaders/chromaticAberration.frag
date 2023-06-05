@@ -2,15 +2,13 @@
 precision mediump float;
 #endif
 
-#include <common>
-
 uniform sampler2D u_texture;
+varying vec2 v_uv;
+
 uniform float u_theta;
 uniform float u_mag_r;
 uniform float u_mag_g;
 uniform float u_mag_b;
-
-varying vec2 v_uv;
 
 #define SCALE_FACTOR 0.01
 
