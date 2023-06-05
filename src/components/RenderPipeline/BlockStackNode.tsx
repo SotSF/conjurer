@@ -1,10 +1,11 @@
 import { WebGLRenderTarget } from "three";
 import black from "@/src/shaders/black.frag";
-import { useFrame } from "@react-three/fiber";
-import { memo } from "react";
+import { useFrame, useThree } from "@react-three/fiber";
+import { memo, useEffect } from "react";
 import { BlockNode } from "@/src/components/RenderPipeline/BlockNode";
 import { useStore } from "@/src/types/StoreContext";
 import { Block } from "@/src/types/Block";
+import { observer } from "mobx-react-lite";
 
 type BlockStackNodeProps = {
   autorun?: boolean;
@@ -14,7 +15,7 @@ type BlockStackNodeProps = {
   renderTargetOut: WebGLRenderTarget;
 };
 
-export const BlockStackNode = memo(function BlockStackNode({
+export const BlockStackNode = observer(function BlockStackNode({
   autorun,
   basePriority,
   parentBlock,
@@ -42,6 +43,10 @@ export const BlockStackNode = memo(function BlockStackNode({
       parentBlock.updateParameters(globalTime - startTime);
     }
   }, basePriority);
+
+  // re-render this BlockStackNode if the number of effects changes
+  const invalidate = useThree(({ invalidate }) => invalidate);
+  useEffect(invalidate, [parentBlock?.effectBlocks.length, invalidate]);
 
   const numberEffects = parentBlock?.effectBlocks.length ?? 0;
   const evenNumberOfEffects = numberEffects % 2 === 0;
