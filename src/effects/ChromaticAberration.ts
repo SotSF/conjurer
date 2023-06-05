@@ -5,7 +5,7 @@ import { Vector4 } from "three";
 export const ChromaticAberration = () =>
   new Pattern("Chromatic Aberration", chromaticAberration, {
     u_theta: {
-      name: "theta",
+      name: "Theta",
       value: 0,
     },
     u_mag_r: {
