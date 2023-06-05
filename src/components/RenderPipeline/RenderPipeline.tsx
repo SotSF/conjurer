@@ -19,6 +19,7 @@ export const RenderPipeline = observer(function RenderPipeline({
   const renderTargetB = useRenderTarget();
   const renderTargetC = useRenderTarget();
   const renderTargetD = useRenderTarget();
+  const renderTargetZ = useRenderTarget();
 
   const activeLayers = store.layers.filter(
     (layer) => layer.visible && !!layer.currentBlock
@@ -29,7 +30,7 @@ export const RenderPipeline = observer(function RenderPipeline({
     <group key={activeLayers.length}>
       {activeLayers.map((layer, index) => (
         <LayerNode
-          key={index}
+          key={index + layer.id}
           priority={index}
           layer={layer}
           renderTargetIn={index === 0 ? renderTargetA : renderTargetC}
@@ -43,10 +44,10 @@ export const RenderPipeline = observer(function RenderPipeline({
           opacity1={activeLayers[0].opacityParameter}
           renderTargetIn2={renderTargetD}
           opacity2={activeLayers[1].opacityParameter}
-          renderTargetOut={renderTargetA}
+          renderTargetOut={renderTargetZ}
         />
       )}
-      {children(activeLayers.length === 2 ? renderTargetA : renderTargetB)}
+      {children(activeLayers.length === 2 ? renderTargetZ : renderTargetB)}
     </group>
   );
 });
