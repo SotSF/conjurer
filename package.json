@@ -40,7 +40,7 @@
     "three": "^0.152.2",
     "ts-node": "^10.9.1",
     "use-debounce": "^9.0.4",
-    "wavesurfer.js": "^7.0.0-alpha.48"
+    "wavesurfer.js": "^7.0.0-beta.6"
   },
   "devDependencies": {
     "@types/node": "^20.2.5",
