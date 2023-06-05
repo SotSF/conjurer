@@ -1,9 +1,9 @@
 import { Pattern } from "@/src/types/Pattern";
-import chromaticAbberation from "./shaders/chromaticAbberation.frag";
+import chromaticAberration from "./shaders/chromaticAberration.frag";
 import { Vector4 } from "three";
 
-export const ChromaticAbberation = () =>
-  new Pattern("Chromatic Abberation", chromaticAbberation, {
+export const ChromaticAberration = () =>
+  new Pattern("Chromatic Aberration", chromaticAberration, {
     u_theta: {
       name: "theta",
       value: 0,
