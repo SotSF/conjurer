@@ -3,11 +3,13 @@ import {
   BufferGeometry,
   Scene,
   WebGLRenderTarget,
+  ShaderChunk,
 } from "three";
 import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
 import canopyVert from "@/src/shaders/canopy.vert";
 import fromTextureWithIntensity from "@/src/shaders/fromTextureWithIntensity.frag";
+import conjurerCommon from "@/src/shaders/conjurer_common.frag";
 import canopyGeometry from "@/src/data/canopyGeometry.json";
 import {
   BloomEffect,
@@ -54,6 +56,10 @@ export const Canopy = function Canopy({ renderTarget }: CanopyViewProps) {
       gl.domElement.clientWidth,
       gl.domElement.clientHeight
     );
+
+    // This enables `#include <conjurer_common>`
+    ShaderChunk.conjurer_common = conjurerCommon;
+
     return effectComposer;
   }, [gl]);
 
