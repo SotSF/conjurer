@@ -4,6 +4,8 @@
 // License URL: http://creativecommons.org/licenses/by-nc-sa/3.0/
 // Source: https://www.shadertoy.com/view/MtKBWw
 
+#include <conjurer_common>
+
 #ifdef GL_ES
 precision mediump float;
 #endif
@@ -25,16 +27,6 @@ uniform float u_intensity;
 uniform vec2 u_resolution;
 uniform float u_time;
 varying vec2 v_uv;
-
-vec3 hsv(float h, float s, float v) {
-    vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
-    vec3 p = abs(fract(vec3(h) + K.xyz) * 6.0 - K.www);
-    return v * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), s);
-}
-
-float rand(vec2 co) {
-    return fract(sin(dot(co.xy, vec2(12.9898, 78.233))) * 43758.5453);
-}
 
 void main() {
     // vec2 st = (2.0 * gl_FragCoord.xy - u_resolution.xy) / min(u_resolution.x, u_resolution.y);
