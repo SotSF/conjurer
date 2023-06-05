@@ -3,6 +3,7 @@ import {
   BufferGeometry,
   Scene,
   WebGLRenderTarget,
+  ShaderChunk,
 } from "three";
 import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
@@ -54,6 +55,7 @@ export const Canopy = function Canopy({ renderTarget }: CanopyViewProps) {
       gl.domElement.clientWidth,
       gl.domElement.clientHeight
     );
+
     return effectComposer;
   }, [gl]);
 
