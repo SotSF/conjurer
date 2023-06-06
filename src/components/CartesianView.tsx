@@ -1,6 +1,6 @@
 import { WebGLRenderTarget } from "three";
 import { useFrame } from "@react-three/fiber";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import vert from "@/src/shaders/default.vert";
 import fromTexture from "@/src/shaders/fromTexture.frag";
 
@@ -14,13 +14,18 @@ export const CartesianView = function CartesianView({
   const outputMesh = useRef<THREE.Mesh>(null);
   const outputUniforms = useRef({ u_texture: { value: renderTarget.texture } });
 
+  useEffect(() => {
+    if (!outputUniforms.current) return;
+    outputUniforms.current.u_texture.value = renderTarget.texture;
+  }, [renderTarget.texture]);
+
   // render the cartesian view
   useFrame(({ gl, camera }) => {
     if (!outputMesh.current) return;
 
     gl.setRenderTarget(null);
     gl.render(outputMesh.current, camera);
-  }, 1001);
+  }, 1000);
 
   return (
     <mesh ref={outputMesh}>

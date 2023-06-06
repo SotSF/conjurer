@@ -1,18 +1,19 @@
-import { WebGLRenderTarget } from "three";
 import { LayerNode } from "@/src/components/RenderPipeline/LayerNode";
 import { useStore } from "@/src/types/StoreContext";
 import { MergeNode } from "@/src/components/RenderPipeline/MergeNode";
 import { useRenderTarget } from "@/src/hooks/renderTarget";
 import { observer } from "mobx-react-lite";
+import { useEffect } from "react";
+import { WebGLRenderTarget } from "three";
 
-type RenderPipelineProps = {
-  children: (renderTarget: WebGLRenderTarget) => JSX.Element;
+type Props = {
+  setRenderTarget: (renderTarget: WebGLRenderTarget) => void;
 };
 
 // TODO: generalize approach here for more than two layers
 export const RenderPipeline = observer(function RenderPipeline({
-  children,
-}: RenderPipelineProps) {
+  setRenderTarget,
+}: Props) {
   const store = useStore();
 
   const renderTargetA = useRenderTarget();
@@ -25,12 +26,15 @@ export const RenderPipeline = observer(function RenderPipeline({
     (layer) => layer.visible && !!layer.currentBlock
   );
 
+  useEffect(() => {
+    setRenderTarget(activeLayers.length === 2 ? renderTargetZ : renderTargetB);
+  }, [setRenderTarget, activeLayers.length, renderTargetB, renderTargetZ]);
+
   return (
-    // TODO: do something better than using key here?
-    <group key={activeLayers.length}>
+    <>
       {activeLayers.map((layer, index) => (
         <LayerNode
-          key={index + layer.id}
+          key={layer.id}
           priority={index}
           layer={layer}
           renderTargetIn={index === 0 ? renderTargetA : renderTargetC}
@@ -47,7 +51,9 @@ export const RenderPipeline = observer(function RenderPipeline({
           renderTargetOut={renderTargetZ}
         />
       )}
-      {children(activeLayers.length === 2 ? renderTargetZ : renderTargetB)}
-    </group>
+      {/* <Fragment key={activeLayers.length}>
+        {children(activeLayers.length === 2 ? renderTargetZ : renderTargetB)}
+      </Fragment> */}
+    </>
   );
 });
