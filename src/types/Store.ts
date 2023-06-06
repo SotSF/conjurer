@@ -20,7 +20,7 @@ export class Store {
   initialized = false;
 
   timer = new Timer();
-  uiStore = new UIStore();
+  uiStore = new UIStore(this.timer);
   audioStore = new AudioStore(this.timer);
   experienceStore = new ExperienceStore(this);
 
