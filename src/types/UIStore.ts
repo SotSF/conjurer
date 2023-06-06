@@ -1,3 +1,4 @@
+import { Timer } from "@/src/types/Timer";
 import { INITIAL_PIXELS_PER_SECOND } from "@/src/utils/time";
 import { makeAutoObservable } from "mobx";
 
@@ -21,7 +22,7 @@ export class UIStore {
 
   pixelsPerSecond = INITIAL_PIXELS_PER_SECOND; // the zoom of the timeline
 
-  constructor() {
+  constructor(readonly timer: Timer) {
     makeAutoObservable(this);
   }
 
@@ -38,6 +39,9 @@ export class UIStore {
     if (this.pixelsPerSecond < MIN_PIXELS_PER_SECOND) {
       this.pixelsPerSecond = MIN_PIXELS_PER_SECOND;
     }
+
+    // resetting the time will restart the playhead animation
+    this.timer.setTime(this.timer.globalTime);
   };
 
   zoomIn = () => {
@@ -45,6 +49,9 @@ export class UIStore {
     if (this.pixelsPerSecond > MAX_PIXELS_PER_SECOND) {
       this.pixelsPerSecond = MAX_PIXELS_PER_SECOND;
     }
+
+    // resetting the time will restart the playhead animation
+    this.timer.setTime(this.timer.globalTime);
   };
 
   toggleLayout = () => {
