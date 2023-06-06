@@ -3,7 +3,6 @@ import {
   BufferGeometry,
   Scene,
   WebGLRenderTarget,
-  ShaderChunk,
 } from "three";
 import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
@@ -29,6 +28,11 @@ export const Canopy = function Canopy({ renderTarget }: CanopyViewProps) {
     u_view_vector: { value: camera.position },
     u_texture: { value: renderTarget.texture },
   });
+
+  useEffect(() => {
+    if (!canopyUniforms.current) return;
+    canopyUniforms.current.u_texture.value = renderTarget.texture;
+  }, [renderTarget.texture]);
 
   const bufferGeometry = useMemo(() => {
     const geometry = new BufferGeometry();
