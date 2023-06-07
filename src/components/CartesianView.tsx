@@ -7,6 +7,7 @@ import { useRenderTarget } from "@/src/hooks/renderTarget";
 import { LED_COUNTS } from "@/src/utils/size";
 import { observer } from "mobx-react-lite";
 import { useStore } from "@/src/types/StoreContext";
+import { sendData } from "@/src/utils/websocket";
 
 type CartesianViewProps = {
   renderTarget: WebGLRenderTarget;
@@ -16,6 +17,7 @@ export const CartesianView = observer(function CartesianView({
   renderTarget,
 }: CartesianViewProps) {
   const store = useStore();
+  const { sendingData } = store;
   const outputMesh = useRef<THREE.Mesh>(null);
   const outputUniforms = useRef({ u_texture: { value: renderTarget.texture } });
 
@@ -37,13 +39,13 @@ export const CartesianView = observer(function CartesianView({
     height: LED_COUNTS.y,
   });
 
-  const buffer = useMemo(
+  const arrayBuffer = useMemo(
     () => new Uint8Array(LED_COUNTS.x * LED_COUNTS.y * 4),
     []
   );
 
   useFrame(({ gl, camera }) => {
-    if (!outputMesh.current || !store.sendingData) return;
+    if (!outputMesh.current || !sendingData) return;
 
     gl.setRenderTarget(finalRenderTarget);
     gl.render(outputMesh.current, camera);
@@ -54,8 +56,10 @@ export const CartesianView = observer(function CartesianView({
       0,
       LED_COUNTS.x,
       LED_COUNTS.y,
-      buffer
+      arrayBuffer
     );
+
+    sendData(arrayBuffer);
 
     // // View image via data url
     // // Create a 2D canvas to store the result
