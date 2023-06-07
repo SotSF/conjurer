@@ -2,7 +2,7 @@
 
 Conjurer is a web app that allows one to design audiovisual experiences for the [Canopy of Luminous Conjury](https://se.cretfi.re/canopy/), a large LED art piece by [The Servants of the Secret Fire](https://se.cretfi.re/).
 
-![Alt text](public/example.png)
+![Conjurer screenshot](public/example.png)
 
 ## Overview
 
