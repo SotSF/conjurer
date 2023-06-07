@@ -5,10 +5,14 @@ import { WebGLRenderTarget } from "three";
 // needed in the future.
 const RENDER_TARGET_SIZE = 256;
 
-export function useRenderTarget() {
+export function useRenderTarget(size?: { width: number; height: number }) {
   const renderTarget = useMemo(
-    () => new WebGLRenderTarget(RENDER_TARGET_SIZE, RENDER_TARGET_SIZE),
-    []
+    () =>
+      new WebGLRenderTarget(
+        size?.width ?? RENDER_TARGET_SIZE,
+        size?.height ?? RENDER_TARGET_SIZE
+      ),
+    [size]
   );
 
   return renderTarget;
