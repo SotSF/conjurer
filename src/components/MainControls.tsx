@@ -1,6 +1,7 @@
 import { observer } from "mobx-react-lite";
 import { HStack, IconButton } from "@chakra-ui/react";
 import { RiZoomInLine, RiZoomOutLine } from "react-icons/ri";
+import { CiStreamOn, CiStreamOff } from "react-icons/ci";
 import { useStore } from "@/src/types/StoreContext";
 import { action } from "mobx";
 import { AudioControls } from "@/src/components/AudioControls";
@@ -25,6 +26,22 @@ export const MainControls = observer(function MainControls() {
         height={6}
         icon={<RiZoomOutLine size={17} />}
         onClick={action(() => uiStore.zoomOut())}
+      />
+      <IconButton
+        aria-label="Send data"
+        title="Send data"
+        height={6}
+        bgColor={store.sendingData ? "orange.700" : undefined}
+        icon={
+          store.sendingData ? (
+            <CiStreamOn size={17} />
+          ) : (
+            <CiStreamOff size={17} />
+          )
+        }
+        onClick={action(() => {
+          store.sendingData = !store.sendingData;
+        })}
       />
     </HStack>
   );
