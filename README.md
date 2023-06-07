@@ -2,6 +2,8 @@
 
 Conjurer is a web app that allows one to design audiovisual experiences for the [Canopy of Luminous Conjury](https://se.cretfi.re/canopy/), a large LED art piece by [The Servants of the Secret Fire](https://se.cretfi.re/).
 
+![Alt text](public/example.png)
+
 ## Overview
 
 You can think of Conjurer as an in-browser Digital Audio Visual Workstation, similar to the concept of a [Digital Audio Workstation (DAW)](https://en.wikipedia.org/wiki/Digital_audio_workstation). Whereas a DAW is used to arrange and produce audio compositions, Conjurer aims to provide the ability to arrange audio and visuals into an "experience" which can be saved and played at a later time.
