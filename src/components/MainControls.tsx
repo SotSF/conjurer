@@ -32,6 +32,13 @@ export const MainControls = observer(function MainControls() {
         title="Send data"
         height={6}
         bgColor={store.sendingData ? "orange.700" : undefined}
+        _hover={
+          store.sendingData
+            ? {
+                bgColor: "orange.600",
+              }
+            : undefined
+        }
         icon={
           store.sendingData ? (
             <CiStreamOn size={17} />
