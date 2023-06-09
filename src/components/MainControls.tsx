@@ -46,9 +46,7 @@ export const MainControls = observer(function MainControls() {
             <CiStreamOff size={17} />
           )
         }
-        onClick={action(() => {
-          store.sendingData = !store.sendingData;
-        })}
+        onClick={store.toggleSendingData}
       />
     </HStack>
   );

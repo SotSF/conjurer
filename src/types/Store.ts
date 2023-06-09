@@ -6,6 +6,7 @@ import { AudioStore } from "@/src/types/AudioStore";
 import { Variation } from "@/src/types/Variations/Variation";
 import { ExperienceStore } from "@/src/types/ExperienceStore";
 import { Layer } from "@/src/types/Layer";
+import { setupWebsocket } from "@/src/utils/websocket";
 
 // Enforce MobX strict mode, which can make many noisy console warnings, but can help use learn MobX better.
 // Feel free to comment out the following if you want to silence the console messages.
@@ -95,6 +96,11 @@ export class Store {
     this.uiStore.initialize();
 
     this.initialized = true;
+  };
+
+  toggleSendingData = () => {
+    this.sendingData = !this.sendingData;
+    if (this.sendingData) setupWebsocket();
   };
 
   selectBlock = (block: Block) => {
