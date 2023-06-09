@@ -12,6 +12,8 @@ export const Display = observer(function Display() {
 
   return (
     <Box
+      // trigger a re-instantiation of the canvas when the layout changes
+      key={`canopy-${uiStore.horizontalLayout ? "horizontal" : "vertical"}`}
       resize={uiStore.horizontalLayout ? "vertical" : undefined}
       overflow="auto"
       position="relative"

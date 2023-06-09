@@ -26,7 +26,7 @@ export class Store {
 
   layers: Layer[] = [];
 
-  sendingData = true;
+  sendingData = false;
 
   private _selectedLayer: Layer = this.layers[0]; // a layer is always selected
 
