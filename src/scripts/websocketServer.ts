@@ -1,25 +1,26 @@
 import Jimp from "jimp";
 import { WebSocketServer } from "ws";
 import { LED_COUNTS } from "../utils/size";
+import { WEBSOCKET_PORT } from "../utils/websocketHost";
 
-const wss = new WebSocketServer({ port: 8080 });
-
+const wss = new WebSocketServer({ port: WEBSOCKET_PORT });
 wss.on("connection", (ws) => {
   ws.on("error", console.error);
 
+  let lastTime = Date.now();
   ws.on("message", (data: ArrayBuffer) => {
-    console.log("received data of length", data.byteLength);
+    // console.log("received data of length", data.byteLength);
+
+    // do some manual throttling: only write the image once per second
+    if (Date.now() - lastTime < 1000) return;
+    lastTime = Date.now();
+
     writeImage(new Uint8Array(data));
   });
 });
 
-const width = LED_COUNTS.x;
-const height = LED_COUNTS.y;
-
 const writeImage = (inputBuffer: Uint8Array) => {
-  const image = new Jimp(width, height);
-  const buffer = image.bitmap.data;
-  for (let i = 0; i < buffer.length; i++) buffer[i] = inputBuffer[i];
-
+  const image = new Jimp(LED_COUNTS.x, LED_COUNTS.y);
+  image.bitmap.data = Buffer.from(inputBuffer);
   image.write("src/scripts/output.png");
 };

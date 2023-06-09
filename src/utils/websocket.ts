@@ -1,5 +1,4 @@
-const WEBSOCKET_HOST = "localhost";
-const WEBSOCKET_PORT = "8080";
+import { WEBSOCKET_HOST, WEBSOCKET_PORT } from "@/src/utils/websocketHost";
 
 const websocket = new WebSocket(`ws://${WEBSOCKET_HOST}:${WEBSOCKET_PORT}`);
 websocket.binaryType = "arraybuffer";
