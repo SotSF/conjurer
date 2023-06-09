@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "generateCanopy": "ts-node --project tsconfig.script.json src/scripts/generateCanopy.ts"
+    "generateCanopy": "ts-node --project tsconfig.script.json src/scripts/generateCanopy.ts",
+    "server": "ts-node --project tsconfig.script.json src/scripts/websocketServer.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.341.0",
@@ -19,12 +20,14 @@
     "@react-three/drei": "^9.68.3",
     "@react-three/fiber": "^8.13.0",
     "@types/recharts": "^1.8.24",
+    "@types/ws": "^8.5.5",
     "CanvasSpliner": "jonathanlurie/CanvasSpliner",
     "axios": "^1.4.0",
     "axios-hooks": "^4.0.0",
     "classnames": "^2.3.2",
     "framer-motion": "^10.12.10",
     "glslify-loader": "^2.0.0",
+    "jimp": "^0.22.8",
     "mobx": "^6.9.0",
     "mobx-react-lite": "^3.4.3",
     "next": "13.4.1",
@@ -40,7 +43,8 @@
     "three": "^0.152.2",
     "ts-node": "^10.9.1",
     "use-debounce": "^9.0.4",
-    "wavesurfer.js": "^7.0.0-beta.6"
+    "wavesurfer.js": "^7.0.0-beta.6",
+    "ws": "^8.13.0"
   },
   "devDependencies": {
     "@types/node": "^20.2.5",

@@ -14,32 +14,30 @@ import { useState } from "react";
 // This enables `#include <conjurer_common>`
 ShaderChunk.conjurer_common = conjurerCommon;
 
-// when DEBUG is true, the canvas will only render win the global time changes. This is useful when
+// when DEBUG is true, the canvas will only render when the global time changes. This is useful when
 // debugging individual frames.
 const DEBUG = false;
 
 export const DisplayCanvas = observer(function DisplayCanvas() {
   const { uiStore } = useStore();
+  const { displayingCanopy, showingPerformance } = uiStore;
+
   const [renderTarget, setRenderTarget] = useState<WebGLRenderTarget | null>(
     null
   );
 
   return (
-    <Canvas
-      // trigger a re-instantiation of the canvas when the layout changes
-      key={`canopy-${uiStore.horizontalLayout ? "horizontal" : "vertical"}`}
-      frameloop={DEBUG ? "demand" : "always"}
-    >
+    <Canvas frameloop={DEBUG ? "demand" : "always"}>
       {DEBUG && <RenderOnTimeChange />}
-      {uiStore.showingPerformance && <Perf />}
+      {showingPerformance && <Perf />}
       <CameraControls />
       <RenderPipeline setRenderTarget={setRenderTarget} />
-      {renderTarget &&
-        (uiStore.displayingCanopy ? (
-          <Canopy renderTarget={renderTarget} />
-        ) : (
+      {renderTarget && (
+        <>
+          {displayingCanopy && <Canopy renderTarget={renderTarget} />}
           <CartesianView renderTarget={renderTarget} />
-        ))}
+        </>
+      )}
     </Canvas>
   );
 });

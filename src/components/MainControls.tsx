@@ -32,6 +32,13 @@ export const MainControls = observer(function MainControls() {
         title="Send data"
         height={6}
         bgColor={store.sendingData ? "orange.700" : undefined}
+        _hover={
+          store.sendingData
+            ? {
+                bgColor: "orange.600",
+              }
+            : undefined
+        }
         icon={
           store.sendingData ? (
             <CiStreamOn size={17} />
@@ -39,9 +46,7 @@ export const MainControls = observer(function MainControls() {
             <CiStreamOff size={17} />
           )
         }
-        onClick={action(() => {
-          store.sendingData = !store.sendingData;
-        })}
+        onClick={store.toggleSendingData}
       />
     </HStack>
   );

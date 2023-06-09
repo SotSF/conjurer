@@ -1,24 +1,22 @@
-import { WebGLRenderTarget } from "three";
-import { useFrame, useThree } from "@react-three/fiber";
-import { useEffect, useMemo, useRef } from "react";
+import { WebGLRenderTarget, Mesh } from "three";
+import { useFrame } from "@react-three/fiber";
+import { useEffect, useRef } from "react";
 import vert from "@/src/shaders/default.vert";
 import fromTexture from "@/src/shaders/fromTexture.frag";
-import { useRenderTarget } from "@/src/hooks/renderTarget";
-import { LED_COUNTS } from "@/src/utils/size";
 import { observer } from "mobx-react-lite";
 import { useStore } from "@/src/types/StoreContext";
-import { sendData } from "@/src/utils/websocket";
+import { useDataTransmission } from "@/src/hooks/dataTransmission";
 
-type CartesianViewProps = {
+type Props = {
   renderTarget: WebGLRenderTarget;
 };
 
 export const CartesianView = observer(function CartesianView({
   renderTarget,
-}: CartesianViewProps) {
+}: Props) {
   const store = useStore();
-  const { sendingData } = store;
-  const outputMesh = useRef<THREE.Mesh>(null);
+  const { uiStore } = store;
+  const outputMesh = useRef<Mesh>(null);
   const outputUniforms = useRef({ u_texture: { value: renderTarget.texture } });
 
   useEffect(() => {
@@ -28,51 +26,13 @@ export const CartesianView = observer(function CartesianView({
 
   // render the cartesian view
   useFrame(({ gl, camera }) => {
-    if (!outputMesh.current) return;
+    if (!outputMesh.current || uiStore.displayingCanopy) return;
 
     gl.setRenderTarget(null);
     gl.render(outputMesh.current, camera);
   }, 1000);
 
-  const finalRenderTarget = useRenderTarget({
-    width: LED_COUNTS.x,
-    height: LED_COUNTS.y,
-  });
-
-  const arrayBuffer = useMemo(
-    () => new Uint8Array(LED_COUNTS.x * LED_COUNTS.y * 4),
-    []
-  );
-
-  useFrame(({ gl, camera }) => {
-    if (!outputMesh.current || !sendingData) return;
-
-    gl.setRenderTarget(finalRenderTarget);
-    gl.render(outputMesh.current, camera);
-
-    gl.readRenderTargetPixels(
-      finalRenderTarget,
-      0,
-      0,
-      LED_COUNTS.x,
-      LED_COUNTS.y,
-      arrayBuffer
-    );
-
-    sendData(arrayBuffer);
-
-    // // View image via data url
-    // // Create a 2D canvas to store the result
-    // const canvas = document.createElement("canvas");
-    // canvas.width = LED_COUNTS.x;
-    // canvas.height = LED_COUNTS.y;
-    // const context = canvas.getContext("2d")!;
-    // // Copy the pixels to a 2D canvas
-    // const imageData = context.createImageData(LED_COUNTS.x, LED_COUNTS.y);
-    // imageData.data.set(buffer);
-    // context.putImageData(imageData, 0, 0);
-    // console.log(canvas.toDataURL());
-  }, 10000);
+  useDataTransmission(outputMesh.current);
 
   return (
     <mesh ref={outputMesh}>

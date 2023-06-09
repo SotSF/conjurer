@@ -1,7 +1,19 @@
-const WEBSOCKET_HOST = "localhost";
-const WEBSOCKET_PORT = "8080";
+import { WEBSOCKET_HOST, WEBSOCKET_PORT } from "@/src/utils/websocketHost";
 
-const websocket = new WebSocket(`ws://${WEBSOCKET_HOST}:${WEBSOCKET_PORT}`);
-websocket.binaryType = "arraybuffer";
+let _websocket: WebSocket;
 
-export const sendData = (data: Uint8Array) => websocket.send(data.buffer);
+export const setupWebsocket = () => {
+  _websocket = new WebSocket(`ws://${WEBSOCKET_HOST}:${WEBSOCKET_PORT}`);
+  _websocket.binaryType = "arraybuffer";
+};
+
+setupWebsocket();
+
+export const transmitData = (data: Uint8Array) => {
+  if (_websocket.readyState !== _websocket.OPEN) {
+    console.warn("Websocket not open, not sending data");
+    return;
+  }
+
+  _websocket.send(data.buffer);
+};
