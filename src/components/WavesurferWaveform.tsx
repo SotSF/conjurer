@@ -18,6 +18,24 @@ import {
 import { action } from "mobx";
 import styles from "@/styles/WavesurferWaveform.module.css";
 
+const importWavesurferConstructors = async () => {
+  // Can't be run on the server, so we need to use dynamic imports
+  const [
+    { default: WaveSurfer },
+    { default: TimelinePlugin },
+    { default: RegionsPlugin },
+  ] = await Promise.all([
+    import("wavesurfer.js"),
+    import("wavesurfer.js/dist/plugins/timeline"),
+    import("wavesurfer.js/dist/plugins/regions"),
+  ]);
+  return {
+    WaveSurfer,
+    TimelinePlugin,
+    RegionsPlugin,
+  };
+};
+
 // https://wavesurfer-js.org/docs/options.html
 const DEFAULT_WAVESURFER_OPTIONS: Partial<WaveSurferOptions> = {
   waveColor: "#ddd",
@@ -68,10 +86,10 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
 
     const shadowRoot = document.querySelector("#waveform div")?.shadowRoot;
     const sourceCanvases = shadowRoot?.querySelectorAll(
-      ".canvases > canvas"
+      ".canvases canvas"
     ) as NodeListOf<HTMLCanvasElement>;
 
-    if (!sourceCanvases) return;
+    if (sourceCanvases.length === 0) return;
 
     const destinationCanvases = [];
     for (const sourceCanvas of sourceCanvases) {
@@ -95,22 +113,9 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
     didInitialize.current = true;
 
     const create = async () => {
-      // Can't be run on the server, so we need to use dynamic imports
       // Lazy load all wave surfer dependencies
-      const [
-        { default: WaveSurfer },
-        { default: TimelinePlugin },
-        { default: RegionsPlugin },
-      ] = await Promise.all([
-        import("wavesurfer.js"),
-        import("wavesurfer.js/dist/plugins/timeline"),
-        import("wavesurfer.js/dist/plugins/regions"),
-      ]);
-      wavesurferConstructors.current = {
-        WaveSurfer,
-        TimelinePlugin,
-        RegionsPlugin,
-      };
+      const { WaveSurfer, TimelinePlugin, RegionsPlugin } =
+        (wavesurferConstructors.current = await importWavesurferConstructors());
 
       // Instantiate plugins
       timelinePlugin.current = TimelinePlugin.create(DEFAULT_TIMELINE_OPTIONS);
