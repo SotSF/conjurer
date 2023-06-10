@@ -16,7 +16,7 @@ import {
   ASSET_BUCKET_REGION,
 } from "@/src/utils/assets";
 import { action } from "mobx";
-import styles from "@/styles/WavesurferWaveform.module.css";
+import { useCloneCanvas } from "@/src/components/Wavesurfer/hooks/cloneCanvas";
 
 const importWavesurferConstructors = async () => {
   // Can't be run on the server, so we need to use dynamic imports
@@ -81,32 +81,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
 
   const { audioStore, timer, uiStore } = useStore();
 
-  const cloneCanvas = useCallback(() => {
-    if (!clonedWaveformRef.current || !uiStore.showingWaveformOverlay) return;
-
-    const shadowRoot = document.querySelector("#waveform div")?.shadowRoot;
-    const sourceCanvases = shadowRoot?.querySelectorAll(
-      ".canvases canvas"
-    ) as NodeListOf<HTMLCanvasElement>;
-
-    if (sourceCanvases.length === 0) return;
-
-    const destinationCanvases = [];
-    for (const sourceCanvas of sourceCanvases) {
-      const destinationCanvas = document.createElement("canvas");
-      destinationCanvas.width = sourceCanvas.width;
-      destinationCanvas.height = sourceCanvas.height;
-      destinationCanvas.classList.add(styles.waveformClone);
-      destinationCanvas.style.left = sourceCanvas.style.left;
-      destinationCanvas.style.width = sourceCanvas.style.width;
-      const destCtx = destinationCanvas.getContext("2d")!;
-      destCtx.drawImage(sourceCanvas, 0, 0);
-      destinationCanvases.push(destinationCanvas);
-    }
-
-    const destinationContainer = clonedWaveformRef.current;
-    destinationContainer.replaceChildren(...destinationCanvases);
-  }, [uiStore.showingWaveformOverlay]);
+  const cloneCanvas = useCloneCanvas(clonedWaveformRef);
 
   useEffect(() => {
     if (didInitialize.current) return;
