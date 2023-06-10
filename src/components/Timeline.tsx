@@ -1,10 +1,10 @@
 import { observer } from "mobx-react-lite";
-import { Box, Grid, GridItem, HStack, Text, VStack } from "@chakra-ui/react";
+import { Box, HStack, VStack } from "@chakra-ui/react";
 import { useStore } from "@/src/types/StoreContext";
 import { PlayHead } from "@/src/components/PlayHead";
 import { useRef } from "react";
 import { useWheelZooming } from "@/src/hooks/wheelZooming";
-import { WavesurferWaveform } from "@/src/components/WavesurferWaveform";
+import { WavesurferWaveform } from "@/src/components/Wavesurfer/WavesurferWaveform";
 import { MAX_TIME } from "@/src/utils/time";
 import { TimelineLayer } from "@/src/components/TimelineLayer";
 import { TimerReadout } from "@/src/components/TimerReadout";
