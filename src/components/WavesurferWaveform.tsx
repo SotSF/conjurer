@@ -280,7 +280,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
         <Box
           ref={clonedWaveformRef}
           position="absolute"
-          top="80px"
+          top="40px"
           pointerEvents="none"
         />
       )}
