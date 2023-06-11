@@ -13,6 +13,7 @@ uniform float u_scale;
 uniform float u_wave_period;
 uniform float u_wave_amplitude;
 uniform float u_waviness;
+uniform float u_spiral_factor;
 uniform float u_number_colors;
 
 // #define u_time_factor 0.4
@@ -23,7 +24,8 @@ uniform float u_number_colors;
 // #define u_scale 1.
 // #define u_wave_period 0.25
 // #define u_wave_amplitude 0.5
-// #define u_waviness 0.
+// #define u_waviness 1.
+// #define u_spiral_factor 1.1
 // #define u_number_colors 5.
 
 uniform vec2 u_resolution;
@@ -68,6 +70,10 @@ float plot(vec2 st, float pct) {
 void main() {
     vec2 st = v_uv;
     // vec2 st = gl_FragCoord.xy / u_resolution.xy;
+
+    // offset the x coordinate based on the y coordinate to create a spiral
+    float inverseY = 1. - st.y;
+    st.x += 1. - u_spiral_factor * inverseY * inverseY;
 
     // vary the shape of the wave over x
     float sinusoid = sin(st.x * PI * 2. / u_wave_period) * u_wave_amplitude;
