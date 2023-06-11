@@ -77,8 +77,8 @@ export const AudioControls = observer(function AudioControls() {
         ))}
       </Select>
       <IconButton
-        aria-label="Toggle waveform style"
-        title="Toggle waveform style"
+        aria-label="Upload audio"
+        title="Upload audio"
         height={6}
         icon={<AiOutlineCloudUpload size={17} />}
         onClick={action(() => (uiStore.showingUploadAudioModal = true))}
