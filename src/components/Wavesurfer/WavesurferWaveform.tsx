@@ -45,18 +45,19 @@ const DEFAULT_WAVESURFER_OPTIONS: Partial<WaveSurferOptions> = {
   fillParent: false,
   autoScroll: false,
   autoCenter: false,
+  interact: true,
 };
 
 const DEFAULT_TIMELINE_OPTIONS: TimelinePluginOptions = {
   height: 40,
-  insertPosition: "beforebegin" as const,
+  insertPosition: "beforebegin",
   timeInterval: 0.25,
   primaryLabelInterval: 5,
   secondaryLabelInterval: 1,
   style: {
     fontSize: "14px",
     color: "#000000",
-  } as CSSStyleDeclaration,
+  },
 };
 
 // TODO: factor some of this logic out into hooks
@@ -224,7 +225,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
 
   // on mute toggle
   useEffect(() => {
-    if (!wavesurferRef.current) return;
+    if (!wavesurferRef.current || !ready.current) return;
     wavesurferRef.current.setMuted(audioStore.audioMuted);
   }, [audioStore.audioMuted]);
 
@@ -237,11 +238,10 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
 
   // on cursor change
   useEffect(() => {
-    if (ready.current && wavesurferRef.current) {
-      const duration = wavesurferRef.current.getDuration();
-      const progress = duration > 0 ? timer.lastCursor.position / duration : 0;
-      wavesurferRef.current.seekTo(clamp(progress, 0, 1));
-    }
+    if (!wavesurferRef.current || !ready.current) return;
+    const duration = wavesurferRef.current.getDuration();
+    const progress = duration > 0 ? timer.lastCursor.position / duration : 0;
+    wavesurferRef.current.seekTo(clamp(progress, 0, 1));
   }, [timer.lastCursor]);
 
   return (
