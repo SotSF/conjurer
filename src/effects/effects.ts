@@ -5,8 +5,10 @@ import { Leaf } from "@/src/effects/Leaf";
 import { Pattern } from "@/src/types/Pattern";
 import { Rotate } from "./Rotate";
 import { ChromaticAberration } from "./ChromaticAberration";
+import { Tiler } from "@/src/effects/Tiler";
 
 const effects: Pattern[] = [
+  Tiler(),
   Shaper(),
   Leaf(),
   ColorTint(),
