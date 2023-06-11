@@ -1,11 +1,13 @@
+#include <conjurer_common>
 #ifdef GL_ES
 precision mediump float;
 #endif
 
-uniform float u_time;
-
 varying vec2 v_uv;
+uniform float u_time;
+uniform vec2 u_resolution;
 uniform sampler2D u_texture;
+
 uniform float u_tiling;
 uniform float u_rotation;
 uniform float u_box_size;
@@ -15,8 +17,6 @@ uniform float u_circle_smooth;
 uniform float u_brick_offset_x;
 uniform float u_brick_offset_y;
 
-// // four debugging/tinkering
-// uniform vec2 u_resolution;
 // float u_tiling = 8.0;
 // float u_rotation = 0.0;
 // float u_box_size = 0.6;
@@ -62,11 +62,8 @@ float circle(vec2 _st, float _radius, float _smoothEdges) {
 void main(void) {
     // vec2 st = gl_FragCoord.xy / u_resolution.xy;
     vec2 st = v_uv;
-    // Cartesian projection
-    float theta = st.x * 2.0 * 3.1415926;
-    float r = st.y * 0.88888888 + 0.111111111;
-    st.x = r * cos(theta) * 0.5;
-    st.y = r * sin(theta) * 0.5;
+
+    st = canopyToCartesianProjection(st);
 
     vec3 color = vec3(0.0);
 
