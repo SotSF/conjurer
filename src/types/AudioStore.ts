@@ -5,7 +5,7 @@ import {
   getS3,
 } from "@/src/utils/assets";
 import { ListObjectsCommand, PutObjectCommand } from "@aws-sdk/client-s3";
-import { makeAutoObservable } from "mobx";
+import { makeAutoObservable, runInAction } from "mobx";
 import type { RegionParams } from "wavesurfer.js/dist/plugins/regions";
 
 export class AudioStore {
@@ -41,10 +41,12 @@ export class AudioStore {
     });
     const data = await getS3().send(listObjectsCommand);
 
-    this.availableAudioFiles = [];
-    data.Contents?.forEach((object) => {
-      const audioFile = object.Key?.split("/")[1];
-      if (audioFile) this.availableAudioFiles.push(audioFile);
+    runInAction(() => {
+      this.availableAudioFiles = [];
+      data.Contents?.forEach((object) => {
+        const audioFile = object.Key?.split("/")[1];
+        if (audioFile) this.availableAudioFiles.push(audioFile);
+      });
     });
   };
 
