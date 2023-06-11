@@ -1,9 +1,8 @@
 import { useStore } from "@/src/types/StoreContext";
 import { Box } from "@chakra-ui/react";
 import { observer } from "mobx-react-lite";
-import { useRef, useEffect, useCallback } from "react";
+import { useRef, useEffect } from "react";
 import { clamp } from "three/src/math/MathUtils";
-import { useDebouncedCallback } from "use-debounce";
 import type WaveSurfer from "wavesurfer.js";
 import type { WaveSurferOptions } from "wavesurfer.js";
 import type TimelinePlugin from "wavesurfer.js/dist/plugins/timeline";
@@ -83,6 +82,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
 
   const cloneCanvas = useCloneCanvas(clonedWaveformRef);
 
+  // initialize wavesurfer
   useEffect(() => {
     if (didInitialize.current) return;
     didInitialize.current = true;
@@ -126,6 +126,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
     create();
   }, [audioStore, audioStore.selectedAudioFile, uiStore.pixelsPerSecond, timer, cloneCanvas]);
 
+  // on selected audio file change
   useEffect(() => {
     if (!didInitialize.current) return;
 
@@ -165,6 +166,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
     cloneCanvas();
   }, [audioStore.selectedAudioFile, timer, uiStore.pixelsPerSecond, cloneCanvas]);
 
+  // on loop toggle
   useEffect(() => {
     if (!didInitialize.current || !ready.current) return;
 
@@ -210,6 +212,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
     return disableDragSelection;
   }, [audioStore, audioStore.audioLooping, timer]);
 
+  // on play/pause toggle
   useEffect(() => {
     if (!didInitialize.current || !ready.current) return;
     if (timer.playing) {
@@ -219,23 +222,20 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
     }
   }, [timer.playing]);
 
+  // on mute toggle
   useEffect(() => {
     if (!wavesurferRef.current) return;
     wavesurferRef.current.setMuted(audioStore.audioMuted);
   }, [audioStore.audioMuted]);
 
-  const zoomDebounced = useDebouncedCallback((pixelsPerSecond: number) => {
-    if (ready.current && wavesurferRef.current) {
-      wavesurferRef.current.zoom(pixelsPerSecond);
-      cloneCanvas();
-    }
-  }, 5);
-
+  // on zoom change
   useEffect(() => {
-    if (ready.current && wavesurferRef.current)
-      zoomDebounced(uiStore.pixelsPerSecond);
-  }, [zoomDebounced, uiStore.pixelsPerSecond]);
+    if (!wavesurferRef.current || !ready.current) return;
+    wavesurferRef.current.zoom(uiStore.pixelsPerSecond);
+    cloneCanvas();
+  }, [cloneCanvas, uiStore.pixelsPerSecond]);
 
+  // on cursor change
   useEffect(() => {
     if (ready.current && wavesurferRef.current) {
       const duration = wavesurferRef.current.getDuration();
@@ -243,10 +243,6 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
       wavesurferRef.current.seekTo(clamp(progress, 0, 1));
     }
   }, [timer.lastCursor]);
-
-  useEffect(() => {
-    if (uiStore.showingWaveformOverlay) cloneCanvas();
-  }, [uiStore.showingWaveformOverlay, cloneCanvas]);
 
   return (
     <Box width="100%" height={10} bgColor="gray.500">

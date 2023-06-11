@@ -1,5 +1,6 @@
 import { useStore } from "@/src/types/StoreContext";
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
+import { useDebouncedCallback } from "use-debounce";
 import styles from "@/styles/CloneCanvas.module.css";
 
 export const useCloneCanvas = (clonedWaveformRef: {
@@ -7,7 +8,7 @@ export const useCloneCanvas = (clonedWaveformRef: {
 }) => {
   const { uiStore } = useStore();
 
-  return useCallback(() => {
+  const cloneCanvas = useCallback(() => {
     if (!clonedWaveformRef.current || !uiStore.showingWaveformOverlay) return;
 
     const shadowRoot = document.querySelector("#waveform div")?.shadowRoot;
@@ -32,5 +33,18 @@ export const useCloneCanvas = (clonedWaveformRef: {
 
     const destinationContainer = clonedWaveformRef.current;
     destinationContainer.replaceChildren(...destinationCanvases);
-  }, [clonedWaveformRef, uiStore.showingWaveformOverlay]);
+    console.log("cloning");
+  }, [uiStore.showingWaveformOverlay, clonedWaveformRef]);
+
+  const debouncedCloneCanvas = useDebouncedCallback(cloneCanvas, 8, {
+    leading: false,
+    trailing: true,
+  });
+
+  // on waveform overlay toggle
+  useEffect(() => {
+    if (uiStore.showingWaveformOverlay) debouncedCloneCanvas();
+  }, [uiStore.showingWaveformOverlay, debouncedCloneCanvas]);
+
+  return debouncedCloneCanvas;
 };
