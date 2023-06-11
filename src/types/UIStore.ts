@@ -18,6 +18,7 @@ export class UIStore {
   showingWaveformOverlay = false;
   showingOpenExperienceModal = false;
   showingSaveExperienceModal = false;
+  showingUploadAudioModal = true;
   patternDrawerOpen = false;
 
   pixelsPerSecond = INITIAL_PIXELS_PER_SECOND; // the zoom of the timeline

@@ -3,6 +3,8 @@ import {
   Button,
   HStack,
   Input,
+  InputGroup,
+  InputLeftAddon,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -75,12 +77,14 @@ export const SaveExperienceModal = observer(function SaveExperienceModal() {
             ) : (
               <>
                 <HStack mb={2} spacing={0}>
-                  <Text fontWeight="bold">{store.user}-</Text>
-                  <Input
-                    ref={inputRef}
-                    onChange={(e) => onExperienceNameChange(e.target.value)}
-                    value={experienceName}
-                  />
+                  <InputGroup>
+                    <InputLeftAddon pr={1}>{store.user}-</InputLeftAddon>
+                    <Input
+                      ref={inputRef}
+                      onChange={(e) => onExperienceNameChange(e.target.value)}
+                      value={experienceName}
+                    />
+                  </InputGroup>
                 </HStack>
                 {experiences.length > 0 && (
                   <Text mb={4}>
