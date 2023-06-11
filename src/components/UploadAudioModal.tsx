@@ -24,7 +24,7 @@ export const UploadAudioModal = observer(function UploadAudioModal() {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const [uploading, setUploading] = useState(false);
-  const [audioFilename, setAudioFilename] = useState("");
+  const [, setAudioFilename] = useState("");
 
   const styles = useMultiStyleConfig("Button", { variant: "outline" });
 
