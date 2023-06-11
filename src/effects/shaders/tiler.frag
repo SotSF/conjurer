@@ -8,6 +8,7 @@ uniform float u_time;
 uniform vec2 u_resolution;
 uniform sampler2D u_texture;
 
+// TODO: implement more of these
 uniform float u_tiling;
 uniform float u_rotation;
 uniform float u_box_size;
@@ -61,6 +62,8 @@ void main(void) {
 
     // tile space
     st = tileCentered(st, u_tiling);
+
+    // TODO: apply a vignette frame
 
     // rotate the space
     st = rotate2DCentered(st, PI * u_rotation);
