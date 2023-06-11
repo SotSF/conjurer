@@ -1,4 +1,10 @@
 import { Timer } from "@/src/types/Timer";
+import {
+  ASSET_BUCKET_NAME,
+  AUDIO_ASSET_PREFIX,
+  getS3,
+} from "@/src/utils/assets";
+import { ListObjectsCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { makeAutoObservable } from "mobx";
 import type { RegionParams } from "wavesurfer.js/dist/plugins/regions";
 
@@ -23,6 +29,32 @@ export class AudioStore {
 
   toggleAudioLooping = () => {
     this.audioLooping = !this.audioLooping;
+  };
+
+  fetchAvailableAudioFiles = async (forceReload = false) => {
+    if (this.audioInitialized && !forceReload) return;
+    this.audioInitialized = true;
+
+    const listObjectsCommand = new ListObjectsCommand({
+      Bucket: ASSET_BUCKET_NAME,
+      Prefix: AUDIO_ASSET_PREFIX,
+    });
+    const data = await getS3().send(listObjectsCommand);
+
+    this.availableAudioFiles = [];
+    data.Contents?.forEach((object) => {
+      const audioFile = object.Key?.split("/")[1];
+      if (audioFile) this.availableAudioFiles.push(audioFile);
+    });
+  };
+
+  uploadAudioFile = async (file: File) => {
+    const putObjectCommand = new PutObjectCommand({
+      Bucket: ASSET_BUCKET_NAME,
+      Key: `${AUDIO_ASSET_PREFIX}${file.name}`,
+      Body: file,
+    });
+    return getS3().send(putObjectCommand);
   };
 
   onTick = (time: number) => {

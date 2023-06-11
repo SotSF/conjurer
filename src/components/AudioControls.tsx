@@ -1,45 +1,19 @@
-import { useEffect } from "react";
-import { ListObjectsCommand } from "@aws-sdk/client-s3";
 import { observer } from "mobx-react-lite";
-import { IconButton, Select, Tooltip } from "@chakra-ui/react";
+import { IconButton, Select } from "@chakra-ui/react";
 import { BsSoundwave } from "react-icons/bs";
 import { FaVolumeMute } from "react-icons/fa";
-import { HiOutlineInformationCircle } from "react-icons/hi";
+import { AiOutlineCloudUpload } from "react-icons/ai";
 import { ImLoop } from "react-icons/im";
 import { useStore } from "@/src/types/StoreContext";
-import { action, runInAction } from "mobx";
-import {
-  ASSET_BUCKET_NAME,
-  AUDIO_ASSET_PREFIX,
-  getS3,
-} from "@/src/utils/assets";
+import { action } from "mobx";
+import { UploadAudioModal } from "@/src/components/UploadAudioModal";
+import { useEffect } from "react";
 
 export const AudioControls = observer(function AudioControls() {
   const store = useStore();
   const { uiStore, audioStore } = store;
 
-  useEffect(() => {
-    if (audioStore.audioInitialized) return;
-    runInAction(() => {
-      audioStore.audioInitialized = true;
-    });
-
-    // get list of objects from s3 bucket using aws sdk
-    const listObjectsCommand = new ListObjectsCommand({
-      Bucket: ASSET_BUCKET_NAME,
-      Prefix: AUDIO_ASSET_PREFIX,
-    });
-    getS3()
-      .send(listObjectsCommand)
-      .then(
-        action((data) => {
-          data.Contents?.forEach((object) => {
-            const audioFile = object.Key?.split("/")[1];
-            if (audioFile) audioStore.availableAudioFiles.push(audioFile);
-          });
-        })
-      );
-  }, [audioStore]);
+  useEffect(() => void audioStore.fetchAvailableAudioFiles(), [audioStore]);
 
   return (
     <>
@@ -73,7 +47,6 @@ export const AudioControls = observer(function AudioControls() {
         }
         onClick={action(() => audioStore.toggleAudioMuted())}
       />
-
       <IconButton
         aria-label="Toggle waveform style"
         title="Toggle waveform style"
@@ -103,11 +76,14 @@ export const AudioControls = observer(function AudioControls() {
           </option>
         ))}
       </Select>
-      <Tooltip label="Contact Ben to have your music added!" fontSize="xs">
-        <span>
-          <HiOutlineInformationCircle />
-        </span>
-      </Tooltip>
+      <IconButton
+        aria-label="Upload audio"
+        title="Upload audio"
+        height={6}
+        icon={<AiOutlineCloudUpload size={17} />}
+        onClick={action(() => (uiStore.showingUploadAudioModal = true))}
+      />
+      <UploadAudioModal />
     </>
   );
 });
