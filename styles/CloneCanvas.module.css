@@ -1,6 +1,7 @@
 .waveformClone {
   position: absolute;
-  height: 220px;
+  height: 400px;
   opacity: 0.4;
+  background-color: black;
   pointer-events: none;
 }

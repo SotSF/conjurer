@@ -71,7 +71,6 @@ export class UIStore {
 
   toggleWaveformOverlay = () => {
     this.showingWaveformOverlay = !this.showingWaveformOverlay;
-    this.saveToLocalStorage();
   };
 
   loadFromLocalStorage = () => {
@@ -82,8 +81,6 @@ export class UIStore {
       this.horizontalLayout = !!localStorageUiSettings.horizontalLayout;
       this.displayingCanopy = !!localStorageUiSettings.displayingCanopy;
       this.showingPerformance = !!localStorageUiSettings.showingPerformance;
-      this.showingWaveformOverlay =
-        !!localStorageUiSettings.showingWaveformOverlay;
     }
   };
 
@@ -95,7 +92,6 @@ export class UIStore {
         horizontalLayout: this.horizontalLayout,
         displayingCanopy: this.displayingCanopy,
         showingPerformance: this.showingPerformance,
-        showingWaveformOverlay: this.showingWaveformOverlay,
       })
     );
   };

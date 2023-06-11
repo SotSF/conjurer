@@ -1,9 +1,8 @@
 import { useStore } from "@/src/types/StoreContext";
 import { Box } from "@chakra-ui/react";
 import { observer } from "mobx-react-lite";
-import { useRef, useEffect, useCallback } from "react";
+import { useRef, useEffect } from "react";
 import { clamp } from "three/src/math/MathUtils";
-import { useDebouncedCallback } from "use-debounce";
 import type WaveSurfer from "wavesurfer.js";
 import type { WaveSurferOptions } from "wavesurfer.js";
 import type TimelinePlugin from "wavesurfer.js/dist/plugins/timeline";
@@ -16,7 +15,25 @@ import {
   ASSET_BUCKET_REGION,
 } from "@/src/utils/assets";
 import { action } from "mobx";
-import styles from "@/styles/WavesurferWaveform.module.css";
+import { useCloneCanvas } from "@/src/components/Wavesurfer/hooks/cloneCanvas";
+
+const importWavesurferConstructors = async () => {
+  // Can't be run on the server, so we need to use dynamic imports
+  const [
+    { default: WaveSurfer },
+    { default: TimelinePlugin },
+    { default: RegionsPlugin },
+  ] = await Promise.all([
+    import("wavesurfer.js"),
+    import("wavesurfer.js/dist/plugins/timeline"),
+    import("wavesurfer.js/dist/plugins/regions"),
+  ]);
+  return {
+    WaveSurfer,
+    TimelinePlugin,
+    RegionsPlugin,
+  };
+};
 
 // https://wavesurfer-js.org/docs/options.html
 const DEFAULT_WAVESURFER_OPTIONS: Partial<WaveSurferOptions> = {
@@ -28,18 +45,19 @@ const DEFAULT_WAVESURFER_OPTIONS: Partial<WaveSurferOptions> = {
   fillParent: false,
   autoScroll: false,
   autoCenter: false,
+  interact: true,
 };
 
 const DEFAULT_TIMELINE_OPTIONS: TimelinePluginOptions = {
   height: 40,
-  insertPosition: "beforebegin" as const,
+  insertPosition: "beforebegin",
   timeInterval: 0.25,
   primaryLabelInterval: 5,
   secondaryLabelInterval: 1,
   style: {
     fontSize: "14px",
     color: "#000000",
-  } as CSSStyleDeclaration,
+  },
 };
 
 // TODO: factor some of this logic out into hooks
@@ -63,54 +81,17 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
 
   const { audioStore, timer, uiStore } = useStore();
 
-  const cloneCanvas = useCallback(() => {
-    if (!clonedWaveformRef.current || !uiStore.showingWaveformOverlay) return;
+  const cloneCanvas = useCloneCanvas(clonedWaveformRef);
 
-    const shadowRoot = document.querySelector("#waveform div")?.shadowRoot;
-    const sourceCanvases = shadowRoot?.querySelectorAll(
-      ".canvases > canvas"
-    ) as NodeListOf<HTMLCanvasElement>;
-
-    if (!sourceCanvases) return;
-
-    const destinationCanvases = [];
-    for (const sourceCanvas of sourceCanvases) {
-      const destinationCanvas = document.createElement("canvas");
-      destinationCanvas.width = sourceCanvas.width;
-      destinationCanvas.height = sourceCanvas.height;
-      destinationCanvas.classList.add(styles.waveformClone);
-      destinationCanvas.style.left = sourceCanvas.style.left;
-      destinationCanvas.style.width = sourceCanvas.style.width;
-      const destCtx = destinationCanvas.getContext("2d")!;
-      destCtx.drawImage(sourceCanvas, 0, 0);
-      destinationCanvases.push(destinationCanvas);
-    }
-
-    const destinationContainer = clonedWaveformRef.current;
-    destinationContainer.replaceChildren(...destinationCanvases);
-  }, [uiStore.showingWaveformOverlay]);
-
+  // initialize wavesurfer
   useEffect(() => {
     if (didInitialize.current) return;
     didInitialize.current = true;
 
     const create = async () => {
-      // Can't be run on the server, so we need to use dynamic imports
       // Lazy load all wave surfer dependencies
-      const [
-        { default: WaveSurfer },
-        { default: TimelinePlugin },
-        { default: RegionsPlugin },
-      ] = await Promise.all([
-        import("wavesurfer.js"),
-        import("wavesurfer.js/dist/plugins/timeline"),
-        import("wavesurfer.js/dist/plugins/regions"),
-      ]);
-      wavesurferConstructors.current = {
-        WaveSurfer,
-        TimelinePlugin,
-        RegionsPlugin,
-      };
+      const { WaveSurfer, TimelinePlugin, RegionsPlugin } =
+        (wavesurferConstructors.current = await importWavesurferConstructors());
 
       // Instantiate plugins
       timelinePlugin.current = TimelinePlugin.create(DEFAULT_TIMELINE_OPTIONS);
@@ -146,6 +127,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
     create();
   }, [audioStore, audioStore.selectedAudioFile, uiStore.pixelsPerSecond, timer, cloneCanvas]);
 
+  // on selected audio file change
   useEffect(() => {
     if (!didInitialize.current) return;
 
@@ -185,6 +167,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
     cloneCanvas();
   }, [audioStore.selectedAudioFile, timer, uiStore.pixelsPerSecond, cloneCanvas]);
 
+  // on loop toggle
   useEffect(() => {
     if (!didInitialize.current || !ready.current) return;
 
@@ -230,6 +213,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
     return disableDragSelection;
   }, [audioStore, audioStore.audioLooping, timer]);
 
+  // on play/pause toggle
   useEffect(() => {
     if (!didInitialize.current || !ready.current) return;
     if (timer.playing) {
@@ -239,34 +223,26 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
     }
   }, [timer.playing]);
 
+  // on mute toggle
   useEffect(() => {
-    if (!wavesurferRef.current) return;
+    if (!wavesurferRef.current || !ready.current) return;
     wavesurferRef.current.setMuted(audioStore.audioMuted);
   }, [audioStore.audioMuted]);
 
-  const zoomDebounced = useDebouncedCallback((pixelsPerSecond: number) => {
-    if (ready.current && wavesurferRef.current) {
-      wavesurferRef.current.zoom(pixelsPerSecond);
-      cloneCanvas();
-    }
-  }, 5);
-
+  // on zoom change
   useEffect(() => {
-    if (ready.current && wavesurferRef.current)
-      zoomDebounced(uiStore.pixelsPerSecond);
-  }, [zoomDebounced, uiStore.pixelsPerSecond]);
+    if (!wavesurferRef.current || !ready.current) return;
+    wavesurferRef.current.zoom(uiStore.pixelsPerSecond);
+    cloneCanvas();
+  }, [cloneCanvas, uiStore.pixelsPerSecond]);
 
+  // on cursor change
   useEffect(() => {
-    if (ready.current && wavesurferRef.current) {
-      const duration = wavesurferRef.current.getDuration();
-      const progress = duration > 0 ? timer.lastCursor.position / duration : 0;
-      wavesurferRef.current.seekTo(clamp(progress, 0, 1));
-    }
+    if (!wavesurferRef.current || !ready.current) return;
+    const duration = wavesurferRef.current.getDuration();
+    const progress = duration > 0 ? timer.lastCursor.position / duration : 0;
+    wavesurferRef.current.seekTo(clamp(progress, 0, 1));
   }, [timer.lastCursor]);
-
-  useEffect(() => {
-    if (uiStore.showingWaveformOverlay) cloneCanvas();
-  }, [uiStore.showingWaveformOverlay, cloneCanvas]);
 
   return (
     <Box width="100%" height={10} bgColor="gray.500">
@@ -275,7 +251,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
         <Box
           ref={clonedWaveformRef}
           position="absolute"
-          top="80px"
+          top="40px"
           pointerEvents="none"
         />
       )}
