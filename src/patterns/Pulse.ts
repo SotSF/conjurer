@@ -39,6 +39,10 @@ export const Pulse = () =>
       name: "Waviness",
       value: 1,
     },
+    u_spiral_factor: {
+      name: "Spiral Factor",
+      value: 0,
+    },
     u_number_colors: {
       name: "Number of Colors",
       value: 4,

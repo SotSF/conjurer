@@ -8,6 +8,7 @@ uniform float u_time;
 uniform vec2 u_resolution;
 uniform sampler2D u_texture;
 
+// TODO: implement more of these
 uniform float u_tiling;
 uniform float u_rotation;
 uniform float u_box_size;
@@ -25,6 +26,8 @@ uniform float u_brick_offset_y;
 // float u_circle_smooth = 0.00;
 // float u_brick_offset_x = 1.0;
 // float u_brick_offset_y = 0.0;
+
+#define PI 3.14159265358979323846
 
 vec2 brickTile(vec2 _st, float _zoom) {
     _st *= _zoom;
@@ -54,29 +57,21 @@ void main(void) {
     // vec2 st = gl_FragCoord.xy / u_resolution.xy;
     vec2 st = v_uv;
 
+    // canopy to centered cartesian space
     st = canopyToCartesianProjection(st);
 
-    vec3 color = vec3(0.0);
+    // tile space
+    st = tileCentered(st, u_tiling);
 
-    // Divide the space in 4
-    st = brickTile(st, u_tiling);
+    // TODO: apply a vignette frame
 
-    // Use a matrix to rotate the space 45 degrees
-    st = rotate2D(st, PI * u_rotation);
+    // rotate the space
+    st = rotate2DCentered(st, PI * u_rotation);
 
-    // Draw a square
-    color = vec3(box(st, vec2(u_box_size), u_box_smooth));
+    // centered cartesian to polar
+    st = cartesianToPolarProjection(st);
 
-    // rotate the space back, translate
-    st = rotate2D(st, - PI * u_rotation);
+    vec4 sampled = texture2D(u_texture, st);
 
-    st += 0.5;
-
-    // Draw a circle
-    color += vec3(circle(fract(st), u_circle_size, u_circle_smooth));
-
-    vec4 sampled = texture2D(u_texture, v_uv);
-    vec3 masked = sampled.xyz * color;
-
-    gl_FragColor = vec4(masked, 1.0);
+    gl_FragColor = vec4(sampled.xyz, 1.0);
 }

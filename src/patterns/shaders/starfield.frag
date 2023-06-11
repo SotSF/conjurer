@@ -30,9 +30,8 @@ varying vec2 v_uv;
 
 void main() {
     // vec2 st = (2.0 * gl_FragCoord.xy - u_resolution.xy) / min(u_resolution.x, u_resolution.y);
-
     vec2 st = v_uv;
-    // st -= 0.15;
+
     // Convert from canopy space to cartesian
     float theta = st.x * 2.0 * 3.1415926;
     float r = st.y * 0.88888888 + 0.111111111;

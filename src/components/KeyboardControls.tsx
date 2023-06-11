@@ -9,8 +9,6 @@ export const KeyboardControls = observer(function KeyboardControls() {
 
   useEffect(() => {
     const handleKeyDown = action((e: KeyboardEvent) => {
-      if (document.activeElement?.nodeName === "INPUT") return;
-
       if (
         e.key === " " &&
         !e.ctrlKey &&
@@ -20,16 +18,20 @@ export const KeyboardControls = observer(function KeyboardControls() {
       ) {
         timer.togglePlaying();
         e.preventDefault();
-      } else if (e.key === "ArrowLeft") timer.skipBackward();
-      else if (e.key === "ArrowRight") timer.skipForward();
-      else if (e.key === "o" && (e.ctrlKey || e.metaKey)) {
-        uiStore.showingOpenExperienceModal = true;
-        e.preventDefault();
       } else if (e.key === "s" && e.shiftKey && (e.ctrlKey || e.metaKey)) {
         uiStore.showingSaveExperienceModal = true;
         e.preventDefault();
       } else if (e.key === "s" && (e.ctrlKey || e.metaKey)) {
         experienceStore.saveToS3();
+        e.preventDefault();
+      }
+
+      if (document.activeElement?.nodeName === "INPUT") return;
+
+      if (e.key === "ArrowLeft") timer.skipBackward();
+      else if (e.key === "ArrowRight") timer.skipForward();
+      else if (e.key === "o" && (e.ctrlKey || e.metaKey)) {
+        uiStore.showingOpenExperienceModal = true;
         e.preventDefault();
       } else if (e.key === "a" && (e.ctrlKey || e.metaKey)) {
         store.selectAllBlocks();
