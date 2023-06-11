@@ -33,7 +33,6 @@ export const useCloneCanvas = (clonedWaveformRef: {
 
     const destinationContainer = clonedWaveformRef.current;
     destinationContainer.replaceChildren(...destinationCanvases);
-    console.log("cloning");
   }, [uiStore.showingWaveformOverlay, clonedWaveformRef]);
 
   const debouncedCloneCanvas = useDebouncedCallback(cloneCanvas, 8, {
