@@ -33,7 +33,7 @@ export class UIStore {
     this.saveToLocalStorage();
   }
 
-  private _lastEffectIndexSelected = 0;
+  private _lastEffectIndexSelected = -1;
 
   get lastEffectIndexSelected() {
     return this._lastEffectIndexSelected;
