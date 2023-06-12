@@ -1,4 +1,4 @@
-import { Box, Grid, GridItem, VStack } from "@chakra-ui/react";
+import { Box, Button, Grid, GridItem, VStack } from "@chakra-ui/react";
 import { PatternList } from "@/src/components/PatternPlayground/PatternList";
 import { PreviewCanvas } from "@/src/components/PatternPlayground/PreviewCanvas";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -93,7 +93,7 @@ export const PatternPlayground = observer(function PatternPlayground() {
       <GridItem area="controls">
         <ParameterControls block={selectedPatternBlock} />
       </GridItem>
-      <GridItem area="preview">
+      <GridItem area="preview" position="relative">
         <VStack
           position="sticky"
           top={0}
@@ -108,6 +108,20 @@ export const PatternPlayground = observer(function PatternPlayground() {
             <PreviewCanvas block={selectedPatternBlock} />
           </Box>
         </VStack>
+        {uiStore.patternDrawerOpen && (
+          <Button
+            position="absolute"
+            bottom={10}
+            right={4}
+            variant="outline"
+            onClick={action(() => {
+              store.selectedLayer.insertCloneOfBlock(selectedPatternBlock);
+              uiStore.patternDrawerOpen = false;
+            })}
+          >
+            Insert
+          </Button>
+        )}
       </GridItem>
     </Grid>
   );

@@ -1,7 +1,5 @@
 import { HStack, Text, VStack } from "@chakra-ui/react";
 import { SelectablePatternEffect } from "@/src/components/PatternPlayground/SelectablePatternEffect";
-import { useStore } from "@/src/types/StoreContext";
-import { action } from "mobx";
 import { Block } from "@/src/types/Block";
 import { patterns } from "@/src/patterns/patterns";
 import { memo } from "react";
@@ -20,9 +18,6 @@ export const PatternList = memo(function PatternList({
   selectedEffectBlock,
   onSelectEffectBlock,
 }: Props) {
-  const store = useStore();
-  const { uiStore } = store;
-
   return (
     <VStack height="100%" flexWrap="wrap" gap={1} spacing={0}>
       <Text fontSize="xl" fontWeight="bold">
@@ -35,10 +30,6 @@ export const PatternList = memo(function PatternList({
             pattern={p}
             selected={p === selectedPatternBlock.pattern}
             onSelect={() => onSelectPatternBlock(index)}
-            onInsert={action(() => {
-              store.selectedLayer.insertCloneOfBlock(selectedPatternBlock);
-              uiStore.patternDrawerOpen = false;
-            })}
           />
         ))}
       </HStack>
@@ -50,7 +41,6 @@ export const PatternList = memo(function PatternList({
           pattern={{ name: "None" }}
           selected={!selectedEffectBlock}
           onSelect={() => onSelectEffectBlock(-1)}
-          onInsert={() => null}
         />
         {effects.map((e, index) => (
           <SelectablePatternEffect
@@ -58,9 +48,6 @@ export const PatternList = memo(function PatternList({
             pattern={e}
             selected={e === selectedEffectBlock?.pattern}
             onSelect={() => onSelectEffectBlock(index)}
-            onInsert={action(() => {
-              // TODO:
-            })}
           />
         ))}
       </HStack>

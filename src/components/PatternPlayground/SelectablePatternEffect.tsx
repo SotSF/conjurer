@@ -5,14 +5,12 @@ type Props = {
   pattern: { name: string };
   selected: boolean;
   onSelect: () => void;
-  onInsert: () => void;
 };
 
 export const SelectablePatternEffect = memo(function SelectablePattern({
   pattern,
   selected,
   onSelect,
-  onInsert,
 }: Props) {
   return (
     <Card
@@ -22,7 +20,6 @@ export const SelectablePatternEffect = memo(function SelectablePattern({
       alignItems="center"
       cursor="pointer"
       onClick={onSelect}
-      onDoubleClick={onInsert}
       role="button"
     >
       <VStack width="150px" height={10} justify="center">
