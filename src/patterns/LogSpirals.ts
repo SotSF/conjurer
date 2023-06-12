@@ -1,6 +1,7 @@
 import { Pattern } from "@/src/types/Pattern";
-import logSpirals from "./shaders/logSpirals.frag";
+import logSpirals from "@/src/patterns/shaders/logSpirals.frag";
 
+export { logSpirals };
 export const LogSpirals = () =>
   new Pattern("Log Spirals", logSpirals, {
     u_spikeMotionTimeScalingFactor: {

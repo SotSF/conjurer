@@ -1,6 +1,7 @@
 import { Pattern } from "@/src/types/Pattern";
 import fire from "./shaders/fire.frag";
 
+export { fire };
 export const Fire = () =>
   new Pattern("Fire", fire, {
     u_fire_power: {

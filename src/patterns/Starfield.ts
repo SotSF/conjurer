@@ -1,6 +1,7 @@
 import { Pattern } from "@/src/types/Pattern";
 import starfield from "./shaders/starfield.frag";
 
+export { starfield };
 export const Starfield = () =>
   new Pattern("Starfield", starfield, {
     u_time_factor: {

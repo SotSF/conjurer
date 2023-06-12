@@ -1,6 +1,7 @@
 import { Pattern } from "@/src/types/Pattern";
 import tunnel from "./shaders/tunnel.frag";
 
+export { tunnel };
 export const Tunnel = () =>
   new Pattern("Tunnel", tunnel, {
     u_time_factor: {

@@ -2,6 +2,7 @@ import { Pattern } from "@/src/types/Pattern";
 import disc from "./shaders/disc.frag";
 import { Vector4 } from "three";
 
+export { disc };
 export const Disc = () =>
   new Pattern("Disc", disc, {
     u_color: {

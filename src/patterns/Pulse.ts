@@ -1,6 +1,7 @@
 import { Pattern } from "@/src/types/Pattern";
 import pulse from "./shaders/pulse.frag";
 
+export { pulse };
 export const Pulse = () =>
   new Pattern("Pulse", pulse, {
     u_time_factor: {

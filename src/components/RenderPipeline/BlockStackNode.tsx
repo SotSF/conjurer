@@ -1,7 +1,7 @@
 import { WebGLRenderTarget } from "three";
 import black from "@/src/shaders/black.frag";
 import { useFrame, useThree } from "@react-three/fiber";
-import { memo, useEffect } from "react";
+import { useEffect } from "react";
 import { BlockNode } from "@/src/components/RenderPipeline/BlockNode";
 import { useStore } from "@/src/types/StoreContext";
 import { Block } from "@/src/types/Block";
