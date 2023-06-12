@@ -8,12 +8,12 @@ import { memo } from "react";
 
 type Props = {
   selectedBlock: Block;
-  setSelectedBlockIndex: (index: number) => void;
+  onSelectBlock: (index: number) => void;
 };
 
 export const PatternList = memo(function PatternList({
   selectedBlock,
-  setSelectedBlockIndex,
+  onSelectBlock,
 }: Props) {
   const store = useStore();
   const { uiStore } = store;
@@ -25,7 +25,7 @@ export const PatternList = memo(function PatternList({
           key={p.name}
           pattern={p}
           selected={p === selectedBlock.pattern}
-          onSelect={() => setSelectedBlockIndex(index)}
+          onSelect={() => onSelectBlock(index)}
           onInsert={action(() => {
             store.selectedLayer.insertCloneOfBlock(selectedBlock);
             uiStore.patternDrawerOpen = false;

@@ -19,7 +19,19 @@ export class UIStore {
   showingOpenExperienceModal = false;
   showingSaveExperienceModal = false;
   showingUploadAudioModal = false;
+
   patternDrawerOpen = false;
+
+  private _lastPatternIndexSelected = 0;
+
+  get lastPatternIndexSelected() {
+    return this._lastPatternIndexSelected;
+  }
+
+  set lastPatternIndexSelected(index: number) {
+    this._lastPatternIndexSelected = index;
+    this.saveToLocalStorage();
+  }
 
   pixelsPerSecond = INITIAL_PIXELS_PER_SECOND; // the zoom of the timeline
 
@@ -82,6 +94,8 @@ export class UIStore {
       this.horizontalLayout = !!localStorageUiSettings.horizontalLayout;
       this.displayingCanopy = !!localStorageUiSettings.displayingCanopy;
       this.showingPerformance = !!localStorageUiSettings.showingPerformance;
+      this.lastPatternIndexSelected =
+        localStorageUiSettings.lastPatternIndexSelected ?? 0;
     }
   };
 
@@ -93,6 +107,7 @@ export class UIStore {
         horizontalLayout: this.horizontalLayout,
         displayingCanopy: this.displayingCanopy,
         showingPerformance: this.showingPerformance,
+        lastPatternIndexSelected: this.lastPatternIndexSelected,
       })
     );
   };
