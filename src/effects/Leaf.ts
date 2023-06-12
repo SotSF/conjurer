@@ -1,6 +1,7 @@
 import { Pattern } from "@/src/types/Pattern";
 import leaf from "./shaders/leaf.frag";
 
+export { leaf };
 export const Leaf = () =>
   new Pattern("Leaf", leaf, {
     u_tiling: {
