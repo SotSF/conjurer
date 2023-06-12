@@ -29,19 +29,19 @@ export const BlockStackNode = observer(function BlockStackNode({
   useFrame(({ clock }) => {
     if (!parentBlock) return;
 
+    if (autorun) {
+      // Don't let the elapsed time go over five minutes
+      const elapsedTime = clock.elapsedTime % (1000 * 60 * 5);
+      parentBlock.updateParameters(elapsedTime);
+      return;
+    }
+
     // mobx linting will complain about these lines if observableRequiresReaction is enabled, but
     // it's fine. We don't want this function to react to changes in these variables - it runs every
     // frame already.
     const { globalTime } = timer;
     const { startTime } = parentBlock;
-
-    if (autorun) {
-      // Don't let the elapsed time go over five minutes
-      const elapsedTime = clock.elapsedTime % (1000 * 60 * 5);
-      parentBlock.updateParameters(elapsedTime);
-    } else {
-      parentBlock.updateParameters(globalTime - startTime);
-    }
+    parentBlock.updateParameters(globalTime - startTime);
   }, basePriority);
 
   // re-render this BlockStackNode if the number of effects changes
