@@ -1,11 +1,15 @@
-import { WebGLRenderTarget } from "three";
 import black from "@/src/shaders/black.frag";
+import conjurerCommon from "@/src/shaders/conjurer_common.frag";
+import { WebGLRenderTarget, ShaderChunk } from "three";
 import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect } from "react";
 import { BlockNode } from "@/src/components/RenderPipeline/BlockNode";
 import { useStore } from "@/src/types/StoreContext";
 import { Block } from "@/src/types/Block";
 import { observer } from "mobx-react-lite";
+
+// This enables `#include <conjurer_common>`
+ShaderChunk.conjurer_common = conjurerCommon;
 
 type BlockStackNodeProps = {
   autorun?: boolean;
