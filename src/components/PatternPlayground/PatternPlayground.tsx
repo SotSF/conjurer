@@ -8,7 +8,7 @@ import { patterns } from "@/src/patterns/patterns";
 import { observer } from "mobx-react-lite";
 import { useStore } from "@/src/types/StoreContext";
 import { effects } from "@/src/effects/effects";
-import { action, set } from "mobx";
+import { action } from "mobx";
 
 const PATTERN_PREVIEW_DISPLAY_SIZE = 600;
 
@@ -16,6 +16,7 @@ export const PatternPlayground = observer(function PatternPlayground() {
   const store = useStore();
   const { uiStore } = store;
 
+  // TODO: in dire need of refactoring
   const patternBlocks = useMemo(
     () => patterns.map((pattern) => new Block(pattern), []),
     []
@@ -30,35 +31,48 @@ export const PatternPlayground = observer(function PatternPlayground() {
     () => effects.map((effect) => new Block(effect)),
     []
   );
-  const [selectedEffectIndex, setSelectedEffectIndex] = useState(-1);
+  const [selectedEffectIndex, setSelectedEffectIndex] = useState(
+    uiStore.lastEffectIndexSelected
+  );
   const selectedEffectBlock = effectBlocks[selectedEffectIndex];
 
-  const onSelectPatternBlock = action((index: number) => {
-    setSelectedPatternIndex(index);
-    uiStore.lastPatternIndexSelected = index;
-    const newSelectedPatternBlock = patternBlocks[index];
-    if (selectedEffectBlock) {
-      newSelectedPatternBlock.effectBlocks = [selectedEffectBlock];
-      selectedEffectBlock.parentBlock = newSelectedPatternBlock;
-    } else {
-      newSelectedPatternBlock.effectBlocks = [];
-    }
-  });
+  const onSelectPatternEffect = action(
+    (patternIndex: number, effectIndex: number) => {
+      setSelectedPatternIndex(patternIndex);
+      setSelectedEffectIndex(effectIndex);
+      uiStore.lastPatternIndexSelected = patternIndex;
+      uiStore.lastEffectIndexSelected = effectIndex;
+      const newSelectedPatternBlock = patternBlocks[patternIndex];
+      const newSelectedEffectBlock = effectBlocks[effectIndex];
 
-  const onSelectEffectBlock = action((index: number) => {
-    setSelectedEffectIndex(index);
-    const newSelectedEffectBlock = effectBlocks[index];
-    selectedPatternBlock.effectBlocks = [newSelectedEffectBlock];
-    newSelectedEffectBlock.parentBlock = selectedPatternBlock;
-  });
+      if (!newSelectedEffectBlock) {
+        newSelectedPatternBlock.effectBlocks = [];
+        return;
+      }
+
+      newSelectedPatternBlock.effectBlocks[0] = newSelectedEffectBlock;
+      newSelectedEffectBlock.parentBlock = newSelectedPatternBlock;
+    }
+  );
+
+  const onSelectPatternBlock = action((index: number) =>
+    onSelectPatternEffect(index, selectedEffectIndex)
+  );
+
+  const onSelectEffectBlock = action((index: number) =>
+    onSelectPatternEffect(selectedPatternIndex, index)
+  );
 
   const didInitialize = useRef(false);
   useEffect(() => {
     if (didInitialize.current) return;
     didInitialize.current = true;
     store.initializePlayground();
-    setSelectedPatternIndex(uiStore.lastPatternIndexSelected);
-  }, [store, uiStore.lastPatternIndexSelected]);
+    onSelectPatternEffect(
+      uiStore.lastPatternIndexSelected,
+      uiStore.lastEffectIndexSelected
+    );
+  }, [store, uiStore.lastPatternIndexSelected, uiStore.lastEffectIndexSelected, onSelectPatternEffect]);
 
   return (
     <Grid

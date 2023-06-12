@@ -33,6 +33,17 @@ export class UIStore {
     this.saveToLocalStorage();
   }
 
+  private _lastEffectIndexSelected = 0;
+
+  get lastEffectIndexSelected() {
+    return this._lastEffectIndexSelected;
+  }
+
+  set lastEffectIndexSelected(index: number) {
+    this._lastEffectIndexSelected = index;
+    this.saveToLocalStorage();
+  }
+
   pixelsPerSecond = INITIAL_PIXELS_PER_SECOND; // the zoom of the timeline
 
   constructor(readonly timer: Timer) {
@@ -96,6 +107,8 @@ export class UIStore {
       this.showingPerformance = !!localStorageUiSettings.showingPerformance;
       this.lastPatternIndexSelected =
         localStorageUiSettings.lastPatternIndexSelected ?? 0;
+      this.lastEffectIndexSelected =
+        localStorageUiSettings.lastEffectIndexSelected ?? 0;
     }
   };
 
@@ -108,6 +121,7 @@ export class UIStore {
         displayingCanopy: this.displayingCanopy,
         showingPerformance: this.showingPerformance,
         lastPatternIndexSelected: this.lastPatternIndexSelected,
+        lastEffectIndexSelected: this.lastEffectIndexSelected,
       })
     );
   };
