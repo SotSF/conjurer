@@ -4,6 +4,10 @@ precision mediump float;
 
 #define PI 3.14159265358979323846
 
+varying vec2 v_uv;
+uniform float u_time;
+uniform vec2 u_resolution;
+
 uniform float u_time_factor;
 uniform float u_time_offset;
 uniform float u_hue_start;
@@ -16,6 +20,7 @@ uniform float u_waviness;
 uniform float u_spiral_factor;
 uniform float u_number_colors;
 
+// // For debugging
 // #define u_time_factor 0.4
 // #define u_time_offset 0.0
 // #define u_hue_start 0.
@@ -27,10 +32,6 @@ uniform float u_number_colors;
 // #define u_waviness 1.
 // #define u_spiral_factor 1.1
 // #define u_number_colors 5.
-
-uniform vec2 u_resolution;
-uniform float u_time;
-varying vec2 v_uv;
 
 vec3 RGBtoHCV(in vec3 RGB) {
     float Epsilon = 1e-9;

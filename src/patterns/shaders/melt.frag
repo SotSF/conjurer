@@ -11,19 +11,21 @@
 #ifdef GL_ES
 precision mediump float;
 #endif
+
 #define RADIANS 0.017453292519943295
+
+varying vec2 v_uv;
+uniform float u_time;
+uniform vec2 u_resolution;
 
 uniform float u_time_factor;
 uniform float u_time_offset;
 uniform float u_rotation_speed;
 
+// // For debugging
 // #define u_time_factor 1.0
 // #define u_time_offset 0.0
 // #define u_rotation_speed 1.0
-
-uniform vec2 u_resolution;
-uniform float u_time;
-varying vec2 v_uv;
 
 vec3 spectral_colour(float l) // RGB <0,1> <- lambda l <400,700> [nm]
 {

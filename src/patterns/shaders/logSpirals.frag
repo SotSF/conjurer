@@ -4,8 +4,10 @@ precision mediump float;
 
 #define tau 6.2831853
 
-uniform float u_globalTimeFactor;
+varying vec2 v_uv;
 uniform float u_time;
+
+uniform float u_globalTimeFactor;
 uniform float u_spikeMotionTimeScalingFactor;
 uniform float u_repetitionsPerSpiralTurn;
 uniform float u_primaryOscPeriod;
@@ -19,7 +21,20 @@ uniform float u_spiralTightness;
 uniform int u_colorIterations;
 uniform int u_spiralCount;
 
-varying vec2 v_uv;
+// // For debugging
+// #define u_globalTimeFactor 1.2
+// #define u_spikeMotionTimeScalingFactor -0.4
+// #define u_repetitionsPerSpiralTurn 14.
+// #define u_primaryOscPeriod 15.
+// #define u_distCutoff 1.5
+// #define u_colorRangeStart 0.55
+// #define u_colorRangeWidth 0.35
+// #define u_waveOffset 0.0172
+// #define u_baseAmplitude 0.04
+// #define u_spiralGrowthFactor 0.1
+// #define u_spiralTightness 0.35
+// #define u_colorIterations 32
+// #define u_spiralCount 4
 
 vec3 RGBtoHCV(in vec3 RGB) {
     float Epsilon = 1e-9;

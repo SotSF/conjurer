@@ -8,13 +8,9 @@
 precision mediump float;
 #endif
 
-// float u_time_factor = 1.;
-// float u_time_offset = 0.;
-// float u_max_space = 0.;
-// float u_max_depth_spacing = 0.0;
-// float u_nucleus_size = 0.5;
-// float u_permanent_gap = .0;
-// float u_gap_factor = 1.;
+varying vec2 v_uv;
+uniform float u_time;
+uniform vec2 u_resolution;
 
 uniform float u_time_factor;
 uniform float u_time_offset;
@@ -24,9 +20,14 @@ uniform float u_nucleus_size;
 uniform float u_permanent_gap;
 uniform float u_gap_factor;
 
-uniform vec2 u_resolution;
-uniform float u_time;
-varying vec2 v_uv;
+// // For debugging
+// #define u_time_factor 1.
+// #define u_time_offset 0.
+// #define u_max_space 0.
+// #define u_max_depth_spacing 0.0
+// #define u_nucleus_size 0.5
+// #define u_permanent_gap .0
+// #define u_gap_factor 1.
 
 vec3 palette(float i) {
     if (i < 4.0) {

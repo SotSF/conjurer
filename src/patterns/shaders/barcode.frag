@@ -1,11 +1,12 @@
-// Author @patriciogv - 2015
-// Title: Truchet - 10 print
-
 #ifdef GL_ES
 precision mediump float;
 #endif
 
 #define PI 3.14159265358979323846
+
+varying vec2 v_uv;
+uniform float u_time;
+uniform vec2 u_resolution;
 
 uniform float u_segments;
 uniform float u_stutter_frequency;
@@ -14,16 +15,13 @@ uniform float u_saturation_start;
 uniform float u_hue_start;
 uniform float u_hue_width;
 
-// #define u_segments 4.5
+// // For debugging
+// #define u_segments 10.5
 // #define u_stutter_frequency .8
 // #define u_go_nuts 0.0
 // #define u_saturation_start 1.0
 // #define u_hue_start 0.05
 // #define u_hue_width 0.55
-
-uniform vec2 u_resolution;
-uniform float u_time;
-varying vec2 v_uv;
 
 vec3 RGBtoHCV(in vec3 RGB) {
     float Epsilon = 1e-9;
