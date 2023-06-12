@@ -8,11 +8,11 @@
 precision mediump float;
 #endif
 
-// TODO: add uniforms
-
-uniform vec2 u_resolution;
-uniform float u_time;
 varying vec2 v_uv;
+uniform float u_time;
+uniform vec2 u_resolution;
+
+// TODO: add uniforms
 
 vec4 permute(vec4 x) {
     return mod(((x * 34.0) + 1.0) * x, 289.0);

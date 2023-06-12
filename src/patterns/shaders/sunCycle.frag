@@ -4,16 +4,16 @@ precision mediump float;
 
 #define PI 3.14159265359
 
+varying vec2 v_uv;
 uniform float u_time;
-
-// #define u_time_factor 1.0
-// #define u_time_offset 0.0
-// uniform vec2 u_resolution;
+uniform vec2 u_resolution;
 
 uniform float u_time_factor;
 uniform float u_time_offset;
 
-varying vec2 v_uv;
+// // For debugging
+// #define u_time_factor 1.0
+// #define u_time_offset 0.0
 
 vec3 colorA = vec3(1.000, 0.411, 0.058);
 vec3 colorB = vec3(0.027, 0.638, 1.000);

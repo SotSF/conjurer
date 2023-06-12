@@ -10,12 +10,9 @@
 precision mediump float;
 #endif
 
-// float u_time_factor = 1.0;
-// float u_time_offset = 0.0;
-// float u_meander_factor = 0.;
-// float u_meander_offset = 1.0;
-// float u_saturation = 1.0;
-// float u_intensity = 1.0;
+varying vec2 v_uv;
+uniform float u_time;
+uniform vec2 u_resolution;
 
 uniform float u_time_factor;
 uniform float u_time_offset;
@@ -24,9 +21,13 @@ uniform float u_meander_offset;
 uniform float u_saturation;
 uniform float u_intensity;
 
-uniform vec2 u_resolution;
-uniform float u_time;
-varying vec2 v_uv;
+// // For debugging
+// #define u_time_factor 1.0
+// #define u_time_offset 0.0
+// #define u_meander_factor 0.
+// #define u_meander_offset 1.0
+// #define u_saturation 1.0
+// #define u_intensity 1.0
 
 void main() {
     // vec2 st = (2.0 * gl_FragCoord.xy - u_resolution.xy) / min(u_resolution.x, u_resolution.y);

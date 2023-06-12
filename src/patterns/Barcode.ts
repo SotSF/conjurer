@@ -1,6 +1,7 @@
 import { Pattern } from "@/src/types/Pattern";
 import barcode from "./shaders/barcode.frag";
 
+export { barcode };
 export const Barcode = () =>
   new Pattern("Barcode", barcode, {
     u_segments: {

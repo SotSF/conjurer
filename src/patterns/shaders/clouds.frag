@@ -6,13 +6,17 @@ precision mediump float;
 #define F4 0.309016994374947451
 #define PI 3.14159265359
 
+varying vec2 v_uv;
 uniform float u_time;
 
 uniform float u_scale;
 uniform float u_speed;
 uniform vec4 u_color;
 
-varying vec2 v_uv;
+// // For debugging
+// #define u_scale 1.
+// #define u_speed 1.
+// #define u_color vec4(1., 0., 0., 1.)
 
 // Description : Array and textureless GLSL 2D/3D/4D simplex
 //               noise functions.

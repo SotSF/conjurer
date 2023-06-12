@@ -1,6 +1,7 @@
 import { Pattern } from "@/src/types/Pattern";
 import rotate from "./shaders/rotate.frag";
 
+export { rotate };
 export const Rotate = () =>
   new Pattern("Rotate", rotate, {
     u_speed: {

@@ -10,17 +10,18 @@ precision mediump float;
 
 #define PI 3.14159265358979323846
 
+varying vec2 v_uv;
+uniform float u_time;
+uniform vec2 u_resolution;
+
 uniform float u_fire_power;
 uniform float u_time_factor;
 uniform float u_time_offset;
 
+// // For debugging
 // #define u_fire_power 0.8
 // #define u_time_factor 1.0
 // #define u_time_offset 0.0
-
-uniform vec2 u_resolution;
-uniform float u_time;
-varying vec2 v_uv;
 
 float snoise(vec3 uv, float res) {
     const vec3 s = vec3(1e0, 1e2, 1e3);

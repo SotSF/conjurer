@@ -1,37 +1,56 @@
-import { HStack } from "@chakra-ui/react";
-import { SelectablePattern } from "@/src/components/PatternPlayground/SelectablePattern";
-import { useStore } from "@/src/types/StoreContext";
-import { action } from "mobx";
+import { HStack, Text, VStack } from "@chakra-ui/react";
+import { SelectablePatternEffect } from "@/src/components/PatternPlayground/SelectablePatternEffect";
 import { Block } from "@/src/types/Block";
 import { patterns } from "@/src/patterns/patterns";
 import { memo } from "react";
+import { effects } from "@/src/effects/effects";
 
 type Props = {
-  selectedBlock: Block;
-  setSelectedBlockIndex: (index: number) => void;
+  selectedPatternBlock: Block;
+  onSelectPatternBlock: (index: number) => void;
+  selectedEffectBlock: Block | null;
+  onSelectEffectBlock: (index: number) => void;
 };
 
 export const PatternList = memo(function PatternList({
-  selectedBlock,
-  setSelectedBlockIndex,
+  selectedPatternBlock,
+  onSelectPatternBlock,
+  selectedEffectBlock,
+  onSelectEffectBlock,
 }: Props) {
-  const store = useStore();
-  const { uiStore } = store;
-
   return (
-    <HStack height="100%" flexWrap="wrap" gap={1} spacing={0}>
-      {patterns.map((p, index) => (
-        <SelectablePattern
-          key={p.name}
-          pattern={p}
-          selected={p === selectedBlock.pattern}
-          onSelect={() => setSelectedBlockIndex(index)}
-          onInsert={action(() => {
-            store.selectedLayer.insertCloneOfBlock(selectedBlock);
-            uiStore.patternDrawerOpen = false;
-          })}
+    <VStack height="100%" flexWrap="wrap" gap={1} spacing={0}>
+      <Text fontSize="xl" fontWeight="bold">
+        Patterns
+      </Text>
+      <HStack width="100%" flexWrap="wrap" gap={1} spacing={0}>
+        {patterns.map((p, index) => (
+          <SelectablePatternEffect
+            key={p.name}
+            pattern={p}
+            selected={p === selectedPatternBlock.pattern}
+            onSelect={() => onSelectPatternBlock(index)}
+          />
+        ))}
+      </HStack>
+      <Text fontSize="xl" fontWeight="bold">
+        Effects
+      </Text>
+      <HStack width="100%" flexWrap="wrap" gap={1} spacing={0}>
+        <SelectablePatternEffect
+          pattern={{ name: "None" }}
+          selected={!selectedEffectBlock}
+          onSelect={() => onSelectEffectBlock(-1)}
         />
-      ))}
-    </HStack>
+        {effects.map((e, index) => (
+          <SelectablePatternEffect
+            key={e.name}
+            pattern={e}
+            selected={e === selectedEffectBlock?.pattern}
+            onSelect={() => onSelectEffectBlock(index)}
+          />
+        ))}
+      </HStack>
+    </VStack>
   );
 });

@@ -11,9 +11,6 @@ import { ShaderChunk, WebGLRenderTarget } from "three";
 import conjurerCommon from "@/src/shaders/conjurer_common.frag";
 import { useState } from "react";
 
-// This enables `#include <conjurer_common>`
-ShaderChunk.conjurer_common = conjurerCommon;
-
 // when DEBUG is true, the canvas will only render when the global time changes. This is useful when
 // debugging individual frames.
 const DEBUG = false;

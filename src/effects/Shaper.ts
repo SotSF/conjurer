@@ -1,6 +1,7 @@
 import { Pattern } from "@/src/types/Pattern";
 import shaper from "./shaders/shaper.frag";
 
+export { shaper };
 export const Shaper = () =>
   new Pattern("Shaper", shaper, {
     u_tiling: {

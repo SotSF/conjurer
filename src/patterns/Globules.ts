@@ -1,6 +1,7 @@
 import { Pattern } from "@/src/types/Pattern";
 import globules from "./shaders/globules.frag";
 
+export { globules };
 export const Globules = () =>
   new Pattern("Globules", globules, {
     u_time_factor: {

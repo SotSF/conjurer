@@ -98,6 +98,13 @@ export class Store {
     this.initialized = true;
   };
 
+  initializePlayground = () => {
+    if (this.initialized) return;
+    this.initialized = true;
+
+    this.uiStore.initialize();
+  };
+
   toggleSendingData = () => {
     this.sendingData = !this.sendingData;
     if (this.sendingData) setupWebsocket();

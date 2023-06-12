@@ -1,6 +1,7 @@
 import { Pattern } from "@/src/types/Pattern";
 import melt from "./shaders/melt.frag";
 
+export { melt };
 export const Melt = () =>
   new Pattern("Melt", melt, {
     u_time_factor: {

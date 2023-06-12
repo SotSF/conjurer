@@ -1,6 +1,7 @@
 import { Pattern } from "@/src/types/Pattern";
 import tiler from "./shaders/tiler.frag";
 
+export { tiler };
 export const Tiler = () =>
   new Pattern("Tiler", tiler, {
     u_tiling: {
