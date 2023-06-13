@@ -37,7 +37,7 @@ vec2 cartesianToPolarProjection(vec2 _st) {
 // requires centered cartesian space
 vec2 tileCentered(vec2 _st, float _zoom) {
     _st *= _zoom;
-    return mod(_st, 0.5) * 2.0 - 0.5;
+    return fract(_st - 0.5) - 0.5;
 }
 
 // requires bottom-left-origin cartesian space
