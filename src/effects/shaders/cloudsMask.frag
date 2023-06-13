@@ -8,19 +8,19 @@ precision mediump float;
 
 varying vec2 v_uv;
 uniform float u_time;
+uniform vec2 u_resolution;
+uniform sampler2D u_texture;
 
 uniform float u_scale;
 uniform float u_speed;
 uniform float u_high_pass;
 uniform float u_threshold_size;
-uniform vec4 u_color;
 
 // // For debugging
 // #define u_scale 1.
 // #define u_speed 1.
 // #define u_high_pass 0.
 // #define u_threshold_size 0.150
-// #define u_color vec4(1., 1., 1., 1.)
 
 // Description : Array and textureless GLSL 2D/3D/4D simplex
 //               noise functions.
@@ -179,5 +179,9 @@ void main() {
     float cloudiness = floor(surf / u_threshold_size) * threshold_step_size;
 
     cloudiness = step(u_high_pass, cloudiness) * cloudiness;
-    gl_FragColor = u_color * vec4(vec3(cloudiness), 1.0);
+
+    vec4 sampled = texture2D(u_texture, v_uv);
+    vec3 masked = sampled.xyz * cloudiness;
+
+    gl_FragColor = vec4(masked, 1.0);
 }

@@ -21,16 +21,16 @@ uniform float u_spiral_factor;
 uniform float u_number_colors;
 
 // // For debugging
-// #define u_time_factor 0.4
+// #define u_time_factor 0.6
 // #define u_time_offset 0.0
-// #define u_hue_start 0.
-// #define u_hue_width 0.8
-// #define u_duty_cycle .5
+// #define u_hue_start 0.2
+// #define u_hue_width 0.6
+// #define u_duty_cycle .3
 // #define u_scale 1.
 // #define u_wave_period 0.25
-// #define u_wave_amplitude 0.5
+// #define u_wave_amplitude 0.25
 // #define u_waviness 1.
-// #define u_spiral_factor 1.1
+// #define u_spiral_factor 0.
 // #define u_number_colors 5.
 
 vec3 RGBtoHCV(in vec3 RGB) {

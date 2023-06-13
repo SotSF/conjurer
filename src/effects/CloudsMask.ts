@@ -1,10 +1,9 @@
 import { Pattern } from "@/src/types/Pattern";
-import clouds from "./shaders/clouds.frag";
-import { Vector4 } from "three";
+import cloudsMask from "./shaders/cloudsMask.frag";
 
-export { clouds };
-export const Clouds = () =>
-  new Pattern("Clouds", clouds, {
+export { cloudsMask };
+export const CloudsMask = () =>
+  new Pattern("Clouds Mask", cloudsMask, {
     u_scale: {
       name: "Scale",
       value: 0.5,
@@ -20,9 +19,5 @@ export const Clouds = () =>
     u_threshold_size: {
       name: "Threshold Size",
       value: 0.15,
-    },
-    u_color: {
-      name: "Color",
-      value: new Vector4(1, 1, 1, 1),
     },
   });
