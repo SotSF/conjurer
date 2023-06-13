@@ -11,12 +11,16 @@ uniform float u_time;
 
 uniform float u_scale;
 uniform float u_speed;
+uniform float u_high_pass;
+uniform float u_threshold_size;
 uniform vec4 u_color;
 
 // // For debugging
 // #define u_scale 1.
 // #define u_speed 1.
-// #define u_color vec4(1., 0., 0., 1.)
+// #define u_high_pass 0.
+// #define u_threshold_size 0.150
+// #define u_color vec4(1., 1., 1., 1.)
 
 // Description : Array and textureless GLSL 2D/3D/4D simplex
 //               noise functions.
@@ -45,6 +49,7 @@ float permute(float x) {
 }
 
 vec4 taylorInvSqrt(vec4 r) {
+
     return 1.79284291400159 - 0.85373472095314 * r;
 }
 
@@ -170,5 +175,9 @@ void main() {
     // TODO: u_time, u_speed need to be applied differently. when input to surface becomes to high, doesn't work anymore
     float surf = surface(vec4(nx, ny, nz, nw) + u_time * 0.05 * u_speed);
 
-    gl_FragColor = u_color * vec4(vec3(surf), 1.0);
+    float threshold_step_size = 1.0 / floor(1.0 / u_threshold_size);
+    float cloudiness = floor(surf / u_threshold_size) * threshold_step_size;
+
+    cloudiness = step(u_high_pass, cloudiness) * cloudiness;
+    gl_FragColor = u_color * vec4(vec3(cloudiness), 1.0);
 }
