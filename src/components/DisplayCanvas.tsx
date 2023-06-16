@@ -7,8 +7,7 @@ import { RenderPipeline } from "@/src/components/RenderPipeline/RenderPipeline";
 import { CartesianView } from "@/src/components/CartesianView";
 import { CameraControls } from "@/src/components/CameraControls";
 import { RenderOnTimeChange } from "@/src/components/RenderOnTimeChange";
-import { ShaderChunk, WebGLRenderTarget } from "three";
-import conjurerCommon from "@/src/shaders/conjurer_common.frag";
+import { WebGLRenderTarget } from "three";
 import { useState } from "react";
 
 // when DEBUG is true, the canvas will only render when the global time changes. This is useful when
