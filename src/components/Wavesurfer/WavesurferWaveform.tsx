@@ -116,9 +116,9 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
         ready.current = true;
       }
 
-      wavesurferRef.current.on("interaction", () => {
+      wavesurferRef.current.on("interaction", (newTime: number) => {
         if (!wavesurferRef.current) return;
-        timer.setTime(Math.max(0, wavesurferRef.current.getCurrentTime()));
+        timer.setTime(Math.max(0, newTime));
       });
 
       cloneCanvas();

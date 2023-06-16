@@ -1,4 +1,13 @@
-import { Box, Button, Grid, GridItem, VStack } from "@chakra-ui/react";
+import { FaDotCircle } from "react-icons/fa";
+import { TbRectangleFilled } from "react-icons/tb";
+import {
+  Box,
+  Button,
+  Grid,
+  GridItem,
+  IconButton,
+  VStack,
+} from "@chakra-ui/react";
 import { PatternList } from "@/src/components/PatternPlayground/PatternList";
 import { PreviewCanvas } from "@/src/components/PatternPlayground/PreviewCanvas";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -108,10 +117,26 @@ export const PatternPlayground = observer(function PatternPlayground() {
             <PreviewCanvas block={selectedPatternBlock} />
           </Box>
         </VStack>
+        <IconButton
+          position="absolute"
+          top={15}
+          right={4}
+          aria-label="Toggle canopy view"
+          title="Toggle canopy view"
+          height={6}
+          icon={
+            uiStore.displayingCanopy ? (
+              <TbRectangleFilled size={17} />
+            ) : (
+              <FaDotCircle size={17} />
+            )
+          }
+          onClick={uiStore.toggleCanopyDisplay}
+        />
         {uiStore.patternDrawerOpen && (
           <Button
             position="absolute"
-            bottom={10}
+            top={10}
             right={4}
             variant="outline"
             onClick={action(() => {
