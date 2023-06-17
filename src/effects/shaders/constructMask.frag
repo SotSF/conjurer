@@ -7,6 +7,7 @@ precision mediump float;
 varying vec2 v_uv;
 uniform float u_time;
 uniform vec2 u_resolution;
+uniform sampler2D u_texture;
 
 uniform float u_time_factor;
 uniform float u_time_offset;
@@ -71,5 +72,8 @@ void main() {
         intensity += fade_factor * plot2(elevation, constructed);
     }
 
-    gl_FragColor = vec4(vec3(intensity), 1.0);
+    vec4 sampled = texture2D(u_texture, v_uv);
+    vec3 masked = sampled.xyz * intensity;
+
+    gl_FragColor = vec4(masked, 1.0);
 }
