@@ -14,6 +14,12 @@ vec3 hsv(float h, float s, float v) {
     return v * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), s);
 }
 
+// plots a line by returning 1.0 if the point is on the line, 0.0 otherwise with a little bit of smoothing
+float plot(vec2 st, float pct) {
+    return smoothstep(pct - 0.02, pct, st.y) -
+        smoothstep(pct, pct + 0.02, st.y);
+}
+
 // Converts canopy coordinates to cartesian coordinates
 // Canopy coordinates mean:
 //  x: 0.0 means the location of the first led on the first strip

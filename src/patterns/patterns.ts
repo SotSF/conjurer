@@ -11,6 +11,7 @@ import { Tunnel, tunnel } from "@/src/patterns/Tunnel";
 import { Rainbow, rainbow } from "@/src/patterns/Rainbow";
 import { Starfield, starfield } from "@/src/patterns/Starfield";
 import { Globules, globules } from "@/src/patterns/Globules";
+import { Construct, construct } from "@/src/patterns/Construct";
 
 // Importing the fragment shaders and doing a no-op on them means that nextJS will recompute the
 // patterns whenever a shader is changed. This essentially allows us to hot-reload shaders.
@@ -26,6 +27,7 @@ void tunnel;
 void rainbow;
 void starfield;
 void globules;
+void construct;
 
 const patterns: Pattern[] = [
   LogSpirals(),
@@ -40,6 +42,7 @@ const patterns: Pattern[] = [
   Starfield(),
   SunCycle(),
   Tunnel(),
+  Construct(),
 ];
 
 const patternMap: { [key: string]: Pattern } = {};
