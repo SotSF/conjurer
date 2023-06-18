@@ -46,7 +46,7 @@ export const SaveExperienceModal = observer(function SaveExperienceModal() {
     runInAction(() => {
       store.experienceName = experienceName;
     });
-    await experienceStore.saveToS3();
+    await experienceStore.save();
     setSaving(false);
     onClose();
   };

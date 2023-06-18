@@ -58,11 +58,22 @@ export class ExperienceStore {
     );
   };
 
-  saveToS3 = () => {
+  save = () => {
     this.rootStore.experienceLastSavedAt = Date.now();
     const experienceFilename = `${this.rootStore.user}-${
       this.rootStore.experienceName || "untitled"
     }`;
+
+    if (this.rootStore.usingLocalAssets) {
+      fetch(`/api/experiences/${experienceFilename}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ experience: this.stringifyExperience() }),
+      });
+      return;
+    }
 
     const putObjectCommand = new PutObjectCommand({
       Bucket: ASSET_BUCKET_NAME,
