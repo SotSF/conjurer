@@ -29,6 +29,17 @@ export class Store {
 
   sendingData = false;
 
+  private _usingLocalAssets = false;
+
+  get usingLocalAssets(): boolean {
+    return this._usingLocalAssets;
+  }
+
+  set usingLocalAssets(value: boolean) {
+    this._usingLocalAssets = value;
+    localStorage.setItem("usingLocalAssets", String(value));
+  }
+
   private _selectedLayer: Layer = this.layers[0]; // a layer is always selected
 
   get selectedLayer() {
@@ -80,6 +91,10 @@ export class Store {
     const username = localStorage.getItem("user");
     if (username) this._user = username;
 
+    // check for a usingLocalAssets in local storage
+    const usingLocalAssets = localStorage.getItem("usingLocalAssets");
+    if (usingLocalAssets) this._usingLocalAssets = usingLocalAssets === "true";
+
     // check for an experience name in local storage
     const experienceName = localStorage.getItem("experienceName");
     if (experienceName) {
@@ -108,6 +123,10 @@ export class Store {
   toggleSendingData = () => {
     this.sendingData = !this.sendingData;
     if (this.sendingData) setupWebsocket();
+  };
+
+  toggleUsingLocalAssets = () => {
+    this.usingLocalAssets = !this.usingLocalAssets;
   };
 
   selectBlock = (block: Block) => {
