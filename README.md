@@ -57,7 +57,7 @@ Starts a websocket server at port 8080 on localhost. For development use only. W
 
 #### `yarn downloadCloudAssets`
 
-Downloads all of the experience and audio files from s3 into the folder `public/cloudAssets`. Conjurer can then read from these files when in "local asset mode", useful for situations when internet is not available.
+Downloads all of the experience and audio files from s3 into the folder `public/cloud-assets`. Conjurer can then read from these files when in "local asset mode", useful for situations when internet is not available.
 
 ## Todos
 

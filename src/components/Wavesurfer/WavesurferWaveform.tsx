@@ -9,11 +9,6 @@ import type TimelinePlugin from "wavesurfer.js/dist/plugins/timeline";
 import type { TimelinePluginOptions } from "wavesurfer.js/dist/plugins/timeline";
 import type RegionsPlugin from "wavesurfer.js/dist/plugins/regions";
 import type { RegionParams } from "wavesurfer.js/dist/plugins/regions";
-import {
-  ASSET_BUCKET_NAME,
-  AUDIO_ASSET_PREFIX,
-  ASSET_BUCKET_REGION,
-} from "@/src/utils/assets";
 import { action } from "mobx";
 import { useCloneCanvas } from "@/src/components/Wavesurfer/hooks/cloneCanvas";
 
@@ -109,9 +104,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
 
       // Load selected audio file
       if (audioStore.selectedAudioFile) {
-        await wavesurferRef.current.load(
-          `https://${ASSET_BUCKET_NAME}.s3.${ASSET_BUCKET_REGION}.amazonaws.com/${AUDIO_ASSET_PREFIX}${audioStore.selectedAudioFile}`
-        );
+        await wavesurferRef.current.load(audioStore.getSelectedAudioFileUrl());
         wavesurferRef.current?.zoom(uiStore.pixelsPerSecond);
         ready.current = true;
       }
@@ -155,9 +148,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
           DEFAULT_TIMELINE_OPTIONS
         );
         wavesurferRef.current.registerPlugin(timelinePlugin.current);
-        await wavesurferRef.current.load(
-          `https://${ASSET_BUCKET_NAME}.s3.${ASSET_BUCKET_REGION}.amazonaws.com/${AUDIO_ASSET_PREFIX}${audioStore.selectedAudioFile}`
-        );
+        await wavesurferRef.current.load(audioStore.getSelectedAudioFileUrl());
         wavesurferRef.current.zoom(uiStore.pixelsPerSecond);
         wavesurferRef.current.seekTo(0);
         ready.current = true;
@@ -165,7 +156,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
     };
     changeAudioFile();
     cloneCanvas();
-  }, [audioStore.selectedAudioFile, timer, uiStore.pixelsPerSecond, cloneCanvas]);
+  }, [audioStore, audioStore.selectedAudioFile, timer, uiStore.pixelsPerSecond, cloneCanvas]);
 
   // on loop toggle
   useEffect(() => {
@@ -185,7 +176,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
       const regions = regionsPlugin.current;
       disableDragSelection = regions.enableDragSelection({
         color: "rgba(237, 137, 54, 0.4)",
-      } as RegionParams);
+      });
 
       // TODO: figure out how/when to clear region selection
       regions.on(

@@ -22,7 +22,7 @@ export class Store {
 
   timer = new Timer();
   uiStore = new UIStore(this.timer);
-  audioStore = new AudioStore(this.timer);
+  audioStore = new AudioStore(this, this.timer);
   experienceStore = new ExperienceStore(this);
 
   layers: Layer[] = [];

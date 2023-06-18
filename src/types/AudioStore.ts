@@ -1,12 +1,19 @@
 import { Timer } from "@/src/types/Timer";
 import {
   ASSET_BUCKET_NAME,
+  ASSET_BUCKET_REGION,
   AUDIO_ASSET_PREFIX,
+  LOCAL_ASSET_DIRECTORY,
   getS3,
 } from "@/src/utils/assets";
 import { ListObjectsCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { makeAutoObservable, runInAction } from "mobx";
 import type { RegionParams } from "wavesurfer.js/dist/plugins/regions";
+
+// Define a new RootStore interface here so that we avoid circular dependencies
+interface RootStore {
+  usingLocalAssets: boolean;
+}
 
 export class AudioStore {
   audioInitialized = false;
@@ -18,8 +25,8 @@ export class AudioStore {
 
   selectedRegion: RegionParams | null = null;
 
-  constructor(readonly timer: Timer) {
-    makeAutoObservable(this);
+  constructor(readonly rootStore: RootStore, readonly timer: Timer) {
+    makeAutoObservable(this, { getSelectedAudioFileUrl: false });
     this.timer.addTickListener(this.onTick);
   }
 
@@ -30,6 +37,11 @@ export class AudioStore {
   toggleAudioLooping = () => {
     this.audioLooping = !this.audioLooping;
   };
+
+  getSelectedAudioFileUrl = () =>
+    this.rootStore.usingLocalAssets
+      ? `${location.href}/${LOCAL_ASSET_DIRECTORY}${AUDIO_ASSET_PREFIX}${this.selectedAudioFile}`
+      : `https://${ASSET_BUCKET_NAME}.s3.${ASSET_BUCKET_REGION}.amazonaws.com/${AUDIO_ASSET_PREFIX}${this.selectedAudioFile}`;
 
   fetchAvailableAudioFiles = async (forceReload = false) => {
     if (this.audioInitialized && !forceReload) return;
