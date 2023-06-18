@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "generateCanopy": "ts-node --project tsconfig.script.json src/scripts/generateCanopy.ts",
+    "downloadCloudAssets": "ts-node --project tsconfig.script.json src/scripts/downloadCloudAssets.ts",
     "server": "ts-node --project tsconfig.script.json src/scripts/websocketServer.ts"
   },
   "dependencies": {
