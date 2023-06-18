@@ -47,7 +47,17 @@ yarn dev
 
 ### Scripts
 
-`yarn generateCanopy` generates canopy geometry data and stores it in `src/data/canopyGeometry.json`
+#### `yarn generateCanopy`
+
+Generates canopy geometry data and stores it in `src/data/canopyGeometry.json`.
+
+#### `yarn server`
+
+Starts a websocket server at port 8080 on localhost. For development use only. Writes `src/scripts/output.png` once per second.
+
+#### `yarn downloadCloudAssets`
+
+Downloads all of the experience and audio files from s3 into the folder `public/cloud-assets`. Conjurer can then read from these files when in "local asset mode", useful for situations when internet is not available.
 
 ## Todos
 

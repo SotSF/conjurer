@@ -28,7 +28,7 @@ export const UserPicker = observer(function UserPicker() {
 
   const [newUser, setNewUser] = useState("");
 
-  const { loading, experiences, refetch } = useExperiences(true, false);
+  const { loading, experiences } = useExperiences(true, false);
   const usersWithDuplicates = experiences
     .map((experience) => experience.split("-")[0] || "")
     .filter((user) => !!user);
@@ -36,15 +36,7 @@ export const UserPicker = observer(function UserPicker() {
 
   return (
     <>
-      <Button
-        variant="ghost"
-        onClick={() => {
-          refetch();
-          onOpen();
-        }}
-        leftIcon={<FaUser />}
-        size="xs"
-      >
+      <Button variant="ghost" onClick={onOpen} leftIcon={<FaUser />} size="xs">
         {store.user || "Log in"}
       </Button>
 

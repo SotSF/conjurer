@@ -2,6 +2,7 @@ import { observer } from "mobx-react-lite";
 import { HStack, IconButton } from "@chakra-ui/react";
 import { RiZoomInLine, RiZoomOutLine } from "react-icons/ri";
 import { CiStreamOn, CiStreamOff } from "react-icons/ci";
+import { GiDesert } from "react-icons/gi";
 import { useStore } from "@/src/types/StoreContext";
 import { action } from "mobx";
 import { AudioControls } from "@/src/components/AudioControls";
@@ -28,8 +29,8 @@ export const MainControls = observer(function MainControls() {
         onClick={action(() => uiStore.zoomOut())}
       />
       <IconButton
-        aria-label="Send data"
-        title="Send data"
+        aria-label="Send data to canopy"
+        title="Send data to canopy"
         height={6}
         bgColor={store.sendingData ? "orange.700" : undefined}
         _hover={
@@ -47,6 +48,21 @@ export const MainControls = observer(function MainControls() {
           )
         }
         onClick={store.toggleSendingData}
+      />
+      <IconButton
+        aria-label="Use local assets"
+        title="Use local assets"
+        height={6}
+        bgColor={store.usingLocalAssets ? "orange.700" : undefined}
+        _hover={
+          store.usingLocalAssets
+            ? {
+                bgColor: "orange.600",
+              }
+            : undefined
+        }
+        icon={<GiDesert size={17} />}
+        onClick={store.toggleUsingLocalAssets}
       />
     </HStack>
   );

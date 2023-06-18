@@ -11,9 +11,12 @@ import { useEffect } from "react";
 
 export const AudioControls = observer(function AudioControls() {
   const store = useStore();
-  const { uiStore, audioStore } = store;
+  const { uiStore, audioStore, initialized } = store;
 
-  useEffect(() => void audioStore.fetchAvailableAudioFiles(), [audioStore]);
+  useEffect(() => {
+    if (!initialized) return;
+    void audioStore.fetchAvailableAudioFiles();
+  }, [audioStore, initialized]);
 
   return (
     <>
@@ -81,6 +84,7 @@ export const AudioControls = observer(function AudioControls() {
         title="Upload audio"
         height={6}
         icon={<AiOutlineCloudUpload size={17} />}
+        isDisabled={store.usingLocalAssets}
         onClick={action(() => (uiStore.showingUploadAudioModal = true))}
       />
       <UploadAudioModal />

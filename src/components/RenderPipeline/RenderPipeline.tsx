@@ -51,9 +51,6 @@ export const RenderPipeline = observer(function RenderPipeline({
           renderTargetOut={renderTargetZ}
         />
       )}
-      {/* <Fragment key={activeLayers.length}>
-        {children(activeLayers.length === 2 ? renderTargetZ : renderTargetB)}
-      </Fragment> */}
     </>
   );
 });

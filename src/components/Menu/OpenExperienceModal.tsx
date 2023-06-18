@@ -29,7 +29,7 @@ export const OpenExperienceModal = observer(function OpenExperienceModal() {
   });
 
   const onOpenExperience = async (experienceFilename: string) => {
-    await experienceStore.loadFromS3(experienceFilename);
+    await experienceStore.load(experienceFilename);
     onClose();
   };
 
