@@ -99,7 +99,7 @@ export class Store {
     const experienceName = localStorage.getItem("experienceName");
     if (experienceName) {
       this._experienceName = experienceName;
-      this.experienceStore.loadFromS3(`${this.user}-${experienceName}`);
+      this.experienceStore.load(`${this.user}-${experienceName}`);
     } else this.experienceStore.loadInitialExperience();
 
     // set up an autosave interval

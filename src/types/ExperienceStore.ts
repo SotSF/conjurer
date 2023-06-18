@@ -1,6 +1,10 @@
 import { makeAutoObservable } from "mobx";
 import initialExperience from "@/src/data/initialExperience.json";
-import { GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
+import {
+  GetObjectCommand,
+  ListObjectsCommand,
+  PutObjectCommand,
+} from "@aws-sdk/client-s3";
 import {
   ASSET_BUCKET_NAME,
   EXPERIENCE_ASSET_PREFIX,
@@ -19,6 +23,7 @@ interface RootStore {
   user: string;
   experienceName: string;
   experienceLastSavedAt: number;
+  usingLocalAssets: boolean;
   serialize: () => any;
   deserialize: (data: any) => void;
 }
@@ -28,23 +33,57 @@ export class ExperienceStore {
     makeAutoObservable(this);
   }
 
+  fetchAvailableExperiences = async (userPrefix: string) => {
+    if (this.rootStore.usingLocalAssets) {
+      const response = await fetch("/api/experiences");
+      const { experienceFilenames } = await response.json();
+      return experienceFilenames;
+    }
+
+    const listObjectsCommand = new ListObjectsCommand({
+      Bucket: ASSET_BUCKET_NAME,
+      Prefix: EXPERIENCE_ASSET_PREFIX,
+    });
+
+    const data = await getS3().send(listObjectsCommand);
+    const experienceFilenames =
+      // get the names of all experience files
+      data.Contents?.map((object) => object.Key?.split("/")[1] ?? "")
+        // filter down to only the desired user's experiences
+        .filter((e) => e.startsWith(userPrefix))
+        // remove .json extension
+        .map((e) => e.replaceAll(".json", "")) ?? [];
+
+    return experienceFilenames;
+  };
+
   saveToS3 = () => {
     this.rootStore.experienceLastSavedAt = Date.now();
     const experienceFilename = `${this.rootStore.user}-${
       this.rootStore.experienceName || "untitled"
     }`;
+
     const putObjectCommand = new PutObjectCommand({
       Bucket: ASSET_BUCKET_NAME,
       Key: `${EXPERIENCE_ASSET_PREFIX}${experienceFilename}.json`,
       Body: this.stringifyExperience(),
     });
+
     return getS3().send(putObjectCommand);
   };
 
-  loadFromS3 = async (experienceFilename: string) => {
+  load = async (experienceFilename: string) => {
     this.rootStore.experienceName =
       extractExperienceNameFromFileName(experienceFilename);
     this.rootStore.experienceLastSavedAt = Date.now();
+
+    if (this.rootStore.usingLocalAssets) {
+      const response = await fetch(`/api/experiences/${experienceFilename}`);
+      const { experience } = await response.json();
+      this.loadFromString(experience);
+      return;
+    }
+
     const getObjectCommand = new GetObjectCommand({
       Bucket: ASSET_BUCKET_NAME,
       Key: `${EXPERIENCE_ASSET_PREFIX}${experienceFilename}.json`,

@@ -47,6 +47,15 @@ export class AudioStore {
     if (this.audioInitialized && !forceReload) return;
     this.audioInitialized = true;
 
+    if (this.rootStore.usingLocalAssets) {
+      const response = await fetch("/api/audio");
+      const { audioFilenames } = await response.json();
+      runInAction(() => {
+        this.availableAudioFiles = audioFilenames;
+      });
+      return;
+    }
+
     const listObjectsCommand = new ListObjectsCommand({
       Bucket: ASSET_BUCKET_NAME,
       Prefix: AUDIO_ASSET_PREFIX,
