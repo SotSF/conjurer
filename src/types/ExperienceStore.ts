@@ -34,27 +34,28 @@ export class ExperienceStore {
   }
 
   fetchAvailableExperiences = async (userPrefix: string) => {
+    let experienceFilenames: string[] = [];
     if (this.rootStore.usingLocalAssets) {
       const response = await fetch("/api/experiences");
-      const { experienceFilenames } = await response.json();
-      return experienceFilenames;
+      experienceFilenames = (await response.json()).experienceFilenames;
+    } else {
+      const listObjectsCommand = new ListObjectsCommand({
+        Bucket: ASSET_BUCKET_NAME,
+        Prefix: EXPERIENCE_ASSET_PREFIX,
+      });
+
+      const data = await getS3().send(listObjectsCommand);
+      experienceFilenames =
+        data.Contents?.map((object) => object.Key?.split("/")[1] ?? "") ?? [];
     }
 
-    const listObjectsCommand = new ListObjectsCommand({
-      Bucket: ASSET_BUCKET_NAME,
-      Prefix: EXPERIENCE_ASSET_PREFIX,
-    });
-
-    const data = await getS3().send(listObjectsCommand);
-    const experienceFilenames =
-      // get the names of all experience files
-      data.Contents?.map((object) => object.Key?.split("/")[1] ?? "")
+    return (
+      experienceFilenames
         // filter down to only the desired user's experiences
         .filter((e) => e.startsWith(userPrefix))
         // remove .json extension
-        .map((e) => e.replaceAll(".json", "")) ?? [];
-
-    return experienceFilenames;
+        .map((e) => e.replaceAll(".json", "")) ?? []
+    );
   };
 
   saveToS3 = () => {
