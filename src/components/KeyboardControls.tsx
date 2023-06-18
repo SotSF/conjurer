@@ -22,7 +22,7 @@ export const KeyboardControls = observer(function KeyboardControls() {
         uiStore.showingSaveExperienceModal = true;
         e.preventDefault();
       } else if (e.key === "s" && (e.ctrlKey || e.metaKey)) {
-        experienceStore.saveToS3();
+        experienceStore.save();
         e.preventDefault();
       }
 

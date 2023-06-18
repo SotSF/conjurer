@@ -144,7 +144,7 @@ export const MenuBar = observer(function MenuBar() {
             <MenuItem
               icon={<FiSave size={17} />}
               command="⌘S"
-              onClick={experienceStore.saveToS3}
+              onClick={experienceStore.save}
             >
               Save
             </MenuItem>
