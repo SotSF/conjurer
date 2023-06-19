@@ -23,10 +23,15 @@ export class AudioStore {
   audioMuted = false;
   audioLooping = false;
 
+  audioBuffer: AudioBuffer | null = null; // currently unused
+
   selectedRegion: RegionParams | null = null;
 
   constructor(readonly rootStore: RootStore, readonly timer: Timer) {
-    makeAutoObservable(this, { getSelectedAudioFileUrl: false });
+    makeAutoObservable(this, {
+      getSelectedAudioFileUrl: false,
+      audioBuffer: false,
+    });
     this.timer.addTickListener(this.onTick);
   }
 
