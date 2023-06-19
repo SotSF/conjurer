@@ -101,6 +101,9 @@ export const PatternPlayground = observer(function PatternPlayground() {
       </GridItem>
       <GridItem area="controls">
         <ParameterControls block={selectedPatternBlock} />
+        {selectedEffectBlock && (
+          <ParameterControls block={selectedEffectBlock} />
+        )}
       </GridItem>
       <GridItem area="preview" position="relative">
         <VStack
@@ -117,14 +120,14 @@ export const PatternPlayground = observer(function PatternPlayground() {
             <PreviewCanvas block={selectedPatternBlock} />
           </Box>
         </VStack>
-        <IconButton
+        <Button
           position="absolute"
           top={15}
-          right={4}
+          right={2}
           aria-label="Toggle canopy view"
           title="Toggle canopy view"
           height={6}
-          icon={
+          leftIcon={
             uiStore.displayingCanopy ? (
               <TbRectangleFilled size={17} />
             ) : (
@@ -132,13 +135,13 @@ export const PatternPlayground = observer(function PatternPlayground() {
             )
           }
           onClick={uiStore.toggleCanopyDisplay}
-        />
+        >{`${uiStore.displayingCanopy ? "Cartesian" : "Canopy"} view`}</Button>
         {uiStore.patternDrawerOpen && (
           <Button
             position="absolute"
-            top={10}
-            right={4}
-            variant="outline"
+            top={12}
+            right={2}
+            colorScheme="teal"
             onClick={action(() => {
               store.selectedLayer.insertCloneOfBlock(selectedPatternBlock);
               uiStore.patternDrawerOpen = false;

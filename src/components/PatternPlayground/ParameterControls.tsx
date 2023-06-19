@@ -1,5 +1,6 @@
 import {
   HStack,
+  Heading,
   NumberDecrementStepper,
   NumberIncrementStepper,
   NumberInput,
@@ -54,6 +55,9 @@ export const ParameterControls = memo(function ParameterControls({
 
   return (
     <VStack spacing={0} width="100%">
+      <Heading size="sm" mt={4}>
+        {block.pattern.name}
+      </Heading>
       {Object.entries(block.pattern.params).map(([uniformName, patternParam]) =>
         uniformNamesToExclude.includes(uniformName) ||
         typeof patternParam.value !== "number" ? null : (

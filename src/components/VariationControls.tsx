@@ -2,8 +2,11 @@ import {
   Box,
   Button,
   HStack,
+  Icon,
+  Link,
   Radio,
   RadioGroup,
+  Select,
   Switch,
   Text,
   VStack,
@@ -12,7 +15,7 @@ import { ChangeEvent, useState } from "react";
 import { Variation } from "@/src/types/Variations/Variation";
 import { action } from "mobx";
 import { FaTrashAlt } from "react-icons/fa";
-import { BiDuplicate } from "react-icons/bi";
+import { BiDuplicate, BiLinkExternal } from "react-icons/bi";
 import { Block } from "@/src/types/Block";
 import { FlatVariation } from "@/src/types/Variations/FlatVariation";
 import { LinearVariation } from "@/src/types/Variations/LinearVariation";
@@ -28,6 +31,11 @@ import { SplineVariation } from "@/src/types/Variations/SplineVariation";
 import { ExtraParams } from "@/src/types/PatternParams";
 import { useStore } from "@/src/types/StoreContext";
 import { ScalarInput } from "@/src/components/ScalarInput";
+import {
+  EasingVariation,
+  EasingVariationType,
+} from "@/src/types/Variations/EasingVariation";
+import { easings } from "@/src/utils/easings";
 
 type VariationControlsProps = {
   uniformName: string;
@@ -54,6 +62,8 @@ export const VariationControls = function VariationControls({
       <PeriodicVariationControls variation={variation} {...controlsProps} />
     ) : variation instanceof SplineVariation ? (
       <SplineVariationControls variation={variation} {...controlsProps} />
+    ) : variation instanceof EasingVariation ? (
+      <EasingVariationControls variation={variation} {...controlsProps} />
     ) : variation instanceof LinearVariation4 ? (
       <LinearVariation4Controls variation={variation} {...controlsProps} />
     ) : (
@@ -381,6 +391,65 @@ function SplineVariationControls({
           block.triggerVariationReactions(uniformName);
         }}
         value={max}
+      />
+    </>
+  );
+}
+
+type EasingVariationControlsProps = {
+  uniformName: string;
+  variation: EasingVariation;
+  block: Block;
+};
+
+function EasingVariationControls({
+  uniformName,
+  variation,
+  block,
+}: EasingVariationControlsProps) {
+  const [easingType, setEasingType] = useState<EasingVariationType>(
+    variation.easingType
+  );
+  const [from, setFrom] = useState(variation.from.toString());
+  const [to, setTo] = useState(variation.to.toString());
+
+  return (
+    <>
+      <Link href="https://easings.net/" isExternal>
+        Easing reference <Icon as={BiLinkExternal} />
+      </Link>
+      <Select
+        size="xs"
+        value={easingType}
+        onChange={(e) => {
+          variation.easingType = e.target.value as EasingVariationType;
+          setEasingType(variation.easingType);
+          block.triggerVariationReactions(uniformName);
+        }}
+      >
+        {Object.keys(easings).map((easingName) => (
+          <option key={easingName} value={easingName}>
+            {easingName}
+          </option>
+        ))}
+      </Select>
+      <ScalarInput
+        name="From"
+        onChange={(valueString, valueNumber) => {
+          variation.from = valueNumber;
+          setFrom(valueString);
+          block.triggerVariationReactions(uniformName);
+        }}
+        value={from}
+      />
+      <ScalarInput
+        name="To"
+        onChange={(valueString, valueNumber) => {
+          variation.to = valueNumber;
+          setTo(valueString);
+          block.triggerVariationReactions(uniformName);
+        }}
+        value={to}
       />
     </>
   );

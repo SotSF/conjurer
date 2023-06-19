@@ -2,7 +2,11 @@ import { ExtraParams } from "@/src/types/PatternParams";
 import { IconButton, VStack } from "@chakra-ui/react";
 import { memo } from "react";
 import { BsArrowUpRight } from "react-icons/bs";
-import { TbWaveSine, TbVectorSpline } from "react-icons/tb";
+import {
+  TbWaveSine,
+  TbVectorSpline,
+  TbEaseInOutControlPoints,
+} from "react-icons/tb";
 import { MdTrendingFlat, MdColorLens } from "react-icons/md";
 import { Block } from "@/src/types/Block";
 import { action } from "mobx";
@@ -18,6 +22,7 @@ import {
 } from "@/src/types/Variations/SplineVariation";
 import { isVector4 } from "@/src/utils/object";
 import { useStore } from "@/src/types/StoreContext";
+import { EasingVariation } from "@/src/types/Variations/EasingVariation";
 
 type NewVariationButtonsProps = {
   uniformName: string;
@@ -164,6 +169,36 @@ export const NewVariationButtons = memo(function NewVariationButtons({
             block,
             uniformName,
             new SplineVariation(DEFAULT_VARIATION_DURATION)
+          );
+        })}
+      />
+      <IconButton
+        size="xs"
+        aria-label="Ease"
+        title="Ease"
+        height={6}
+        icon={<TbEaseInOutControlPoints size={17} />}
+        onClick={action(() => {
+          // grab the last scalar value from the previous variation if it exists
+          const lastValue = block.getLastParameterValue(uniformName);
+          if (lastValue && typeof lastValue === "number") {
+            store.addVariation(
+              block,
+              uniformName,
+              new EasingVariation(
+                DEFAULT_VARIATION_DURATION,
+                "easeInSine",
+                lastValue,
+                1
+              )
+            );
+            return;
+          }
+
+          store.addVariation(
+            block,
+            uniformName,
+            new EasingVariation(DEFAULT_VARIATION_DURATION, "easeInSine", 0, 1)
           );
         })}
       />
