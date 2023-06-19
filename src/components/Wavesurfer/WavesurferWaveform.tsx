@@ -1,7 +1,7 @@
 import { useStore } from "@/src/types/StoreContext";
-import { Box } from "@chakra-ui/react";
+import { Box, Skeleton, Spinner } from "@chakra-ui/react";
 import { observer } from "mobx-react-lite";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { clamp } from "three/src/math/MathUtils";
 import type WaveSurfer from "wavesurfer.js";
 import type { WaveSurferOptions } from "wavesurfer.js";
@@ -60,6 +60,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
   const didInitialize = useRef(false);
   const ready = useRef(false);
   const lastAudioLoaded = useRef("");
+  const [loading, setLoading] = useState(true);
 
   const wavesurferConstructors = useRef<{
     WaveSurfer: typeof WaveSurfer | null;
@@ -84,6 +85,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
     didInitialize.current = true;
 
     const create = async () => {
+      setLoading(true);
       // Lazy load all wave surfer dependencies
       const { WaveSurfer, TimelinePlugin, RegionsPlugin } =
         (wavesurferConstructors.current = await importWavesurferConstructors());
@@ -115,6 +117,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
       });
 
       cloneCanvas();
+      setLoading(false);
     };
 
     create();
@@ -136,6 +139,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
         wavesurferRef.current.stop();
         timer.playing = false;
         timer.setTime(0);
+        setLoading(true);
 
         // Destroy the old timeline plugin
         timelinePlugin.current?.destroy();
@@ -152,6 +156,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
         wavesurferRef.current.zoom(uiStore.pixelsPerSecond);
         wavesurferRef.current.seekTo(0);
         ready.current = true;
+        setLoading(false);
       }
     };
     changeAudioFile();
@@ -237,6 +242,14 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
 
   return (
     <Box width="100%" height={10} bgColor="gray.500">
+      <Skeleton
+        width="100%"
+        height="100%"
+        startColor="gray.500"
+        endColor="gray.700"
+        speed={0.5}
+        isLoaded={!loading}
+      />
       <Box position="absolute" top={0} id="waveform" ref={waveformRef} />
       {uiStore.showingWaveformOverlay && (
         <Box
