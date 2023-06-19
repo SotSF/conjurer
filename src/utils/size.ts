@@ -1,6 +1,6 @@
 import { Vector2 } from "three";
 
-export const LED_COUNTS = new Vector2(96, 150);
+export const LED_COUNTS = new Vector2(96, 151);
 
 const FEET_PR_METER = 3.28084;
 const STRIP_LENGTH_METERS = 2.5;
