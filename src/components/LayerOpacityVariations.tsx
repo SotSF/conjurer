@@ -31,7 +31,7 @@ export const LayerOpacityVariations = observer(function LayerOpacityVariations({
         />
       ) : (
         <HStack ml={2}>
-          <Text py={2} fontSize={10}>
+          <Text userSelect="none" py={2} fontSize={10}>
             Click to add a variation:
           </Text>
           <NewVariationButtons

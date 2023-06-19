@@ -7,6 +7,7 @@ import { NewVariationButtons } from "@/src/components/NewVariationButtons";
 import { ParameterVariations } from "@/src/components/ParameterVariations";
 import { observer } from "mobx-react-lite";
 import { ParameterValue } from "@/src/components/ParameterValue";
+import { useStore } from "@/src/types/StoreContext";
 
 type ParameterProps = {
   uniformName: string;
@@ -21,6 +22,7 @@ export const ParameterView = observer(function ParameterView({
   block,
   expandMode = "collapsed",
 }: ParameterProps) {
+  const { uiStore } = useStore();
   const variations = block.parameterVariations[uniformName] ?? [];
   const [isExpanded, setExpanded] = useState(expandMode === "expanded");
 
@@ -36,6 +38,12 @@ export const ParameterView = observer(function ParameterView({
       borderStyle="dashed"
       borderBottomWidth={1}
       borderColor="gray.500"
+      onDoubleClick={(e) => {
+        const boundingBox = e.currentTarget.getBoundingClientRect();
+        const x = e.clientX - boundingBox.left;
+        const time = uiStore.xToTime(x);
+        block.addFlatVariationUpToTime(uniformName, time);
+      }}
     >
       <Button
         variant="ghost"
@@ -71,7 +79,7 @@ export const ParameterView = observer(function ParameterView({
       {isExpanded &&
         (variations.length === 0 ? (
           <HStack ml={2} width="100%">
-            <Text py={2} fontSize={10}>
+            <Text userSelect="none" py={2} fontSize={10}>
               Click to add a variation:
             </Text>
             <NewVariationButtons uniformName={uniformName} block={block} />

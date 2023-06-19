@@ -8,6 +8,7 @@ import { deserializeVariation } from "@/src/types/Variations/variations";
 import { effectMap } from "@/src/effects/effects";
 import { Layer } from "@/src/types/Layer";
 import { Opacity } from "@/src/patterns/Opacity";
+import { FlatVariation } from "@/src/types/Variations/FlatVariation";
 
 type SerializedBlock = {
   pattern: string;
@@ -118,6 +119,30 @@ export class Block<T extends ExtraParams = {}> {
 
     const lastVariation = variations[variations.length - 1];
     return lastVariation.valueAtTime(lastVariation.duration);
+  };
+
+  addFlatVariationUpToTime = (uniformName: string, time: number) => {
+    const parameter = this.pattern.params[uniformName];
+    if (typeof parameter.value !== "number") return;
+
+    const variations = this.parameterVariations[uniformName];
+    if (!variations) {
+      this.parameterVariations[uniformName as keyof T] = [
+        new FlatVariation(time, parameter.value),
+      ];
+    } else {
+      const totalVariationDuration = variations.reduce(
+        (total, variation) => total + variation.duration,
+        0
+      );
+
+      if (time < totalVariationDuration || time > this.duration) return;
+
+      variations.push(
+        new FlatVariation(time - totalVariationDuration, parameter.value)
+      );
+      this.triggerVariationReactions(uniformName);
+    }
   };
 
   addVariation = (uniformName: string, variation: Variation) => {
