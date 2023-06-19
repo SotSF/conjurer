@@ -3,6 +3,10 @@ precision mediump float;
 #endif
 
 uniform sampler2D u_texture;
+uniform float u_cartesianness;
+
+// // For debugging
+// #define u_cartesianness 0.5
 
 varying vec2 v_uv;
 
@@ -13,5 +17,7 @@ void main() {
     float x = r * cos(theta) * 0.5 + 0.5;
     float y = r * sin(theta) * 0.5 + 0.5;
 
-    gl_FragColor = texture2D(u_texture, vec2(x, y));
+    vec2 coordinate = mix(st, vec2(x, y), u_cartesianness);
+
+    gl_FragColor = texture2D(u_texture, coordinate);
 }
