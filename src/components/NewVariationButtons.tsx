@@ -189,7 +189,7 @@ export const NewVariationButtons = memo(function NewVariationButtons({
                 DEFAULT_VARIATION_DURATION,
                 "easeInSine",
                 lastValue,
-                1
+                lastValue + 1
               )
             );
             return;

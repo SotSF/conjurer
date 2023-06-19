@@ -53,7 +53,8 @@ export class EasingVariation extends Variation<number> {
   }
 
   valueAtTime = (time: number) =>
-    easings[this.easingType](time / this.duration);
+    this.from +
+    (this.to - this.from) * easings[this.easingType](time / this.duration);
 
   computeDomain = () =>
     [Math.min(this.from, this.to), Math.max(this.from, this.to)] as [
