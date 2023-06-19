@@ -35,7 +35,7 @@ export type EasingVariationType =
 
 export class EasingVariation extends Variation<number> {
   displayName = "Easing";
-  periodicType: EasingVariationType = "easeInSine";
+  easingType: EasingVariationType = "easeInSine";
   from: number;
   to: number;
 
@@ -47,13 +47,13 @@ export class EasingVariation extends Variation<number> {
   ) {
     super("easing", duration);
 
-    this.periodicType = easingType;
+    this.easingType = easingType;
     this.from = from;
     this.to = to;
   }
 
   valueAtTime = (time: number) =>
-    easings[this.periodicType](time / this.duration);
+    easings[this.easingType](time / this.duration);
 
   computeDomain = () =>
     [Math.min(this.from, this.to), Math.max(this.from, this.to)] as [
@@ -74,16 +74,16 @@ export class EasingVariation extends Variation<number> {
   };
 
   clone = () =>
-    new EasingVariation(this.duration, this.periodicType, this.from, this.to);
+    new EasingVariation(this.duration, this.easingType, this.from, this.to);
 
   serialize = () => ({
     type: this.type,
     duration: this.duration,
-    periodicType: this.periodicType,
+    easingType: this.easingType,
     from: this.from,
     to: this.to,
   });
 
   static deserialize = (data: any) =>
-    new EasingVariation(data.duration, data.periodicType, data.from, data.to);
+    new EasingVariation(data.duration, data.easingType, data.from, data.to);
 }
