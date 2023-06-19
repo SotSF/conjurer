@@ -101,6 +101,9 @@ export const PatternPlayground = observer(function PatternPlayground() {
       </GridItem>
       <GridItem area="controls">
         <ParameterControls block={selectedPatternBlock} />
+        {selectedEffectBlock && (
+          <ParameterControls block={selectedEffectBlock} />
+        )}
       </GridItem>
       <GridItem area="preview" position="relative">
         <VStack
