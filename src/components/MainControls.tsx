@@ -1,6 +1,8 @@
 import { observer } from "mobx-react-lite";
 import { HStack, IconButton } from "@chakra-ui/react";
 import { RiZoomInLine, RiZoomOutLine } from "react-icons/ri";
+import { RxAlignCenterHorizontally } from "react-icons/rx";
+import { TbArrowBigRightLines } from "react-icons/tb";
 import { CiStreamOn, CiStreamOff } from "react-icons/ci";
 import { GiDesert } from "react-icons/gi";
 import { useStore } from "@/src/types/StoreContext";
@@ -63,6 +65,42 @@ export const MainControls = observer(function MainControls() {
         }
         icon={<GiDesert size={17} />}
         onClick={store.toggleUsingLocalAssets}
+      />
+      <IconButton
+        aria-label="Keep playhead centered"
+        title="Keep playhead centered"
+        height={6}
+        bgColor={uiStore.keepingPlayHeadCentered ? "orange.700" : undefined}
+        _hover={
+          uiStore.keepingPlayHeadCentered
+            ? {
+                bgColor: "orange.600",
+              }
+            : undefined
+        }
+        icon={<RxAlignCenterHorizontally size={17} />}
+        onClick={action(
+          () =>
+            (uiStore.keepingPlayHeadCentered = !uiStore.keepingPlayHeadCentered)
+        )}
+      />
+      <IconButton
+        aria-label="Keep playhead visible"
+        title="Keep playhead visible"
+        height={6}
+        bgColor={uiStore.keepingPlayHeadVisible ? "orange.700" : undefined}
+        _hover={
+          uiStore.keepingPlayHeadVisible
+            ? {
+                bgColor: "orange.600",
+              }
+            : undefined
+        }
+        icon={<TbArrowBigRightLines size={17} />}
+        onClick={action(
+          () =>
+            (uiStore.keepingPlayHeadVisible = !uiStore.keepingPlayHeadVisible)
+        )}
       />
     </HStack>
   );

@@ -4,11 +4,43 @@ import { useStore } from "@/src/types/StoreContext";
 import styles from "@/styles/TimeMarker.module.css";
 import classNames from "classnames";
 import { useEffect, useRef } from "react";
+import { useDebouncedCallback } from "use-debounce";
 
 export const PlayHead = observer(function PlayHead() {
   const { timer, uiStore } = useStore();
 
   const playHead = useRef<HTMLDivElement>(null);
+
+  const scrollIntoView = useDebouncedCallback(
+    (scrollPosition: ScrollLogicalPosition) =>
+      playHead.current?.scrollIntoView({
+        behavior: "smooth",
+        block: scrollPosition,
+        inline: scrollPosition,
+      }),
+    20
+  );
+
+  useEffect(() => {
+    if (!playHead.current || !uiStore.keepingPlayHeadVisible || !timer.playing)
+      return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => !entry.isIntersecting && scrollIntoView("start")
+    );
+    observer.observe(playHead.current);
+    return () => observer.disconnect();
+  }, [scrollIntoView, uiStore.keepingPlayHeadVisible, timer.playing]);
+
+  useEffect(() => {
+    if (!uiStore.keepingPlayHeadCentered || !timer.playing) return;
+
+    const interval = setInterval(
+      () => requestAnimationFrame(() => scrollIntoView("center")),
+      30
+    );
+    return () => clearInterval(interval);
+  }, [scrollIntoView, uiStore.keepingPlayHeadCentered, timer.playing]);
 
   useEffect(() => {
     if (!playHead.current) return;
