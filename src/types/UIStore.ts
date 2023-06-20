@@ -20,6 +20,10 @@ export class UIStore {
   showingSaveExperienceModal = false;
   showingUploadAudioModal = false;
 
+  // TODO: refactor these in display in ui differently
+  keepingPlayHeadCentered = false;
+  keepingPlayHeadVisible = false;
+
   patternDrawerOpen = false;
 
   private _lastPatternIndexSelected = 0;
