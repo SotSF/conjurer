@@ -7,7 +7,7 @@ import {
 import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
 import canopyVert from "@/src/shaders/canopy.vert";
-import fromTextureWithIntensity from "@/src/shaders/fromTextureWithIntensity.frag";
+import fromTextureCircularMask from "@/src/shaders/fromTextureCircularMask.frag";
 import canopyGeometry from "@/src/data/canopyGeometry.json";
 import {
   BloomEffect,
@@ -87,7 +87,7 @@ export const Canopy = function Canopy({ renderTarget }: CanopyViewProps) {
         <primitive attach="geometry" object={bufferGeometry} />
         <shaderMaterial
           uniforms={canopyUniforms.current}
-          fragmentShader={fromTextureWithIntensity}
+          fragmentShader={fromTextureCircularMask}
           vertexShader={canopyVert}
         />
       </points>
