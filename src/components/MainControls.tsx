@@ -8,6 +8,7 @@ import { GiDesert } from "react-icons/gi";
 import { useStore } from "@/src/types/StoreContext";
 import { action } from "mobx";
 import { AudioControls } from "@/src/components/AudioControls";
+import { IntensitySlider } from "@/src/components/IntensitySlider";
 
 export const MainControls = observer(function MainControls() {
   const store = useStore();
@@ -102,6 +103,7 @@ export const MainControls = observer(function MainControls() {
             (uiStore.keepingPlayHeadVisible = !uiStore.keepingPlayHeadVisible)
         )}
       />
+      <IntensitySlider />
     </HStack>
   );
 });

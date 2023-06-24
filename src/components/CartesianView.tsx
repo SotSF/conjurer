@@ -17,12 +17,20 @@ export const CartesianView = observer(function CartesianView({
   const store = useStore();
   const { uiStore } = store;
   const outputMesh = useRef<Mesh>(null);
-  const outputUniforms = useRef({ u_texture: { value: renderTarget.texture } });
+  const outputUniforms = useRef({
+    u_texture: { value: renderTarget.texture },
+    u_intensity: { value: 1 },
+  });
 
   useEffect(() => {
     if (!outputUniforms.current) return;
     outputUniforms.current.u_texture.value = renderTarget.texture;
   }, [renderTarget.texture]);
+
+  useEffect(() => {
+    if (!outputUniforms.current) return;
+    outputUniforms.current.u_intensity.value = store.globalIntensity;
+  }, [store.globalIntensity]);
 
   // render the cartesian view
   useFrame(({ gl, camera }) => {

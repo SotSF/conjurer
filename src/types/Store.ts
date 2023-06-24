@@ -29,6 +29,17 @@ export class Store {
 
   sendingData = false;
 
+  _globalIntensity = 1;
+
+  get globalIntensity(): number {
+    return this._globalIntensity;
+  }
+
+  set globalIntensity(value: number) {
+    this._globalIntensity = value;
+    localStorage.setItem("globalIntensity", String(value));
+  }
+
   private _usingLocalAssets = false;
 
   get usingLocalAssets(): boolean {
@@ -90,6 +101,10 @@ export class Store {
     // check for a username in local storage
     const username = localStorage.getItem("user");
     if (username) this._user = username;
+
+    // check for a global intensity in local storage
+    const globalIntensity = localStorage.getItem("globalIntensity");
+    if (globalIntensity) this._globalIntensity = Number(globalIntensity);
 
     // check for a usingLocalAssets in local storage
     const usingLocalAssets = localStorage.getItem("usingLocalAssets");
