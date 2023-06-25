@@ -29,6 +29,8 @@ export class Block<T extends ExtraParams = {}> {
   startTime: number = 0; // global time that block starts playing at in seconds
   duration: number = 5; // duration that block plays for in seconds
 
+  headerRepetitions: number = 1; // number of times to repeat the headers in this block
+
   private _layer: Layer | null = null; // the layer that this block is in
 
   get layer() {
@@ -221,6 +223,14 @@ export class Block<T extends ExtraParams = {}> {
 
     // create a new array so that mobx can detect the change
     this.parameterVariations[uniformName as keyof T] = [...variations];
+  };
+
+  recomputeHeaderRepetitions = (width: number) => {
+    this.headerRepetitions = Math.ceil(width / 1200);
+
+    this.effectBlocks.forEach((effect) =>
+      effect.recomputeHeaderRepetitions(width)
+    );
   };
 
   reorderEffectBlock = (block: Block, delta: number) => {

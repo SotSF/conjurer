@@ -54,7 +54,7 @@ export const ParameterView = observer(function ParameterView({
         onClick={() => setExpanded(!isExpanded)}
       >
         <HStack width="100%" justify="space-evenly">
-          <HeaderRepeat times={2}>
+          <HeaderRepeat times={block.headerRepetitions}>
             <Text
               lineHeight={1}
               userSelect="none"

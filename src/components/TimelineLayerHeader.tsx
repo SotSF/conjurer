@@ -79,13 +79,7 @@ export const TimelineLayerHeader = observer(function TimelineLayerHeader({
             />
           )}
       </VStack>
-      <HStack
-        // position="absolute"
-        // bottom={0}
-        // height="40px"
-        justify="center"
-        spacing={0}
-      >
+      <HStack justify="center" spacing={0}>
         <Button
           mb={2}
           color={layer.showingOpacityControls ? "white" : "black"}

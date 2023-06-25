@@ -50,7 +50,7 @@ export const PatternOrEffectBlock = observer(function PatternOrEffectBlock({
         role="button"
         onClick={handleBlockClick}
       >
-        <HeaderRepeat times={2}>
+        <HeaderRepeat times={block.headerRepetitions}>
           {!isEffect && <MdDragIndicator size={30} />}
           <Heading
             size="md"

@@ -13,15 +13,15 @@ import {
 import { action } from "mobx";
 import { FiPlusSquare } from "react-icons/fi";
 import { effects } from "@/src/effects/effects";
-import { memo } from "react";
 import { HeaderRepeat } from "@/src/components/HeaderRepeat";
+import { observer } from "mobx-react-lite";
 
 type Props = {
   block: Block;
   isSelected: boolean;
 };
 
-export const AddEffectButton = memo(function AddEffectButton({
+export const AddEffectButton = observer(function AddEffectButton({
   block,
   isSelected,
 }: Props) {
@@ -40,7 +40,7 @@ export const AddEffectButton = memo(function AddEffectButton({
             overflowWrap="anywhere"
             justify="space-evenly"
           >
-            <HeaderRepeat times={2}>
+            <HeaderRepeat times={block.headerRepetitions}>
               <FiPlusSquare size={20} />
               <Text
                 userSelect="none"

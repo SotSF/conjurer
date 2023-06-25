@@ -30,10 +30,18 @@ export const TimelineBlockStack = observer(function TimelineBlockStack({
   const dragNodeRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
     if (!dragNodeRef.current) return;
-    new ResizeObserver(() => patternBlock.layer?.recomputeHeight()).observe(
-      dragNodeRef.current
-    );
-  }, [dragNodeRef, patternBlock.layer]);
+
+    // Anytime the TimelineBlockStack is resized,
+    new ResizeObserver(() => {
+      // recompute the height of the layer
+      patternBlock.layer?.recomputeHeight();
+
+      // recompute the number of header repetitions
+      patternBlock.recomputeHeaderRepetitions(
+        dragNodeRef.current?.clientWidth ?? 0
+      );
+    }).observe(dragNodeRef.current);
+  }, [dragNodeRef, patternBlock.layer, patternBlock]);
 
   const lastMouseDown = useRef(0);
 
