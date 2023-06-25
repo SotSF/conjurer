@@ -57,10 +57,28 @@ Starts a websocket server at port 8080 on localhost. For development use only. W
 
 #### `yarn downloadCloudAssets`
 
-Downloads all of the experience and audio files from s3 into the folder `public/cloud-assets`. Conjurer can then read from these files when in "local asset mode", useful for situations when internet is not available.
+Downloads all of the experience and audio files from s3 into the folder `public/cloud-assets`. Conjurer can then read from these files when in "local asset mode", useful for situations when internet is not available. See section below for more details.
+
+### Preparing to run Conjurer without internet access
+
+In order to run Conjurer without internet access, such as at a festival, you can follow these below steps.
+
+1. Clone this repository as usual.
+1. Run `yarn` as usual to install dependencies.
+1. Run `yarn downloadCloudAssets` to download all cloud assets into the folder `public/cloud-assets`. Note that you are getting a snapshot of all of the experiences and audio files. If you make more changes to these cloud saved files, you will have to rerun this script to download the latest changed assets.
+1. Run `yarn dev` as usual to run the app with hot reloading.
+1. Toggle the `Use local assets` button on such that it is orange:
+
+![Use local assets button](public/use-local-assets-button.png)
+
+You are good to go! From now on, you should not need internet access for any functionality. Whenever you open an experience or audio file, it will be loaded from the `public/cloud-assets` directory, and whenever you save an experience file, it will be saved locally into that same directory.
+
+You can toggle the same button again to return to opening/saving files to the cloud. Just be careful of potentially overwriting the wrong thing.
 
 ## Todos
 
-Must do's captured in the "Road to Minimum Viable Magical Product" [issue](https://github.com/SotSF/conjurer/issues/26).
+To dos are captured in the [wiki](https://github.com/SotSF/conjurer/wiki), and occasionally are captured as issues.
 
-Other to do's captured in the [wiki](https://github.com/SotSF/conjurer/wiki).
+## Contributing
+
+Please do! This is a group effort, and any help is welcome.
