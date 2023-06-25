@@ -13,14 +13,15 @@ import {
 import { action } from "mobx";
 import { FiPlusSquare } from "react-icons/fi";
 import { effects } from "@/src/effects/effects";
-import { memo } from "react";
+import { HeaderRepeat } from "@/src/components/HeaderRepeat";
+import { observer } from "mobx-react-lite";
 
 type Props = {
   block: Block;
   isSelected: boolean;
 };
 
-export const AddEffectButton = memo(function AddEffectButton({
+export const AddEffectButton = observer(function AddEffectButton({
   block,
   isSelected,
 }: Props) {
@@ -32,17 +33,29 @@ export const AddEffectButton = memo(function AddEffectButton({
       borderStyle="solid"
     >
       <Menu placement="bottom">
-        <MenuButton as={Button} variant="ghost" width="100%" textAlign="center">
+        <MenuButton
+          as={Button}
+          variant="ghost"
+          width="100%"
+          textAlign="center"
+          px={0}
+        >
           <HStack
             userSelect="none"
             textOverflow="clip"
             overflowWrap="anywhere"
-            justify="center"
+            justify="space-evenly"
           >
-            <FiPlusSquare size={20} />
-            <Text userSelect="none" textOverflow="clip" overflowWrap="anywhere">
-              Add effect
-            </Text>
+            <HeaderRepeat times={block.headerRepetitions}>
+              <FiPlusSquare size={20} />
+              <Text
+                userSelect="none"
+                textOverflow="clip"
+                overflowWrap="anywhere"
+              >
+                Add effect
+              </Text>
+            </HeaderRepeat>
           </HStack>
         </MenuButton>
         <Portal>
