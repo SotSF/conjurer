@@ -16,7 +16,7 @@
     "@aws-sdk/credential-providers": "^3.351.0",
     "@chakra-ui/react": "^2.5.5",
     "@emotion/react": "^11.11.0",
-    "@emotion/styled": "^11.10.6",
+    "@emotion/styled": "^11.11.0",
     "@hello-pangea/dnd": "^16.2.0",
     "@react-three/drei": "^9.68.3",
     "@react-three/fiber": "^8.13.0",
