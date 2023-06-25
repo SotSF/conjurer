@@ -14,6 +14,7 @@ import { action } from "mobx";
 import { FiPlusSquare } from "react-icons/fi";
 import { effects } from "@/src/effects/effects";
 import { memo } from "react";
+import { HeaderRepeat } from "@/src/components/HeaderRepeat";
 
 type Props = {
   block: Block;
@@ -37,12 +38,18 @@ export const AddEffectButton = memo(function AddEffectButton({
             userSelect="none"
             textOverflow="clip"
             overflowWrap="anywhere"
-            justify="center"
+            justify="space-evenly"
           >
-            <FiPlusSquare size={20} />
-            <Text userSelect="none" textOverflow="clip" overflowWrap="anywhere">
-              Add effect
-            </Text>
+            <HeaderRepeat times={2}>
+              <FiPlusSquare size={20} />
+              <Text
+                userSelect="none"
+                textOverflow="clip"
+                overflowWrap="anywhere"
+              >
+                Add effect
+              </Text>
+            </HeaderRepeat>
           </HStack>
         </MenuButton>
         <Portal>

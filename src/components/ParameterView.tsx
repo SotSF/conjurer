@@ -8,6 +8,7 @@ import { ParameterVariations } from "@/src/components/ParameterVariations";
 import { observer } from "mobx-react-lite";
 import { ParameterValue } from "@/src/components/ParameterValue";
 import { useStore } from "@/src/types/StoreContext";
+import { HeaderRepeat } from "@/src/components/HeaderRepeat";
 
 type ParameterProps = {
   uniformName: string;
@@ -52,27 +53,29 @@ export const ParameterView = observer(function ParameterView({
         p={0}
         onClick={() => setExpanded(!isExpanded)}
       >
-        <HStack width="100%" justify="center">
-          <Text
-            lineHeight={1}
-            userSelect="none"
-            fontSize={14}
-            color={headerColor}
-          >
-            {patternParam.name}
-            {isCurrentBlock && (
-              <ParameterValue
-                uniformName={uniformName}
-                patternParam={patternParam}
-                block={block}
-              />
+        <HStack width="100%" justify="space-evenly">
+          <HeaderRepeat times={2}>
+            <Text
+              lineHeight={1}
+              userSelect="none"
+              fontSize={14}
+              color={headerColor}
+            >
+              {patternParam.name}
+              {isCurrentBlock && (
+                <ParameterValue
+                  uniformName={uniformName}
+                  patternParam={patternParam}
+                  block={block}
+                />
+              )}
+            </Text>
+            {isExpanded ? (
+              <BsCaretUp key={headerColor} size={10} color={headerColor} />
+            ) : (
+              <BsCaretDown key={headerColor} size={10} color={headerColor} />
             )}
-          </Text>
-          {isExpanded ? (
-            <BsCaretUp key={headerColor} size={10} color={headerColor} />
-          ) : (
-            <BsCaretDown key={headerColor} size={10} color={headerColor} />
-          )}
+          </HeaderRepeat>
         </HStack>
       </Button>
 

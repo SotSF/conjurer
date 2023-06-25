@@ -8,6 +8,7 @@ import { BsArrowsCollapse, BsArrowsExpand } from "react-icons/bs";
 import { ParametersList } from "@/src/components/ParametersList";
 import { RxCaretDown, RxCaretUp } from "react-icons/rx";
 import { FaTrashAlt } from "react-icons/fa";
+import { HeaderRepeat } from "@/src/components/HeaderRepeat";
 
 type Props = {
   block: Block;
@@ -42,78 +43,84 @@ export const PatternOrEffectBlock = observer(function PatternOrEffectBlock({
         borderColor={color}
         borderStyle="solid"
         className={isEffect ? "" : "handle"}
-        justify="center"
+        justify="space-evenly"
         cursor={isEffect ? "pointer" : "grab"}
         spacing={0}
         color={color}
         role="button"
         onClick={handleBlockClick}
       >
-        {!isEffect && <MdDragIndicator size={30} />}
-        <Heading
-          size="md"
-          userSelect="none"
-          textOverflow="clip"
-          overflowWrap="anywhere"
-          color={color}
-        >
-          {isEffect ? "Effect" : "Pattern"}: {block.pattern.name}
-        </Heading>
-        <IconButton
-          variant="ghost"
-          size="xs"
-          aria-label="Flat"
-          title="Flat"
-          height={6}
-          icon={
-            expandMode === "collapsed" ? (
-              <BsArrowsExpand size={15} />
-            ) : (
-              <BsArrowsCollapse size={15} />
-            )
-          }
-          onClick={(e) => {
-            setExpandMode(expandMode === "expanded" ? "collapsed" : "expanded");
-            e.stopPropagation();
-          }}
-        />
-        {isEffect && (
-          <HStack position="absolute" right={0}>
-            {effectIndex < lastEffectIndex && (
+        <HeaderRepeat times={2}>
+          {!isEffect && <MdDragIndicator size={30} />}
+          <Heading
+            size="md"
+            userSelect="none"
+            textOverflow="clip"
+            overflowWrap="anywhere"
+            color={color}
+          >
+            {isEffect ? "Effect" : "Pattern"}: {block.pattern.name}
+          </Heading>
+          <IconButton
+            variant="ghost"
+            size="xs"
+            aria-label="Flat"
+            title="Flat"
+            height={6}
+            icon={
+              expandMode === "collapsed" ? (
+                <BsArrowsExpand size={15} />
+              ) : (
+                <BsArrowsCollapse size={15} />
+              )
+            }
+            onClick={(e) => {
+              setExpandMode(
+                expandMode === "expanded" ? "collapsed" : "expanded"
+              );
+              e.stopPropagation();
+            }}
+          />
+          {isEffect && (
+            <HStack position="absolute" right={0}>
+              {effectIndex < lastEffectIndex && (
+                <IconButton
+                  variant="link"
+                  aria-label="Move down"
+                  title="Move down"
+                  height={6}
+                  _hover={{ color: "blue.500" }}
+                  icon={<RxCaretDown size={28} />}
+                  onClick={action(() =>
+                    parentBlock.reorderEffectBlock(block, 1)
+                  )}
+                />
+              )}
+              {effectIndex > 0 && (
+                <IconButton
+                  variant="link"
+                  aria-label="Move up"
+                  title="Move up"
+                  height={6}
+                  _hover={{ color: "blue.500" }}
+                  icon={<RxCaretUp size={28} />}
+                  onClick={action(() =>
+                    parentBlock.reorderEffectBlock(block, -1)
+                  )}
+                />
+              )}
               <IconButton
                 variant="link"
-                aria-label="Move down"
-                title="Move down"
+                aria-label="Delete effect"
+                title="Delete effect"
                 height={6}
-                _hover={{ color: "blue.500" }}
-                icon={<RxCaretDown size={28} />}
-                onClick={action(() => parentBlock.reorderEffectBlock(block, 1))}
+                _hover={{ color: "red.500" }}
+                icon={<FaTrashAlt size={12} />}
+                onClick={action(() => parentBlock.removeEffectBlock(block))}
               />
-            )}
-            {effectIndex > 0 && (
-              <IconButton
-                variant="link"
-                aria-label="Move up"
-                title="Move up"
-                height={6}
-                _hover={{ color: "blue.500" }}
-                icon={<RxCaretUp size={28} />}
-                onClick={action(() =>
-                  parentBlock.reorderEffectBlock(block, -1)
-                )}
-              />
-            )}
-            <IconButton
-              variant="link"
-              aria-label="Delete effect"
-              title="Delete effect"
-              height={6}
-              _hover={{ color: "red.500" }}
-              icon={<FaTrashAlt size={12} />}
-              onClick={action(() => parentBlock.removeEffectBlock(block))}
-            />
-          </HStack>
-        )}
+            </HStack>
+          )}
+        </HeaderRepeat>
       </HStack>
       <ParametersList expandMode={expandMode} block={block} />
     </>
