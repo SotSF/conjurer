@@ -226,7 +226,8 @@ export class Block<T extends ExtraParams = {}> {
   };
 
   recomputeHeaderRepetitions = (width: number) => {
-    this.headerRepetitions = Math.ceil(width / 1200);
+    // average screen width is 1280px, so repeat header and additional time for each multiple of this
+    this.headerRepetitions = Math.floor(width / 1280) + 1;
 
     this.effectBlocks.forEach((effect) =>
       effect.recomputeHeaderRepetitions(width)

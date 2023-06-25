@@ -33,7 +33,13 @@ export const AddEffectButton = observer(function AddEffectButton({
       borderStyle="solid"
     >
       <Menu placement="bottom">
-        <MenuButton as={Button} variant="ghost" width="100%" textAlign="center">
+        <MenuButton
+          as={Button}
+          variant="ghost"
+          width="100%"
+          textAlign="center"
+          px={0}
+        >
           <HStack
             userSelect="none"
             textOverflow="clip"
