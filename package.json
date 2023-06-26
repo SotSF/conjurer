@@ -52,7 +52,7 @@
     "@types/react": "^18.0.32",
     "@types/three": "^0.150.1",
     "@typescript-eslint/parser": "^5.59.9",
-    "eslint": "^8.37.0",
+    "eslint": "^8.43.0",
     "eslint-config-next": "13.4.1",
     "eslint-plugin-mobx": "^0.0.9",
     "r3f-perf": "^7.1.2",
