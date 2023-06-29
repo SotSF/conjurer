@@ -6,12 +6,11 @@ import {
   DEFAULT_VARIATION_DURATION,
   MINIMUM_VARIATION_DURATION,
 } from "@/src/utils/time";
-import { defaultPatternMap } from "@/src/patterns/patterns";
 import { deserializeVariation } from "@/src/types/Variations/variations";
-import { defaultEffectMap } from "@/src/effects/effects";
 import { Layer } from "@/src/types/Layer";
 import { Opacity } from "@/src/patterns/Opacity";
 import { FlatVariation } from "@/src/types/Variations/FlatVariation";
+import { defaultPatternEffectMap } from "@/src/utils/patternsEffects";
 
 type SerializedBlock = {
   pattern: string;
@@ -298,16 +297,13 @@ export class Block<T extends ExtraParams = {}> {
     // check for any parameters without variations but that have changed from their default value.
     // insert a flat variation in this case so that we persist the difference from the default.
     const parameterNames = Object.keys(
-      defaultPatternMap[this.pattern.name]?.params ??
-        defaultEffectMap[this.pattern.name]?.params ??
-        {}
+      defaultPatternEffectMap[this.pattern.name]?.params ?? {}
     );
     for (const parameter of parameterNames) {
       if (BASE_UNIFORMS.includes(parameter)) continue;
 
       const defaultParameterValue =
-        defaultPatternMap[this.pattern.name]?.params[parameter].value ??
-        defaultEffectMap[this.pattern.name]?.params[parameter].value;
+        defaultPatternEffectMap[this.pattern.name]?.params[parameter].value;
       const parameterValue = this.pattern.params[parameter].value;
       if (
         // if this parameter has no variations,
@@ -344,11 +340,7 @@ export class Block<T extends ExtraParams = {}> {
       data.pattern === "Opacity"
         ? // TODO: make opacity less of a special case
           new Block<ExtraParams>(Opacity())
-        : new Block<ExtraParams>(
-            effect
-              ? defaultEffectMap[data.pattern].clone()
-              : defaultPatternMap[data.pattern].clone()
-          );
+        : new Block<ExtraParams>(defaultPatternEffectMap[data.pattern].clone());
 
     block.setTiming({
       startTime: data.startTime,
