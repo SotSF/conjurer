@@ -13,23 +13,30 @@ import { Starfield } from "@/src/patterns/Starfield";
 import { Globules } from "@/src/patterns/Globules";
 import { Construct } from "@/src/patterns/Construct";
 
-const patterns: Pattern[] = [
-  LogSpirals(),
-  Barcode(),
-  Clouds(),
-  Disc(),
-  Fire(),
-  Globules(),
-  Melt(),
-  Pulse(),
-  Rainbow(),
-  Starfield(),
-  SunCycle(),
-  Tunnel(),
-  Construct(),
+const patternFactories: Array<() => Pattern> = [
+  LogSpirals,
+  Barcode,
+  Clouds,
+  Disc,
+  Fire,
+  Globules,
+  Melt,
+  Pulse,
+  Rainbow,
+  Starfield,
+  SunCycle,
+  Tunnel,
+  Construct,
 ];
 
-const patternMap: { [key: string]: Pattern } = {};
-for (const pattern of patterns) patternMap[pattern.name] = pattern;
+// Patterns that will not have their uniforms changed. These are used for checking what the default
+// uniform values are.
+const defaultPatterns: Pattern[] = patternFactories.map((f) => f());
+const defaultPatternMap: { [key: string]: Pattern } = {};
+for (const pattern of defaultPatterns)
+  defaultPatternMap[pattern.name] = pattern;
 
-export { patterns, patternMap };
+// Patterns that will have their uniforms updated by the pattern playground.
+const playgroundPatterns: Pattern[] = patternFactories.map((f) => f());
+
+export { defaultPatternMap, playgroundPatterns };

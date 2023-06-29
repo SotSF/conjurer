@@ -20,8 +20,7 @@ import { ExtraParams } from "@/src/types/PatternParams";
 import { FlatVariation } from "@/src/types/Variations/FlatVariation";
 import { DEFAULT_VARIATION_DURATION } from "@/src/utils/time";
 import { runInAction } from "mobx";
-
-const uniformNamesToExclude = ["u_time", "u_texture"];
+import { BASE_UNIFORMS } from "@/src/types/Pattern";
 
 const labelStyles = {
   mt: -3,
@@ -59,7 +58,7 @@ export const ParameterControls = memo(function ParameterControls({
         {block.pattern.name}
       </Heading>
       {Object.entries(block.pattern.params).map(([uniformName, patternParam]) =>
-        uniformNamesToExclude.includes(uniformName) ||
+        BASE_UNIFORMS.includes(uniformName) ||
         typeof patternParam.value !== "number" ? null : (
           <VStack key={uniformName} mt={4} width="100%">
             <HStack width="100%" mt={6} justify="space-between">

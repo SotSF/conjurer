@@ -1,14 +1,16 @@
 import { makeAutoObservable } from "mobx";
-import { Pattern } from "@/src/types/Pattern";
+import { BASE_UNIFORMS, Pattern } from "@/src/types/Pattern";
 import { ExtraParams, ParamType } from "@/src/types/PatternParams";
 import { Variation } from "@/src/types/Variations/Variation";
-import { MINIMUM_VARIATION_DURATION } from "@/src/utils/time";
-import { patternMap } from "@/src/patterns/patterns";
+import {
+  DEFAULT_VARIATION_DURATION,
+  MINIMUM_VARIATION_DURATION,
+} from "@/src/utils/time";
 import { deserializeVariation } from "@/src/types/Variations/variations";
-import { effectMap } from "@/src/effects/effects";
 import { Layer } from "@/src/types/Layer";
 import { Opacity } from "@/src/patterns/Opacity";
 import { FlatVariation } from "@/src/types/Variations/FlatVariation";
+import { defaultPatternEffectMap } from "@/src/utils/patternsEffects";
 
 type SerializedBlock = {
   pattern: string;
@@ -291,6 +293,35 @@ export class Block<T extends ExtraParams = {}> {
         parameter as keyof T
       ]?.map((variation) => variation.serialize());
     }
+
+    // check for any parameters without variations but that have changed from their default value.
+    // insert a flat variation in this case so that we persist the difference from the default.
+    const parameterNames = Object.keys(
+      defaultPatternEffectMap[this.pattern.name]?.params ?? {}
+    );
+    for (const parameter of parameterNames) {
+      if (BASE_UNIFORMS.includes(parameter)) continue;
+
+      const defaultParameterValue =
+        defaultPatternEffectMap[this.pattern.name]?.params[parameter].value;
+      const parameterValue = this.pattern.params[parameter].value;
+      if (
+        // if this parameter has no variations,
+        (this.parameterVariations[parameter]?.length ?? 0) === 0 &&
+        // and it's a number
+        typeof parameterValue === "number" &&
+        // and it's not the default value
+        parameterValue !== defaultParameterValue
+      ) {
+        // then add a flat variation to persist the difference from the default
+        serialized[parameter as keyof T] = [
+          new FlatVariation(
+            DEFAULT_VARIATION_DURATION,
+            parameterValue
+          ).serialize(),
+        ];
+      }
+    }
     return serialized;
   };
 
@@ -309,11 +340,7 @@ export class Block<T extends ExtraParams = {}> {
       data.pattern === "Opacity"
         ? // TODO: make opacity less of a special case
           new Block<ExtraParams>(Opacity())
-        : new Block<ExtraParams>(
-            effect
-              ? effectMap[data.pattern].clone()
-              : patternMap[data.pattern].clone()
-          );
+        : new Block<ExtraParams>(defaultPatternEffectMap[data.pattern].clone());
 
     block.setTiming({
       startTime: data.startTime,
