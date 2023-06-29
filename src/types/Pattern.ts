@@ -1,6 +1,8 @@
 import { deepClone } from "@/src/utils/object";
 import { ExtraParams, StandardParams } from "./PatternParams";
 
+export const BASE_UNIFORMS = ["u_time", "u_texture"];
+
 export class Pattern<T extends ExtraParams = ExtraParams> {
   name: string;
   src: string;

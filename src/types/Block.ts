@@ -1,5 +1,5 @@
 import { makeAutoObservable } from "mobx";
-import { Pattern } from "@/src/types/Pattern";
+import { BASE_UNIFORMS, Pattern } from "@/src/types/Pattern";
 import { ExtraParams, ParamType } from "@/src/types/PatternParams";
 import { Variation } from "@/src/types/Variations/Variation";
 import {
@@ -303,10 +303,11 @@ export class Block<T extends ExtraParams = {}> {
         {}
     );
     for (const parameter of parameterNames) {
+      if (BASE_UNIFORMS.includes(parameter)) continue;
+
       const defaultParameterValue =
         defaultPatternMap[this.pattern.name].params[parameter].value;
       const parameterValue = this.pattern.params[parameter].value;
-
       if (
         // if this parameter has no variations,
         (this.parameterVariations[parameter]?.length ?? 0) === 0 &&
