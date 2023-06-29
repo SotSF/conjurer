@@ -306,7 +306,8 @@ export class Block<T extends ExtraParams = {}> {
       if (BASE_UNIFORMS.includes(parameter)) continue;
 
       const defaultParameterValue =
-        defaultPatternMap[this.pattern.name].params[parameter].value;
+        defaultPatternMap[this.pattern.name]?.params[parameter].value ??
+        defaultEffectMap[this.pattern.name]?.params[parameter].value;
       const parameterValue = this.pattern.params[parameter].value;
       if (
         // if this parameter has no variations,
