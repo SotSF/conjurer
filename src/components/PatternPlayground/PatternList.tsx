@@ -1,9 +1,9 @@
 import { HStack, Text, VStack } from "@chakra-ui/react";
 import { SelectablePatternEffect } from "@/src/components/PatternPlayground/SelectablePatternEffect";
 import { Block } from "@/src/types/Block";
-import { patterns } from "@/src/patterns/patterns";
+import { playgroundPatterns } from "@/src/patterns/patterns";
 import { memo } from "react";
-import { effects } from "@/src/effects/effects";
+import { playgroundEffects } from "@/src/effects/effects";
 
 type Props = {
   selectedPatternBlock: Block;
@@ -24,7 +24,7 @@ export const PatternList = memo(function PatternList({
         Patterns
       </Text>
       <HStack width="100%" flexWrap="wrap" gap={1} spacing={0}>
-        {patterns.map((p, index) => (
+        {playgroundPatterns.map((p, index) => (
           <SelectablePatternEffect
             key={p.name}
             pattern={p}
@@ -42,7 +42,7 @@ export const PatternList = memo(function PatternList({
           selected={!selectedEffectBlock}
           onSelect={() => onSelectEffectBlock(-1)}
         />
-        {effects.map((e, index) => (
+        {playgroundEffects.map((e, index) => (
           <SelectablePatternEffect
             key={e.name}
             pattern={e}

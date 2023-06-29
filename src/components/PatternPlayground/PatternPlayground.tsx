@@ -13,10 +13,10 @@ import { PreviewCanvas } from "@/src/components/PatternPlayground/PreviewCanvas"
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Block } from "@/src/types/Block";
 import { ParameterControls } from "@/src/components/PatternPlayground/ParameterControls";
-import { patterns } from "@/src/patterns/patterns";
+import { playgroundPatterns } from "@/src/patterns/patterns";
 import { observer } from "mobx-react-lite";
 import { useStore } from "@/src/types/StoreContext";
-import { effects } from "@/src/effects/effects";
+import { playgroundEffects } from "@/src/effects/effects";
 import { action } from "mobx";
 
 const PATTERN_PREVIEW_DISPLAY_SIZE = 600;
@@ -27,7 +27,7 @@ export const PatternPlayground = observer(function PatternPlayground() {
 
   // TODO: in dire need of refactoring
   const patternBlocks = useMemo(
-    () => patterns.map((pattern) => new Block(pattern), []),
+    () => playgroundPatterns.map((pattern) => new Block(pattern), []),
     []
   );
   const [selectedPatternIndex, setSelectedPatternIndex] = useState(
@@ -37,7 +37,7 @@ export const PatternPlayground = observer(function PatternPlayground() {
     patternBlocks[selectedPatternIndex] ?? patternBlocks[0];
 
   const effectBlocks = useMemo(
-    () => effects.map((effect) => new Block(effect)),
+    () => playgroundEffects.map((effect) => new Block(effect)),
     []
   );
   const [selectedEffectIndex, setSelectedEffectIndex] = useState(

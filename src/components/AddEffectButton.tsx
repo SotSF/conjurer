@@ -12,7 +12,7 @@ import {
 } from "@chakra-ui/react";
 import { action } from "mobx";
 import { FiPlusSquare } from "react-icons/fi";
-import { effects } from "@/src/effects/effects";
+import { playgroundEffects } from "@/src/effects/effects";
 import { HeaderRepeat } from "@/src/components/HeaderRepeat";
 import { observer } from "mobx-react-lite";
 
@@ -60,7 +60,7 @@ export const AddEffectButton = observer(function AddEffectButton({
         </MenuButton>
         <Portal>
           <MenuList>
-            {effects.map((effect) => (
+            {playgroundEffects.map((effect) => (
               <MenuItem
                 key={effect.name}
                 onClick={action(() => block.addCloneOfEffect(effect))}
