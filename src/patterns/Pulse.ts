@@ -20,6 +20,10 @@ export const Pulse = () =>
       name: "Hue Width",
       value: 0.8,
     },
+    u_saturation: {
+      name: "Saturation",
+      value: 1,
+    },
     u_duty_cycle: {
       name: "Duty Cycle",
       value: 0.5,
@@ -47,5 +51,9 @@ export const Pulse = () =>
     u_number_colors: {
       name: "Number of Colors",
       value: 4,
+    },
+    u_white_leading_edge: {
+      name: "White Leading Edge",
+      value: 1,
     },
   });
