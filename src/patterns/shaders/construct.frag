@@ -19,6 +19,7 @@ uniform float u_global_elevation;
 uniform float u_wave_frequency;
 uniform float u_wave_amplitude;
 uniform float u_wave_elevation_factor;
+uniform vec4 u_color;
 
 // // For debugging
 // #define u_time_factor 1.
@@ -32,6 +33,7 @@ uniform float u_wave_elevation_factor;
 // #define u_wave_frequency 5.
 // #define u_wave_amplitude 0.5
 // #define u_wave_elevation_factor 1.5
+// #define u_color vec4(0.2627, 0.1765, 0.9255, 1.0)
 
 float plot2(float y, float pct) {
     float plotted = smoothstep(pct - u_thickness, pct, y) -
@@ -71,5 +73,5 @@ void main() {
         intensity += fade_factor * plot2(elevation, constructed);
     }
 
-    gl_FragColor = vec4(vec3(intensity), 1.0);
+    gl_FragColor = vec4(intensity * u_color.xyz, 1.);
 }
