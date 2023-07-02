@@ -1,5 +1,6 @@
 import { Pattern } from "@/src/types/Pattern";
 import construct from "./shaders/construct.frag";
+import { Vector4 } from "three";
 
 export { construct };
 export const Construct = () =>
@@ -47,5 +48,9 @@ export const Construct = () =>
     u_wave_elevation_factor: {
       name: "Wave Elevation Factor",
       value: 1.5,
+    },
+    u_color: {
+      name: "Color",
+      value: new Vector4(1, 1, 1, 1),
     },
   });

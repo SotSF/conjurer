@@ -4,6 +4,16 @@
 
 #define PI 3.14159265358979323846
 
+// cosine based palette, 4 vec3 params
+// https://iquilezles.org/articles/palettes/
+vec3 palette(in float t, in vec3 a, in vec3 b, in vec3 c, in vec3 d) {
+    return a + b * cos(6.28318 * (c * t + d));
+}
+
+float rand(float n) {
+    return fract(sin(n) * 43758.5453123);
+}
+
 float rand(vec2 co) {
     return fract(sin(dot(co.xy, vec2(12.9898, 78.233))) * 43758.5453);
 }
@@ -27,17 +37,30 @@ float plot(vec2 st, float pct) {
 //  y: 0.0 means the location of the last led on the first strip
 //  y: 1.0 means the location of the last led on the last strip
 // Cartesian coordinates mean the usual x,y coordinates, where (0, 0) is at the center of the canopy
+// and (0.5, 0.5) is at the top right corner of the canopy.
 vec2 canopyToCartesianProjection(vec2 _st) {
-    float theta = _st.x * 2.0 * 3.1415926;
+    float theta = _st.x * 2.0 * PI;
     // TODO: double check these numbers
     float r = _st.y * 0.88888888 + 0.111111111;
     return vec2(r * cos(theta) * 0.5, r * sin(theta) * 0.5);
+}
+
+vec2 canopyToPolarProjection(vec2 _st) {
+    float theta = _st.x * 2.0 * PI;
+    float r = _st.y * 0.88888888 + 0.111111111;
+    return vec2(theta, r);
 }
 
 vec2 cartesianToPolarProjection(vec2 _st) {
     float theta = atan(_st.y, _st.x) / PI / 2. + 0.5;
     float r = length(_st);
     return vec2(theta, r);
+}
+
+vec2 polarToCartesianProjection(vec2 _st) {
+    float theta = _st.x * 2.0 * PI;
+    float r = _st.y;
+    return vec2(r * cos(theta), r * sin(theta));
 }
 
 // requires centered cartesian space

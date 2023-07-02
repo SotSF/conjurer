@@ -12,6 +12,7 @@ uniform float u_time_factor;
 uniform float u_time_offset;
 uniform float u_hue_start;
 uniform float u_hue_width;
+uniform float u_saturation;
 uniform float u_duty_cycle;
 uniform float u_scale;
 uniform float u_wave_period;
@@ -19,19 +20,22 @@ uniform float u_wave_amplitude;
 uniform float u_waviness;
 uniform float u_spiral_factor;
 uniform float u_number_colors;
+uniform float u_white_leading_edge;
 
 // // For debugging
 // #define u_time_factor 0.6
 // #define u_time_offset 0.0
 // #define u_hue_start 0.2
 // #define u_hue_width 0.6
+// #define u_saturation 1.
 // #define u_duty_cycle .3
-// #define u_scale 1.
+// #define u_scale 2.
 // #define u_wave_period 0.25
-// #define u_wave_amplitude 0.25
+// #define u_wave_amplitude 0.5
 // #define u_waviness 1.
-// #define u_spiral_factor 0.
-// #define u_number_colors 5.
+// #define u_spiral_factor .5
+// #define u_number_colors 20.
+// #define u_white_leading_edge .5
 
 vec3 RGBtoHCV(in vec3 RGB) {
     float Epsilon = 1e-9;
@@ -99,17 +103,17 @@ void main() {
 
     // calculate color based on color cell
     float hue = u_hue_start + u_hue_width * color_cell / u_number_colors;
-    vec3 hsv = vec3(hue, 1., st.y);
+    vec3 hsv = vec3(hue, u_saturation, st.y);
     vec3 color = HSVtoRGB(hsv);
 
     // make the wavefront white
-    color = mix(color, vec3(1.), st.y * st.y);
+    color = mix(color, vec3(1.), u_white_leading_edge * st.y * st.y);
 
     // only display this color if this is the first duty cell in the duty cycle
     color = mix(color, vec3(0.0), step(1., duty_cell));
 
     // do additional blending if we are the second duty cell in the duty cycle
-    color = mix(color, vec3(duty_cell + 1. - pow(st.y, 5.)), step(1., duty_cell));
+    color = mix(color, vec3(duty_cell + 1. - pow(st.y, 5.)), u_white_leading_edge * step(1., duty_cell));
 
     gl_FragColor = vec4(color, 1.0);
 }

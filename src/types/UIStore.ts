@@ -5,6 +5,8 @@ import { makeAutoObservable } from "mobx";
 const MAX_PIXELS_PER_SECOND = 90;
 const MIN_PIXELS_PER_SECOND = 4;
 
+export type DisplayMode = "canopy" | "canopySpace" | "cartesianSpace";
+
 /**
  * MobX store for UI state.
  *
@@ -13,7 +15,6 @@ const MIN_PIXELS_PER_SECOND = 4;
  */
 export class UIStore {
   horizontalLayout = true;
-  displayingCanopy = true;
   showingPerformance = false;
   showingWaveformOverlay = false;
   showingOpenExperienceModal = false;
@@ -23,6 +24,17 @@ export class UIStore {
   // TODO: refactor these in display in ui differently
   keepingPlayHeadCentered = false;
   keepingPlayHeadVisible = false;
+
+  private _displayMode: DisplayMode = "canopy";
+
+  get displayMode() {
+    return this._displayMode;
+  }
+
+  set displayMode(mode: DisplayMode) {
+    this._displayMode = mode;
+    this.saveToLocalStorage();
+  }
 
   patternDrawerOpen = false;
 
@@ -87,8 +99,8 @@ export class UIStore {
     this.saveToLocalStorage();
   };
 
-  toggleCanopyDisplay = () => {
-    this.displayingCanopy = !this.displayingCanopy;
+  toggleDisplayMode = () => {
+    this.displayMode = this.displayMode === "canopy" ? "canopySpace" : "canopy";
     this.saveToLocalStorage();
   };
 
@@ -107,7 +119,7 @@ export class UIStore {
     if (data) {
       const localStorageUiSettings = JSON.parse(data);
       this.horizontalLayout = !!localStorageUiSettings.horizontalLayout;
-      this.displayingCanopy = !!localStorageUiSettings.displayingCanopy;
+      this.displayMode = localStorageUiSettings.displayMode ?? "canopy";
       this.showingPerformance = !!localStorageUiSettings.showingPerformance;
       this.lastPatternIndexSelected =
         localStorageUiSettings.lastPatternIndexSelected ?? 0;
@@ -122,7 +134,7 @@ export class UIStore {
       "uiStore",
       JSON.stringify({
         horizontalLayout: this.horizontalLayout,
-        displayingCanopy: this.displayingCanopy,
+        displayMode: this.displayMode,
         showingPerformance: this.showingPerformance,
         lastPatternIndexSelected: this.lastPatternIndexSelected,
         lastEffectIndexSelected: this.lastEffectIndexSelected,

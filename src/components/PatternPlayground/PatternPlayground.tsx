@@ -6,10 +6,13 @@ import {
   Grid,
   GridItem,
   IconButton,
+  Tab,
+  TabList,
+  Tabs,
   VStack,
 } from "@chakra-ui/react";
 import { PatternList } from "@/src/components/PatternPlayground/PatternList";
-import { PreviewCanvas } from "@/src/components/PatternPlayground/PreviewCanvas";
+import { PreviewCanvas } from "@/src/components/Canvas/PreviewCanvas";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Block } from "@/src/types/Block";
 import { ParameterControls } from "@/src/components/PatternPlayground/ParameterControls";
@@ -18,6 +21,7 @@ import { observer } from "mobx-react-lite";
 import { useStore } from "@/src/types/StoreContext";
 import { playgroundEffects } from "@/src/effects/effects";
 import { action } from "mobx";
+import { DisplayModeButtons } from "@/src/components/PatternPlayground/DisplayModeButtons";
 
 const PATTERN_PREVIEW_DISPLAY_SIZE = 600;
 
@@ -106,6 +110,7 @@ export const PatternPlayground = observer(function PatternPlayground() {
         )}
       </GridItem>
       <GridItem area="preview" position="relative">
+        <DisplayModeButtons />
         <VStack
           position="sticky"
           top={0}
@@ -120,22 +125,7 @@ export const PatternPlayground = observer(function PatternPlayground() {
             <PreviewCanvas block={selectedPatternBlock} />
           </Box>
         </VStack>
-        <Button
-          position="absolute"
-          top={15}
-          right={2}
-          aria-label="Toggle canopy view"
-          title="Toggle canopy view"
-          height={6}
-          leftIcon={
-            uiStore.displayingCanopy ? (
-              <TbRectangleFilled size={17} />
-            ) : (
-              <FaDotCircle size={17} />
-            )
-          }
-          onClick={uiStore.toggleCanopyDisplay}
-        >{`${uiStore.displayingCanopy ? "Cartesian" : "Canopy"} view`}</Button>
+
         {uiStore.patternDrawerOpen && (
           <Button
             position="absolute"
