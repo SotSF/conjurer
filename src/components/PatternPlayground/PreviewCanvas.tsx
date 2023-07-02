@@ -8,7 +8,7 @@ import { CameraControls } from "@/src/components/CameraControls";
 import { SingleBlockRenderPipeline } from "@/src/components/RenderPipeline/SingleBlockRenderPipeline";
 import { useState } from "react";
 import { WebGLRenderTarget } from "three";
-import { CartesianView } from "@/src/components/CartesianView";
+import { CanopySpaceView } from "@/src/components/CanopySpaceView";
 
 type PreviewCanvasProps = {
   block: Block;
@@ -18,7 +18,7 @@ export const PreviewCanvas = observer(function PreviewCanvas({
   block,
 }: PreviewCanvasProps) {
   const { timer, uiStore } = useStore();
-  const { displayingCanopy } = uiStore;
+  const { displayMode } = uiStore;
   const [renderTarget, setRenderTarget] = useState<WebGLRenderTarget | null>(
     null
   );
@@ -34,8 +34,8 @@ export const PreviewCanvas = observer(function PreviewCanvas({
       />
       {renderTarget && (
         <>
-          {displayingCanopy && <Canopy renderTarget={renderTarget} />}
-          <CartesianView renderTarget={renderTarget} />
+          {displayMode === "canopy" && <Canopy renderTarget={renderTarget} />}
+          <CanopySpaceView renderTarget={renderTarget} />
         </>
       )}
     </Canvas>

@@ -4,7 +4,7 @@ import { Perf } from "r3f-perf";
 import { observer } from "mobx-react-lite";
 import { useStore } from "@/src/types/StoreContext";
 import { RenderPipeline } from "@/src/components/RenderPipeline/RenderPipeline";
-import { CartesianView } from "@/src/components/CartesianView";
+import { CanopySpaceView } from "@/src/components/CanopySpaceView";
 import { CameraControls } from "@/src/components/CameraControls";
 import { RenderOnTimeChange } from "@/src/components/RenderOnTimeChange";
 import { WebGLRenderTarget } from "three";
@@ -16,7 +16,7 @@ const DEBUG = false;
 
 export const DisplayCanvas = observer(function DisplayCanvas() {
   const { uiStore } = useStore();
-  const { displayingCanopy, showingPerformance } = uiStore;
+  const { displayMode, showingPerformance } = uiStore;
 
   const [renderTarget, setRenderTarget] = useState<WebGLRenderTarget | null>(
     null
@@ -30,8 +30,8 @@ export const DisplayCanvas = observer(function DisplayCanvas() {
       <RenderPipeline setRenderTarget={setRenderTarget} />
       {renderTarget && (
         <>
-          {displayingCanopy && <Canopy renderTarget={renderTarget} />}
-          <CartesianView renderTarget={renderTarget} />
+          {displayMode === "canopy" && <Canopy renderTarget={renderTarget} />}
+          <CanopySpaceView renderTarget={renderTarget} />
         </>
       )}
     </Canvas>

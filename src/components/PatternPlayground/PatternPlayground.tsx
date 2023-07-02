@@ -128,14 +128,16 @@ export const PatternPlayground = observer(function PatternPlayground() {
           title="Toggle canopy view"
           height={6}
           leftIcon={
-            uiStore.displayingCanopy ? (
+            uiStore.displayMode === "canopySpace" ? (
               <TbRectangleFilled size={17} />
             ) : (
               <FaDotCircle size={17} />
             )
           }
-          onClick={uiStore.toggleCanopyDisplay}
-        >{`${uiStore.displayingCanopy ? "Cartesian" : "Canopy"} view`}</Button>
+          onClick={uiStore.toggleDisplayMode}
+        >
+          {uiStore.displayMode === "canopySpace" ? "Canopy space" : "Canopy"}
+        </Button>
         {uiStore.patternDrawerOpen && (
           <Button
             position="absolute"

@@ -11,7 +11,7 @@ type Props = {
   renderTarget: WebGLRenderTarget;
 };
 
-export const CartesianView = observer(function CartesianView({
+export const CanopySpaceView = observer(function CanopySpaceView({
   renderTarget,
 }: Props) {
   const store = useStore();
@@ -32,9 +32,9 @@ export const CartesianView = observer(function CartesianView({
     outputUniforms.current.u_intensity.value = store.globalIntensity;
   }, [store.globalIntensity]);
 
-  // render the cartesian view
+  // render the canopy space view
   useFrame(({ gl, camera }) => {
-    if (!outputMesh.current || uiStore.displayingCanopy) return;
+    if (!outputMesh.current || uiStore.displayMode !== "canopySpace") return;
 
     gl.setRenderTarget(null);
     gl.render(outputMesh.current, camera);

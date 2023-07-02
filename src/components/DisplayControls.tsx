@@ -38,13 +38,13 @@ export const DisplayControls = observer(function DisplayControls() {
         title="Toggle canopy view"
         height={6}
         icon={
-          uiStore.displayingCanopy ? (
+          uiStore.displayMode === "canopySpace" ? (
             <TbRectangleFilled size={17} />
           ) : (
             <FaDotCircle size={17} />
           )
         }
-        onClick={action(() => uiStore.toggleCanopyDisplay())}
+        onClick={action(() => uiStore.toggleDisplayMode())}
       />
       <IconButton
         aria-label="Toggle performance"
