@@ -1,10 +1,10 @@
 import { Canvas } from "@react-three/fiber";
-import { Canopy } from "@/src/components/Canopy";
+import { Canopy } from "@/src/components/Canvas/CanopyView";
 import { Perf } from "r3f-perf";
 import { observer } from "mobx-react-lite";
 import { useStore } from "@/src/types/StoreContext";
 import { RenderPipeline } from "@/src/components/RenderPipeline/RenderPipeline";
-import { CanopySpaceView } from "@/src/components/CanopySpaceView";
+import { CanopySpaceView } from "@/src/components/Canvas/CanopySpaceView";
 import { CameraControls } from "@/src/components/CameraControls";
 import { RenderOnTimeChange } from "@/src/components/RenderOnTimeChange";
 import { WebGLRenderTarget } from "three";

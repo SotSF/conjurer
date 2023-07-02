@@ -12,7 +12,7 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { PatternList } from "@/src/components/PatternPlayground/PatternList";
-import { PreviewCanvas } from "@/src/components/PatternPlayground/PreviewCanvas";
+import { PreviewCanvas } from "@/src/components/Canvas/PreviewCanvas";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Block } from "@/src/types/Block";
 import { ParameterControls } from "@/src/components/PatternPlayground/ParameterControls";

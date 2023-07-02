@@ -1,6 +1,6 @@
 import styles from "@/styles/Display.module.css";
 import { Box, Heading, VStack } from "@chakra-ui/react";
-import { DisplayCanvas } from "@/src/components/DisplayCanvas";
+import { DisplayCanvas } from "@/src/components/Canvas/DisplayCanvas";
 import { DisplayControls } from "@/src/components/DisplayControls";
 import { observer } from "mobx-react-lite";
 import { useStore } from "@/src/types/StoreContext";
