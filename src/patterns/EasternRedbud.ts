@@ -4,7 +4,7 @@ import { Vector4 } from "three";
 
 export { easternRedbud };
 export const EasternRedbud = () =>
-  new Pattern("EasternRedbud", easternRedbud, {
+  new Pattern("Eastern Redbud", easternRedbud, {
     u_time_factor: {
       name: "Time Factor",
       value: 1,
@@ -13,44 +13,28 @@ export const EasternRedbud = () =>
       name: "Time Offset",
       value: 0,
     },
-    u_iterations: {
-      name: "Iterations",
+    u_period: {
+      name: "Period",
       value: 5,
     },
-    u_repetition_period: {
-      name: "Repetition Period",
-      value: 5,
+    u_leaves: {
+      name: "Leaves",
+      value: 100,
     },
-    u_fade_fraction: {
-      name: "Fade Fraction",
-      value: 0.2,
+    u_trailing_leaves: {
+      name: "Trailing Leaves",
+      value: 10,
     },
-    u_thickness: {
-      name: "Thickness",
-      value: 0.05,
+    u_curve_factor: {
+      name: "Curve Factor",
+      value: 0.3,
     },
-    u_spacing: {
-      name: "Spacing",
-      value: 0.22,
-    },
-    u_global_elevation: {
-      name: "Global Elevation",
-      value: 0.05,
-    },
-    u_wave_frequency: {
-      name: "Wave Frequency",
-      value: 5,
-    },
-    u_wave_amplitude: {
-      name: "Wave Amplitude",
+    u_leaf_crispness: {
+      name: "Leaf Crispness",
       value: 0.5,
     },
-    u_wave_elevation_factor: {
-      name: "Wave Elevation Factor",
-      value: 1.5,
-    },
-    u_color: {
-      name: "Color",
-      value: new Vector4(1, 1, 1, 1),
+    u_color_change_rate: {
+      name: "Color Change Rate",
+      value: 0.4,
     },
   });
