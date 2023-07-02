@@ -16,6 +16,7 @@ uniform float u_trailing_leaves;
 uniform float u_curve_factor;
 uniform float u_leaf_crispness;
 uniform float u_color_change_rate;
+uniform Palette u_palette;
 
 // // For debugging
 // #define u_time_factor 1.
@@ -38,10 +39,6 @@ float sdEgg(in vec2 p, in float ra, in float rb) {
 float smoothLeaf(in vec2 p, in float radius) {
     float leaf = sdEgg(p, radius, 0.02 * radius);
     return - 400. * u_leaf_crispness * clamp(leaf, - 1., 0.);
-}
-
-vec3 palette(in float t) {
-    return palette(t, vec3(0.387, 0.800, 0.435), vec3(0.800, 0.392, 0.071), vec3(1.497, 1.219, 1.176), vec3(3.613, 5.485, 0.773));
 }
 
 void main() {
@@ -88,7 +85,7 @@ void main() {
         }
 
         intensity = clamp(intensity, 0., 1.);
-        color = mix(color, palette(polarRadialDistance + cos(time * u_color_change_rate)), intensity);
+        color = mix(color, palette(polarRadialDistance + cos(time * u_color_change_rate), u_palette), intensity);
     }
 
     gl_FragColor = vec4(color, 1.);
