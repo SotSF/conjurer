@@ -14,8 +14,6 @@ export type DisplayMode = "canopy" | "canopySpace" | "cartesianSpace";
  * @class UIStore
  */
 export class UIStore {
-  displayMode: DisplayMode = "canopy";
-
   horizontalLayout = true;
   showingPerformance = false;
   showingWaveformOverlay = false;
@@ -26,6 +24,17 @@ export class UIStore {
   // TODO: refactor these in display in ui differently
   keepingPlayHeadCentered = false;
   keepingPlayHeadVisible = false;
+
+  private _displayMode: DisplayMode = "canopy";
+
+  get displayMode() {
+    return this._displayMode;
+  }
+
+  set displayMode(mode: DisplayMode) {
+    this._displayMode = mode;
+    this.saveToLocalStorage();
+  }
 
   patternDrawerOpen = false;
 

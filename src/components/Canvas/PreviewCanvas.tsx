@@ -9,6 +9,7 @@ import { SingleBlockRenderPipeline } from "@/src/components/RenderPipeline/Singl
 import { useState } from "react";
 import { WebGLRenderTarget } from "three";
 import { CanopySpaceView } from "@/src/components/Canvas/CanopySpaceView";
+import { CartesianSpaceView } from "@/src/components/Canvas/CartesianSpaceView";
 
 type PreviewCanvasProps = {
   block: Block;
@@ -35,6 +36,9 @@ export const PreviewCanvas = observer(function PreviewCanvas({
       {renderTarget && (
         <>
           {displayMode === "canopy" && <Canopy renderTarget={renderTarget} />}
+          {displayMode === "cartesianSpace" && (
+            <CartesianSpaceView renderTarget={renderTarget} />
+          )}
           <CanopySpaceView renderTarget={renderTarget} />
         </>
       )}

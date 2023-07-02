@@ -26,7 +26,7 @@ export const DisplayModeButtons = observer(function DisplayModeButtons() {
       mt={2}
       mx={2}
       variant="line"
-      defaultValue={selectedDisplayModeIndex}
+      index={selectedDisplayModeIndex}
       onChange={setSelectedDisplayModeIndex}
     >
       <TabList>
