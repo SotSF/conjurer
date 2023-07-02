@@ -5,7 +5,7 @@ import { makeAutoObservable } from "mobx";
 const MAX_PIXELS_PER_SECOND = 90;
 const MIN_PIXELS_PER_SECOND = 4;
 
-type DisplayMode = "canopy" | "canopySpace" | "cartesianSpace";
+export type DisplayMode = "canopy" | "canopySpace" | "cartesianSpace";
 
 /**
  * MobX store for UI state.
