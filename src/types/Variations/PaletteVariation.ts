@@ -1,12 +1,13 @@
 import { Palette } from "@/src/types/Palette";
 import { Variation } from "@/src/types/Variations/Variation";
+import { Vector3 } from "three";
 
 export class PaletteVariation extends Variation<Palette> {
   displayName = "Palette";
   palette: Palette;
 
   constructor(duration: number, palette: Palette) {
-    super("linear4", duration);
+    super("palette", duration);
 
     this.palette = new Palette(
       palette.a.clone(),
@@ -34,10 +35,10 @@ export class PaletteVariation extends Variation<Palette> {
     new PaletteVariation(
       data.duration,
       new Palette(
-        data.palette.a,
-        data.palette.b,
-        data.palette.c,
-        data.palette.d
+        new Vector3(...data.palette.a),
+        new Vector3(...data.palette.b),
+        new Vector3(...data.palette.c),
+        new Vector3(...data.palette.d)
       )
     );
 }

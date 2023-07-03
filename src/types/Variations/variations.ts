@@ -2,6 +2,7 @@ import { EasingVariation } from "@/src/types/Variations/EasingVariation";
 import { FlatVariation } from "@/src/types/Variations/FlatVariation";
 import { LinearVariation } from "@/src/types/Variations/LinearVariation";
 import { LinearVariation4 } from "@/src/types/Variations/LinearVariation4";
+import { PaletteVariation } from "@/src/types/Variations/PaletteVariation";
 import { PeriodicVariation } from "@/src/types/Variations/PeriodicVariation";
 import { SplineVariation } from "@/src/types/Variations/SplineVariation";
 import { Variation } from "@/src/types/Variations/Variation";
@@ -20,6 +21,8 @@ export const deserializeVariation = (data: any): Variation => {
       return EasingVariation.deserialize(data);
     case "linear4":
       return LinearVariation4.deserialize(data);
+    case "palette":
+      return PaletteVariation.deserialize(data);
     default:
       throw new Error(
         `Need to implement deserialization for variation type: ${data.type}`
