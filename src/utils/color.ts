@@ -1,4 +1,4 @@
-import { Vector4 } from "three";
+import { Vector3, Vector4 } from "three";
 
 export const vector4ToRgbaString = (v: Vector4) => {
   const r = Math.floor(v.x * 255);
@@ -6,6 +6,13 @@ export const vector4ToRgbaString = (v: Vector4) => {
   const b = Math.floor(v.z * 255);
   const a = v.w;
   return `rgba(${r}, ${g}, ${b}, ${a})`;
+};
+
+export const vector3ToRgbaString = (v: Vector3) => {
+  const r = Math.floor(v.x * 255);
+  const g = Math.floor(v.y * 255);
+  const b = Math.floor(v.z * 255);
+  return `rgba(${r}, ${g}, ${b}, 1)`;
 };
 
 export const vector4ToHex = (v: Vector4) => {

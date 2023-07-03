@@ -15,6 +15,16 @@ export class Palette {
     this.d = new Vector3(d.x, d.y, d.z);
   }
 
+  colorAt = (t: number) => {
+    const r =
+      this.a.x + this.b.x * Math.cos(2 * Math.PI * (this.c.x * t + this.d.x));
+    const g =
+      this.a.y + this.b.y * Math.cos(2 * Math.PI * (this.c.y * t + this.d.y));
+    const b =
+      this.a.z + this.b.z * Math.cos(2 * Math.PI * (this.c.z * t + this.d.z));
+    return new Vector3(r, g, b);
+  };
+
   clone = () =>
     new Palette(this.a.clone(), this.b.clone(), this.c.clone(), this.d.clone());
 

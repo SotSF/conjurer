@@ -86,7 +86,6 @@ export const NewVariationButtons = memo(function NewVariationButtons({
           // grab the last palette from the previous variation if it exists
           const lastValue = block.getLastParameterValue(uniformName);
           if (lastValue && isPalette(lastValue)) {
-            console.log(lastValue);
             store.addVariation(
               block,
               uniformName,
