@@ -23,6 +23,8 @@ import {
 import { isVector4 } from "@/src/utils/object";
 import { useStore } from "@/src/types/StoreContext";
 import { EasingVariation } from "@/src/types/Variations/EasingVariation";
+import { Palette, isPalette } from "@/src/types/Palette";
+import { PaletteVariation } from "@/src/types/Variations/PaletteVariation";
 
 type NewVariationButtonsProps = {
   uniformName: string;
@@ -68,6 +70,37 @@ export const NewVariationButtons = memo(function NewVariationButtons({
               new Vector4(0, 0, 0, 1),
               new Vector4(0.32, 0.1, 0.6, 1)
             )
+          );
+        })}
+      />
+    </>
+  ) : isPalette(block.pattern.params[uniformName].value) ? (
+    <>
+      <IconButton
+        size="xs"
+        aria-label="Color palette"
+        title="Color palette"
+        height={6}
+        icon={<MdColorLens size={17} />}
+        onClick={action(() => {
+          // grab the last palette from the previous variation if it exists
+          const lastValue = block.getLastParameterValue(uniformName);
+          if (lastValue && isPalette(lastValue)) {
+            store.addVariation(
+              block,
+              uniformName,
+              new PaletteVariation(
+                DEFAULT_VARIATION_DURATION,
+                new Palette(lastValue.a, lastValue.b, lastValue.c, lastValue.d)
+              )
+            );
+            return;
+          }
+
+          store.addVariation(
+            block,
+            uniformName,
+            new PaletteVariation(DEFAULT_VARIATION_DURATION, Palette.default())
           );
         })}
       />

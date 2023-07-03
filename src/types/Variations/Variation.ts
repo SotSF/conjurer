@@ -6,7 +6,8 @@ type VariationType =
   | "periodic"
   | "spline"
   | "easing"
-  | "linear4";
+  | "linear4"
+  | "palette";
 
 export abstract class Variation<T extends ParamType = ParamType> {
   id: string = Math.random().toString(16).slice(2); // unique id

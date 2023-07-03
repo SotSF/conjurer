@@ -1,6 +1,7 @@
 import { Pattern } from "@/src/types/Pattern";
 import easternRedbud from "./shaders/easternRedbud.frag";
-import { Vector4 } from "three";
+import { Vector3 } from "three";
+import { Palette } from "@/src/types/Palette";
 
 export { easternRedbud };
 export const EasternRedbud = () =>
@@ -36,5 +37,14 @@ export const EasternRedbud = () =>
     u_color_change_rate: {
       name: "Color Change Rate",
       value: 0.4,
+    },
+    u_palette: {
+      name: "Palette",
+      value: new Palette(
+        new Vector3(0.387, 0.8, 0.435),
+        new Vector3(0.8, 0.392, 0.071),
+        new Vector3(1.497, 1.219, 1.176),
+        new Vector3(3.613, 5.485, 0.773)
+      ),
     },
   });

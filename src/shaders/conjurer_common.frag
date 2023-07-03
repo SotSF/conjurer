@@ -10,6 +10,18 @@ vec3 palette(in float t, in vec3 a, in vec3 b, in vec3 c, in vec3 d) {
     return a + b * cos(6.28318 * (c * t + d));
 }
 
+struct Palette {
+    vec3 a;
+    vec3 b;
+    vec3 c;
+    vec3 d;
+};
+
+// custom palette function utilizing above struct
+vec3 palette(in float t, in Palette u_palette) {
+    return palette(t, u_palette.a, u_palette.b, u_palette.c, u_palette.d);
+}
+
 float rand(float n) {
     return fract(sin(n) * 43758.5453123);
 }

@@ -1,6 +1,7 @@
+import { Palette } from "@/src/types/Palette";
 import { Texture, Vector4 } from "three";
 
-export type ParamType = number | Vector4 | Texture | null;
+export type ParamType = number | Vector4 | Palette | Texture | null;
 
 export type PatternParam<T = ParamType> = {
   readonly name: string;

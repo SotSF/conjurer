@@ -3,6 +3,8 @@ import { Block } from "@/src/types/Block";
 import { LinearVariation4 } from "@/src/types/Variations/LinearVariation4";
 import { ScalarVariationGraph } from "@/src/components/VariationGraph/ScalarVariationGraph";
 import { LinearVariationGraph4 } from "@/src/components/VariationGraph/LinearVariationGraph4";
+import { PaletteVariation } from "@/src/types/Variations/PaletteVariation";
+import { PaletteVariationGraph } from "@/src/components/VariationGraph/PaletteVariationGraph";
 
 type VariationGraphProps = {
   uniformName: string;
@@ -21,6 +23,14 @@ export const VariationGraph = function VariationGraph({
 }: VariationGraphProps) {
   return variation instanceof LinearVariation4 ? (
     <LinearVariationGraph4
+      uniformName={uniformName}
+      variation={variation}
+      width={width}
+      domain={domain}
+      block={block}
+    />
+  ) : variation instanceof PaletteVariation ? (
+    <PaletteVariationGraph
       uniformName={uniformName}
       variation={variation}
       width={width}
