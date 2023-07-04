@@ -8,8 +8,9 @@ import { ExtraParams, PatternParam } from "@/src/types/PatternParams";
 
 export class Layer {
   id: string = Math.random().toString(16).slice(2); // unique id
-  patternBlocks: Block[] = [];
+  name = "";
 
+  patternBlocks: Block[] = [];
   opacityBlock: Block<ExtraParams> = new Block(Opacity());
 
   get opacityParameter() {
@@ -301,6 +302,7 @@ export class Layer {
 
   serialize = () => ({
     id: this.id,
+    name: this.name,
     patternBlocks: this.patternBlocks.map((b) => b.serialize()),
     opacityBlock: this.opacityBlock.serialize(),
   });
@@ -308,6 +310,7 @@ export class Layer {
   static deserialize = (data: any, timer: Timer) => {
     const layer = new Layer(timer);
     if (data.id) layer.id = data.id;
+    layer.name = data.name ?? "";
     layer.patternBlocks = data.patternBlocks.map((b: any) =>
       Block.deserialize(b)
     );
