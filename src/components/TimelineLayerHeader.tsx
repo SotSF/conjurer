@@ -1,6 +1,15 @@
 import { observer } from "mobx-react-lite";
 import { useStore } from "@/src/types/StoreContext";
-import { Button, HStack, Heading, IconButton, VStack } from "@chakra-ui/react";
+import {
+  Button,
+  Editable,
+  EditableInput,
+  EditablePreview,
+  HStack,
+  Heading,
+  IconButton,
+  VStack,
+} from "@chakra-ui/react";
 import { Layer } from "@/src/types/Layer";
 import { action } from "mobx";
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
@@ -38,19 +47,29 @@ export const TimelineLayerHeader = observer(function TimelineLayerHeader({
       <HStack
         position="relative"
         width="100%"
-        justify="center"
+        justify="space-between"
         m={3}
         spacing={0}
       >
-        <Heading color="black" fontSize={16} userSelect="none">
-          Layer {index + 1}
-        </Heading>
+        <Editable
+          flexGrow={1}
+          px={2}
+          placeholder={`Layer ${index + 1}`}
+          value={layer.name}
+          onChange={action((value) => (layer.name = value))}
+          color="black"
+          fontSize={16}
+          fontWeight="bold"
+          textAlign="center"
+        >
+          <EditablePreview />
+          <EditableInput _placeholder={{ color: "gray.600" }} />
+        </Editable>
+
         <IconButton
-          position="absolute"
-          right={1}
-          width={6}
+          minW={6}
           height={6}
-          variant="ghost"
+          variant="unstyled"
           color={layer.visible ? "gray.500" : "red.600"}
           aria-label="Toggle layer visibility"
           title="Toggle layer visibility"

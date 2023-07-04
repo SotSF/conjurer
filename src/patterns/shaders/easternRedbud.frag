@@ -27,6 +27,7 @@ uniform Palette u_palette;
 // #define u_curve_factor .3
 // #define u_leaf_crispness .5
 // #define u_color_change_rate .4
+// #define u_palette Palette(vec3(0.387, 0.8, 0.435), vec3(0.8, 0.392, 0.071), vec3(1.497, 1.219, 1.176), vec3(3.613, 5.485, 0.773))
 
 // sdEgg from IQ, https://iquilezles.org/articles/distfunctions2d/)
 float sdEgg(in vec2 p, in float ra, in float rb) {
