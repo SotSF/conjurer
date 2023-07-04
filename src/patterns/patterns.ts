@@ -13,6 +13,7 @@ import { Starfield } from "@/src/patterns/Starfield";
 import { Globules } from "@/src/patterns/Globules";
 import { Construct } from "@/src/patterns/Construct";
 import { EasternRedbud } from "@/src/patterns/EasternRedbud";
+import { Convergence } from "@/src/patterns/Convergence";
 
 const patternFactories: Array<() => Pattern> = [
   LogSpirals,
@@ -29,6 +30,7 @@ const patternFactories: Array<() => Pattern> = [
   Tunnel,
   Construct,
   EasternRedbud,
+  Convergence,
 ];
 
 // Patterns that will not have their uniforms changed. These are used for checking what the default
