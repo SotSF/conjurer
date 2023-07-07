@@ -8,14 +8,14 @@ import { playgroundEffects } from "@/src/effects/effects";
 type Props = {
   selectedPatternBlock: Block;
   onSelectPatternBlock: (index: number) => void;
-  selectedEffectBlock: Block | null;
-  onSelectEffectBlock: (index: number) => void;
+  selectedEffectIndices: number[];
+  onSelectEffectBlock: (index: number, indices: number[]) => void;
 };
 
 export const PatternList = memo(function PatternList({
   selectedPatternBlock,
   onSelectPatternBlock,
-  selectedEffectBlock,
+  selectedEffectIndices,
   onSelectEffectBlock,
 }: Props) {
   return (
@@ -37,17 +37,12 @@ export const PatternList = memo(function PatternList({
         Effects
       </Text>
       <HStack width="100%" flexWrap="wrap" gap={1} spacing={0}>
-        <SelectablePatternEffect
-          pattern={{ name: "None" }}
-          selected={!selectedEffectBlock}
-          onSelect={() => onSelectEffectBlock(-1)}
-        />
         {playgroundEffects.map((e, index) => (
           <SelectablePatternEffect
             key={e.name}
             pattern={e}
-            selected={e === selectedEffectBlock?.pattern}
-            onSelect={() => onSelectEffectBlock(index)}
+            selected={selectedEffectIndices.indexOf(index) >= 0}
+            onSelect={() => onSelectEffectBlock(index, selectedEffectIndices)}
           />
         ))}
       </HStack>
