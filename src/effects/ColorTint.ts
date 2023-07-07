@@ -5,9 +5,17 @@ import { Vector4 } from "three";
 export { colorTint };
 export const ColorTint = () =>
   new Pattern("Color Tint", colorTint, {
-    u_color: {
-      name: "Color",
-      value: new Vector4(1, 0, 0, 1),
+    u_red: {
+      name: "R",
+      value: 1.0,
+    },
+    u_green: {
+      name: "G",
+      value: 0.0,
+    },
+    u_blue: {
+      name: "B",
+      value: 0.0,
     },
     u_intensity: {
       name: "Intensity",
