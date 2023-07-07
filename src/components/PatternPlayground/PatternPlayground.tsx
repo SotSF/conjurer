@@ -1,14 +1,8 @@
-import { FaDotCircle } from "react-icons/fa";
-import { TbRectangleFilled } from "react-icons/tb";
 import {
   Box,
   Button,
   Grid,
   GridItem,
-  IconButton,
-  Tab,
-  TabList,
-  Tabs,
   VStack,
 } from "@chakra-ui/react";
 import { PatternList } from "@/src/components/PatternPlayground/PatternList";
@@ -45,31 +39,8 @@ export const PatternPlayground = observer(function PatternPlayground() {
     () => playgroundEffects.map((effect) => new Block(effect)),
     []
   );
-  const [selectedEffectIndex, setSelectedEffectIndex] = useState(
-    uiStore.lastEffectIndexSelected
-  );
 
   const [selectedEffectIndices, setSelectedEffectIndices] = useState(initIndices);
-  const selectedEffectBlock = effectBlocks[selectedEffectIndex];
-
-  const onSelectPatternEffect = action(
-    (patternIndex: number, effectIndex: number) => {
-      setSelectedPatternIndex(patternIndex);
-      setSelectedEffectIndex(effectIndex);
-      uiStore.lastPatternIndexSelected = patternIndex;
-      uiStore.lastEffectIndexSelected = effectIndex;
-      const newSelectedPatternBlock = patternBlocks[patternIndex];
-      const newSelectedEffectBlock = effectBlocks[effectIndex];
-
-      if (!newSelectedEffectBlock) {
-        newSelectedPatternBlock.effectBlocks = [];
-        return;
-      }
-
-      newSelectedPatternBlock.effectBlocks[0] = newSelectedEffectBlock;
-      newSelectedEffectBlock.parentBlock = newSelectedPatternBlock;
-    }
-  );
 
   const applyPatternEffects = (patternIndex: number, effectIndices: number[]) => {
     const pattern = patternBlocks[patternIndex];
@@ -97,13 +68,8 @@ export const PatternPlayground = observer(function PatternPlayground() {
         setSelectedEffectIndices(indices);
       }
       else {
-        if (indices.length == 3) {
-          //???
-        }
-        else {
-          indices = indices.concat(index);
-          setSelectedEffectIndices(indices);
-        }
+        indices = indices.concat(index);
+        setSelectedEffectIndices(indices);
       }
     }
     uiStore.lastEffectIndices = indices;

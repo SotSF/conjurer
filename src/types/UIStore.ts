@@ -49,17 +49,6 @@ export class UIStore {
     this.saveToLocalStorage();
   }
 
-  private _lastEffectIndexSelected = -1;
-
-  get lastEffectIndexSelected() {
-    return this._lastEffectIndexSelected;
-  }
-
-  set lastEffectIndexSelected(index: number) {
-    this._lastEffectIndexSelected = index;
-    this.saveToLocalStorage();
-  }
-
   private _lastEffectIndices : number[] = [];
   get lastEffectIndices() {
     return this._lastEffectIndices;
@@ -132,8 +121,8 @@ export class UIStore {
       this.showingPerformance = !!localStorageUiSettings.showingPerformance;
       this.lastPatternIndexSelected =
         localStorageUiSettings.lastPatternIndexSelected ?? 0;
-      this.lastEffectIndexSelected =
-        localStorageUiSettings.lastEffectIndexSelected ?? 0;
+      this.lastEffectIndices = 
+        localStorageUiSettings.lastEffectIndices ?? [];
     }
   };
 
@@ -146,7 +135,7 @@ export class UIStore {
         displayMode: this.displayMode,
         showingPerformance: this.showingPerformance,
         lastPatternIndexSelected: this.lastPatternIndexSelected,
-        lastEffectIndexSelected: this.lastEffectIndexSelected,
+        lastEffectIndices: this.lastEffectIndices
       })
     );
   };

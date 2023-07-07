@@ -34,7 +34,7 @@ export const PatternList = memo(function PatternList({
         ))}
       </HStack>
       <Text fontSize="xl" fontWeight="bold">
-        Effects (up to 3)
+        Effects
       </Text>
       <HStack width="100%" flexWrap="wrap" gap={1} spacing={0}>
         {playgroundEffects.map((e, index) => (
