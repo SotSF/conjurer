@@ -30,7 +30,7 @@ const patternFactories: Array<() => Pattern> = [
   Tunnel,
   Construct,
   EasternRedbud,
-  // Convergence,
+  Convergence,
 ];
 
 // Patterns that will not have their uniforms changed. These are used for checking what the default
