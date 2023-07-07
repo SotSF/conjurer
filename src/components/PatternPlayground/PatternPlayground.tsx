@@ -22,7 +22,7 @@ const PATTERN_PREVIEW_DISPLAY_SIZE = 600;
 export const PatternPlayground = observer(function PatternPlayground() {
   const store = useStore();
   const { uiStore } = store;
-  const initIndices : number[] = [];
+  const initIndices: number[] = [];
 
   // TODO: in dire need of refactoring
   const patternBlocks = useMemo(
