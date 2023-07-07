@@ -60,6 +60,15 @@ export class UIStore {
     this.saveToLocalStorage();
   }
 
+  private _lastEffectIndices : number[] = [];
+  get lastEffectIndices() {
+    return this._lastEffectIndices;
+  }
+  set lastEffectIndices(indices: number[]) {
+    this._lastEffectIndices = indices;
+    this.saveToLocalStorage();
+  }
+
   pixelsPerSecond = INITIAL_PIXELS_PER_SECOND; // the zoom of the timeline
 
   constructor(readonly timer: Timer) {

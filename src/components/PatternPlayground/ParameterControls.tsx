@@ -21,6 +21,7 @@ import { FlatVariation } from "@/src/types/Variations/FlatVariation";
 import { DEFAULT_VARIATION_DURATION } from "@/src/utils/time";
 import { runInAction } from "mobx";
 import { BASE_UNIFORMS } from "@/src/types/Pattern";
+import { BsArrowsCollapse, BsArrowsExpand } from "react-icons/bs";
 
 const labelStyles = {
   mt: -3,
@@ -35,6 +36,7 @@ export const ParameterControls = memo(function ParameterControls({
   block,
 }: ParameterControlsProps) {
   const [parameters, setParameters] = useState({});
+  const [showControls, toggleControls] = useState(true);
 
   const setParameter = (name: string, value: number) => {
     setParameters({ ...parameters, [name]: value });
@@ -52,14 +54,18 @@ export const ParameterControls = memo(function ParameterControls({
     });
   };
 
+
+
   return (
     <VStack spacing={0} width="100%">
       <Heading size="sm" mt={4}>
         {block.pattern.name}
+        <button onClick={() => { toggleControls(!showControls);} }>{showControls ? 
+        <BsArrowsCollapse></BsArrowsCollapse> : <BsArrowsExpand></BsArrowsExpand>}</button>
       </Heading>
       {Object.entries(block.pattern.params).map(([uniformName, patternParam]) =>
         BASE_UNIFORMS.includes(uniformName) ||
-        typeof patternParam.value !== "number" ? null : (
+        typeof patternParam.value !== "number" || !showControls ? null : 
           <VStack key={uniformName} mt={4} width="100%">
             <HStack width="100%" mt={6} justify="space-between">
               <Text fontSize={12}>{patternParam.name}</Text>
@@ -97,7 +103,7 @@ export const ParameterControls = memo(function ParameterControls({
               </SliderMark>
             </Slider>
           </VStack>
-        )
+        
       )}
     </VStack>
   );
