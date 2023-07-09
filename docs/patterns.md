@@ -44,7 +44,7 @@ void main() {
 
     float time = u_time * u_time_factor + u_time_offset;
 
-    vec3 color = vec3(0., sin(time), cos(time));
+    vec3 color = vec3(0., sin(time), st.y);
     gl_FragColor = vec4(color, 1.);
 }
 ```
