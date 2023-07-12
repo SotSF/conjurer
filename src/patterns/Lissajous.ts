@@ -7,38 +7,36 @@ export { lissajous };
 export const Lissajous = () =>
   new Pattern("Lissajous", lissajous, {
     u_count: {
-        name: "Count",
-        value: 3
+      name: "Count",
+      value: 8
     },
-    u_scale: {
-        name: "Size",
-        value: 0.5
+    u_space: {
+      name: "Interval",  
+      value: 0.05
     },
     u_a0: {
-        name: "A",
-        value: 2
-    },
-    u_a1: {
-        name: "a",
-        value: 2.5
+      name: "Amplitude - X",
+      value: 1
     },
     u_b0: {
-        name: "B",
-        value: 1
+      name: "Amplitude - Y",
+      value: 1
+  },
+    u_a1: {
+      name: "Frequency - X",
+      value: 2
     },
     u_b1: {
-        name: "b",
-        value: 1
+      name: "Frequency - Y",
+      value: 3
     },
     u_palette: {
-        name: "Palette",
-        value: new Palette(
-            new Vector3(0.518,0.558,-0.112),
-            new Vector3(1.123,-1.082,1.288),
-            new Vector3(1.278,-0.332,-0.172),
-            new Vector3(-0.192,0.308,0.968)
-          )
+      name: "Palette",
+      value: new Palette(
+          new Vector3(0.5,0.5,0.5),
+          new Vector3(0.5,0.5,0.194),
+          new Vector3(1.0,0.608,1.0),
+          new Vector3(0.468,0.198,0.557)
+        )
     }
   });
-
-  //[[0.518 0.558 -0.112] [1.123 -1.082 1.288] [1.278 -0.332 -0.172] [-0.192 0.308 0.968]]

@@ -9,7 +9,7 @@ uniform float u_time;
 uniform vec2 u_resolution;
 
 uniform float u_count;
-uniform float u_scale;
+uniform float u_space;
 uniform float u_a0;
 uniform float u_a1;
 uniform float u_b0;
@@ -17,22 +17,26 @@ uniform float u_b1;
 uniform Palette u_palette;
 
 void main() {
-    float u_d = 3.14159265 / 2.;
-    vec2 uv = v_uv * 2. - u_resolution.xy;
-    uv = canopyToCartesianProjection(uv);
+    vec2 uv = v_uv;
+
+    // Convert from canopy space to cartesian
+    float theta = uv.x * 2.0 * 3.1415926;
+    float r = uv.y * 0.88888888 + 0.111111111;
+    float x = r * cos(theta) * 0.5 + 0.5;
+    float y = r * sin(theta) * 0.5 + 0.5;
+    uv = vec2(x, y) * 2.0 - 1.0;
+
     vec3 col = vec3(0.);
-    float c = u_count < 1. ? 1. : u_count;
+    float c = u_count < 1. ? 1. : u_count; // todo: int props? editable min/max values on props
     for (float i = 0.; i < c; i++) {
-        uv = uv / u_scale;
-        float x = u_a0 * sin(u_a1 * (u_time + i)) + u_d;
-        float y = u_b0 * sin(u_b1 * (u_time + i));
+        float x = u_a0 * sin(u_a1 * (u_time + (i * u_space)));
+        float y = u_b0 * sin(u_b1 * (u_time + (i * u_space)));
         vec2 xy = vec2(x,y);
         float d = distance(uv,xy);
-        float d1 = distance(vec2(-1.*uv.x,uv.y), xy);
         float l = length(uv);
-        float m1 = 0.05;
-        float m = max(pow(m1,d), pow(m1,d1));
-        col = col + (palette(m * l + l, u_palette) * m);
+        float m1 = 0.0001;
+        float m = pow(m1,d);
+        col = col + (palette(l + d + u_time, u_palette) * m);
     }
 
     gl_FragColor = vec4(col, 1.);
