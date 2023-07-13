@@ -49,7 +49,7 @@ export const ScalarParameterControl = memo(function ScalarParameterControl({
     block.pattern.params[name].value = value;
 
     runInAction(() => {
-      // Also insert a flat variation so that this parameter value is serializable
+      // Also insert a variation so that this parameter value is serializable
       if (!block.parameterVariations[name])
         block.parameterVariations[name] = [];
 
@@ -61,9 +61,9 @@ export const ScalarParameterControl = memo(function ScalarParameterControl({
   };
 
   return (
-    <VStack key={uniformName} mt={4} width="100%">
+    <VStack mt={4} width="100%">
       <HStack width="100%" mt={6} justify="space-between">
-        <Text fontSize={12}>{patternParam.name}</Text>
+        <Text fontSize={14}>{patternParam.name}</Text>
         <NumberInput
           size="sm"
           step={0.1}

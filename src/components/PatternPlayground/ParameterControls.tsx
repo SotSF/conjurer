@@ -5,6 +5,9 @@ import { ExtraParams, PatternParam } from "@/src/types/PatternParams";
 import { BASE_UNIFORMS } from "@/src/types/Pattern";
 import { BsArrowsCollapse, BsArrowsExpand } from "react-icons/bs";
 import { ScalarParameterControl } from "@/src/components/PatternPlayground/ScalarParameterControl";
+import { isVector4 } from "@/src/utils/object";
+import { ColorParameterControl } from "@/src/components/PatternPlayground/ColorParameterControl";
+import { Vector4 } from "three";
 
 type ParameterControlsProps = {
   block: Block<ExtraParams>;
@@ -32,16 +35,27 @@ export const ParameterControls = memo(function ParameterControls({
         Object.entries<PatternParam>(block.pattern.params).map(
           ([uniformName, patternParam]) => {
             if (BASE_UNIFORMS.includes(uniformName)) return null;
+            const props = {
+              key: uniformName,
+              block,
+              uniformName,
+              parameters,
+              setParameters,
+            };
             if (typeof patternParam.value === "number")
               return (
                 <ScalarParameterControl
-                  key={uniformName}
-                  block={block}
-                  uniformName={uniformName}
+                  {...props}
                   // TODO: implement better type discrimination somehow
                   patternParam={patternParam as PatternParam<number>}
-                  parameters={parameters}
-                  setParameters={setParameters}
+                />
+              );
+            if (isVector4(patternParam.value))
+              return (
+                <ColorParameterControl
+                  {...props}
+                  // TODO: implement better type discrimination somehow
+                  patternParam={patternParam as PatternParam<Vector4>}
                 />
               );
             return null;
