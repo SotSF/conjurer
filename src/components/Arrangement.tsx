@@ -11,7 +11,7 @@ export const Arrangement = memo(function Arrangement() {
       height="100%"
       templateAreas={`"timerControls  controls"
                       "timeline       timeline"`}
-      gridTemplateColumns="150px 1fr"
+      gridTemplateColumns="150px minmax(0,1fr)"
       gridTemplateRows="auto minmax(0,1fr)"
     >
       <GridItem area="timerControls">
