@@ -63,11 +63,7 @@ export const ParameterView = observer(function ParameterView({
             >
               {patternParam.name}
               {isCurrentBlock && (
-                <ParameterValue
-                  uniformName={uniformName}
-                  patternParam={patternParam}
-                  block={block}
-                />
+                <ParameterValue uniformName={uniformName} block={block} />
               )}
             </Text>
             {isExpanded ? (
