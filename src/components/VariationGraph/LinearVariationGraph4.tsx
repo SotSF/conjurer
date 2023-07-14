@@ -25,6 +25,7 @@ export const LinearVariationGraph4 = function LinearVariationGraph4({
     <Box
       py={1}
       _hover={{ bgColor: "gray.500" }}
+      role="button"
       onClick={() => store.selectVariation(block, uniformName, variation)}
     >
       <svg width={width - VARIATION_BOUND_WIDTH} height={60}>

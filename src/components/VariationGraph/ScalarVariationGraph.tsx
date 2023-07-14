@@ -42,6 +42,7 @@ export const ScalarVariationGraph = function ScalarVariationGraph({
       py={1}
       bgColor="gray.600"
       _hover={{ bgColor: "gray.500" }}
+      role="button"
       onClick={() => store.selectVariation(block, uniformName, variation)}
     >
       <LineChart

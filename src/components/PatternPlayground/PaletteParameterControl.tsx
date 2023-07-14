@@ -41,6 +41,8 @@ export const PaletteParameterControl = memo(function PaletteParameterControl({
 
   const variation = block.parameterVariations[uniformName]?.[0];
   const [initialized, setInitialized] = useState(false);
+  // upon initializing a palette parameter, create a variation if one does not exist
+  // TODO: this is janky and probably should be done elsewhere
   useEffect(() => {
     if (variation || initialized) return;
     setInitialized(true);
