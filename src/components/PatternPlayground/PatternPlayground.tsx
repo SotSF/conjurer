@@ -1,10 +1,4 @@
-import {
-  Box,
-  Button,
-  Grid,
-  GridItem,
-  VStack,
-} from "@chakra-ui/react";
+import { Box, Button, Grid, GridItem, VStack } from "@chakra-ui/react";
 import { PatternList } from "@/src/components/PatternPlayground/PatternList";
 import { PreviewCanvas } from "@/src/components/Canvas/PreviewCanvas";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -40,9 +34,13 @@ export const PatternPlayground = observer(function PatternPlayground() {
     []
   );
 
-  const [selectedEffectIndices, setSelectedEffectIndices] = useState(initIndices);
+  const [selectedEffectIndices, setSelectedEffectIndices] =
+    useState(initIndices);
 
-  const applyPatternEffects = (patternIndex: number, effectIndices: number[]) => {
+  const applyPatternEffects = (
+    patternIndex: number,
+    effectIndices: number[]
+  ) => {
     const pattern = patternBlocks[patternIndex];
     pattern.effectBlocks = [];
     effectIndices.forEach((effectIndex, index) => {
@@ -50,7 +48,7 @@ export const PatternPlayground = observer(function PatternPlayground() {
       pattern.effectBlocks[index] = effect;
       effect.parentBlock = pattern;
     });
-  }
+  };
 
   const onSelectPatternBlock = action((index: number) => {
     setSelectedPatternIndex(index);
@@ -59,22 +57,23 @@ export const PatternPlayground = observer(function PatternPlayground() {
     applyPatternEffects(index, selectedEffectIndices);
   });
 
-  const onSelectEffectBlock = action((index: number, selectedIndices: number[]) => {
-    let indices = selectedIndices.concat([]);
-    if (index > -1) {
-      const i = indices.indexOf(index);
-      if (i >= 0) {
-        indices.splice(i,1);
-        setSelectedEffectIndices(indices);
+  const onSelectEffectBlock = action(
+    (index: number, selectedIndices: number[]) => {
+      let indices = selectedIndices.concat([]);
+      if (index > -1) {
+        const i = indices.indexOf(index);
+        if (i >= 0) {
+          indices.splice(i, 1);
+          setSelectedEffectIndices(indices);
+        } else {
+          indices = indices.concat(index);
+          setSelectedEffectIndices(indices);
+        }
       }
-      else {
-        indices = indices.concat(index);
-        setSelectedEffectIndices(indices);
-      }
+      uiStore.lastEffectIndices = indices;
+      applyPatternEffects(selectedPatternIndex, indices);
     }
-    uiStore.lastEffectIndices = indices;
-    applyPatternEffects(selectedPatternIndex, indices);
-  });
+  );
 
   const didInitialize = useRef(false);
   useEffect(() => {
@@ -104,7 +103,7 @@ export const PatternPlayground = observer(function PatternPlayground() {
       <GridItem area="controls">
         <ParameterControls block={selectedPatternBlock} />
         {selectedEffectIndices.map((effectIndex, i) => (
-            <ParameterControls key={i} block={effectBlocks[effectIndex]} />
+          <ParameterControls key={i} block={effectBlocks[effectIndex]} />
         ))}
       </GridItem>
       <GridItem area="preview" position="relative">
