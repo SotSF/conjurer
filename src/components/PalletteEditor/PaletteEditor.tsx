@@ -1,9 +1,37 @@
-import { Button, HStack } from "@chakra-ui/react";
+import { Text } from "@chakra-ui/react";
+import {
+  LineChart,
+  Line,
+  Tooltip,
+  YAxis,
+  CartesianGrid,
+  XAxis,
+} from "recharts";
+import { Button, HStack, VStack } from "@chakra-ui/react";
 import { memo } from "react";
 import { PaletteVariationGraph } from "@/src/components/VariationGraph/PaletteVariationGraph";
 import { PaletteVariation } from "@/src/types/Variations/PaletteVariation";
 import { Block } from "@/src/types/Block";
 import { Palette } from "@/src/types/Palette";
+
+const samples = 100;
+const getPaletteSeriesData = (palette: Palette) => {
+  const redData = [];
+  const greenData = [];
+  const blueData = [];
+  for (let i = 0; i < samples; i++) {
+    const t = i / samples;
+    const color = palette.colorAt(t);
+    redData.push({ t, value: color.x });
+    greenData.push({ t, value: color.y });
+    blueData.push({ t, value: color.z });
+  }
+  return [
+    { name: "red", data: redData },
+    { name: "green", data: greenData },
+    { name: "blue", data: blueData },
+  ];
+};
 
 type PaletteEditorProps = {
   uniformName: string;
@@ -23,16 +51,42 @@ export const PaletteEditor = memo(function PaletteEditor({
     setPalette?.(variation.palette);
   };
 
+  const series = getPaletteSeriesData(variation.palette);
   return (
-    <HStack>
+    <VStack>
+      <LineChart
+        width={500}
+        height={100}
+        margin={{ top: 0, left: 0, right: 0, bottom: 0 }}
+      >
+        <CartesianGrid strokeDasharray="3 3" />
+        <XAxis dataKey="t" type="number" hide />
+        <YAxis type="number" domain={[0, 1]} hide allowDataOverflow />
+        {series.map(({ name, data }) => (
+          <Line
+            key={name}
+            dot={false}
+            isAnimationActive={false}
+            type="monotone"
+            dataKey="value"
+            data={data}
+            name={name}
+            stroke={name}
+            strokeWidth={2}
+          />
+        ))}
+        <Tooltip isAnimationActive={false} content={<ColorValuesTooltip />} />
+      </LineChart>
       <PaletteVariationGraph
         uniformName={uniformName}
         variation={variation}
-        width={300}
+        width={500}
         block={block}
       />
-      <Button onClick={randomize}>Randomize</Button>
-    </HStack>
+      <HStack>
+        <Button onClick={randomize}>Randomize</Button>
+      </HStack>
+    </VStack>
   );
 });
 
@@ -60,3 +114,21 @@ export const PaletteEditor = memo(function PaletteEditor({
             size="sm"
           />
       </HStack> */
+
+const ColorValuesTooltip = ({
+  active,
+  payload,
+}: {
+  active?: boolean;
+  payload?: any;
+}) => {
+  if (!(active && payload && payload.length)) return null;
+
+  return (
+    <>
+      <Text fontSize={12}>{`red: ${payload[0].value.toFixed(2)}`}</Text>
+      <Text fontSize={12}>{`green: ${payload[1].value.toFixed(2)}`}</Text>
+      <Text fontSize={12}>{`blue: ${payload[2].value.toFixed(2)}`}</Text>
+    </>
+  );
+};

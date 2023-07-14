@@ -1,4 +1,5 @@
 import { Vector3 } from "three";
+import { clamp } from "three/src/math/MathUtils";
 
 // This cosine-based palette creates a continuous spectrum of color given 4 vec3 params
 // https://iquilezles.org/articles/palettes/
@@ -17,12 +18,21 @@ export class Palette {
   }
 
   colorAt = (t: number): Vector3 => {
-    const r =
-      this.a.x + this.b.x * Math.cos(2 * Math.PI * (this.c.x * t + this.d.x));
-    const g =
-      this.a.y + this.b.y * Math.cos(2 * Math.PI * (this.c.y * t + this.d.y));
-    const b =
-      this.a.z + this.b.z * Math.cos(2 * Math.PI * (this.c.z * t + this.d.z));
+    const r = clamp(
+      this.a.x + this.b.x * Math.cos(2 * Math.PI * (this.c.x * t + this.d.x)),
+      0,
+      1
+    );
+    const g = clamp(
+      this.a.y + this.b.y * Math.cos(2 * Math.PI * (this.c.y * t + this.d.y)),
+      0,
+      1
+    );
+    const b = clamp(
+      this.a.z + this.b.z * Math.cos(2 * Math.PI * (this.c.z * t + this.d.z)),
+      0,
+      1
+    );
     this.colorOut.set(r, g, b);
     return this.colorOut;
   };
