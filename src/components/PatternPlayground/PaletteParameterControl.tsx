@@ -54,16 +54,16 @@ export const PaletteParameterControl = memo(function PaletteParameterControl({
     initialized,
   ]);
 
-  const setParameter = (name: string, value: Vector4) => {
-    setParameters({ ...parameters, [name]: value });
-    block.pattern.params[name].value = value;
+  const setParameter = (value: Vector4) => {
+    setParameters({ ...parameters, [uniformName]: value });
+    block.pattern.params[uniformName].value = value;
 
     runInAction(() => {
       // Also insert a variation so that this parameter value is serializable
-      if (!block.parameterVariations[name])
-        block.parameterVariations[name] = [];
+      if (!block.parameterVariations[uniformName])
+        block.parameterVariations[uniformName] = [];
 
-      block.parameterVariations[name]![0] = new LinearVariation4(
+      block.parameterVariations[uniformName]![0] = new LinearVariation4(
         DEFAULT_VARIATION_DURATION,
         value,
         value

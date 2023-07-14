@@ -28,16 +28,16 @@ export const ColorParameterControl = memo(function ColorParameterControl({
   parameters,
   setParameters,
 }: ColorParameterControlProps) {
-  const setParameter = (name: string, value: Vector4) => {
-    setParameters({ ...parameters, [name]: value });
-    block.pattern.params[name].value = value;
+  const setParameter = (value: Vector4) => {
+    setParameters({ ...parameters, [uniformName]: value });
+    block.pattern.params[uniformName].value = value;
 
     runInAction(() => {
       // Also insert a variation so that this parameter value is serializable
-      if (!block.parameterVariations[name])
-        block.parameterVariations[name] = [];
+      if (!block.parameterVariations[uniformName])
+        block.parameterVariations[uniformName] = [];
 
-      block.parameterVariations[name]![0] = new LinearVariation4(
+      block.parameterVariations[uniformName]![0] = new LinearVariation4(
         DEFAULT_VARIATION_DURATION,
         value,
         value
@@ -50,7 +50,7 @@ export const ColorParameterControl = memo(function ColorParameterControl({
     setColor(newHex);
     const rgb = hexToRgb(newHex);
     patternParam.value.set(rgb.r / 255, rgb.g / 255, rgb.b / 255, 1);
-    setParameter(uniformName, patternParam.value);
+    setParameter(patternParam.value);
   };
 
   return (

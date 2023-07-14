@@ -60,7 +60,7 @@ export const PaletteEditor = observer(function PaletteEditor({
       <PaletteVariationGraph
         uniformName={uniformName}
         variation={variation}
-        width={100}
+        width={300}
         block={block}
       />
     </HStack>
