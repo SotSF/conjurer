@@ -101,9 +101,15 @@ export const PatternPlayground = observer(function PatternPlayground() {
         />
       </GridItem>
       <GridItem area="controls">
-        <ParameterControls block={selectedPatternBlock} />
+        <ParameterControls
+          key={selectedPatternBlock.id}
+          block={selectedPatternBlock}
+        />
         {selectedEffectIndices.map((effectIndex, i) => (
-          <ParameterControls key={i} block={effectBlocks[effectIndex]} />
+          <ParameterControls
+            key={`${effectBlocks[effectIndex].id}-${i}`}
+            block={effectBlocks[effectIndex]}
+          />
         ))}
       </GridItem>
       <GridItem area="preview" position="relative">
