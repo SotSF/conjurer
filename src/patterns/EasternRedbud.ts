@@ -6,6 +6,19 @@ import { Palette } from "@/src/types/Palette";
 export { easternRedbud };
 export const EasternRedbud = () =>
   new Pattern("Eastern Redbud", easternRedbud, {
+    u_palette: {
+      name: "Palette",
+      value: new Palette(
+        new Vector3(0.387, 0.8, 0.435),
+        new Vector3(0.8, 0.392, 0.071),
+        new Vector3(1.497, 1.219, 1.176),
+        new Vector3(3.613, 5.485, 0.773)
+      ),
+    },
+    u_color_density: {
+      name: "Color Density",
+      value: 0.5,
+    },
     u_time_factor: {
       name: "Time Factor",
       value: 1,
@@ -37,14 +50,5 @@ export const EasternRedbud = () =>
     u_color_change_rate: {
       name: "Color Change Rate",
       value: 0.4,
-    },
-    u_palette: {
-      name: "Palette",
-      value: new Palette(
-        new Vector3(0.387, 0.8, 0.435),
-        new Vector3(0.8, 0.392, 0.071),
-        new Vector3(1.497, 1.219, 1.176),
-        new Vector3(3.613, 5.485, 0.773)
-      ),
     },
   });

@@ -8,6 +8,8 @@ varying vec2 v_uv;
 uniform float u_time;
 uniform vec2 u_resolution;
 
+uniform Palette u_palette;
+uniform float u_color_density;
 uniform float u_time_factor;
 uniform float u_time_offset;
 uniform float u_period;
@@ -16,9 +18,10 @@ uniform float u_trailing_leaves;
 uniform float u_curve_factor;
 uniform float u_leaf_crispness;
 uniform float u_color_change_rate;
-uniform Palette u_palette;
 
 // // For debugging
+// #define u_palette Palette(vec3(0.387, 0.8, 0.435), vec3(0.8, 0.392, 0.071), vec3(1.497, 1.219, 1.176), vec3(3.613, 5.485, 0.773))
+// #define u_color_density 1.
 // #define u_time_factor 1.
 // #define u_time_offset 0.
 // #define u_period 5.
@@ -26,8 +29,7 @@ uniform Palette u_palette;
 // #define u_trailing_leaves 10.
 // #define u_curve_factor .3
 // #define u_leaf_crispness .5
-// #define u_color_change_rate .4
-// #define u_palette Palette(vec3(0.387, 0.8, 0.435), vec3(0.8, 0.392, 0.071), vec3(1.497, 1.219, 1.176), vec3(3.613, 5.485, 0.773))
+// #define u_color_change_rate .0
 
 // sdEgg from IQ, https://iquilezles.org/articles/distfunctions2d/)
 float sdEgg(in vec2 p, in float ra, in float rb) {
@@ -86,7 +88,7 @@ void main() {
         }
 
         intensity = clamp(intensity, 0., 1.);
-        color = mix(color, palette(polarRadialDistance + cos(time * u_color_change_rate), u_palette), intensity);
+        color = mix(color, palette(polarRadialDistance * u_color_density * 2. + cos(time * u_color_change_rate), u_palette), intensity);
     }
 
     gl_FragColor = vec4(color, 1.);
