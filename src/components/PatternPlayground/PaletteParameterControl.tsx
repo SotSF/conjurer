@@ -61,7 +61,7 @@ export const PaletteParameterControl = memo(function PaletteParameterControl({
       {variation?.type === "palette" && (
         <PaletteEditor
           uniformName={uniformName}
-          // do better type discrimination
+          // TODO: do better type discrimination
           variation={variation as PaletteVariation}
           block={block}
           setPalette={(palette) => setParameter(palette)}

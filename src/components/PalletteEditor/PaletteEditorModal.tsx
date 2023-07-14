@@ -1,7 +1,6 @@
 import { observer } from "mobx-react-lite";
 import {
   Button,
-  Input,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -9,38 +8,29 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
-  Spinner,
-  Text,
-  useMultiStyleConfig,
 } from "@chakra-ui/react";
 import { useStore } from "@/src/types/StoreContext";
-import { useRef, useState } from "react";
 import { action } from "mobx";
 import { PaletteEditor } from "@/src/components/PalletteEditor/PaletteEditor";
+import { PaletteVariation } from "@/src/types/Variations/PaletteVariation";
+import { Block } from "@/src/types/Block";
+import { Palette } from "@/src/types/Palette";
 
-export const PaletteEditorModal = observer(function PaletteEditorModal() {
-  const store = useStore();
-  const { uiStore, audioStore } = store;
+type PaletteEditorModalProps = {
+  uniformName: string;
+  variation: PaletteVariation;
+  block: Block;
+  setPalette?: (palette: Palette) => void;
+};
 
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  const [uploading, setUploading] = useState(false);
-  const [, setAudioFilename] = useState("");
-
-  const styles = useMultiStyleConfig("Button", { variant: "outline" });
-
+export const PaletteEditorModal = observer(function PaletteEditorModal({
+  uniformName,
+  variation,
+  block,
+  setPalette,
+}: PaletteEditorModalProps) {
+  const { uiStore } = useStore();
   const onClose = action(() => (uiStore.showingPaletteEditorModal = false));
-
-  const onUpload = async () => {
-    if (!inputRef.current?.files?.length) return;
-
-    setUploading(true);
-    await audioStore.uploadAudioFile(inputRef.current.files[0]);
-    await audioStore.fetchAvailableAudioFiles(true);
-    setUploading(false);
-
-    onClose();
-  };
 
   return (
     <Modal
@@ -53,15 +43,15 @@ export const PaletteEditorModal = observer(function PaletteEditorModal() {
         <ModalHeader>Palette editor</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          <PaletteEditor />
+          <PaletteEditor
+            uniformName={uniformName}
+            variation={variation}
+            block={block}
+            setPalette={setPalette}
+          />
         </ModalBody>
         <ModalFooter>
-          <Button
-            isDisabled={uploading || !inputRef.current?.files?.length}
-            onClick={onUpload}
-          >
-            {uploading ? <Spinner /> : "Upload"}
-          </Button>
+          <Button onClick={onClose}>Done</Button>
         </ModalFooter>
       </ModalContent>
     </Modal>

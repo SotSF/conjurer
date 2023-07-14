@@ -1,6 +1,5 @@
 import { Box } from "@chakra-ui/react";
 import { Block } from "@/src/types/Block";
-import { memo } from "react";
 import { useStore } from "@/src/types/StoreContext";
 import { PaletteVariation } from "@/src/types/Variations/PaletteVariation";
 import { VARIATION_BOUND_WIDTH } from "@/src/utils/layout";
@@ -13,7 +12,7 @@ type PaletteVariationGraphProps = {
   block: Block;
 };
 
-export const PaletteVariationGraph = memo(function PaletteVariationGraph({
+export const PaletteVariationGraph = function PaletteVariationGraph({
   uniformName,
   variation,
   width,
@@ -68,4 +67,4 @@ export const PaletteVariationGraph = memo(function PaletteVariationGraph({
       </svg>
     </Box>
   );
-});
+};

@@ -1,22 +1,5 @@
-import { observer } from "mobx-react-lite";
-import {
-  Button,
-  HStack,
-  Input,
-  Modal,
-  ModalBody,
-  ModalCloseButton,
-  ModalContent,
-  ModalFooter,
-  ModalHeader,
-  ModalOverlay,
-  Spinner,
-  Text,
-  useMultiStyleConfig,
-} from "@chakra-ui/react";
-import { useStore } from "@/src/types/StoreContext";
-import { useRef, useState } from "react";
-import { action } from "mobx";
+import { Button, HStack } from "@chakra-ui/react";
+import { memo } from "react";
 import { PaletteVariationGraph } from "@/src/components/VariationGraph/PaletteVariationGraph";
 import { PaletteVariation } from "@/src/types/Variations/PaletteVariation";
 import { Block } from "@/src/types/Block";
@@ -29,38 +12,15 @@ type PaletteEditorProps = {
   setPalette?: (palette: Palette) => void;
 };
 
-export const PaletteEditor = observer(function PaletteEditor({
+export const PaletteEditor = memo(function PaletteEditor({
   uniformName,
   variation,
   block,
   setPalette,
 }: PaletteEditorProps) {
-  const store = useStore();
-  const { uiStore, audioStore } = store;
-
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  const [uploading, setUploading] = useState(false);
-  const [, setAudioFilename] = useState("");
-
-  const styles = useMultiStyleConfig("Button", { variant: "outline" });
-
-  const onClose = action(() => (uiStore.showingPaletteEditorModal = false));
-
-  const onUpload = async () => {
-    if (!inputRef.current?.files?.length) return;
-
-    setUploading(true);
-    await audioStore.uploadAudioFile(inputRef.current.files[0]);
-    await audioStore.fetchAvailableAudioFiles(true);
-    setUploading(false);
-
-    onClose();
-  };
-
   const randomize = () => {
     variation.palette.randomize();
-    if (setPalette) setPalette(variation.palette);
+    setPalette?.(variation.palette);
   };
 
   return (
@@ -75,3 +35,28 @@ export const PaletteEditor = observer(function PaletteEditor({
     </HStack>
   );
 });
+
+// const [palette, setPalette] = useState(JSON.stringify(variation.palette));
+/* <HStack width="100%" justify="end" mx={1}>
+        <Text>Palette</Text>
+
+        <Input
+            value={palette}
+            onChange={(event) => {
+              try {
+                const newPalette = JSON.parse(event.target.value);
+                if (isPalette(newPalette)) {
+                  const { a, b, c, d } = newPalette;
+                  variation.palette.a = new Vector3(a.x, a.y, a.z);
+                  variation.palette.b = new Vector3(b.x, b.y, b.z);
+                  variation.palette.c = new Vector3(c.x, c.y, c.z);
+                  variation.palette.d = new Vector3(d.x, d.y, d.z);
+                }
+                setPalette(JSON.stringify(variation.palette));
+                block.triggerVariationReactions(uniformName);
+              } catch (e) {}
+            }}
+            placeholder="Color palette"
+            size="sm"
+          />
+      </HStack> */

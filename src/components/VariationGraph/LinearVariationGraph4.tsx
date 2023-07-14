@@ -1,7 +1,6 @@
 import { Box } from "@chakra-ui/react";
 import { Block } from "@/src/types/Block";
 import { LinearVariation4 } from "@/src/types/Variations/LinearVariation4";
-import { memo } from "react";
 import { vector4ToHex } from "@/src/utils/color";
 import { VARIATION_BOUND_WIDTH } from "@/src/utils/layout";
 import { useStore } from "@/src/types/StoreContext";
@@ -10,11 +9,10 @@ type LinearVariationGraph4Props = {
   uniformName: string;
   variation: LinearVariation4;
   width: number;
-  domain: [number, number];
   block: Block;
 };
 
-export const LinearVariationGraph4 = memo(function LinearVariationGraph4({
+export const LinearVariationGraph4 = function LinearVariationGraph4({
   uniformName,
   variation,
   width,
@@ -52,4 +50,4 @@ export const LinearVariationGraph4 = memo(function LinearVariationGraph4({
       </svg>
     </Box>
   );
-});
+};
