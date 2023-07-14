@@ -26,11 +26,7 @@ export const ParameterControls = memo(function ParameterControls({
       <Heading size="sm" mt={4}>
         {block.pattern.name}
         <button onClick={() => toggleControls(!showControls)}>
-          {showControls ? (
-            <BsArrowsCollapse></BsArrowsCollapse>
-          ) : (
-            <BsArrowsExpand></BsArrowsExpand>
-          )}
+          {showControls ? <BsArrowsCollapse /> : <BsArrowsExpand />}
         </button>
       </Heading>
       {showControls &&
