@@ -27,6 +27,13 @@ export class Palette {
     return this.colorOut;
   };
 
+  randomize = () => {
+    this.a.set(Math.random(), Math.random(), Math.random());
+    this.b.set(Math.random(), Math.random(), Math.random());
+    this.c.set(Math.random(), Math.random(), Math.random());
+    this.d.set(Math.random(), Math.random(), Math.random());
+  };
+
   clone = () =>
     new Palette(this.a.clone(), this.b.clone(), this.c.clone(), this.d.clone());
 

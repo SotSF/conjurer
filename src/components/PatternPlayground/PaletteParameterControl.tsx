@@ -1,5 +1,5 @@
 import { HStack, Text } from "@chakra-ui/react";
-import { memo, useEffect, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useState } from "react";
 import { Block } from "@/src/types/Block";
 import {
   ExtraParams,
@@ -8,8 +8,6 @@ import {
 } from "@/src/types/PatternParams";
 import { DEFAULT_VARIATION_DURATION } from "@/src/utils/time";
 import { runInAction } from "mobx";
-import { Vector4 } from "three";
-import { LinearVariation4 } from "@/src/types/Variations/LinearVariation4";
 import { Palette } from "@/src/types/Palette";
 import { PaletteEditor } from "@/src/components/PalletteEditor/PaletteEditor";
 import { PaletteVariation } from "@/src/types/Variations/PaletteVariation";
@@ -29,13 +27,7 @@ export const PaletteParameterControl = memo(function PaletteParameterControl({
   parameters,
   setParameters,
 }: PaletteParameterControlProps) {
-  const variation = block.parameterVariations[uniformName]?.[0];
-
-  const [initialized, setInitialized] = useState(false);
-  useEffect(() => {
-    if (variation || initialized) return;
-    setInitialized(true);
-
+  const updatePaletteVariation = useCallback(() => {
     runInAction(() => {
       if (!block.parameterVariations[uniformName])
         block.parameterVariations[uniformName] = [];
@@ -44,31 +36,23 @@ export const PaletteParameterControl = memo(function PaletteParameterControl({
         DEFAULT_VARIATION_DURATION,
         patternParam.value
       );
-      console.log(block.parameterVariations[uniformName]![0]);
     });
-  }, [
-    block.parameterVariations,
-    patternParam.value,
-    uniformName,
-    variation,
-    initialized,
-  ]);
+  }, [block.parameterVariations, patternParam.value, uniformName]);
 
-  const setParameter = (value: Vector4) => {
+  const variation = block.parameterVariations[uniformName]?.[0];
+  const [initialized, setInitialized] = useState(false);
+  useEffect(() => {
+    if (variation || initialized) return;
+    setInitialized(true);
+
+    updatePaletteVariation();
+  }, [updatePaletteVariation, variation, initialized]);
+
+  const setParameter = (value: Palette) => {
     setParameters({ ...parameters, [uniformName]: value });
     block.pattern.params[uniformName].value = value;
 
-    runInAction(() => {
-      // Also insert a variation so that this parameter value is serializable
-      if (!block.parameterVariations[uniformName])
-        block.parameterVariations[uniformName] = [];
-
-      block.parameterVariations[uniformName]![0] = new LinearVariation4(
-        DEFAULT_VARIATION_DURATION,
-        value,
-        value
-      );
-    });
+    updatePaletteVariation();
   };
 
   return (
@@ -80,6 +64,7 @@ export const PaletteParameterControl = memo(function PaletteParameterControl({
           // do better type discrimination
           variation={variation as PaletteVariation}
           block={block}
+          setPalette={(palette) => setParameter(palette)}
         />
       )}
     </HStack>

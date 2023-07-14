@@ -20,17 +20,20 @@ import { action } from "mobx";
 import { PaletteVariationGraph } from "@/src/components/VariationGraph/PaletteVariationGraph";
 import { PaletteVariation } from "@/src/types/Variations/PaletteVariation";
 import { Block } from "@/src/types/Block";
+import { Palette } from "@/src/types/Palette";
 
 type PaletteEditorProps = {
   uniformName: string;
   variation: PaletteVariation;
   block: Block;
+  setPalette?: (palette: Palette) => void;
 };
 
 export const PaletteEditor = observer(function PaletteEditor({
   uniformName,
   variation,
   block,
+  setPalette,
 }: PaletteEditorProps) {
   const store = useStore();
   const { uiStore, audioStore } = store;
@@ -55,6 +58,11 @@ export const PaletteEditor = observer(function PaletteEditor({
     onClose();
   };
 
+  const randomize = () => {
+    variation.palette.randomize();
+    if (setPalette) setPalette(variation.palette);
+  };
+
   return (
     <HStack>
       <PaletteVariationGraph
@@ -63,6 +71,7 @@ export const PaletteEditor = observer(function PaletteEditor({
         width={300}
         block={block}
       />
+      <Button onClick={randomize}>Randomize</Button>
     </HStack>
   );
 });
