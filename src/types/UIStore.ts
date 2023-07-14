@@ -20,6 +20,7 @@ export class UIStore {
   showingOpenExperienceModal = false;
   showingSaveExperienceModal = false;
   showingUploadAudioModal = false;
+  showingPaletteEditorModal = false;
 
   // TODO: refactor these in display in ui differently
   keepingPlayHeadCentered = false;
@@ -49,7 +50,7 @@ export class UIStore {
     this.saveToLocalStorage();
   }
 
-  private _lastEffectIndices : number[] = [];
+  private _lastEffectIndices: number[] = [];
   get lastEffectIndices() {
     return this._lastEffectIndices;
   }
@@ -121,8 +122,7 @@ export class UIStore {
       this.showingPerformance = !!localStorageUiSettings.showingPerformance;
       this.lastPatternIndexSelected =
         localStorageUiSettings.lastPatternIndexSelected ?? 0;
-      this.lastEffectIndices = 
-        localStorageUiSettings.lastEffectIndices ?? [];
+      this.lastEffectIndices = localStorageUiSettings.lastEffectIndices ?? [];
     }
   };
 
@@ -135,7 +135,7 @@ export class UIStore {
         displayMode: this.displayMode,
         showingPerformance: this.showingPerformance,
         lastPatternIndexSelected: this.lastPatternIndexSelected,
-        lastEffectIndices: this.lastEffectIndices
+        lastEffectIndices: this.lastEffectIndices,
       })
     );
   };

@@ -34,7 +34,6 @@ export const VariationGraph = function VariationGraph({
       uniformName={uniformName}
       variation={variation}
       width={width}
-      domain={domain}
       block={block}
     />
   ) : (
