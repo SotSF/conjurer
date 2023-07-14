@@ -44,16 +44,16 @@ export const ScalarParameterControl = memo(function ScalarParameterControl({
   parameters,
   setParameters,
 }: ScalarParameterControlProps) {
-  const setParameter = (name: string, value: number) => {
-    setParameters({ ...parameters, [name]: value });
-    block.pattern.params[name].value = value;
+  const setParameter = (value: number) => {
+    setParameters({ ...parameters, [uniformName]: value });
+    block.pattern.params[uniformName].value = value;
 
     runInAction(() => {
       // Also insert a variation so that this parameter value is serializable
-      if (!block.parameterVariations[name])
-        block.parameterVariations[name] = [];
+      if (!block.parameterVariations[uniformName])
+        block.parameterVariations[uniformName] = [];
 
-      block.parameterVariations[name]![0] = new FlatVariation(
+      block.parameterVariations[uniformName]![0] = new FlatVariation(
         DEFAULT_VARIATION_DURATION,
         value
       );
@@ -67,9 +67,7 @@ export const ScalarParameterControl = memo(function ScalarParameterControl({
         <NumberInput
           size="sm"
           step={0.1}
-          onChange={(valueString) => {
-            setParameter(uniformName, parseFloat(valueString));
-          }}
+          onChange={(valueString) => setParameter(parseFloat(valueString))}
           value={patternParam.value}
         >
           <NumberInputField />
@@ -84,7 +82,7 @@ export const ScalarParameterControl = memo(function ScalarParameterControl({
         max={1}
         step={0.001}
         defaultValue={patternParam.value}
-        onChange={(value) => setParameter(uniformName, value)}
+        onChange={(value) => setParameter(value)}
       >
         <SliderTrack>
           <SliderFilledTrack />

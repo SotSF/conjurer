@@ -13,7 +13,7 @@ import {
 import { Layer } from "@/src/types/Layer";
 import { action } from "mobx";
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
-import { VariationControls } from "@/src/components/VariationControls";
+import { VariationControls } from "@/src/components/VariationControls/VariationControls";
 
 type Props = {
   index: number;

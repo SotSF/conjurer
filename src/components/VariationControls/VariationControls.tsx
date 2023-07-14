@@ -40,6 +40,8 @@ import { easings } from "@/src/utils/easings";
 import { PaletteVariation } from "@/src/types/Variations/PaletteVariation";
 import { isPalette } from "@/src/types/Palette";
 import { Vector3 } from "three";
+import { PaletteEditorModal } from "@/src/components/PalletteEditor/PaletteEditorModal";
+import { PaletteVariationControls } from "@/src/components/VariationControls/PaletteVariationControls";
 
 type VariationControlsProps = {
   uniformName: string;
@@ -203,48 +205,6 @@ function LinearVariation4Controls({
       </HStack>
       <HexColorPicker color={toColor} onChange={onToColorChange} />
     </VStack>
-  );
-}
-
-type PaletteVariationControlsProps = {
-  uniformName: string;
-  variation: PaletteVariation;
-  block: Block;
-};
-
-function PaletteVariationControls({
-  uniformName,
-  variation,
-  block,
-}: PaletteVariationControlsProps) {
-  const [palette, setPalette] = useState(JSON.stringify(variation.palette));
-
-  // TODO: do better
-  return (
-    <>
-      <HStack width="100%" justify="end" mx={1}>
-        <Text>Palette</Text>
-        <Input
-          value={palette}
-          onChange={(event) => {
-            try {
-              const newPalette = JSON.parse(event.target.value);
-              if (isPalette(newPalette)) {
-                const { a, b, c, d } = newPalette;
-                variation.palette.a = new Vector3(a.x, a.y, a.z);
-                variation.palette.b = new Vector3(b.x, b.y, b.z);
-                variation.palette.c = new Vector3(c.x, c.y, c.z);
-                variation.palette.d = new Vector3(d.x, d.y, d.z);
-              }
-              setPalette(JSON.stringify(variation.palette));
-              block.triggerVariationReactions(uniformName);
-            } catch (e) {}
-          }}
-          placeholder="Color palette"
-          size="sm"
-        />
-      </HStack>
-    </>
   );
 }
 

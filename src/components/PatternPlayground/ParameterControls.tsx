@@ -8,6 +8,8 @@ import { ScalarParameterControl } from "@/src/components/PatternPlayground/Scala
 import { isVector4 } from "@/src/utils/object";
 import { ColorParameterControl } from "@/src/components/PatternPlayground/ColorParameterControl";
 import { Vector4 } from "three";
+import { Palette, isPalette } from "@/src/types/Palette";
+import { PaletteParameterControl } from "@/src/components/PatternPlayground/PaletteParameterControl";
 
 type ParameterControlsProps = {
   block: Block<ExtraParams>;
@@ -24,11 +26,7 @@ export const ParameterControls = memo(function ParameterControls({
       <Heading size="sm" mt={4}>
         {block.pattern.name}
         <button onClick={() => toggleControls(!showControls)}>
-          {showControls ? (
-            <BsArrowsCollapse></BsArrowsCollapse>
-          ) : (
-            <BsArrowsExpand></BsArrowsExpand>
-          )}
+          {showControls ? <BsArrowsCollapse /> : <BsArrowsExpand />}
         </button>
       </Heading>
       {showControls &&
@@ -56,6 +54,13 @@ export const ParameterControls = memo(function ParameterControls({
                   {...props}
                   // TODO: implement better type discrimination somehow
                   patternParam={patternParam as PatternParam<Vector4>}
+                />
+              );
+            if (isPalette(patternParam.value))
+              return (
+                <PaletteParameterControl
+                  {...props}
+                  patternParam={patternParam as PatternParam<Palette>}
                 />
               );
             return null;

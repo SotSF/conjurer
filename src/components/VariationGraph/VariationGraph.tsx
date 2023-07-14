@@ -21,29 +21,12 @@ export const VariationGraph = function VariationGraph({
   domain,
   block,
 }: VariationGraphProps) {
+  const props = { uniformName, width, block };
   return variation instanceof LinearVariation4 ? (
-    <LinearVariationGraph4
-      uniformName={uniformName}
-      variation={variation}
-      width={width}
-      domain={domain}
-      block={block}
-    />
+    <LinearVariationGraph4 {...props} variation={variation} />
   ) : variation instanceof PaletteVariation ? (
-    <PaletteVariationGraph
-      uniformName={uniformName}
-      variation={variation}
-      width={width}
-      domain={domain}
-      block={block}
-    />
+    <PaletteVariationGraph {...props} variation={variation} />
   ) : (
-    <ScalarVariationGraph
-      uniformName={uniformName}
-      variation={variation}
-      width={width}
-      domain={domain}
-      block={block}
-    />
+    <ScalarVariationGraph {...props} variation={variation} domain={domain} />
   );
 };

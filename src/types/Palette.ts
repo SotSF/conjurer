@@ -1,4 +1,5 @@
 import { Vector3 } from "three";
+import { clamp } from "three/src/math/MathUtils";
 
 // This cosine-based palette creates a continuous spectrum of color given 4 vec3 params
 // https://iquilezles.org/articles/palettes/
@@ -7,6 +8,7 @@ export class Palette {
   b: Vector3;
   c: Vector3;
   d: Vector3;
+  colorOut = new Vector3();
 
   constructor(a: Vector3, b: Vector3, c: Vector3, d: Vector3) {
     this.a = new Vector3(a.x, a.y, a.z);
@@ -15,14 +17,31 @@ export class Palette {
     this.d = new Vector3(d.x, d.y, d.z);
   }
 
-  colorAt = (t: number) => {
-    const r =
-      this.a.x + this.b.x * Math.cos(2 * Math.PI * (this.c.x * t + this.d.x));
-    const g =
-      this.a.y + this.b.y * Math.cos(2 * Math.PI * (this.c.y * t + this.d.y));
-    const b =
-      this.a.z + this.b.z * Math.cos(2 * Math.PI * (this.c.z * t + this.d.z));
-    return new Vector3(r, g, b);
+  colorAt = (t: number): Vector3 => {
+    const r = clamp(
+      this.a.x + this.b.x * Math.cos(2 * Math.PI * (this.c.x * t + this.d.x)),
+      0,
+      1
+    );
+    const g = clamp(
+      this.a.y + this.b.y * Math.cos(2 * Math.PI * (this.c.y * t + this.d.y)),
+      0,
+      1
+    );
+    const b = clamp(
+      this.a.z + this.b.z * Math.cos(2 * Math.PI * (this.c.z * t + this.d.z)),
+      0,
+      1
+    );
+    this.colorOut.set(r, g, b);
+    return this.colorOut;
+  };
+
+  randomize = () => {
+    this.a.set(Math.random(), Math.random(), Math.random());
+    this.b.set(Math.random(), Math.random(), Math.random());
+    this.c.set(Math.random(), Math.random(), Math.random());
+    this.d.set(Math.random(), Math.random(), Math.random());
   };
 
   clone = () =>
