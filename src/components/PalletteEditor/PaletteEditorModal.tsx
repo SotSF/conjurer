@@ -37,6 +37,7 @@ export const PaletteEditorModal = observer(function PaletteEditorModal({
       onClose={onClose}
       isOpen={uiStore.showingPaletteEditorModal}
       isCentered
+      size="xl"
     >
       <ModalOverlay />
       <ModalContent>
