@@ -8,7 +8,10 @@ export const Lissajous = () =>
   new Pattern("Lissajous", lissajous, {
     u_count: {
       name: "Count",
-      value: 8
+      value: 8,
+      min: 1,
+      max: 64,
+      step: 1
     },
     u_space: {
       name: "Interval",  

@@ -60,13 +60,17 @@ export const ScalarParameterControl = memo(function ScalarParameterControl({
     });
   };
 
+  const min = patternParam.min ? patternParam.min : 0;
+  const max = patternParam.max ? patternParam.max : 1;
+  const step = patternParam.step ? patternParam.step : 0.01;
+
   return (
     <VStack mt={4} width="100%">
       <HStack width="100%" mt={6} justify="space-between">
         <Text fontSize={14}>{patternParam.name}</Text>
         <NumberInput
           size="sm"
-          step={0.1}
+          step={step}
           onChange={(valueString) => setParameter(parseFloat(valueString))}
           value={patternParam.value}
         >
@@ -78,9 +82,9 @@ export const ScalarParameterControl = memo(function ScalarParameterControl({
         </NumberInput>
       </HStack>
       <Slider
-        min={0}
-        max={1}
-        step={0.001}
+        min={min}
+        max={max}
+        step={step}
         defaultValue={patternParam.value}
         onChange={(value) => setParameter(value)}
       >
@@ -88,11 +92,11 @@ export const ScalarParameterControl = memo(function ScalarParameterControl({
           <SliderFilledTrack />
         </SliderTrack>
         <SliderThumb boxSize={5} />
-        <SliderMark value={0} {...labelStyles} ml={-5}>
-          0
+        <SliderMark value={min} {...labelStyles} ml={-5}>
+          {min}
         </SliderMark>
-        <SliderMark value={1} {...labelStyles} ml={4}>
-          1
+        <SliderMark value={max} {...labelStyles} ml={4}>
+          {max}
         </SliderMark>
       </Slider>
     </VStack>
