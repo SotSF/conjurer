@@ -44,7 +44,13 @@ export const ScalarParameterControl = memo(function ScalarParameterControl({
   parameters,
   setParameters,
 }: ScalarParameterControlProps) {
+  const min = patternParam.min ? patternParam.min : 0;
+  const max = patternParam.max ? patternParam.max : 1;
+  const step = patternParam.step ? patternParam.step : 0.01;
+
   const setParameter = (value: number) => {
+    value = parseFloat((Math.round(value / step) * step).toFixed(3)); 
+
     setParameters({ ...parameters, [uniformName]: value });
     block.pattern.params[uniformName].value = value;
 
@@ -60,10 +66,6 @@ export const ScalarParameterControl = memo(function ScalarParameterControl({
     });
   };
 
-  const min = patternParam.min ? patternParam.min : 0;
-  const max = patternParam.max ? patternParam.max : 1;
-  const step = patternParam.step ? patternParam.step : 0.01;
-
   return (
     <VStack mt={4} width="100%">
       <HStack width="100%" mt={6} justify="space-between">
@@ -74,7 +76,7 @@ export const ScalarParameterControl = memo(function ScalarParameterControl({
           onChange={(valueString) => setParameter(parseFloat(valueString))}
           value={patternParam.value}
         >
-          <NumberInputField />
+          <NumberInputField min={min} step={step} />
           <NumberInputStepper>
             <NumberIncrementStepper />
             <NumberDecrementStepper />
