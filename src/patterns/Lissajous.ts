@@ -41,5 +41,12 @@ export const Lissajous = () =>
           new Vector3(1.0,0.608,1.0),
           new Vector3(0.468,0.198,0.557)
         )
+    },
+    u_uniformColor: {
+      name: "Uniform Color",
+      value: 0,
+      min: 0,
+      max: 1,
+      step: 1
     }
   });

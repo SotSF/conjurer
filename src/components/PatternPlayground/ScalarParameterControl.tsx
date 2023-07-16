@@ -76,7 +76,7 @@ export const ScalarParameterControl = memo(function ScalarParameterControl({
           onChange={(valueString) => setParameter(parseFloat(valueString))}
           value={patternParam.value}
         >
-          <NumberInputField min={min} step={step} />
+          <NumberInputField />
           <NumberInputStepper>
             <NumberIncrementStepper />
             <NumberDecrementStepper />
@@ -87,7 +87,7 @@ export const ScalarParameterControl = memo(function ScalarParameterControl({
         min={min}
         max={max}
         step={step}
-        defaultValue={patternParam.value}
+        value={patternParam.value}
         onChange={(value) => setParameter(value)}
       >
         <SliderTrack>
