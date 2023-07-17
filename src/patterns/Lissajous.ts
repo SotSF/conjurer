@@ -33,6 +33,13 @@ export const Lissajous = () =>
       name: "Frequency - Y",
       value: 3
     },
+    u_toggleColor: {
+      name: "Toggle Color",
+      value: 0,
+      min: 0,
+      max: 1,
+      step: 1
+    },
     u_palette: {
       name: "Palette",
       value: new Palette(
@@ -41,12 +48,5 @@ export const Lissajous = () =>
           new Vector3(1.0,0.608,1.0),
           new Vector3(0.468,0.198,0.557)
         )
-    },
-    u_uniformColor: {
-      name: "Uniform Color",
-      value: 0,
-      min: 0,
-      max: 1,
-      step: 1
     }
   });
