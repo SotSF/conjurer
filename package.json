@@ -48,7 +48,7 @@
     "ws": "^8.13.0"
   },
   "devDependencies": {
-    "@types/node": "^20.3.1",
+    "@types/node": "^20.4.2",
     "@types/react": "^18.0.32",
     "@types/three": "^0.150.1",
     "@typescript-eslint/parser": "^5.60.1",
