@@ -53,7 +53,7 @@
     "@types/three": "^0.150.1",
     "@typescript-eslint/parser": "^5.60.1",
     "eslint": "^8.43.0",
-    "eslint-config-next": "13.4.1",
+    "eslint-config-next": "13.4.10",
     "eslint-plugin-mobx": "^0.0.9",
     "r3f-perf": "^7.1.2",
     "typescript": "^5.1.3"
