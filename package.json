@@ -44,7 +44,7 @@
     "three": "^0.152.2",
     "ts-node": "^10.9.1",
     "use-debounce": "^9.0.4",
-    "wavesurfer.js": "^7.0.0-beta.11",
+    "wavesurfer.js": "^7.0.3",
     "ws": "^8.13.0"
   },
   "devDependencies": {
