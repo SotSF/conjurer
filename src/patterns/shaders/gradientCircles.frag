@@ -11,7 +11,7 @@ uniform vec2 u_resolution;
 uniform float u_count;
 uniform float u_offset;
 uniform float u_radius;
-uniform float u_velocity;
+uniform float u_colorShift;
 uniform Palette u_palette;
 uniform float u_clockwise;
 
@@ -28,8 +28,8 @@ void main() {
                         u_offset * sin(a * i));
         float t = u_clockwise > 0. ? -1. * u_time : u_time;
         vec2 point = center + vec2(
-            u_radius * cos(t * u_velocity + i * a),
-            u_radius * sin(t * u_velocity + i * a)
+            u_radius * cos(t * u_colorShift + i * a),
+            u_radius * sin(t * u_colorShift + i * a)
         );
         float d = distance(uv, point);
         float d1 = distance(uv, center);

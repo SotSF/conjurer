@@ -18,8 +18,8 @@ export const GradientCircles = () =>
       name: "Radius",
       value: 0.2
     },
-    u_velocity: {
-      name: "Velocity",
+    u_colorShift: {
+      name: "Color Shift",
       value: 1.0
     },
     u_clockwise: {
