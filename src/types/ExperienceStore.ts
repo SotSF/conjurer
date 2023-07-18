@@ -1,5 +1,6 @@
 import { makeAutoObservable } from "mobx";
 import initialExperience from "@/src/data/initialExperience.json";
+import emptyExperience from "@/src/data/emptyExperience.json";
 import {
   GetObjectCommand,
   ListObjectsCommand,
@@ -107,6 +108,10 @@ export class ExperienceStore {
 
   loadFromString = (experienceString: string) => {
     this.rootStore.deserialize(this.parseExperience(experienceString));
+  };
+
+  loadEmptyExperience = () => {
+    this.rootStore.deserialize(emptyExperience);
   };
 
   loadInitialExperience = () => {
