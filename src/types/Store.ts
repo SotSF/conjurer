@@ -144,6 +144,13 @@ export class Store {
     this.usingLocalAssets = !this.usingLocalAssets;
   };
 
+  newExperience = () => {
+    this.experienceStore.saveToLocalStorage("autosave");
+    this.experienceName = "untitled";
+    this.experienceLastSavedAt = 0;
+    this.experienceStore.loadEmptyExperience();
+  };
+
   selectBlock = (block: Block) => {
     this.selectedBlocks = new Set([block]);
   };
