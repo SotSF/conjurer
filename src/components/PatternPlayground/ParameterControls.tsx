@@ -1,11 +1,16 @@
 import { Heading, VStack } from "@chakra-ui/react";
 import { memo, useState } from "react";
 import { Block } from "@/src/types/Block";
-import { ExtraParams, PatternParam } from "@/src/types/PatternParams";
+import {
+  ExtraParams,
+  PatternParam,
+  isNumberParam,
+  isPaletteParam,
+  isVector4Param,
+} from "@/src/types/PatternParams";
 import { BASE_UNIFORMS } from "@/src/types/Pattern";
 import { BsArrowsCollapse, BsArrowsExpand } from "react-icons/bs";
 import { ScalarParameterControl } from "@/src/components/PatternPlayground/ScalarParameterControl";
-import { isVector4 } from "@/src/utils/object";
 import { ColorParameterControl } from "@/src/components/PatternPlayground/ColorParameterControl";
 import { Vector4 } from "three";
 import { Palette, isPalette } from "@/src/types/Palette";
@@ -40,27 +45,22 @@ export const ParameterControls = memo(function ParameterControls({
               parameters,
               setParameters,
             };
-            if (typeof patternParam.value === "number")
+            if (isNumberParam(patternParam))
               return (
                 <ScalarParameterControl
                   {...props}
-                  // TODO: implement better type discrimination somehow
-                  patternParam={patternParam as PatternParam<number>}
+                  patternParam={patternParam}
                 />
               );
-            if (isVector4(patternParam.value))
+            if (isVector4Param(patternParam))
               return (
-                <ColorParameterControl
-                  {...props}
-                  // TODO: implement better type discrimination somehow
-                  patternParam={patternParam as PatternParam<Vector4>}
-                />
+                <ColorParameterControl {...props} patternParam={patternParam} />
               );
-            if (isPalette(patternParam.value))
+            if (isPaletteParam(patternParam))
               return (
                 <PaletteParameterControl
                   {...props}
-                  patternParam={patternParam as PatternParam<Palette>}
+                  patternParam={patternParam}
                 />
               );
             return null;
