@@ -10,7 +10,6 @@ import {
   SliderMark,
   SliderThumb,
   SliderTrack,
-  Text,
   VStack,
 } from "@chakra-ui/react";
 import { memo } from "react";
@@ -23,6 +22,7 @@ import {
 import { FlatVariation } from "@/src/types/Variations/FlatVariation";
 import { DEFAULT_VARIATION_DURATION } from "@/src/utils/time";
 import { runInAction } from "mobx";
+import { ParameterControlName } from "@/src/components/PatternPlayground/ParameterControlName";
 
 const labelStyles = {
   mt: -3,
@@ -61,9 +61,9 @@ export const ScalarParameterControl = memo(function ScalarParameterControl({
   };
 
   return (
-    <VStack mt={4} width="100%">
-      <HStack width="100%" mt={6} justify="space-between">
-        <Text fontSize={14}>{patternParam.name}</Text>
+    <VStack width="100%">
+      <HStack width="100%" justify="space-between">
+        <ParameterControlName patternParam={patternParam} />
         <NumberInput
           size="sm"
           step={0.1}
@@ -78,6 +78,7 @@ export const ScalarParameterControl = memo(function ScalarParameterControl({
         </NumberInput>
       </HStack>
       <Slider
+        width="80%"
         min={0}
         max={1}
         step={0.001}

@@ -1,4 +1,4 @@
-import { HStack, Text, VStack } from "@chakra-ui/react";
+import { HStack } from "@chakra-ui/react";
 import { memo, useState } from "react";
 import { Block } from "@/src/types/Block";
 import {
@@ -12,6 +12,7 @@ import { Vector4 } from "three";
 import { HexColorInput, HexColorPicker } from "react-colorful";
 import { hexToRgb, vector4ToHex } from "@/src/utils/color";
 import { LinearVariation4 } from "@/src/types/Variations/LinearVariation4";
+import { ParameterControlName } from "@/src/components/PatternPlayground/ParameterControlName";
 
 type ColorParameterControlProps = {
   block: Block<ExtraParams>;
@@ -55,7 +56,7 @@ export const ColorParameterControl = memo(function ColorParameterControl({
 
   return (
     <HStack pt={6} width="100%" gap={4}>
-      <Text fontSize={14}>{patternParam.name}</Text>
+      <ParameterControlName patternParam={patternParam} />
       <HexColorInput
         className="hexColorInput"
         color={color}
