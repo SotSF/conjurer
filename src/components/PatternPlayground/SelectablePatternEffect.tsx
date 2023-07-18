@@ -22,13 +22,15 @@ export const SelectablePatternEffect = memo(function SelectablePattern({
       onClick={onSelect}
       role="button"
     >
-      <VStack width="150px" height={10} justify="center">
+      <VStack width="100px" height={8} justify="center">
         <Text
+          fontSize="xs"
           textAlign="center"
           userSelect="none"
+          fontWeight={selected ? "bold" : "normal"}
           color={selected ? "teal.200" : "ButtonText"}
         >
-          {selected ? `> ${pattern.name} <` : pattern.name}
+          {pattern.name}
         </Text>
       </VStack>
     </Card>

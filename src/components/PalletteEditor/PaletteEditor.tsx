@@ -1,4 +1,12 @@
-import { Text } from "@chakra-ui/react";
+import {
+  Accordion,
+  AccordionButton,
+  AccordionIcon,
+  AccordionItem,
+  AccordionPanel,
+  Box,
+  Text,
+} from "@chakra-ui/react";
 import {
   LineChart,
   Line,
@@ -8,11 +16,13 @@ import {
   XAxis,
 } from "recharts";
 import { Button, HStack, VStack } from "@chakra-ui/react";
-import { memo } from "react";
+import { memo, useState } from "react";
 import { PaletteVariationGraph } from "@/src/components/VariationGraph/PaletteVariationGraph";
 import { PaletteVariation } from "@/src/types/Variations/PaletteVariation";
 import { Block } from "@/src/types/Block";
 import { Palette } from "@/src/types/Palette";
+import { HexColorInput, HexColorPicker } from "react-colorful";
+import { hexToVector3 } from "@/src/utils/color";
 
 const samples = 100;
 const getPaletteSeriesData = (palette: Palette) => {
@@ -46,8 +56,10 @@ export const PaletteEditor = memo(function PaletteEditor({
   block,
   setPalette,
 }: PaletteEditorProps) {
-  const randomize = () => {
+  const [color, setColor] = useState("#efa6b4");
+  const randomize = (useSeed = false) => {
     variation.palette.randomize();
+    if (useSeed) variation.palette.a = hexToVector3(color);
     setPalette?.(variation.palette);
   };
 
@@ -83,8 +95,37 @@ export const PaletteEditor = memo(function PaletteEditor({
         width={500}
         block={block}
       />
+      <Accordion width="100%" allowToggle>
+        <AccordionItem>
+          <AccordionButton>
+            <HStack>
+              <Text>Randomize with seed color</Text>
+              <AccordionIcon />
+            </HStack>
+          </AccordionButton>
+
+          <AccordionPanel>
+            <HStack>
+              <VStack>
+                <HexColorInput
+                  className="hexColorInput"
+                  color={color}
+                  onChange={setColor}
+                />
+                <HexColorPicker color={color} onChange={setColor} />
+              </VStack>
+              <VStack>
+                <Box w={12} h={12} bg={color} />
+                <Button onClick={() => randomize(true)}>
+                  Randomize with seed color
+                </Button>
+              </VStack>
+            </HStack>
+          </AccordionPanel>
+        </AccordionItem>
+      </Accordion>
       <HStack>
-        <Button onClick={randomize}>Randomize</Button>
+        <Button onClick={() => randomize()}>Randomize</Button>
       </HStack>
     </VStack>
   );

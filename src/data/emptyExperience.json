@@ -1,0 +1,37 @@
+{
+  "audioStore": {
+    "selectedAudioFile": "Ott. - Skylon - 02 The Queen Of All Everything.mp3",
+    "audioMuted": false
+  },
+  "uiStore": { "pixelsPerSecond": 60 },
+  "layers": [
+    {
+      "id": "6bdeca3da54078",
+      "patternBlocks": [],
+      "opacityBlock": {
+        "pattern": "Opacity",
+        "startTime": 0,
+        "duration": 3600,
+        "parameterVariations": {
+          "u_opacity": []
+        },
+        "effectBlocks": []
+      }
+    },
+    {
+      "id": "90debf99b7c2e",
+      "patternBlocks": [],
+      "opacityBlock": {
+        "pattern": "Opacity",
+        "startTime": 0,
+        "duration": 3600,
+        "parameterVariations": {
+          "u_opacity": []
+        },
+        "effectBlocks": []
+      }
+    }
+  ],
+  "user": "",
+  "savedAt": 0
+}

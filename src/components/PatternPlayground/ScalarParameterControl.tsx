@@ -10,7 +10,6 @@ import {
   SliderMark,
   SliderThumb,
   SliderTrack,
-  Text,
   VStack,
 } from "@chakra-ui/react";
 import { memo } from "react";
@@ -23,6 +22,7 @@ import {
 import { FlatVariation } from "@/src/types/Variations/FlatVariation";
 import { DEFAULT_VARIATION_DURATION } from "@/src/utils/time";
 import { runInAction } from "mobx";
+import { ParameterControlName } from "@/src/components/PatternPlayground/ParameterControlName";
 
 const labelStyles = {
   mt: -3,
@@ -67,11 +67,11 @@ export const ScalarParameterControl = memo(function ScalarParameterControl({
   };
 
   return (
-    <VStack mt={4} width="100%">
-      <HStack width="100%" mt={6} justify="space-between">
-        <Text fontSize={14}>{patternParam.name}</Text>
+    <HStack width="100%">
+      <VStack width="200px" spacing={1} alignItems="flex-start">
+        <ParameterControlName patternParam={patternParam} />
         <NumberInput
-          size="sm"
+          size="xs"
           step={step}
           onChange={(valueString) => setParameter(parseFloat(valueString))}
           value={patternParam.value}
@@ -82,25 +82,27 @@ export const ScalarParameterControl = memo(function ScalarParameterControl({
             <NumberDecrementStepper />
           </NumberInputStepper>
         </NumberInput>
-      </HStack>
-      <Slider
-        min={min}
-        max={max}
-        step={step}
-        value={patternParam.value}
-        onChange={(value) => setParameter(value)}
-      >
-        <SliderTrack>
-          <SliderFilledTrack />
-        </SliderTrack>
-        <SliderThumb boxSize={5} />
-        <SliderMark value={min} {...labelStyles} ml={-5}>
-          {min}
-        </SliderMark>
-        <SliderMark value={max} {...labelStyles} ml={4}>
-          {max}
-        </SliderMark>
-      </Slider>
-    </VStack>
+      </VStack>
+      <VStack mx={6} flexGrow={1}>
+        <Slider
+          min={min}
+          max={max}
+          step={step}
+          value={patternParam.value}
+          onChange={(value) => setParameter(value)}
+        >
+          <SliderTrack>
+            <SliderFilledTrack />
+          </SliderTrack>
+          <SliderThumb boxSize={5} />
+          <SliderMark value={min} {...labelStyles} ml={-5}>
+            {min}
+          </SliderMark>
+          <SliderMark value={max} {...labelStyles} ml={4}>
+            {max}
+          </SliderMark>
+        </Slider>
+      </VStack>
+    </HStack>=
   );
 });

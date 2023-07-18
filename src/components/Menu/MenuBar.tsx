@@ -20,7 +20,7 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 import { BiTimer } from "react-icons/bi";
-import { FaFolderOpen, FaRegClipboard } from "react-icons/fa";
+import { FaFile, FaFolderOpen, FaRegClipboard } from "react-icons/fa";
 import { FiSave } from "react-icons/fi";
 import { useStore } from "@/src/types/StoreContext";
 import { OpenExperienceModal } from "@/src/components/Menu/OpenExperienceModal";
@@ -110,15 +110,14 @@ export const MenuBar = observer(function MenuBar() {
             File
           </MenuButton>
           <MenuList zIndex={12}>
-            {/* <MenuItem
-            command="⌘N"
-            onClick={() => {
-              // TODO:
-            }}
-          >
-            New experience
-          </MenuItem>
-          <MenuDivider /> */}
+            <MenuItem
+              icon={<FaFile size={17} />}
+              command="⌘N"
+              onClick={action(() => store.newExperience())}
+            >
+              New experience
+            </MenuItem>
+            <MenuDivider />
             <MenuItem
               icon={<FaFolderOpen size={17} />}
               command="⌘O"

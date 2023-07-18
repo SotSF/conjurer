@@ -15,6 +15,9 @@ export const KeyboardControls = observer(function KeyboardControls() {
       } else if (e.key === "s" && (e.ctrlKey || e.metaKey)) {
         experienceStore.save();
         e.preventDefault();
+      } else if (e.key === "n" && (e.ctrlKey || e.metaKey)) {
+        store.newExperience();
+        e.preventDefault();
       }
 
       if (document.activeElement?.nodeName === "INPUT") return;
