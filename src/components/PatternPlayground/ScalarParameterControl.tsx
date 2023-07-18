@@ -44,9 +44,9 @@ export const ScalarParameterControl = memo(function ScalarParameterControl({
   parameters,
   setParameters,
 }: ScalarParameterControlProps) {
-  const min = patternParam.min ? patternParam.min : 0;
-  const max = patternParam.max ? patternParam.max : 1;
-  const step = patternParam.step ? patternParam.step : 0.01;
+  const min = typeof patternParam.min === "number" ? patternParam.min : 0;
+  const max = typeof patternParam.max === "number" ? patternParam.max : 1;
+  const step = typeof patternParam.step === "number" ? patternParam.step : 0.01;
 
   const setParameter = (value: number) => {
     value = parseFloat((Math.round(value / step) * step).toFixed(3)); 
