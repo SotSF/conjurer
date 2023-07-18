@@ -20,7 +20,7 @@ export const PatternList = memo(function PatternList({
 }: Props) {
   return (
     <VStack height="100%" flexWrap="wrap" gap={1} spacing={0}>
-      <Text fontSize="xl" fontWeight="bold">
+      <Text fontSize="md" fontWeight="bold">
         Patterns
       </Text>
       <HStack width="100%" flexWrap="wrap" gap={1} spacing={0}>
@@ -33,7 +33,7 @@ export const PatternList = memo(function PatternList({
           />
         ))}
       </HStack>
-      <Text fontSize="xl" fontWeight="bold">
+      <Text fontSize="md" fontWeight="bold">
         Effects
       </Text>
       <HStack width="100%" flexWrap="wrap" gap={1} spacing={0}>

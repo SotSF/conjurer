@@ -87,10 +87,10 @@ export const PatternPlayground = observer(function PatternPlayground() {
   return (
     <Grid
       height="100%"
-      templateAreas={`"patterns patterns"
+      templateAreas={`"controls patterns"
                       "controls preview"`}
       gridTemplateColumns="50% 50%"
-      gridTemplateRows="auto 1fr"
+      gridTemplateRows="auto minmax(0, 1fr)"
     >
       <GridItem area="patterns">
         <PatternList
@@ -101,16 +101,18 @@ export const PatternPlayground = observer(function PatternPlayground() {
         />
       </GridItem>
       <GridItem area="controls">
-        <ParameterControls
-          key={selectedPatternBlock.id}
-          block={selectedPatternBlock}
-        />
-        {selectedEffectIndices.map((effectIndex, i) => (
+        <VStack p={2} height="100%" overflowY="scroll">
           <ParameterControls
-            key={`${effectBlocks[effectIndex].id}-${i}`}
-            block={effectBlocks[effectIndex]}
+            key={selectedPatternBlock.id}
+            block={selectedPatternBlock}
           />
-        ))}
+          {selectedEffectIndices.map((effectIndex, i) => (
+            <ParameterControls
+              key={`${effectBlocks[effectIndex].id}-${i}`}
+              block={effectBlocks[effectIndex]}
+            />
+          ))}
+        </VStack>
       </GridItem>
       <GridItem area="preview" position="relative">
         <DisplayModeButtons />
