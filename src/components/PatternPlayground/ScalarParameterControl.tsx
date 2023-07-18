@@ -103,6 +103,6 @@ export const ScalarParameterControl = memo(function ScalarParameterControl({
           </SliderMark>
         </Slider>
       </VStack>
-    </HStack>=
+    </HStack>
   );
 });
