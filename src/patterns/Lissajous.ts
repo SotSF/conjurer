@@ -8,7 +8,10 @@ export const Lissajous = () =>
   new Pattern("Lissajous", lissajous, {
     u_count: {
       name: "Count",
-      value: 8
+      value: 8,
+      min: 1,
+      max: 64,
+      step: 1
     },
     u_space: {
       name: "Interval",  
@@ -29,6 +32,13 @@ export const Lissajous = () =>
     u_b1: {
       name: "Frequency - Y",
       value: 3
+    },
+    u_toggleColor: {
+      name: "Toggle Color",
+      value: 0,
+      min: 0,
+      max: 1,
+      step: 1
     },
     u_palette: {
       name: "Palette",

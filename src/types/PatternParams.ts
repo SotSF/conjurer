@@ -7,6 +7,10 @@ export type ParamType = number | Vector4 | Palette | Texture | null;
 export type PatternParam<T = ParamType> = {
   readonly name: string;
   value: T;
+
+  min?: number;
+  max?: number;
+  step?: number;
 };
 
 export const isNumberParam = (

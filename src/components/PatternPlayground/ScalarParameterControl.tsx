@@ -44,7 +44,13 @@ export const ScalarParameterControl = memo(function ScalarParameterControl({
   parameters,
   setParameters,
 }: ScalarParameterControlProps) {
+  const min = typeof patternParam.min === "number" ? patternParam.min : 0;
+  const max = typeof patternParam.max === "number" ? patternParam.max : 1;
+  const step = typeof patternParam.step === "number" ? patternParam.step : 0.01;
+
   const setParameter = (value: number) => {
+    value = parseFloat((Math.round(value / step) * step).toFixed(3)); 
+
     setParameters({ ...parameters, [uniformName]: value });
     block.pattern.params[uniformName].value = value;
 
@@ -66,7 +72,7 @@ export const ScalarParameterControl = memo(function ScalarParameterControl({
         <ParameterControlName patternParam={patternParam} />
         <NumberInput
           size="xs"
-          step={0.1}
+          step={step}
           onChange={(valueString) => setParameter(parseFloat(valueString))}
           value={patternParam.value}
         >
@@ -79,21 +85,21 @@ export const ScalarParameterControl = memo(function ScalarParameterControl({
       </VStack>
       <VStack mx={6} flexGrow={1}>
         <Slider
-          min={0}
-          max={1}
-          step={0.001}
-          defaultValue={patternParam.value}
+          min={min}
+          max={max}
+          step={step}
+          value={patternParam.value}
           onChange={(value) => setParameter(value)}
         >
           <SliderTrack>
             <SliderFilledTrack />
           </SliderTrack>
           <SliderThumb boxSize={5} />
-          <SliderMark value={0} {...labelStyles} ml={-5}>
-            0
+          <SliderMark value={min} {...labelStyles} ml={-5}>
+            {min}
           </SliderMark>
-          <SliderMark value={1} {...labelStyles} ml={4}>
-            1
+          <SliderMark value={max} {...labelStyles} ml={4}>
+            {max}
           </SliderMark>
         </Slider>
       </VStack>
