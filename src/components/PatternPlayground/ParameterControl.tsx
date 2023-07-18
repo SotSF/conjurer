@@ -53,7 +53,7 @@ export const ParameterControl = memo(function ParameterControl({
 
   return (
     <Box
-      p={2}
+      p={1}
       width="100%"
       _odd={{ bgColor: "whiteAlpha.200" }}
       _even={{ bgColor: "whiteAlpha.50" }}

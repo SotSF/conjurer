@@ -8,7 +8,7 @@ export const ParameterControlName = memo(function ParameterControlName({
   patternParam: PatternParam;
 }) {
   return (
-    <Text fontSize="sm" fontWeight="bold">
+    <Text lineHeight={1} fontSize="sm" fontWeight="bold">
       {patternParam.name}
     </Text>
   );

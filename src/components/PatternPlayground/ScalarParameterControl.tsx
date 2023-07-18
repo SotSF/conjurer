@@ -62,7 +62,7 @@ export const ScalarParameterControl = memo(function ScalarParameterControl({
 
   return (
     <HStack width="100%">
-      <VStack width="200px" alignItems="flex-start">
+      <VStack width="200px" spacing={1} alignItems="flex-start">
         <ParameterControlName patternParam={patternParam} />
         <NumberInput
           size="xs"
