@@ -8,11 +8,13 @@ import { ChromaticAberration } from "./ChromaticAberration";
 import { Tiler } from "@/src/effects/Tiler";
 import { CloudsMask } from "@/src/effects/CloudsMask";
 import { ConstructMask } from "@/src/effects/ConstructMask";
+import { BrightnessAdjust } from "./BrightnessAdjust";
 
 const effectFactories: Array<() => Pattern> = [
   Tiler,
   Shaper,
   Leaf,
+  BrightnessAdjust,
   ColorTint,
   CartesianProjection,
   Rotate,
