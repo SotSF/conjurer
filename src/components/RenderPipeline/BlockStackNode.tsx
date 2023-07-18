@@ -9,7 +9,7 @@ import { Block } from "@/src/types/Block";
 import { observer } from "mobx-react-lite";
 
 // This enables `#include <conjurer_common>`
-ShaderChunk.conjurer_common = conjurerCommon;
+(ShaderChunk as any).conjurer_common = conjurerCommon;
 
 type BlockStackNodeProps = {
   autorun?: boolean;
