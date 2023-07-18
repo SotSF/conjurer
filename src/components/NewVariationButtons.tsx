@@ -1,4 +1,4 @@
-import { ExtraParams } from "@/src/types/PatternParams";
+import { ExtraParams, isVector4Param } from "@/src/types/PatternParams";
 import { IconButton, VStack } from "@chakra-ui/react";
 import { memo } from "react";
 import { BsArrowUpRight } from "react-icons/bs";
@@ -20,7 +20,6 @@ import {
   DEFAULT_SPLINE_POINTS,
   SplineVariation,
 } from "@/src/types/Variations/SplineVariation";
-import { isVector4 } from "@/src/utils/object";
 import { useStore } from "@/src/types/StoreContext";
 import { EasingVariation } from "@/src/types/Variations/EasingVariation";
 import { Palette, isPalette } from "@/src/types/Palette";
@@ -36,8 +35,8 @@ export const NewVariationButtons = memo(function NewVariationButtons({
   block,
 }: NewVariationButtonsProps) {
   const store = useStore();
-  const newVariationButtons = isVector4(
-    block.pattern.params[uniformName].value
+  const newVariationButtons = isVector4Param(
+    block.pattern.params[uniformName]
   ) ? (
     <>
       <IconButton

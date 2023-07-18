@@ -1,4 +1,4 @@
-import { HStack, Text } from "@chakra-ui/react";
+import { HStack } from "@chakra-ui/react";
 import { memo, useCallback, useEffect, useState } from "react";
 import { Block } from "@/src/types/Block";
 import {
@@ -11,6 +11,7 @@ import { runInAction } from "mobx";
 import { Palette } from "@/src/types/Palette";
 import { PaletteEditor } from "@/src/components/PalletteEditor/PaletteEditor";
 import { PaletteVariation } from "@/src/types/Variations/PaletteVariation";
+import { ParameterControlName } from "@/src/components/PatternPlayground/ParameterControlName";
 
 type PaletteParameterControlProps = {
   block: Block<ExtraParams>;
@@ -59,7 +60,7 @@ export const PaletteParameterControl = memo(function PaletteParameterControl({
 
   return (
     <HStack pt={6} width="100%" gap={4}>
-      <Text fontSize={14}>{patternParam.name}</Text>
+      <ParameterControlName patternParam={patternParam} />
       {variation?.type === "palette" && (
         <PaletteEditor
           uniformName={uniformName}
