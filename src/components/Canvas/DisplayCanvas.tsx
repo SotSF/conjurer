@@ -15,7 +15,7 @@ import { useState } from "react";
 const DEBUG = false;
 
 export const DisplayCanvas = observer(function DisplayCanvas() {
-  const { uiStore } = useStore();
+  const { uiStore, experienceName } = useStore();
   const { displayMode, showingPerformance } = uiStore;
 
   const [renderTarget, setRenderTarget] = useState<WebGLRenderTarget | null>(
@@ -23,7 +23,7 @@ export const DisplayCanvas = observer(function DisplayCanvas() {
   );
 
   return (
-    <Canvas frameloop={DEBUG ? "demand" : "always"}>
+    <Canvas key={experienceName} frameloop={DEBUG ? "demand" : "always"}>
       {DEBUG && <RenderOnTimeChange />}
       {showingPerformance && <Perf />}
       <CameraControls />
