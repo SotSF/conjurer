@@ -15,6 +15,7 @@ export const ParameterControls = memo(function ParameterControls({
   const [parameters, setParameters] = useState({});
   const [showControls, toggleControls] = useState(true);
 
+  const isEffect = block.parentBlock !== null;
   return (
     <VStack
       spacing={0}
@@ -23,8 +24,8 @@ export const ParameterControls = memo(function ParameterControls({
       borderWidth={1}
       borderColor="black"
     >
-      <Heading size="md">
-        {block.pattern.name}
+      <Heading size="sm">
+        {isEffect ? "Effect:" : "Pattern:"} {block.pattern.name}
         <Button
           ml={1}
           variant="unstyled"

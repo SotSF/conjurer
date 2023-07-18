@@ -61,11 +61,11 @@ export const ScalarParameterControl = memo(function ScalarParameterControl({
   };
 
   return (
-    <VStack width="100%">
-      <HStack width="100%" justify="space-between">
+    <HStack width="100%">
+      <VStack width="200px" alignItems="flex-start">
         <ParameterControlName patternParam={patternParam} />
         <NumberInput
-          size="sm"
+          size="xs"
           step={0.1}
           onChange={(valueString) => setParameter(parseFloat(valueString))}
           value={patternParam.value}
@@ -76,26 +76,27 @@ export const ScalarParameterControl = memo(function ScalarParameterControl({
             <NumberDecrementStepper />
           </NumberInputStepper>
         </NumberInput>
-      </HStack>
-      <Slider
-        width="80%"
-        min={0}
-        max={1}
-        step={0.001}
-        defaultValue={patternParam.value}
-        onChange={(value) => setParameter(value)}
-      >
-        <SliderTrack>
-          <SliderFilledTrack />
-        </SliderTrack>
-        <SliderThumb boxSize={5} />
-        <SliderMark value={0} {...labelStyles} ml={-5}>
-          0
-        </SliderMark>
-        <SliderMark value={1} {...labelStyles} ml={4}>
-          1
-        </SliderMark>
-      </Slider>
-    </VStack>
+      </VStack>
+      <VStack mx={6} flexGrow={1}>
+        <Slider
+          min={0}
+          max={1}
+          step={0.001}
+          defaultValue={patternParam.value}
+          onChange={(value) => setParameter(value)}
+        >
+          <SliderTrack>
+            <SliderFilledTrack />
+          </SliderTrack>
+          <SliderThumb boxSize={5} />
+          <SliderMark value={0} {...labelStyles} ml={-5}>
+            0
+          </SliderMark>
+          <SliderMark value={1} {...labelStyles} ml={4}>
+            1
+          </SliderMark>
+        </Slider>
+      </VStack>
+    </HStack>
   );
 });
