@@ -14,8 +14,9 @@ import { Globules } from "@/src/patterns/Globules";
 import { Construct } from "@/src/patterns/Construct";
 import { EasternRedbud } from "@/src/patterns/EasternRedbud";
 import { Convergence } from "@/src/patterns/Convergence";
-import { Lissajous } from "./Lissajous";
-import { GradientCircles } from "./GradientCircles";
+import { Lissajous } from "@/src/patterns//Lissajous";
+import { GradientCircles } from "@/src/patterns//GradientCircles";
+import { Perlin } from "@/src/patterns/Perlin";
 
 const patternFactories: Array<() => Pattern> = [
   LogSpirals,
@@ -27,6 +28,7 @@ const patternFactories: Array<() => Pattern> = [
   GradientCircles,
   Lissajous,
   Melt,
+  Perlin,
   Pulse,
   Rainbow,
   Starfield,
