@@ -1,7 +1,6 @@
 import { Pattern } from "@/src/types/Pattern";
 import perlin from "./shaders/perlin.frag";
 import { Palette } from "../types/Palette";
-import { Vector3 } from "three";
 
 export { perlin };
 export const Perlin = () =>
@@ -10,9 +9,20 @@ export const Perlin = () =>
       name: "Time Factor",
       value: 0.5
     },
+    u_colorShift: {
+      name: "Color Shift",
+      value: 0.5
+    },
     u_seed: {
       name: "Seed",
       value: 0
+    },
+    u_steps: {
+      name: "Steps",
+      value: 5,
+      min: 0,
+      max: 10,
+      step: 1,
     },
     u_period: {
       name: "Period",

@@ -9,15 +9,15 @@ uniform float u_time;
 uniform vec2 u_resolution;
 
 uniform float u_timeFactor;
+uniform float u_colorShift;
 uniform float u_seed;
+uniform float u_steps;
 uniform float u_period;
 uniform Palette u_palette;
 
-#define u_steps 5.
-
 //	Classic Perlin 3D Noise 
 //	by Stefan Gustavson
-//
+//  =======================
 vec4 permute(vec4 x){return mod(((x*34.0)+1.0)*x, 289.0);}
 vec4 taylorInvSqrt(vec4 r){return 1.79284291400159 - 0.85373472095314 * r;}
 vec4 fade(vec4 t) {return t*t*t*(t*(t*6.0-15.0)+10.0);}
@@ -154,15 +154,15 @@ float cnoise(vec4 P){
   float n_xyzw = mix(n_yzw.x, n_yzw.y, fade_xyzw.x);
   return 2.2 * n_xyzw;
 }
+//  =======================
 
 void main() {
     vec2 uv = v_uv;
     uv = canopyToCartesianProjection(uv);
     vec2 pos = vec2(uv*u_period);
 
-    float t = u_time * u_timeFactor;
-    float n = cnoise(vec4(pos, t, u_seed));
-    vec3 col = n > 0. ? palette(n + t, u_palette) : vec3(0.);
+    float n = cnoise(vec4(pos, u_time * u_timeFactor, u_seed));
+    vec3 col = n > 0. ? palette(n + u_time * u_colorShift, u_palette) : vec3(0.);
     
     for (float i = 0.; i < u_steps; i++) {
         col += smoothstep(.005 + (i * 0.1),.1 + (i * 0.1),n);    
