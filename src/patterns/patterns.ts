@@ -17,6 +17,7 @@ import { Convergence } from "@/src/patterns/Convergence";
 import { Lissajous } from "@/src/patterns//Lissajous";
 import { GradientCircles } from "@/src/patterns//GradientCircles";
 import { Perlin } from "@/src/patterns/Perlin";
+import { PulsePalette } from "@/src/patterns/PulsePalette";
 
 const patternFactories: Array<() => Pattern> = [
   LogSpirals,
@@ -30,6 +31,7 @@ const patternFactories: Array<() => Pattern> = [
   Melt,
   Perlin,
   Pulse,
+  PulsePalette,
   Rainbow,
   Starfield,
   SunCycle,
