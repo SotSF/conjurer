@@ -21,20 +21,20 @@ uniform float u_spiral_factor;
 uniform float u_number_colors;
 uniform float u_white_leading_edge;
 
-// For debugging
-#define u_palette Palette(vec3(0.261, 0.446, 0.315), vec3(0.843, 0.356, 0.239), vec3(0.948, 1.474, 1.361), vec3(3.042, 5.630, 5.424))
-#define u_time_factor 1.
-#define u_time_offset 0.
-#define u_period 4.
-#define u_duty_cycle .2
-#define u_scale 5.
-#define u_fade_factor .75
-#define u_wave_frequency 4.
-#define u_wave_amplitude 0.6
-#define u_waviness 1.
-#define u_spiral_factor .5
-#define u_number_colors 100.
-#define u_white_leading_edge .75
+// // For debugging
+// #define u_palette Palette(vec3(0.261, 0.446, 0.315), vec3(0.843, 0.356, 0.239), vec3(0.948, 1.474, 1.361), vec3(3.042, 5.630, 5.424))
+// #define u_time_factor 1.
+// #define u_time_offset 0.
+// #define u_period 4.
+// #define u_duty_cycle .2
+// #define u_scale 5.
+// #define u_fade_factor .75
+// #define u_wave_frequency 4.
+// #define u_wave_amplitude 0.6
+// #define u_waviness 1.
+// #define u_spiral_factor .5
+// #define u_number_colors 100.
+// #define u_white_leading_edge .75
 
 float triangleWave(in float x) {
     return 2. / PI * asin(sin(x));

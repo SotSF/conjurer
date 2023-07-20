@@ -17,39 +17,42 @@ export const PulsePalette = () =>
     },
     u_time_factor: {
       name: "Time Factor",
-      value: 0.4,
+      value: 1,
+      max: 5,
     },
     u_time_offset: {
       name: "Time Offset",
       value: 0,
     },
-    u_hue_start: {
-      name: "Hue Start",
-      value: 0,
-    },
-    u_hue_width: {
-      name: "Hue Width",
-      value: 0.8,
-    },
-    u_saturation: {
-      name: "Saturation",
-      value: 1,
+    u_period: {
+      name: "Period",
+      value: 4,
+      max: 10,
     },
     u_duty_cycle: {
       name: "Duty Cycle",
-      value: 0.5,
+      value: 0.2,
     },
     u_scale: {
       name: "Scale",
-      value: 1,
+      value: 5,
+      max: 10,
+      step: 0.1,
     },
-    u_wave_period: {
-      name: "Wave Period",
-      value: 0.25,
+    u_fade_factor: {
+      name: "Fade Factor",
+      value: 0.75,
+    },
+    u_wave_frequency: {
+      name: "Wave Frequency",
+      value: 4,
+      min: 1,
+      max: 12,
+      step: 1,
     },
     u_wave_amplitude: {
       name: "Wave Amplitude",
-      value: 0,
+      value: 0.5,
     },
     u_waviness: {
       name: "Waviness",
@@ -57,14 +60,17 @@ export const PulsePalette = () =>
     },
     u_spiral_factor: {
       name: "Spiral Factor",
-      value: 0,
+      value: 0.5,
     },
     u_number_colors: {
       name: "Number of Colors",
-      value: 4,
+      value: 40,
+      min: 1,
+      max: 100,
+      step: 1,
     },
     u_white_leading_edge: {
       name: "White Leading Edge",
-      value: 1,
+      value: 0.1,
     },
   });
