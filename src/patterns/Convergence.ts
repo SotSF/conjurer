@@ -6,9 +6,19 @@ import { Palette } from "@/src/types/Palette";
 export { convergence };
 export const Convergence = () =>
   new Pattern("Convergence", convergence, {
+    u_palette: {
+      name: "Palette",
+      value: new Palette(
+        new Vector3(0.261, 0.446, 0.315),
+        new Vector3(0.843, 0.356, 0.239),
+        new Vector3(0.948, 1.474, 1.361),
+        new Vector3(3.042, 5.63, 5.424)
+      ),
+    },
     u_time_factor: {
       name: "Time Factor",
       value: 1,
+      max: 5,
     },
     u_time_offset: {
       name: "Time Offset",
@@ -17,14 +27,20 @@ export const Convergence = () =>
     u_period: {
       name: "Period",
       value: 3,
+      max: 10,
     },
     u_waves: {
       name: "Waves",
       value: 10,
+      max: 30,
+      step: 1,
     },
     u_trailing_waves: {
       name: "Trailing Waves",
       value: 2,
+      min: 0,
+      max: 10,
+      step: 1,
     },
     u_wave_size: {
       name: "Wave Size",
@@ -45,14 +61,5 @@ export const Convergence = () =>
     u_spread_factor: {
       name: "Spread Factor",
       value: 1,
-    },
-    u_palette: {
-      name: "Palette",
-      value: new Palette(
-        new Vector3(0.261, 0.446, 0.315),
-        new Vector3(0.843, 0.356, 0.239),
-        new Vector3(0.948, 1.474, 1.361),
-        new Vector3(3.042, 5.63, 5.424)
-      ),
     },
   });

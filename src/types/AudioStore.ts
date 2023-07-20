@@ -43,6 +43,16 @@ export class AudioStore {
     this.audioLooping = !this.audioLooping;
   };
 
+  loopAudio = (start: number, end: number) => {
+    this.audioLooping = true;
+    this.selectedRegion = {
+      id: "block",
+      start,
+      end,
+    };
+    // TODO: make this region appear in the UI
+  };
+
   getSelectedAudioFileUrl = () =>
     this.rootStore.usingLocalAssets
       ? `${location.href}/${LOCAL_ASSET_DIRECTORY}${AUDIO_ASSET_PREFIX}${this.selectedAudioFile}`

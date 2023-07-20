@@ -47,10 +47,6 @@ float wave(vec2 st, float edge, float size, float intensityFactor) {
 void main() {
     vec2 st = v_uv;
 
-    vec2 polar = canopyToPolarProjection(st);
-    float polarTheta = polar.x;
-    float polarRadialDistance = polar.y;
-
     vec2 cartesian = canopyToCartesianProjection(st) + 0.5;
 
     float time = u_time * u_time_factor + u_time_offset;

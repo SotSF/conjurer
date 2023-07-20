@@ -10,9 +10,10 @@ import {
   SliderMark,
   SliderThumb,
   SliderTrack,
+  Tooltip,
   VStack,
 } from "@chakra-ui/react";
-import { memo } from "react";
+import { memo, useState } from "react";
 import { Block } from "@/src/types/Block";
 import {
   ExtraParams,
@@ -44,12 +45,13 @@ export const ScalarParameterControl = memo(function ScalarParameterControl({
   parameters,
   setParameters,
 }: ScalarParameterControlProps) {
+  const [showTooltip, setShowTooltip] = useState(false);
   const min = typeof patternParam.min === "number" ? patternParam.min : 0;
   const max = typeof patternParam.max === "number" ? patternParam.max : 1;
   const step = typeof patternParam.step === "number" ? patternParam.step : 0.01;
 
   const setParameter = (value: number) => {
-    value = parseFloat((Math.round(value / step) * step).toFixed(3)); 
+    value = parseFloat((Math.round(value / step) * step).toFixed(3));
 
     setParameters({ ...parameters, [uniformName]: value });
     block.pattern.params[uniformName].value = value;
@@ -83,22 +85,33 @@ export const ScalarParameterControl = memo(function ScalarParameterControl({
           </NumberInputStepper>
         </NumberInput>
       </VStack>
-      <VStack mx={6} flexGrow={1}>
+      <VStack mx={12} flexGrow={1}>
         <Slider
           min={min}
           max={max}
           step={step}
           value={patternParam.value}
           onChange={(value) => setParameter(value)}
+          onMouseEnter={() => setShowTooltip(true)}
+          onMouseLeave={() => setShowTooltip(false)}
         >
           <SliderTrack>
             <SliderFilledTrack />
           </SliderTrack>
-          <SliderThumb boxSize={5} />
-          <SliderMark value={min} {...labelStyles} ml={-5}>
+          <Tooltip
+            hasArrow
+            bg="blue.300"
+            color="white"
+            placement="top"
+            isOpen={showTooltip}
+            label={patternParam.value}
+          >
+            <SliderThumb boxSize={5} />
+          </Tooltip>
+          <SliderMark value={min} {...labelStyles} ml={-7}>
             {min}
           </SliderMark>
-          <SliderMark value={max} {...labelStyles} ml={4}>
+          <SliderMark value={max} {...labelStyles} ml={5}>
             {max}
           </SliderMark>
         </Slider>
