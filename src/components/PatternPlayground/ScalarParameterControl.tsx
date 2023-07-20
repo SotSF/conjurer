@@ -10,9 +10,10 @@ import {
   SliderMark,
   SliderThumb,
   SliderTrack,
+  Tooltip,
   VStack,
 } from "@chakra-ui/react";
-import { memo } from "react";
+import { memo, useState } from "react";
 import { Block } from "@/src/types/Block";
 import {
   ExtraParams,
@@ -44,6 +45,7 @@ export const ScalarParameterControl = memo(function ScalarParameterControl({
   parameters,
   setParameters,
 }: ScalarParameterControlProps) {
+  const [showTooltip, setShowTooltip] = useState(false);
   const min = typeof patternParam.min === "number" ? patternParam.min : 0;
   const max = typeof patternParam.max === "number" ? patternParam.max : 1;
   const step = typeof patternParam.step === "number" ? patternParam.step : 0.01;
@@ -90,11 +92,22 @@ export const ScalarParameterControl = memo(function ScalarParameterControl({
           step={step}
           value={patternParam.value}
           onChange={(value) => setParameter(value)}
+          onMouseEnter={() => setShowTooltip(true)}
+          onMouseLeave={() => setShowTooltip(false)}
         >
           <SliderTrack>
             <SliderFilledTrack />
           </SliderTrack>
-          <SliderThumb boxSize={5} />
+          <Tooltip
+            hasArrow
+            bg="blue.300"
+            color="white"
+            placement="top"
+            isOpen={showTooltip}
+            label={patternParam.value}
+          >
+            <SliderThumb boxSize={5} />
+          </Tooltip>
           <SliderMark value={min} {...labelStyles} ml={-7}>
             {min}
           </SliderMark>
