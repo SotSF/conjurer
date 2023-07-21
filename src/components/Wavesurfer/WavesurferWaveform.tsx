@@ -9,9 +9,9 @@ import type TimelinePlugin from "wavesurfer.js/dist/plugins/timeline";
 import type { TimelinePluginOptions } from "wavesurfer.js/dist/plugins/timeline";
 import type RegionsPlugin from "wavesurfer.js/dist/plugins/regions";
 import type { RegionParams } from "wavesurfer.js/dist/plugins/regions";
-import { action, runInAction } from "mobx";
+import { action } from "mobx";
 import { useCloneCanvas } from "@/src/components/Wavesurfer/hooks/cloneCanvas";
-import { loopRegionColor, markRegionColor } from "@/src/types/AudioStore";
+import { loopRegionColor } from "@/src/types/AudioStore";
 
 const importWavesurferConstructors = async () => {
   // Can't be run on the server, so we need to use dynamic imports
@@ -226,60 +226,31 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
       )
         return;
 
-      if (!audioStore.markingAudio) {
-        audioStore.regions.unAll();
-        audioStore.regions.clearRegions();
-        return;
-      }
+      if (!audioStore.markingAudio) return;
 
-      disableCreateByClick = wavesurfer.on("interaction", (newTime: number) => {
-        if (!wavesurfer) return;
-        const label = document.createElement("div");
-        label.innerHTML = "Region";
-        label.setAttribute(
-          "style",
-          "width: 100px; color: black; font-size: 12px;"
-        );
-        const id = Math.random().toString(36).substring(7);
-        const newRegion: RegionParams = {
-          id,
-          start: newTime,
-          color: markRegionColor,
-          content: label,
-        };
-        regions.addRegion(newRegion);
-        runInAction(() => {
-          audioStore.markerRegions.push(newRegion);
-          uiStore.showingMarkerEditorModal = true;
-          uiStore.markerIdToEdit = id;
-        });
-      });
-
-      // TODO: figure out how/when to clear region selection
       regions.on(
-        "region-created",
-        action((newRegion: RegionParams) => {
-          // Remove all other regions, we only allow one region at a time
-          // regions
-          //   .getRegions()
-          //   .forEach((region) => region !== newRegion && region.remove());
-          audioStore.markerRegions.push(newRegion);
-          if (!audioStore.wavesurfer) return;
-          timer.setTime(Math.max(0, newRegion.start));
+        "region-clicked",
+        action((region: RegionParams) => {
+          console.log("region clicked");
+          uiStore.showingMarkerEditorModal = true;
+          uiStore.markerToEdit = region;
         })
       );
-      regions.on(
-        "region-updated",
-        action((region: RegionParams) => {
-          // audioStore.loopRegion = region;
-          if (!audioStore.wavesurfer) return;
-          timer.setTime(Math.max(0, region.start));
+
+      disableCreateByClick = wavesurfer.on(
+        "interaction",
+        action((newTime: number) => {
+          uiStore.showingMarkerEditorModal = true;
+          uiStore.markerToEdit = {
+            id: Math.random().toString(36).substring(7),
+            start: newTime,
+          };
         })
       );
     });
     toggleMarkingMode();
     return disableCreateByClick;
-  }, [audioStore, audioStore.markingAudio, timer]);
+  }, [uiStore, audioStore, audioStore.markingAudio, timer]);
 
   // on play/pause toggle
   useEffect(() => {

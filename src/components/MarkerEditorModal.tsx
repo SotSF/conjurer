@@ -10,28 +10,50 @@ import {
   ModalHeader,
   ModalOverlay,
   Text,
+  VStack,
 } from "@chakra-ui/react";
 import { useStore } from "@/src/types/StoreContext";
 import { useState } from "react";
 import { action } from "mobx";
+import { HexColorInput, HexColorPicker } from "react-colorful";
+import { hexToRgbaString } from "@/src/utils/color";
+import { RegionParams } from "wavesurfer.js/dist/plugins/regions";
 
 export const MarkerEditorModal = observer(function MarkerEditorModal() {
   const store = useStore();
   const { uiStore, audioStore } = store;
 
-  const [markerName, setMarkerName] = useState("");
+  const markerElement = uiStore.markerToEdit.content;
+  const regionName =
+    (typeof markerElement === "object" && markerElement.innerHTML) || "";
+  const [markerName, setMarkerName] = useState(regionName);
+  const [color, setColor] = useState("#efa6b4");
 
   const onClose = action(() => {
     uiStore.showingMarkerEditorModal = false;
-    uiStore.markerIdToEdit = "";
+    uiStore.markerToEdit = {};
   });
 
   const onDone = action(() => {
-    const markerLabelElement = audioStore.markerRegions.find(
-      (region) => region.id === uiStore.markerIdToEdit
-    )?.content;
-    if (!markerLabelElement || typeof markerLabelElement === "string") return;
-    markerLabelElement.innerHTML = markerName;
+    const { wavesurfer, regions } = audioStore;
+
+    if (!wavesurfer || !regions) return;
+    const label = document.createElement("div");
+    label.innerHTML = markerName;
+    label.setAttribute("style", "width: 100px; color: black; font-size: 12px;");
+    const newRegion: RegionParams = {
+      ...uiStore.markerToEdit,
+      start: uiStore.markerToEdit.start || 0,
+      color: hexToRgbaString(color, 0.4),
+      content: label,
+    };
+
+    // In case we are editing an existing marker, remove it first
+    regions.getRegions().forEach((region) => {
+      if (region.id === uiStore.markerToEdit.id) region.remove();
+    });
+    regions.addRegion(newRegion);
+
     onClose();
   });
 
@@ -52,6 +74,14 @@ export const MarkerEditorModal = observer(function MarkerEditorModal() {
               value={markerName}
               onChange={(e) => setMarkerName(e.target.value)}
             />
+            <VStack>
+              <HexColorInput
+                className="hexColorInput"
+                color={color}
+                onChange={setColor}
+              />
+              <HexColorPicker color={color} onChange={setColor} />
+            </VStack>
           </>
         </ModalBody>
         <ModalFooter>

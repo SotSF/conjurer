@@ -35,7 +35,7 @@ export const Timeline = observer(function Timeline() {
       >
         <TimerReadout />
         <WavesurferWaveform />
-        <MarkerEditorModal />
+        <MarkerEditorModal key={uiStore.markerToEdit.id} />
       </HStack>
       <VStack position="relative" alignItems="flex-start" spacing={0}>
         <PlayHead />

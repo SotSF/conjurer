@@ -14,7 +14,6 @@ import type RegionsPlugin from "wavesurfer.js/dist/plugins/regions";
 import type { RegionParams } from "wavesurfer.js/dist/plugins/regions";
 
 export const loopRegionColor = "rgba(237, 137, 54, 0.4)";
-export const markRegionColor = "rgba(137, 237, 54, 0.4)";
 
 // Define a new RootStore interface here so that we avoid circular dependencies
 interface RootStore {
@@ -34,7 +33,6 @@ export class AudioStore {
   audioBuffer: AudioBuffer | null = null; // currently unused
 
   markingAudio = false;
-  markerRegions: RegionParams[] = [];
 
   loopingAudio = false;
   loopRegion: RegionParams | null = null;
