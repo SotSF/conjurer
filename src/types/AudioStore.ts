@@ -8,7 +8,12 @@ import {
 } from "@/src/utils/assets";
 import { ListObjectsCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { makeAutoObservable, runInAction } from "mobx";
+import type WaveSurfer from "wavesurfer.js";
+import type TimelinePlugin from "wavesurfer.js/dist/plugins/timeline";
+import type RegionsPlugin from "wavesurfer.js/dist/plugins/regions";
 import type { RegionParams } from "wavesurfer.js/dist/plugins/regions";
+
+export const loopRegionColor = "rgba(237, 137, 54, 0.4)";
 
 // Define a new RootStore interface here so that we avoid circular dependencies
 interface RootStore {
@@ -19,18 +24,26 @@ export class AudioStore {
   audioInitialized = false;
   availableAudioFiles: string[] = [];
   selectedAudioFile: string = "";
-
   audioMuted = false;
-  audioLooping = false;
+
+  wavesurfer: WaveSurfer | null = null;
+  timeline: TimelinePlugin | null = null;
+  regions: RegionsPlugin | null = null;
 
   audioBuffer: AudioBuffer | null = null; // currently unused
 
-  selectedRegion: RegionParams | null = null;
+  markingAudio = false;
+
+  loopingAudio = false;
+  loopRegion: RegionParams | null = null;
 
   constructor(readonly rootStore: RootStore, readonly timer: Timer) {
     makeAutoObservable(this, {
       getSelectedAudioFileUrl: false,
       audioBuffer: false,
+      wavesurfer: false,
+      timeline: false,
+      regions: false,
     });
     this.timer.addTickListener(this.onTick);
   }
@@ -39,18 +52,23 @@ export class AudioStore {
     this.audioMuted = !this.audioMuted;
   };
 
-  toggleAudioLooping = () => {
-    this.audioLooping = !this.audioLooping;
+  toggleMarkingAudio = () => {
+    this.markingAudio = !this.markingAudio;
+  };
+
+  toggleLoopingAudio = () => {
+    this.loopingAudio = !this.loopingAudio;
   };
 
   loopAudio = (start: number, end: number) => {
-    this.audioLooping = true;
-    this.selectedRegion = {
+    this.loopingAudio = true;
+    this.loopRegion = {
       id: "block",
       start,
       end,
+      color: loopRegionColor,
     };
-    // TODO: make this region appear in the UI
+    this.regions?.addRegion(this.loopRegion);
   };
 
   getSelectedAudioFileUrl = () =>
@@ -96,11 +114,9 @@ export class AudioStore {
   };
 
   onTick = (time: number) => {
-    if (!this.audioLooping || !this.selectedRegion || !this.selectedRegion.end)
-      return;
+    if (!this.loopingAudio || !this.loopRegion || !this.loopRegion.end) return;
 
-    if (time > this.selectedRegion.end)
-      this.timer.setTime(this.selectedRegion.start);
+    if (time > this.loopRegion.end) this.timer.setTime(this.loopRegion.start);
   };
 
   serialize = () => ({
