@@ -1,5 +1,5 @@
 import { observer } from "mobx-react-lite";
-import { IconButton, Select } from "@chakra-ui/react";
+import { IconButton, Select, Slider, SliderFilledTrack, SliderThumb, SliderTrack, Tooltip } from "@chakra-ui/react";
 import { BsSoundwave } from "react-icons/bs";
 import { FaVolumeMute, FaPencilAlt } from "react-icons/fa";
 import { AiOutlineCloudUpload } from "react-icons/ai";
@@ -7,11 +7,19 @@ import { ImLoop } from "react-icons/im";
 import { useStore } from "@/src/types/StoreContext";
 import { action } from "mobx";
 import { UploadAudioModal } from "@/src/components/UploadAudioModal";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export const AudioControls = observer(function AudioControls() {
   const store = useStore();
   const { uiStore, audioStore, initialized } = store;
+  const { wavesurfer } = audioStore;
+  const [showTooltip, setShowTooltip] = useState(false);
+  const [audioVol, setAudioVol] = useState(1);
+
+  const changeVolume = (value: number) => {
+    wavesurfer?.setVolume(value);
+    setAudioVol(value);
+  }
 
   useEffect(() => {
     if (!initialized) return;
@@ -20,6 +28,32 @@ export const AudioControls = observer(function AudioControls() {
 
   return (
     <>
+      <Slider aria-label='slider-ex-1'
+        min={0}
+        max={1}
+        step={0.01}
+        value={audioVol}
+        onChange={(action((value) => changeVolume(value)))}
+        width="120px"
+        onMouseEnter={() => setShowTooltip(true)}
+        onMouseLeave={() => setShowTooltip(false)}
+      >
+        <SliderTrack>
+          <SliderFilledTrack />
+        </SliderTrack>
+        <SliderThumb />
+        <Tooltip
+          hasArrow
+          bg="teal.500"
+          color="white"
+          placement="top"
+          isOpen={showTooltip}
+          label={`Audio volume: ${(audioVol * 100).toFixed(0)}%`}
+        >
+          <SliderThumb />
+        </Tooltip>
+      </Slider>
+
       <IconButton
         aria-label="Loop time range"
         title="Loop time range"
