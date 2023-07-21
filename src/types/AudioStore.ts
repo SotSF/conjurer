@@ -13,6 +13,8 @@ import type TimelinePlugin from "wavesurfer.js/dist/plugins/timeline";
 import type RegionsPlugin from "wavesurfer.js/dist/plugins/regions";
 import type { RegionParams } from "wavesurfer.js/dist/plugins/regions";
 
+const loopRegionColor = "rgba(237, 137, 54, 0.4)";
+
 // Define a new RootStore interface here so that we avoid circular dependencies
 interface RootStore {
   usingLocalAssets: boolean;
@@ -59,8 +61,9 @@ export class AudioStore {
       id: "block",
       start,
       end,
+      color: loopRegionColor,
     };
-    // TODO: make this region appear in the UI
+    this.regions?.addRegion(this.selectedRegion);
   };
 
   getSelectedAudioFileUrl = () =>
