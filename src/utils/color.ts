@@ -46,3 +46,11 @@ export const hexToRgbaString = (hex: string, a: number) => {
   const { r, g, b } = hexToRgb(hex);
   return `rgba(${r}, ${g}, ${b}, ${a})`;
 };
+
+export const rgbaStringToHex = (rgba: string) => {
+  const [r, g, b, a] = rgba
+    .slice(5, -1)
+    .split(",")
+    .map((s) => parseInt(s.trim(), 10));
+  return `#${r.toString(16)}${g.toString(16)}${b.toString(16)}`;
+};

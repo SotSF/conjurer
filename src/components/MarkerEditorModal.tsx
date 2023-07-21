@@ -16,7 +16,7 @@ import { useStore } from "@/src/types/StoreContext";
 import { useState } from "react";
 import { action } from "mobx";
 import { HexColorInput, HexColorPicker } from "react-colorful";
-import { hexToRgbaString } from "@/src/utils/color";
+import { hexToRgbaString, rgbaStringToHex } from "@/src/utils/color";
 import { RegionParams } from "wavesurfer.js/dist/plugins/regions";
 
 export const MarkerEditorModal = observer(function MarkerEditorModal() {
@@ -27,7 +27,11 @@ export const MarkerEditorModal = observer(function MarkerEditorModal() {
   const regionName =
     (typeof markerElement === "object" && markerElement.innerHTML) || "";
   const [markerName, setMarkerName] = useState(regionName);
-  const [color, setColor] = useState("#efa6b4");
+  const [color, setColor] = useState(
+    uiStore.markerToEdit.color
+      ? rgbaStringToHex(uiStore.markerToEdit.color)
+      : "#efa6b4"
+  );
 
   const onClose = action(() => {
     uiStore.showingMarkerEditorModal = false;

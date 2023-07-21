@@ -21,21 +21,6 @@ export const AudioControls = observer(function AudioControls() {
   return (
     <>
       <IconButton
-        aria-label="Mark audio"
-        title="Mark audio"
-        height={6}
-        icon={<FaPencilAlt size={17} />}
-        bgColor={audioStore.markingAudio ? "orange.700" : undefined}
-        _hover={
-          audioStore.markingAudio
-            ? {
-                bgColor: "orange.600",
-              }
-            : undefined
-        }
-        onClick={action(() => audioStore.toggleMarkingAudio())}
-      />
-      <IconButton
         aria-label="Loop time range"
         title="Loop time range"
         height={6}
@@ -79,6 +64,21 @@ export const AudioControls = observer(function AudioControls() {
             : undefined
         }
         onClick={action(() => uiStore.toggleWaveformOverlay())}
+      />
+      <IconButton
+        aria-label="Mark audio"
+        title="Mark audio"
+        height={6}
+        icon={<FaPencilAlt size={17} />}
+        bgColor={audioStore.markingAudio ? "orange.700" : undefined}
+        _hover={
+          audioStore.markingAudio
+            ? {
+                bgColor: "orange.600",
+              }
+            : undefined
+        }
+        onClick={action(() => audioStore.toggleMarkingAudio())}
       />
       <Select
         size="xs"

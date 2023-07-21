@@ -229,9 +229,8 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
       if (!audioStore.markingAudio) return;
 
       regions.on(
-        "region-clicked",
+        "region-double-clicked",
         action((region: RegionParams) => {
-          console.log("region clicked");
           uiStore.showingMarkerEditorModal = true;
           uiStore.markerToEdit = region;
         })
