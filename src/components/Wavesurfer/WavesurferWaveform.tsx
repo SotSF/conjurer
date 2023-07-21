@@ -172,10 +172,10 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
     const toggleLoopingMode = action(async () => {
       if (!didInitialize.current || !audioStore.regions) return;
 
-      if (!audioStore.audioLooping) {
+      if (!audioStore.loopingAudio) {
         audioStore.regions.unAll();
         audioStore.regions.clearRegions();
-        audioStore.selectedRegion = null;
+        audioStore.loopRegion = null;
         return;
       }
 
@@ -192,7 +192,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
           regions
             .getRegions()
             .forEach((region) => region !== newRegion && region.remove());
-          audioStore.selectedRegion = newRegion;
+          audioStore.loopRegion = newRegion;
           if (!audioStore.wavesurfer) return;
           timer.setTime(Math.max(0, newRegion.start));
         })
@@ -200,7 +200,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
       regions.on(
         "region-updated",
         action((region: RegionParams) => {
-          audioStore.selectedRegion = region;
+          audioStore.loopRegion = region;
           if (!audioStore.wavesurfer) return;
           timer.setTime(Math.max(0, region.start));
         })
@@ -208,7 +208,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
     });
     toggleLoopingMode();
     return disableDragSelection;
-  }, [audioStore, audioStore.audioLooping, timer]);
+  }, [audioStore, audioStore.loopingAudio, timer]);
 
   // on play/pause toggle
   useEffect(() => {

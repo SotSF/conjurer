@@ -7,7 +7,7 @@ import {
   getS3,
 } from "@/src/utils/assets";
 import { ListObjectsCommand, PutObjectCommand } from "@aws-sdk/client-s3";
-import { makeAutoObservable, runInAction } from "mobx";
+import { action, makeAutoObservable, runInAction } from "mobx";
 import type WaveSurfer from "wavesurfer.js";
 import type TimelinePlugin from "wavesurfer.js/dist/plugins/timeline";
 import type RegionsPlugin from "wavesurfer.js/dist/plugins/regions";
@@ -24,17 +24,18 @@ export class AudioStore {
   audioInitialized = false;
   availableAudioFiles: string[] = [];
   selectedAudioFile: string = "";
-
   audioMuted = false;
-  audioLooping = false;
-
-  audioBuffer: AudioBuffer | null = null; // currently unused
-
-  selectedRegion: RegionParams | null = null;
 
   wavesurfer: WaveSurfer | null = null;
   timeline: TimelinePlugin | null = null;
   regions: RegionsPlugin | null = null;
+
+  audioBuffer: AudioBuffer | null = null; // currently unused
+
+  markerRegions: RegionParams[] = [];
+
+  loopingAudio = false;
+  loopRegion: RegionParams | null = null;
 
   constructor(readonly rootStore: RootStore, readonly timer: Timer) {
     makeAutoObservable(this, {
@@ -52,18 +53,18 @@ export class AudioStore {
   };
 
   toggleAudioLooping = () => {
-    this.audioLooping = !this.audioLooping;
+    this.loopingAudio = !this.loopingAudio;
   };
 
   loopAudio = (start: number, end: number) => {
-    this.audioLooping = true;
-    this.selectedRegion = {
+    this.loopingAudio = true;
+    this.loopRegion = {
       id: "block",
       start,
       end,
       color: loopRegionColor,
     };
-    this.regions?.addRegion(this.selectedRegion);
+    this.regions?.addRegion(this.loopRegion);
   };
 
   getSelectedAudioFileUrl = () =>
@@ -109,11 +110,9 @@ export class AudioStore {
   };
 
   onTick = (time: number) => {
-    if (!this.audioLooping || !this.selectedRegion || !this.selectedRegion.end)
-      return;
+    if (!this.loopingAudio || !this.loopRegion || !this.loopRegion.end) return;
 
-    if (time > this.selectedRegion.end)
-      this.timer.setTime(this.selectedRegion.start);
+    if (time > this.loopRegion.end) this.timer.setTime(this.loopRegion.start);
   };
 
   serialize = () => ({

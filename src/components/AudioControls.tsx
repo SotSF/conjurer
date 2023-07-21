@@ -25,9 +25,9 @@ export const AudioControls = observer(function AudioControls() {
         title="Loop time range"
         height={6}
         icon={<ImLoop size={17} />}
-        bgColor={audioStore.audioLooping ? "orange.700" : undefined}
+        bgColor={audioStore.loopingAudio ? "orange.700" : undefined}
         _hover={
-          audioStore.audioLooping
+          audioStore.loopingAudio
             ? {
                 bgColor: "orange.600",
               }
