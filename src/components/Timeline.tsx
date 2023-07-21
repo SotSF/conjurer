@@ -8,6 +8,7 @@ import { WavesurferWaveform } from "@/src/components/Wavesurfer/WavesurferWavefo
 import { MAX_TIME } from "@/src/utils/time";
 import { TimelineLayer } from "@/src/components/TimelineLayer";
 import { TimerReadout } from "@/src/components/TimerReadout";
+import { MarkerEditorModal } from "@/src/components/MarkerEditorModal";
 
 export const Timeline = observer(function Timeline() {
   const store = useStore();
@@ -34,6 +35,7 @@ export const Timeline = observer(function Timeline() {
       >
         <TimerReadout />
         <WavesurferWaveform />
+        <MarkerEditorModal />
       </HStack>
       <VStack position="relative" alignItems="flex-start" spacing={0}>
         <PlayHead />

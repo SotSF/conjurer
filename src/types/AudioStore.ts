@@ -7,13 +7,14 @@ import {
   getS3,
 } from "@/src/utils/assets";
 import { ListObjectsCommand, PutObjectCommand } from "@aws-sdk/client-s3";
-import { action, makeAutoObservable, runInAction } from "mobx";
+import { makeAutoObservable, runInAction } from "mobx";
 import type WaveSurfer from "wavesurfer.js";
 import type TimelinePlugin from "wavesurfer.js/dist/plugins/timeline";
 import type RegionsPlugin from "wavesurfer.js/dist/plugins/regions";
 import type { RegionParams } from "wavesurfer.js/dist/plugins/regions";
 
-const loopRegionColor = "rgba(237, 137, 54, 0.4)";
+export const loopRegionColor = "rgba(237, 137, 54, 0.4)";
+export const markRegionColor = "rgba(137, 237, 54, 0.4)";
 
 // Define a new RootStore interface here so that we avoid circular dependencies
 interface RootStore {

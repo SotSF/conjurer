@@ -21,6 +21,8 @@ export class UIStore {
   showingSaveExperienceModal = false;
   showingUploadAudioModal = false;
   showingPaletteEditorModal = false;
+  showingMarkerEditorModal = false;
+  markerIdToEdit: string = "";
 
   // TODO: refactor these in display in ui differently
   keepingPlayHeadCentered = false;
