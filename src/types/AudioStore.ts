@@ -32,6 +32,7 @@ export class AudioStore {
 
   audioBuffer: AudioBuffer | null = null; // currently unused
 
+  markingAudio = false;
   markerRegions: RegionParams[] = [];
 
   loopingAudio = false;
@@ -52,7 +53,11 @@ export class AudioStore {
     this.audioMuted = !this.audioMuted;
   };
 
-  toggleAudioLooping = () => {
+  toggleMarkingAudio = () => {
+    this.markingAudio = !this.markingAudio;
+  };
+
+  toggleLoopingAudio = () => {
     this.loopingAudio = !this.loopingAudio;
   };
 

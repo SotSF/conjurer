@@ -1,7 +1,7 @@
 import { observer } from "mobx-react-lite";
 import { IconButton, Select } from "@chakra-ui/react";
 import { BsSoundwave } from "react-icons/bs";
-import { FaVolumeMute } from "react-icons/fa";
+import { FaVolumeMute, FaPencilAlt } from "react-icons/fa";
 import { AiOutlineCloudUpload } from "react-icons/ai";
 import { ImLoop } from "react-icons/im";
 import { useStore } from "@/src/types/StoreContext";
@@ -21,6 +21,21 @@ export const AudioControls = observer(function AudioControls() {
   return (
     <>
       <IconButton
+        aria-label="Mark audio"
+        title="Mark audio"
+        height={6}
+        icon={<FaPencilAlt size={17} />}
+        bgColor={audioStore.markingAudio ? "orange.700" : undefined}
+        _hover={
+          audioStore.markingAudio
+            ? {
+                bgColor: "orange.600",
+              }
+            : undefined
+        }
+        onClick={action(() => audioStore.toggleMarkingAudio())}
+      />
+      <IconButton
         aria-label="Loop time range"
         title="Loop time range"
         height={6}
@@ -33,7 +48,7 @@ export const AudioControls = observer(function AudioControls() {
               }
             : undefined
         }
-        onClick={action(() => audioStore.toggleAudioLooping())}
+        onClick={action(() => audioStore.toggleLoopingAudio())}
       />
       <IconButton
         aria-label="Mute/unmute audio"
