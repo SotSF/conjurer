@@ -9,14 +9,12 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
-  Text,
   VStack,
 } from "@chakra-ui/react";
 import { useStore } from "@/src/types/StoreContext";
 import { useState } from "react";
 import { action } from "mobx";
 import { HexColorInput, HexColorPicker } from "react-colorful";
-import { hexToRgbaString, rgbaStringToHex } from "@/src/utils/color";
 import { RegionParams } from "wavesurfer.js/dist/plugins/regions";
 
 export const MarkerEditorModal = observer(function MarkerEditorModal() {
@@ -27,18 +25,25 @@ export const MarkerEditorModal = observer(function MarkerEditorModal() {
   const regionName =
     (typeof markerElement === "object" && markerElement.innerHTML) || "";
   const [markerName, setMarkerName] = useState(regionName);
-  const [color, setColor] = useState(
-    uiStore.markerToEdit.color
-      ? rgbaStringToHex(uiStore.markerToEdit.color)
-      : "#efa6b4"
-  );
+  const [color, setColor] = useState(uiStore.markerToEdit.color || "#efa6b4");
 
   const onClose = action(() => {
     uiStore.showingMarkerEditorModal = false;
     uiStore.markerToEdit = {};
   });
 
-  const onDone = action(() => {
+  const onDelete = action(() => {
+    const { wavesurfer, regions } = audioStore;
+    if (!wavesurfer || !regions) return;
+
+    regions.getRegions().forEach((region) => {
+      if (region.id === uiStore.markerToEdit.id) region.remove();
+    });
+
+    onClose();
+  });
+
+  const onSave = action(() => {
     const { wavesurfer, regions } = audioStore;
 
     if (!wavesurfer || !regions) return;
@@ -48,7 +53,7 @@ export const MarkerEditorModal = observer(function MarkerEditorModal() {
     const newRegion: RegionParams = {
       ...uiStore.markerToEdit,
       start: uiStore.markerToEdit.start || 0,
-      color: hexToRgbaString(color, 0.4),
+      color,
       content: label,
     };
 
@@ -70,13 +75,13 @@ export const MarkerEditorModal = observer(function MarkerEditorModal() {
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>Edit marker</ModalHeader>
-        <ModalCloseButton />
         <ModalBody>
           <>
-            <Text mb={4}>Name this marker</Text>
             <Input
               value={markerName}
               onChange={(e) => setMarkerName(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && onSave()}
+              placeholder="Marker name"
             />
             <VStack>
               <HexColorInput
@@ -88,9 +93,13 @@ export const MarkerEditorModal = observer(function MarkerEditorModal() {
             </VStack>
           </>
         </ModalBody>
+        <ModalCloseButton />
         <ModalFooter>
-          <Button isDisabled={!markerName} onClick={onDone}>
-            Done
+          <Button mr={4} variant="ghost" colorScheme="red" onClick={onDelete}>
+            Delete
+          </Button>
+          <Button isDisabled={!markerName} onClick={onSave}>
+            Save
           </Button>
         </ModalFooter>
       </ModalContent>
