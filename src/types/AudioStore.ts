@@ -8,6 +8,9 @@ import {
 } from "@/src/utils/assets";
 import { ListObjectsCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { makeAutoObservable, runInAction } from "mobx";
+import type WaveSurfer from "wavesurfer.js";
+import type TimelinePlugin from "wavesurfer.js/dist/plugins/timeline";
+import type RegionsPlugin from "wavesurfer.js/dist/plugins/regions";
 import type { RegionParams } from "wavesurfer.js/dist/plugins/regions";
 
 // Define a new RootStore interface here so that we avoid circular dependencies
@@ -27,10 +30,17 @@ export class AudioStore {
 
   selectedRegion: RegionParams | null = null;
 
+  wavesurfer: WaveSurfer | null = null;
+  timeline: TimelinePlugin | null = null;
+  regions: RegionsPlugin | null = null;
+
   constructor(readonly rootStore: RootStore, readonly timer: Timer) {
     makeAutoObservable(this, {
       getSelectedAudioFileUrl: false,
       audioBuffer: false,
+      wavesurfer: false,
+      timeline: false,
+      regions: false,
     });
     this.timer.addTickListener(this.onTick);
   }

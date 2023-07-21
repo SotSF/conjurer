@@ -68,10 +68,6 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
     RegionsPlugin: typeof RegionsPlugin | null;
   }>({ WaveSurfer: null, TimelinePlugin: null, RegionsPlugin: null });
 
-  const timelinePlugin = useRef<TimelinePlugin | null>(null);
-  const regionsPlugin = useRef<RegionsPlugin | null>(null);
-
-  const wavesurferRef = useRef<WaveSurfer | null>(null);
   const waveformRef = useRef<HTMLDivElement>(null);
   const clonedWaveformRef = useRef<HTMLDivElement>(null);
 
@@ -91,8 +87,10 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
         (wavesurferConstructors.current = await importWavesurferConstructors());
 
       // Instantiate plugins
-      timelinePlugin.current = TimelinePlugin.create(DEFAULT_TIMELINE_OPTIONS);
-      regionsPlugin.current = RegionsPlugin.create();
+      const timelinePlugin = (audioStore.timeline = TimelinePlugin.create(
+        DEFAULT_TIMELINE_OPTIONS
+      ));
+      const regionsPlugin = (audioStore.regions = RegionsPlugin.create());
 
       // Instantiate wavesurfer
       // https://wavesurfer-js.org/docs/options.html
@@ -100,20 +98,21 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
         ...DEFAULT_WAVESURFER_OPTIONS,
         container: waveformRef.current!,
         minPxPerSec: uiStore.pixelsPerSecond,
-        plugins: [timelinePlugin.current, regionsPlugin.current],
+        plugins: [timelinePlugin, regionsPlugin],
       };
-      wavesurferRef.current = WaveSurfer.create(options);
+      const wavesurferRef = (audioStore.wavesurfer =
+        WaveSurfer.create(options));
 
       // Load selected audio file
       if (audioStore.selectedAudioFile) {
-        await wavesurferRef.current.load(audioStore.getSelectedAudioFileUrl());
-        wavesurferRef.current?.zoom(uiStore.pixelsPerSecond);
-        audioStore.audioBuffer = wavesurferRef.current.getDecodedData();
+        await wavesurferRef.load(audioStore.getSelectedAudioFileUrl());
+        wavesurferRef?.zoom(uiStore.pixelsPerSecond);
+        audioStore.audioBuffer = wavesurferRef.getDecodedData();
         ready.current = true;
       }
 
-      wavesurferRef.current.on("interaction", (newTime: number) => {
-        if (!wavesurferRef.current) return;
+      wavesurferRef.on("interaction", (newTime: number) => {
+        if (!wavesurferRef) return;
         timer.setTime(Math.max(0, newTime));
       });
 
@@ -131,32 +130,32 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
     const changeAudioFile = async () => {
       if (
         didInitialize.current &&
-        wavesurferRef.current &&
+        audioStore.wavesurfer &&
         wavesurferConstructors.current.TimelinePlugin &&
         lastAudioLoaded.current !== audioStore.selectedAudioFile
       ) {
         ready.current = false;
         lastAudioLoaded.current = audioStore.selectedAudioFile;
-        wavesurferRef.current.stop();
+        audioStore.wavesurfer.stop();
         timer.playing = false;
         timer.setTime(0);
         setLoading(true);
 
         // Destroy the old timeline plugin
-        timelinePlugin.current?.destroy();
+        audioStore.timeline?.destroy();
         // TODO: we destroy the plugin, but it remains in the array of wavesurfer plugins. Small
         // memory leak here, and it generally feels like there is a better way to do this
 
         // Create a new timeline plugin
         const { TimelinePlugin } = wavesurferConstructors.current;
-        timelinePlugin.current = TimelinePlugin.create(
+        const timeline = (audioStore.timeline = TimelinePlugin.create(
           DEFAULT_TIMELINE_OPTIONS
-        );
-        wavesurferRef.current.registerPlugin(timelinePlugin.current);
-        await wavesurferRef.current.load(audioStore.getSelectedAudioFileUrl());
-        wavesurferRef.current.zoom(uiStore.pixelsPerSecond);
-        wavesurferRef.current.seekTo(0);
-        audioStore.audioBuffer = wavesurferRef.current.getDecodedData();
+        ));
+        audioStore.wavesurfer.registerPlugin(timeline);
+        await audioStore.wavesurfer.load(audioStore.getSelectedAudioFileUrl());
+        audioStore.wavesurfer.zoom(uiStore.pixelsPerSecond);
+        audioStore.wavesurfer.seekTo(0);
+        audioStore.audioBuffer = audioStore.wavesurfer.getDecodedData();
         ready.current = true;
         setLoading(false);
       }
@@ -171,16 +170,16 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
 
     let disableDragSelection = () => {};
     const toggleLoopingMode = action(async () => {
-      if (!didInitialize.current || !regionsPlugin.current) return;
+      if (!didInitialize.current || !audioStore.regions) return;
 
       if (!audioStore.audioLooping) {
-        regionsPlugin.current.unAll();
-        regionsPlugin.current.clearRegions();
+        audioStore.regions.unAll();
+        audioStore.regions.clearRegions();
         audioStore.selectedRegion = null;
         return;
       }
 
-      const regions = regionsPlugin.current;
+      const regions = audioStore.regions;
       disableDragSelection = regions.enableDragSelection({
         color: "rgba(237, 137, 54, 0.4)",
       });
@@ -194,7 +193,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
             .getRegions()
             .forEach((region) => region !== newRegion && region.remove());
           audioStore.selectedRegion = newRegion;
-          if (!wavesurferRef.current) return;
+          if (!audioStore.wavesurfer) return;
           timer.setTime(Math.max(0, newRegion.start));
         })
       );
@@ -202,7 +201,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
         "region-updated",
         action((region: RegionParams) => {
           audioStore.selectedRegion = region;
-          if (!wavesurferRef.current) return;
+          if (!audioStore.wavesurfer) return;
           timer.setTime(Math.max(0, region.start));
         })
       );
@@ -215,32 +214,32 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
   useEffect(() => {
     if (!didInitialize.current || !ready.current) return;
     if (timer.playing) {
-      wavesurferRef.current?.play();
+      audioStore.wavesurfer?.play();
     } else {
-      wavesurferRef.current?.pause();
+      audioStore.wavesurfer?.pause();
     }
-  }, [timer.playing]);
+  }, [timer.playing, audioStore.wavesurfer]);
 
   // on mute toggle
   useEffect(() => {
-    if (!wavesurferRef.current || !ready.current) return;
-    wavesurferRef.current.setMuted(audioStore.audioMuted);
-  }, [audioStore.audioMuted]);
+    if (!audioStore.wavesurfer || !ready.current) return;
+    audioStore.wavesurfer.setMuted(audioStore.audioMuted);
+  }, [audioStore.audioMuted, audioStore.wavesurfer]);
 
   // on zoom change
   useEffect(() => {
-    if (!wavesurferRef.current || !ready.current) return;
-    wavesurferRef.current.zoom(uiStore.pixelsPerSecond);
+    if (!audioStore.wavesurfer || !ready.current) return;
+    audioStore.wavesurfer.zoom(uiStore.pixelsPerSecond);
     cloneCanvas();
-  }, [cloneCanvas, uiStore.pixelsPerSecond]);
+  }, [cloneCanvas, uiStore.pixelsPerSecond, audioStore.wavesurfer]);
 
   // on cursor change
   useEffect(() => {
-    if (!wavesurferRef.current || !ready.current) return;
-    const duration = wavesurferRef.current.getDuration();
+    if (!audioStore.wavesurfer || !ready.current) return;
+    const duration = audioStore.wavesurfer.getDuration();
     const progress = duration > 0 ? timer.lastCursor.position / duration : 0;
-    wavesurferRef.current.seekTo(clamp(progress, 0, 1));
-  }, [timer.lastCursor]);
+    audioStore.wavesurfer.seekTo(clamp(progress, 0, 1));
+  }, [timer.lastCursor, audioStore.wavesurfer]);
 
   return (
     <Box width="100%" height={10} bgColor="gray.500">
