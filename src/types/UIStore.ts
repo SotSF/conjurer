@@ -3,7 +3,7 @@ import { INITIAL_PIXELS_PER_SECOND } from "@/src/utils/time";
 import { makeAutoObservable } from "mobx";
 import { RegionParams } from "wavesurfer.js/dist/plugins/regions";
 
-const MAX_PIXELS_PER_SECOND = 90;
+const MAX_PIXELS_PER_SECOND = 160;
 const MIN_PIXELS_PER_SECOND = 4;
 
 export type DisplayMode = "canopy" | "canopySpace" | "cartesianSpace";
