@@ -7,6 +7,7 @@ import {
   Droppable,
   OnDragEndResponder,
 } from "@hello-pangea/dnd";
+import { MouseEvent as ReactMouseEvent, useCallback, Fragment } from "react";
 import { reorder } from "@/src/utils/algorithm";
 import { Block } from "@/src/types/Block";
 import { action } from "mobx";
@@ -14,8 +15,8 @@ import { VariationBound } from "@/src/components/VariationBound";
 import { NewVariationButtons } from "@/src/components/NewVariationButtons";
 import { observer } from "mobx-react-lite";
 import { useStore } from "@/src/types/StoreContext";
-import { Fragment } from "react";
 import { VariationHandle } from "@/src/components/VariationHandle";
+import { Variation } from "@/src/types/Variations/Variation";
 
 type ParameterVariationsProps = {
   uniformName: string;
@@ -49,6 +50,27 @@ export const ParameterVariations = observer(function ParameterVariations({
     );
   });
 
+  const handleVariationClick = useCallback(
+    (e: ReactMouseEvent, variation: Variation) => {
+      if (
+        Array.from(store.selectedBlocksOrVariations).find(
+          (blockOrVariation) =>
+            blockOrVariation.type === "variation" &&
+            blockOrVariation.variation === variation
+        )
+      ) {
+        store.deselectVariation(block, uniformName, variation);
+      } else if (e.shiftKey) {
+        store.addVariationToSelection(block, uniformName, variation);
+      } else {
+        store.selectVariation(block, uniformName, variation);
+      }
+
+      e.stopPropagation();
+    },
+    [store, block, uniformName]
+  );
+
   return (
     <VStack spacing={0}>
       <DragDropContext onDragEnd={onDragEnd}>
@@ -78,11 +100,7 @@ export const ParameterVariations = observer(function ParameterVariations({
                       spacing={0}
                       cursor="grab"
                       role="button"
-                      onClick={(e) => {
-                        if (block.layer) store.selectedLayer = block.layer;
-                        store.selectVariation(block, uniformName, variation);
-                        e.stopPropagation();
-                      }}
+                      onClick={(e) => handleVariationClick(e, variation)}
                     >
                       <VariationHandle
                         block={block}

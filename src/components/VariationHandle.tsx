@@ -7,6 +7,7 @@ import { BiDuplicate } from "react-icons/bi";
 import { TbTrashXFilled, TbTrashFilled } from "react-icons/tb";
 import { Block } from "@/src/types/Block";
 import { useState } from "react";
+import { computed } from "mobx";
 
 type VariationHandleProps = {
   block: Block;
@@ -20,20 +21,22 @@ export const VariationHandle = observer(function VariationHandle({
   variation,
 }: VariationHandleProps) {
   const store = useStore();
-  const { singleVariationSelection } = store;
   const [confirmingDelete, setConfirmingDelete] = useState(false);
 
+  // cache this value, see https://mobx.js.org/computeds-with-args.html
+  const isSelected = computed(
+    () =>
+      !!Array.from(store.selectedBlocksOrVariations).find(
+        (blockOrVariation) =>
+          blockOrVariation.type === "variation" &&
+          blockOrVariation.variation === variation
+      )
+  ).get();
+
   return (
-    <HStack
-      spacing={0}
-      color={
-        singleVariationSelection?.variation.id === variation.id
-          ? "blue.500"
-          : "white"
-      }
-    >
+    <HStack spacing={0} color={isSelected ? "blue.500" : "white"}>
       <MdDragIndicator size={18} />
-      <Text pointerEvents="none" fontSize="x-small">
+      <Text pointerEvents="none" userSelect="none" fontSize="x-small">
         {variation.displayName}
       </Text>
       <IconButton
