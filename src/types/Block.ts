@@ -170,9 +170,18 @@ export class Block<T extends ExtraParams = {}> {
     }
   };
 
-  duplicateVariation = (uniformName: string, variation: Variation) => {
+  duplicateVariation = (
+    uniformName: string,
+    variation: Variation,
+    insertAtEnd = false
+  ) => {
     const variations = this.parameterVariations[uniformName];
     if (!variations) return;
+
+    if (insertAtEnd) {
+      variations.push(variation.clone());
+      return;
+    }
 
     const index = variations.indexOf(variation);
     if (index > -1) variations.splice(index, 0, variation.clone());

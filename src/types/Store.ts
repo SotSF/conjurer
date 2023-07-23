@@ -276,9 +276,10 @@ export class Store {
   duplicateVariation = (
     block: Block,
     uniformName: string,
-    variation: Variation
+    variation: Variation,
+    insertAtEnd = false
   ) => {
-    block.duplicateVariation(uniformName, variation);
+    block.duplicateVariation(uniformName, variation, insertAtEnd);
     if (block.layer) this._selectedLayer = block.layer;
     this.selectVariation(block, uniformName, variation);
   };
@@ -364,7 +365,8 @@ export class Store {
         this.duplicateVariation(
           selectedVariation.block,
           selectedVariation.uniformName,
-          selectedVariation.variation
+          selectedVariation.variation,
+          selectedVariations.length > 1
         );
       }
     }
