@@ -24,7 +24,6 @@ export const Timeline = observer(function Timeline() {
       height="100%"
       overflow="scroll"
       overscrollBehavior="none"
-      onClick={store.deselectAll}
     >
       <HStack
         position="sticky"

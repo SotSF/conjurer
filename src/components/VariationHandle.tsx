@@ -20,13 +20,17 @@ export const VariationHandle = observer(function VariationHandle({
   variation,
 }: VariationHandleProps) {
   const store = useStore();
-  const { selectedVariation } = store;
+  const { singleVariationSelection } = store;
   const [confirmingDelete, setConfirmingDelete] = useState(false);
 
   return (
     <HStack
       spacing={0}
-      color={selectedVariation?.id === variation.id ? "blue.500" : "white"}
+      color={
+        singleVariationSelection?.variation.id === variation.id
+          ? "blue.500"
+          : "white"
+      }
     >
       <MdDragIndicator size={18} />
       <Text pointerEvents="none" fontSize="x-small">

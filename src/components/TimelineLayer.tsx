@@ -47,7 +47,7 @@ export const TimelineLayer = observer(function TimelineLayer({
         borderBottomWidth={1}
         borderColor="black"
         borderStyle="dotted"
-        onClick={action((e) =>
+        onClick={action((e) => {
           timer.setTime(
             Math.max(
               0,
@@ -55,8 +55,9 @@ export const TimelineLayer = observer(function TimelineLayer({
                 e.clientX - boxRef.current!.getBoundingClientRect().x
               )
             )
-          )
-        )}
+          );
+          store.deselectAll();
+        })}
       >
         {layer.patternBlocks.map((block) => (
           <TimelineBlockStack key={block.id} patternBlock={block} />
