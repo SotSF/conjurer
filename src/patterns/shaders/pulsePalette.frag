@@ -34,7 +34,7 @@ uniform float u_white_leading_edge;
 // #define u_waviness 1.
 // #define u_spiral_factor .5
 // #define u_number_colors 100.
-// #define u_white_leading_edge .75
+// #define u_white_leading_edge .2
 
 float triangleWave(in float x) {
     return 2. / PI * asin(sin(x));
@@ -64,12 +64,13 @@ void main() {
 
     // divide the infinite domain into color cells
     float color_cell = floor(mod(st.y, u_number_colors));
+    float last_color_cell = floor(mod(st.y - 1., u_number_colors));
 
     // transform to color cell space
     st.y = fract(st.y);
 
     // create duty cells based on the duty cycle
-    float number_duty_cells = 1. / u_duty_cycle;
+    float number_duty_cells = floor(1. / u_duty_cycle);
     st.y *= number_duty_cells;
 
     // keep track of what duty cell we are in
@@ -78,7 +79,9 @@ void main() {
     float duty_cell_reversed = (number_duty_cells - 1.) - floor(st.y);
 
     // calculate color based on color cell
-    vec3 color = palette(rand(color_cell), u_palette);
+    vec3 palette_color = palette(rand(color_cell), u_palette);
+    vec3 palette_color_next = palette(rand(last_color_cell), u_palette);
+    vec3 color = palette_color;
 
     // make the wavefront white, the waveback the color from the palette
     color = mix(color, vec3(1.), u_white_leading_edge * pow(duty_cell_fraction, 2.));
@@ -91,6 +94,8 @@ void main() {
 
     // do additional blending if we are the first duty cell
     float first_duty_cell = step(0., duty_cell) * (1. - step(1., duty_cell));
+
+    color = mix(color, vec3(palette_color_next), first_duty_cell * 0.75 * pow(1. - st.y, 10.));
     color = mix(color, vec3(1.), first_duty_cell * u_white_leading_edge * pow(1. - st.y, 10.));
 
     gl_FragColor = vec4(color, 1.0);
