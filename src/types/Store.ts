@@ -17,6 +17,15 @@ configure({
   observableRequiresReaction: false, // This will trigger false positives sometimes, so turning off
 });
 
+type BlockOrVariation =
+  | { type: "block"; block: Block }
+  | {
+      type: "variation";
+      block: Block;
+      uniformName: string;
+      variation: Variation;
+    };
+
 export class Store {
   initialized = false;
 
@@ -63,7 +72,7 @@ export class Store {
     this.deselectVariation();
   }
 
-  selectedBlocks: Set<Block> = new Set();
+  selectedBlocksOrVariations: Set<BlockOrVariation> = new Set();
 
   selectedVariationBlock: Block | null = null;
   selectedVariationUniformName: string = "";
@@ -152,34 +161,49 @@ export class Store {
   };
 
   selectBlock = (block: Block) => {
-    this.selectedBlocks = new Set([block]);
+    this.selectedBlocksOrVariations = new Set([{ type: "block", block }]);
   };
 
   addBlockToSelection = (block: Block) => {
-    this.selectedBlocks.add(block);
+    this.selectedBlocksOrVariations.add({ type: "block", block });
   };
 
   deselectBlock = (block: Block) => {
-    this.selectedBlocks.delete(block);
+    this.selectedBlocksOrVariations.forEach((selectedBlockOrVariation) => {
+      if (
+        selectedBlockOrVariation.type === "block" &&
+        selectedBlockOrVariation.block === block
+      ) {
+        this.selectedBlocksOrVariations.delete(selectedBlockOrVariation);
+      }
+    });
   };
 
   selectAllBlocks = () => {
-    const allBlocks = this.layers.flatMap((l) => l.patternBlocks);
-    this.selectedBlocks = new Set(allBlocks);
+    const allBlocks = this.layers
+      .flatMap((l) => l.patternBlocks)
+      .map((b) => ({
+        type: "block" as const,
+        block: b,
+      }));
+    this.selectedBlocksOrVariations = new Set(allBlocks);
   };
 
-  deselectAllBlocks = () => {
-    if (this.selectedBlocks.size === 0) return;
-    this.selectedBlocks = new Set();
+  deselectAll = () => {
+    if (this.selectedBlocksOrVariations.size === 0) return;
+    this.selectedBlocksOrVariations = new Set();
   };
 
   // TODO: better generalize for multiple layers
   deleteSelected = () => {
-    if (this.selectedBlocks.size > 0) {
-      Array.from(this.selectedBlocks).forEach((block) => {
-        this.layers.forEach((l) => l.removeBlock(block));
-      });
-      this.selectedBlocks = new Set();
+    if (this.selectedBlocksOrVariations.size > 0) {
+      Array.from(this.selectedBlocksOrVariations).forEach(
+        (blockOrVariation) => {
+          if (blockOrVariation.type === "block")
+            this.layers.forEach((l) => l.removeBlock(blockOrVariation.block));
+        }
+      );
+      this.selectedBlocksOrVariations = new Set();
       return;
     }
 
@@ -227,7 +251,14 @@ export class Store {
   copyBlocksToClipboard = (clipboardData: DataTransfer) => {
     clipboardData.setData(
       "text/plain",
-      JSON.stringify(Array.from(this.selectedBlocks).map((b) => b.serialize()))
+      JSON.stringify(
+        Array.from(this.selectedBlocksOrVariations).map((blockOrVariation) => {
+          // TODO: better account for variations
+          if (blockOrVariation.type === "block")
+            return blockOrVariation.block.serialize();
+          return "";
+        })
+      )
     );
   };
 
@@ -240,7 +271,7 @@ export class Store {
     if (!layerToPasteInto) return;
 
     const blocksToPaste = blocksData.map((b: any) => Block.deserialize(b));
-    this.selectedBlocks = new Set();
+    this.selectedBlocksOrVariations = new Set();
     for (const blockToPaste of blocksToPaste) {
       const nextGap = layerToPasteInto.nextFiniteGap(
         this.timer.globalTime,
@@ -254,12 +285,14 @@ export class Store {
 
   // TODO: better generalize for multiple layers
   duplicateSelected = () => {
-    if (this.selectedBlocks.size > 0) {
+    if (this.selectedBlocksOrVariations.size > 0) {
       const layerToPasteInto = this.selectedLayer;
       if (!layerToPasteInto) return;
 
-      const selectedBlocks = Array.from(this.selectedBlocks);
-      this.selectedBlocks = new Set();
+      const selectedBlocks = Array.from(this.selectedBlocksOrVariations)
+        .filter((blockOrVariation) => blockOrVariation.type === "block")
+        .map((blockOrVariation) => blockOrVariation.block);
+      this.selectedBlocksOrVariations = new Set();
       for (const selectedBlock of selectedBlocks) {
         const newBlock = selectedBlock.clone();
         const nextGap = layerToPasteInto.nextFiniteGap(

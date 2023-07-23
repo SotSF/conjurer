@@ -39,7 +39,7 @@ export const KeyboardControls = observer(function KeyboardControls() {
       } else if (e.key === "a" && (e.ctrlKey || e.metaKey)) {
         store.selectAllBlocks();
         e.preventDefault();
-      } else if (e.key === "Escape") store.deselectAllBlocks();
+      } else if (e.key === "Escape") store.deselectAll();
       else if (e.key === "Delete" || e.key === "Backspace") {
         store.deleteSelected();
       } else if (e.key === "d" && (e.ctrlKey || e.metaKey)) {
