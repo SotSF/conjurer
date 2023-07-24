@@ -1,11 +1,16 @@
 import { ParamType } from "@/src/types/PatternParams";
 
+export type RootStore = {
+  audioStore: { getPeakAtTime: (time: number) => number };
+};
+
 type VariationType =
   | "flat"
   | "linear"
   | "periodic"
   | "spline"
   | "easing"
+  | "audio"
   | "linear4"
   | "palette";
 
@@ -21,10 +26,13 @@ export abstract class Variation<T extends ParamType = ParamType> {
     this.duration = duration;
   }
 
-  abstract valueAtTime: (time: number) => T;
+  abstract valueAtTime: (time: number, globalTime: number) => T;
   abstract computeDomain: () => [number, number];
-  abstract computeSampledData: (duration: number) => { value: number }[];
+  abstract computeSampledData: (
+    duration: number,
+    globalStartTime?: number
+  ) => { value: number }[];
   abstract clone: () => Variation<T>;
   abstract serialize: () => any;
-  static deserialize: (data: any) => Variation;
+  static deserialize: (store: RootStore, data: any) => Variation;
 }

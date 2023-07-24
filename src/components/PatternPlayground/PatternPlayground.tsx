@@ -19,8 +19,8 @@ export const PatternPlayground = observer(function PatternPlayground() {
 
   // TODO: in dire need of refactoring
   const patternBlocks = useMemo(
-    () => playgroundPatterns.map((pattern) => new Block(pattern), []),
-    []
+    () => playgroundPatterns.map((pattern) => new Block(store, pattern), []),
+    [store]
   );
   const [selectedPatternIndex, setSelectedPatternIndex] = useState(
     uiStore.lastPatternIndexSelected
@@ -29,8 +29,8 @@ export const PatternPlayground = observer(function PatternPlayground() {
     patternBlocks[selectedPatternIndex] ?? patternBlocks[0];
 
   const effectBlocks = useMemo(
-    () => playgroundEffects.map((effect) => new Block(effect)),
-    []
+    () => playgroundEffects.map((effect) => new Block(store, effect)),
+    [store]
   );
 
   const [selectedEffectIndices, setSelectedEffectIndices] = useState<number[]>(

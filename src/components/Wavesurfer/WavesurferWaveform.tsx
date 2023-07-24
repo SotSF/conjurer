@@ -104,14 +104,6 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
       const wavesurferRef = (audioStore.wavesurfer =
         WaveSurfer.create(options));
 
-      // Load selected audio file
-      if (audioStore.selectedAudioFile) {
-        await wavesurferRef.load(audioStore.getSelectedAudioFileUrl());
-        wavesurferRef?.zoom(uiStore.pixelsPerSecond);
-        audioStore.audioBuffer = wavesurferRef.getDecodedData();
-        ready.current = true;
-      }
-
       wavesurferRef.on("interaction", (newTime: number) => {
         if (!wavesurferRef) return;
         timer.setTime(Math.max(0, newTime));
@@ -156,7 +148,10 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
         await audioStore.wavesurfer.load(audioStore.getSelectedAudioFileUrl());
         audioStore.wavesurfer.zoom(uiStore.pixelsPerSecond);
         audioStore.wavesurfer.seekTo(0);
-        audioStore.audioBuffer = audioStore.wavesurfer.getDecodedData();
+
+        const audioBuffer = audioStore.wavesurfer.getDecodedData();
+        if (audioBuffer) audioStore.computePeaks(audioBuffer);
+
         ready.current = true;
         setLoading(false);
       }

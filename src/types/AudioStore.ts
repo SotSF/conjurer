@@ -12,8 +12,11 @@ import type WaveSurfer from "wavesurfer.js";
 import type TimelinePlugin from "wavesurfer.js/dist/plugins/timeline";
 import type RegionsPlugin from "wavesurfer.js/dist/plugins/regions";
 import type { RegionParams } from "wavesurfer.js/dist/plugins/regions";
+import { filterData } from "@/src/types/audioPeaks";
 
 export const loopRegionColor = "rgba(237, 137, 54, 0.4)";
+
+export const PEAK_DATA_SAMPLE_RATE = 30;
 
 // Define a new RootStore interface here so that we avoid circular dependencies
 interface RootStore {
@@ -30,7 +33,7 @@ export class AudioStore {
   timeline: TimelinePlugin | null = null;
   regions: RegionsPlugin | null = null;
 
-  audioBuffer: AudioBuffer | null = null; // currently unused
+  peaks: number[] = [];
 
   markingAudio = false;
 
@@ -40,13 +43,37 @@ export class AudioStore {
   constructor(readonly rootStore: RootStore, readonly timer: Timer) {
     makeAutoObservable(this, {
       getSelectedAudioFileUrl: false,
-      audioBuffer: false,
       wavesurfer: false,
       timeline: false,
       regions: false,
+      peaks: false,
+      getPeakAtTime: false,
     });
     this.timer.addTickListener(this.onTick);
   }
+
+  computePeaks = (audioBuffer: AudioBuffer) => {
+    const totalDesiredSamples = Math.floor(
+      PEAK_DATA_SAMPLE_RATE * audioBuffer.duration
+    );
+    const channelData = filterData(audioBuffer, totalDesiredSamples, true);
+    const numberOfChannels = channelData.length;
+
+    this.peaks = [];
+    for (let j = 0; j < channelData[0].length; j++) {
+      let frameTotal = 0;
+      for (let i = 0; i < numberOfChannels; i++) {
+        frameTotal += channelData[i][j];
+      }
+      this.peaks.push(frameTotal / numberOfChannels);
+    }
+  };
+
+  getPeakAtTime = (time: number) => {
+    if (!this.peaks.length) return 0;
+    const index = Math.floor(time * PEAK_DATA_SAMPLE_RATE);
+    return this.peaks[index];
+  };
 
   toggleAudioMuted = () => {
     this.audioMuted = !this.audioMuted;

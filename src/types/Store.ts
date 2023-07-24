@@ -324,7 +324,7 @@ export class Store {
       if (!layerToPasteInto) return;
 
       const blocksToPaste = blocksOrVariationsData.map((b: any) =>
-        Block.deserialize(b)
+        Block.deserialize(this, b)
       );
       this.selectedBlocksOrVariations = new Set();
       for (const blockToPaste of blocksToPaste) {
@@ -353,7 +353,7 @@ export class Store {
     const uniformNameToPasteTo = selectedVariations[0].uniformName;
 
     const variationsToPaste = blocksOrVariationsData.map((v) =>
-      deserializeVariation(v)
+      deserializeVariation(this, v)
     );
 
     this.selectedBlocksOrVariations = new Set();
@@ -416,7 +416,7 @@ export class Store {
   deserialize = (data: any) => {
     this.audioStore.deserialize(data.audioStore);
     this.uiStore.deserialize(data.uiStore);
-    this.layers = data.layers.map((l: any) => Layer.deserialize(l, this.timer));
+    this.layers = data.layers.map((l: any) => Layer.deserialize(this, l));
     this.selectedLayer = this.layers[0];
   };
 }
