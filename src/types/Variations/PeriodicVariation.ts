@@ -1,4 +1,4 @@
-import { Variation } from "@/src/types/Variations/Variation";
+import { RootStore, Variation } from "@/src/types/Variations/Variation";
 
 export type PeriodicVariationType = "sine" | "square" | "triangle";
 
@@ -118,7 +118,7 @@ export class PeriodicVariation extends Variation<number> {
     offset: this.offset,
   });
 
-  static deserialize = (data: any) =>
+  static deserialize = (store: RootStore, data: any) =>
     new PeriodicVariation(
       data.duration,
       data.periodicType,

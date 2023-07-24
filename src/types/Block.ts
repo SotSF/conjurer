@@ -378,7 +378,9 @@ export class Block<T extends ExtraParams = {}> {
     for (const parameter of Object.keys(data.parameterVariations)) {
       block.parameterVariations[parameter] = data.parameterVariations[
         parameter
-      ]?.map((variationData: any) => deserializeVariation(variationData));
+      ]?.map((variationData: any) =>
+        deserializeVariation(store, variationData)
+      );
     }
 
     block.effectBlocks = data.effectBlocks.map((effectBlockData: any) =>

@@ -1,4 +1,4 @@
-import { Variation } from "@/src/types/Variations/Variation";
+import { RootStore, Variation } from "@/src/types/Variations/Variation";
 import { Vector4 } from "three";
 
 export class LinearVariation4 extends Variation<Vector4> {
@@ -40,7 +40,7 @@ export class LinearVariation4 extends Variation<Vector4> {
     to: this.to.toArray(),
   });
 
-  static deserialize = (data: any) =>
+  static deserialize = (store: RootStore, data: any) =>
     new LinearVariation4(
       data.duration,
       new Vector4(...data.from),

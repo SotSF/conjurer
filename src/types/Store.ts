@@ -353,7 +353,7 @@ export class Store {
     const uniformNameToPasteTo = selectedVariations[0].uniformName;
 
     const variationsToPaste = blocksOrVariationsData.map((v) =>
-      deserializeVariation(v)
+      deserializeVariation(this, v)
     );
 
     this.selectedBlocksOrVariations = new Set();
