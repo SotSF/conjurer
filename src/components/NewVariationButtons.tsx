@@ -246,7 +246,7 @@ export const NewVariationButtons = memo(function NewVariationButtons({
           store.addVariation(
             block,
             uniformName,
-            new AudioVariation(DEFAULT_VARIATION_DURATION, 1, 0)
+            new AudioVariation(DEFAULT_VARIATION_DURATION, 1, 0, store)
           );
         })}
       />

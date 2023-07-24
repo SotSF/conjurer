@@ -24,7 +24,7 @@ export class AudioVariation extends Variation<number> {
   computeDomain = () => [0, 1] as [number, number];
 
   computeSampledData = (duration: number) => {
-    const totalSamples = Math.ceil(duration * 10);
+    const totalSamples = Math.ceil(duration * 30);
 
     const data = [];
     for (let i = 0; i < totalSamples; i++) {

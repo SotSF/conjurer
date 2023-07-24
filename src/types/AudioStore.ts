@@ -56,7 +56,17 @@ export class AudioStore {
     const totalDesiredSamples = Math.floor(
       PEAK_DATA_SAMPLE_RATE * audioBuffer.duration
     );
-    this.peaks = filterData(audioBuffer, totalDesiredSamples)[0]; // first channel only for now
+    const channelData = filterData(audioBuffer, totalDesiredSamples, true);
+    const numberOfChannels = channelData.length;
+
+    this.peaks = [];
+    for (let j = 0; j < channelData[0].length; j++) {
+      let frameTotal = 0;
+      for (let i = 0; i < numberOfChannels; i++) {
+        frameTotal += channelData[i][j];
+      }
+      this.peaks.push(frameTotal / numberOfChannels);
+    }
   };
 
   getPeakAtTime = (time: number) => {
