@@ -20,6 +20,12 @@ type SerializedBlock = {
   effectBlocks: SerializedBlock[];
 };
 
+export type RootStore = {
+  audioStore: {
+    getPeakAtTime: (time: number) => number;
+  };
+};
+
 export class Block<T extends ExtraParams = {}> {
   id: string = Math.random().toString(16).slice(2); // unique id
   pattern: Pattern<T>;
@@ -48,7 +54,11 @@ export class Block<T extends ExtraParams = {}> {
     return this.startTime + this.duration;
   }
 
-  constructor(pattern: Pattern<T>, parentBlock: Block | null = null) {
+  constructor(
+    readonly store: RootStore,
+    pattern: Pattern<T>,
+    parentBlock: Block | null = null
+  ) {
     this.pattern = pattern;
     this.parentBlock = parentBlock;
 
@@ -88,14 +98,11 @@ export class Block<T extends ExtraParams = {}> {
 
     let variationTime = 0;
     for (const variation of variations) {
-      if (
-        // if infinite duration variation, OR
-        variation.duration < 0 ||
+      if (time < variationTime + variation.duration) {
         // this is the variation that is active at this time
-        time < variationTime + variation.duration
-      ) {
         this.pattern.params[parameter].value = variation.valueAtTime(
-          time - variationTime
+          time - variationTime,
+          this.startTime + time
         );
         return;
       }
@@ -108,7 +115,8 @@ export class Block<T extends ExtraParams = {}> {
     // if the current time is beyond the end of the last variation, use the last variation's last value
     const lastVariation = variations[variations.length - 1];
     this.pattern.params[parameter].value = lastVariation.valueAtTime(
-      lastVariation.duration
+      lastVariation.duration,
+      this.startTime + variationTime
     );
   };
 
@@ -122,7 +130,14 @@ export class Block<T extends ExtraParams = {}> {
       return this.pattern.params[uniformName].value;
 
     const lastVariation = variations[variations.length - 1];
-    return lastVariation.valueAtTime(lastVariation.duration);
+    const totalVariationTime = variations.reduce(
+      (total, variation) => total + variation.duration,
+      0
+    );
+    return lastVariation.valueAtTime(
+      lastVariation.duration,
+      this.startTime + totalVariationTime
+    );
   };
 
   addFlatVariationUpToTime = (uniformName: string, time: number) => {
@@ -270,14 +285,14 @@ export class Block<T extends ExtraParams = {}> {
    * @memberof Block
    */
   addCloneOfEffect = (effect: Pattern) => {
-    const newBlock = new Block(effect.clone());
+    const newBlock = new Block(this.store, effect.clone());
     newBlock.parentBlock = this;
     newBlock.layer = this.layer;
     this.effectBlocks.push(newBlock);
   };
 
   clone = () => {
-    const newBlock = new Block(this.pattern.clone());
+    const newBlock = new Block(this.store, this.pattern.clone());
     newBlock.startTime = this.startTime;
     newBlock.duration = this.duration;
     newBlock.layer = this.layer;
@@ -344,12 +359,15 @@ export class Block<T extends ExtraParams = {}> {
     ),
   });
 
-  static deserialize = (data: any, effect?: boolean, parentBlock?: Block) => {
+  static deserialize = (store: RootStore, data: any, parentBlock?: Block) => {
     const block =
       data.pattern === "Opacity"
         ? // TODO: make opacity less of a special case
-          new Block<ExtraParams>(Opacity())
-        : new Block<ExtraParams>(defaultPatternEffectMap[data.pattern].clone());
+          new Block<ExtraParams>(store, Opacity())
+        : new Block<ExtraParams>(
+            store,
+            defaultPatternEffectMap[data.pattern].clone()
+          );
 
     block.setTiming({
       startTime: data.startTime,
@@ -364,7 +382,7 @@ export class Block<T extends ExtraParams = {}> {
     }
 
     block.effectBlocks = data.effectBlocks.map((effectBlockData: any) =>
-      Block.deserialize(effectBlockData, true, block)
+      Block.deserialize(store, effectBlockData, block)
     );
 
     return block;

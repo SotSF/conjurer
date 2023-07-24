@@ -22,7 +22,7 @@ export abstract class Variation<T extends ParamType = ParamType> {
     this.duration = duration;
   }
 
-  abstract valueAtTime: (time: number) => T;
+  abstract valueAtTime: (time: number, globalTime: number) => T;
   abstract computeDomain: () => [number, number];
   abstract computeSampledData: (duration: number) => { value: number }[];
   abstract clone: () => Variation<T>;

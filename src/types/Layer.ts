@@ -1,17 +1,23 @@
 import { Block } from "@/src/types/Block";
-import { Timer } from "@/src/types/Timer";
 import { binarySearchForBlockAtTime } from "@/src/utils/algorithm";
 import { DEFAULT_BLOCK_DURATION } from "@/src/utils/time";
 import { makeAutoObservable } from "mobx";
 import { Opacity } from "@/src/patterns/Opacity";
 import { ExtraParams, PatternParam } from "@/src/types/PatternParams";
 
+type RootStore = {
+  audioStore: {
+    getPeakAtTime: (time: number) => number;
+  };
+  timer: { globalTime: number };
+};
+
 export class Layer {
   id: string = Math.random().toString(16).slice(2); // unique id
   name = "";
 
   patternBlocks: Block[] = [];
-  opacityBlock: Block<ExtraParams> = new Block(Opacity());
+  opacityBlock: Block<ExtraParams>;
 
   get opacityParameter() {
     return this.opacityBlock.pattern.params.u_opacity as PatternParam<number>;
@@ -29,15 +35,15 @@ export class Layer {
   get currentBlock(): Block | null {
     if (
       this._lastComputedCurrentBlock &&
-      this._lastComputedCurrentBlock.startTime <= this.timer.globalTime &&
-      this.timer.globalTime < this._lastComputedCurrentBlock.endTime
+      this._lastComputedCurrentBlock.startTime <= this.store.timer.globalTime &&
+      this.store.timer.globalTime < this._lastComputedCurrentBlock.endTime
     ) {
       return this._lastComputedCurrentBlock;
     }
 
     const currentBlockIndex = binarySearchForBlockAtTime(
       this.patternBlocks,
-      this.timer.globalTime
+      this.store.timer.globalTime
     );
     this._lastComputedCurrentBlock =
       this.patternBlocks[currentBlockIndex] ?? null;
@@ -51,7 +57,8 @@ export class Layer {
     return lastBlock.endTime;
   }
 
-  constructor(readonly timer: Timer) {
+  constructor(readonly store: RootStore) {
+    this.opacityBlock = new Block(store, Opacity());
     makeAutoObservable(this, {
       _lastComputedCurrentBlock: false, // don't make this observable, since it's just a cache
     });
@@ -59,7 +66,7 @@ export class Layer {
 
   insertCloneOfBlock = (block: Block) => {
     const newBlock = block.clone();
-    const nextGap = this.nextFiniteGap(this.timer.globalTime);
+    const nextGap = this.nextFiniteGap(this.store.timer.globalTime);
     newBlock.setTiming(nextGap);
     this.addBlock(newBlock);
   };
@@ -307,15 +314,15 @@ export class Layer {
     opacityBlock: this.opacityBlock.serialize(),
   });
 
-  static deserialize = (data: any, timer: Timer) => {
-    const layer = new Layer(timer);
+  static deserialize = (store: RootStore, data: any) => {
+    const layer = new Layer(store);
     if (data.id) layer.id = data.id;
     layer.name = data.name ?? "";
     layer.patternBlocks = data.patternBlocks.map((b: any) =>
-      Block.deserialize(b)
+      Block.deserialize(store, b)
     );
     layer.patternBlocks.forEach((b) => (b.layer = layer));
-    layer.opacityBlock = Block.deserialize(data.opacityBlock);
+    layer.opacityBlock = Block.deserialize(store, data.opacityBlock);
     return layer;
   };
 }

@@ -46,6 +46,8 @@ export class AudioStore {
       wavesurfer: false,
       timeline: false,
       regions: false,
+      peaks: false,
+      getPeakAtTime: false,
     });
     this.timer.addTickListener(this.onTick);
   }
@@ -55,6 +57,12 @@ export class AudioStore {
       PEAK_DATA_SAMPLE_RATE * audioBuffer.duration
     );
     this.peaks = filterData(audioBuffer, totalDesiredSamples)[0]; // first channel only for now
+  };
+
+  getPeakAtTime = (time: number) => {
+    if (!this.peaks.length) return 0;
+    const index = Math.floor(time * PEAK_DATA_SAMPLE_RATE);
+    return this.peaks[index];
   };
 
   toggleAudioMuted = () => {
