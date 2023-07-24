@@ -1,9 +1,9 @@
 import { Box } from "@chakra-ui/react";
 import { Block } from "@/src/types/Block";
-import { useStore } from "@/src/types/StoreContext";
 import { PaletteVariation } from "@/src/types/Variations/PaletteVariation";
 import { VARIATION_BOUND_WIDTH } from "@/src/utils/layout";
 import { vector3ToRgbaString } from "@/src/utils/color";
+import { useVariationClick } from "@/src/hooks/variationClick";
 
 type PaletteVariationGraphProps = {
   uniformName: string;
@@ -18,17 +18,18 @@ export const PaletteVariationGraph = function PaletteVariationGraph({
   width,
   block,
 }: PaletteVariationGraphProps) {
-  const store = useStore();
-
   const { palette } = variation;
   const colorCells = 14;
   const colorCellSize = (width - VARIATION_BOUND_WIDTH) / colorCells;
+
+  const onVariationClick = useVariationClick(block, uniformName);
+
   return (
     <Box
       py={1}
       width={`${width - VARIATION_BOUND_WIDTH}px`}
       _hover={{ bgColor: "gray.500" }}
-      onClick={() => store.selectVariation(block, uniformName, variation)}
+      onClick={(e) => onVariationClick(e, variation)}
     >
       <svg width={width - VARIATION_BOUND_WIDTH} height={60}>
         <defs>

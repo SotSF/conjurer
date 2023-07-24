@@ -25,7 +25,7 @@ export const TimelineBlockStack = observer(function TimelineBlockStack({
   patternBlock,
 }: Props) {
   const store = useStore();
-  const { selectedBlocks, uiStore } = store;
+  const { selectedBlocksOrVariations, uiStore } = store;
 
   const dragNodeRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
@@ -75,7 +75,13 @@ export const TimelineBlockStack = observer(function TimelineBlockStack({
     (e: ReactMouseEvent) => {
       if (Math.abs(e.clientX - lastMouseDown.current) > 5) return;
 
-      if (selectedBlocks.has(patternBlock)) {
+      if (
+        Array.from(selectedBlocksOrVariations).find(
+          (blockOrVariation) =>
+            blockOrVariation.type === "block" &&
+            blockOrVariation.block === patternBlock
+        )
+      ) {
         store.deselectBlock(patternBlock);
       } else if (e.shiftKey) {
         store.addBlockToSelection(patternBlock);
@@ -86,12 +92,17 @@ export const TimelineBlockStack = observer(function TimelineBlockStack({
       if (patternBlock.layer) store.selectedLayer = patternBlock.layer;
       e.stopPropagation();
     },
-    [store, patternBlock, selectedBlocks]
+    [store, patternBlock, selectedBlocksOrVariations]
   );
 
   // cache this value, see https://mobx.js.org/computeds-with-args.html
-  const isSelected = computed(() =>
-    store.selectedBlocks.has(patternBlock)
+  const isSelected = computed(
+    () =>
+      !!Array.from(store.selectedBlocksOrVariations).find(
+        (blockOrVariation) =>
+          blockOrVariation.type === "block" &&
+          blockOrVariation.block === patternBlock
+      )
   ).get();
 
   return (

@@ -11,9 +11,10 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { Layer } from "@/src/types/Layer";
-import { action } from "mobx";
+import { action, computed } from "mobx";
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
 import { VariationControls } from "@/src/components/VariationControls/VariationControls";
+import { VariationSelection } from "@/src/types/Store";
 
 type Props = {
   index: number;
@@ -25,7 +26,7 @@ export const TimelineLayerHeader = observer(function TimelineLayerHeader({
   layer,
 }: Props) {
   const store = useStore();
-  const { selectedLayer } = store;
+  const { selectedLayer, singleVariationSelection } = store;
 
   const bgColor = selectedLayer === layer ? "gray.300" : "gray.400";
 
@@ -87,16 +88,14 @@ export const TimelineLayerHeader = observer(function TimelineLayerHeader({
         />
       </HStack>
       <VStack justify="center" flexGrow={1}>
-        {store.selectedVariationBlock &&
-          store.selectedVariation &&
-          store.selectedLayer === layer && (
-            <VariationControls
-              key={store.selectedVariation.id}
-              block={store.selectedVariationBlock}
-              uniformName={store.selectedVariationUniformName}
-              variation={store.selectedVariation}
-            />
-          )}
+        {singleVariationSelection && store.selectedLayer === layer && (
+          <VariationControls
+            key={singleVariationSelection.variation.id}
+            block={singleVariationSelection.block}
+            uniformName={singleVariationSelection.uniformName}
+            variation={singleVariationSelection.variation}
+          />
+        )}
       </VStack>
       <HStack justify="center" spacing={0}>
         <Button

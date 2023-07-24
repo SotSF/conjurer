@@ -2,7 +2,7 @@ import { Box, useToken } from "@chakra-ui/react";
 import { Block } from "@/src/types/Block";
 import { memo, useEffect, useRef } from "react";
 import { SplineVariation } from "@/src/types/Variations/SplineVariation";
-import { useStore } from "@/src/types/StoreContext";
+import { useVariationClick } from "@/src/hooks/variationClick";
 
 type ScalarVariationGraphProps = {
   uniformName: string;
@@ -19,7 +19,6 @@ export const SplineVariationGraph = memo(function SplineVariationGraph({
   domain,
   block,
 }: ScalarVariationGraphProps) {
-  const store = useStore();
   const didInitialize = useRef(false);
   const id = `spline-${variation.id}`;
 
@@ -71,12 +70,14 @@ export const SplineVariationGraph = memo(function SplineVariationGraph({
     create();
   }, [variation, id, width, orange, blue]);
 
+  const onVariationClick = useVariationClick(block, uniformName);
+
   return (
     <Box
       className="spline-container"
       id={id}
       bgColor="gray.600"
-      onClick={() => store.selectVariation(block, uniformName, variation)}
+      onClick={(e) => onVariationClick(e, variation)}
     />
   );
 });

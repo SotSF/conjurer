@@ -5,7 +5,7 @@ import { Block } from "@/src/types/Block";
 import { VARIATION_BOUND_WIDTH } from "@/src/utils/layout";
 import { SplineVariation } from "@/src/types/Variations/SplineVariation";
 import { SplineVariationGraph } from "@/src/components/VariationGraph/SplineVariationGraph";
-import { useStore } from "@/src/types/StoreContext";
+import { useVariationClick } from "@/src/hooks/variationClick";
 
 type ScalarVariationGraphProps = {
   uniformName: string;
@@ -22,8 +22,10 @@ export const ScalarVariationGraph = function ScalarVariationGraph({
   domain,
   block,
 }: ScalarVariationGraphProps) {
-  const store = useStore();
   const orange = useToken("colors", "orange.400");
+
+  const onVariationClick = useVariationClick(block, uniformName);
+
   if (variation instanceof SplineVariation)
     return (
       <SplineVariationGraph
@@ -37,13 +39,14 @@ export const ScalarVariationGraph = function ScalarVariationGraph({
     );
 
   const data = variation.computeSampledData(variation.duration);
+
   return (
     <Box
       py={1}
       bgColor="gray.600"
       _hover={{ bgColor: "gray.500" }}
       role="button"
-      onClick={() => store.selectVariation(block, uniformName, variation)}
+      onClick={(e) => onVariationClick(e, variation)}
     >
       <LineChart
         width={width - VARIATION_BOUND_WIDTH}

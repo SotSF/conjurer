@@ -7,6 +7,7 @@ import { Variation } from "@/src/types/Variations/Variation";
 import { ExperienceStore } from "@/src/types/ExperienceStore";
 import { Layer } from "@/src/types/Layer";
 import { setupWebsocket } from "@/src/utils/websocket";
+import { deserializeVariation } from "@/src/types/Variations/variations";
 
 // Enforce MobX strict mode, which can make many noisy console warnings, but can help use learn MobX better.
 // Feel free to comment out the following if you want to silence the console messages.
@@ -16,6 +17,17 @@ configure({
   reactionRequiresObservable: true,
   observableRequiresReaction: false, // This will trigger false positives sometimes, so turning off
 });
+
+export type BlockSelection = { type: "block"; block: Block };
+
+export type VariationSelection = {
+  type: "variation";
+  block: Block;
+  uniformName: string;
+  variation: Variation;
+};
+
+export type BlockOrVariation = BlockSelection | VariationSelection;
 
 export class Store {
   initialized = false;
@@ -60,14 +72,20 @@ export class Store {
   set selectedLayer(value: Layer) {
     if (this._selectedLayer === value) return;
     this._selectedLayer = value;
-    this.deselectVariation();
+    // this.deselectVariation();
   }
 
-  selectedBlocks: Set<Block> = new Set();
+  selectedBlocksOrVariations: Set<BlockOrVariation> = new Set();
 
-  selectedVariationBlock: Block | null = null;
-  selectedVariationUniformName: string = "";
-  selectedVariation: Variation | null = null;
+  get singleVariationSelection(): VariationSelection | null {
+    const variationSelections = Array.from(
+      this.selectedBlocksOrVariations
+    ).filter(
+      (blockOrVariation) => blockOrVariation.type === "variation"
+    ) as VariationSelection[];
+
+    return variationSelections.length === 1 ? variationSelections[0] : null;
+  }
 
   private _user = "";
 
@@ -152,63 +170,119 @@ export class Store {
   };
 
   selectBlock = (block: Block) => {
-    this.selectedBlocks = new Set([block]);
+    this.selectedBlocksOrVariations = new Set([{ type: "block", block }]);
   };
 
   addBlockToSelection = (block: Block) => {
-    this.selectedBlocks.add(block);
+    this.selectedBlocksOrVariations.add({ type: "block", block });
+  };
+
+  selectVariation = (
+    block: Block,
+    uniformName: string,
+    variation: Variation
+  ) => {
+    this.selectedBlocksOrVariations = new Set([
+      {
+        type: "variation",
+        block,
+        uniformName,
+        variation,
+      },
+    ]);
+    if (block.layer) this._selectedLayer = block.layer;
+  };
+
+  addVariationToSelection = (
+    block: Block,
+    uniformName: string,
+    variation: Variation
+  ) => {
+    this.selectedBlocksOrVariations.add({
+      type: "variation",
+      block,
+      uniformName,
+      variation,
+    });
   };
 
   deselectBlock = (block: Block) => {
-    this.selectedBlocks.delete(block);
+    this.selectedBlocksOrVariations.forEach((selectedBlockOrVariation) => {
+      if (
+        selectedBlockOrVariation.type === "block" &&
+        selectedBlockOrVariation.block === block
+      ) {
+        this.selectedBlocksOrVariations.delete(selectedBlockOrVariation);
+      }
+    });
+  };
+
+  deselectVariation = (
+    block: Block,
+    uniformName: string,
+    variation: Variation
+  ) => {
+    this.selectedBlocksOrVariations.forEach((selectedBlockOrVariation) => {
+      if (
+        selectedBlockOrVariation.type === "variation" &&
+        selectedBlockOrVariation.block === block &&
+        selectedBlockOrVariation.uniformName === uniformName &&
+        selectedBlockOrVariation.variation === variation
+      )
+        this.selectedBlocksOrVariations.delete(selectedBlockOrVariation);
+    });
   };
 
   selectAllBlocks = () => {
-    const allBlocks = this.layers.flatMap((l) => l.patternBlocks);
-    this.selectedBlocks = new Set(allBlocks);
+    const allBlocks = this.layers
+      .flatMap((l) => l.patternBlocks)
+      .map((block) => ({
+        type: "block" as const,
+        block,
+      }));
+    this.selectedBlocksOrVariations = new Set(allBlocks);
   };
 
-  deselectAllBlocks = () => {
-    if (this.selectedBlocks.size === 0) return;
-    this.selectedBlocks = new Set();
+  deselectAll = () => {
+    if (this.selectedBlocksOrVariations.size === 0) return;
+    this.selectedBlocksOrVariations = new Set();
   };
 
-  // TODO: better generalize for multiple layers
   deleteSelected = () => {
-    if (this.selectedBlocks.size > 0) {
-      Array.from(this.selectedBlocks).forEach((block) => {
-        this.layers.forEach((l) => l.removeBlock(block));
-      });
-      this.selectedBlocks = new Set();
-      return;
+    if (this.selectedBlocksOrVariations.size === 0) return;
+
+    for (const blockOrVariation of Array.from(
+      this.selectedBlocksOrVariations
+    )) {
+      if (blockOrVariation.type === "block")
+        // TODO: better generalize for multiple layers
+        this.layers.forEach((l) => l.removeBlock(blockOrVariation.block));
+      else if (blockOrVariation.type === "variation")
+        this.deleteVariation(
+          blockOrVariation.block,
+          blockOrVariation.uniformName,
+          blockOrVariation.variation
+        );
     }
 
-    if (this.selectedVariation && this.selectedVariationBlock)
-      this.deleteVariation(
-        this.selectedVariationBlock,
-        this.selectedVariationUniformName,
-        this.selectedVariation
-      );
+    this.selectedBlocksOrVariations = new Set();
   };
 
   addVariation = (block: Block, uniformName: string, variation: Variation) => {
     block.addVariation(uniformName, variation);
     if (block.layer) this._selectedLayer = block.layer;
-    this.selectedVariationBlock = block;
-    this.selectedVariationUniformName = uniformName;
-    this.selectedVariation = variation;
+    this.selectVariation(block, uniformName, variation);
   };
 
   duplicateVariation = (
     block: Block,
     uniformName: string,
-    variation: Variation
+    variation: Variation,
+    insertAtEnd = false
   ) => {
-    block.duplicateVariation(uniformName, variation);
+    block.duplicateVariation(uniformName, variation, insertAtEnd);
     if (block.layer) this._selectedLayer = block.layer;
-    this.selectedVariationBlock = block;
-    this.selectedVariationUniformName = uniformName;
-    this.selectedVariation = variation;
+    this.selectVariation(block, uniformName, variation);
   };
 
   deleteVariation = (
@@ -217,49 +291,89 @@ export class Store {
     variation: Variation
   ) => {
     block.removeVariation(uniformName, variation);
-    if (this.selectedVariation === variation) {
-      this.selectedVariationBlock = null;
-      this.selectedVariationUniformName = "";
-      this.selectedVariation = null;
-    }
+    this.deselectVariation(block, uniformName, variation);
   };
 
-  copyBlocksToClipboard = (clipboardData: DataTransfer) => {
+  copyToClipboard = (clipboardData: DataTransfer) => {
+    if (this.selectedBlocksOrVariations.size === 0) return;
+
     clipboardData.setData(
       "text/plain",
-      JSON.stringify(Array.from(this.selectedBlocks).map((b) => b.serialize()))
+      JSON.stringify(
+        Array.from(this.selectedBlocksOrVariations).map((blockOrVariation) =>
+          blockOrVariation.type === "block"
+            ? blockOrVariation.block.serialize()
+            : blockOrVariation.variation.serialize()
+        )
+      )
     );
   };
 
   // TODO: better generalize for multiple layers
-  pasteBlocksFromClipboard = (clipboardData: DataTransfer) => {
-    const blocksData = JSON.parse(clipboardData.getData("text/plain"));
-    if (!blocksData || !blocksData.length) return;
+  pasteFromClipboard = (clipboardData: DataTransfer) => {
+    const blocksOrVariationsData = JSON.parse(
+      clipboardData.getData("text/plain")
+    ) as any[];
+    if (!blocksOrVariationsData || !blocksOrVariationsData.length) return;
 
-    const layerToPasteInto = this.selectedLayer;
-    if (!layerToPasteInto) return;
+    const firstBlockOrVariation = blocksOrVariationsData[0];
+    if (firstBlockOrVariation.pattern) {
+      // these are blocks
 
-    const blocksToPaste = blocksData.map((b: any) => Block.deserialize(b));
-    this.selectedBlocks = new Set();
-    for (const blockToPaste of blocksToPaste) {
-      const nextGap = layerToPasteInto.nextFiniteGap(
-        this.timer.globalTime,
-        blockToPaste.duration
+      const layerToPasteInto = this.selectedLayer;
+      if (!layerToPasteInto) return;
+
+      const blocksToPaste = blocksOrVariationsData.map((b: any) =>
+        Block.deserialize(b)
       );
-      blockToPaste.setTiming(nextGap);
-      layerToPasteInto.addBlock(blockToPaste);
-      this.addBlockToSelection(blockToPaste);
+      this.selectedBlocksOrVariations = new Set();
+      for (const blockToPaste of blocksToPaste) {
+        const nextGap = layerToPasteInto.nextFiniteGap(
+          this.timer.globalTime,
+          blockToPaste.duration
+        );
+        blockToPaste.setTiming(nextGap);
+        layerToPasteInto.addBlock(blockToPaste);
+        this.addBlockToSelection(blockToPaste);
+      }
+      return;
+    }
+
+    // otherwise, these are variations
+
+    // at least one variation must already be selected to know where to paste
+    const selectedVariations = Array.from(
+      this.selectedBlocksOrVariations
+    ).filter(
+      (blockOrVariation) => blockOrVariation.type === "variation"
+    ) as VariationSelection[];
+    if (!selectedVariations.length) return;
+
+    const blockToPasteTo = selectedVariations[0].block;
+    const uniformNameToPasteTo = selectedVariations[0].uniformName;
+
+    const variationsToPaste = blocksOrVariationsData.map((v) =>
+      deserializeVariation(v)
+    );
+
+    this.selectedBlocksOrVariations = new Set();
+    for (const variationToPaste of variationsToPaste) {
+      this.addVariation(blockToPasteTo, uniformNameToPasteTo, variationToPaste);
     }
   };
 
   // TODO: better generalize for multiple layers
   duplicateSelected = () => {
-    if (this.selectedBlocks.size > 0) {
+    if (this.selectedBlocksOrVariations.size === 0) return;
+
+    const selectedBlocks = Array.from(this.selectedBlocksOrVariations)
+      .filter((blockOrVariation) => blockOrVariation.type === "block")
+      .map((blockOrVariation) => blockOrVariation.block);
+    if (selectedBlocks.length > 0) {
       const layerToPasteInto = this.selectedLayer;
       if (!layerToPasteInto) return;
 
-      const selectedBlocks = Array.from(this.selectedBlocks);
-      this.selectedBlocks = new Set();
+      this.selectedBlocksOrVariations = new Set();
       for (const selectedBlock of selectedBlocks) {
         const newBlock = selectedBlock.clone();
         const nextGap = layerToPasteInto.nextFiniteGap(
@@ -273,30 +387,22 @@ export class Store {
       return;
     }
 
-    if (this.selectedVariation && this.selectedVariationBlock) {
-      this.duplicateVariation(
-        this.selectedVariationBlock,
-        this.selectedVariationUniformName,
-        this.selectedVariation
-      );
+    const selectedVariations = Array.from(
+      this.selectedBlocksOrVariations
+    ).filter(
+      (blockOrVariation) => blockOrVariation.type === "variation"
+      // TODO: do better type discrimination
+    ) as VariationSelection[];
+    if (selectedVariations.length > 0) {
+      for (const selectedVariation of selectedVariations) {
+        this.duplicateVariation(
+          selectedVariation.block,
+          selectedVariation.uniformName,
+          selectedVariation.variation,
+          selectedVariations.length > 1
+        );
+      }
     }
-  };
-
-  selectVariation = (
-    block: Block,
-    uniformName: string,
-    variation: Variation
-  ) => {
-    this.selectedVariation = variation;
-    this.selectedVariationUniformName = uniformName;
-    this.selectedVariationBlock = block;
-    if (block.layer) this._selectedLayer = block.layer;
-  };
-
-  deselectVariation = () => {
-    this.selectedVariation = null;
-    this.selectedVariationUniformName = "";
-    this.selectedVariationBlock = null;
   };
 
   serialize = () => ({
