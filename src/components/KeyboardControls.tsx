@@ -56,7 +56,7 @@ export const KeyboardControls = observer(function KeyboardControls() {
       if (!e.clipboardData || document.activeElement?.nodeName === "INPUT")
         return;
 
-      store.copyBlocksToClipboard(e.clipboardData);
+      store.copyToClipboard(e.clipboardData);
       e.preventDefault();
     };
     window.addEventListener("copy", handleCopy);
@@ -65,7 +65,7 @@ export const KeyboardControls = observer(function KeyboardControls() {
       if (!e.clipboardData || document.activeElement?.nodeName === "INPUT")
         return;
 
-      store.pasteBlocksFromClipboard(e.clipboardData);
+      store.pasteFromClipboard(e.clipboardData);
       e.preventDefault();
     };
     window.addEventListener("paste", handlePaste);

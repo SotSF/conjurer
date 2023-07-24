@@ -7,6 +7,7 @@ import { Variation } from "@/src/types/Variations/Variation";
 import { ExperienceStore } from "@/src/types/ExperienceStore";
 import { Layer } from "@/src/types/Layer";
 import { setupWebsocket } from "@/src/utils/websocket";
+import { deserializeVariation } from "@/src/types/Variations/variations";
 
 // Enforce MobX strict mode, which can make many noisy console warnings, but can help use learn MobX better.
 // Feel free to comment out the following if you want to silence the console messages.
@@ -293,39 +294,71 @@ export class Store {
     this.deselectVariation(block, uniformName, variation);
   };
 
-  // TODO: better account for variations
-  copyBlocksToClipboard = (clipboardData: DataTransfer) => {
+  copyToClipboard = (clipboardData: DataTransfer) => {
+    if (this.selectedBlocksOrVariations.size === 0) return;
+
     clipboardData.setData(
       "text/plain",
       JSON.stringify(
-        Array.from(this.selectedBlocksOrVariations).map((blockOrVariation) => {
-          if (blockOrVariation.type === "block")
-            return blockOrVariation.block.serialize();
-          return "";
-        })
+        Array.from(this.selectedBlocksOrVariations).map((blockOrVariation) =>
+          blockOrVariation.type === "block"
+            ? blockOrVariation.block.serialize()
+            : blockOrVariation.variation.serialize()
+        )
       )
     );
   };
 
-  // TODO: better account for variations
   // TODO: better generalize for multiple layers
-  pasteBlocksFromClipboard = (clipboardData: DataTransfer) => {
-    const blocksData = JSON.parse(clipboardData.getData("text/plain"));
-    if (!blocksData || !blocksData.length) return;
+  pasteFromClipboard = (clipboardData: DataTransfer) => {
+    const blocksOrVariationsData = JSON.parse(
+      clipboardData.getData("text/plain")
+    ) as any[];
+    if (!blocksOrVariationsData || !blocksOrVariationsData.length) return;
 
-    const layerToPasteInto = this.selectedLayer;
-    if (!layerToPasteInto) return;
+    const firstBlockOrVariation = blocksOrVariationsData[0];
+    if (firstBlockOrVariation.pattern) {
+      // these are blocks
 
-    const blocksToPaste = blocksData.map((b: any) => Block.deserialize(b));
-    this.selectedBlocksOrVariations = new Set();
-    for (const blockToPaste of blocksToPaste) {
-      const nextGap = layerToPasteInto.nextFiniteGap(
-        this.timer.globalTime,
-        blockToPaste.duration
+      const layerToPasteInto = this.selectedLayer;
+      if (!layerToPasteInto) return;
+
+      const blocksToPaste = blocksOrVariationsData.map((b: any) =>
+        Block.deserialize(b)
       );
-      blockToPaste.setTiming(nextGap);
-      layerToPasteInto.addBlock(blockToPaste);
-      this.addBlockToSelection(blockToPaste);
+      this.selectedBlocksOrVariations = new Set();
+      for (const blockToPaste of blocksToPaste) {
+        const nextGap = layerToPasteInto.nextFiniteGap(
+          this.timer.globalTime,
+          blockToPaste.duration
+        );
+        blockToPaste.setTiming(nextGap);
+        layerToPasteInto.addBlock(blockToPaste);
+        this.addBlockToSelection(blockToPaste);
+      }
+      return;
+    }
+
+    // otherwise, these are variations
+
+    // at least one variation must already be selected to know where to paste
+    const selectedVariations = Array.from(
+      this.selectedBlocksOrVariations
+    ).filter(
+      (blockOrVariation) => blockOrVariation.type === "variation"
+    ) as VariationSelection[];
+    if (!selectedVariations.length) return;
+
+    const blockToPasteTo = selectedVariations[0].block;
+    const uniformNameToPasteTo = selectedVariations[0].uniformName;
+
+    const variationsToPaste = blocksOrVariationsData.map((v) =>
+      deserializeVariation(v)
+    );
+
+    this.selectedBlocksOrVariations = new Set();
+    for (const variationToPaste of variationsToPaste) {
+      this.addVariation(blockToPasteTo, uniformNameToPasteTo, variationToPaste);
     }
   };
 
