@@ -6,6 +6,7 @@ type VariationType =
   | "periodic"
   | "spline"
   | "easing"
+  | "audio"
   | "linear4"
   | "palette";
 

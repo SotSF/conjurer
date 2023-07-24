@@ -8,6 +8,7 @@ import {
   TbEaseInOutControlPoints,
 } from "react-icons/tb";
 import { MdTrendingFlat, MdColorLens } from "react-icons/md";
+import { PiWaveform } from "react-icons/pi";
 import { Block } from "@/src/types/Block";
 import { action } from "mobx";
 import { FlatVariation } from "@/src/types/Variations/FlatVariation";
@@ -24,6 +25,7 @@ import { useStore } from "@/src/types/StoreContext";
 import { EasingVariation } from "@/src/types/Variations/EasingVariation";
 import { Palette, isPalette } from "@/src/types/Palette";
 import { PaletteVariation } from "@/src/types/Variations/PaletteVariation";
+import { AudioVariation } from "@/src/types/Variations/AudioVariation";
 
 type NewVariationButtonsProps = {
   uniformName: string;
@@ -231,6 +233,20 @@ export const NewVariationButtons = memo(function NewVariationButtons({
             block,
             uniformName,
             new EasingVariation(DEFAULT_VARIATION_DURATION, "easeInSine", 0, 1)
+          );
+        })}
+      />
+      <IconButton
+        size="xs"
+        aria-label="Audio"
+        title="Audio"
+        height={6}
+        icon={<PiWaveform size={17} />}
+        onClick={action(() => {
+          store.addVariation(
+            block,
+            uniformName,
+            new AudioVariation(DEFAULT_VARIATION_DURATION, 1, 0)
           );
         })}
       />

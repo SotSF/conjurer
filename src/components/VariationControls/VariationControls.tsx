@@ -3,7 +3,6 @@ import {
   Button,
   HStack,
   Icon,
-  Input,
   Link,
   Radio,
   RadioGroup,
@@ -38,10 +37,9 @@ import {
 } from "@/src/types/Variations/EasingVariation";
 import { easings } from "@/src/utils/easings";
 import { PaletteVariation } from "@/src/types/Variations/PaletteVariation";
-import { isPalette } from "@/src/types/Palette";
-import { Vector3 } from "three";
-import { PaletteEditorModal } from "@/src/components/PalletteEditor/PaletteEditorModal";
 import { PaletteVariationControls } from "@/src/components/VariationControls/PaletteVariationControls";
+import { AudioVariation } from "@/src/types/Variations/AudioVariation";
+import { AudioVariationControls } from "@/src/components/VariationControls/AudioVariationControls";
 
 type VariationControlsProps = {
   uniformName: string;
@@ -70,6 +68,8 @@ export const VariationControls = function VariationControls({
       <SplineVariationControls variation={variation} {...controlsProps} />
     ) : variation instanceof EasingVariation ? (
       <EasingVariationControls variation={variation} {...controlsProps} />
+    ) : variation instanceof AudioVariation ? (
+      <AudioVariationControls variation={variation} {...controlsProps} />
     ) : variation instanceof LinearVariation4 ? (
       <LinearVariation4Controls variation={variation} {...controlsProps} />
     ) : variation instanceof PaletteVariation ? (

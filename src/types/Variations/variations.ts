@@ -5,6 +5,7 @@ import { LinearVariation4 } from "@/src/types/Variations/LinearVariation4";
 import { PaletteVariation } from "@/src/types/Variations/PaletteVariation";
 import { PeriodicVariation } from "@/src/types/Variations/PeriodicVariation";
 import { SplineVariation } from "@/src/types/Variations/SplineVariation";
+import { AudioVariation } from "@/src/types/Variations/AudioVariation";
 import { Variation } from "@/src/types/Variations/Variation";
 
 export const deserializeVariation = (data: any): Variation => {
@@ -19,6 +20,8 @@ export const deserializeVariation = (data: any): Variation => {
       return SplineVariation.deserialize(data);
     case "easing":
       return EasingVariation.deserialize(data);
+    case "audio":
+      return AudioVariation.deserialize(data);
     case "linear4":
       return LinearVariation4.deserialize(data);
     case "palette":
