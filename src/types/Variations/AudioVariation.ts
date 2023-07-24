@@ -17,19 +17,22 @@ export class AudioVariation extends Variation<number> {
     this.offset = offset;
   }
 
-  valueAtTime = (time: number) =>
-    this.factor * this.store.audioStore.getPeakAtTime(time) + this.offset;
+  valueAtTime = (time: number, globalTime: number) =>
+    this.factor * this.store.audioStore.getPeakAtTime(globalTime) + this.offset;
 
   // TODO:
   computeDomain = () => [0, 1] as [number, number];
 
-  computeSampledData = (duration: number) => {
+  computeSampledData = (duration: number, globalStartTime = 0) => {
     const totalSamples = Math.ceil(duration * 30);
 
     const data = [];
     for (let i = 0; i < totalSamples; i++) {
       data.push({
-        value: this.valueAtTime(duration * (i / (totalSamples - 1))),
+        value: this.valueAtTime(
+          0,
+          globalStartTime + duration * (i / (totalSamples - 1))
+        ),
       });
     }
     return data;

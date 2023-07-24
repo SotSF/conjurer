@@ -28,7 +28,10 @@ export abstract class Variation<T extends ParamType = ParamType> {
 
   abstract valueAtTime: (time: number, globalTime: number) => T;
   abstract computeDomain: () => [number, number];
-  abstract computeSampledData: (duration: number) => { value: number }[];
+  abstract computeSampledData: (
+    duration: number,
+    globalStartTime?: number
+  ) => { value: number }[];
   abstract clone: () => Variation<T>;
   abstract serialize: () => any;
   static deserialize: (store: RootStore, data: any) => Variation;
