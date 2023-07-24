@@ -3,7 +3,7 @@ import { Block } from "@/src/types/Block";
 import { LinearVariation4 } from "@/src/types/Variations/LinearVariation4";
 import { vector4ToHex } from "@/src/utils/color";
 import { VARIATION_BOUND_WIDTH } from "@/src/utils/layout";
-import { useStore } from "@/src/types/StoreContext";
+import { useVariationClick } from "@/src/hooks/variationClick";
 
 type LinearVariationGraph4Props = {
   uniformName: string;
@@ -18,15 +18,17 @@ export const LinearVariationGraph4 = function LinearVariationGraph4({
   width,
   block,
 }: LinearVariationGraph4Props) {
-  const store = useStore();
   const fromColor = vector4ToHex(variation.from);
   const toColor = vector4ToHex(variation.to);
+
+  const onVariationClick = useVariationClick(block, uniformName);
+
   return (
     <Box
       py={1}
       _hover={{ bgColor: "gray.500" }}
       role="button"
-      onClick={() => store.selectVariation(block, uniformName, variation)}
+      onClick={(e) => onVariationClick(e, variation)}
     >
       <svg width={width - VARIATION_BOUND_WIDTH} height={60}>
         <defs>

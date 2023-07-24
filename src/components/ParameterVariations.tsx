@@ -7,7 +7,7 @@ import {
   Droppable,
   OnDragEndResponder,
 } from "@hello-pangea/dnd";
-import { MouseEvent as ReactMouseEvent, useCallback, Fragment } from "react";
+import { Fragment } from "react";
 import { reorder } from "@/src/utils/algorithm";
 import { Block } from "@/src/types/Block";
 import { action } from "mobx";
@@ -16,7 +16,7 @@ import { NewVariationButtons } from "@/src/components/NewVariationButtons";
 import { observer } from "mobx-react-lite";
 import { useStore } from "@/src/types/StoreContext";
 import { VariationHandle } from "@/src/components/VariationHandle";
-import { Variation } from "@/src/types/Variations/Variation";
+import { useVariationClick } from "@/src/hooks/variationClick";
 
 type ParameterVariationsProps = {
   uniformName: string;
@@ -50,26 +50,7 @@ export const ParameterVariations = observer(function ParameterVariations({
     );
   });
 
-  const handleVariationClick = useCallback(
-    (e: ReactMouseEvent, variation: Variation) => {
-      if (
-        Array.from(store.selectedBlocksOrVariations).find(
-          (blockOrVariation) =>
-            blockOrVariation.type === "variation" &&
-            blockOrVariation.variation === variation
-        )
-      ) {
-        store.deselectVariation(block, uniformName, variation);
-      } else if (e.shiftKey) {
-        store.addVariationToSelection(block, uniformName, variation);
-      } else {
-        store.selectVariation(block, uniformName, variation);
-      }
-
-      e.stopPropagation();
-    },
-    [store, block, uniformName]
-  );
+  const onVariationClick = useVariationClick(block, uniformName);
 
   return (
     <VStack spacing={0}>
@@ -100,7 +81,7 @@ export const ParameterVariations = observer(function ParameterVariations({
                       spacing={0}
                       cursor="grab"
                       role="button"
-                      onClick={(e) => handleVariationClick(e, variation)}
+                      onClick={(e) => onVariationClick(e, variation)}
                     >
                       <VariationHandle
                         block={block}
