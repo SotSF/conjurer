@@ -9,7 +9,7 @@ type Props = {
   selectedPatternBlock: Block;
   onSelectPatternBlock: (index: number) => void;
   selectedEffectIndices: number[];
-  onSelectEffectBlock: (index: number, indices: number[]) => void;
+  onSelectEffectBlock: (index: number) => void;
 };
 
 export const PatternList = memo(function PatternList({
@@ -41,8 +41,8 @@ export const PatternList = memo(function PatternList({
           <SelectablePatternEffect
             key={e.name}
             pattern={e}
-            selected={selectedEffectIndices.indexOf(index) >= 0}
-            onSelect={() => onSelectEffectBlock(index, selectedEffectIndices)}
+            selected={selectedEffectIndices.includes(index)}
+            onSelect={() => onSelectEffectBlock(index)}
           />
         ))}
       </HStack>
