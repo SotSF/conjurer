@@ -3,6 +3,25 @@
 // License: GPL-3.0
 // This is a modified version of the original source code.
 
+export const getAveragePeaks = (
+  audioBuffer: AudioBuffer,
+  totalSamples: number
+) => {
+  const channelData = filterData(audioBuffer, totalSamples, true);
+  const numberOfChannels = channelData.length;
+
+  const peaks = [];
+  for (let j = 0; j < channelData[0].length; j++) {
+    let frameTotal = 0;
+    for (let i = 0; i < numberOfChannels; i++) {
+      frameTotal += channelData[i][j];
+    }
+    peaks.push(frameTotal / numberOfChannels);
+  }
+
+  return peaks;
+};
+
 /**
  * Filters the AudioBuffer
  * @param {AudioBuffer} audioBuffer the AudioBuffer from drawAudio()

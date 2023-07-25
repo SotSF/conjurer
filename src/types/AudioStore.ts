@@ -12,7 +12,7 @@ import type WaveSurfer from "wavesurfer.js";
 import type TimelinePlugin from "wavesurfer.js/dist/plugins/timeline";
 import type RegionsPlugin from "wavesurfer.js/dist/plugins/regions";
 import type { RegionParams } from "wavesurfer.js/dist/plugins/regions";
-import { filterData } from "@/src/types/audioPeaks";
+import { filterData, getAveragePeaks } from "@/src/types/audioPeaks";
 
 export const loopRegionColor = "rgba(237, 137, 54, 0.4)";
 
@@ -56,17 +56,50 @@ export class AudioStore {
     const totalDesiredSamples = Math.floor(
       PEAK_DATA_SAMPLE_RATE * audioBuffer.duration
     );
-    const channelData = filterData(audioBuffer, totalDesiredSamples, true);
-    const numberOfChannels = channelData.length;
+    this.peaks = getAveragePeaks(audioBuffer, totalDesiredSamples);
 
-    this.peaks = [];
-    for (let j = 0; j < channelData[0].length; j++) {
-      let frameTotal = 0;
-      for (let i = 0; i < numberOfChannels; i++) {
-        frameTotal += channelData[i][j];
-      }
-      this.peaks.push(frameTotal / numberOfChannels);
+    // this.computeLowPassPeaks(audioBuffer);
+  };
+
+  computeLowPassPeaks = async (audioBuffer: AudioBuffer) => {
+    console.log("computing low pass peaks");
+    const audioContext = new OfflineAudioContext({
+      numberOfChannels: audioBuffer.numberOfChannels,
+      length: audioBuffer.length,
+      sampleRate: audioBuffer.sampleRate,
+    });
+
+    const source = audioContext.createBufferSource();
+
+    // clone the audio buffer
+    source.buffer = audioContext.createBuffer(
+      audioBuffer.numberOfChannels,
+      audioBuffer.length,
+      audioBuffer.sampleRate
+    );
+    for (let i = 0; i < audioBuffer.numberOfChannels; i++) {
+      source.buffer.copyToChannel(audioBuffer.getChannelData(i), i, 0);
     }
+
+    // source.buffer = audioBuffer;
+
+    // const lowpass = audioContext.createBiquadFilter();
+    // lowpass.type = "lowpass";
+    // lowpass.frequency.value = 100000;
+
+    // source.connect(lowpass);
+    // lowpass.connect(audioContext.destination);
+    source.connect(audioContext.destination);
+    source.start();
+    const renderedAudioBuffer = await audioContext.startRendering();
+
+    console.log("rendered audio buffer", renderedAudioBuffer);
+
+    const totalDesiredSamples = Math.floor(
+      PEAK_DATA_SAMPLE_RATE * renderedAudioBuffer.duration
+    );
+    this.peaks = getAveragePeaks(renderedAudioBuffer, totalDesiredSamples);
+    console.log("peaks", this.peaks);
   };
 
   getPeakAtTime = (time: number) => {

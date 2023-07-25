@@ -150,7 +150,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
         audioStore.wavesurfer.seekTo(0);
 
         const audioBuffer = audioStore.wavesurfer.getDecodedData();
-        if (audioBuffer) audioStore.computePeaks(audioBuffer);
+        if (audioBuffer) audioStore.computeLowPassPeaks(audioBuffer);
 
         ready.current = true;
         setLoading(false);
