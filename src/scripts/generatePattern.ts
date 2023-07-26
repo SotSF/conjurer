@@ -1,41 +1,19 @@
-import { context } from "@react-three/fiber";
-import ts from "typescript";
+import ts, { EmitHint } from "typescript";
 
-// maybe use prettier later?
-// import prettier from "pret";
-
-/*
-
-- program takes an argument for name of new pattern, in PascalCase, eg MyPattern
-- program writes the required files for the new pattern
-  - add ./src/patterns/shaders/myPattern.frag
-  - add ./src/patterns/shaders/MyPattern.ts
-  - edit ./src/patterns/patterns.ts
-
-*/
-
-const patternName = "MyPattern";
+const patternName = process.argv[2];
 
 // hardcode our input file
-const filePath = "./src/patterns/patterns.ts";
+const patternsTSFile = "./src/patterns/patterns.ts";
 
 // create a program instance, which is a collection of source files
 // in this case we only have one source file
-const program = ts.createProgram([filePath], {});
-
-// pull off the typechecker instance from our program
-const checker = program.getTypeChecker();
+const program = ts.createProgram([patternsTSFile], {});
 
 // get our models.ts source file AST
-const source = program.getSourceFile(filePath);
+const source = program.getSourceFile(patternsTSFile);
 
 // create TS printer instance which gives us utilities to pretty print our final AST
 const printer = ts.createPrinter();
-
-// helper to give us Node string type given kind
-const syntaxToKind = (kind: ts.Node["kind"]) => {
-  return ts.SyntaxKind[kind];
-};
 
 const prependChild = (
   node: ts.Node,
@@ -61,12 +39,6 @@ const transformer: ts.TransformerFactory<ts.Node> = (context) => {
     const f = ts.factory;
 
     let newImportInserted = false;
-
-    // keep a Set of imported identifiers
-    // as we iterate over identifiers, if we found a dupe,
-    //  then abort mission due to duplicate pattern name.
-    //  say "hey choose a different name ya dunce"
-    //  os exit 1
 
     const newIdentifier = f.createIdentifier(patternName);
 
@@ -131,7 +103,7 @@ const transformer: ts.TransformerFactory<ts.Node> = (context) => {
 };
 
 const result = ts.transform(source!, [transformer]);
-const s = result.transformed[0];
+const updatedSource = result.transformed[0];
 
 import fs from "fs";
 
@@ -153,11 +125,7 @@ fs.writeFileSync(newTSPath, newTS);
 
 fs.copyFileSync(shaderPath, newShaderPath);
 
-// console.log(newTS);
-
-// console.log(printer.printNode(ts.EmitHint.Unspecified, s, source!));
-
-// ts.visitNode(source!, (node) => {
-//   console.log("text", node.text);
-//   return node;
-// });
+fs.writeFileSync(
+  patternsTSFile,
+  printer.printNode(ts.EmitHint.Unspecified, updatedSource, source!)
+);

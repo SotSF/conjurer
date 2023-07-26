@@ -9,7 +9,8 @@
     "lint": "next lint",
     "generateCanopy": "ts-node --project tsconfig.script.json src/scripts/generateCanopy.ts",
     "downloadCloudAssets": "ts-node --project tsconfig.script.json src/scripts/downloadCloudAssets.ts",
-    "server": "ts-node --project tsconfig.script.json src/scripts/websocketServer.ts"
+    "server": "ts-node --project tsconfig.script.json src/scripts/websocketServer.ts",
+    "generatePattern": "ts-node --project tsconfig.script.json src/scripts/generatePattern.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.374.0",
