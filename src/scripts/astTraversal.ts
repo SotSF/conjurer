@@ -35,6 +35,25 @@ const syntaxToKind = (kind: ts.Node["kind"]) => {
   return ts.SyntaxKind[kind];
 };
 
+const prependChild = (
+  node: ts.Node,
+  newChild: ts.Node,
+  context: ts.TransformationContext
+) => {
+  let childCount = 0;
+
+  return ts.visitEachChild(
+    node,
+    (n) => {
+      if (childCount++ == 0) {
+        return [newChild, n];
+      }
+      return n;
+    },
+    context
+  );
+};
+
 const transformer: ts.TransformerFactory<ts.Node> = (context) => {
   return (sourceFile) => {
     const f = ts.factory;
@@ -97,18 +116,7 @@ const transformer: ts.TransformerFactory<ts.Node> = (context) => {
           }
           if (isPatternFactoriesDeclaration) {
             if (ts.isArrayLiteralExpression(variableChild)) {
-              let insertedIdentifier = false;
-              return ts.visitEachChild(
-                variableChild,
-                (ident: ts.Node) => {
-                  if (!insertedIdentifier) {
-                    insertedIdentifier = true;
-                    return [newIdentifier, ident];
-                  }
-                  return ident;
-                },
-                context
-              );
+              return prependChild(variableChild, newIdentifier, context);
             }
           }
           return ts.visitEachChild(variableChild, v, context);
@@ -120,8 +128,6 @@ const transformer: ts.TransformerFactory<ts.Node> = (context) => {
     return ts.visitNode(sourceFile, visitor);
   };
 };
-
-// const findNode: (node: ts.)
 
 const result = ts.transform(source!, [transformer]);
 const s = result.transformed[0];
