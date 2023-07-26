@@ -14,8 +14,6 @@ void main() {
     vec3 sampled = vec3(0.);
     vec2 uv0 = uv;
     float angleOfRotation = PI * 2. / u_reflectCount;
-
-    float d = 0.9;
     for (float i = 0.; i < u_reflectCount; i++) {
         uv.x = uv0.x * cos(angleOfRotation * i) - uv0.y * sin(angleOfRotation * i);
         uv.y = uv0.x * sin(angleOfRotation * i) + uv0.y * cos(angleOfRotation * i);
