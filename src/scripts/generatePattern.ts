@@ -1,6 +1,15 @@
-import ts, { EmitHint } from "typescript";
+import ts from "typescript";
 
-const patternName = process.argv[2];
+const patternArg = process.argv[2];
+
+if (process.argv.length != 3) {
+  console.error("Specify exactly 1 PatternName as an argument");
+  process.exit(1);
+}
+
+const patternName = `${patternArg
+  .charAt(0)
+  .toUpperCase()}${patternArg.substring(1)}`;
 
 // hardcode our input file
 const patternsTSFile = "./src/patterns/patterns.ts";
