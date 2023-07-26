@@ -1,3 +1,4 @@
+import { context } from "@react-three/fiber";
 import ts from "typescript";
 
 // maybe use prettier later?
@@ -38,41 +39,96 @@ const transformer: ts.TransformerFactory<ts.Node> = (context) => {
   return (sourceFile) => {
     const f = ts.factory;
 
-    let done = false;
-    const visitor = (node: ts.Node): ts.VisitResult<ts.Node> => {
-      if (done) return ts.visitEachChild(node, visitor, context);
-      // If it is a expression statement,
-      if (ts.isImportDeclaration(node)) {
-        // Return it twice.
-        // Effectively duplicating the statement
-        done = true;
-        const newnode = f.createImportDeclaration(
-          [],
-          f.createImportClause(
-            false,
-            undefined,
-            f.createNamedImports([
-              f.createImportSpecifier(
-                false,
-                undefined,
-                f.createIdentifier("MyPattern")
-              ),
-            ])
-          ),
-          f.createStringLiteral("@/src/patterns/MyPattern")
-        );
-        f; // f
-        return [newnode, node];
-      }
+    let newImportInserted = false;
 
+    // keep a Set of imported identifiers
+    // as we iterate over identifiers, if we found a dupe,
+    //  then abort mission due to duplicate pattern name.
+    //  say "hey choose a different name ya dunce"
+    //  os exit 1
+
+    const patternName = "MyPattern";
+    const newIdentifier = f.createIdentifier(patternName);
+
+    const newImport = f.createImportDeclaration(
+      [],
+      f.createImportClause(
+        false,
+        undefined,
+        f.createNamedImports([
+          f.createImportSpecifier(false, undefined, newIdentifier),
+        ])
+      ),
+      f.createStringLiteral(`@/src/patterns/${patternName}`)
+    );
+
+    const importIdentifiers = new Set([patternName]);
+
+    const visitor = (node: ts.Node): ts.VisitResult<ts.Node> => {
+      if (ts.isImportDeclaration(node)) {
+        // TODO: maybe refactor this.
+        const v = (importChild: ts.Node): ts.VisitResult<ts.Node> => {
+          if (ts.isIdentifier(importChild)) {
+            if (importIdentifiers.has(importChild.text)) {
+              console.error(
+                `ERROR: hey choose a different name ya dunce (${importChild.text}), exiting!`
+              );
+              process.exit(1);
+            }
+            importIdentifiers.add(importChild.text);
+          }
+          return ts.visitEachChild(importChild, v, context);
+        };
+        ts.visitEachChild(node, v, context);
+
+        if (!newImportInserted) {
+          newImportInserted = true;
+          return [newImport, node];
+        }
+        return node;
+      }
+      if (ts.isVariableDeclaration(node)) {
+        let isPatternFactoriesDeclaration = false;
+        const v = (variableChild: ts.Node): ts.VisitResult<ts.Node> => {
+          if (ts.isIdentifier(variableChild)) {
+            if (variableChild.text == "patternFactories") {
+              isPatternFactoriesDeclaration = true;
+            }
+          }
+          if (isPatternFactoriesDeclaration) {
+            if (ts.isArrayLiteralExpression(variableChild)) {
+              let insertedIdentifier = false;
+              return ts.visitEachChild(
+                variableChild,
+                (ident: ts.Node) => {
+                  if (!insertedIdentifier) {
+                    insertedIdentifier = true;
+                    return [newIdentifier, ident];
+                  }
+                  return ident;
+                },
+                context
+              );
+            }
+          }
+          return ts.visitEachChild(variableChild, v, context);
+        };
+        return ts.visitEachChild(node, v, context);
+      }
       return ts.visitEachChild(node, visitor, context);
     };
-
     return ts.visitNode(sourceFile, visitor);
   };
 };
+
+// const findNode: (node: ts.)
 
 const result = ts.transform(source!, [transformer]);
 const s = result.transformed[0];
 
 console.log(printer.printNode(ts.EmitHint.Unspecified, s, source!));
+
+// ts.visitNode(source!, (node) => {
+//   console.log("text", node.text);
+//   return node;
+// });
