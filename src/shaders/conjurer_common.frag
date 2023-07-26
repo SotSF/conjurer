@@ -52,10 +52,10 @@ float plot(vec2 st, float pct) {
 // Cartesian coordinates mean the usual x,y coordinates, where (0, 0) is at the center of the canopy
 // and (0.5, 0.5) is at the top right corner of the canopy.
 vec2 canopyToCartesianProjection(vec2 _st) {
-    float theta = _st.x * 2.0 * PI;
+    float theta = (_st.x - 0.5) * 2.0 * PI;
     // TODO: double check these numbers
     float r = _st.y * 0.88888888 + 0.111111111;
-    return vec2(r * cos(theta) * 0.5, r * sin(theta) * 0.5);
+    return vec2(r * cos(theta), r * sin(theta));
 }
 
 vec2 canopyToPolarProjection(vec2 _st) {
@@ -84,9 +84,8 @@ float polarToCanopyRadius(float radius) {
 
 vec2 cartesianToCanopyProjection(vec2 _st) {
     float theta = atan(_st.y, _st.x) / PI / 2. + 0.5;
-    float polarRadius = length(_st);
-    float canopyRadius = polarToCanopyRadius(polarRadius);
-    return vec2(theta, canopyRadius);
+    float polarRadius = polarToCanopyRadius(length(_st));
+    return vec2(theta, polarRadius);
 }
 
 // requires centered cartesian space

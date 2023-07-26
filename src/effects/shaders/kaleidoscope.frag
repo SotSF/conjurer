@@ -7,16 +7,19 @@ varying vec2 v_uv;
 uniform sampler2D u_texture;
 
 uniform float u_reflectCount;
-uniform float u_angleOffset;
 
 void main() {
     vec2 uv = v_uv;
-    vec2 rt = canopyToPolarProjection(uv);
-    float offset = radians(u_angleOffset);
+    uv = canopyToCartesianProjection(uv);
+    vec3 sampled = vec3(0.);
+    vec2 uv0 = uv;
     float angleOfRotation = PI * 2. / u_reflectCount;
-    float theta = mod(rt.x,angleOfRotation) + offset; // find comparable theta within AngleOfRotation
-    vec2 xy = vec2(rt.y * cos(theta), rt.y * sin(theta));
-    xy = cartesianToCanopyProjection(xy);
-    vec4 sampled = texture2D(u_texture, xy); // want to sample within the first slice of angleOfRotation
-    gl_FragColor = sampled;
+
+    float d = 0.9;
+    for (float i = 0.; i < u_reflectCount; i++) {
+        uv.x = uv0.x * cos(angleOfRotation * i) - uv0.y * sin(angleOfRotation * i);
+        uv.y = uv0.x * sin(angleOfRotation * i) + uv0.y * cos(angleOfRotation * i);
+        sampled += texture2D(u_texture, cartesianToCanopyProjection(uv)).rgb * pow(0.9, u_reflectCount);
+    }
+    gl_FragColor = vec4(sampled, 1.);
 }

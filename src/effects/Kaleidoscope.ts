@@ -10,12 +10,5 @@ export const Kaleidoscope = () =>
       min: 1,
       max: 16,
       step: 1
-    },
-    u_angleOffset: {
-      name: "Angle Offet",
-      value: 0,
-      min: 0,
-      max: 360,
-      step: 1
     }
   });
