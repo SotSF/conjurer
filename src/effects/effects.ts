@@ -9,6 +9,7 @@ import { Tiler } from "@/src/effects/Tiler";
 import { CloudsMask } from "@/src/effects/CloudsMask";
 import { ConstructMask } from "@/src/effects/ConstructMask";
 import { BrightnessAdjust } from "./BrightnessAdjust";
+import { Kaleidoscope } from "@/src/effects/Kaleidoscope";
 
 const effectFactories: Array<() => Pattern> = [
   Tiler,
@@ -21,6 +22,7 @@ const effectFactories: Array<() => Pattern> = [
   ChromaticAberration,
   CloudsMask,
   ConstructMask,
+  Kaleidoscope
 ];
 
 // Effects that will not have their uniforms changed. These are used for checking what the default
