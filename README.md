@@ -52,6 +52,10 @@ Open the app locally by visiting http://localhost:3000.
 
 ### Scripts
 
+#### `yarn generatePattern PatternName`
+
+Generates boilerplate for a new pattern called PatternName. Choose your own unique PatternName. It prints out the filepaths it writes, including the fragment shader and typescript pattern definition.
+
 #### `yarn generateCanopy`
 
 Generates canopy geometry data and stores it in `src/data/canopyGeometry.json`.
