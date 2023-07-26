@@ -1,5 +1,12 @@
 import ts from "typescript";
 
+if (process.argv[0] != "yarn") {
+  console.error("Call me from yarn please");
+  console.error("eg.");
+  console.error("   yarn generatePattern MyPattern");
+  process.exit(2);
+}
+
 const patternArg = process.argv[2];
 
 if (process.argv.length != 3) {
@@ -12,7 +19,7 @@ const patternName = `${patternArg
   .toUpperCase()}${patternArg.substring(1)}`;
 
 // hardcode our input file
-const patternsTSFile = "./src/patterns/patterns.ts";
+const patternsTSFile = "src/patterns/patterns.ts";
 
 // create a program instance, which is a collection of source files
 // in this case we only have one source file
@@ -130,10 +137,14 @@ const newTS = fs
   .toString()
   .replace(/ExamplePattern/g, patternName)
   .replace(/examplePattern/g, camelCase(patternName));
+
+console.log("writing", newTSPath);
 fs.writeFileSync(newTSPath, newTS);
 
+console.log("writing", newShaderPath);
 fs.copyFileSync(shaderPath, newShaderPath);
 
+console.log("writing", patternsTSFile);
 fs.writeFileSync(
   patternsTSFile,
   printer.printNode(ts.EmitHint.Unspecified, updatedSource, source!)
