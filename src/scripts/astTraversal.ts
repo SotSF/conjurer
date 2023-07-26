@@ -14,6 +14,8 @@ import ts from "typescript";
 
 */
 
+const patternName = "MyPattern";
+
 // hardcode our input file
 const filePath = "./src/patterns/patterns.ts";
 
@@ -66,7 +68,6 @@ const transformer: ts.TransformerFactory<ts.Node> = (context) => {
     //  say "hey choose a different name ya dunce"
     //  os exit 1
 
-    const patternName = "MyPattern";
     const newIdentifier = f.createIdentifier(patternName);
 
     const newImport = f.createImportDeclaration(
@@ -132,7 +133,29 @@ const transformer: ts.TransformerFactory<ts.Node> = (context) => {
 const result = ts.transform(source!, [transformer]);
 const s = result.transformed[0];
 
-console.log(printer.printNode(ts.EmitHint.Unspecified, s, source!));
+import fs from "fs";
+
+const tsPath = "src/patterns/ExamplePattern.ts";
+const newTSPath = `src/patterns/${patternName}.ts`;
+
+const camelCase = (s: string) =>
+  `${s.charAt(0).toLowerCase()}${s.substring(1)}`;
+
+const shaderPath = "src/patterns/shaders/examplePattern.frag";
+const newShaderPath = `src/patterns/shaders/${camelCase(patternName)}.frag`;
+
+const newTS = fs
+  .readFileSync(tsPath)
+  .toString()
+  .replace(/ExamplePattern/g, patternName)
+  .replace(/examplePattern/g, camelCase(patternName));
+fs.writeFileSync(newTSPath, newTS);
+
+fs.copyFileSync(shaderPath, newShaderPath);
+
+// console.log(newTS);
+
+// console.log(printer.printNode(ts.EmitHint.Unspecified, s, source!));
 
 // ts.visitNode(source!, (node) => {
 //   console.log("text", node.text);
