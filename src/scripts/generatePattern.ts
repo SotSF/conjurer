@@ -1,16 +1,14 @@
 import ts from "typescript";
 
-if (process.argv[0] != "yarn") {
-  console.error("Call me from yarn please");
-  console.error("eg.");
-  console.error("   yarn generatePattern MyPattern");
-  process.exit(2);
-}
-
 const patternArg = process.argv[2];
 
 if (process.argv.length != 3) {
   console.error("Specify exactly 1 PatternName as an argument");
+  process.exit(1);
+}
+
+if (!patternArg.match(/^[a-zA-Z]+$/)) {
+  console.error("Please only use alphabet characters ([a-zA-Z]). Exiting.");
   process.exit(1);
 }
 
