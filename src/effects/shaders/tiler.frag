@@ -30,7 +30,7 @@ void main(void) {
     vec2 st = v_uv;
 
     // canopy to centered cartesian space
-    st = canopyToCartesianProjection(st);
+    st = canopyToHalfCartesianProjection(st);
 
     // rotate the global space
     st = rotate2DCentered(st, PI * u_rotation_rate * u_time + PI * u_rotation);

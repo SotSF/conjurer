@@ -47,7 +47,7 @@ float wave(vec2 st, float edge, float size, float intensityFactor) {
 void main() {
     vec2 st = v_uv;
 
-    vec2 cartesian = canopyToCartesianProjection(st) + 0.5;
+    vec2 cartesian = canopyToHalfCartesianProjection(st) + 0.5;
 
     float time = u_time * u_time_factor + u_time_offset;
 

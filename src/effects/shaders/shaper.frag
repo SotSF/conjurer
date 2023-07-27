@@ -54,7 +54,7 @@ void main(void) {
     // vec2 st = gl_FragCoord.xy / u_resolution.xy;
     vec2 st = v_uv;
 
-    st = canopyToCartesianProjection(st);
+    st = canopyToHalfCartesianProjection(st);
 
     vec3 color = vec3(0.0);
 
