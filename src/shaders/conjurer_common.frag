@@ -1,8 +1,9 @@
 #ifndef conjurer_common_included
 #define conjurer_common_included
-// START conjurer_common
 
 #define PI 3.14159265358979323846
+
+// ========== PALETTES ==========
 
 // cosine based palette, 4 vec3 params
 // https://iquilezles.org/articles/palettes/
@@ -19,9 +20,14 @@ struct Palette {
 };
 
 // custom palette function utilizing above struct
+//   t: number between 0 and 1 (although you can also go outside this range)
+//   u_palette: a Palette struct
+//   returns: a vec3 color
 vec3 palette(in float t, in Palette u_palette) {
     return palette(t, u_palette.a, u_palette.b, u_palette.c, u_palette.d);
 }
+
+// ========== RANDOMNESS ==========
 
 float rand(float n) {
     return fract(sin(n) * 43758.5453123);
@@ -43,20 +49,64 @@ float plot(vec2 st, float pct) {
         smoothstep(pct, pct + 0.02, st.y);
 }
 
+// ========== COORDINATE PROJECTIONS ==========
+
+// We make use of a number of coordinate systems. Importantly, by default shaders are provided with
+// a "varying" called v_uv which is a vec2 in what we call "canopy coordinates".
+
+// ---------- CANOPY COORDINATES ----------
+
+// Think of these coordinates as: x is the angle around the center of the canopy, and y is the
+// distance away from the apex. It is very similar to polar coordinates (theta, radius), but with a
+// different radius. In the case of canopy coordinates, a "radius" of 0.0 does not mean the exact
+// center of the circle, but rather means the edge of the apex. Or, the distance to the first led.
+
+// Canopy coordinates are normalized:
+//   x goes from 0.0 to 1.0, which describes the angle around the center from 0 to 2pi
+//   y goes from 0.0 to 1.0, which describes the distance from the apex to the edge of the canopy
+
+// Cannot be coordinate can be useful to write patterns so that you can described behavior with the
+// boundaries of the canopy in mind. However, the coordinate space being so specialized can be
+// limiting. Use the functions below to convert to other coordinate systems whenever desired.
+
+// ---------- CARTESIAN COORDINATES ----------
+
+// Cartesian coordinates mean the usual x,y coordinates, where:
+//  (0, 0) is at the center of the canopy
+//  (1.0, 1.0) is at the top right corner of the canopy
+//  (-1.0, -1.0) is at the bottom left corner of the canopy
+
+// ---------- HALF CARTESIAN COORDINATES ----------
+
+// For lack of a better name, "half cartesian coordinates" is what we will call cartesian coordinates but with
+// the axes going from -0.5 to 0.5, so:
+//  (0, 0) is at the center of the canopy
+//  (0.5, 0.5) is at the top right corner of the canopy
+//  (-0.5, -0.5) is at the bottom left corner of the canopy
+
+// ---------- POLAR COORDINATES ----------
+
+// Polar coordinates are the usual theta, radius coordinates, where:
+//  theta goes from 0.0 to 1.0, which describes the angle around the center from 0 to 2pi
+//  radius goes from 0.0 to 1.0, which describes the distance from the center to the edge of the canopy
+
+// ---------- ---------- ---------- ----------
+
 // Converts canopy coordinates to cartesian coordinates
-// Canopy coordinates mean:
-//  x: 0.0 means the location of the first led on the first strip
-//  x: 1.0 means the location of the first led on the last strip
-//  y: 0.0 means the location of the last led on the first strip
-//  y: 1.0 means the location of the last led on the last strip
-// Cartesian coordinates mean the usual x,y coordinates, where (0, 0) is at the center of the canopy
-// and (0.5, 0.5) is at the top right corner of the canopy.
 vec2 canopyToCartesianProjection(vec2 _st) {
-    float theta = (_st.x - 0.5) * 2.0 * PI;
-    // TODO: double check these numbers
+    float theta = _st.x * 2.0 * PI;
     float r = _st.y * 0.88888888 + 0.111111111;
     return vec2(r * cos(theta), r * sin(theta));
 }
+
+// Converts canopy coordinates to half cartesian coordinates
+vec2 canopyToHalfCartesianProjection(vec2 _st) {
+    float theta = _st.x * 2.0 * PI;
+    float r = _st.y * 0.88888888 + 0.111111111;
+    return vec2(r * .5 * cos(theta), r * .5 * sin(theta));
+}
+
+// TODO: in general, organize code below this point better
 
 vec2 canopyToPolarProjection(vec2 _st) {
     float theta = _st.x * 2.0 * PI;
@@ -64,12 +114,14 @@ vec2 canopyToPolarProjection(vec2 _st) {
     return vec2(theta, r);
 }
 
+// TODO: check if this is cartesian or half cartesian
 vec2 cartesianToPolarProjection(vec2 _st) {
     float theta = atan(_st.y, _st.x) / PI / 2. + 0.5;
     float r = length(_st);
     return vec2(theta, r);
 }
 
+// TODO: check if this is cartesian or half cartesian
 vec2 polarToCartesianProjection(vec2 _st) {
     float theta = _st.x * 2.0 * PI;
     float r = _st.y;
@@ -82,6 +134,7 @@ float polarToCanopyRadius(float radius) {
     return canopyRadius;
 }
 
+// TODO: check if this is cartesian or half cartesian
 vec2 cartesianToCanopyProjection(vec2 _st) {
     float theta = atan(_st.y, _st.x) / PI / 2. + 0.5;
     float polarRadius = polarToCanopyRadius(length(_st));
@@ -114,5 +167,4 @@ vec2 rotate2D(vec2 _st, float _angle) {
     return _st;
 }
 
-// END conjurer_common
 #endif
