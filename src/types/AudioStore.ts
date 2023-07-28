@@ -13,6 +13,7 @@ import type TimelinePlugin from "wavesurfer.js/dist/plugins/timeline";
 import type RegionsPlugin from "wavesurfer.js/dist/plugins/regions";
 import type { RegionParams } from "wavesurfer.js/dist/plugins/regions";
 import { filterData } from "@/src/types/audioPeaks";
+import { AudioRegion } from "@/src/types/AudioRegion";
 
 export const loopRegionColor = "rgba(237, 137, 54, 0.4)";
 
@@ -149,6 +150,9 @@ export class AudioStore {
   serialize = () => ({
     selectedAudioFile: this.selectedAudioFile,
     audioMuted: this.audioMuted,
+    audioRegions: this.regions
+      ?.getRegions()
+      .map((region) => new AudioRegion(region).serialize()),
   });
 
   deserialize = (data: any) => {

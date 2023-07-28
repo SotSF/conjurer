@@ -168,14 +168,17 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
     const toggleLoopingMode = action(async () => {
       if (!didInitialize.current || !audioStore.regions) return;
 
+      const regions = audioStore.regions;
       if (!audioStore.loopingAudio) {
-        audioStore.regions.unAll();
-        audioStore.regions.clearRegions();
+        regions.unAll();
+        regions
+          .getRegions()
+          // remove the looped region, if any. looped regions will not have content
+          .forEach((region) => !region.content && region.remove());
         audioStore.loopRegion = null;
         return;
       }
 
-      const regions = audioStore.regions;
       disableDragSelection = regions.enableDragSelection({
         color: loopRegionColor,
       });
@@ -184,10 +187,11 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
       regions.on(
         "region-created",
         action((newRegion: RegionParams) => {
-          // Remove all other regions, we only allow one region at a time
-          regions
-            .getRegions()
-            .forEach((region) => region !== newRegion && region.remove());
+          regions.getRegions().forEach(
+            (region) =>
+              // remove the last looped region, if any. looped regions will not have content
+              region !== newRegion && !region.content && region.remove()
+          );
           audioStore.loopRegion = newRegion;
           if (!audioStore.wavesurfer) return;
           timer.setTime(Math.max(0, newRegion.start));
