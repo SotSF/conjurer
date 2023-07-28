@@ -88,10 +88,10 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
         (wavesurferConstructors.current = await importWavesurferConstructors());
 
       // Instantiate plugins
-      const timelinePlugin = (audioStore.timeline = TimelinePlugin.create(
+      const timelinePlugin = (audioStore.timelinePlugin = TimelinePlugin.create(
         DEFAULT_TIMELINE_OPTIONS
       ));
-      const regionsPlugin = (audioStore.regions = RegionsPlugin.create());
+      const regionsPlugin = (audioStore.regionsPlugin = RegionsPlugin.create());
 
       // Instantiate wavesurfer
       // https://wavesurfer-js.org/docs/options.html
@@ -135,16 +135,17 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
         setLoading(true);
 
         // Destroy the old timeline plugin
-        audioStore.timeline?.destroy();
+        audioStore.timelinePlugin?.destroy();
         // TODO: we destroy the plugin, but it remains in the array of wavesurfer plugins. Small
         // memory leak here, and it generally feels like there is a better way to do this
 
         // Create a new timeline plugin
         const { TimelinePlugin } = wavesurferConstructors.current;
-        const timeline = (audioStore.timeline = TimelinePlugin.create(
-          DEFAULT_TIMELINE_OPTIONS
-        ));
-        audioStore.wavesurfer.registerPlugin(timeline);
+        const timelinePlugin = (audioStore.timelinePlugin =
+          TimelinePlugin.create(DEFAULT_TIMELINE_OPTIONS));
+        audioStore.wavesurfer.registerPlugin(timelinePlugin);
+
+        // Load the new audio file
         await audioStore.wavesurfer.load(audioStore.getSelectedAudioFileUrl());
         audioStore.wavesurfer.zoom(uiStore.pixelsPerSecond);
         audioStore.wavesurfer.seekTo(0);
@@ -166,12 +167,12 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
 
     let disableDragSelection = () => {};
     const toggleLoopingMode = action(async () => {
-      if (!didInitialize.current || !audioStore.regions) return;
+      if (!didInitialize.current || !audioStore.regionsPlugin) return;
 
-      const regions = audioStore.regions;
+      const regionsPlugin = audioStore.regionsPlugin;
       if (!audioStore.loopingAudio) {
-        regions.unAll();
-        regions
+        regionsPlugin.unAll();
+        regionsPlugin
           .getRegions()
           // remove the looped region, if any. looped regions will not have content
           .forEach((region) => !region.content && region.remove());
@@ -179,15 +180,15 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
         return;
       }
 
-      disableDragSelection = regions.enableDragSelection({
+      disableDragSelection = regionsPlugin.enableDragSelection({
         color: loopRegionColor,
       });
 
       // TODO: figure out how/when to clear region selection
-      regions.on(
+      regionsPlugin.on(
         "region-created",
         action((newRegion: RegionParams) => {
-          regions.getRegions().forEach(
+          regionsPlugin.getRegions().forEach(
             (region) =>
               // remove the last looped region, if any. looped regions will not have content
               region !== newRegion && !region.content && region.remove()
@@ -197,7 +198,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
           timer.setTime(Math.max(0, newRegion.start));
         })
       );
-      regions.on(
+      regionsPlugin.on(
         "region-updated",
         action((region: RegionParams) => {
           audioStore.loopRegion = region;
@@ -216,18 +217,18 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
 
     let disableCreateByClick = () => {};
     const toggleMarkingMode = action(async () => {
-      const { wavesurfer, regions } = audioStore;
+      const { wavesurfer, regionsPlugin } = audioStore;
       if (
         !didInitialize.current ||
-        !audioStore.regions ||
+        !audioStore.regionsPlugin ||
         !wavesurfer ||
-        !regions
+        !regionsPlugin
       )
         return;
 
       if (!audioStore.markingAudio) return;
 
-      regions.on(
+      regionsPlugin.on(
         "region-double-clicked",
         action((region: RegionParams) => {
           uiStore.showingMarkerEditorModal = true;

@@ -33,10 +33,10 @@ export const MarkerEditorModal = observer(function MarkerEditorModal() {
   });
 
   const onDelete = action(() => {
-    const { wavesurfer, regions } = audioStore;
-    if (!wavesurfer || !regions) return;
+    const { wavesurfer, regionsPlugin } = audioStore;
+    if (!wavesurfer || !regionsPlugin) return;
 
-    regions.getRegions().forEach((region) => {
+    regionsPlugin.getRegions().forEach((region) => {
       if (region.id === uiStore.markerToEdit.id) region.remove();
     });
 
@@ -44,9 +44,9 @@ export const MarkerEditorModal = observer(function MarkerEditorModal() {
   });
 
   const onSave = action(() => {
-    const { wavesurfer, regions } = audioStore;
+    const { wavesurfer, regionsPlugin } = audioStore;
 
-    if (!wavesurfer || !regions) return;
+    if (!wavesurfer || !regionsPlugin) return;
     const label = document.createElement("div");
     label.innerHTML = markerName;
     label.setAttribute("style", "width: 100px; color: black; font-size: 12px;");
@@ -58,10 +58,10 @@ export const MarkerEditorModal = observer(function MarkerEditorModal() {
     };
 
     // In case we are editing an existing marker, remove it first
-    regions.getRegions().forEach((region) => {
+    regionsPlugin.getRegions().forEach((region) => {
       if (region.id === uiStore.markerToEdit.id) region.remove();
     });
-    regions.addRegion(newRegion);
+    regionsPlugin.addRegion(newRegion);
 
     onClose();
   });

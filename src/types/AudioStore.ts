@@ -31,8 +31,10 @@ export class AudioStore {
   audioMuted = false;
 
   wavesurfer: WaveSurfer | null = null;
-  timeline: TimelinePlugin | null = null;
-  regions: RegionsPlugin | null = null;
+  timelinePlugin: TimelinePlugin | null = null;
+  regionsPlugin: RegionsPlugin | null = null;
+
+  regions: AudioRegion[] = [];
 
   peaks: number[] = [];
 
@@ -45,8 +47,8 @@ export class AudioStore {
     makeAutoObservable(this, {
       getSelectedAudioFileUrl: false,
       wavesurfer: false,
-      timeline: false,
-      regions: false,
+      timelinePlugin: false,
+      regionsPlugin: false,
       peaks: false,
       getPeakAtTime: false,
     });
@@ -96,7 +98,7 @@ export class AudioStore {
       end,
       color: loopRegionColor,
     };
-    this.regions?.addRegion(this.loopRegion);
+    this.regionsPlugin?.addRegion(this.loopRegion);
   };
 
   getSelectedAudioFileUrl = () =>
@@ -150,7 +152,7 @@ export class AudioStore {
   serialize = () => ({
     selectedAudioFile: this.selectedAudioFile,
     audioMuted: this.audioMuted,
-    audioRegions: this.regions
+    audioRegions: this.regionsPlugin
       ?.getRegions()
       .map((region) => new AudioRegion(region).serialize()),
   });
