@@ -39,7 +39,7 @@ export const PatternPlayground = observer(function PatternPlayground() {
 
   const applyPatternEffects = useCallback(
     (patternIndex: number, effectIndices: number[]) => {
-      const pattern = patternBlocks[patternIndex];
+      const pattern = patternBlocks[patternIndex] ?? patternBlocks[0];
       runInAction(() => {
         pattern.effectBlocks = [];
         effectIndices.forEach((effectIndex, index) => {
