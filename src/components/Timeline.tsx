@@ -37,6 +37,7 @@ export const Timeline = observer(function Timeline() {
           position="sticky"
           top={0}
           left={0}
+          flexShrink={0}
           boxSizing="border-box"
           borderRightWidth={1}
           borderBottomWidth={1}

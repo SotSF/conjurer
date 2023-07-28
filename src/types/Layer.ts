@@ -60,6 +60,7 @@ export class Layer {
   constructor(readonly store: RootStore) {
     this.opacityBlock = new Block(store, Opacity());
     makeAutoObservable(this, {
+      store: false,
       _lastComputedCurrentBlock: false, // don't make this observable, since it's just a cache
     });
   }
