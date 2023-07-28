@@ -63,6 +63,7 @@ export class Block<T extends ExtraParams = {}> {
     this.parentBlock = parentBlock;
 
     makeAutoObservable(this, {
+      store: false,
       pattern: false,
       updateParameters: false,
       updateParameter: false,
