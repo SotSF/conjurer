@@ -1,5 +1,13 @@
 import { observer } from "mobx-react-lite";
-import { IconButton, Select, Slider, SliderFilledTrack, SliderThumb, SliderTrack, Tooltip } from "@chakra-ui/react";
+import {
+  IconButton,
+  Select,
+  Slider,
+  SliderFilledTrack,
+  SliderThumb,
+  SliderTrack,
+  Tooltip,
+} from "@chakra-ui/react";
 import { BsSoundwave } from "react-icons/bs";
 import { FaVolumeMute, FaPencilAlt } from "react-icons/fa";
 import { AiOutlineCloudUpload } from "react-icons/ai";
@@ -19,7 +27,7 @@ export const AudioControls = observer(function AudioControls() {
   const changeVolume = (value: number) => {
     wavesurfer?.setVolume(value);
     setAudioVol(value);
-  }
+  };
 
   useEffect(() => {
     if (!initialized) return;
@@ -28,12 +36,38 @@ export const AudioControls = observer(function AudioControls() {
 
   return (
     <>
-      <Slider aria-label='slider-ex-1'
+      <Select
+        size="xs"
+        width={40}
+        value={audioStore.selectedAudioFile}
+        onChange={action((e) => {
+          audioStore.selectedAudioFile = e.target.value;
+        })}
+      >
+        {audioStore.availableAudioFiles.map((audioFile) => (
+          <option key={audioFile} value={audioFile}>
+            {audioFile}
+          </option>
+        ))}
+      </Select>
+      <UploadAudioModal />
+      <IconButton
+        aria-label="Upload audio"
+        title="Upload audio"
+        height={6}
+        icon={<AiOutlineCloudUpload size={17} />}
+        isDisabled={store.usingLocalAssets}
+        onClick={action(() => (uiStore.showingUploadAudioModal = true))}
+      />
+      <Slider
+        aria-label="Audio volume"
+        title="Audio volume"
+        mx={2}
         min={0}
         max={1}
         step={0.01}
         value={audioVol}
-        onChange={(action((value) => changeVolume(value)))}
+        onChange={action((value) => changeVolume(value))}
         width="120px"
         onMouseEnter={() => setShowTooltip(true)}
         onMouseLeave={() => setShowTooltip(false)}
@@ -55,21 +89,6 @@ export const AudioControls = observer(function AudioControls() {
       </Slider>
 
       <IconButton
-        aria-label="Loop time range"
-        title="Loop time range"
-        height={6}
-        icon={<ImLoop size={17} />}
-        bgColor={audioStore.loopingAudio ? "orange.700" : undefined}
-        _hover={
-          audioStore.loopingAudio
-            ? {
-                bgColor: "orange.600",
-              }
-            : undefined
-        }
-        onClick={action(() => audioStore.toggleLoopingAudio())}
-      />
-      <IconButton
         aria-label="Mute/unmute audio"
         title="Mute/unmute audio"
         height={6}
@@ -83,6 +102,21 @@ export const AudioControls = observer(function AudioControls() {
             : undefined
         }
         onClick={action(() => audioStore.toggleAudioMuted())}
+      />
+      <IconButton
+        aria-label="Loop time range"
+        title="Loop time range"
+        height={6}
+        icon={<ImLoop size={17} />}
+        bgColor={audioStore.loopingAudio ? "orange.700" : undefined}
+        _hover={
+          audioStore.loopingAudio
+            ? {
+                bgColor: "orange.600",
+              }
+            : undefined
+        }
+        onClick={action(() => audioStore.toggleLoopingAudio())}
       />
       <IconButton
         aria-label="Toggle waveform style"
@@ -114,29 +148,6 @@ export const AudioControls = observer(function AudioControls() {
         }
         onClick={action(() => audioStore.toggleMarkingAudio())}
       />
-      <Select
-        size="xs"
-        width={40}
-        value={audioStore.selectedAudioFile}
-        onChange={action((e) => {
-          audioStore.selectedAudioFile = e.target.value;
-        })}
-      >
-        {audioStore.availableAudioFiles.map((audioFile) => (
-          <option key={audioFile} value={audioFile}>
-            {audioFile}
-          </option>
-        ))}
-      </Select>
-      <IconButton
-        aria-label="Upload audio"
-        title="Upload audio"
-        height={6}
-        icon={<AiOutlineCloudUpload size={17} />}
-        isDisabled={store.usingLocalAssets}
-        onClick={action(() => (uiStore.showingUploadAudioModal = true))}
-      />
-      <UploadAudioModal />
     </>
   );
 });
