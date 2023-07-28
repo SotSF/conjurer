@@ -12,6 +12,7 @@ import type { RegionParams } from "wavesurfer.js/dist/plugins/regions";
 import { action } from "mobx";
 import { useCloneCanvas } from "@/src/components/Wavesurfer/hooks/cloneCanvas";
 import { loopRegionColor } from "@/src/types/AudioStore";
+import { AudioRegion } from "@/src/types/AudioRegion";
 
 const importWavesurferConstructors = async () => {
   // Can't be run on the server, so we need to use dynamic imports
@@ -87,10 +88,12 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
       const { WaveSurfer, TimelinePlugin, RegionsPlugin } =
         (wavesurferConstructors.current = await importWavesurferConstructors());
 
-      // Instantiate plugins
+      // Instantiate timeline plugin
       const timelinePlugin = (audioStore.timelinePlugin = TimelinePlugin.create(
         DEFAULT_TIMELINE_OPTIONS
       ));
+
+      // Instantiate regions plugin
       const regionsPlugin = (audioStore.regionsPlugin = RegionsPlugin.create());
 
       // Instantiate wavesurfer
@@ -101,12 +104,19 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
         minPxPerSec: uiStore.pixelsPerSecond,
         plugins: [timelinePlugin, regionsPlugin],
       };
-      const wavesurferRef = (audioStore.wavesurfer =
-        WaveSurfer.create(options));
+      const wavesurfer = (audioStore.wavesurfer = WaveSurfer.create(options));
 
-      wavesurferRef.on("interaction", (newTime: number) => {
-        if (!wavesurferRef) return;
+      wavesurfer.on("interaction", (newTime: number) => {
+        if (!wavesurfer) return;
         timer.setTime(Math.max(0, newTime));
+      });
+
+      wavesurfer.on("ready", () => {
+        if (audioStore.regions.length > 0) {
+          audioStore.regions.forEach((region) => {
+            regionsPlugin.addRegion(region.withNewContentElement());
+          });
+        }
       });
 
       cloneCanvas();

@@ -6,8 +6,8 @@ export class AudioRegion {
   id: string;
   start: number;
   end?: number;
-  drag = false;
-  resize = false;
+  drag? = false;
+  resize? = false;
   color = "#ffffff";
   content?: string | HTMLElement;
   minLength?: number;
@@ -24,6 +24,20 @@ export class AudioRegion {
     this.minLength = region.minLength;
     this.maxLength = region.maxLength;
   }
+
+  withNewContentElement = () => {
+    const label = document.createElement("div");
+    label.innerHTML =
+      typeof this.content === "string"
+        ? this.content
+        : this.content?.textContent || "";
+    label.setAttribute(
+      "style",
+      "width: fit-content; max-width: 100px; color: white; font-size: 12px; background-color: rgba(1, 1, 1, 0.3);"
+    );
+    this.content = label;
+    return this;
+  };
 
   serialize = () => ({
     id: this.id,
