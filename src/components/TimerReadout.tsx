@@ -15,21 +15,7 @@ export const TimerReadout = observer(function TimerReadout() {
   const { timer } = useStore();
 
   return (
-    <VStack
-      position="sticky"
-      top={0}
-      left={0}
-      height={10}
-      width="150px"
-      flexShrink={0}
-      zIndex={18}
-      bgColor="gray.500"
-      justify="center"
-      boxSizing="border-box"
-      borderRightWidth={1}
-      borderBottomWidth={1}
-      borderColor="black"
-    >
+    <VStack height={10} justify="center">
       <Text
         color="black"
         fontSize={18}

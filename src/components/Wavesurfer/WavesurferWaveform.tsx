@@ -37,7 +37,7 @@ const DEFAULT_WAVESURFER_OPTIONS: Partial<WaveSurferOptions> = {
   waveColor: "#ddd",
   progressColor: "#0178FF",
   cursorColor: "#FF0000FF",
-  height: 40,
+  height: 80,
   hideScrollbar: true,
   fillParent: false,
   autoScroll: false,
@@ -46,7 +46,7 @@ const DEFAULT_WAVESURFER_OPTIONS: Partial<WaveSurferOptions> = {
 };
 
 const DEFAULT_TIMELINE_OPTIONS: TimelinePluginOptions = {
-  height: 40,
+  height: 80,
   insertPosition: "beforebegin",
   timeInterval: 0.25,
   primaryLabelInterval: 5,
@@ -112,8 +112,8 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
       });
 
       wavesurfer.on("ready", () => {
-        if (audioStore.regions.length > 0) {
-          audioStore.regions.forEach((region) => {
+        if (audioStore.initialRegions.length > 0) {
+          audioStore.initialRegions.forEach((region) => {
             regionsPlugin.addRegion(region.withNewContentElement());
           });
         }
@@ -293,7 +293,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
   }, [timer.lastCursor, audioStore.wavesurfer]);
 
   return (
-    <Box width="100%" height={10} bgColor="gray.500">
+    <Box width="100%" height={20} bgColor="gray.500">
       <Skeleton
         width="100%"
         height="100%"
@@ -307,7 +307,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
         <Box
           ref={clonedWaveformRef}
           position="absolute"
-          top="40px"
+          top="80px"
           pointerEvents="none"
         />
       )}

@@ -34,7 +34,7 @@ export class AudioStore {
   timelinePlugin: TimelinePlugin | null = null;
   regionsPlugin: RegionsPlugin | null = null;
 
-  regions: AudioRegion[] = [];
+  initialRegions: AudioRegion[] = [];
 
   peaks: number[] = [];
 
@@ -167,7 +167,7 @@ export class AudioStore {
   deserialize = (data: any) => {
     this.selectedAudioFile = data.selectedAudioFile;
     this.audioMuted = !!data.audioMuted;
-    this.regions = data.audioRegions?.map(
+    this.initialRegions = data.audioRegions?.map(
       (region: any) => new AudioRegion(region)
     );
   };
