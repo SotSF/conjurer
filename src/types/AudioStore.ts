@@ -84,6 +84,13 @@ export class AudioStore {
 
   toggleMarkingAudio = () => {
     this.markingAudio = !this.markingAudio;
+
+    this.regionsPlugin
+      ?.getRegions()
+      .forEach(
+        (region) =>
+          region.content && region.setOptions({ drag: this.markingAudio })
+      );
   };
 
   toggleLoopingAudio = () => {
