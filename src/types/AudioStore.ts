@@ -167,8 +167,7 @@ export class AudioStore {
   deserialize = (data: any) => {
     this.selectedAudioFile = data.selectedAudioFile;
     this.audioMuted = !!data.audioMuted;
-    this.initialRegions = data.audioRegions?.map(
-      (region: any) => new AudioRegion(region)
-    );
+    this.initialRegions =
+      data.audioRegions?.map((region: any) => new AudioRegion(region)) ?? [];
   };
 }
