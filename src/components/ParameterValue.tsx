@@ -1,10 +1,8 @@
 import {
-  ExtraParams,
   PatternParam,
   isNumberParam,
   isVector4Param,
 } from "@/src/types/PatternParams";
-import { Block } from "@/src/types/Block";
 import { observer } from "mobx-react-lite";
 import { useStore } from "@/src/types/StoreContext";
 
@@ -22,19 +20,14 @@ const parameterToString = (parameter: PatternParam): string => {
 };
 
 type ParameterValueProps = {
-  uniformName: string;
-  block: Block<ExtraParams>;
+  parameter: PatternParam;
 };
 
 export const ParameterValue = observer(function ParameterValue({
-  uniformName,
-  block,
+  parameter,
 }: ParameterValueProps) {
   const { timer } = useStore();
-  const { globalTime } = timer;
-  void globalTime;
-
-  const parameter = block.pattern.params[uniformName];
+  void timer.globalTime;
 
   return <>{`: ${parameterToString(parameter)}`}</>;
 });
