@@ -117,6 +117,9 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
             regionsPlugin.addRegion(region.withNewContentElement());
           });
         }
+        if (audioStore.audioMuted) {
+          wavesurfer.setMuted(true);
+        }
       });
 
       cloneCanvas();
