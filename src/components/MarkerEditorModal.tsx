@@ -15,7 +15,7 @@ import { useStore } from "@/src/types/StoreContext";
 import { useState } from "react";
 import { action } from "mobx";
 import { HexColorInput, HexColorPicker } from "react-colorful";
-import { RegionParams } from "wavesurfer.js/dist/plugins/regions";
+import { AudioRegion } from "@/src/types/AudioRegion";
 
 export const MarkerEditorModal = observer(function MarkerEditorModal() {
   const store = useStore();
@@ -33,10 +33,10 @@ export const MarkerEditorModal = observer(function MarkerEditorModal() {
   });
 
   const onDelete = action(() => {
-    const { wavesurfer, regions } = audioStore;
-    if (!wavesurfer || !regions) return;
+    const { wavesurfer, regionsPlugin } = audioStore;
+    if (!wavesurfer || !regionsPlugin) return;
 
-    regions.getRegions().forEach((region) => {
+    regionsPlugin.getRegions().forEach((region) => {
       if (region.id === uiStore.markerToEdit.id) region.remove();
     });
 
@@ -44,24 +44,22 @@ export const MarkerEditorModal = observer(function MarkerEditorModal() {
   });
 
   const onSave = action(() => {
-    const { wavesurfer, regions } = audioStore;
+    const { wavesurfer, regionsPlugin } = audioStore;
+    if (!wavesurfer || !regionsPlugin) return;
 
-    if (!wavesurfer || !regions) return;
-    const label = document.createElement("div");
-    label.innerHTML = markerName;
-    label.setAttribute("style", "width: 100px; color: black; font-size: 12px;");
-    const newRegion: RegionParams = {
+    // In case we are editing an existing marker, remove it first
+    regionsPlugin.getRegions().forEach((region) => {
+      if (region.id === uiStore.markerToEdit.id) region.remove();
+    });
+
+    // Create a new region with the updated name and color
+    const newRegion = new AudioRegion({
       ...uiStore.markerToEdit,
       start: uiStore.markerToEdit.start || 0,
       color,
-      content: label,
-    };
-
-    // In case we are editing an existing marker, remove it first
-    regions.getRegions().forEach((region) => {
-      if (region.id === uiStore.markerToEdit.id) region.remove();
-    });
-    regions.addRegion(newRegion);
+      content: markerName,
+    }).withNewContentElement();
+    regionsPlugin.addRegion(newRegion);
 
     onClose();
   });

@@ -15,7 +15,14 @@ export const MainControls = observer(function MainControls() {
   const { uiStore } = store;
 
   return (
-    <HStack height={10} py={2} spacing={1} overflowX="clip" borderColor="black">
+    <HStack
+      height={10}
+      pl={2}
+      py={2}
+      spacing={1}
+      overflowX="clip"
+      borderColor="black"
+    >
       <AudioControls />
       <IconButton
         aria-label="Zoom in"

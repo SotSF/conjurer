@@ -9,6 +9,7 @@ import { MAX_TIME } from "@/src/utils/time";
 import { TimelineLayer } from "@/src/components/TimelineLayer";
 import { TimerReadout } from "@/src/components/TimerReadout";
 import { MarkerEditorModal } from "@/src/components/MarkerEditorModal";
+import { TimerControls } from "@/src/components/TimerControls";
 
 export const Timeline = observer(function Timeline() {
   const store = useStore();
@@ -32,7 +33,23 @@ export const Timeline = observer(function Timeline() {
         spacing={0}
         zIndex={12}
       >
-        <TimerReadout />
+        <VStack
+          position="sticky"
+          top={0}
+          left={0}
+          boxSizing="border-box"
+          borderRightWidth={1}
+          borderBottomWidth={1}
+          borderColor="black"
+          spacing={0}
+          width="150px"
+          zIndex={18}
+          bgColor="gray.500"
+        >
+          <TimerControls />
+          <TimerReadout />
+        </VStack>
+
         <WavesurferWaveform />
         <MarkerEditorModal key={uiStore.markerToEdit.id} />
       </HStack>

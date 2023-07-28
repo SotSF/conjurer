@@ -9,18 +9,12 @@ export const TimerControls = observer(function TimerControls() {
   const { timer } = useStore();
 
   return (
-    <HStack
-      width="100%"
-      justify="center"
-      py={2}
-      spacing={1}
-      overflowX="clip"
-      borderColor="black"
-    >
+    <HStack width="100%" justify="center" py={2} spacing={1} overflowX="clip">
       <IconButton
         aria-label="Backward"
         title="Backward"
         height={6}
+        bgColor="gray.600"
         icon={<FaStepBackward size={10} />}
         onClick={action(() => timer.setTime(0))}
       />
@@ -29,6 +23,7 @@ export const TimerControls = observer(function TimerControls() {
         title="Play"
         color={timer.playing ? "orange" : "green"}
         height={6}
+        bgColor="gray.600"
         icon={timer.playing ? <FaPause size={10} /> : <FaPlay size={10} />}
         onClick={action(timer.togglePlaying)}
       />
@@ -36,6 +31,7 @@ export const TimerControls = observer(function TimerControls() {
         aria-label="Forward"
         title="Forward"
         height={6}
+        bgColor="gray.600"
         icon={<FaStepForward size={10} />}
         onClick={action(() => {
           timer.setTime(MAX_TIME);

@@ -13,6 +13,7 @@ import type TimelinePlugin from "wavesurfer.js/dist/plugins/timeline";
 import type RegionsPlugin from "wavesurfer.js/dist/plugins/regions";
 import type { RegionParams } from "wavesurfer.js/dist/plugins/regions";
 import { filterData } from "@/src/types/audioPeaks";
+import { AudioRegion } from "@/src/types/AudioRegion";
 
 export const loopRegionColor = "rgba(237, 137, 54, 0.4)";
 
@@ -30,8 +31,10 @@ export class AudioStore {
   audioMuted = false;
 
   wavesurfer: WaveSurfer | null = null;
-  timeline: TimelinePlugin | null = null;
-  regions: RegionsPlugin | null = null;
+  timelinePlugin: TimelinePlugin | null = null;
+  regionsPlugin: RegionsPlugin | null = null;
+
+  initialRegions: AudioRegion[] = [];
 
   peaks: number[] = [];
 
@@ -44,8 +47,8 @@ export class AudioStore {
     makeAutoObservable(this, {
       getSelectedAudioFileUrl: false,
       wavesurfer: false,
-      timeline: false,
-      regions: false,
+      timelinePlugin: false,
+      regionsPlugin: false,
       peaks: false,
       getPeakAtTime: false,
     });
@@ -81,6 +84,13 @@ export class AudioStore {
 
   toggleMarkingAudio = () => {
     this.markingAudio = !this.markingAudio;
+
+    this.regionsPlugin
+      ?.getRegions()
+      .forEach(
+        (region) =>
+          region.content && region.setOptions({ drag: this.markingAudio })
+      );
   };
 
   toggleLoopingAudio = () => {
@@ -95,7 +105,7 @@ export class AudioStore {
       end,
       color: loopRegionColor,
     };
-    this.regions?.addRegion(this.loopRegion);
+    this.regionsPlugin?.addRegion(this.loopRegion);
   };
 
   getSelectedAudioFileUrl = () =>
@@ -149,10 +159,16 @@ export class AudioStore {
   serialize = () => ({
     selectedAudioFile: this.selectedAudioFile,
     audioMuted: this.audioMuted,
+    audioRegions: this.regionsPlugin
+      ?.getRegions()
+      .map((region) => new AudioRegion(region).serialize()),
   });
 
   deserialize = (data: any) => {
     this.selectedAudioFile = data.selectedAudioFile;
     this.audioMuted = !!data.audioMuted;
+    this.initialRegions = data.audioRegions?.map(
+      (region: any) => new AudioRegion(region)
+    );
   };
 }
