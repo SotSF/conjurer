@@ -72,7 +72,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
   const waveformRef = useRef<HTMLDivElement>(null);
   const clonedWaveformRef = useRef<HTMLDivElement>(null);
 
-  const { audioStore, timer, uiStore } = useStore();
+  const { audioStore, timer, uiStore, playlistStore } = useStore();
 
   const cloneCanvas = useCloneCanvas(clonedWaveformRef);
 
@@ -131,12 +131,17 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
         }
       });
 
+      wavesurfer.on("finish", () => {
+        timer.playing = false;
+        if (playlistStore.autoplay) playlistStore.playNextExperience();
+      });
+
       cloneCanvas();
       setLoading(false);
     };
 
     create();
-  }, [audioStore, audioStore.selectedAudioFile, uiStore, uiStore.pixelsPerSecond, timer, cloneCanvas]);
+  }, [audioStore, audioStore.selectedAudioFile, uiStore, uiStore.pixelsPerSecond, timer, playlistStore, cloneCanvas]);
 
   // on selected audio file change
   useEffect(() => {

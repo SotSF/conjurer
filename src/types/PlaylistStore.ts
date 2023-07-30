@@ -15,6 +15,8 @@ export class PlaylistStore {
   name: string = "";
   experienceFilenames: string[] = [];
 
+  autoplay = true;
+
   constructor(
     readonly rootStore: RootStore,
     readonly timer: Timer,
@@ -47,6 +49,18 @@ export class PlaylistStore {
         resolve();
       });
     });
+
+  playNextExperience = async () => {
+    const currentIndex = this.experienceFilenames.indexOf(
+      this.rootStore.experienceFilename
+    );
+    if (currentIndex < 0) return;
+
+    const nextIndex = currentIndex + 1;
+    if (nextIndex > this.experienceFilenames.length - 1) return;
+
+    await this.loadAndPlayExperience(this.experienceFilenames[nextIndex]);
+  };
 
   initialize = () => {
     this.name = initialPlaylist.name;

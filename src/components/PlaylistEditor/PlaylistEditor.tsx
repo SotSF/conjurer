@@ -1,5 +1,6 @@
 import {
   Button,
+  Checkbox,
   Table,
   TableContainer,
   Tbody,
@@ -20,7 +21,13 @@ export const PlaylistEditor = observer(function PlaylistEditor() {
 
   return (
     <>
-      <TableContainer>
+      <Checkbox
+        isChecked={playlistStore.autoplay}
+        onChange={({ target }) => (playlistStore.autoplay = target.checked)}
+      >
+        Autoplay next experience in playlist
+      </Checkbox>
+      <TableContainer mt={6}>
         <Table size="sm" variant="simple">
           <Thead>
             <Tr>
