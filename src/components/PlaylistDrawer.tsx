@@ -18,7 +18,7 @@ export const PlaylistDrawer = observer(function PlaylistDrawer() {
 
   return (
     <Drawer
-      size="sm"
+      size="md"
       isOpen={playlistDrawerOpen}
       placement="right"
       onClose={action(() => (uiStore.playlistDrawerOpen = false))}

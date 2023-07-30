@@ -1,8 +1,8 @@
-import { HStack, IconButton, VStack } from "@chakra-ui/react";
+import { Button, HStack, IconButton, Td, Text, VStack } from "@chakra-ui/react";
 import { RxCaretDown, RxCaretUp } from "react-icons/rx";
 import { action } from "mobx";
-import { FaTrashAlt } from "react-icons/fa";
-import { memo } from "react";
+import { FaPause, FaPlay, FaTrashAlt } from "react-icons/fa";
+import { memo, useState } from "react";
 
 type PlaylistItemControlsProps = {
   experienceName: string;
@@ -15,8 +15,38 @@ export const PlaylistItemControls = memo(function PlaylistItemControls({
   index,
   playlistLength,
 }: PlaylistItemControlsProps) {
+  const [mousingOver, setMousingOver] = useState(false);
   return (
     <>
+      <HStack
+        height={12}
+        justify="center"
+        onMouseEnter={() => setMousingOver(true)}
+        onMouseLeave={() => setMousingOver(false)}
+      >
+        {mousingOver ? (
+          <IconButton
+            variant="unstyled"
+            aria-label="Play"
+            title="Play"
+            color="green"
+            height={6}
+            icon={
+              <HStack justify="center">
+                <FaPlay size={10} />
+              </HStack>
+            }
+            // onClick={action(timer.togglePlaying)}
+          />
+        ) : (
+          <Button variant="unstyled" fontSize={14}>
+            {index + 1}
+          </Button>
+        )}
+      </HStack>
+      <Td>
+        <Text fontSize={14}>{experienceName}</Text>
+      </Td>
       <HStack height={12} alignItems="center" spacing={0}>
         <VStack spacing={0}>
           {index > 0 && (
@@ -30,7 +60,7 @@ export const PlaylistItemControls = memo(function PlaylistItemControls({
               onClick={action(() => {})}
             />
           )}
-          {index < playlistLength && (
+          {index < playlistLength - 1 && (
             <IconButton
               variant="link"
               aria-label="Move down"

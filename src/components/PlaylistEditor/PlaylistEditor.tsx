@@ -1,8 +1,10 @@
 import {
+  Button,
   Table,
   TableContainer,
   Tbody,
   Td,
+  Text,
   Th,
   Thead,
   Tr,
@@ -30,8 +32,6 @@ export const PlaylistEditor = observer(function PlaylistEditor() {
           <Tbody>
             {experiences.map((experience, index) => (
               <Tr key={experience}>
-                <Td>{index + 1}</Td>
-                <Td>{experience}</Td>
                 <PlaylistItemControls
                   experienceName={experience}
                   index={index}
