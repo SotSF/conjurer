@@ -21,12 +21,12 @@ export const PlaylistEditor = observer(function PlaylistEditor() {
   return (
     <>
       <TableContainer>
-        <Table variant="simple">
+        <Table size="sm" variant="simple">
           <Thead>
             <Tr>
               <Th isNumeric>#</Th>
+              <Th>User</Th>
               <Th>Experience name</Th>
-              <Th></Th>
             </Tr>
           </Thead>
           <Tbody>

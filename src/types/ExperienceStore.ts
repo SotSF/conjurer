@@ -18,7 +18,7 @@ export const extractUserFromFilename = (filename: string): string => {
   if (parts.length < 2) return "";
   return parts[0];
 };
-const extractExperienceNameFromFileName = (filename: string): string => {
+export const extractExperienceNameFromFileName = (filename: string): string => {
   const parts = filename.split("-");
   if (parts.length < 2) return "untitled";
   return parts.slice(1).join("-");
@@ -91,6 +91,7 @@ export class ExperienceStore {
   };
 
   load = async (experienceFilename: string) => {
+    this.rootStore.user = extractUserFromFilename(experienceFilename);
     this.rootStore.experienceName =
       extractExperienceNameFromFileName(experienceFilename);
     this.rootStore.experienceLastSavedAt = Date.now();
