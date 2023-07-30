@@ -16,9 +16,7 @@ export const AddPatternButton = observer(function AddPatternButton() {
         bgColor="gray.600"
         fontWeight="bold"
         borderRadius="50%"
-        onClick={action(() => {
-          uiStore.patternDrawerOpen = true;
-        })}
+        onClick={action(() => (uiStore.patternDrawerOpen = true))}
         zIndex={100}
       >
         <AiOutlinePlus />
