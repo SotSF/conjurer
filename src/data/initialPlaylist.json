@@ -1,1 +1,4 @@
-{ "name": "Burning Man event playlist", "experiences": [] }
+{
+  "name": "Burning Man event playlist",
+  "experiences": ["ben-queen-of-all-everything", "ben-example"]
+}

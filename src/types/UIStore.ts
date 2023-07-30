@@ -58,7 +58,7 @@ export class UIStore {
     this.saveToLocalStorage();
   }
 
-  playlistDrawerOpen = false;
+  playlistDrawerOpen = true;
 
   pixelsPerSecond = INITIAL_PIXELS_PER_SECOND; // the zoom of the timeline
 

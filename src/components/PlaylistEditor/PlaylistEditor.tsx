@@ -1,20 +1,47 @@
 import {
-  Drawer,
-  DrawerBody,
-  DrawerCloseButton,
-  DrawerContent,
-  DrawerHeader,
-  DrawerOverlay,
+  Table,
+  TableContainer,
+  Tbody,
+  Td,
+  Th,
+  Thead,
+  Tr,
 } from "@chakra-ui/react";
 import { useStore } from "@/src/types/StoreContext";
 import { observer } from "mobx-react-lite";
-import { action } from "mobx";
-import Link from "next/link";
+import { PlaylistItemControls } from "@/src/components/PlaylistEditor/PlaylistItemControls";
 
 export const PlaylistEditor = observer(function PlaylistEditor() {
   const store = useStore();
-  const { uiStore } = store;
-  const { playlistDrawerOpen } = uiStore;
+  const { playlistStore } = store;
+  const { experiences } = playlistStore;
 
-  return "test";
+  return (
+    <>
+      <TableContainer>
+        <Table variant="simple">
+          <Thead>
+            <Tr>
+              <Th isNumeric>#</Th>
+              <Th>Experience name</Th>
+              <Th></Th>
+            </Tr>
+          </Thead>
+          <Tbody>
+            {experiences.map((experience, index) => (
+              <Tr key={experience}>
+                <Td>{index + 1}</Td>
+                <Td>{experience}</Td>
+                <PlaylistItemControls
+                  experienceName={experience}
+                  index={index}
+                  playlistLength={experiences.length}
+                />
+              </Tr>
+            ))}
+          </Tbody>
+        </Table>
+      </TableContainer>
+    </>
+  );
 });
