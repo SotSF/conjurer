@@ -1,5 +1,5 @@
 import { useStore } from "@/src/types/StoreContext";
-import { Box, Skeleton, Spinner } from "@chakra-ui/react";
+import { Box, Skeleton } from "@chakra-ui/react";
 import { observer } from "mobx-react-lite";
 import { useRef, useEffect, useState } from "react";
 import { clamp } from "three/src/math/MathUtils";
@@ -12,7 +12,6 @@ import type { RegionParams } from "wavesurfer.js/dist/plugins/regions";
 import { action } from "mobx";
 import { useCloneCanvas } from "@/src/components/Wavesurfer/hooks/cloneCanvas";
 import { loopRegionColor } from "@/src/types/AudioStore";
-import { AudioRegion } from "@/src/types/AudioRegion";
 
 const importWavesurferConstructors = async () => {
   // Can't be run on the server, so we need to use dynamic imports
@@ -117,6 +116,15 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
             regionsPlugin.addRegion(region.withNewContentElement());
           });
         }
+        regionsPlugin.on(
+          "region-double-clicked",
+          action((region: RegionParams) => {
+            // only edit regions that have content
+            if (!region.content) return;
+            uiStore.showingMarkerEditorModal = true;
+            uiStore.markerToEdit = region;
+          })
+        );
         if (audioStore.audioMuted) {
           wavesurfer.setMuted(true);
         }
@@ -127,7 +135,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
     };
 
     create();
-  }, [audioStore, audioStore.selectedAudioFile, uiStore.pixelsPerSecond, timer, cloneCanvas]);
+  }, [audioStore, audioStore.selectedAudioFile, uiStore, uiStore.pixelsPerSecond, timer, cloneCanvas]);
 
   // on selected audio file change
   useEffect(() => {
@@ -197,7 +205,6 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
         color: loopRegionColor,
       });
 
-      // TODO: figure out how/when to clear region selection
       regionsPlugin.on(
         "region-created",
         action((newRegion: RegionParams) => {
@@ -240,14 +247,6 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
         return;
 
       if (!audioStore.markingAudio) return;
-
-      regionsPlugin.on(
-        "region-double-clicked",
-        action((region: RegionParams) => {
-          uiStore.showingMarkerEditorModal = true;
-          uiStore.markerToEdit = region;
-        })
-      );
 
       disableCreateByClick = wavesurfer.on(
         "interaction",
