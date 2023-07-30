@@ -111,6 +111,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
       });
 
       wavesurfer.on("ready", () => {
+        ready.current = true;
         if (audioStore.initialRegions.length > 0) {
           audioStore.initialRegions.forEach((region) => {
             regionsPlugin.addRegion(region.withNewContentElement());
@@ -174,7 +175,6 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
         const audioBuffer = audioStore.wavesurfer.getDecodedData();
         if (audioBuffer) audioStore.computePeaks(audioBuffer);
 
-        ready.current = true;
         setLoading(false);
       }
     };

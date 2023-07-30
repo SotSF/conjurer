@@ -2,6 +2,7 @@ import { Timer } from "@/src/types/Timer";
 import { makeAutoObservable, runInAction } from "mobx";
 import initialPlaylist from "@/src/data/initialPlaylist.json";
 import { ExperienceStore } from "@/src/types/ExperienceStore";
+import { AudioStore } from "@/src/types/AudioStore";
 
 // Define a new RootStore interface here so that we avoid circular dependencies
 interface RootStore {
@@ -17,6 +18,7 @@ export class PlaylistStore {
   constructor(
     readonly rootStore: RootStore,
     readonly timer: Timer,
+    readonly audioStore: AudioStore,
     readonly experienceStore: ExperienceStore
   ) {
     makeAutoObservable(this);
@@ -25,17 +27,26 @@ export class PlaylistStore {
   }
 
   loadAndPlayExperience = async (experienceFilename: string) => {
-    if (this.rootStore.experienceFilename !== experienceFilename) {
-      await this.experienceStore.load(experienceFilename);
+    this.timer.playing = false;
+
+    if (this.rootStore.experienceFilename === experienceFilename) {
+      this.timer.setTime(0);
+      this.timer.playing = true;
+      return;
     }
 
-    await this.playExperience(experienceFilename);
+    await this.experienceStore.load(experienceFilename);
+    await this.playExperienceWhenReady(experienceFilename);
   };
 
-  playExperience = async (experienceFilename: string) => {
-    // this.timer.setTime(0);
-    // this.timer.playing = true;
-  };
+  playExperienceWhenReady = (experienceFilename: string) =>
+    new Promise<void>((resolve) => {
+      this.audioStore.wavesurfer?.once("ready", () => {
+        this.timer.setTime(0);
+        if (!this.timer.playing) this.timer.togglePlaying();
+        resolve();
+      });
+    });
 
   initialize = () => {
     this.name = initialPlaylist.name;

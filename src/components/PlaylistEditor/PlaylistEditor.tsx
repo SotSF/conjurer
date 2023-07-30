@@ -11,7 +11,7 @@ import {
 } from "@chakra-ui/react";
 import { useStore } from "@/src/types/StoreContext";
 import { observer } from "mobx-react-lite";
-import { PlaylistItemControls } from "@/src/components/PlaylistEditor/PlaylistItemControls";
+import { PlaylistItem } from "@/src/components/PlaylistEditor/PlaylistItem";
 
 export const PlaylistEditor = observer(function PlaylistEditor() {
   const store = useStore();
@@ -32,7 +32,7 @@ export const PlaylistEditor = observer(function PlaylistEditor() {
           <Tbody>
             {experienceFilenames.map((experienceFilename, index) => (
               <Tr key={experienceFilename}>
-                <PlaylistItemControls
+                <PlaylistItem
                   experienceFilename={experienceFilename}
                   index={index}
                   playlistLength={experienceFilenames.length}

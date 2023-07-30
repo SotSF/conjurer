@@ -10,7 +10,7 @@ import {
 import { RxCaretDown, RxCaretUp } from "react-icons/rx";
 import { action } from "mobx";
 import { FaPause, FaPlay, FaTrashAlt } from "react-icons/fa";
-import { memo, useState } from "react";
+import { useState } from "react";
 import { useStore } from "@/src/types/StoreContext";
 import { observer } from "mobx-react-lite";
 import {
@@ -24,7 +24,7 @@ type PlaylistItemControlsProps = {
   playlistLength: number;
 };
 
-export const PlaylistItemControls = observer(function PlaylistItemControls({
+export const PlaylistItem = observer(function PlaylistItem({
   experienceFilename,
   index,
   playlistLength,
@@ -110,7 +110,9 @@ export const PlaylistItemControls = observer(function PlaylistItemControls({
                 height={4}
                 _hover={{ color: "blue.500" }}
                 icon={<RxCaretUp size={28} />}
-                onClick={action(() => {})}
+                onClick={action(() => {
+                  // TODO:
+                })}
               />
             )}
             {index < playlistLength - 1 && (
@@ -121,7 +123,9 @@ export const PlaylistItemControls = observer(function PlaylistItemControls({
                 height={4}
                 _hover={{ color: "blue.500" }}
                 icon={<RxCaretDown size={28} />}
-                onClick={action(() => {})}
+                onClick={action(() => {
+                  // TODO:
+                })}
               />
             )}
           </VStack>
@@ -132,7 +136,9 @@ export const PlaylistItemControls = observer(function PlaylistItemControls({
             height={6}
             _hover={{ color: "red.500" }}
             icon={<FaTrashAlt size={12} />}
-            onClick={action(() => {})}
+            onClick={action(() => {
+              // TODO:
+            })}
           />
         </HStack>
       </Td>

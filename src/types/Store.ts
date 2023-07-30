@@ -37,7 +37,12 @@ export class Store {
   uiStore = new UIStore(this.timer);
   audioStore = new AudioStore(this, this.timer);
   experienceStore = new ExperienceStore(this);
-  playlistStore = new PlaylistStore(this, this.timer, this.experienceStore);
+  playlistStore = new PlaylistStore(
+    this,
+    this.timer,
+    this.audioStore,
+    this.experienceStore
+  );
 
   layers: Layer[] = [];
 
