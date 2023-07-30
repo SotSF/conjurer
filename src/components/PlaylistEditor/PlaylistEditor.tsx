@@ -16,7 +16,7 @@ import { PlaylistItemControls } from "@/src/components/PlaylistEditor/PlaylistIt
 export const PlaylistEditor = observer(function PlaylistEditor() {
   const store = useStore();
   const { playlistStore } = store;
-  const { experiences } = playlistStore;
+  const { experienceFilenames } = playlistStore;
 
   return (
     <>
@@ -30,12 +30,12 @@ export const PlaylistEditor = observer(function PlaylistEditor() {
             </Tr>
           </Thead>
           <Tbody>
-            {experiences.map((experience, index) => (
-              <Tr key={experience}>
+            {experienceFilenames.map((experienceFilename, index) => (
+              <Tr key={experienceFilename}>
                 <PlaylistItemControls
-                  experienceName={experience}
+                  experienceFilename={experienceFilename}
                   index={index}
-                  playlistLength={experiences.length}
+                  playlistLength={experienceFilenames.length}
                 />
               </Tr>
             ))}

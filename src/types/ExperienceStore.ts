@@ -12,7 +12,12 @@ import {
   getS3,
 } from "@/src/utils/assets";
 
-// Filename format: <user>-<experienceName>.json
+// Experience filename format: <user>-<experienceName>.json
+export const extractUserFromFilename = (filename: string): string => {
+  const parts = filename.split("-");
+  if (parts.length < 2) return "";
+  return parts[0];
+};
 const extractExperienceNameFromFileName = (filename: string): string => {
   const parts = filename.split("-");
   if (parts.length < 2) return "untitled";

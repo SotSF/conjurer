@@ -3,23 +3,36 @@ import { RxCaretDown, RxCaretUp } from "react-icons/rx";
 import { action } from "mobx";
 import { FaPause, FaPlay, FaTrashAlt } from "react-icons/fa";
 import { memo, useState } from "react";
+import { useStore } from "@/src/types/StoreContext";
 
 type PlaylistItemControlsProps = {
-  experienceName: string;
+  experienceFilename: string;
   index: number;
   playlistLength: number;
 };
 
 export const PlaylistItemControls = memo(function PlaylistItemControls({
-  experienceName,
+  experienceFilename,
   index,
   playlistLength,
 }: PlaylistItemControlsProps) {
+  const store = useStore();
+  const { playlistStore } = store;
+
   const [mousingOver, setMousingOver] = useState(false);
+  const [loadingExperience, setLoadingExperience] = useState(false);
+  const onPlayClick = async () => {
+    setLoadingExperience(true);
+    await playlistStore.playExperience(experienceFilename);
+    setLoadingExperience(false);
+  };
+
+  const isSelectedExperience = store.experienceFilename === experienceFilename;
+
   return (
     <>
       <HStack
-        height={12}
+        height={16}
         justify="center"
         onMouseEnter={() => setMousingOver(true)}
         onMouseLeave={() => setMousingOver(false)}
@@ -36,18 +49,18 @@ export const PlaylistItemControls = memo(function PlaylistItemControls({
                 <FaPlay size={10} />
               </HStack>
             }
-            // onClick={action(timer.togglePlaying)}
+            onClick={onPlayClick}
           />
         ) : (
-          <Button variant="unstyled" fontSize={14}>
+          <Button variant="unstyled" onClick={onPlayClick} fontSize={14}>
             {index + 1}
           </Button>
         )}
       </HStack>
       <Td>
-        <Text fontSize={14}>{experienceName}</Text>
+        <Text fontSize={14}>{experienceFilename}</Text>
       </Td>
-      <HStack height={12} alignItems="center" spacing={0}>
+      <HStack height={16} alignItems="center" spacing={0}>
         <VStack spacing={0}>
           {index > 0 && (
             <IconButton
