@@ -39,8 +39,16 @@ export const PlaylistItem = observer(function PlaylistItem({
     await playlistStore.loadAndPlayExperience(experienceFilename);
     setLoadingExperience(false);
   };
+  const onPauseClick = () => {
+    if (timer.playing) timer.togglePlaying();
+  };
 
   const isSelectedExperience = store.experienceFilename === experienceFilename;
+
+  const textProps = {
+    color: isSelectedExperience ? "blue.400" : undefined,
+    fontSize: 14,
+  };
 
   return (
     <>
@@ -65,7 +73,7 @@ export const PlaylistItem = observer(function PlaylistItem({
                   {timer.playing ? <FaPause size={10} /> : <FaPlay size={10} />}
                 </HStack>
               }
-              onClick={onPlayClick}
+              onClick={timer.playing ? onPauseClick : onPlayClick}
             />
           ) : mousingOver ? (
             <IconButton
@@ -90,11 +98,13 @@ export const PlaylistItem = observer(function PlaylistItem({
       </Td>
 
       <Td>
-        <Text fontSize={14}>{extractUserFromFilename(experienceFilename)}</Text>
+        <Text {...textProps}>
+          {extractUserFromFilename(experienceFilename)}
+        </Text>
       </Td>
 
       <Td>
-        <Text fontSize={14}>
+        <Text {...textProps}>
           {extractExperienceNameFromFileName(experienceFilename)}
         </Text>
       </Td>
