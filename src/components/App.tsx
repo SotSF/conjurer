@@ -7,6 +7,7 @@ import { observer } from "mobx-react-lite";
 import { PatternDrawer } from "@/src/components/PatternDrawer";
 import { KeyboardControls } from "@/src/components/KeyboardControls";
 import { AddPatternButton } from "@/src/components/AddPatternButton";
+import { PlaylistDrawer } from "@/src/components/PlaylistDrawer";
 
 export const App = observer(function App() {
   const store = useStore();
@@ -33,6 +34,7 @@ export const App = observer(function App() {
     <Box position="relative" w="100vw" h="100vh">
       <KeyboardControls />
       <PatternDrawer />
+      <PlaylistDrawer />
       {uiStore.horizontalLayout ? (
         <Grid
           templateAreas={`"display"
