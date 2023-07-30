@@ -8,6 +8,7 @@ import { ExperienceStore } from "@/src/types/ExperienceStore";
 import { Layer } from "@/src/types/Layer";
 import { setupWebsocket } from "@/src/utils/websocket";
 import { deserializeVariation } from "@/src/types/Variations/variations";
+import { PlaylistStore } from "@/src/types/PlaylistStore";
 
 // Enforce MobX strict mode, which can make many noisy console warnings, but can help use learn MobX better.
 // Feel free to comment out the following if you want to silence the console messages.
@@ -36,39 +37,39 @@ export class Store {
   uiStore = new UIStore(this.timer);
   audioStore = new AudioStore(this, this.timer);
   experienceStore = new ExperienceStore(this);
+  playlistStore = new PlaylistStore(
+    this,
+    this.timer,
+    this.audioStore,
+    this.experienceStore
+  );
 
   layers: Layer[] = [];
 
   sendingData = false;
 
   _globalIntensity = 1;
-
   get globalIntensity(): number {
     return this._globalIntensity;
   }
-
   set globalIntensity(value: number) {
     this._globalIntensity = value;
     localStorage.setItem("globalIntensity", String(value));
   }
 
   private _usingLocalAssets = false;
-
   get usingLocalAssets(): boolean {
     return this._usingLocalAssets;
   }
-
   set usingLocalAssets(value: boolean) {
     this._usingLocalAssets = value;
     localStorage.setItem("usingLocalAssets", String(value));
   }
 
   private _selectedLayer: Layer = this.layers[0]; // a layer is always selected
-
   get selectedLayer() {
     return this._selectedLayer;
   }
-
   set selectedLayer(value: Layer) {
     if (this._selectedLayer === value) return;
     this._selectedLayer = value;
@@ -88,25 +89,25 @@ export class Store {
   }
 
   private _user = "";
-
   get user(): string {
     return this._user;
   }
-
   set user(value: string) {
     this._user = value;
     localStorage.setItem("user", value);
   }
 
   private _experienceName = "untitled";
-
   get experienceName(): string {
     return this._experienceName;
   }
-
   set experienceName(value: string) {
     this._experienceName = value;
     localStorage.setItem("experienceName", value);
+  }
+
+  get experienceFilename(): string {
+    return `${this.user}-${this.experienceName}`;
   }
 
   experienceLastSavedAt = 0;

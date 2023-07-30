@@ -30,11 +30,9 @@ export class UIStore {
   keepingPlayHeadVisible = false;
 
   private _displayMode: DisplayMode = "canopy";
-
   get displayMode() {
     return this._displayMode;
   }
-
   set displayMode(mode: DisplayMode) {
     this._displayMode = mode;
     this.saveToLocalStorage();
@@ -43,11 +41,9 @@ export class UIStore {
   patternDrawerOpen = false;
 
   private _lastPatternIndexSelected = 0;
-
   get lastPatternIndexSelected() {
     return this._lastPatternIndexSelected;
   }
-
   set lastPatternIndexSelected(index: number) {
     this._lastPatternIndexSelected = index;
     this.saveToLocalStorage();
@@ -61,6 +57,8 @@ export class UIStore {
     this._lastEffectIndices = indices;
     this.saveToLocalStorage();
   }
+
+  playlistDrawerOpen = false;
 
   pixelsPerSecond = INITIAL_PIXELS_PER_SECOND; // the zoom of the timeline
 

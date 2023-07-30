@@ -158,7 +158,6 @@ export class AudioStore {
 
   serialize = () => ({
     selectedAudioFile: this.selectedAudioFile,
-    audioMuted: this.audioMuted,
     audioRegions: this.regionsPlugin
       ?.getRegions()
       .map((region) => new AudioRegion(region).serialize()),
@@ -166,7 +165,6 @@ export class AudioStore {
 
   deserialize = (data: any) => {
     this.selectedAudioFile = data.selectedAudioFile;
-    this.audioMuted = !!data.audioMuted;
     this.initialRegions =
       data.audioRegions?.map((region: any) => new AudioRegion(region)) ?? [];
   };

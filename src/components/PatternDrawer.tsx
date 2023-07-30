@@ -22,13 +22,10 @@ export const PatternDrawer = observer(function PatternDrawer() {
       size="full"
       isOpen={patternDrawerOpen}
       placement="left"
-      onClose={action(() => {
-        uiStore.patternDrawerOpen = false;
-      })}
+      onClose={action(() => (uiStore.patternDrawerOpen = false))}
     >
       <DrawerOverlay />
       <DrawerContent bgColor="gray.700">
-        <DrawerCloseButton />
         <DrawerHeader>
           <Link href="/playground" target="_blank">
             Pattern Playground
@@ -37,6 +34,7 @@ export const PatternDrawer = observer(function PatternDrawer() {
         <DrawerBody>
           <PatternPlayground />
         </DrawerBody>
+        <DrawerCloseButton />
       </DrawerContent>
     </Drawer>
   );

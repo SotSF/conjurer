@@ -12,8 +12,13 @@ import {
   getS3,
 } from "@/src/utils/assets";
 
-// Filename format: <user>-<experienceName>.json
-const extractExperienceNameFromFileName = (filename: string): string => {
+// Experience filename format: <user>-<experienceName>.json
+export const extractUserFromFilename = (filename: string): string => {
+  const parts = filename.split("-");
+  if (parts.length < 2) return "";
+  return parts[0];
+};
+export const extractExperienceNameFromFileName = (filename: string): string => {
   const parts = filename.split("-");
   if (parts.length < 2) return "untitled";
   return parts.slice(1).join("-");
@@ -86,6 +91,7 @@ export class ExperienceStore {
   };
 
   load = async (experienceFilename: string) => {
+    this.rootStore.user = extractUserFromFilename(experienceFilename);
     this.rootStore.experienceName =
       extractExperienceNameFromFileName(experienceFilename);
     this.rootStore.experienceLastSavedAt = Date.now();

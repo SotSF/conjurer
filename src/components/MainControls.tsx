@@ -5,6 +5,7 @@ import { RxAlignCenterHorizontally } from "react-icons/rx";
 import { TbArrowBigRightLines } from "react-icons/tb";
 import { CiStreamOn, CiStreamOff } from "react-icons/ci";
 import { GiDesert } from "react-icons/gi";
+import { RiPlayList2Fill } from "react-icons/ri";
 import { useStore } from "@/src/types/StoreContext";
 import { action } from "mobx";
 import { AudioControls } from "@/src/components/AudioControls";
@@ -111,6 +112,13 @@ export const MainControls = observer(function MainControls() {
         )}
       />
       <IntensitySlider />
+      <IconButton
+        aria-label="Show playlist"
+        title="Show playlist"
+        height={6}
+        icon={<RiPlayList2Fill size={17} />}
+        onClick={action(() => (uiStore.playlistDrawerOpen = true))}
+      />
     </HStack>
   );
 });
