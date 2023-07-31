@@ -20,10 +20,11 @@ import { PlaylistItem } from "@/src/components/PlaylistEditor/PlaylistItem";
 import { MdOutlinePlaylistAdd } from "react-icons/md";
 import { FaRegClipboard } from "react-icons/fa";
 import { action } from "mobx";
+import { AddExperienceModal } from "@/src/components/PlaylistEditor/AddExperienceModal";
 
 export const PlaylistEditor = observer(function PlaylistEditor() {
   const store = useStore();
-  const { playlistStore } = store;
+  const { playlistStore, uiStore } = store;
   const { experienceFilenames } = playlistStore;
 
   return (
@@ -87,9 +88,9 @@ export const PlaylistEditor = observer(function PlaylistEditor() {
           variant="outline"
           size="sm"
           leftIcon={<MdOutlinePlaylistAdd size={20} />}
-          onClick={() => {
-            // TODO:
-          }}
+          onClick={action(
+            () => (uiStore.showingPlaylistAddExperienceModal = true)
+          )}
         >
           Add experience
         </Button>
@@ -97,6 +98,7 @@ export const PlaylistEditor = observer(function PlaylistEditor() {
       <Text mt={4} fontSize="sm" textAlign="center" color="gray.500">
         Note: playlists cannot currently be saved!
       </Text>
+      <AddExperienceModal />
     </>
   );
 });

@@ -33,6 +33,12 @@ export class PlaylistStore {
     this.experienceFilenames = initialPlaylist.experienceFilenames;
   };
 
+  addExperience = (experienceFilename: string) => {
+    const experienceFilenames = [...this.experienceFilenames];
+    experienceFilenames.push(experienceFilename);
+    this.experienceFilenames = experienceFilenames;
+  };
+
   reorderExperience = (currentIndex: number, delta: number) => {
     const newIndex = currentIndex + delta;
     if (newIndex < 0 || newIndex > this.experienceFilenames.length - 1) return;

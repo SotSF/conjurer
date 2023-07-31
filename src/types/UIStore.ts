@@ -23,6 +23,8 @@ export class UIStore {
   showingUploadAudioModal = false;
   showingPaletteEditorModal = false;
   showingMarkerEditorModal = false;
+  showingPlaylistAddExperienceModal = false;
+
   markerToEdit: Partial<RegionParams> = {};
 
   // TODO: refactor these in display in ui differently
