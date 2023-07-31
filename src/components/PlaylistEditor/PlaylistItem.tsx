@@ -128,9 +128,9 @@ export const PlaylistItem = observer(function PlaylistItem({
                 height={4}
                 _hover={{ color: "blue.500" }}
                 icon={<RxCaretUp size={20} />}
-                onClick={action(() => {
-                  // TODO:
-                })}
+                onClick={action(() =>
+                  playlistStore.reorderExperience(index, -1)
+                )}
               />
             )}
             {index < playlistLength - 1 && (
@@ -141,9 +141,9 @@ export const PlaylistItem = observer(function PlaylistItem({
                 height={4}
                 _hover={{ color: "blue.500" }}
                 icon={<RxCaretDown size={20} />}
-                onClick={action(() => {
-                  // TODO:
-                })}
+                onClick={action(() =>
+                  playlistStore.reorderExperience(index, 1)
+                )}
               />
             )}
           </VStack>
@@ -154,9 +154,7 @@ export const PlaylistItem = observer(function PlaylistItem({
             height={6}
             _hover={{ color: "red.500" }}
             icon={<FaTrashAlt size={10} />}
-            onClick={action(() => {
-              // TODO:
-            })}
+            onClick={action(() => playlistStore.removeExperience(index))}
           />
         </HStack>
       </Td>

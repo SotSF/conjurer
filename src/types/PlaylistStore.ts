@@ -28,6 +28,28 @@ export class PlaylistStore {
     runInAction(() => this.initialize());
   }
 
+  initialize = () => {
+    this.name = initialPlaylist.name;
+    this.experienceFilenames = initialPlaylist.experienceFilenames;
+  };
+
+  reorderExperience = (currentIndex: number, delta: number) => {
+    const newIndex = currentIndex + delta;
+    if (newIndex < 0 || newIndex > this.experienceFilenames.length - 1) return;
+
+    const experienceFilenames = [...this.experienceFilenames];
+    const [removed] = experienceFilenames.splice(currentIndex, 1);
+    experienceFilenames.splice(newIndex, 0, removed);
+
+    this.experienceFilenames = experienceFilenames;
+  };
+
+  removeExperience = (index: number) => {
+    const experienceFilenames = [...this.experienceFilenames];
+    experienceFilenames.splice(index, 1);
+    this.experienceFilenames = experienceFilenames;
+  };
+
   loadExperience = async (experienceFilename: string) => {
     await this.experienceStore.load(experienceFilename);
   };
@@ -64,11 +86,6 @@ export class PlaylistStore {
     if (nextIndex > this.experienceFilenames.length - 1) return;
 
     await this.loadAndPlayExperience(this.experienceFilenames[nextIndex]);
-  };
-
-  initialize = () => {
-    this.name = initialPlaylist.name;
-    this.experienceFilenames = initialPlaylist.experienceFilenames;
   };
 
   copyToClipboard = () => {
