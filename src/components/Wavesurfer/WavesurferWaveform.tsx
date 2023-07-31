@@ -130,6 +130,9 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
 
         wavesurfer.zoom(uiStore.pixelsPerSecond);
         wavesurfer.seekTo(0);
+
+        const audioBuffer = wavesurfer.getDecodedData();
+        if (audioBuffer) audioStore.computePeaks(audioBuffer);
       });
 
       wavesurfer.on("finish", () => {
@@ -175,9 +178,6 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
 
         // Load the new audio file
         await audioStore.wavesurfer.load(audioStore.getSelectedAudioFileUrl());
-
-        const audioBuffer = audioStore.wavesurfer.getDecodedData();
-        if (audioBuffer) audioStore.computePeaks(audioBuffer);
 
         setLoading(false);
       }
