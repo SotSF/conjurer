@@ -62,7 +62,7 @@ export const PlaylistItem = observer(function PlaylistItem({
     <>
       <Td>
         <HStack
-          height={16}
+          height={4}
           justify="center"
           onMouseEnter={() => setMousingOver(true)}
           onMouseLeave={() => setMousingOver(false)}
@@ -118,7 +118,7 @@ export const PlaylistItem = observer(function PlaylistItem({
       </Td>
 
       <Td px={0}>
-        <HStack height={16} alignItems="center" spacing={0}>
+        <HStack height={10} alignItems="center" spacing={0}>
           <VStack spacing={0}>
             {index > 0 && (
               <IconButton

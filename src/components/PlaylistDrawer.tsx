@@ -20,6 +20,7 @@ export const PlaylistDrawer = observer(function PlaylistDrawer() {
       isOpen={playlistDrawerOpen}
       placement="right"
       onClose={action(() => (uiStore.playlistDrawerOpen = false))}
+      autoFocus={false}
     >
       <DrawerOverlay />
       <DrawerContent bgColor="gray.700">
