@@ -4,15 +4,15 @@ import {
   Table,
   TableContainer,
   Tbody,
-  Td,
-  Text,
   Th,
   Thead,
   Tr,
+  VStack,
 } from "@chakra-ui/react";
 import { useStore } from "@/src/types/StoreContext";
 import { observer } from "mobx-react-lite";
 import { PlaylistItem } from "@/src/components/PlaylistEditor/PlaylistItem";
+import { MdOutlinePlaylistAdd } from "react-icons/md";
 
 export const PlaylistEditor = observer(function PlaylistEditor() {
   const store = useStore();
@@ -21,12 +21,16 @@ export const PlaylistEditor = observer(function PlaylistEditor() {
 
   return (
     <>
-      <Checkbox
-        isChecked={playlistStore.autoplay}
-        onChange={({ target }) => (playlistStore.autoplay = target.checked)}
-      >
-        Autoplay next experience in playlist
-      </Checkbox>
+      <VStack>
+        <Checkbox
+          mb={2}
+          isChecked={playlistStore.autoplay}
+          onChange={({ target }) => (playlistStore.autoplay = target.checked)}
+        >
+          Autoplay next experience in playlist
+        </Checkbox>
+      </VStack>
+
       <TableContainer mt={6}>
         <Table size="sm" variant="simple">
           <Thead>
@@ -49,6 +53,18 @@ export const PlaylistEditor = observer(function PlaylistEditor() {
           </Tbody>
         </Table>
       </TableContainer>
+      <VStack>
+        <Button
+          variant="outline"
+          size="sm"
+          leftIcon={<MdOutlinePlaylistAdd size={20} />}
+          onClick={() => {
+            // TODO:
+          }}
+        >
+          Add experience
+        </Button>
+      </VStack>
     </>
   );
 });

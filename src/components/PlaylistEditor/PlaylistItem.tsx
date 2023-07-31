@@ -42,12 +42,20 @@ export const PlaylistItem = observer(function PlaylistItem({
   const onPauseClick = () => {
     if (timer.playing) timer.togglePlaying();
   };
+  const onSelect = async () => {
+    setLoadingExperience(true);
+    await playlistStore.loadExperience(experienceFilename);
+    setLoadingExperience(false);
+  };
 
   const isSelectedExperience = store.experienceFilename === experienceFilename;
 
   const textProps = {
     color: isSelectedExperience ? "blue.400" : undefined,
     fontSize: 14,
+    cursor: "pointer",
+    _hover: { textDecoration: "underline" },
+    onClick: onSelect,
   };
 
   return (
@@ -109,7 +117,7 @@ export const PlaylistItem = observer(function PlaylistItem({
         </Text>
       </Td>
 
-      <Td>
+      <Td px={0}>
         <HStack height={16} alignItems="center" spacing={0}>
           <VStack spacing={0}>
             {index > 0 && (
@@ -119,7 +127,7 @@ export const PlaylistItem = observer(function PlaylistItem({
                 title="Move up"
                 height={4}
                 _hover={{ color: "blue.500" }}
-                icon={<RxCaretUp size={28} />}
+                icon={<RxCaretUp size={20} />}
                 onClick={action(() => {
                   // TODO:
                 })}
@@ -132,7 +140,7 @@ export const PlaylistItem = observer(function PlaylistItem({
                 title="Move down"
                 height={4}
                 _hover={{ color: "blue.500" }}
-                icon={<RxCaretDown size={28} />}
+                icon={<RxCaretDown size={20} />}
                 onClick={action(() => {
                   // TODO:
                 })}
@@ -145,7 +153,7 @@ export const PlaylistItem = observer(function PlaylistItem({
             title="Delete effect"
             height={6}
             _hover={{ color: "red.500" }}
-            icon={<FaTrashAlt size={12} />}
+            icon={<FaTrashAlt size={10} />}
             onClick={action(() => {
               // TODO:
             })}

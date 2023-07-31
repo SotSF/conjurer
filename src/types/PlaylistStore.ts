@@ -28,6 +28,10 @@ export class PlaylistStore {
     runInAction(() => this.initialize());
   }
 
+  loadExperience = async (experienceFilename: string) => {
+    await this.experienceStore.load(experienceFilename);
+  };
+
   loadAndPlayExperience = async (experienceFilename: string) => {
     this.timer.playing = false;
 
@@ -37,11 +41,11 @@ export class PlaylistStore {
       return;
     }
 
-    await this.experienceStore.load(experienceFilename);
-    await this.playExperienceWhenReady(experienceFilename);
+    await this.loadExperience(experienceFilename);
+    await this.playExperienceWhenReady();
   };
 
-  playExperienceWhenReady = (experienceFilename: string) =>
+  playExperienceWhenReady = () =>
     new Promise<void>((resolve) => {
       this.audioStore.wavesurfer?.once("ready", () => {
         this.timer.setTime(0);
