@@ -42,19 +42,27 @@ export const PlaylistItem = observer(function PlaylistItem({
   const onPauseClick = () => {
     if (timer.playing) timer.togglePlaying();
   };
+  const onSelect = async () => {
+    setLoadingExperience(true);
+    await playlistStore.loadExperience(experienceFilename);
+    setLoadingExperience(false);
+  };
 
   const isSelectedExperience = store.experienceFilename === experienceFilename;
 
   const textProps = {
     color: isSelectedExperience ? "blue.400" : undefined,
     fontSize: 14,
+    cursor: "pointer",
+    _hover: { textDecoration: "underline" },
+    onClick: onSelect,
   };
 
   return (
     <>
       <Td>
         <HStack
-          height={16}
+          height={4}
           justify="center"
           onMouseEnter={() => setMousingOver(true)}
           onMouseLeave={() => setMousingOver(false)}
@@ -109,8 +117,8 @@ export const PlaylistItem = observer(function PlaylistItem({
         </Text>
       </Td>
 
-      <Td>
-        <HStack height={16} alignItems="center" spacing={0}>
+      <Td px={0}>
+        <HStack height={10} alignItems="center" spacing={0}>
           <VStack spacing={0}>
             {index > 0 && (
               <IconButton
@@ -119,10 +127,10 @@ export const PlaylistItem = observer(function PlaylistItem({
                 title="Move up"
                 height={4}
                 _hover={{ color: "blue.500" }}
-                icon={<RxCaretUp size={28} />}
-                onClick={action(() => {
-                  // TODO:
-                })}
+                icon={<RxCaretUp size={20} />}
+                onClick={action(() =>
+                  playlistStore.reorderExperience(index, -1)
+                )}
               />
             )}
             {index < playlistLength - 1 && (
@@ -132,10 +140,10 @@ export const PlaylistItem = observer(function PlaylistItem({
                 title="Move down"
                 height={4}
                 _hover={{ color: "blue.500" }}
-                icon={<RxCaretDown size={28} />}
-                onClick={action(() => {
-                  // TODO:
-                })}
+                icon={<RxCaretDown size={20} />}
+                onClick={action(() =>
+                  playlistStore.reorderExperience(index, 1)
+                )}
               />
             )}
           </VStack>
@@ -145,10 +153,8 @@ export const PlaylistItem = observer(function PlaylistItem({
             title="Delete effect"
             height={6}
             _hover={{ color: "red.500" }}
-            icon={<FaTrashAlt size={12} />}
-            onClick={action(() => {
-              // TODO:
-            })}
+            icon={<FaTrashAlt size={10} />}
+            onClick={action(() => playlistStore.removeExperience(index))}
           />
         </HStack>
       </Td>

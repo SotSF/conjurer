@@ -1,9 +1,7 @@
 import {
   Drawer,
   DrawerBody,
-  DrawerCloseButton,
   DrawerContent,
-  DrawerHeader,
   DrawerOverlay,
 } from "@chakra-ui/react";
 import { useStore } from "@/src/types/StoreContext";
@@ -22,14 +20,13 @@ export const PlaylistDrawer = observer(function PlaylistDrawer() {
       isOpen={playlistDrawerOpen}
       placement="right"
       onClose={action(() => (uiStore.playlistDrawerOpen = false))}
+      autoFocus={false}
     >
       <DrawerOverlay />
       <DrawerContent bgColor="gray.700">
-        <DrawerHeader>Playlist</DrawerHeader>
         <DrawerBody>
           <PlaylistEditor />
         </DrawerBody>
-        <DrawerCloseButton />
       </DrawerContent>
     </Drawer>
   );

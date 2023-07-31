@@ -23,6 +23,8 @@ export class UIStore {
   showingUploadAudioModal = false;
   showingPaletteEditorModal = false;
   showingMarkerEditorModal = false;
+  showingPlaylistAddExperienceModal = false;
+
   markerToEdit: Partial<RegionParams> = {};
 
   // TODO: refactor these in display in ui differently
@@ -58,7 +60,7 @@ export class UIStore {
     this.saveToLocalStorage();
   }
 
-  playlistDrawerOpen = false;
+  playlistDrawerOpen = true;
 
   pixelsPerSecond = INITIAL_PIXELS_PER_SECOND; // the zoom of the timeline
 

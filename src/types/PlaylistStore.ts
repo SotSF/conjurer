@@ -28,6 +28,38 @@ export class PlaylistStore {
     runInAction(() => this.initialize());
   }
 
+  initialize = () => {
+    this.name = initialPlaylist.name;
+    this.experienceFilenames = initialPlaylist.experienceFilenames;
+  };
+
+  addExperience = (experienceFilename: string) => {
+    const experienceFilenames = [...this.experienceFilenames];
+    experienceFilenames.push(experienceFilename);
+    this.experienceFilenames = experienceFilenames;
+  };
+
+  reorderExperience = (currentIndex: number, delta: number) => {
+    const newIndex = currentIndex + delta;
+    if (newIndex < 0 || newIndex > this.experienceFilenames.length - 1) return;
+
+    const experienceFilenames = [...this.experienceFilenames];
+    const [removed] = experienceFilenames.splice(currentIndex, 1);
+    experienceFilenames.splice(newIndex, 0, removed);
+
+    this.experienceFilenames = experienceFilenames;
+  };
+
+  removeExperience = (index: number) => {
+    const experienceFilenames = [...this.experienceFilenames];
+    experienceFilenames.splice(index, 1);
+    this.experienceFilenames = experienceFilenames;
+  };
+
+  loadExperience = async (experienceFilename: string) => {
+    await this.experienceStore.load(experienceFilename);
+  };
+
   loadAndPlayExperience = async (experienceFilename: string) => {
     this.timer.playing = false;
 
@@ -37,11 +69,11 @@ export class PlaylistStore {
       return;
     }
 
-    await this.experienceStore.load(experienceFilename);
-    await this.playExperienceWhenReady(experienceFilename);
+    await this.loadExperience(experienceFilename);
+    await this.playExperienceWhenReady();
   };
 
-  playExperienceWhenReady = (experienceFilename: string) =>
+  playExperienceWhenReady = () =>
     new Promise<void>((resolve) => {
       this.audioStore.wavesurfer?.once("ready", () => {
         this.timer.setTime(0);
@@ -62,8 +94,15 @@ export class PlaylistStore {
     await this.loadAndPlayExperience(this.experienceFilenames[nextIndex]);
   };
 
-  initialize = () => {
-    this.name = initialPlaylist.name;
-    this.experienceFilenames = initialPlaylist.experienceFilenames;
+  copyToClipboard = () => {
+    if (typeof window === "undefined") return;
+    navigator.clipboard.writeText(this.stringifyPlaylist());
   };
+
+  stringifyPlaylist = () => JSON.stringify(this.serialize());
+
+  serialize = () => ({
+    name: this.name,
+    experienceFilenames: this.experienceFilenames,
+  });
 }
