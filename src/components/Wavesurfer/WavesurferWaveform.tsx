@@ -126,9 +126,10 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
             uiStore.markerToEdit = region;
           })
         );
-        if (audioStore.audioMuted) {
-          wavesurfer.setMuted(true);
-        }
+        if (audioStore.audioMuted) wavesurfer.setMuted(true);
+
+        wavesurfer.zoom(uiStore.pixelsPerSecond);
+        wavesurfer.seekTo(0);
       });
 
       wavesurfer.on("finish", () => {
@@ -174,8 +175,6 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
 
         // Load the new audio file
         await audioStore.wavesurfer.load(audioStore.getSelectedAudioFileUrl());
-        audioStore.wavesurfer.zoom(uiStore.pixelsPerSecond);
-        audioStore.wavesurfer.seekTo(0);
 
         const audioBuffer = audioStore.wavesurfer.getDecodedData();
         if (audioBuffer) audioStore.computePeaks(audioBuffer);
