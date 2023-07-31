@@ -70,4 +70,16 @@ export class PlaylistStore {
     this.name = initialPlaylist.name;
     this.experienceFilenames = initialPlaylist.experienceFilenames;
   };
+
+  copyToClipboard = () => {
+    if (typeof window === "undefined") return;
+    navigator.clipboard.writeText(this.stringifyPlaylist());
+  };
+
+  stringifyPlaylist = () => JSON.stringify(this.serialize());
+
+  serialize = () => ({
+    name: this.name,
+    experienceFilenames: this.experienceFilenames,
+  });
 }
