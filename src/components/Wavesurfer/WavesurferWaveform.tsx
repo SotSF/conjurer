@@ -140,8 +140,10 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
         if (playlistStore.autoplay) playlistStore.playNextExperience();
       });
 
+      // we are only truly done loading when the waveform has been drawn
+      wavesurfer.on("redraw", () => setLoading(false));
+
       cloneCanvas();
-      setLoading(false);
     };
 
     create();
@@ -178,8 +180,6 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
 
         // Load the new audio file
         await audioStore.wavesurfer.load(audioStore.getSelectedAudioFileUrl());
-
-        setLoading(false);
       }
     };
     changeAudioFile();
