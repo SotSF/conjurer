@@ -30,7 +30,7 @@ export const PlaylistItem = observer(function PlaylistItem({
   playlistLength,
 }: PlaylistItemControlsProps) {
   const store = useStore();
-  const { playlistStore, timer } = store;
+  const { playlistStore } = store;
 
   const [mousingOver, setMousingOver] = useState(false);
   const [loadingExperience, setLoadingExperience] = useState(false);
@@ -40,7 +40,7 @@ export const PlaylistItem = observer(function PlaylistItem({
     setLoadingExperience(false);
   };
   const onPauseClick = () => {
-    if (timer.playing) timer.togglePlaying();
+    store.pause();
   };
   const onSelect = async () => {
     setLoadingExperience(true);
@@ -74,14 +74,14 @@ export const PlaylistItem = observer(function PlaylistItem({
               variant="unstyled"
               aria-label="Play"
               title="Play"
-              color={timer.playing ? "orange" : "green"}
+              color={store.playing ? "orange" : "green"}
               height={6}
               icon={
                 <HStack justify="center">
-                  {timer.playing ? <FaPause size={10} /> : <FaPlay size={10} />}
+                  {store.playing ? <FaPause size={10} /> : <FaPlay size={10} />}
                 </HStack>
               }
-              onClick={timer.playing ? onPauseClick : onPlayClick}
+              onClick={store.playing ? onPauseClick : onPlayClick}
             />
           ) : mousingOver ? (
             <IconButton

@@ -43,6 +43,8 @@ export class AudioStore {
   loopingAudio = false;
   loopRegion: RegionParams | null = null;
 
+  audioState: "paused" | "starting" | "playing" = "paused";
+
   constructor(readonly rootStore: RootStore, readonly timer: Timer) {
     makeAutoObservable(this, {
       getSelectedAudioFileUrl: false,

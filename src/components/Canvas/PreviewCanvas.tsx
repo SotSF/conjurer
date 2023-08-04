@@ -18,7 +18,8 @@ type PreviewCanvasProps = {
 export const PreviewCanvas = observer(function PreviewCanvas({
   block,
 }: PreviewCanvasProps) {
-  const { timer, uiStore } = useStore();
+  const store = useStore();
+  const { uiStore } = store;
   const { displayMode } = uiStore;
   const [renderTarget, setRenderTarget] = useState<WebGLRenderTarget | null>(
     null
@@ -26,7 +27,7 @@ export const PreviewCanvas = observer(function PreviewCanvas({
 
   return (
     <Canvas frameloop="demand">
-      <RenderingGate shouldRender={!timer.playing} />
+      <RenderingGate shouldRender={!store.playing} />
       <CameraControls />
       <SingleBlockRenderPipeline
         autorun

@@ -7,7 +7,8 @@ import { useEffect, useRef } from "react";
 import { useDebouncedCallback } from "use-debounce";
 
 export const PlayHead = observer(function PlayHead() {
-  const { timer, uiStore } = useStore();
+  const store = useStore();
+  const { timer, uiStore } = store;
 
   const playHead = useRef<HTMLDivElement>(null);
 
@@ -22,7 +23,7 @@ export const PlayHead = observer(function PlayHead() {
   );
 
   useEffect(() => {
-    if (!playHead.current || !uiStore.keepingPlayHeadVisible || !timer.playing)
+    if (!playHead.current || !uiStore.keepingPlayHeadVisible || !store.playing)
       return;
 
     const observer = new IntersectionObserver(
@@ -30,17 +31,17 @@ export const PlayHead = observer(function PlayHead() {
     );
     observer.observe(playHead.current);
     return () => observer.disconnect();
-  }, [scrollIntoView, uiStore.keepingPlayHeadVisible, timer.playing]);
+  }, [scrollIntoView, uiStore.keepingPlayHeadVisible, store.playing]);
 
   useEffect(() => {
-    if (!uiStore.keepingPlayHeadCentered || !timer.playing) return;
+    if (!uiStore.keepingPlayHeadCentered || !store.playing) return;
 
     const interval = setInterval(
       () => requestAnimationFrame(() => scrollIntoView("center")),
       30
     );
     return () => clearInterval(interval);
-  }, [scrollIntoView, uiStore.keepingPlayHeadCentered, timer.playing]);
+  }, [scrollIntoView, uiStore.keepingPlayHeadCentered, store.playing]);
 
   useEffect(() => {
     if (!playHead.current) return;
@@ -63,7 +64,7 @@ export const PlayHead = observer(function PlayHead() {
       position="absolute"
       top={0}
       left={uiStore.timeToXPixels(timer.lastCursor.position)}
-      className={classNames(styles.marker, { [styles.playing]: timer.playing })}
+      className={classNames(styles.marker, { [styles.playing]: store.playing })}
       willChange="transform"
       overflowY="visible"
       zIndex={10}
