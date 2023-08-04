@@ -49,7 +49,7 @@ export const VariationBound = memo(function VariationBound({
     >
       <Box
         ref={dragNodeRef}
-        width="2px"
+        width={`${VARIATION_BOUND_WIDTH}px`}
         height="60px"
         boxSizing="border-box"
         borderRightWidth={VARIATION_BOUND_WIDTH}

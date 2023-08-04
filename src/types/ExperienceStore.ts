@@ -107,9 +107,15 @@ export class ExperienceStore {
       Bucket: ASSET_BUCKET_NAME,
       Key: `${EXPERIENCE_ASSET_PREFIX}${experienceFilename}.json`,
     });
-    const experienceData = await getS3().send(getObjectCommand);
-    const experienceString = await experienceData.Body?.transformToString();
-    if (experienceString) this.loadFromString(experienceString);
+
+    try {
+      const experienceData = await getS3().send(getObjectCommand);
+      const experienceString = await experienceData.Body?.transformToString();
+      if (experienceString) this.loadFromString(experienceString);
+    } catch (err) {
+      console.log(err);
+      this.loadEmptyExperience();
+    }
   };
 
   loadFromString = (experienceString: string) => {
