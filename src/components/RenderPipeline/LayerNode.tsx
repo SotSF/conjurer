@@ -18,7 +18,7 @@ export const LayerNode = observer(function LayerNode({
   renderTargetIn,
   renderTargetOut,
 }: LayerNodeProps) {
-  const { timer } = useStore();
+  const { audioStore } = useStore();
 
   const { opacityBlock } = layer;
 
@@ -29,7 +29,7 @@ export const LayerNode = observer(function LayerNode({
     // mobx linting will complain about these lines if observableRequiresReaction is enabled, but
     // it's fine. We don't want this function to react to changes in these variables - it runs every
     // frame already.
-    const { globalTime } = timer;
+    const { globalTime } = audioStore;
     const { startTime } = opacityBlock;
 
     opacityBlock.updateParameters(globalTime - startTime);

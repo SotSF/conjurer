@@ -107,7 +107,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
 
       wavesurfer.on("interaction", (newTime: number) => {
         if (!wavesurfer) return;
-        timer.setTime(Math.max(0, newTime));
+        audioStore.setTime(Math.max(0, newTime));
       });
 
       wavesurfer.on("ready", () => {
@@ -136,38 +136,12 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
       });
 
       wavesurfer.on("finish", () => {
-        timer.stop();
+        // timer.stop();
         if (playlistStore.autoplay) playlistStore.playNextExperience();
       });
 
       // we are only truly done loading when the waveform has been drawn
       wavesurfer.on("redraw", () => setLoading(false));
-
-      // May need to fine tune this number in the future:
-      const AUDIO_DELAY = 34;
-
-      // // Use the below to do so:
-      // let runningTotal = 0;
-      // let count = 0;
-      // wavesurfer.on("audioprocess", (time: number) => {
-      //   runningTotal += time - timer.globalTime;
-      //   count++;
-      //   if (count === 100) {
-      //     console.log(runningTotal / count);
-      //     runningTotal = 0;
-      //     count = 0;
-      //   }
-      // });
-
-      wavesurfer.on("play", () => {
-        // we have to artificially delay the timer start to account for the time it takes
-        // for the audio to actually start playing. annoying, seemingly a bug in wavesurfer.
-        setTimeout(() => timer.start(), AUDIO_DELAY);
-      });
-
-      wavesurfer.on("pause", () => {
-        timer.stop();
-      });
 
       cloneCanvas();
     };
@@ -189,8 +163,8 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
         ready.current = false;
         lastAudioLoaded.current = audioStore.selectedAudioFile;
         audioStore.wavesurfer.stop();
-        timer.stop();
-        timer.setTime(0);
+        // timer.stop();
+        audioStore.setTime(0);
         setLoading(true);
 
         // Destroy the old timeline plugin
@@ -245,7 +219,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
           );
           audioStore.loopRegion = newRegion;
           if (!audioStore.wavesurfer) return;
-          timer.setTime(Math.max(0, newRegion.start));
+          audioStore.setTime(Math.max(0, newRegion.start));
         })
       );
       regionsPlugin.on(
@@ -253,7 +227,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
         action((region: RegionParams) => {
           audioStore.loopRegion = region;
           if (!audioStore.wavesurfer) return;
-          timer.setTime(Math.max(0, region.start));
+          audioStore.setTime(Math.max(0, region.start));
         })
       );
     });

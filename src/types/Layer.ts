@@ -8,8 +8,8 @@ import { ExtraParams, PatternParam } from "@/src/types/PatternParams";
 type RootStore = {
   audioStore: {
     getPeakAtTime: (time: number) => number;
+    globalTime: number;
   };
-  timer: { globalTime: number };
 };
 
 export class Layer {
@@ -35,15 +35,16 @@ export class Layer {
   get currentBlock(): Block | null {
     if (
       this._lastComputedCurrentBlock &&
-      this._lastComputedCurrentBlock.startTime <= this.store.timer.globalTime &&
-      this.store.timer.globalTime < this._lastComputedCurrentBlock.endTime
+      this._lastComputedCurrentBlock.startTime <=
+        this.store.audioStore.globalTime &&
+      this.store.audioStore.globalTime < this._lastComputedCurrentBlock.endTime
     ) {
       return this._lastComputedCurrentBlock;
     }
 
     const currentBlockIndex = binarySearchForBlockAtTime(
       this.patternBlocks,
-      this.store.timer.globalTime
+      this.store.audioStore.globalTime
     );
     this._lastComputedCurrentBlock =
       this.patternBlocks[currentBlockIndex] ?? null;
@@ -67,7 +68,7 @@ export class Layer {
 
   insertCloneOfBlock = (block: Block) => {
     const newBlock = block.clone();
-    const nextGap = this.nextFiniteGap(this.store.timer.globalTime);
+    const nextGap = this.nextFiniteGap(this.store.audioStore.globalTime);
     newBlock.setTiming(nextGap);
     this.addBlock(newBlock);
   };

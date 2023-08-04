@@ -7,7 +7,7 @@ import { action } from "mobx";
 
 export const TimerControls = observer(function TimerControls() {
   const store = useStore();
-  const { timer } = store;
+  const { audioStore } = store;
 
   return (
     <HStack width="100%" justify="center" py={2} spacing={1} overflowX="clip">
@@ -17,7 +17,7 @@ export const TimerControls = observer(function TimerControls() {
         height={6}
         bgColor="gray.600"
         icon={<FaStepBackward size={10} />}
-        onClick={action(() => timer.setTime(0))}
+        onClick={action(() => audioStore.setTime(0))}
       />
       <IconButton
         aria-label="Play"
@@ -35,7 +35,7 @@ export const TimerControls = observer(function TimerControls() {
         bgColor="gray.600"
         icon={<FaStepForward size={10} />}
         onClick={action(() => {
-          timer.setTime(MAX_TIME);
+          audioStore.setTime(MAX_TIME);
           store.pause();
         })}
       />

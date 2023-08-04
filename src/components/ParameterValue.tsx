@@ -26,8 +26,8 @@ type ParameterValueProps = {
 export const ParameterValue = observer(function ParameterValue({
   parameter,
 }: ParameterValueProps) {
-  const { timer } = useStore();
-  void timer.globalTime;
+  const { audioStore } = useStore();
+  void audioStore.globalTime;
 
   return <>{`: ${parameterToString(parameter)}`}</>;
 });

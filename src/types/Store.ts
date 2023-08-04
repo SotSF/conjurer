@@ -34,8 +34,8 @@ export class Store {
   initialized = false;
 
   timer = new Timer();
-  uiStore = new UIStore(this.timer);
-  audioStore = new AudioStore(this, this.timer);
+  audioStore = new AudioStore(this);
+  uiStore = new UIStore(this.audioStore);
   experienceStore = new ExperienceStore(this);
   playlistStore = new PlaylistStore(
     this,
@@ -333,7 +333,7 @@ export class Store {
       this.selectedBlocksOrVariations = new Set();
       for (const blockToPaste of blocksToPaste) {
         const nextGap = layerToPasteInto.nextFiniteGap(
-          this.timer.globalTime,
+          this.audioStore.globalTime,
           blockToPaste.duration
         );
         blockToPaste.setTiming(nextGap);

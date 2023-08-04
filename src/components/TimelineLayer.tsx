@@ -19,7 +19,7 @@ export const TimelineLayer = observer(function TimelineLayer({
   layer,
 }: TimelineLayerProps) {
   const store = useStore();
-  const { uiStore, timer, selectedLayer } = store;
+  const { uiStore, audioStore, selectedLayer } = store;
 
   const boxRef = useRef<HTMLDivElement>(null);
 
@@ -48,7 +48,7 @@ export const TimelineLayer = observer(function TimelineLayer({
         borderColor="black"
         borderStyle="dotted"
         onClick={action((e) => {
-          timer.setTime(
+          audioStore.setTime(
             Math.max(
               0,
               uiStore.xToTime(

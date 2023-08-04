@@ -5,12 +5,12 @@ import { observer } from "mobx-react-lite";
 
 export const RenderOnTimeChange = observer(function RenderOnTimeChange() {
   const store = useStore();
-  const { timer } = store;
+  const { audioStore } = store;
   const invalidate = useThree((state) => state.invalidate);
 
   useEffect(() => {
     invalidate();
-  }, [timer.globalTime, invalidate]);
+  }, [audioStore.globalTime, invalidate]);
 
   return null;
 });

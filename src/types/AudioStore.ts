@@ -45,7 +45,7 @@ export class AudioStore {
 
   audioState: "paused" | "starting" | "playing" = "paused";
 
-  constructor(readonly rootStore: RootStore, readonly timer: Timer) {
+  constructor(readonly rootStore: RootStore) {
     makeAutoObservable(this, {
       getSelectedAudioFileUrl: false,
       wavesurfer: false,
@@ -54,7 +54,7 @@ export class AudioStore {
       peaks: false,
       getPeakAtTime: false,
     });
-    this.timer.addTickListener(this.onTick);
+    // this.timer.addTickListener(this.onTick);
   }
 
   computePeaks = (audioBuffer: AudioBuffer) => {
@@ -152,10 +152,32 @@ export class AudioStore {
     return getS3().send(putObjectCommand);
   };
 
-  onTick = (time: number) => {
-    if (!this.loopingAudio || !this.loopRegion || !this.loopRegion.end) return;
+  // TIMER STUFF
 
-    if (time > this.loopRegion.end) this.timer.setTime(this.loopRegion.start);
+  get globalTime() {
+    return this.wavesurfer?.getCurrentTime() ?? 0;
+  }
+
+  get globalTimeRounded() {
+    return Math.round(this.globalTime * 10) / 10;
+  }
+
+  setTime = (time: number) => {
+    if (!this.wavesurfer) return;
+    if (this.wavesurfer.getCurrentTime() === time) return;
+
+    this.wavesurfer.seekTo(time / this.wavesurfer.getDuration());
+    // TODO:
+  };
+
+  skipForward = () => {};
+  skipBackward = () => {};
+
+  onTick = (time: number) => {
+    // TODO: are implement looping functionality
+    // if (!this.loopingAudio || !this.loopRegion || !this.loopRegion.end) return;
+    // if (time > this.loopRegion.end) this.timer.setTime(this.loopRegion.start);
+    // TODO:
   };
 
   serialize = () => ({

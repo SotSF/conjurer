@@ -1,3 +1,4 @@
+import { AudioStore } from "@/src/types/AudioStore";
 import { Timer } from "@/src/types/Timer";
 import { INITIAL_PIXELS_PER_SECOND } from "@/src/utils/time";
 import { makeAutoObservable } from "mobx";
@@ -64,7 +65,7 @@ export class UIStore {
 
   pixelsPerSecond = INITIAL_PIXELS_PER_SECOND; // the zoom of the timeline
 
-  constructor(readonly timer: Timer) {
+  constructor(readonly audioStore: AudioStore) {
     makeAutoObservable(this);
   }
 
@@ -83,7 +84,7 @@ export class UIStore {
     }
 
     // resetting the time will restart the playhead animation
-    this.timer.setTime(this.timer.globalTime);
+    this.audioStore.setTime(this.audioStore.globalTime);
   };
 
   zoomIn = () => {
@@ -93,7 +94,7 @@ export class UIStore {
     }
 
     // resetting the time will restart the playhead animation
-    this.timer.setTime(this.timer.globalTime);
+    this.audioStore.setTime(this.audioStore.globalTime);
   };
 
   toggleLayout = () => {

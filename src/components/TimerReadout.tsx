@@ -12,7 +12,7 @@ const formatTime = (time: number) => {
 };
 
 export const TimerReadout = observer(function TimerReadout() {
-  const { timer } = useStore();
+  const { audioStore } = useStore();
 
   return (
     <VStack height={10} justify="center">
@@ -22,7 +22,7 @@ export const TimerReadout = observer(function TimerReadout() {
         fontFamily="monospace"
         userSelect="none"
       >
-        {formatTime(timer.globalTimeRounded)}
+        {formatTime(audioStore.globalTimeRounded)}
       </Text>
     </VStack>
   );

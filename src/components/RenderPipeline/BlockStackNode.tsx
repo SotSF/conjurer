@@ -26,7 +26,7 @@ export const BlockStackNode = observer(function BlockStackNode({
   renderTargetIn,
   renderTargetOut,
 }: BlockStackNodeProps) {
-  const { timer } = useStore();
+  const { audioStore } = useStore();
 
   // initial pass of block stack: update parameters (uniforms). BlockNodes will use these parameters
   // to render the pattern + effects in later priority useFrame calls
@@ -43,7 +43,7 @@ export const BlockStackNode = observer(function BlockStackNode({
     // mobx linting will complain about these lines if observableRequiresReaction is enabled, but
     // it's fine. We don't want this function to react to changes in these variables - it runs every
     // frame already.
-    const { globalTime } = timer;
+    const { globalTime } = audioStore;
     const { startTime } = parentBlock;
     parentBlock.updateParameters(globalTime - startTime);
   }, basePriority);
