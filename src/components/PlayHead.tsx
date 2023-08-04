@@ -8,7 +8,7 @@ import { useDebouncedCallback } from "use-debounce";
 
 export const PlayHead = observer(function PlayHead() {
   const store = useStore();
-  const { timer, uiStore } = store;
+  const { audioStore, uiStore } = store;
 
   const playHead = useRef<HTMLDivElement>(null);
 
@@ -45,7 +45,7 @@ export const PlayHead = observer(function PlayHead() {
 
   useEffect(() => {
     if (!playHead.current) return;
-
+    console.log("detected last cursor change");
     // This forces the animation to restart. https://css-tricks.com/restart-css-animation/
     playHead.current.style.animation = "none";
     void playHead.current.offsetHeight; // trigger reflow
@@ -56,14 +56,14 @@ export const PlayHead = observer(function PlayHead() {
     playHead.current.style.animationDuration = `${
       144000 / uiStore.pixelsPerSecond
     }s`;
-  }, [timer.lastCursor, uiStore.pixelsPerSecond]);
+  }, [audioStore.lastCursor, uiStore.pixelsPerSecond]);
 
   return (
     <Box
       ref={playHead}
       position="absolute"
       top={0}
-      left={uiStore.timeToXPixels(timer.lastCursor.position)}
+      left={uiStore.timeToXPixels(audioStore.lastCursor.position)}
       className={classNames(styles.marker, { [styles.playing]: store.playing })}
       willChange="transform"
       overflowY="visible"

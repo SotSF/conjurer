@@ -48,7 +48,7 @@ export const TimelineLayer = observer(function TimelineLayer({
         borderColor="black"
         borderStyle="dotted"
         onClick={action((e) => {
-          audioStore.setTime(
+          audioStore.setTimeWithCursor(
             Math.max(
               0,
               uiStore.xToTime(

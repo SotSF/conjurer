@@ -17,7 +17,7 @@ export const TimerControls = observer(function TimerControls() {
         height={6}
         bgColor="gray.600"
         icon={<FaStepBackward size={10} />}
-        onClick={action(() => audioStore.setTime(0))}
+        onClick={action(() => audioStore.setTimeWithCursor(0))}
       />
       <IconButton
         aria-label="Play"
@@ -35,7 +35,7 @@ export const TimerControls = observer(function TimerControls() {
         bgColor="gray.600"
         icon={<FaStepForward size={10} />}
         onClick={action(() => {
-          audioStore.setTime(MAX_TIME);
+          audioStore.setTimeWithCursor(MAX_TIME);
           store.pause();
         })}
       />

@@ -84,7 +84,7 @@ export class UIStore {
     }
 
     // resetting the time will restart the playhead animation
-    this.audioStore.setTime(this.audioStore.globalTime);
+    this.audioStore.setTimeWithCursor(this.audioStore.globalTime);
   };
 
   zoomIn = () => {
@@ -94,7 +94,7 @@ export class UIStore {
     }
 
     // resetting the time will restart the playhead animation
-    this.audioStore.setTime(this.audioStore.globalTime);
+    this.audioStore.setTimeWithCursor(this.audioStore.globalTime);
   };
 
   toggleLayout = () => {

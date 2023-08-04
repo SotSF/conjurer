@@ -107,7 +107,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
 
       wavesurfer.on("interaction", (newTime: number) => {
         if (!wavesurfer) return;
-        audioStore.setTime(Math.max(0, newTime));
+        audioStore.setTimeWithCursor(Math.max(0, newTime));
       });
 
       wavesurfer.on("ready", () => {
@@ -168,7 +168,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
         lastAudioLoaded.current = audioStore.selectedAudioFile;
         audioStore.wavesurfer.stop();
         // timer.stop();
-        audioStore.setTime(0);
+        audioStore.setTimeWithCursor(0);
         setLoading(true);
 
         // Destroy the old timeline plugin
@@ -223,7 +223,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
           );
           audioStore.loopRegion = newRegion;
           if (!audioStore.wavesurfer) return;
-          audioStore.setTime(Math.max(0, newRegion.start));
+          audioStore.setTimeWithCursor(Math.max(0, newRegion.start));
         })
       );
       regionsPlugin.on(
@@ -231,7 +231,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
         action((region: RegionParams) => {
           audioStore.loopRegion = region;
           if (!audioStore.wavesurfer) return;
-          audioStore.setTime(Math.max(0, region.start));
+          audioStore.setTimeWithCursor(Math.max(0, region.start));
         })
       );
     });

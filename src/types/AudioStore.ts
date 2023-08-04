@@ -158,18 +158,17 @@ export class AudioStore {
   get globalTime() {
     return this._globalTime;
   }
-  set globalTime(time: number) {
-    this._globalTime = time;
-  }
 
   get globalTimeRounded() {
     return Math.round(this.globalTime * 10) / 10;
   }
 
-  setTime = (time: number) => {
+  setTimeWithCursor = (time: number) => {
     if (!this.wavesurfer) return;
-    if (this.wavesurfer.getCurrentTime() === time) return;
+    // TODO: this line could be causing unnecessary are renders
+    this.lastCursorPosition = time;
 
+    if (this.wavesurfer.getCurrentTime() === time) return;
     this.wavesurfer.seekTo(time / this.wavesurfer.getDuration());
     // TODO:
   };
@@ -182,8 +181,29 @@ export class AudioStore {
     // if (!this.loopingAudio || !this.loopRegion || !this.loopRegion.end) return;
     // if (time > this.loopRegion.end) this.timer.setTime(this.loopRegion.start);
     // TODO:
-    this.globalTime = time;
+    this._globalTime = time;
   };
+
+  private _lastCursor = { position: 0 };
+
+  /**
+   * The last cursor position that was set by the user. This is listenable/observable, since it is an object and not a primitive.
+   *
+   * @readonly
+   * @memberof Timer
+   */
+  get lastCursor() {
+    return this._lastCursor;
+  }
+
+  get lastCursorPosition() {
+    return this._lastCursor.position;
+  }
+
+  set lastCursorPosition(time: number) {
+    // instantiate a new object here to trigger Mobx reactions
+    this._lastCursor = { position: time < 0 ? 0 : time };
+  }
 
   serialize = () => ({
     selectedAudioFile: this.selectedAudioFile,

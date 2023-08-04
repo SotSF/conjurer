@@ -66,7 +66,7 @@ export class PlaylistStore {
     this.rootStore.pause();
 
     if (this.rootStore.experienceFilename === experienceFilename) {
-      this.audioStore.setTime(0);
+      this.audioStore.setTimeWithCursor(0);
       this.rootStore.play();
       return;
     }
@@ -78,7 +78,7 @@ export class PlaylistStore {
   playExperienceWhenReady = () =>
     new Promise<void>((resolve) => {
       this.audioStore.wavesurfer?.once("ready", () => {
-        this.audioStore.setTime(0);
+        this.audioStore.setTimeWithCursor(0);
         this.rootStore.play();
         resolve();
       });
