@@ -9,6 +9,7 @@ import { useDebouncedCallback } from "use-debounce";
 export const PlayHead = observer(function PlayHead() {
   const store = useStore();
   const { audioStore, uiStore } = store;
+  const { audioState } = audioStore;
 
   const playHead = useRef<HTMLDivElement>(null);
 
@@ -64,7 +65,9 @@ export const PlayHead = observer(function PlayHead() {
       position="absolute"
       top={0}
       left={uiStore.timeToXPixels(audioStore.lastCursor.position)}
-      className={classNames(styles.marker, { [styles.playing]: store.playing })}
+      className={classNames(styles.marker, {
+        [styles.playing]: audioState === "playing",
+      })}
       willChange="transform"
       overflowY="visible"
       zIndex={10}

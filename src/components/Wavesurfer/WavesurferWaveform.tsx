@@ -9,7 +9,7 @@ import type TimelinePlugin from "wavesurfer.js/dist/plugins/timeline";
 import type { TimelinePluginOptions } from "wavesurfer.js/dist/plugins/timeline";
 import type RegionsPlugin from "wavesurfer.js/dist/plugins/regions";
 import type { RegionParams } from "wavesurfer.js/dist/plugins/regions";
-import { action } from "mobx";
+import { action, runInAction } from "mobx";
 import { useCloneCanvas } from "@/src/components/Wavesurfer/hooks/cloneCanvas";
 import { loopRegionColor } from "@/src/types/AudioStore";
 
@@ -142,6 +142,12 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
       wavesurfer.on("timeupdate", (currentTime: number) =>
         audioStore.onTick(currentTime)
       );
+
+      wavesurfer.on("play", () => {
+        runInAction(() => {
+          audioStore.audioState = "playing";
+        });
+      });
 
       // we are only truly done loading when the waveform has been drawn
       wavesurfer.on("redraw", () => setLoading(false));

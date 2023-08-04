@@ -16,7 +16,7 @@ import { AudioRegion } from "@/src/types/AudioRegion";
 
 export const loopRegionColor = "rgba(237, 137, 54, 0.4)";
 
-export const PEAK_DATA_SAMPLE_RATE = 30;
+export const PEAK_DATA_SAMPLE_RATE = 60;
 
 // Define a new RootStore interface here so that we avoid circular dependencies
 interface RootStore {
