@@ -170,18 +170,17 @@ export class AudioStore {
 
     if (this.wavesurfer.getCurrentTime() === time) return;
     this.wavesurfer.seekTo(time / this.wavesurfer.getDuration());
-    // TODO:
   };
 
   skipForward = () => {};
   skipBackward = () => {};
 
   onTick = (time: number) => {
-    // TODO: are implement looping functionality
-    // if (!this.loopingAudio || !this.loopRegion || !this.loopRegion.end) return;
-    // if (time > this.loopRegion.end) this.timer.setTime(this.loopRegion.start);
-    // TODO:
     this._globalTime = time;
+
+    if (!this.loopingAudio || !this.loopRegion || !this.loopRegion.end) return;
+    if (time > this.loopRegion.end)
+      this.setTimeWithCursor(this.loopRegion.start);
   };
 
   private _lastCursor = { position: 0 };
