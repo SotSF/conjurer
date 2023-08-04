@@ -29,7 +29,7 @@ export const KeyboardControls = observer(function KeyboardControls() {
         !e.altKey &&
         !e.shiftKey
       ) {
-        timer.togglePlaying();
+        store.togglePlaying();
         e.preventDefault();
       } else if (e.key === "ArrowLeft") timer.skipBackward();
       else if (e.key === "ArrowRight") timer.skipForward();

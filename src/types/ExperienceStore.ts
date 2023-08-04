@@ -128,8 +128,8 @@ export class ExperienceStore {
 
   stringifyExperience = (): string =>
     JSON.stringify(this.rootStore.serialize(), (_, val) =>
-      // round numbers to 4 decimal places, which saves space and is probably enough precision
-      val?.toFixed ? Number(val.toFixed(4)) : val
+      // round numbers to 6 decimal places, which saves space and is probably enough precision
+      val?.toFixed ? Number(val.toFixed(6)) : val
     );
 
   parseExperience = (experience: string): any => JSON.parse(experience);

@@ -136,12 +136,38 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
       });
 
       wavesurfer.on("finish", () => {
-        timer.playing = false;
+        timer.stop();
         if (playlistStore.autoplay) playlistStore.playNextExperience();
       });
 
       // we are only truly done loading when the waveform has been drawn
       wavesurfer.on("redraw", () => setLoading(false));
+
+      // May need to fine tune this number in the future:
+      const AUDIO_DELAY = 34;
+
+      // // Use the below to do so:
+      // let runningTotal = 0;
+      // let count = 0;
+      // wavesurfer.on("audioprocess", (time: number) => {
+      //   runningTotal += time - timer.globalTime;
+      //   count++;
+      //   if (count === 100) {
+      //     console.log(runningTotal / count);
+      //     runningTotal = 0;
+      //     count = 0;
+      //   }
+      // });
+
+      wavesurfer.on("play", () => {
+        // we have to artificially delay the timer start to account for the time it takes
+        // for the audio to actually start playing. annoying, seemingly a bug in wavesurfer.
+        setTimeout(() => timer.start(), AUDIO_DELAY);
+      });
+
+      wavesurfer.on("pause", () => {
+        timer.stop();
+      });
 
       cloneCanvas();
     };
@@ -163,7 +189,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
         ready.current = false;
         lastAudioLoaded.current = audioStore.selectedAudioFile;
         audioStore.wavesurfer.stop();
-        timer.playing = false;
+        timer.stop();
         timer.setTime(0);
         setLoading(true);
 
@@ -268,14 +294,23 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
   }, [uiStore, audioStore, audioStore.markingAudio, timer]);
 
   // on play/pause toggle
+  // useEffect(() => {
+  //   if (!didInitialize.current || !ready.current) return;
+  //   if (timer.playing) {
+  //     audioStore.wavesurfer?.play();
+  //   } else {
+  //     audioStore.wavesurfer?.pause();
+  //   }
+  // }, [timer.playing, audioStore.wavesurfer])
+
   useEffect(() => {
     if (!didInitialize.current || !ready.current) return;
-    if (timer.playing) {
+    if (audioStore.audioState === "starting") {
       audioStore.wavesurfer?.play();
-    } else {
+    } else if (audioStore.audioState === "paused") {
       audioStore.wavesurfer?.pause();
     }
-  }, [timer.playing, audioStore.wavesurfer]);
+  }, [audioStore.audioState, audioStore.wavesurfer]);
 
   // on mute toggle
   useEffect(() => {

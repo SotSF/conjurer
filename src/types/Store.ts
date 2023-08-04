@@ -112,6 +112,10 @@ export class Store {
 
   experienceLastSavedAt = 0;
 
+  get playing() {
+    return this.audioStore.audioState !== "paused";
+  }
+
   constructor() {
     makeAutoObservable(this);
   }
@@ -138,8 +142,7 @@ export class Store {
 
     // set up an autosave interval
     setInterval(() => {
-      if (!this.timer.playing)
-        this.experienceStore.saveToLocalStorage("autosave");
+      if (!this.playing) this.experienceStore.saveToLocalStorage("autosave");
     }, 60 * 1000);
 
     this.uiStore.initialize();
@@ -403,6 +406,33 @@ export class Store {
           selectedVariations.length > 1
         );
       }
+    }
+  };
+
+  play = () => {
+    if (this.playing) return;
+    this.togglePlaying();
+  };
+
+  pause = () => {
+    if (!this.playing) return;
+    this.togglePlaying();
+  };
+
+  // How playing works:
+  // - When the user clicks play, we set audioState to "starting"
+  // - When the wavesurfer audio actually starts playing, we set audioState to "playing"
+  // - When the audioState changes to "playing", the timer starts ticking
+  // In general, it goes:
+  //   general consumer -> store.togglePlaying -> audioStore -> wavesurfer -> timer
+  togglePlaying = () => {
+    if (
+      this.audioStore.audioState === "playing" ||
+      this.audioStore.audioState === "starting"
+    ) {
+      this.audioStore.audioState = "paused";
+    } else {
+      this.audioStore.audioState = "starting";
     }
   };
 

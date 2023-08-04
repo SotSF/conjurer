@@ -44,15 +44,7 @@ export class Timer {
     this._lastCursor = { position: time < 0 ? 0 : time };
   }
 
-  private _playing = false;
-
-  get playing() {
-    return this._playing;
-  }
-
-  set playing(value: boolean) {
-    this._playing = value;
-  }
+  ticking = false;
 
   constructor() {
     makeAutoObservable(this);
@@ -69,19 +61,20 @@ export class Timer {
     this._tickListeners.push(listener);
   };
 
-  togglePlaying = () => {
-    this.playing = !this.playing;
+  start = () => {
+    this.ticking = true;
+    this._lastStartedAtDateTime = Date.now();
+    requestAnimationFrame(this.tick);
+  };
 
-    if (this.playing) {
-      this._lastStartedAtDateTime = Date.now();
-      this.lastCursorPosition = this.globalTime;
-      requestAnimationFrame(this.tick);
-    }
+  stop = () => {
+    this.ticking = false;
+    this.lastCursorPosition = this.globalTime;
   };
 
   tick = (t: number) => {
-    if (this.globalTime > MAX_TIME) this.playing = false;
-    if (!this.playing) return;
+    if (this.globalTime > MAX_TIME) this.ticking = false;
+    if (!this.ticking) return;
 
     setTimeout(this.tick, 1000 / MAX_FRAMES_PER_SECOND);
 
@@ -108,10 +101,10 @@ export class Timer {
   };
 
   skipBackward = () => {
-    this.setTime(this.globalTime - 0.2);
+    this.setTime(this.globalTime - 0.05);
   };
 
   skipForward = () => {
-    this.setTime(this.globalTime + 0.2);
+    this.setTime(this.globalTime + 0.05);
   };
 }

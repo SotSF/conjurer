@@ -9,6 +9,8 @@ interface RootStore {
   user: string;
   experienceName: string;
   experienceFilename: string;
+  play: () => void;
+  pause: () => void;
 }
 
 export class PlaylistStore {
@@ -61,11 +63,11 @@ export class PlaylistStore {
   };
 
   loadAndPlayExperience = async (experienceFilename: string) => {
-    this.timer.playing = false;
+    this.rootStore.pause();
 
     if (this.rootStore.experienceFilename === experienceFilename) {
       this.timer.setTime(0);
-      this.timer.playing = true;
+      this.rootStore.play();
       return;
     }
 
@@ -77,7 +79,7 @@ export class PlaylistStore {
     new Promise<void>((resolve) => {
       this.audioStore.wavesurfer?.once("ready", () => {
         this.timer.setTime(0);
-        if (!this.timer.playing) this.timer.togglePlaying();
+        this.rootStore.play();
         resolve();
       });
     });
