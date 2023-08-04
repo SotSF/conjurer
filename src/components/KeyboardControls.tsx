@@ -31,9 +31,13 @@ export const KeyboardControls = observer(function KeyboardControls() {
       ) {
         store.togglePlaying();
         e.preventDefault();
-      } else if (e.key === "ArrowLeft") audioStore.skipBackward();
-      else if (e.key === "ArrowRight") audioStore.skipForward();
-      else if (e.key === "o" && (e.ctrlKey || e.metaKey)) {
+      } else if (e.key === "ArrowLeft") {
+        audioStore.skipBackward();
+        e.preventDefault();
+      } else if (e.key === "ArrowRight") {
+        audioStore.skipForward();
+        e.preventDefault();
+      } else if (e.key === "o" && (e.ctrlKey || e.metaKey)) {
         uiStore.showingOpenExperienceModal = true;
         e.preventDefault();
       } else if (e.key === "a" && (e.ctrlKey || e.metaKey)) {

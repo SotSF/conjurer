@@ -172,8 +172,8 @@ export class AudioStore {
     this.wavesurfer.seekTo(time / this.wavesurfer.getDuration());
   };
 
-  skipForward = () => {};
-  skipBackward = () => {};
+  skipForward = () => this.setTimeWithCursor(this.globalTime + 0.01);
+  skipBackward = () => this.setTimeWithCursor(this.globalTime - 0.01);
 
   onTick = (time: number) => {
     this._globalTime = time;

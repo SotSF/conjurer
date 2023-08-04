@@ -45,7 +45,7 @@ export const PlayHead = observer(function PlayHead() {
 
   useEffect(() => {
     if (!playHead.current) return;
-    console.log("detected last cursor change");
+
     // This forces the animation to restart. https://css-tricks.com/restart-css-animation/
     playHead.current.style.animation = "none";
     void playHead.current.offsetHeight; // trigger reflow
