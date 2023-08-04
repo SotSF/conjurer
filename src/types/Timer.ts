@@ -64,13 +64,12 @@ export class Timer {
   start = () => {
     this.ticking = true;
     this._lastStartedAtDateTime = Date.now();
-    // TODO: determine if this is needed
-    // this.lastCursorPosition = this.globalTime;
     requestAnimationFrame(this.tick);
   };
 
   stop = () => {
     this.ticking = false;
+    this.lastCursorPosition = this.globalTime;
   };
 
   tick = (t: number) => {
@@ -102,10 +101,10 @@ export class Timer {
   };
 
   skipBackward = () => {
-    this.setTime(this.globalTime - 0.2);
+    this.setTime(this.globalTime - 0.05);
   };
 
   skipForward = () => {
-    this.setTime(this.globalTime + 0.2);
+    this.setTime(this.globalTime + 0.05);
   };
 }
