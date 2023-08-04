@@ -140,6 +140,10 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
         if (playlistStore.autoplay) playlistStore.playNextExperience();
       });
 
+      wavesurfer.on("timeupdate", (currentTime: number) =>
+        audioStore.onTick(currentTime)
+      );
+
       // we are only truly done loading when the waveform has been drawn
       wavesurfer.on("redraw", () => setLoading(false));
 

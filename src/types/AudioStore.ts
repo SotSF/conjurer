@@ -154,8 +154,12 @@ export class AudioStore {
 
   // TIMER STUFF
 
+  private _globalTime = 0;
   get globalTime() {
-    return this.wavesurfer?.getCurrentTime() ?? 0;
+    return this._globalTime;
+  }
+  set globalTime(time: number) {
+    this._globalTime = time;
   }
 
   get globalTimeRounded() {
@@ -178,6 +182,7 @@ export class AudioStore {
     // if (!this.loopingAudio || !this.loopRegion || !this.loopRegion.end) return;
     // if (time > this.loopRegion.end) this.timer.setTime(this.loopRegion.start);
     // TODO:
+    this.globalTime = time;
   };
 
   serialize = () => ({
