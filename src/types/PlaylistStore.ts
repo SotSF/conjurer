@@ -1,4 +1,3 @@
-import { Timer } from "@/src/types/Timer";
 import { makeAutoObservable, runInAction } from "mobx";
 import initialPlaylist from "@/src/data/initialPlaylist.json";
 import { ExperienceStore } from "@/src/types/ExperienceStore";
@@ -21,7 +20,6 @@ export class PlaylistStore {
 
   constructor(
     readonly rootStore: RootStore,
-    readonly timer: Timer,
     readonly audioStore: AudioStore,
     readonly experienceStore: ExperienceStore
   ) {

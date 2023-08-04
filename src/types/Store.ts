@@ -1,5 +1,4 @@
 import { Block } from "@/src/types/Block";
-import { Timer } from "@/src/types/Timer";
 import { UIStore } from "@/src/types/UIStore";
 import { makeAutoObservable, configure } from "mobx";
 import { AudioStore } from "@/src/types/AudioStore";
@@ -33,13 +32,11 @@ export type BlockOrVariation = BlockSelection | VariationSelection;
 export class Store {
   initialized = false;
 
-  timer = new Timer();
   audioStore = new AudioStore(this);
   uiStore = new UIStore(this.audioStore);
   experienceStore = new ExperienceStore(this);
   playlistStore = new PlaylistStore(
     this,
-    this.timer,
     this.audioStore,
     this.experienceStore
   );
@@ -423,8 +420,6 @@ export class Store {
   // - When the user clicks play, we set audioState to "starting"
   // - When the wavesurfer audio actually starts playing, we set audioState to "playing"
   // - When the audioState changes to "playing", the timer starts ticking
-  // In general, it goes:
-  //   general consumer -> store.togglePlaying -> audioStore -> wavesurfer -> timer
   togglePlaying = () => {
     if (
       this.audioStore.audioState === "playing" ||

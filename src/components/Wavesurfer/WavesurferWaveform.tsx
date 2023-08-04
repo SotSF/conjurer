@@ -72,7 +72,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
   const waveformRef = useRef<HTMLDivElement>(null);
   const clonedWaveformRef = useRef<HTMLDivElement>(null);
 
-  const { audioStore, timer, uiStore, playlistStore } = useStore();
+  const { audioStore, uiStore, playlistStore } = useStore();
 
   const cloneCanvas = useCloneCanvas(clonedWaveformRef);
 
@@ -136,7 +136,6 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
       });
 
       wavesurfer.on("finish", () => {
-        // timer.stop();
         if (playlistStore.autoplay) playlistStore.playNextExperience();
       });
 
@@ -151,7 +150,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
     };
 
     create();
-  }, [audioStore, audioStore.selectedAudioFile, uiStore, uiStore.pixelsPerSecond, timer, playlistStore, cloneCanvas]);
+  }, [audioStore, audioStore.selectedAudioFile, uiStore, uiStore.pixelsPerSecond, playlistStore, cloneCanvas]);
 
   // on selected audio file change
   useEffect(() => {
@@ -167,7 +166,6 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
         ready.current = false;
         lastAudioLoaded.current = audioStore.selectedAudioFile;
         audioStore.wavesurfer.stop();
-        // timer.stop();
         audioStore.setTimeWithCursor(0);
         setLoading(true);
 
@@ -188,7 +186,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
     };
     changeAudioFile();
     cloneCanvas();
-  }, [audioStore, audioStore.selectedAudioFile, timer, uiStore.pixelsPerSecond, cloneCanvas]);
+  }, [audioStore, audioStore.selectedAudioFile, uiStore.pixelsPerSecond, cloneCanvas]);
 
   // on loop toggle
   useEffect(() => {
@@ -237,7 +235,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
     });
     toggleLoopingMode();
     return disableDragSelection;
-  }, [audioStore, audioStore.loopingAudio, timer]);
+  }, [audioStore, audioStore.loopingAudio]);
 
   // on marker mode toggle
   useEffect(() => {
@@ -269,17 +267,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
     });
     toggleMarkingMode();
     return disableCreateByClick;
-  }, [uiStore, audioStore, audioStore.markingAudio, timer]);
-
-  // on play/pause toggle
-  // useEffect(() => {
-  //   if (!didInitialize.current || !ready.current) return;
-  //   if (timer.playing) {
-  //     audioStore.wavesurfer?.play();
-  //   } else {
-  //     audioStore.wavesurfer?.pause();
-  //   }
-  // }, [timer.playing, audioStore.wavesurfer])
+  }, [uiStore, audioStore, audioStore.markingAudio]);
 
   useEffect(() => {
     if (!didInitialize.current || !ready.current) return;
@@ -307,9 +295,10 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
   useEffect(() => {
     if (!audioStore.wavesurfer || !ready.current) return;
     const duration = audioStore.wavesurfer.getDuration();
-    const progress = duration > 0 ? timer.lastCursor.position / duration : 0;
+    const progress =
+      duration > 0 ? audioStore.lastCursor.position / duration : 0;
     audioStore.wavesurfer.seekTo(clamp(progress, 0, 1));
-  }, [timer.lastCursor, audioStore.wavesurfer]);
+  }, [audioStore.lastCursor, audioStore.wavesurfer]);
 
   return (
     <Box width="100%" height={20} bgColor="gray.500">

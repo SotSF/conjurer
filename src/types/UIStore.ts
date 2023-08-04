@@ -1,5 +1,4 @@
 import { AudioStore } from "@/src/types/AudioStore";
-import { Timer } from "@/src/types/Timer";
 import { INITIAL_PIXELS_PER_SECOND } from "@/src/utils/time";
 import { makeAutoObservable } from "mobx";
 import { RegionParams } from "wavesurfer.js/dist/plugins/regions";

@@ -1,4 +1,3 @@
-import { Timer } from "@/src/types/Timer";
 import {
   ASSET_BUCKET_NAME,
   ASSET_BUCKET_REGION,
@@ -152,7 +151,7 @@ export class AudioStore {
     return getS3().send(putObjectCommand);
   };
 
-  // TIMER STUFF
+  // Timer relevant code - perhaps extract this to a separate file
 
   private _globalTime = 0;
   get globalTime() {
@@ -175,6 +174,7 @@ export class AudioStore {
   skipForward = () => this.setTimeWithCursor(this.globalTime + 0.01);
   skipBackward = () => this.setTimeWithCursor(this.globalTime - 0.01);
 
+  // called by wavesurfer, which defaults to 60fps
   onTick = (time: number) => {
     this._globalTime = time;
 
@@ -186,10 +186,8 @@ export class AudioStore {
   private _lastCursor = { position: 0 };
 
   /**
-   * The last cursor position that was set by the user. This is listenable/observable, since it is an object and not a primitive.
-   *
-   * @readonly
-   * @memberof Timer
+   * The last cursor position that was set by the user. This is listenable/observable, since it is
+   * an object and not a primitive.
    */
   get lastCursor() {
     return this._lastCursor;
@@ -203,6 +201,8 @@ export class AudioStore {
     // instantiate a new object here to trigger Mobx reactions
     this._lastCursor = { position: time < 0 ? 0 : time };
   }
+
+  // Serialization
 
   serialize = () => ({
     selectedAudioFile: this.selectedAudioFile,

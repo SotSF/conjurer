@@ -5,7 +5,7 @@ import { useEffect } from "react";
 
 export const KeyboardControls = observer(function KeyboardControls() {
   const store = useStore();
-  const { timer, uiStore, experienceStore, audioStore } = store;
+  const { uiStore, experienceStore, audioStore } = store;
 
   useEffect(() => {
     const handleKeyDown = action((e: KeyboardEvent) => {
@@ -79,7 +79,7 @@ export const KeyboardControls = observer(function KeyboardControls() {
       window.removeEventListener("copy", handleCopy);
       window.removeEventListener("paste", handlePaste);
     };
-  }, [store, timer, uiStore, experienceStore, audioStore]);
+  }, [store, uiStore, experienceStore, audioStore]);
 
   return null;
 });
