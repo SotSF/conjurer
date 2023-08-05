@@ -17,7 +17,7 @@ export default function Playground() {
       <ChakraProvider theme={theme}>
         <StoreContext.Provider value={new Store("playground")}>
           <Box height="100vh" width="100vw" bgColor="gray.700">
-            <PatternPlayground />
+            <PatternPlayground page="playground" />
           </Box>
         </StoreContext.Provider>
       </ChakraProvider>
