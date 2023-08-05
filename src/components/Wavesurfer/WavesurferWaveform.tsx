@@ -143,11 +143,13 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
         audioStore.onTick(currentTime)
       );
 
-      wavesurfer.on("play", () => {
-        runInAction(() => {
+      wavesurfer.on(
+        "play",
+        action(() => {
+          console.log("wavesurfer play", new Date().getTime());
           audioStore.audioState = "playing";
-        });
-      });
+        })
+      );
 
       // we are only truly done loading when the waveform has been drawn
       wavesurfer.on("redraw", () => setLoading(false));

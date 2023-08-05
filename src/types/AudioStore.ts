@@ -153,19 +153,29 @@ export class AudioStore {
 
   // Timer relevant code - perhaps extract this to a separate file
 
+  AUDIO_LATENCY = 0.15;
+
   private _globalTime = 0;
   get globalTime() {
     return this._globalTime;
+  }
+  set globalTime(time: number) {
+    this._globalTime = time + this.AUDIO_LATENCY;
+    this.invalidate?.();
   }
 
   get globalTimeRounded() {
     return Math.round(this.globalTime * 10) / 10;
   }
 
+  get adjustedGlobalTime() {
+    return this.globalTime + this.AUDIO_LATENCY;
+  }
+
   setTimeWithCursor = (time: number) => {
     if (!this.wavesurfer) return;
     this.lastCursorPosition = time;
-    this._globalTime = time;
+    this.globalTime = time;
 
     if (this.wavesurfer.getCurrentTime() === time) return;
     this.wavesurfer.seekTo(time / this.wavesurfer.getDuration());
@@ -176,7 +186,7 @@ export class AudioStore {
 
   // called by wavesurfer, which defaults to 60fps
   onTick = (time: number) => {
-    this._globalTime = time;
+    this.globalTime = time;
 
     if (!this.loopingAudio || !this.loopRegion || !this.loopRegion.end) return;
     if (time > this.loopRegion.end)
