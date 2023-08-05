@@ -164,8 +164,8 @@ export class AudioStore {
 
   setTimeWithCursor = (time: number) => {
     if (!this.wavesurfer) return;
-    // TODO: this line could be causing unnecessary are renders
     this.lastCursorPosition = time;
+    this._globalTime = time;
 
     if (this.wavesurfer.getCurrentTime() === time) return;
     this.wavesurfer.seekTo(time / this.wavesurfer.getDuration());

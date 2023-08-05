@@ -139,7 +139,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
         if (playlistStore.autoplay) playlistStore.playNextExperience();
       });
 
-      wavesurfer.on("timeupdate", (currentTime: number) =>
+      wavesurfer.on("audioprocess", (currentTime: number) =>
         audioStore.onTick(currentTime)
       );
 
