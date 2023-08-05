@@ -1,4 +1,3 @@
-import { Timer } from "@/src/types/Timer";
 import {
   ASSET_BUCKET_NAME,
   ASSET_BUCKET_REGION,
@@ -17,7 +16,7 @@ import { AudioRegion } from "@/src/types/AudioRegion";
 
 export const loopRegionColor = "rgba(237, 137, 54, 0.4)";
 
-export const PEAK_DATA_SAMPLE_RATE = 30;
+export const PEAK_DATA_SAMPLE_RATE = 60;
 
 // Define a new RootStore interface here so that we avoid circular dependencies
 interface RootStore {
@@ -45,7 +44,7 @@ export class AudioStore {
 
   audioState: "paused" | "starting" | "playing" = "paused";
 
-  constructor(readonly rootStore: RootStore, readonly timer: Timer) {
+  constructor(readonly rootStore: RootStore) {
     makeAutoObservable(this, {
       getSelectedAudioFileUrl: false,
       wavesurfer: false,
@@ -54,7 +53,7 @@ export class AudioStore {
       peaks: false,
       getPeakAtTime: false,
     });
-    this.timer.addTickListener(this.onTick);
+    // this.timer.addTickListener(this.onTick);
   }
 
   computePeaks = (audioBuffer: AudioBuffer) => {
@@ -152,11 +151,62 @@ export class AudioStore {
     return getS3().send(putObjectCommand);
   };
 
-  onTick = (time: number) => {
-    if (!this.loopingAudio || !this.loopRegion || !this.loopRegion.end) return;
+  // Timer relevant code - perhaps extract this to a separate file
 
-    if (time > this.loopRegion.end) this.timer.setTime(this.loopRegion.start);
+  private _globalTime = 0;
+  get globalTime() {
+    return this._globalTime;
+  }
+  set globalTime(time: number) {
+    this._globalTime = time;
+  }
+  get globalTimeRounded() {
+    return Math.round(this.globalTime * 10) / 10;
+  }
+
+  audioLatency = 0.15; // seconds
+
+  setTimeWithCursor = (time: number) => {
+    if (!this.wavesurfer) return;
+    this.lastCursorPosition = time;
+    this.globalTime = time;
+
+    if (this.wavesurfer.getCurrentTime() === time) return;
+    this.wavesurfer.seekTo(time / this.wavesurfer.getDuration());
   };
+
+  skipForward = () => this.setTimeWithCursor(this.globalTime + 0.01);
+  skipBackward = () => this.setTimeWithCursor(this.globalTime - 0.01);
+
+  // called by wavesurfer, which defaults to 60fps
+  onTick = (time: number) => {
+    this.globalTime = time;
+
+    if (!this.loopingAudio || !this.loopRegion || !this.loopRegion.end) return;
+    if (time > this.loopRegion.end)
+      this.setTimeWithCursor(this.loopRegion.start);
+  };
+
+  private _lastCursor = { position: 0 };
+
+  /**
+   * The last cursor position that was set by the user. This is listenable/observable, since it is
+   * an object and not a primitive.
+   */
+  get lastCursor() {
+    return this._lastCursor;
+  }
+
+  get lastCursorPosition() {
+    return this._lastCursor.position;
+  }
+
+  set lastCursorPosition(time: number) {
+    // instantiate a new object here to trigger Mobx reactions
+    this._lastCursor = { position: time < 0 ? 0 : time };
+  }
+
+  // Serialization
 
   serialize = () => ({
     selectedAudioFile: this.selectedAudioFile,

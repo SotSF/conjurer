@@ -53,7 +53,11 @@ export const ParameterVariations = observer(function ParameterVariations({
   const onVariationClick = useVariationClick(block, uniformName);
 
   return (
-    <VStack spacing={0}>
+    <VStack
+      spacing={0}
+      // make variation graphs extend over the block border:
+      mx="-2px"
+    >
       <DragDropContext onDragEnd={onDragEnd}>
         <Droppable droppableId={block.id + uniformName} direction="horizontal">
           {(provided, snapshot) => (

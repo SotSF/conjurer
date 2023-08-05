@@ -1,4 +1,4 @@
-import { Timer } from "@/src/types/Timer";
+import { AudioStore } from "@/src/types/AudioStore";
 import { INITIAL_PIXELS_PER_SECOND } from "@/src/utils/time";
 import { makeAutoObservable } from "mobx";
 import { RegionParams } from "wavesurfer.js/dist/plugins/regions";
@@ -64,7 +64,7 @@ export class UIStore {
 
   pixelsPerSecond = INITIAL_PIXELS_PER_SECOND; // the zoom of the timeline
 
-  constructor(readonly timer: Timer) {
+  constructor(readonly audioStore: AudioStore) {
     makeAutoObservable(this);
   }
 
@@ -83,7 +83,7 @@ export class UIStore {
     }
 
     // resetting the time will restart the playhead animation
-    this.timer.setTime(this.timer.globalTime);
+    this.audioStore.setTimeWithCursor(this.audioStore.globalTime);
   };
 
   zoomIn = () => {
@@ -93,7 +93,7 @@ export class UIStore {
     }
 
     // resetting the time will restart the playhead animation
-    this.timer.setTime(this.timer.globalTime);
+    this.audioStore.setTimeWithCursor(this.audioStore.globalTime);
   };
 
   toggleLayout = () => {

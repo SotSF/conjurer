@@ -5,7 +5,7 @@ import { useEffect } from "react";
 
 export const KeyboardControls = observer(function KeyboardControls() {
   const store = useStore();
-  const { timer, uiStore, experienceStore } = store;
+  const { uiStore, experienceStore, audioStore } = store;
 
   useEffect(() => {
     const handleKeyDown = action((e: KeyboardEvent) => {
@@ -31,9 +31,13 @@ export const KeyboardControls = observer(function KeyboardControls() {
       ) {
         store.togglePlaying();
         e.preventDefault();
-      } else if (e.key === "ArrowLeft") timer.skipBackward();
-      else if (e.key === "ArrowRight") timer.skipForward();
-      else if (e.key === "o" && (e.ctrlKey || e.metaKey)) {
+      } else if (e.key === "ArrowLeft") {
+        audioStore.skipBackward();
+        e.preventDefault();
+      } else if (e.key === "ArrowRight") {
+        audioStore.skipForward();
+        e.preventDefault();
+      } else if (e.key === "o" && (e.ctrlKey || e.metaKey)) {
         uiStore.showingOpenExperienceModal = true;
         e.preventDefault();
       } else if (e.key === "a" && (e.ctrlKey || e.metaKey)) {
@@ -75,7 +79,7 @@ export const KeyboardControls = observer(function KeyboardControls() {
       window.removeEventListener("copy", handleCopy);
       window.removeEventListener("paste", handlePaste);
     };
-  }, [store, timer, uiStore, experienceStore]);
+  }, [store, uiStore, experienceStore, audioStore]);
 
   return null;
 });

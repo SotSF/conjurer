@@ -8,7 +8,8 @@ import { useDebouncedCallback } from "use-debounce";
 
 export const PlayHead = observer(function PlayHead() {
   const store = useStore();
-  const { timer, uiStore } = store;
+  const { audioStore, uiStore } = store;
+  const { audioState } = audioStore;
 
   const playHead = useRef<HTMLDivElement>(null);
 
@@ -56,15 +57,17 @@ export const PlayHead = observer(function PlayHead() {
     playHead.current.style.animationDuration = `${
       144000 / uiStore.pixelsPerSecond
     }s`;
-  }, [timer.lastCursor, uiStore.pixelsPerSecond]);
+  }, [audioStore.lastCursor, uiStore.pixelsPerSecond]);
 
   return (
     <Box
       ref={playHead}
       position="absolute"
       top={0}
-      left={uiStore.timeToXPixels(timer.lastCursor.position)}
-      className={classNames(styles.marker, { [styles.playing]: store.playing })}
+      left={uiStore.timeToXPixels(audioStore.lastCursor.position)}
+      className={classNames(styles.marker, {
+        [styles.playing]: audioState === "playing",
+      })}
       willChange="transform"
       overflowY="visible"
       zIndex={10}

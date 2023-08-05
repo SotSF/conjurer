@@ -9,7 +9,7 @@ import type TimelinePlugin from "wavesurfer.js/dist/plugins/timeline";
 import type { TimelinePluginOptions } from "wavesurfer.js/dist/plugins/timeline";
 import type RegionsPlugin from "wavesurfer.js/dist/plugins/regions";
 import type { RegionParams } from "wavesurfer.js/dist/plugins/regions";
-import { action } from "mobx";
+import { action, runInAction } from "mobx";
 import { useCloneCanvas } from "@/src/components/Wavesurfer/hooks/cloneCanvas";
 import { loopRegionColor } from "@/src/types/AudioStore";
 
@@ -72,7 +72,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
   const waveformRef = useRef<HTMLDivElement>(null);
   const clonedWaveformRef = useRef<HTMLDivElement>(null);
 
-  const { audioStore, timer, uiStore, playlistStore } = useStore();
+  const { audioStore, uiStore, playlistStore } = useStore();
 
   const cloneCanvas = useCloneCanvas(clonedWaveformRef);
 
@@ -83,6 +83,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
 
     const create = async () => {
       setLoading(true);
+
       // Lazy load all wave surfer dependencies
       const { WaveSurfer, TimelinePlugin, RegionsPlugin } =
         (wavesurferConstructors.current = await importWavesurferConstructors());
@@ -107,12 +108,13 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
 
       wavesurfer.on("interaction", (newTime: number) => {
         if (!wavesurfer) return;
-        timer.setTime(Math.max(0, newTime));
+        audioStore.setTimeWithCursor(Math.max(0, newTime));
       });
 
       wavesurfer.on("ready", () => {
         ready.current = true;
         if (audioStore.initialRegions.length > 0) {
+          regionsPlugin.clearRegions();
           audioStore.initialRegions.forEach((region) => {
             regionsPlugin.addRegion(region.withNewContentElement());
           });
@@ -133,47 +135,38 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
 
         const audioBuffer = wavesurfer.getDecodedData();
         if (audioBuffer) audioStore.computePeaks(audioBuffer);
+
+        // delay audio in order to sync with video
+        const audioContext = new AudioContext();
+        const mediaElement = wavesurfer.getMediaElement();
+        const mediaSource = audioContext.createMediaElementSource(mediaElement);
+        const delayNode = audioContext.createDelay(1);
+        delayNode.delayTime.value = audioStore.audioLatency;
+        mediaSource.connect(delayNode);
+        delayNode.connect(audioContext.destination);
       });
 
       wavesurfer.on("finish", () => {
-        timer.stop();
         if (playlistStore.autoplay) playlistStore.playNextExperience();
       });
 
+      wavesurfer.on("audioprocess", (currentTime: number) =>
+        audioStore.onTick(currentTime)
+      );
+
+      wavesurfer.on(
+        "play",
+        action(() => (audioStore.audioState = "playing"))
+      );
+
       // we are only truly done loading when the waveform has been drawn
       wavesurfer.on("redraw", () => setLoading(false));
-
-      // May need to fine tune this number in the future:
-      const AUDIO_DELAY = 34;
-
-      // // Use the below to do so:
-      // let runningTotal = 0;
-      // let count = 0;
-      // wavesurfer.on("audioprocess", (time: number) => {
-      //   runningTotal += time - timer.globalTime;
-      //   count++;
-      //   if (count === 100) {
-      //     console.log(runningTotal / count);
-      //     runningTotal = 0;
-      //     count = 0;
-      //   }
-      // });
-
-      wavesurfer.on("play", () => {
-        // we have to artificially delay the timer start to account for the time it takes
-        // for the audio to actually start playing. annoying, seemingly a bug in wavesurfer.
-        setTimeout(() => timer.start(), AUDIO_DELAY);
-      });
-
-      wavesurfer.on("pause", () => {
-        timer.stop();
-      });
 
       cloneCanvas();
     };
 
     create();
-  }, [audioStore, audioStore.selectedAudioFile, uiStore, uiStore.pixelsPerSecond, timer, playlistStore, cloneCanvas]);
+  }, [audioStore, audioStore.selectedAudioFile, uiStore, uiStore.pixelsPerSecond, playlistStore, cloneCanvas]);
 
   // on selected audio file change
   useEffect(() => {
@@ -189,8 +182,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
         ready.current = false;
         lastAudioLoaded.current = audioStore.selectedAudioFile;
         audioStore.wavesurfer.stop();
-        timer.stop();
-        timer.setTime(0);
+        audioStore.setTimeWithCursor(0);
         setLoading(true);
 
         // Destroy the old timeline plugin
@@ -210,7 +202,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
     };
     changeAudioFile();
     cloneCanvas();
-  }, [audioStore, audioStore.selectedAudioFile, timer, uiStore.pixelsPerSecond, cloneCanvas]);
+  }, [audioStore, audioStore.selectedAudioFile, uiStore.pixelsPerSecond, cloneCanvas]);
 
   // on loop toggle
   useEffect(() => {
@@ -245,7 +237,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
           );
           audioStore.loopRegion = newRegion;
           if (!audioStore.wavesurfer) return;
-          timer.setTime(Math.max(0, newRegion.start));
+          audioStore.setTimeWithCursor(Math.max(0, newRegion.start));
         })
       );
       regionsPlugin.on(
@@ -253,13 +245,13 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
         action((region: RegionParams) => {
           audioStore.loopRegion = region;
           if (!audioStore.wavesurfer) return;
-          timer.setTime(Math.max(0, region.start));
+          audioStore.setTimeWithCursor(Math.max(0, region.start));
         })
       );
     });
     toggleLoopingMode();
     return disableDragSelection;
-  }, [audioStore, audioStore.loopingAudio, timer]);
+  }, [audioStore, audioStore.loopingAudio]);
 
   // on marker mode toggle
   useEffect(() => {
@@ -291,17 +283,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
     });
     toggleMarkingMode();
     return disableCreateByClick;
-  }, [uiStore, audioStore, audioStore.markingAudio, timer]);
-
-  // on play/pause toggle
-  // useEffect(() => {
-  //   if (!didInitialize.current || !ready.current) return;
-  //   if (timer.playing) {
-  //     audioStore.wavesurfer?.play();
-  //   } else {
-  //     audioStore.wavesurfer?.pause();
-  //   }
-  // }, [timer.playing, audioStore.wavesurfer])
+  }, [uiStore, audioStore, audioStore.markingAudio]);
 
   useEffect(() => {
     if (!didInitialize.current || !ready.current) return;
@@ -329,9 +311,10 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
   useEffect(() => {
     if (!audioStore.wavesurfer || !ready.current) return;
     const duration = audioStore.wavesurfer.getDuration();
-    const progress = duration > 0 ? timer.lastCursor.position / duration : 0;
+    const progress =
+      duration > 0 ? audioStore.lastCursor.position / duration : 0;
     audioStore.wavesurfer.seekTo(clamp(progress, 0, 1));
-  }, [timer.lastCursor, audioStore.wavesurfer]);
+  }, [audioStore.lastCursor, audioStore.wavesurfer]);
 
   return (
     <Box width="100%" height={20} bgColor="gray.500">
