@@ -113,9 +113,17 @@ export class Store {
     return this.audioStore.audioState !== "paused";
   }
 
-  constructor() {
+  constructor(readonly context: string) {
     makeAutoObservable(this);
+
+    this.initializeContext();
   }
+
+  initializeContext = () => {
+    if (this.context === "playground") {
+      this.uiStore.patternDrawerOpen = true;
+    }
+  };
 
   initialize = () => {
     // check for a username in local storage

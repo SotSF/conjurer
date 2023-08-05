@@ -1,4 +1,4 @@
-import { Box, Button, Grid, GridItem, VStack } from "@chakra-ui/react";
+import { Box, Button, Grid, GridItem, HStack, VStack } from "@chakra-ui/react";
 import { PatternList } from "@/src/components/PatternPlayground/PatternList";
 import { PreviewCanvas } from "@/src/components/Canvas/PreviewCanvas";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -10,10 +10,17 @@ import { useStore } from "@/src/types/StoreContext";
 import { playgroundEffects } from "@/src/effects/effects";
 import { action, runInAction } from "mobx";
 import { DisplayModeButtons } from "@/src/components/PatternPlayground/DisplayModeButtons";
+import { SendDataButton } from "@/src/components/SendDataButton";
 
 const PATTERN_PREVIEW_DISPLAY_SIZE = 600;
 
-export const PatternPlayground = observer(function PatternPlayground() {
+type PatternPlaygroundProps = {
+  page?: "playground";
+};
+
+export const PatternPlayground = observer(function PatternPlayground({
+  page,
+}: PatternPlaygroundProps) {
   const store = useStore();
   const { uiStore } = store;
 
@@ -86,7 +93,13 @@ export const PatternPlayground = observer(function PatternPlayground() {
       uiStore.lastPatternIndexSelected,
       uiStore.lastEffectIndices
     );
-  }, [store, uiStore.lastPatternIndexSelected, uiStore.lastEffectIndices, onSelectPatternBlock, applyPatternEffects]);
+  }, [
+    store,
+    uiStore.lastPatternIndexSelected,
+    uiStore.lastEffectIndices,
+    onSelectPatternBlock,
+    applyPatternEffects,
+  ]);
 
   return (
     <Grid
@@ -119,7 +132,23 @@ export const PatternPlayground = observer(function PatternPlayground() {
         </VStack>
       </GridItem>
       <GridItem area="preview" position="relative">
-        <DisplayModeButtons />
+        <HStack mt={2} pr={1} width="100%" justify="end">
+          <DisplayModeButtons />
+          <SendDataButton />
+          {page !== "playground" && (
+            <Button
+              size="sm"
+              colorScheme="teal"
+              onClick={action(() => {
+                store.selectedLayer.insertCloneOfBlock(selectedPatternBlock);
+                uiStore.patternDrawerOpen = false;
+              })}
+            >
+              Insert
+            </Button>
+          )}
+        </HStack>
+
         <VStack
           position="sticky"
           top={0}
@@ -134,21 +163,6 @@ export const PatternPlayground = observer(function PatternPlayground() {
             <PreviewCanvas block={selectedPatternBlock} />
           </Box>
         </VStack>
-
-        {uiStore.patternDrawerOpen && (
-          <Button
-            position="absolute"
-            top={12}
-            right={2}
-            colorScheme="teal"
-            onClick={action(() => {
-              store.selectedLayer.insertCloneOfBlock(selectedPatternBlock);
-              uiStore.patternDrawerOpen = false;
-            })}
-          >
-            Insert
-          </Button>
-        )}
       </GridItem>
     </Grid>
   );

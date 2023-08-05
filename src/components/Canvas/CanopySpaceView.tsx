@@ -9,10 +9,12 @@ import { useDataTransmission } from "@/src/hooks/dataTransmission";
 
 type Props = {
   renderTarget: WebGLRenderTarget;
+  transmitData: boolean;
 };
 
 export const CanopySpaceView = observer(function CanopySpaceView({
   renderTarget,
+  transmitData,
 }: Props) {
   const store = useStore();
   const { uiStore } = store;
@@ -40,7 +42,7 @@ export const CanopySpaceView = observer(function CanopySpaceView({
     gl.render(outputMesh.current, camera);
   }, 1000);
 
-  useDataTransmission(outputMesh.current);
+  useDataTransmission(outputMesh.current, transmitData);
 
   return (
     <mesh ref={outputMesh}>

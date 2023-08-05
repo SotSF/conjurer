@@ -6,7 +6,7 @@ import { LED_COUNTS } from "@/src/utils/size";
 import { useStore } from "@/src/types/StoreContext";
 import { transmitData } from "@/src/utils/websocket";
 
-export const useDataTransmission = (mesh: Mesh | null) => {
+export const useDataTransmission = (mesh: Mesh | null, enabled: boolean) => {
   const { sendingData } = useStore();
 
   const finalRenderTarget = useRenderTarget(LED_COUNTS.x, LED_COUNTS.y);
@@ -17,7 +17,7 @@ export const useDataTransmission = (mesh: Mesh | null) => {
   );
 
   useFrame(({ gl, camera }) => {
-    if (!mesh || !sendingData) return;
+    if (!mesh || !sendingData || !enabled) return;
 
     gl.setRenderTarget(finalRenderTarget);
     gl.render(mesh, camera);

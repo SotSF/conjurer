@@ -10,6 +10,7 @@ import { useStore } from "@/src/types/StoreContext";
 import { action } from "mobx";
 import { AudioControls } from "@/src/components/AudioControls";
 import { IntensitySlider } from "@/src/components/IntensitySlider";
+import { SendDataButton } from "@/src/components/SendDataButton";
 
 export const MainControls = observer(function MainControls() {
   const store = useStore();
@@ -39,27 +40,7 @@ export const MainControls = observer(function MainControls() {
         icon={<RiZoomOutLine size={17} />}
         onClick={action(() => uiStore.zoomOut())}
       />
-      <IconButton
-        aria-label="Send data to canopy"
-        title="Send data to canopy"
-        height={6}
-        bgColor={store.sendingData ? "orange.700" : undefined}
-        _hover={
-          store.sendingData
-            ? {
-                bgColor: "orange.600",
-              }
-            : undefined
-        }
-        icon={
-          store.sendingData ? (
-            <CiStreamOn size={17} />
-          ) : (
-            <CiStreamOff size={17} />
-          )
-        }
-        onClick={store.toggleSendingData}
-      />
+      <SendDataButton />
       <IconButton
         aria-label="Use local assets"
         title="Use local assets"
