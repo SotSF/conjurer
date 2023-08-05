@@ -15,7 +15,7 @@ export default function Home() {
       </Head>
 
       <ChakraProvider theme={theme}>
-        <StoreContext.Provider value={new Store()}>
+        <StoreContext.Provider value={new Store("default")}>
           <App />
         </StoreContext.Provider>
       </ChakraProvider>
