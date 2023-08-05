@@ -114,6 +114,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
       wavesurfer.on("ready", () => {
         ready.current = true;
         if (audioStore.initialRegions.length > 0) {
+          regionsPlugin.clearRegions();
           audioStore.initialRegions.forEach((region) => {
             regionsPlugin.addRegion(region.withNewContentElement());
           });
