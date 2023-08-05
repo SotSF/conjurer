@@ -83,6 +83,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
 
     const create = async () => {
       setLoading(true);
+
       // Lazy load all wave surfer dependencies
       const { WaveSurfer, TimelinePlugin, RegionsPlugin } =
         (wavesurferConstructors.current = await importWavesurferConstructors());
@@ -133,6 +134,15 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
 
         const audioBuffer = wavesurfer.getDecodedData();
         if (audioBuffer) audioStore.computePeaks(audioBuffer);
+
+        // delay audio in order to sync with video
+        const audioContext = new AudioContext();
+        const mediaElement = wavesurfer.getMediaElement();
+        const mediaSource = audioContext.createMediaElementSource(mediaElement);
+        const delayNode = audioContext.createDelay(1);
+        delayNode.delayTime.value = audioStore.audioLatency;
+        mediaSource.connect(delayNode);
+        delayNode.connect(audioContext.destination);
       });
 
       wavesurfer.on("finish", () => {
@@ -145,10 +155,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
 
       wavesurfer.on(
         "play",
-        action(() => {
-          console.log("wavesurfer play", new Date().getTime());
-          audioStore.audioState = "playing";
-        })
+        action(() => (audioStore.audioState = "playing"))
       );
 
       // we are only truly done loading when the waveform has been drawn
