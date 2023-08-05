@@ -1,4 +1,4 @@
-import { Box, Button, Grid, GridItem, VStack } from "@chakra-ui/react";
+import { Box, Button, Grid, GridItem, HStack, VStack } from "@chakra-ui/react";
 import { PatternList } from "@/src/components/PatternPlayground/PatternList";
 import { PreviewCanvas } from "@/src/components/Canvas/PreviewCanvas";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -10,6 +10,7 @@ import { useStore } from "@/src/types/StoreContext";
 import { playgroundEffects } from "@/src/effects/effects";
 import { action, runInAction } from "mobx";
 import { DisplayModeButtons } from "@/src/components/PatternPlayground/DisplayModeButtons";
+import { SendDataButton } from "@/src/components/SendDataButton";
 
 const PATTERN_PREVIEW_DISPLAY_SIZE = 600;
 
@@ -119,7 +120,10 @@ export const PatternPlayground = observer(function PatternPlayground() {
         </VStack>
       </GridItem>
       <GridItem area="preview" position="relative">
-        <DisplayModeButtons />
+        <HStack width="100%" justify="space-between">
+          <DisplayModeButtons />
+          <SendDataButton />
+        </HStack>
         <VStack
           position="sticky"
           top={0}
@@ -134,7 +138,6 @@ export const PatternPlayground = observer(function PatternPlayground() {
             <PreviewCanvas block={selectedPatternBlock} />
           </Box>
         </VStack>
-
         {uiStore.patternDrawerOpen && (
           <Button
             position="absolute"

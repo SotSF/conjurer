@@ -31,7 +31,10 @@ export const DisplayCanvas = observer(function DisplayCanvas() {
       {renderTarget && (
         <>
           {displayMode === "canopy" && <Canopy renderTarget={renderTarget} />}
-          <CanopySpaceView renderTarget={renderTarget} />
+          <CanopySpaceView
+            renderTarget={renderTarget}
+            transmitData={!uiStore.patternDrawerOpen}
+          />
         </>
       )}
     </Canvas>
