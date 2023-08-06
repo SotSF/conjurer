@@ -7,10 +7,13 @@ export const Pulse = () =>
     u_time_factor: {
       name: "Time Factor",
       value: 0.4,
+      max: 5,
     },
     u_time_offset: {
       name: "Time Offset",
       value: 0,
+      min: -5,
+      max: 5,
     },
     u_hue_start: {
       name: "Hue Start",
@@ -31,6 +34,7 @@ export const Pulse = () =>
     u_scale: {
       name: "Scale",
       value: 1,
+      max: 10,
     },
     u_wave_period: {
       name: "Wave Period",
@@ -51,9 +55,12 @@ export const Pulse = () =>
     u_number_colors: {
       name: "Number of Colors",
       value: 4,
+      min: 1,
+      max: 20,
+      step: 1,
     },
     u_white_leading_edge: {
       name: "White Leading Edge",
-      value: 1,
+      value: 0.1,
     },
   });

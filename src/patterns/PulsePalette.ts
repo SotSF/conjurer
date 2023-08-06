@@ -23,6 +23,8 @@ export const PulsePalette = () =>
     u_time_offset: {
       name: "Time Offset",
       value: 0,
+      min: -5,
+      max: 5,
     },
     u_period: {
       name: "Period",
