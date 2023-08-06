@@ -3,23 +3,25 @@
 // License: Creative Commons Attribution-NonCommercial-ShareAlike
 // License URL: http://creativecommons.org/licenses/by-nc-sa/3.0/
 // Source: https://www.shadertoy.com/view/lsf3RH
+// This is a modified version of the original source code.
+
+#include <conjurer_common>
 
 #ifdef GL_ES
 precision mediump float;
 #endif
 
-#define PI 3.14159265358979323846
-
 varying vec2 v_uv;
 uniform float u_time;
-uniform vec2 u_resolution;
 
 uniform float u_fire_power;
+uniform float u_fade_factor;
 uniform float u_time_factor;
 uniform float u_time_offset;
 
 // // For debugging
-// #define u_fire_power 0.8
+// #define u_fire_power .5
+// #define u_fade_factor .05
 // #define u_time_factor 1.0
 // #define u_time_offset 0.0
 
@@ -40,6 +42,7 @@ float snoise(vec3 uv, float res) {
     float r0 = mix(mix(r.x, r.y, f.x), mix(r.z, r.w, f.x), f.y);
 
     r = fract(sin((v + uv1.z - uv0.z) * 1e-1) * 1e3);
+
     float r1 = mix(mix(r.x, r.y, f.x), mix(r.z, r.w, f.x), f.y);
 
     return mix(r0, r1, f.z) * 2. - 1.;
@@ -47,16 +50,9 @@ float snoise(vec3 uv, float res) {
 
 void main() {
     vec2 st = v_uv;
-    // vec2 st = gl_FragCoord.xy / u_resolution.xy;
+    vec2 p = canopyToCartesianProjection(st);
 
-    // Convert from polar coordinates to cartesian
-    float theta = st.x * 2.0 * 3.1415926;
-    float r = st.y * 0.7 * (2.0 - u_fire_power);
-    float x = r * cos(theta) * 0.5 + 0.5;
-    float y = r * sin(theta) * 0.5 + 0.5;
-    vec2 p = vec2(x, y) * 2.0 - 1.0;
-
-    float color = 3.0 - (3. * length(2. * p));
+    float color = 1. + u_fire_power * 2. - ((u_fade_factor * 5. + 1.5) * length(2. * p));
 
     vec3 coord = vec3(atan(p.x, p.y) / 6.2832 + .5, length(p) * .4, .5);
 
@@ -65,5 +61,5 @@ void main() {
         float power = pow(2.0, float(i));
         color += (1.5 / power) * snoise(coord + vec3(0., - time * .05, time * .01), power * 16.);
     }
-    gl_FragColor = vec4(color, pow(max(color, 0.), 2.) * 0.4, pow(max(color, 0.), 3.) * 0.15, 1.0);
+    gl_FragColor = vec4(color, pow(max(color, 0.), 2.0) * 0.4, pow(max(color, 0.), 3.) * 0.15, 1.0);
 }

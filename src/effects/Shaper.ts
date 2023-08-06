@@ -7,6 +7,9 @@ export const Shaper = () =>
     u_tiling: {
       name: "Tiling",
       value: 8,
+      min: 1,
+      max: 15,
+      step: 1,
     },
     u_rotation: {
       name: "Rotation",
@@ -31,9 +34,13 @@ export const Shaper = () =>
     u_brick_offset_x: {
       name: "Brick Offset X",
       value: 0.0,
+      step: 1,
+      max: 3,
     },
     u_brick_offset_y: {
       name: "Brick Offset Y",
       value: 0.0,
+      step: 1,
+      max: 3,
     },
   });

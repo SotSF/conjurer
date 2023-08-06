@@ -6,47 +6,47 @@ import { Vector3 } from "three";
 export { lissajous };
 export const Lissajous = () =>
   new Pattern("Lissajous", lissajous, {
+    u_palette: {
+      name: "Palette",
+      value: new Palette(
+        new Vector3(0.5, 0.5, 0.5),
+        new Vector3(0.5, 0.5, 0.194),
+        new Vector3(1.0, 0.608, 1.0),
+        new Vector3(0.468, 0.198, 0.557)
+      ),
+    },
     u_count: {
       name: "Count",
       value: 8,
       min: 1,
       max: 64,
-      step: 1
+      step: 1,
     },
     u_space: {
-      name: "Interval",  
-      value: 0.05
+      name: "Interval",
+      value: 0.05,
     },
     u_a0: {
       name: "Amplitude - X",
-      value: 1
+      value: 1,
     },
     u_b0: {
       name: "Amplitude - Y",
-      value: 1
-  },
+      value: 1,
+    },
     u_a1: {
       name: "Frequency - X",
-      value: 2
+      value: 2,
     },
     u_b1: {
       name: "Frequency - Y",
-      value: 3
+      value: 3,
     },
     u_toggleColor: {
       name: "Toggle Color",
       value: 0,
       min: 0,
       max: 1,
-      step: 1
+      step: 1,
     },
-    u_palette: {
-      name: "Palette",
-      value: new Palette(
-          new Vector3(0.5,0.5,0.5),
-          new Vector3(0.5,0.5,0.194),
-          new Vector3(1.0,0.608,1.0),
-          new Vector3(0.468,0.198,0.557)
-        )
-    }
   });

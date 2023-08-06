@@ -10,7 +10,6 @@ precision mediump float;
 
 varying vec2 v_uv;
 uniform float u_time;
-uniform vec2 u_resolution;
 
 uniform float u_time_factor;
 uniform float u_time_offset;
@@ -119,10 +118,6 @@ vec4 mainVR(in vec3 pos, in vec3 dir, in float time) {
 }
 
 void main() {
-
-    // vec2 st = gl_FragCoord.xy / u_resolution.xy;
-    // st = st * 2.0 - 1.;
-
     vec2 st = v_uv;
     st -= 0.15;
     // Convert from canopy space to cartesian

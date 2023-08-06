@@ -7,7 +7,6 @@ precision mediump float;
 
 varying vec2 v_uv;
 uniform float u_time;
-uniform vec2 u_resolution;
 uniform sampler2D u_texture;
 
 uniform float u_tiling;
@@ -26,7 +25,6 @@ uniform float u_cell_rotation_rate;
 // #define u_cell_rotation_rate 0.
 
 void main(void) {
-    // vec2 st = gl_FragCoord.xy / u_resolution.xy;
     vec2 st = v_uv;
 
     // canopy to centered cartesian space

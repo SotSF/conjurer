@@ -6,6 +6,6 @@ export const BrightnessAdjust = () =>
   new Pattern("Brightness Adjust", brightnessAdjust, {
     u_intensity: {
       name: "Intensity",
-      value: 0.3,
+      value: 1,
     },
   });

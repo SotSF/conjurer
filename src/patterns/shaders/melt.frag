@@ -16,7 +16,6 @@ precision mediump float;
 
 varying vec2 v_uv;
 uniform float u_time;
-uniform vec2 u_resolution;
 
 uniform float u_time_factor;
 uniform float u_time_offset;
@@ -73,7 +72,6 @@ vec3 spectral_palette(float x) {
 
 void main() {
     vec2 st = v_uv;
-    // vec2 st = gl_FragCoord.xy / u_resolution.xy;
 
     // Rotate over time
     st.x = fract(st.x + u_rotation_speed * u_time * 0.01);

@@ -15,7 +15,6 @@ uniform float u_time_factor;
 uniform float u_time_offset;
 
 varying vec2 v_uv;
-uniform vec2 u_resolution;
 uniform float u_time;
 uniform sampler2D u_texture;
 
@@ -25,7 +24,6 @@ vec2 tile(vec2 _st, float _zoom) {
 }
 
 void main(void) {
-    // vec2 st = gl_FragCoord.xy / u_resolution.xy;
     vec2 st = v_uv;
 
     // Cartesian projection

@@ -1,27 +1,30 @@
+#include <conjurer_common>
+
 #ifdef GL_ES
 precision mediump float;
 #endif
 
-#define PI 3.14159265358979323846
-
 varying vec2 v_uv;
 uniform float u_time;
-uniform vec2 u_resolution;
 
+uniform Palette u_palette;
+uniform float u_time_factor;
+uniform float u_time_offset;
+uniform float u_bars;
 uniform float u_segments;
-uniform float u_stutter_frequency;
-uniform float u_go_nuts;
-uniform float u_saturation_start;
-uniform float u_hue_start;
-uniform float u_hue_width;
+uniform float u_refresh_period;
+uniform float u_bar_fade_factor;
+uniform float u_bar_likelihood;
 
 // // For debugging
-// #define u_segments 10.5
-// #define u_stutter_frequency .8
-// #define u_go_nuts 0.0
-// #define u_saturation_start 1.0
-// #define u_hue_start 0.05
-// #define u_hue_width 0.55
+// #define u_palette Palette(vec3(0.261, 0.446, 0.315), vec3(0.843, 0.356, 0.239), vec3(0.948, 1.474, 1.361), vec3(3.042, 5.630, 5.424))
+// #define u_time_factor 1.0
+// #define u_time_offset 0.0
+// #define u_bars 20.
+// #define u_segments 10.
+// #define u_refresh_period 3.
+// #define u_bar_fade_factor 0.25
+// #define u_bar_likelihood 0.5
 
 vec3 RGBtoHCV(in vec3 RGB) {
     float Epsilon = 1e-9;
@@ -45,24 +48,16 @@ vec3 HSVtoRGB(in vec3 HSV) {
     return ((RGB - 1.0) * HSV.y + 1.0) * HSV.z;
 }
 
-float random(in float x) {
-    return fract(sin(x) * 43758.5453123);
-}
-
-float random(in vec2 _st) {
-    return fract(sin(dot(_st.xy, vec2(12.98, 78.233))) *
-        43758.5453123);
-}
-
 void main() {
     vec2 st = v_uv;
-    // vec2 st = gl_FragCoord.xy / u_resolution.xy;
 
-    st.x *= 100.;
+    st.x *= u_bars;
     st.y *= u_segments;
 
-    float timeCell = 1. + floor(u_time * u_stutter_frequency);
-    float translate = sin(u_time * 4. * random(timeCell)) * 10.;
+    float time = 0.1 * u_time * u_time_factor + u_time_offset;
+
+    float timeCell = 1. + floor(u_time / u_refresh_period);
+    float translate = sin(time * 4. * rand(timeCell)) * 10.;
 
     if (mod(floor(st.y), 2.0) == 1.0) {
         st.x += translate;
@@ -70,18 +65,15 @@ void main() {
         st.x -= translate;
     }
 
-    if (u_go_nuts >= 1.0) {
-        st = (st - vec2(5.0)) * (abs(sin(u_time * 0.2)) * 5.);
-        st.x += u_time * 3.0;
-    }
-
-    vec2 ipos = floor(st);  // integer
+    // create a grid that repeats every u_bars in x
+    vec2 ipos = floor(vec2(mod(st.x, u_bars), mod(st.y, u_bars)));  // integer
     vec2 fpos = fract(st);  // fraction
 
-    float intensity = step(0.5, random(ipos + timeCell));
+    float intensity = step(1. - u_bar_likelihood, rand(ipos + timeCell));
+    intensity *= 1. - u_bar_fade_factor * abs((fpos.x - 0.5) * 2.0);
 
-    float hue = random(ipos) * u_hue_width + u_hue_start;
-    vec3 color = HSVtoRGB(vec3(hue, u_saturation_start, 1.0));
+    // float hue = rand(ipos) * u_hue_width + u_hue_start;
+    vec3 color = palette(rand(ipos), u_palette);
 
     gl_FragColor = vec4(intensity * color, 1.0);
 }

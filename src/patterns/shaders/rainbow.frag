@@ -10,7 +10,6 @@ precision mediump float;
 
 varying vec2 v_uv;
 uniform float u_time;
-uniform vec2 u_resolution;
 
 uniform float u_time_factor;
 uniform float u_time_offset;
@@ -60,9 +59,6 @@ vec3 spectral_colour(float l) // RGB <0,1> <- lambda l <400,700> [nm]
 }
 
 void main() {
-
-    // vec2 st = (2.0 * gl_FragCoord.xy - u_resolution.xy) / min(u_resolution.x, u_resolution.y);
-
     vec2 st = v_uv;
     // st -= 0.15;
     // Convert from canopy space to cartesian

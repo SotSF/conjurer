@@ -6,7 +6,6 @@ precision mediump float;
 
 varying vec2 v_uv;
 uniform float u_time;
-uniform vec2 u_resolution;
 
 uniform float u_time_factor;
 uniform float u_time_offset;
@@ -74,7 +73,6 @@ float plot(vec2 st, float pct) {
 
 void main() {
     vec2 st = v_uv;
-    // vec2 st = gl_FragCoord.xy / u_resolution.xy;
 
     // offset the x coordinate based on the y coordinate to create a spiral
     float inverseY = 1. - st.y;

@@ -7,18 +7,6 @@ import lightwaves from "@/src/patterns/shaders/lightwaves.frag";
 export { lightwaves };
 export const Lightwaves = () =>
   new Pattern("Lightwaves", lightwaves, {
-    u_intensity: {
-      name: "Intensity",
-      value: 0
-    },
-    u_timeFactor: {
-      name: "Time Factor",
-      value: 0
-    },
-    u_period: {
-      name: "Period",
-      value: 0
-    },
     u_palette: {
       name: "Palette",
       value: new Palette(
@@ -27,5 +15,17 @@ export const Lightwaves = () =>
         new Vector3(0.948, 1.474, 1.361),
         new Vector3(3.042, 5.63, 5.424)
       ),
+    },
+    u_intensity: {
+      name: "Intensity",
+      value: 0,
+    },
+    u_timeFactor: {
+      name: "Time Factor",
+      value: 0,
+    },
+    u_period: {
+      name: "Period",
+      value: 0,
     },
   });

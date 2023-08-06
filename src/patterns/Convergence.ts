@@ -23,15 +23,19 @@ export const Convergence = () =>
     u_time_offset: {
       name: "Time Offset",
       value: 0,
+      min: -5,
+      max: 5,
     },
     u_period: {
       name: "Period",
-      value: 3,
-      max: 10,
+      value: 6.5,
+      min: 1,
+      max: 20,
     },
     u_waves: {
       name: "Waves",
-      value: 10,
+      value: 6,
+      min: 0,
       max: 30,
       step: 1,
     },

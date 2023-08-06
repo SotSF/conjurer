@@ -61,6 +61,7 @@ export const PaletteEditor = memo(function PaletteEditor({
     variation.palette.randomize();
     if (useSeed) variation.palette.a = hexToVector3(color);
     setPalette?.(variation.palette);
+    console.log(variation.palette.toConstructorString());
   };
 
   const series = getPaletteSeriesData(variation.palette);
