@@ -1,3 +1,5 @@
+> NOTE: this is out of date, we have a handy script now! Need to edit this page.
+
 # How to make a pattern
 
 Let's create a pattern called Blah. In total we will create two files and edit one file:
