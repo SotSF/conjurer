@@ -54,6 +54,9 @@ export class Palette {
     d: this.d.toArray(),
   });
 
+  toConstructorString = () =>
+    `new Palette(new Vector3(${this.a.x}, ${this.a.y}, ${this.a.z}), new Vector3(${this.b.x}, ${this.b.y}, ${this.b.z}), new Vector3(${this.c.x}, ${this.c.y}, ${this.c.z}), new Vector3(${this.d.x}, ${this.d.y}, ${this.d.z}))`;
+
   static default = () =>
     new Palette(
       new Vector3(0.387, 0.8, 0.435),
