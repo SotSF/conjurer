@@ -3,6 +3,9 @@
 // License: Creative Commons Attribution-NonCommercial-ShareAlike
 // License URL: http://creativecommons.org/licenses/by-nc-sa/3.0/
 // Source: https://www.shadertoy.com/view/WlGXR1
+// This is a modified version of the original source code.
+
+#include <conjurer_common>
 
 #ifdef GL_ES
 precision mediump float;
@@ -10,9 +13,13 @@ precision mediump float;
 
 varying vec2 v_uv;
 uniform float u_time;
-uniform vec2 u_resolution;
 
-// TODO: add uniforms
+uniform float u_time_factor;
+uniform float u_time_offset;
+
+// // For debugging
+// #define u_time_factor 1.
+// #define u_time_offset 0.
 
 vec4 permute(vec4 x) {
     return mod(((x * 34.0) + 1.0) * x, 289.0);
@@ -107,7 +114,8 @@ vec4 mainVR(in vec3 pos, in vec3 dir) {
 
     vec3 planeNormal = vec3(0.0, 0.0, 1.0);
 
-    vec3 travel = vec3(0.0, 0.0, u_time * 2.4);
+    float time = u_time_offset + u_time * u_time_factor;
+    vec3 travel = vec3(0.0, 0.0, time * 2.4);
     pos += travel;
     vec3 startPos = pos;
 
@@ -122,7 +130,7 @@ vec4 mainVR(in vec3 pos, in vec3 dir) {
     for (float i = 0.0; i < 42.0; i ++) {
         pos += dir * stepSize / abs(dot(dir, planeNormal));
         vec4 n = snoise(pos * 0.3 + vec3(0.5, 0.5, 0.5));
-        float p = n.w + sin(u_time * 3.0) * 0.05 + 0.5;
+        float p = n.w + sin(time * 3.0) * 0.05 + 0.5;
         float dist = length(startPos - pos);
         float ampl = 1.0 / (abs(dot(dir, planeNormal)) + 0.1);
         //float ampl = 1.0 / (abs(dot(dir, n.xyz)) + 0.0);
@@ -136,15 +144,8 @@ vec4 mainVR(in vec3 pos, in vec3 dir) {
 }
 
 void main() {
-    // vec2 st = (2.0 * gl_FragCoord.xy - u_resolution.xy) / min(u_resolution.x, u_resolution.y);
     vec2 st = v_uv;
-
-    // Convert from canopy space to cartesian
-    float theta = st.x * 2.0 * 3.1415926;
-    float r = st.y * 0.88888888 + 0.111111111;
-    float x = r * cos(theta) * 0.5 + 0.5;
-    float y = r * sin(theta) * 0.5 + 0.5;
-    st = vec2(x, y) * 2.0 - 1.0;
+    st = canopyToCartesianProjection(st);
 
     vec2 mouse = vec2(0.5);
 
