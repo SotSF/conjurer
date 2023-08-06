@@ -7,9 +7,12 @@ export const Rotate = () =>
     u_speed: {
       name: "Speed",
       value: 5,
+      max: 10,
     },
     u_offset: {
       name: "Offset",
       value: 0,
+      min: -5,
+      max: 5,
     },
   });
