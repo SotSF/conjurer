@@ -25,7 +25,6 @@ precision mediump float;
 
 varying vec2 v_uv;
 uniform float u_time;
-uniform vec2 u_resolution;
 
 // these are custom uniforms. we will start with two that are typically useful:
 uniform float u_time_factor;

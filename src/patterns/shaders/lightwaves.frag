@@ -5,7 +5,6 @@ precision mediump float;
 #endif
 
 varying vec2 v_uv;
-uniform vec2 u_resolution;
 uniform float u_time;
 
 uniform float u_timeFactor;

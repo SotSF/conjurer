@@ -6,7 +6,6 @@ precision mediump float;
 
 varying vec2 v_uv;
 uniform float u_time;
-uniform vec2 u_resolution;
 
 uniform Palette u_palette;
 uniform float u_color_density;
