@@ -47,13 +47,11 @@ export class AudioStore {
   constructor(readonly rootStore: RootStore) {
     makeAutoObservable(this, {
       getSelectedAudioFileUrl: false,
-      wavesurfer: false,
       timelinePlugin: false,
       regionsPlugin: false,
       peaks: false,
       getPeakAtTime: false,
     });
-    // this.timer.addTickListener(this.onTick);
   }
 
   computePeaks = (audioBuffer: AudioBuffer) => {

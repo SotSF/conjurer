@@ -1,10 +1,11 @@
 # TODO: make this into an actual script
 
 # Download audio from youtube
-# haven't tried the below, from copilot
-youtube-dl -f bestaudio --extract-audio --audio-format mp3 --audio-quality 0 https://www.youtube.com/watch?v=yjamrOtMKfE
+youtube-dl -f bestaudio --extract-audio --audio-format mp3 --audio-quality 256K 'https://www.youtube.com/watch?v=HawbJ76Xg1Y'
 
-# used this
-youtube-dl 'https://www.youtube.com/watch?v=yjamrOtMKfE'
+# Conversion from webm to mp3 example
 # from: https://stackoverflow.com/questions/9913032/how-can-i-extract-audio-from-video-with-ffmpeg
-ffmpeg -i The\ Blue\ Whale-yjamrOtMKfE.webm -q:a 0 -map a the-blue-whale.mp3
+ffmpeg -i The\ Blue\ Whale-yjamrOtMKfE.webm -q:a 256K -map a the-blue-whale.mp3
+
+# Important learning: do not use variable bit rate mp3. Wavesurfer has issues with desynchronizing
+# the audio and the waveform. Specify a bitrate of 256K or 320K.

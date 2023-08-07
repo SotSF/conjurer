@@ -71,6 +71,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
 
   const waveformRef = useRef<HTMLDivElement>(null);
   const clonedWaveformRef = useRef<HTMLDivElement>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
 
   const { audioStore, uiStore, playlistStore } = useStore();
 
@@ -103,8 +104,10 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
         container: waveformRef.current!,
         minPxPerSec: uiStore.pixelsPerSecond,
         plugins: [timelinePlugin, regionsPlugin],
+        media: audioRef.current!,
       };
-      const wavesurfer = (audioStore.wavesurfer = WaveSurfer.create(options));
+      const wavesurfer = WaveSurfer.create(options);
+      runInAction(() => (audioStore.wavesurfer = wavesurfer));
 
       wavesurfer.on("interaction", (newTime: number) => {
         if (!wavesurfer) return;
@@ -135,20 +138,15 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
 
         const audioBuffer = wavesurfer.getDecodedData();
         if (audioBuffer) audioStore.computePeaks(audioBuffer);
-
-        // delay audio in order to sync with video
-        const audioContext = new AudioContext();
-        const mediaElement = wavesurfer.getMediaElement();
-        const mediaSource = audioContext.createMediaElementSource(mediaElement);
-        const delayNode = audioContext.createDelay(1);
-        delayNode.delayTime.value = audioStore.audioLatency;
-        mediaSource.connect(delayNode);
-        delayNode.connect(audioContext.destination);
       });
 
-      wavesurfer.on("finish", () => {
-        if (playlistStore.autoplay) playlistStore.playNextExperience();
-      });
+      wavesurfer.on(
+        "finish",
+        action(() => {
+          audioStore.audioState = "paused";
+          if (playlistStore.autoplay) playlistStore.playNextExperience();
+        })
+      );
 
       wavesurfer.on("audioprocess", (currentTime: number) =>
         audioStore.onTick(currentTime)
@@ -161,6 +159,22 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
 
       // we are only truly done loading when the waveform has been drawn
       wavesurfer.on("redraw", () => setLoading(false));
+
+      audioRef.current!.addEventListener(
+        "canplay",
+        () => {
+          // delay audio in order to sync with video
+          const audioContext = new AudioContext();
+          const mediaSource = audioContext.createMediaElementSource(
+            audioRef.current!
+          );
+          const delayNode = audioContext.createDelay(1);
+          delayNode.delayTime.value = audioStore.audioLatency;
+          mediaSource.connect(delayNode);
+          delayNode.connect(audioContext.destination);
+        },
+        { once: true }
+      );
 
       cloneCanvas();
     };
@@ -202,7 +216,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
     };
     changeAudioFile();
     cloneCanvas();
-  }, [audioStore, audioStore.selectedAudioFile, uiStore.pixelsPerSecond, cloneCanvas]);
+  }, [audioStore, audioStore.wavesurfer, audioStore.selectedAudioFile, uiStore.pixelsPerSecond, cloneCanvas]);
 
   // on loop toggle
   useEffect(() => {
@@ -285,6 +299,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
     return disableCreateByClick;
   }, [uiStore, audioStore, audioStore.markingAudio]);
 
+  // on audio state change
   useEffect(() => {
     if (!didInitialize.current || !ready.current) return;
     if (audioStore.audioState === "starting") {
@@ -318,6 +333,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
 
   return (
     <Box width="100%" height={20} bgColor="gray.500">
+      <audio ref={audioRef} />
       <Skeleton
         width="100%"
         height="100%"
