@@ -146,9 +146,13 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
         delayNode.connect(audioContext.destination);
       });
 
-      wavesurfer.on("finish", () => {
-        if (playlistStore.autoplay) playlistStore.playNextExperience();
-      });
+      wavesurfer.on(
+        "finish",
+        action(() => {
+          audioStore.audioState = "paused";
+          if (playlistStore.autoplay) playlistStore.playNextExperience();
+        })
+      );
 
       wavesurfer.on("audioprocess", (currentTime: number) =>
         audioStore.onTick(currentTime)
@@ -202,7 +206,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
     };
     changeAudioFile();
     cloneCanvas();
-  }, [audioStore, audioStore.selectedAudioFile, uiStore.pixelsPerSecond, cloneCanvas]);
+  }, [audioStore, audioStore.wavesurfer, audioStore.selectedAudioFile, uiStore.pixelsPerSecond, cloneCanvas]);
 
   // on loop toggle
   useEffect(() => {

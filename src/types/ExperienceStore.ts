@@ -106,6 +106,7 @@ export class ExperienceStore {
     const getObjectCommand = new GetObjectCommand({
       Bucket: ASSET_BUCKET_NAME,
       Key: `${EXPERIENCE_ASSET_PREFIX}${experienceFilename}.json`,
+      ResponseCacheControl: "no-store",
     });
 
     try {
