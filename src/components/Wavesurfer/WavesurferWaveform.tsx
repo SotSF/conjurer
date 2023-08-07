@@ -104,7 +104,8 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
         minPxPerSec: uiStore.pixelsPerSecond,
         plugins: [timelinePlugin, regionsPlugin],
       };
-      const wavesurfer = (audioStore.wavesurfer = WaveSurfer.create(options));
+      const wavesurfer = WaveSurfer.create(options);
+      runInAction(() => (audioStore.wavesurfer = wavesurfer));
 
       wavesurfer.on("interaction", (newTime: number) => {
         if (!wavesurfer) return;
