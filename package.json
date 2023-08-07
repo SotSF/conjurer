@@ -13,13 +13,13 @@
     "generatePattern": "ts-node --project tsconfig.script.json src/scripts/generatePattern.ts"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.379.1",
-    "@aws-sdk/credential-providers": "^3.379.1",
+    "@aws-sdk/client-s3": "^3.385.0",
+    "@aws-sdk/credential-providers": "^3.385.0",
     "@chakra-ui/react": "^2.8.0",
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
     "@hello-pangea/dnd": "^16.3.0",
-    "@react-three/drei": "^9.80.0",
+    "@react-three/drei": "^9.80.1",
     "@react-three/fiber": "^8.13.6",
     "@types/recharts": "^1.8.24",
     "@types/ws": "^8.5.5",
@@ -49,10 +49,10 @@
     "ws": "^8.13.0"
   },
   "devDependencies": {
-    "@types/node": "^20.4.5",
-    "@types/react": "^18.2.17",
-    "@types/three": "^0.154.0",
-    "@typescript-eslint/parser": "^6.2.0",
+    "@types/node": "^20.4.8",
+    "@types/react": "^18.2.18",
+    "@types/three": "^0.155.0",
+    "@typescript-eslint/parser": "^6.2.1",
     "eslint": "^8.46.0",
     "eslint-config-next": "13.4.12",
     "eslint-plugin-mobx": "^0.0.9",
