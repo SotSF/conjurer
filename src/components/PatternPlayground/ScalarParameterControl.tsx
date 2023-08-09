@@ -50,11 +50,14 @@ export const ScalarParameterControl = memo(function ScalarParameterControl({
   const max = typeof patternParam.max === "number" ? patternParam.max : 1;
   const step = typeof patternParam.step === "number" ? patternParam.step : 0.01;
 
-  const setParameter = (value: number) => {
-    value = parseFloat((Math.round(value / step) * step).toFixed(3));
+  const [valueString, setValueString] = useState(patternParam.value.toString());
+  const updateParameterValue = (inputString: string, inputNumber: number) => {
+    setValueString(inputString);
 
-    setParameters({ ...parameters, [uniformName]: value });
-    block.pattern.params[uniformName].value = value;
+    if (Number.isNaN(inputNumber)) return;
+
+    setParameters({ ...parameters, [uniformName]: inputNumber });
+    patternParam.value = inputNumber;
 
     runInAction(() => {
       // Also insert a variation so that this parameter value is serializable
@@ -63,7 +66,7 @@ export const ScalarParameterControl = memo(function ScalarParameterControl({
 
       block.parameterVariations[uniformName]![0] = new FlatVariation(
         DEFAULT_VARIATION_DURATION,
-        value
+        inputNumber
       );
     });
   };
@@ -75,8 +78,8 @@ export const ScalarParameterControl = memo(function ScalarParameterControl({
         <NumberInput
           size="xs"
           step={step}
-          onChange={(valueString) => setParameter(parseFloat(valueString))}
-          value={patternParam.value}
+          onChange={updateParameterValue}
+          value={valueString}
         >
           <NumberInputField />
           <NumberInputStepper>
@@ -91,7 +94,10 @@ export const ScalarParameterControl = memo(function ScalarParameterControl({
           max={max}
           step={step}
           value={patternParam.value}
-          onChange={(value) => setParameter(value)}
+          onChange={(inputNumber) =>
+            updateParameterValue(inputNumber.toString(), inputNumber)
+          }
+          focusThumbOnChange={false}
           onMouseEnter={() => setShowTooltip(true)}
           onMouseLeave={() => setShowTooltip(false)}
         >

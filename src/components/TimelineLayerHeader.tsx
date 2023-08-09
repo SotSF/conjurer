@@ -6,15 +6,13 @@ import {
   EditableInput,
   EditablePreview,
   HStack,
-  Heading,
   IconButton,
   VStack,
 } from "@chakra-ui/react";
 import { Layer } from "@/src/types/Layer";
-import { action, computed } from "mobx";
+import { action } from "mobx";
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
 import { VariationControls } from "@/src/components/VariationControls/VariationControls";
-import { VariationSelection } from "@/src/types/Store";
 
 type Props = {
   index: number;
