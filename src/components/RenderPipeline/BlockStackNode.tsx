@@ -65,7 +65,7 @@ export const BlockStackNode = observer(function BlockStackNode({
       />
       {parentBlock?.effectBlocks.map((effect, i) => {
         const isEven = i % 2 === 0;
-        const swap = isEven && evenNumberOfEffects;
+        const swap = evenNumberOfEffects ? isEven : !isEven;
         return (
           <BlockNode
             key={effect.id}
