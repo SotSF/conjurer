@@ -10,8 +10,10 @@ import { CloudsMask } from "@/src/effects/CloudsMask";
 import { ConstructMask } from "@/src/effects/ConstructMask";
 import { BrightnessAdjust } from "./BrightnessAdjust";
 import { Kaleidoscope } from "@/src/effects/Kaleidoscope";
+import { ShapeMask } from "@/src/effects/ShapeMask";
 
 const effectFactories: Array<() => Pattern> = [
+  ShapeMask,
   Tiler,
   Shaper,
   Leaf,
@@ -22,7 +24,7 @@ const effectFactories: Array<() => Pattern> = [
   ChromaticAberration,
   CloudsMask,
   ConstructMask,
-  Kaleidoscope
+  Kaleidoscope,
 ];
 
 // Effects that will not have their uniforms changed. These are used for checking what the default
