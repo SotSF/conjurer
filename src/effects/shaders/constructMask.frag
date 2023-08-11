@@ -6,7 +6,6 @@ precision mediump float;
 
 varying vec2 v_uv;
 uniform float u_time;
-
 uniform sampler2D u_texture;
 
 uniform float u_time_factor;
