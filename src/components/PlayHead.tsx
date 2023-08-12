@@ -79,7 +79,7 @@ export const PlayHead = observer(function PlayHead() {
         left="150"
         bgColor="red"
         width="1px"
-        height="120vh"
+        height="200vh"
       />
     </Box>
   );
