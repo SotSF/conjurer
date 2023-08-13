@@ -1,9 +1,7 @@
-import Jimp from "jimp";
 import { WebSocketServer } from "ws";
-import { LED_COUNTS } from "../utils/size";
-import { WEBSOCKET_PORT } from "../utils/websocketHost";
+import { CONTROLLER_SERVER_WEBSOCKET_PORT } from "../utils/websocketHost";
 
-const wss = new WebSocketServer({ port: WEBSOCKET_PORT });
+const wss = new WebSocketServer({ port: CONTROLLER_SERVER_WEBSOCKET_PORT });
 wss.on("connection", (ws) => {
   ws.on("error", console.error);
 

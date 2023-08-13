@@ -1,2 +1,5 @@
-export const WEBSOCKET_HOST = "localhost";
-export const WEBSOCKET_PORT = 8080;
+export const UNITY_APP_WEBSOCKET_HOST = "localhost";
+export const UNITY_APP_WEBSOCKET_PORT = 8080;
+
+export const CONTROLLER_SERVER_WEBSOCKET_HOST = "192.168.1.11";
+export const CONTROLLER_SERVER_WEBSOCKET_PORT = 8081;
