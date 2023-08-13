@@ -70,7 +70,6 @@ export class Store {
   set selectedLayer(value: Layer) {
     if (this._selectedLayer === value) return;
     this._selectedLayer = value;
-    // this.deselectVariation();
   }
 
   selectedBlocksOrVariations: Set<BlockOrVariation> = new Set();
@@ -429,6 +428,12 @@ export class Store {
   // - When the wavesurfer audio actually starts playing, we set audioState to "playing"
   // - When the audioState changes to "playing", the timer starts ticking
   togglePlaying = () => {
+    if (this.audioStore.audioContext?.state === "suspended") {
+      // resume audio context if it's suspended - will happen in chrome based on autoplay
+      // settings/user interaction: https://developer.chrome.com/blog/autoplay/
+      this.audioStore.audioContext.resume();
+    }
+
     if (
       this.audioStore.audioState === "playing" ||
       this.audioStore.audioState === "starting"

@@ -44,6 +44,8 @@ export class AudioStore {
 
   audioState: "paused" | "starting" | "playing" = "paused";
 
+  audioContext: AudioContext | null = null;
+
   constructor(readonly rootStore: RootStore) {
     makeAutoObservable(this, {
       getSelectedAudioFileUrl: false,

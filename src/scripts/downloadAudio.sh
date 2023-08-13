@@ -7,6 +7,8 @@
 # youtube-dl -f bestaudio --extract-audio --audio-format mp3 --audio-quality 256K 'https://www.youtube.com/watch?v=HnhuZ_p-dbQ' -o 'the-queen-of-all-everything.%(ext)s'
 # youtube-dl -f bestaudio --extract-audio --audio-format mp3 --audio-quality 256K 'https://www.youtube.com/watch?v=use8dcTn4tI' -o 'ratatat-tacobelcanon.%(ext)s'
 # youtube-dl -f bestaudio --extract-audio --audio-format mp3 --audio-quality 256K 'https://www.youtube.com/watch?v=J-WNYs9GwKM' -o 'the-king-beetle-on-a-coconut-estate.%(ext)s'
+# youtube-dl -f bestaudio --extract-audio --audio-format mp3 --audio-quality 256K 'https://www.youtube.com/watch?v=A7KYhOGdagg' -o 'light-dr-toast.%(ext)s'
+# youtube-dl -f bestaudio --extract-audio --audio-format mp3 --audio-quality 256K 'https://www.youtube.com/watch?v=C_w9eMbGFz8' -o 'hiatus-nightjar.%(ext)s'
 
 # Still need to download these:
 # youtube-dl -f bestaudio --extract-audio --audio-format mp3 --audio-quality 256K 'https://www.youtube.com/watch?v=...' -o 'cloudkicker-explorebecurious.%(ext)s'

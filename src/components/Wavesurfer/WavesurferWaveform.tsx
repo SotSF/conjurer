@@ -165,6 +165,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
         () => {
           // delay audio in order to sync with video
           const audioContext = new AudioContext();
+          audioStore.audioContext = audioContext;
           const mediaSource = audioContext.createMediaElementSource(
             audioRef.current!
           );
