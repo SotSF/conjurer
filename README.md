@@ -56,13 +56,17 @@ Open the app locally by visiting http://localhost:3000.
 
 Generates boilerplate for a new pattern called PatternName. Choose your own unique PatternName. It prints out the filepaths it writes, including the fragment shader and typescript pattern definition.
 
+#### `yarn controllerServer`
+
+Starts the server that passes messages between conjurer and conjurer controllers.
+
 #### `yarn generateCanopy`
 
 Generates canopy geometry data and stores it in `src/data/canopyGeometry.json`.
 
-#### `yarn server`
+#### `yarn unityTestServer`
 
-Starts a websocket server at port 8080 on localhost. For development use only. Writes `src/scripts/output.png` once per second.
+Starts a websocket server at port 8080 on localhost. For development use only, to mock the websocket server that the Unity app would run. Writes `src/scripts/output.png` once per second.
 
 #### `yarn downloadCloudAssets`
 
