@@ -15,6 +15,9 @@ export const setupControllerWebsocket = () => {
     `ws://${CONTROLLER_SERVER_WEBSOCKET_HOST}:${CONTROLLER_SERVER_WEBSOCKET_PORT}`
   );
   _websocket.binaryType = "blob";
+
+  _websocket.onopen = () =>
+    _websocket.send(JSON.stringify({ type: "connect", id: 0 }));
 };
 
 let lastWarned = 0;
@@ -32,5 +35,5 @@ export const sendControllerMessage = (data: any) => {
     return;
   }
 
-  _websocket.send(data);
+  _websocket.send(JSON.stringify(data));
 };

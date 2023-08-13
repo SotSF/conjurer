@@ -1,7 +1,7 @@
 import { observer } from "mobx-react-lite";
 import { Button, HStack } from "@chakra-ui/react";
 import { useStore } from "@/src/types/StoreContext";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import {
   sendControllerMessage,
   setupControllerWebsocket,
@@ -9,9 +9,11 @@ import {
 
 export const MobileController = observer(function MobileController() {
   const store = useStore();
-  const { audioStore } = store;
 
+  const initialized = useRef(false);
   useEffect(() => {
+    if (initialized.current) return;
+    initialized.current = true;
     setupControllerWebsocket();
   }, []);
 
@@ -19,8 +21,7 @@ export const MobileController = observer(function MobileController() {
     <HStack width="100%" justify="center">
       <Button
         onClick={() => {
-          // setupControllerWebsocket();
-          sendControllerMessage(JSON.stringify({ type: "turtle" }));
+          sendControllerMessage({ type: "turtle" });
         }}
       >
         Play
