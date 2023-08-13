@@ -14,7 +14,7 @@ export const setupControllerWebsocket = () => {
   _websocket = new WebSocket(
     `ws://${CONTROLLER_SERVER_WEBSOCKET_HOST}:${CONTROLLER_SERVER_WEBSOCKET_PORT}`
   );
-  _websocket.binaryType = "arraybuffer";
+  _websocket.binaryType = "blob";
 };
 
 let lastWarned = 0;
