@@ -9,6 +9,7 @@ import { setupUnityAppWebsocket } from "@/src/utils/unityWebsocket";
 import { deserializeVariation } from "@/src/types/Variations/variations";
 import { PlaylistStore } from "@/src/types/PlaylistStore";
 import { PlaygroundStore } from "@/src/types/PlaygroundStore";
+import { setupControllerWebsocket } from "@/src/utils/controllerWebsocket";
 
 // Enforce MobX strict mode, which can make many noisy console warnings, but can help use learn MobX better.
 // Feel free to comment out the following if you want to silence the console messages.
@@ -130,8 +131,15 @@ export class Store {
     if (this.initialized) return;
     this.initialized = true;
 
-    if (this.context === "playground" || this.context === "controller") {
+    if (this.context === "controller") {
+      setupControllerWebsocket();
       this.playgroundStore.initialize();
+      return;
+    }
+
+    if (this.context === "playground") {
+      this.playgroundStore.initialize();
+      return;
     }
 
     // check for a username in local storage
@@ -159,10 +167,6 @@ export class Store {
     }, 60 * 1000);
 
     this.uiStore.initialize();
-  };
-
-  initializePlayground = () => {
-    this.initialized = true;
   };
 
   toggleSendingData = () => {
