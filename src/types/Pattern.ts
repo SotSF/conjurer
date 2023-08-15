@@ -1,5 +1,11 @@
 import { deepClone } from "@/src/utils/object";
-import { ExtraParams, ParamType, StandardParams } from "./PatternParams";
+import {
+  ExtraParams,
+  ParamType,
+  StandardParams,
+  isPaletteParam,
+  isVector4Param,
+} from "./PatternParams";
 import { TransferPattern, TransformParams } from "@/src/types/TransferBlock";
 
 export const BASE_UNIFORMS = ["u_time", "u_texture"];
@@ -36,8 +42,9 @@ export class Pattern<T extends ExtraParams = ExtraParams> {
     const transferParams: TransformParams = {};
     for (const [key, param] of Object.entries(this.params)) {
       if (BASE_UNIFORMS.includes(key)) continue;
-      transferParams[key] = { value: param.value };
-      // handle vectors and palettes
+      if (isPaletteParam(param)) {
+        transferParams[key] = { value: param.value.serialize() };
+      } else transferParams[key] = { value: param.value };
     }
 
     return {

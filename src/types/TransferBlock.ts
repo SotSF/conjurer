@@ -1,6 +1,9 @@
+import { SerializedPalette } from "@/src/types/Palette";
 import { ParamType } from "@/src/types/PatternParams";
 
-export type TransformParams = Record<string, { value: ParamType }>;
+type TransferParamType = ParamType | SerializedPalette;
+
+export type TransformParams = Record<string, { value: TransferParamType }>;
 
 export type TransferPattern = {
   name: string;

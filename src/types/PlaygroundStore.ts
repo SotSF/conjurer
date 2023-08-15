@@ -1,7 +1,12 @@
 import { playgroundEffects } from "@/src/effects/effects";
 import { playgroundPatterns } from "@/src/patterns/patterns";
 import { Block, RootStore } from "@/src/types/Block";
-import { ExtraParams } from "@/src/types/PatternParams";
+import { Palette, SerializedPalette } from "@/src/types/Palette";
+import {
+  ExtraParams,
+  ParamType,
+  isPaletteParam,
+} from "@/src/types/PatternParams";
 import { TransferBlock } from "@/src/types/TransferBlock";
 import { makeAutoObservable } from "mobx";
 
@@ -86,8 +91,15 @@ export class PlaygroundStore {
         const { params } = transferPattern;
         for (const [uniformName, param] of Object.entries(params)) {
           const playgroundParams = patternBlock.pattern.params as ExtraParams;
-          if (playgroundParams[uniformName])
-            playgroundParams[uniformName].value = param.value;
+          // TODO: fix duplicated code here
+          if (playgroundParams[uniformName]) {
+            if (isPaletteParam(playgroundParams[uniformName])) {
+              (
+                playgroundParams[uniformName].value as Palette
+              ).setFromSerialized(param.value as SerializedPalette);
+            } else
+              playgroundParams[uniformName].value = param.value as ParamType;
+          }
         }
 
         // set this pattern as selected
@@ -101,8 +113,15 @@ export class PlaygroundStore {
               for (const [uniformName, param] of Object.entries(params)) {
                 const playgroundParams = effectBlock.pattern
                   .params as ExtraParams;
-                if (playgroundParams[uniformName])
-                  playgroundParams[uniformName].value = param.value;
+                if (playgroundParams[uniformName]) {
+                  if (isPaletteParam(playgroundParams[uniformName])) {
+                    (
+                      playgroundParams[uniformName].value as Palette
+                    ).setFromSerialized(param.value as SerializedPalette);
+                  } else
+                    playgroundParams[uniformName].value =
+                      param.value as ParamType;
+                }
               }
 
               // set this effect as selected

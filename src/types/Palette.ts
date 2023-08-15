@@ -1,6 +1,13 @@
 import { Vector3 } from "three";
 import { clamp } from "three/src/math/MathUtils";
 
+export type SerializedPalette = {
+  a: [number, number, number];
+  b: [number, number, number];
+  c: [number, number, number];
+  d: [number, number, number];
+};
+
 // This cosine-based palette creates a continuous spectrum of color given 4 vec3 params
 // https://iquilezles.org/articles/palettes/
 export class Palette {
@@ -47,12 +54,27 @@ export class Palette {
   clone = () =>
     new Palette(this.a.clone(), this.b.clone(), this.c.clone(), this.d.clone());
 
-  serialize = () => ({
+  serialize = (): SerializedPalette => ({
     a: this.a.toArray(),
     b: this.b.toArray(),
     c: this.c.toArray(),
     d: this.d.toArray(),
   });
+
+  static deserialize = (serialized: SerializedPalette) =>
+    new Palette(
+      new Vector3(serialized.a[0], serialized.a[1], serialized.a[2]),
+      new Vector3(serialized.b[0], serialized.b[1], serialized.b[2]),
+      new Vector3(serialized.c[0], serialized.c[1], serialized.c[2]),
+      new Vector3(serialized.d[0], serialized.d[1], serialized.d[2])
+    );
+
+  setFromSerialized = (serialized: SerializedPalette) => {
+    this.a.set(serialized.a[0], serialized.a[1], serialized.a[2]);
+    this.b.set(serialized.b[0], serialized.b[1], serialized.b[2]);
+    this.c.set(serialized.c[0], serialized.c[1], serialized.c[2]);
+    this.d.set(serialized.d[0], serialized.d[1], serialized.d[2]);
+  };
 
   toConstructorString = () =>
     `new Palette(new Vector3(${this.a.x}, ${this.a.y}, ${this.a.z}), new Vector3(${this.b.x}, ${this.b.y}, ${this.b.z}), new Vector3(${this.c.x}, ${this.c.y}, ${this.c.z}), new Vector3(${this.d.x}, ${this.d.y}, ${this.d.z}))`;
