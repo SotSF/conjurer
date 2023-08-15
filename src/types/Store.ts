@@ -132,14 +132,14 @@ export class Store {
     this.initialized = true;
 
     if (this.context === "controller") {
-      setupControllerWebsocket(this.context);
       this.playgroundStore.initialize();
+      setupControllerWebsocket(this.context);
       return;
     }
 
     if (this.context === "playground") {
-      setupControllerWebsocket(this.context);
       this.playgroundStore.initialize();
+      setupControllerWebsocket(this.context, this.playgroundStore.onUpdate);
       return;
     }
 

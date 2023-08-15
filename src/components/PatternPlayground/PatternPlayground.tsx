@@ -118,7 +118,7 @@ export const PatternPlayground = observer(function PatternPlayground() {
             <HStack width="100%" justify="center">
               <Button
                 onClick={() =>
-                  sendControllerMessage(context, {
+                  sendControllerMessage({
                     type: "updateBlock",
                     transferBlock:
                       selectedPatternBlock.serializeTransferBlock(),

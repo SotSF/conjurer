@@ -1,6 +1,8 @@
 import { playgroundEffects } from "@/src/effects/effects";
 import { playgroundPatterns } from "@/src/patterns/patterns";
 import { Block, RootStore } from "@/src/types/Block";
+import { ExtraParams } from "@/src/types/PatternParams";
+import { TransferBlock } from "@/src/types/TransferBlock";
 import { makeAutoObservable } from "mobx";
 
 export class PlaygroundStore {
@@ -61,5 +63,21 @@ export class PlaygroundStore {
         lastEffectIndices: this.lastEffectIndices,
       })
     );
+  };
+
+  onUpdate = (transferBlock: TransferBlock) => {
+    const { id, pattern, effectBlocks } = transferBlock;
+    for (const patternBlock of this.patternBlocks) {
+      if (patternBlock.pattern.name === pattern.name) {
+        // const { name, params } = pattern;
+        const { params } = pattern;
+        for (const [uniformName, param] of Object.entries(params)) {
+          const playgroundParams = patternBlock.pattern.params as ExtraParams;
+          if (playgroundParams[uniformName])
+            playgroundParams[uniformName].value = param.value;
+        }
+        break;
+      }
+    }
   };
 }
