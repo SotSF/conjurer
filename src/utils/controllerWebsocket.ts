@@ -1,3 +1,4 @@
+import { ControllerMessage } from "@/src/types/ControllerMessage";
 import {
   CONTROLLER_SERVER_WEBSOCKET_HOST,
   CONTROLLER_SERVER_WEBSOCKET_PORT,
@@ -16,12 +17,11 @@ export const setupControllerWebsocket = () => {
   );
   _websocket.binaryType = "blob";
 
-  _websocket.onopen = () =>
-    _websocket.send(JSON.stringify({ type: "connect", id: 0 }));
+  _websocket.onopen = () => sendControllerMessage({ type: "connect" });
 };
 
 let lastWarned = 0;
-export const sendControllerMessage = (data: any) => {
+export const sendControllerMessage = (message: ControllerMessage) => {
   if (!_websocket) {
     setupControllerWebsocket();
     return;
@@ -35,5 +35,5 @@ export const sendControllerMessage = (data: any) => {
     return;
   }
 
-  _websocket.send(JSON.stringify(data));
+  _websocket.send(JSON.stringify(message));
 };

@@ -6,6 +6,7 @@ import {
   sendControllerMessage,
   setupControllerWebsocket,
 } from "@/src/utils/controllerWebsocket";
+import { PatternPlayground } from "@/src/components/PatternPlayground/PatternPlayground";
 
 export const MobileController = observer(function MobileController() {
   const store = useStore();
@@ -18,14 +19,17 @@ export const MobileController = observer(function MobileController() {
   }, []);
 
   return (
-    <HStack width="100%" justify="center">
-      <Button
-        onClick={() => {
-          sendControllerMessage({ type: "turtle" });
-        }}
-      >
-        Play
-      </Button>
-    </HStack>
+    <>
+      <HStack width="100%" justify="center">
+        <Button
+          onClick={() => {
+            sendControllerMessage({ type: "update" });
+          }}
+        >
+          Play
+        </Button>
+      </HStack>
+      <PatternPlayground />
+    </>
   );
 });

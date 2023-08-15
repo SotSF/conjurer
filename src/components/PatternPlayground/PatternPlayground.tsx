@@ -14,15 +14,10 @@ import { SendDataButton } from "@/src/components/SendDataButton";
 
 const PATTERN_PREVIEW_DISPLAY_SIZE = 600;
 
-type PatternPlaygroundProps = {
-  page?: "playground";
-};
-
-export const PatternPlayground = observer(function PatternPlayground({
-  page,
-}: PatternPlaygroundProps) {
+export const PatternPlayground = observer(function PatternPlayground() {
   const store = useStore();
-  const { uiStore } = store;
+  const { uiStore, context } = store;
+  console.log(context);
 
   // TODO: in dire need of refactoring
   const patternBlocks = useMemo(
@@ -93,13 +88,7 @@ export const PatternPlayground = observer(function PatternPlayground({
       uiStore.lastPatternIndexSelected,
       uiStore.lastEffectIndices
     );
-  }, [
-    store,
-    uiStore.lastPatternIndexSelected,
-    uiStore.lastEffectIndices,
-    onSelectPatternBlock,
-    applyPatternEffects,
-  ]);
+  }, [store, uiStore.lastPatternIndexSelected, uiStore.lastEffectIndices, onSelectPatternBlock, applyPatternEffects]);
 
   return (
     <Grid
@@ -134,8 +123,8 @@ export const PatternPlayground = observer(function PatternPlayground({
       <GridItem area="preview" position="relative">
         <HStack mt={2} pr={1} width="100%" justify="end">
           <DisplayModeButtons />
-          <SendDataButton />
-          {page !== "playground" && (
+          {["playground", "default"].includes(context) && <SendDataButton />}
+          {context === "default" && (
             <Button
               size="sm"
               colorScheme="teal"
