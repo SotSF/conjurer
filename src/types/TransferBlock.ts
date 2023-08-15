@@ -1,8 +1,10 @@
-import { ExtraParams } from "@/src/types/PatternParams";
+import { ParamType } from "@/src/types/PatternParams";
 
-type TransferPattern = {
+export type TransformParams = Record<string, { value: ParamType }>;
+
+export type TransferPattern = {
   name: string;
-  params: ExtraParams;
+  params: TransformParams;
 };
 
 export type TransferBlock = {

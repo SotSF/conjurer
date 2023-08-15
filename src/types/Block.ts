@@ -394,7 +394,7 @@ export class Block<T extends ExtraParams = {}> {
 
   serializeTransferBlock = (): TransferBlock => ({
     id: this.id,
-    pattern: { name: this.pattern.name, params: this.pattern.params },
+    pattern: this.pattern.serializeTransferPattern(),
     effectBlocks: this.effectBlocks.map((effectBlock) =>
       effectBlock.serializeTransferBlock()
     ),
