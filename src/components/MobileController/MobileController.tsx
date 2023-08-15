@@ -1,15 +1,13 @@
-import { observer } from "mobx-react-lite";
 import { Button, HStack } from "@chakra-ui/react";
-import { useStore } from "@/src/types/StoreContext";
-import { useEffect, useRef } from "react";
+import { memo, useEffect, useRef } from "react";
 import {
   sendControllerMessage,
   setupControllerWebsocket,
 } from "@/src/utils/controllerWebsocket";
 import { PatternPlayground } from "@/src/components/PatternPlayground/PatternPlayground";
 
-export const MobileController = observer(function MobileController() {
-  const store = useStore();
+export const MobileController = memo(function MobileController() {
+  // const store = useStore();
 
   const initialized = useRef(false);
   useEffect(() => {

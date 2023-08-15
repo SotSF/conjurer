@@ -8,6 +8,7 @@ import { Layer } from "@/src/types/Layer";
 import { setupUnityAppWebsocket } from "@/src/utils/unityWebsocket";
 import { deserializeVariation } from "@/src/types/Variations/variations";
 import { PlaylistStore } from "@/src/types/PlaylistStore";
+import { PlaygroundStore } from "@/src/types/PlaygroundStore";
 
 // Enforce MobX strict mode, which can make many noisy console warnings, but can help use learn MobX better.
 // Feel free to comment out the following if you want to silence the console messages.
@@ -40,6 +41,7 @@ export class Store {
     this.audioStore,
     this.experienceStore
   );
+  playgroundStore = new PlaygroundStore(this);
 
   layers: Layer[] = [];
 
