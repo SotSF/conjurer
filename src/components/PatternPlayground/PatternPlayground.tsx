@@ -18,19 +18,12 @@ export const PatternPlayground = observer(function PatternPlayground() {
   const {
     patternBlocks,
     effectBlocks,
+    selectedPatternIndex,
+    selectedEffectIndices,
     lastPatternIndexSelected,
     lastEffectIndices,
+    selectedPatternBlock,
   } = playgroundStore;
-
-  // TODO: in dire need of refactoring
-  const [selectedPatternIndex, setSelectedPatternIndex] = useState(
-    lastPatternIndexSelected
-  );
-  const selectedPatternBlock =
-    patternBlocks[selectedPatternIndex] ?? patternBlocks[0];
-
-  const [selectedEffectIndices, setSelectedEffectIndices] =
-    useState<number[]>(lastEffectIndices);
 
   const applyPatternEffects = useCallback(
     (patternIndex: number, effectIndices: number[]) => {
@@ -48,7 +41,7 @@ export const PatternPlayground = observer(function PatternPlayground() {
   );
 
   const onSelectPatternBlock = action((index: number) => {
-    setSelectedPatternIndex(index);
+    playgroundStore.selectedPatternIndex = index;
     playgroundStore.lastPatternIndexSelected = index;
 
     applyPatternEffects(index, selectedEffectIndices);
@@ -60,23 +53,28 @@ export const PatternPlayground = observer(function PatternPlayground() {
     if (i >= 0) {
       // index found, remove it
       newSelectedEffectIndices.splice(i, 1);
-      setSelectedEffectIndices(newSelectedEffectIndices);
+      playgroundStore.selectedEffectIndices = newSelectedEffectIndices;
     } else {
       // index not found, add it
       newSelectedEffectIndices = newSelectedEffectIndices.concat(index);
-      setSelectedEffectIndices(newSelectedEffectIndices);
+      playgroundStore.selectedEffectIndices = newSelectedEffectIndices;
     }
     playgroundStore.lastEffectIndices = newSelectedEffectIndices;
     applyPatternEffects(selectedPatternIndex, newSelectedEffectIndices);
   });
+
+  useEffect(() => {
+    applyPatternEffects(
+      playgroundStore.selectedPatternIndex,
+      playgroundStore.selectedEffectIndices
+    );
+  }, [applyPatternEffects, playgroundStore.selectedEffectIndices, playgroundStore.selectedPatternIndex]);
 
   const didInitialize = useRef(false);
   useEffect(() => {
     if (didInitialize.current) return;
     didInitialize.current = true;
     store.initialize();
-    onSelectPatternBlock(lastPatternIndexSelected);
-    setSelectedEffectIndices(playgroundStore.lastEffectIndices);
     applyPatternEffects(lastPatternIndexSelected, lastEffectIndices);
   }, [store, lastPatternIndexSelected, lastEffectIndices, playgroundStore.lastEffectIndices, onSelectPatternBlock, applyPatternEffects]);
 

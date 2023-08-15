@@ -9,6 +9,9 @@ export class PlaygroundStore {
   patternBlocks: Block[];
   effectBlocks: Block[];
 
+  selectedPatternIndex = 0;
+  selectedEffectIndices: number[] = [];
+
   constructor(readonly store: RootStore) {
     this.patternBlocks = playgroundPatterns.map(
       (pattern) => new Block(this.store, pattern),
@@ -23,7 +26,16 @@ export class PlaygroundStore {
 
   initialize = () => {
     this.loadFromLocalStorage();
+
+    this.selectedPatternIndex = this.lastPatternIndexSelected;
+    this.selectedEffectIndices = this.lastEffectIndices;
   };
+
+  get selectedPatternBlock() {
+    return (
+      this.patternBlocks[this.selectedPatternIndex] ?? this.patternBlocks[0]
+    );
+  }
 
   private _lastPatternIndexSelected = 0;
   get lastPatternIndexSelected() {
@@ -69,7 +81,7 @@ export class PlaygroundStore {
   onUpdate = (transferBlock: TransferBlock) => {
     const { pattern: transferPattern, effectBlocks: transferEffectBlocks } =
       transferBlock;
-    for (const patternBlock of this.patternBlocks) {
+    this.patternBlocks.forEach((patternBlock, patternIndex) => {
       if (patternBlock.pattern.name === transferPattern.name) {
         const { params } = transferPattern;
         for (const [uniformName, param] of Object.entries(params)) {
@@ -78,8 +90,12 @@ export class PlaygroundStore {
             playgroundParams[uniformName].value = param.value;
         }
 
+        // set this pattern as selected
+        this.selectedPatternIndex = patternIndex;
+
+        const effectIndices: number[] = [];
         for (const transferEffectBlock of transferEffectBlocks) {
-          for (const effectBlock of this.effectBlocks) {
+          this.effectBlocks.forEach((effectBlock, effectIndex) => {
             if (effectBlock.pattern.name === transferEffectBlock.pattern.name) {
               const { params } = transferEffectBlock.pattern;
               for (const [uniformName, param] of Object.entries(params)) {
@@ -88,13 +104,15 @@ export class PlaygroundStore {
                 if (playgroundParams[uniformName])
                   playgroundParams[uniformName].value = param.value;
               }
-              break;
-            }
-          }
-        }
 
-        break;
+              // set this effect as selected
+              effectIndices.push(effectIndex);
+            }
+          });
+        }
+        console.log("setting effect indices", effectIndices);
+        this.selectedEffectIndices = effectIndices;
       }
-    }
+    });
   };
 }
