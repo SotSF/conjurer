@@ -110,7 +110,6 @@ export class PlaygroundStore {
             }
           });
         }
-        console.log("setting effect indices", effectIndices);
         this.selectedEffectIndices = effectIndices;
       }
     });

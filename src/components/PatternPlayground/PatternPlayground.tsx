@@ -68,7 +68,13 @@ export const PatternPlayground = observer(function PatternPlayground() {
       playgroundStore.selectedPatternIndex,
       playgroundStore.selectedEffectIndices
     );
-  }, [applyPatternEffects, playgroundStore.selectedEffectIndices, playgroundStore.selectedPatternIndex]);
+
+    if (context === "controller")
+      sendControllerMessage({
+        type: "updateBlock",
+        transferBlock: selectedPatternBlock.serializeTransferBlock(),
+      });
+  }, [context, selectedPatternBlock, applyPatternEffects, playgroundStore.selectedEffectIndices, playgroundStore.selectedPatternIndex]);
 
   const didInitialize = useRef(false);
   useEffect(() => {
