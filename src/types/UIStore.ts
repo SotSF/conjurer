@@ -42,24 +42,6 @@ export class UIStore {
 
   patternDrawerOpen = false;
 
-  private _lastPatternIndexSelected = 0;
-  get lastPatternIndexSelected() {
-    return this._lastPatternIndexSelected;
-  }
-  set lastPatternIndexSelected(index: number) {
-    this._lastPatternIndexSelected = index;
-    this.saveToLocalStorage();
-  }
-
-  private _lastEffectIndices: number[] = [];
-  get lastEffectIndices() {
-    return this._lastEffectIndices;
-  }
-  set lastEffectIndices(indices: number[]) {
-    this._lastEffectIndices = indices;
-    this.saveToLocalStorage();
-  }
-
   playlistDrawerOpen = false;
 
   pixelsPerSecond = INITIAL_PIXELS_PER_SECOND; // the zoom of the timeline
@@ -123,9 +105,6 @@ export class UIStore {
       this.horizontalLayout = !!localStorageUiSettings.horizontalLayout;
       this.displayMode = localStorageUiSettings.displayMode ?? "canopy";
       this.showingPerformance = !!localStorageUiSettings.showingPerformance;
-      this.lastPatternIndexSelected =
-        localStorageUiSettings.lastPatternIndexSelected ?? 0;
-      this.lastEffectIndices = localStorageUiSettings.lastEffectIndices ?? [];
     }
   };
 
@@ -137,8 +116,6 @@ export class UIStore {
         horizontalLayout: this.horizontalLayout,
         displayMode: this.displayMode,
         showingPerformance: this.showingPerformance,
-        lastPatternIndexSelected: this.lastPatternIndexSelected,
-        lastEffectIndices: this.lastEffectIndices,
       })
     );
   };

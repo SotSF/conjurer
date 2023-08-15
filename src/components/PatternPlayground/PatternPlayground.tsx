@@ -1,48 +1,29 @@
 import { Box, Button, Grid, GridItem, HStack, VStack } from "@chakra-ui/react";
 import { PatternList } from "@/src/components/PatternPlayground/PatternList";
 import { PreviewCanvas } from "@/src/components/Canvas/PreviewCanvas";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Block } from "@/src/types/Block";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ParameterControls } from "@/src/components/PatternPlayground/ParameterControls";
-import { playgroundPatterns } from "@/src/patterns/patterns";
 import { observer } from "mobx-react-lite";
 import { useStore } from "@/src/types/StoreContext";
-import { playgroundEffects } from "@/src/effects/effects";
 import { action, runInAction } from "mobx";
 import { DisplayModeButtons } from "@/src/components/PatternPlayground/DisplayModeButtons";
 import { SendDataButton } from "@/src/components/SendDataButton";
+import { sendControllerMessage } from "@/src/utils/controllerWebsocket";
 
 const PATTERN_PREVIEW_DISPLAY_SIZE = 600;
 
-type PatternPlaygroundProps = {
-  page?: "playground";
-};
-
-export const PatternPlayground = observer(function PatternPlayground({
-  page,
-}: PatternPlaygroundProps) {
+export const PatternPlayground = observer(function PatternPlayground() {
   const store = useStore();
-  const { uiStore } = store;
-
-  // TODO: in dire need of refactoring
-  const patternBlocks = useMemo(
-    () => playgroundPatterns.map((pattern) => new Block(store, pattern), []),
-    [store]
-  );
-  const [selectedPatternIndex, setSelectedPatternIndex] = useState(
-    uiStore.lastPatternIndexSelected
-  );
-  const selectedPatternBlock =
-    patternBlocks[selectedPatternIndex] ?? patternBlocks[0];
-
-  const effectBlocks = useMemo(
-    () => playgroundEffects.map((effect) => new Block(store, effect)),
-    [store]
-  );
-
-  const [selectedEffectIndices, setSelectedEffectIndices] = useState<number[]>(
-    []
-  );
+  const { uiStore, playgroundStore, context } = store;
+  const {
+    patternBlocks,
+    effectBlocks,
+    selectedPatternIndex,
+    selectedEffectIndices,
+    lastPatternIndexSelected,
+    lastEffectIndices,
+    selectedPatternBlock,
+  } = playgroundStore;
 
   const applyPatternEffects = useCallback(
     (patternIndex: number, effectIndices: number[]) => {
@@ -60,8 +41,8 @@ export const PatternPlayground = observer(function PatternPlayground({
   );
 
   const onSelectPatternBlock = action((index: number) => {
-    setSelectedPatternIndex(index);
-    uiStore.lastPatternIndexSelected = index;
+    playgroundStore.selectedPatternIndex = index;
+    playgroundStore.lastPatternIndexSelected = index;
 
     applyPatternEffects(index, selectedEffectIndices);
   });
@@ -72,34 +53,36 @@ export const PatternPlayground = observer(function PatternPlayground({
     if (i >= 0) {
       // index found, remove it
       newSelectedEffectIndices.splice(i, 1);
-      setSelectedEffectIndices(newSelectedEffectIndices);
+      playgroundStore.selectedEffectIndices = newSelectedEffectIndices;
     } else {
       // index not found, add it
       newSelectedEffectIndices = newSelectedEffectIndices.concat(index);
-      setSelectedEffectIndices(newSelectedEffectIndices);
+      playgroundStore.selectedEffectIndices = newSelectedEffectIndices;
     }
-    uiStore.lastEffectIndices = newSelectedEffectIndices;
+    playgroundStore.lastEffectIndices = newSelectedEffectIndices;
     applyPatternEffects(selectedPatternIndex, newSelectedEffectIndices);
   });
+
+  useEffect(() => {
+    applyPatternEffects(
+      playgroundStore.selectedPatternIndex,
+      playgroundStore.selectedEffectIndices
+    );
+
+    if (context === "controller")
+      sendControllerMessage({
+        type: "updateBlock",
+        transferBlock: selectedPatternBlock.serializeTransferBlock(),
+      });
+  }, [context, selectedPatternBlock, applyPatternEffects, playgroundStore.selectedEffectIndices, playgroundStore.selectedPatternIndex]);
 
   const didInitialize = useRef(false);
   useEffect(() => {
     if (didInitialize.current) return;
     didInitialize.current = true;
-    store.initializePlayground();
-    onSelectPatternBlock(uiStore.lastPatternIndexSelected);
-    setSelectedEffectIndices(uiStore.lastEffectIndices);
-    applyPatternEffects(
-      uiStore.lastPatternIndexSelected,
-      uiStore.lastEffectIndices
-    );
-  }, [
-    store,
-    uiStore.lastPatternIndexSelected,
-    uiStore.lastEffectIndices,
-    onSelectPatternBlock,
-    applyPatternEffects,
-  ]);
+    store.initialize();
+    applyPatternEffects(lastPatternIndexSelected, lastEffectIndices);
+  }, [store, lastPatternIndexSelected, lastEffectIndices, playgroundStore.lastEffectIndices, onSelectPatternBlock, applyPatternEffects]);
 
   return (
     <Grid
@@ -134,8 +117,23 @@ export const PatternPlayground = observer(function PatternPlayground({
       <GridItem area="preview" position="relative">
         <HStack mt={2} pr={1} width="100%" justify="end">
           <DisplayModeButtons />
-          <SendDataButton />
-          {page !== "playground" && (
+          {["playground", "default"].includes(context) && <SendDataButton />}
+          {context === "controller" && (
+            <HStack width="100%" justify="center">
+              <Button
+                onClick={() =>
+                  sendControllerMessage({
+                    type: "updateBlock",
+                    transferBlock:
+                      selectedPatternBlock.serializeTransferBlock(),
+                  })
+                }
+              >
+                Update
+              </Button>
+            </HStack>
+          )}
+          {context === "default" && (
             <Button
               size="sm"
               colorScheme="teal"

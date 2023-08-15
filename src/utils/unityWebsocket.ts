@@ -1,21 +1,26 @@
-import { WEBSOCKET_HOST, WEBSOCKET_PORT } from "@/src/utils/websocketHost";
+import {
+  UNITY_APP_WEBSOCKET_HOST,
+  UNITY_APP_WEBSOCKET_PORT,
+} from "@/src/utils/websocketHost";
 
 let _websocket: WebSocket;
 
-export const setupWebsocket = () => {
+export const setupUnityAppWebsocket = () => {
   console.log(
     "Reconnecting to websocket server at",
-    WEBSOCKET_HOST,
-    WEBSOCKET_PORT
+    UNITY_APP_WEBSOCKET_HOST,
+    UNITY_APP_WEBSOCKET_PORT
   );
-  _websocket = new WebSocket(`ws://${WEBSOCKET_HOST}:${WEBSOCKET_PORT}`);
+  _websocket = new WebSocket(
+    `ws://${UNITY_APP_WEBSOCKET_HOST}:${UNITY_APP_WEBSOCKET_PORT}`
+  );
   _websocket.binaryType = "arraybuffer";
 };
 
 let lastWarned = 0;
 export const transmitData = (data: Uint8Array) => {
   if (!_websocket) {
-    setupWebsocket();
+    setupUnityAppWebsocket();
     return;
   }
 

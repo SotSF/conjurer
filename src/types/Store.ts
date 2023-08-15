@@ -5,9 +5,11 @@ import { AudioStore } from "@/src/types/AudioStore";
 import { Variation } from "@/src/types/Variations/Variation";
 import { ExperienceStore } from "@/src/types/ExperienceStore";
 import { Layer } from "@/src/types/Layer";
-import { setupWebsocket } from "@/src/utils/websocket";
+import { setupUnityAppWebsocket } from "@/src/utils/unityWebsocket";
 import { deserializeVariation } from "@/src/types/Variations/variations";
 import { PlaylistStore } from "@/src/types/PlaylistStore";
+import { PlaygroundStore } from "@/src/types/PlaygroundStore";
+import { setupControllerWebsocket } from "@/src/utils/controllerWebsocket";
 
 // Enforce MobX strict mode, which can make many noisy console warnings, but can help use learn MobX better.
 // Feel free to comment out the following if you want to silence the console messages.
@@ -40,6 +42,7 @@ export class Store {
     this.audioStore,
     this.experienceStore
   );
+  playgroundStore = new PlaygroundStore(this);
 
   layers: Layer[] = [];
 
@@ -112,7 +115,7 @@ export class Store {
     return this.audioStore.audioState !== "paused";
   }
 
-  constructor(readonly context: string) {
+  constructor(readonly context: "playground" | "controller" | "default") {
     makeAutoObservable(this);
 
     this.initializeContext();
@@ -125,6 +128,21 @@ export class Store {
   };
 
   initialize = () => {
+    if (this.initialized) return;
+    this.initialized = true;
+
+    if (this.context === "controller") {
+      this.playgroundStore.initialize();
+      setupControllerWebsocket(this.context);
+      return;
+    }
+
+    if (this.context === "playground") {
+      this.playgroundStore.initialize();
+      setupControllerWebsocket(this.context, this.playgroundStore.onUpdate);
+      return;
+    }
+
     // check for a username in local storage
     const username = localStorage.getItem("user");
     if (username) this._user = username;
@@ -150,20 +168,11 @@ export class Store {
     }, 60 * 1000);
 
     this.uiStore.initialize();
-
-    this.initialized = true;
-  };
-
-  initializePlayground = () => {
-    if (this.initialized) return;
-    this.initialized = true;
-
-    this.uiStore.initialize();
   };
 
   toggleSendingData = () => {
     this.sendingData = !this.sendingData;
-    if (this.sendingData) setupWebsocket();
+    if (this.sendingData) setupUnityAppWebsocket();
   };
 
   toggleUsingLocalAssets = () => {
