@@ -6,7 +6,7 @@ import {
 
 let _websocket: WebSocket;
 
-export const setupControllerWebsocket = () => {
+export const setupControllerWebsocket = (context: string) => {
   console.log(
     "Reconnecting to websocket server at",
     CONTROLLER_SERVER_WEBSOCKET_HOST,
@@ -17,13 +17,22 @@ export const setupControllerWebsocket = () => {
   );
   _websocket.binaryType = "blob";
 
-  _websocket.onopen = () => sendControllerMessage({ type: "connect" });
+  _websocket.onopen = () =>
+    sendControllerMessage(context, { type: "connect", context });
+
+  _websocket.onmessage = ({ data }) => {
+    const dataString = data.toString();
+    const transferBlock = JSON.parse(dataString);
+  };
 };
 
 let lastWarned = 0;
-export const sendControllerMessage = (message: ControllerMessage) => {
+export const sendControllerMessage = (
+  context: string,
+  message: ControllerMessage
+) => {
   if (!_websocket) {
-    setupControllerWebsocket();
+    setupControllerWebsocket(context);
     return;
   }
 
