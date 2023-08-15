@@ -1,19 +1,35 @@
 import { Button, Heading, VStack } from "@chakra-ui/react";
-import { memo, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import { Block } from "@/src/types/Block";
 import { ExtraParams, PatternParam } from "@/src/types/PatternParams";
 import { BsArrowsCollapse, BsArrowsExpand } from "react-icons/bs";
 import { ParameterControl } from "@/src/components/PatternPlayground/ParameterControl";
+import { sendControllerMessage } from "@/src/utils/controllerWebsocket";
+import { observer } from "mobx-react-lite";
+import { useStore } from "@/src/types/StoreContext";
 
 type ParameterControlsProps = {
   block: Block<ExtraParams>;
 };
 
-export const ParameterControls = memo(function ParameterControls({
+export const ParameterControls = observer(function ParameterControls({
   block,
 }: ParameterControlsProps) {
+  const store = useStore();
+  const { context, playgroundStore } = store;
+  const { selectedPatternBlock } = playgroundStore;
   const [parameters, setParameters] = useState({});
   const [showControls, toggleControls] = useState(true);
+
+  // TODO: will also send a message when the selected pattern block changes, which is redundant with
+  // another call
+  useEffect(() => {
+    if (context === "controller")
+      sendControllerMessage({
+        type: "updateBlock",
+        transferBlock: selectedPatternBlock.serializeTransferBlock(),
+      });
+  }, [context, parameters, selectedPatternBlock]);
 
   const isEffect = block.parentBlock !== null;
   return (
