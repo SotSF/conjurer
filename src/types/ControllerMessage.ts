@@ -1,5 +1,7 @@
+import { TransferBlock } from "@/src/types/TransferBlock";
+
 export type ControllerMessage =
   | {
       type: "connect";
     }
-  | { type: "update" };
+  | { type: "updateBlock"; transferBlock: TransferBlock };

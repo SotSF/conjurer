@@ -11,6 +11,7 @@ import { Layer } from "@/src/types/Layer";
 import { Opacity } from "@/src/patterns/Opacity";
 import { FlatVariation } from "@/src/types/Variations/FlatVariation";
 import { defaultPatternEffectMap } from "@/src/utils/patternsEffects";
+import { TransferBlock } from "@/src/types/TransferBlock";
 
 type SerializedBlock = {
   pattern: string;
@@ -390,4 +391,12 @@ export class Block<T extends ExtraParams = {}> {
 
     return block;
   };
+
+  serializeTransferBlock = (): TransferBlock => ({
+    id: this.id,
+    pattern: { name: this.pattern.name, params: this.pattern.params },
+    effectBlocks: this.effectBlocks.map((effectBlock) =>
+      effectBlock.serializeTransferBlock()
+    ),
+  });
 }
