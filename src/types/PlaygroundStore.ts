@@ -65,17 +65,34 @@ export class PlaygroundStore {
     );
   };
 
+  // TODO: refactor, make performant
   onUpdate = (transferBlock: TransferBlock) => {
-    const { id, pattern, effectBlocks } = transferBlock;
+    const { pattern: transferPattern, effectBlocks: transferEffectBlocks } =
+      transferBlock;
     for (const patternBlock of this.patternBlocks) {
-      if (patternBlock.pattern.name === pattern.name) {
-        // const { name, params } = pattern;
-        const { params } = pattern;
+      if (patternBlock.pattern.name === transferPattern.name) {
+        const { params } = transferPattern;
         for (const [uniformName, param] of Object.entries(params)) {
           const playgroundParams = patternBlock.pattern.params as ExtraParams;
           if (playgroundParams[uniformName])
             playgroundParams[uniformName].value = param.value;
         }
+
+        for (const transferEffectBlock of transferEffectBlocks) {
+          for (const effectBlock of this.effectBlocks) {
+            if (effectBlock.pattern.name === transferEffectBlock.pattern.name) {
+              const { params } = transferEffectBlock.pattern;
+              for (const [uniformName, param] of Object.entries(params)) {
+                const playgroundParams = effectBlock.pattern
+                  .params as ExtraParams;
+                if (playgroundParams[uniformName])
+                  playgroundParams[uniformName].value = param.value;
+              }
+              break;
+            }
+          }
+        }
+
         break;
       }
     }
