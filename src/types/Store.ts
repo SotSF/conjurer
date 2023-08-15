@@ -127,6 +127,13 @@ export class Store {
   };
 
   initialize = () => {
+    if (this.initialized) return;
+    this.initialized = true;
+
+    if (this.context === "playground" || this.context === "controller") {
+      this.playgroundStore.initialize();
+    }
+
     // check for a username in local storage
     const username = localStorage.getItem("user");
     if (username) this._user = username;
@@ -152,15 +159,10 @@ export class Store {
     }, 60 * 1000);
 
     this.uiStore.initialize();
-
-    this.initialized = true;
   };
 
   initializePlayground = () => {
-    if (this.initialized) return;
     this.initialized = true;
-
-    this.uiStore.initialize();
   };
 
   toggleSendingData = () => {

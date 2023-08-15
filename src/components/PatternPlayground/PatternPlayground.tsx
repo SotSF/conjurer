@@ -1,13 +1,10 @@
 import { Box, Button, Grid, GridItem, HStack, VStack } from "@chakra-ui/react";
 import { PatternList } from "@/src/components/PatternPlayground/PatternList";
 import { PreviewCanvas } from "@/src/components/Canvas/PreviewCanvas";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Block } from "@/src/types/Block";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ParameterControls } from "@/src/components/PatternPlayground/ParameterControls";
-import { playgroundPatterns } from "@/src/patterns/patterns";
 import { observer } from "mobx-react-lite";
 import { useStore } from "@/src/types/StoreContext";
-import { playgroundEffects } from "@/src/effects/effects";
 import { action, runInAction } from "mobx";
 import { DisplayModeButtons } from "@/src/components/PatternPlayground/DisplayModeButtons";
 import { SendDataButton } from "@/src/components/SendDataButton";
@@ -16,28 +13,23 @@ const PATTERN_PREVIEW_DISPLAY_SIZE = 600;
 
 export const PatternPlayground = observer(function PatternPlayground() {
   const store = useStore();
-  const { uiStore, context } = store;
-  console.log(context);
+  const { uiStore, playgroundStore, context } = store;
+  const {
+    patternBlocks,
+    effectBlocks,
+    lastPatternIndexSelected,
+    lastEffectIndices,
+  } = playgroundStore;
 
   // TODO: in dire need of refactoring
-  const patternBlocks = useMemo(
-    () => playgroundPatterns.map((pattern) => new Block(store, pattern), []),
-    [store]
-  );
   const [selectedPatternIndex, setSelectedPatternIndex] = useState(
-    uiStore.lastPatternIndexSelected
+    lastPatternIndexSelected
   );
   const selectedPatternBlock =
     patternBlocks[selectedPatternIndex] ?? patternBlocks[0];
 
-  const effectBlocks = useMemo(
-    () => playgroundEffects.map((effect) => new Block(store, effect)),
-    [store]
-  );
-
-  const [selectedEffectIndices, setSelectedEffectIndices] = useState<number[]>(
-    []
-  );
+  const [selectedEffectIndices, setSelectedEffectIndices] =
+    useState<number[]>(lastEffectIndices);
 
   const applyPatternEffects = useCallback(
     (patternIndex: number, effectIndices: number[]) => {
@@ -56,7 +48,7 @@ export const PatternPlayground = observer(function PatternPlayground() {
 
   const onSelectPatternBlock = action((index: number) => {
     setSelectedPatternIndex(index);
-    uiStore.lastPatternIndexSelected = index;
+    playgroundStore.lastPatternIndexSelected = index;
 
     applyPatternEffects(index, selectedEffectIndices);
   });
@@ -73,7 +65,7 @@ export const PatternPlayground = observer(function PatternPlayground() {
       newSelectedEffectIndices = newSelectedEffectIndices.concat(index);
       setSelectedEffectIndices(newSelectedEffectIndices);
     }
-    uiStore.lastEffectIndices = newSelectedEffectIndices;
+    playgroundStore.lastEffectIndices = newSelectedEffectIndices;
     applyPatternEffects(selectedPatternIndex, newSelectedEffectIndices);
   });
 
@@ -82,13 +74,10 @@ export const PatternPlayground = observer(function PatternPlayground() {
     if (didInitialize.current) return;
     didInitialize.current = true;
     store.initializePlayground();
-    onSelectPatternBlock(uiStore.lastPatternIndexSelected);
-    setSelectedEffectIndices(uiStore.lastEffectIndices);
-    applyPatternEffects(
-      uiStore.lastPatternIndexSelected,
-      uiStore.lastEffectIndices
-    );
-  }, [store, uiStore.lastPatternIndexSelected, uiStore.lastEffectIndices, onSelectPatternBlock, applyPatternEffects]);
+    onSelectPatternBlock(lastPatternIndexSelected);
+    setSelectedEffectIndices(playgroundStore.lastEffectIndices);
+    applyPatternEffects(lastPatternIndexSelected, lastEffectIndices);
+  }, [store, lastPatternIndexSelected, lastEffectIndices, playgroundStore.lastEffectIndices, onSelectPatternBlock, applyPatternEffects]);
 
   return (
     <Grid

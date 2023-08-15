@@ -1,20 +1,23 @@
 import { Button, HStack } from "@chakra-ui/react";
-import { memo, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import {
   sendControllerMessage,
   setupControllerWebsocket,
 } from "@/src/utils/controllerWebsocket";
 import { PatternPlayground } from "@/src/components/PatternPlayground/PatternPlayground";
+import { useStore } from "@/src/types/StoreContext";
+import { observer } from "mobx-react-lite";
 
-export const MobileController = memo(function MobileController() {
-  // const store = useStore();
+export const MobileController = observer(function MobileController() {
+  const store = useStore();
 
   const initialized = useRef(false);
   useEffect(() => {
     if (initialized.current) return;
     initialized.current = true;
+    store.initialize();
     setupControllerWebsocket();
-  }, []);
+  }, [store]);
 
   return (
     <>
@@ -27,7 +30,7 @@ export const MobileController = memo(function MobileController() {
           Play
         </Button>
       </HStack>
-      <PatternPlayground />
+      {store.initialized && <PatternPlayground />}
     </>
   );
 });
