@@ -3,9 +3,13 @@ import {
   UNITY_APP_WEBSOCKET_PORT,
 } from "@/src/utils/websocketHost";
 
+const env = process.env.NODE_ENV;
+
 let _websocket: WebSocket;
 
 export const setupUnityAppWebsocket = () => {
+  if (env == "production") return;
+
   console.log(
     "Reconnecting to websocket server at",
     UNITY_APP_WEBSOCKET_HOST,
@@ -19,6 +23,8 @@ export const setupUnityAppWebsocket = () => {
 
 let lastWarned = 0;
 export const transmitData = (data: Uint8Array) => {
+  if (env == "production") return;
+
   if (!_websocket) {
     setupUnityAppWebsocket();
     return;

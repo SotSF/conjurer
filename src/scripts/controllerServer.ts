@@ -14,7 +14,7 @@ wss.on("connection", (ws) => {
   ws.on("message", (rawData: Buffer) => {
     const dataString = rawData.toString();
     const data = JSON.parse(dataString);
-    console.log("received", inspect(data, { depth: 10 }));
+    // console.log("received", inspect(data, { depth: 10 }));
 
     if (data.type === "connect" && data.context === "playground") {
       // Mark this client as a playground client. Always the last playground to connect.
