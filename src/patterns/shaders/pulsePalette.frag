@@ -20,6 +20,7 @@ uniform float u_waviness;
 uniform float u_spiral_factor;
 uniform float u_number_colors;
 uniform float u_white_leading_edge;
+uniform float u_sector_cells;
 
 // // For debugging
 // #define u_palette Palette(vec3(0.261, 0.446, 0.315), vec3(0.843, 0.356, 0.239), vec3(0.948, 1.474, 1.361), vec3(3.042, 5.630, 5.424))
@@ -35,6 +36,7 @@ uniform float u_white_leading_edge;
 // #define u_spiral_factor .5
 // #define u_number_colors 100.
 // #define u_white_leading_edge .2
+// #define u_sector_cells 4.
 
 float triangleWave(in float x) {
     return 2. / PI * asin(sin(x));
@@ -55,9 +57,16 @@ void main() {
     // scale the cells based on the duty cycle
     st.y *= 1. - u_duty_cycle;
 
+    // divide the annular space into sectors
+    float sector_cell = floor(st.x * u_sector_cells);
+    float is_odd_sector_cell = mod(sector_cell, 2.0);
+
+    // every other sector cell moves in the opposite direction
+    float move_factor = is_odd_sector_cell * - 2. + 1.;
+
     // move the cells over time
     float time = u_time_offset + u_time * u_time_factor;
-    st.y -= time / u_period;
+    st.y += move_factor * time / u_period;
 
     // scale the cells
     st.y *= u_scale;
