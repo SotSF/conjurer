@@ -68,7 +68,7 @@ export const PaletteEditor = memo(function PaletteEditor({
   return (
     <VStack>
       <LineChart
-        width={500}
+        width={200}
         height={100}
         margin={{ top: 0, left: 0, right: 0, bottom: 0 }}
       >
@@ -93,7 +93,7 @@ export const PaletteEditor = memo(function PaletteEditor({
       <PaletteVariationGraph
         uniformName={uniformName}
         variation={variation}
-        width={500}
+        width={200}
         block={block}
       />
       <Accordion width="100%" allowToggle>

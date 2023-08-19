@@ -150,8 +150,9 @@ export const PatternPlayground = observer(function PatternPlayground() {
           alignItems="center"
         >
           <Box
-            width={`${PATTERN_PREVIEW_DISPLAY_SIZE}px`}
-            height={`${PATTERN_PREVIEW_DISPLAY_SIZE}px`}
+            className={styles.previewCanvas}
+            max-width={`${PATTERN_PREVIEW_DISPLAY_SIZE}px`}
+            max-height={`${PATTERN_PREVIEW_DISPLAY_SIZE}px`}
           >
             <PreviewCanvas block={selectedPatternBlock} />
           </Box>
