@@ -1,11 +1,8 @@
 import {
   Button,
   HStack,
-  NumberDecrementStepper,
-  NumberIncrementStepper,
   NumberInput,
   NumberInputField,
-  NumberInputStepper,
   Slider,
   SliderFilledTrack,
   SliderMark,
@@ -98,7 +95,12 @@ export const ScalarParameterControl = memo(function ScalarParameterControl({
             onChange={updateParameterValue}
             value={valueString}
           >
-            <NumberInputField />
+            <NumberInputField
+              fontSize="md"
+              textAlign="center"
+              fontWeight="bold"
+              padding={0}
+            />
           </NumberInput>
           <Button
             size="xs"

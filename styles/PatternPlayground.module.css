@@ -21,7 +21,7 @@
     grid-template-rows: auto;
     overflow: scroll;
     padding-top: 2em;
-    padding-bottom: 2em;
+    padding-bottom: 4em;
   }
 
   .controls {
