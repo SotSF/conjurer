@@ -3,13 +3,8 @@ import {
   HStack,
   NumberInput,
   NumberInputField,
-  Slider,
-  SliderFilledTrack,
-  SliderMark,
-  SliderThumb,
-  SliderTrack,
   Switch,
-  Tooltip,
+  Text,
   VStack,
   useNumberInput,
 } from "@chakra-ui/react";
@@ -105,16 +100,18 @@ export const BooleanParameterControl = memo(function BooleanParameterControl({
           </Button>
         </HStack>
       </VStack>
-      <VStack mx={12} flexGrow={1}>
+      <HStack mx={12} flexGrow={1} justify="center">
+        <Text>off</Text>
         <Switch
           size="lg"
-          checked={!!patternParam.value}
+          isChecked={!!patternParam.value}
           onChange={() => {
             const newValue = patternParam.value ? 0 : 1;
             updateParameterValue(newValue.toString(), newValue);
           }}
         ></Switch>
-      </VStack>
+        <Text>on</Text>
+      </HStack>
     </HStack>
   );
 });
