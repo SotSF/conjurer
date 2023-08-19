@@ -49,7 +49,7 @@ export const PulsePalette = () =>
       name: "Wave Frequency",
       value: 4,
       min: 1,
-      max: 12,
+      max: 20,
       step: 1,
     },
     u_wave_amplitude: {
@@ -74,5 +74,12 @@ export const PulsePalette = () =>
     u_white_leading_edge: {
       name: "White Leading Edge",
       value: 0.1,
+    },
+    u_sector_cells: {
+      name: "Sector Cells",
+      value: 0,
+      min: 0,
+      max: 96,
+      step: 1,
     },
   });
