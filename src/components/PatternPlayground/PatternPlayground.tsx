@@ -116,6 +116,7 @@ export const PatternPlayground = observer(function PatternPlayground() {
           {context === "controller" && (
             <HStack width="100%" justify="center">
               <Button
+                size="sm"
                 onClick={() =>
                   sendControllerMessage({
                     type: "updateBlock",
@@ -148,11 +149,12 @@ export const PatternPlayground = observer(function PatternPlayground() {
           height="70vh"
           justify="center"
           alignItems="center"
+          overflowX="hidden"
         >
           <Box
             className={styles.previewCanvas}
-            max-width={`${PATTERN_PREVIEW_DISPLAY_SIZE}px`}
-            max-height={`${PATTERN_PREVIEW_DISPLAY_SIZE}px`}
+            width={`${PATTERN_PREVIEW_DISPLAY_SIZE}px`}
+            height={`${PATTERN_PREVIEW_DISPLAY_SIZE}px`}
           >
             <PreviewCanvas block={selectedPatternBlock} />
           </Box>

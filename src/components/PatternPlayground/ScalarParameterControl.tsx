@@ -1,4 +1,5 @@
 import {
+  Button,
   HStack,
   NumberDecrementStepper,
   NumberIncrementStepper,
@@ -12,6 +13,7 @@ import {
   SliderTrack,
   Tooltip,
   VStack,
+  useNumberInput,
 } from "@chakra-ui/react";
 import { memo, useState } from "react";
 import { Block } from "@/src/types/Block";
@@ -71,22 +73,42 @@ export const ScalarParameterControl = memo(function ScalarParameterControl({
     });
   };
 
+  const { getIncrementButtonProps, getDecrementButtonProps } = useNumberInput({
+    step,
+    value: valueString,
+    onChange: updateParameterValue,
+  });
+
   return (
     <HStack width="100%">
-      <VStack width="200px" spacing={1} alignItems="flex-start">
+      <VStack width="150px" spacing={1} alignItems="flex-start">
         <ParameterControlName patternParam={patternParam} />
-        <NumberInput
-          size="xs"
-          step={step}
-          onChange={updateParameterValue}
-          value={valueString}
-        >
-          <NumberInputField />
-          <NumberInputStepper>
-            <NumberIncrementStepper />
-            <NumberDecrementStepper />
-          </NumberInputStepper>
-        </NumberInput>
+        <HStack spacing={0}>
+          <Button
+            size="xs"
+            borderTopRightRadius={0}
+            borderBottomRightRadius={0}
+            {...getDecrementButtonProps()}
+          >
+            -
+          </Button>
+          <NumberInput
+            size="xs"
+            step={step}
+            onChange={updateParameterValue}
+            value={valueString}
+          >
+            <NumberInputField />
+          </NumberInput>
+          <Button
+            size="xs"
+            borderTopLeftRadius={0}
+            borderBottomLeftRadius={0}
+            {...getIncrementButtonProps()}
+          >
+            +
+          </Button>
+        </HStack>
       </VStack>
       <VStack mx={12} flexGrow={1}>
         <Slider
