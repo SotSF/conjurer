@@ -13,6 +13,14 @@ export type PatternParam<T = ParamType> = {
   step?: number;
 };
 
+export const isBooleanParam = (
+  param: PatternParam
+): param is PatternParam<number> =>
+  typeof param.value === "number" &&
+  param.min === 0 &&
+  param.max === 1 &&
+  param.step === 1;
+
 export const isNumberParam = (
   param: PatternParam
 ): param is PatternParam<number> => typeof param.value === "number";

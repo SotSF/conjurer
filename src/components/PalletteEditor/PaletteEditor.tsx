@@ -67,12 +67,18 @@ export const PaletteEditor = memo(function PaletteEditor({
   const series = getPaletteSeriesData(variation.palette);
   return (
     <VStack>
-      <PaletteVariationGraph
-        uniformName={uniformName}
-        variation={variation}
-        width={200}
-        block={block}
-      />
+      <HStack>
+        <PaletteVariationGraph
+          uniformName={uniformName}
+          variation={variation}
+          width={200}
+          block={block}
+        />
+        <Button size="xs" onClick={() => randomize()}>
+          Randomize
+        </Button>
+      </HStack>
+
       <Accordion bgColor="gray.600" maxWidth="325px" allowToggle>
         <AccordionItem>
           <AccordionButton>
@@ -136,11 +142,6 @@ export const PaletteEditor = memo(function PaletteEditor({
           </AccordionPanel>
         </AccordionItem>
       </Accordion>
-      <HStack>
-        <Button size="sm" onClick={() => randomize()}>
-          Randomize
-        </Button>
-      </HStack>
     </VStack>
   );
 });

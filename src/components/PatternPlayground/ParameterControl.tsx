@@ -4,6 +4,7 @@ import { Block } from "@/src/types/Block";
 import {
   ParamType,
   PatternParam,
+  isBooleanParam,
   isNumberParam,
   isPaletteParam,
   isVector4Param,
@@ -12,6 +13,7 @@ import { BASE_UNIFORMS } from "@/src/types/Pattern";
 import { ScalarParameterControl } from "@/src/components/PatternPlayground/ScalarParameterControl";
 import { ColorParameterControl } from "@/src/components/PatternPlayground/ColorParameterControl";
 import { PaletteParameterControl } from "@/src/components/PatternPlayground/PaletteParameterControl";
+import { BooleanParameterControl } from "@/src/components/PatternPlayground/BooleanParameterControl";
 
 type ParameterControlProps = {
   block: Block;
@@ -38,15 +40,19 @@ export const ParameterControl = memo(function ParameterControl({
     setParameters,
   };
   let parameterControl = null;
-  if (isNumberParam(patternParam))
+  if (isBooleanParam(patternParam))
+    parameterControl = (
+      <BooleanParameterControl {...props} patternParam={patternParam} />
+    );
+  else if (isNumberParam(patternParam))
     parameterControl = (
       <ScalarParameterControl {...props} patternParam={patternParam} />
     );
-  if (isVector4Param(patternParam))
+  else if (isVector4Param(patternParam))
     parameterControl = (
       <ColorParameterControl {...props} patternParam={patternParam} />
     );
-  if (isPaletteParam(patternParam))
+  else if (isPaletteParam(patternParam))
     parameterControl = (
       <PaletteParameterControl {...props} patternParam={patternParam} />
     );
