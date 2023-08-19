@@ -16,12 +16,7 @@ export default function Controller() {
 
       <ChakraProvider theme={theme}>
         <StoreContext.Provider value={new Store("controller")}>
-          <Box
-            height="100vh"
-            width="100vw"
-            overflow="scroll"
-            bgColor="gray.700"
-          >
+          <Box height="100vh" width="100vw" bgColor="gray.700">
             <ControllerPage />
           </Box>
         </StoreContext.Provider>
