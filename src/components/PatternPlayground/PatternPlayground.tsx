@@ -1,7 +1,8 @@
+import styles from "@/styles/PatternPlayground.module.css";
 import { Box, Button, Grid, GridItem, HStack, VStack } from "@chakra-ui/react";
 import { PatternList } from "@/src/components/PatternPlayground/PatternList";
 import { PreviewCanvas } from "@/src/components/Canvas/PreviewCanvas";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { ParameterControls } from "@/src/components/PatternPlayground/ParameterControls";
 import { observer } from "mobx-react-lite";
 import { useStore } from "@/src/types/StoreContext";
@@ -85,13 +86,7 @@ export const PatternPlayground = observer(function PatternPlayground() {
   }, [store, lastPatternIndexSelected, lastEffectIndices, playgroundStore.lastEffectIndices, onSelectPatternBlock, applyPatternEffects]);
 
   return (
-    <Grid
-      height="100%"
-      templateAreas={`"controls patterns"
-                      "controls preview"`}
-      gridTemplateColumns="50% 50%"
-      gridTemplateRows="auto minmax(0, 1fr)"
-    >
+    <Grid className={styles.grid} height="100%">
       <GridItem area="patterns">
         <PatternList
           selectedPatternBlock={selectedPatternBlock}
@@ -100,7 +95,7 @@ export const PatternPlayground = observer(function PatternPlayground() {
           onSelectEffectBlock={onSelectEffectBlock}
         />
       </GridItem>
-      <GridItem area="controls">
+      <GridItem className={styles.controls} area="controls">
         <VStack p={2} height="100%" overflowY="scroll">
           <ParameterControls
             key={selectedPatternBlock.id}
@@ -121,6 +116,7 @@ export const PatternPlayground = observer(function PatternPlayground() {
           {context === "controller" && (
             <HStack width="100%" justify="center">
               <Button
+                size="sm"
                 onClick={() =>
                   sendControllerMessage({
                     type: "updateBlock",
@@ -153,8 +149,10 @@ export const PatternPlayground = observer(function PatternPlayground() {
           height="70vh"
           justify="center"
           alignItems="center"
+          overflowX="hidden"
         >
           <Box
+            className={styles.previewCanvas}
             width={`${PATTERN_PREVIEW_DISPLAY_SIZE}px`}
             height={`${PATTERN_PREVIEW_DISPLAY_SIZE}px`}
           >

@@ -1,5 +1,3 @@
-import { FaDotCircle } from "react-icons/fa";
-import { TbRectangleFilled } from "react-icons/tb";
 import { Tab, TabList, Tabs } from "@chakra-ui/react";
 import { observer } from "mobx-react-lite";
 import { useStore } from "@/src/types/StoreContext";
@@ -23,6 +21,7 @@ export const DisplayModeButtons = observer(function DisplayModeButtons() {
 
   return (
     <Tabs
+      size="sm"
       flexGrow={1}
       mt={2}
       mx={2}
@@ -31,18 +30,9 @@ export const DisplayModeButtons = observer(function DisplayModeButtons() {
       onChange={setSelectedDisplayModeIndex}
     >
       <TabList>
-        <Tab>
-          <FaDotCircle size={17} />
-          &nbsp;Canopy
-        </Tab>
-        <Tab>
-          <TbRectangleFilled size={17} />
-          &nbsp;Canopy space
-        </Tab>
-        <Tab>
-          <TbRectangleFilled size={17} />
-          &nbsp;Cartesian space
-        </Tab>
+        <Tab>Canopy</Tab>
+        <Tab>Canopy space</Tab>
+        <Tab>Cartesian space</Tab>
       </TabList>
     </Tabs>
   );

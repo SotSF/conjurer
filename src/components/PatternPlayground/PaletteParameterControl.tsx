@@ -59,7 +59,7 @@ export const PaletteParameterControl = memo(function PaletteParameterControl({
   };
 
   return (
-    <HStack pt={6} width="100%" gap={4}>
+    <HStack width="100%" gap={4}>
       <ParameterControlName patternParam={patternParam} />
       {variation?.type === "palette" && (
         <PaletteEditor

@@ -1,0 +1,35 @@
+.grid {
+  grid-template-areas:
+    "controls patterns"
+    "controls preview";
+  grid-template-columns: 50% 50%;
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
+.controls {
+  max-height: 100vh;
+}
+
+/* mobile resolution */
+@media (max-width: 800px) {
+  .grid {
+    grid-template-areas:
+      "preview"
+      "patterns"
+      "controls";
+    grid-template-columns: 100vw;
+    grid-template-rows: auto;
+    overflow: scroll;
+    padding-top: 2em;
+    padding-bottom: 4em;
+  }
+
+  .controls {
+    max-height: none;
+  }
+
+  .previewCanvas {
+    width: 100vw;
+    height: 100vw;
+  }
+}
