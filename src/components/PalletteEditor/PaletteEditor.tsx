@@ -73,10 +73,10 @@ export const PaletteEditor = memo(function PaletteEditor({
         width={200}
         block={block}
       />
-      <Accordion width="325px" allowToggle>
+      <Accordion bgColor="gray.600" maxWidth="325px" allowToggle>
         <AccordionItem>
           <AccordionButton>
-            <HStack width="100%" justify="space-between">
+            <HStack justify="space-between">
               <Text fontSize="sm">More options...</Text>
               <AccordionIcon fontSize="sm" />
             </HStack>
