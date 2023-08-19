@@ -62,7 +62,7 @@ void main() {
     float is_odd_sector_cell = mod(sector_cell, 2.0);
 
     // every other sector cell moves in the opposite direction
-    float move_factor = is_odd_sector_cell * - 2. + 1.;
+    float move_factor = is_odd_sector_cell * 2. - 1.;
 
     // move the cells over time
     float time = u_time_offset + u_time * u_time_factor;
