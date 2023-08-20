@@ -15,6 +15,18 @@ export const GradientCircles = () =>
         new Vector3(0.468, 0.198, 0.557)
       ),
     },
+    u_time_factor: {
+      name: "Time Factor",
+      value: 1,
+      min: -5,
+      max: 5,
+    },
+    u_time_offset: {
+      name: "Time Offset",
+      value: 0,
+      min: -5,
+      max: 5,
+    },
     u_count: {
       name: "Count",
       value: 8,
@@ -40,6 +52,8 @@ export const GradientCircles = () =>
     u_clockwise: {
       name: "Clockwise?",
       value: 0,
+      min: 0,
+      max: 1,
       step: 1,
     },
   });

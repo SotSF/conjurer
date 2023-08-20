@@ -13,18 +13,22 @@ uniform float u_radius;
 uniform float u_colorShift;
 uniform Palette u_palette;
 uniform float u_clockwise;
+uniform float u_time_factor;
+uniform float u_time_offset;
 
 void main() {
     vec2 uv = v_uv;
     uv = canopyToCartesianProjection(uv);
-    float uv_r = sqrt(uv.x * uv.x + uv.y * uv.y);
-    float uv_theta = atan(uv.y / uv.x);
+    // float uv_r = sqrt(uv.x * uv.x + uv.y * uv.y);
+    // float uv_theta = atan(uv.y / uv.x);
     vec3 col = vec3(0.);
     float a = 2. * PI / u_count;
 
+    float time = u_time * u_time_factor + u_time_offset;
+
     for (float i = 0.; i < u_count; i ++) {
         vec2 center = vec2(u_offset * cos(a * i), u_offset * sin(a * i));
-        float t = u_clockwise > 0. ? - 1. * u_time : u_time;
+        float t = u_clockwise > 0. ? - 1. * time : time;
         vec2 point = center + vec2(u_radius * cos(t * u_colorShift + i * a), u_radius * sin(t * u_colorShift + i * a));
         float d = distance(uv, point);
         float d1 = distance(uv, center);
