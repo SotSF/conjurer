@@ -1,9 +1,9 @@
 import { observer } from "mobx-react-lite";
 import { HStack, IconButton } from "@chakra-ui/react";
 import { RiZoomInLine, RiZoomOutLine } from "react-icons/ri";
+import { HiZoomIn, HiZoomOut } from "react-icons/hi";
 import { RxAlignCenterHorizontally } from "react-icons/rx";
 import { TbArrowBigRightLines } from "react-icons/tb";
-import { CiStreamOn, CiStreamOff } from "react-icons/ci";
 import { GiDesert } from "react-icons/gi";
 import { RiPlayList2Fill } from "react-icons/ri";
 import { useStore } from "@/src/types/StoreContext";
@@ -27,18 +27,32 @@ export const MainControls = observer(function MainControls() {
     >
       <AudioControls />
       <IconButton
+        aria-label="Zoom way in"
+        title="Zoom way in"
+        height={6}
+        icon={<RiZoomInLine size={17} />}
+        onClick={action(() => uiStore.zoomIn(50))}
+      />
+      <IconButton
         aria-label="Zoom in"
         title="Zoom in"
         height={6}
-        icon={<RiZoomInLine size={17} />}
+        icon={<HiZoomIn size={17} />}
         onClick={action(() => uiStore.zoomIn())}
       />
       <IconButton
         aria-label="Zoom out"
         title="Zoom out"
         height={6}
-        icon={<RiZoomOutLine size={17} />}
+        icon={<HiZoomOut size={17} />}
         onClick={action(() => uiStore.zoomOut())}
+      />
+      <IconButton
+        aria-label="Zoom way out"
+        title="Zoom way out"
+        height={6}
+        icon={<RiZoomOutLine size={17} />}
+        onClick={action(() => uiStore.zoomOut(50))}
       />
       <SendDataButton />
       <IconButton

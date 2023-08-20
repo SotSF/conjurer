@@ -58,8 +58,8 @@ export class UIStore {
   timeToX = (time: number) => time * this.pixelsPerSecond;
   xToTime = (x: number) => x / this.pixelsPerSecond;
 
-  zoomOut = () => {
-    this.pixelsPerSecond -= 2;
+  zoomOut = (amount?: number) => {
+    this.pixelsPerSecond -= amount || 4;
     if (this.pixelsPerSecond < MIN_PIXELS_PER_SECOND) {
       this.pixelsPerSecond = MIN_PIXELS_PER_SECOND;
     }
@@ -68,8 +68,8 @@ export class UIStore {
     this.audioStore.setTimeWithCursor(this.audioStore.globalTime);
   };
 
-  zoomIn = () => {
-    this.pixelsPerSecond += 2;
+  zoomIn = (amount?: number) => {
+    this.pixelsPerSecond += amount || 4;
     if (this.pixelsPerSecond > MAX_PIXELS_PER_SECOND) {
       this.pixelsPerSecond = MAX_PIXELS_PER_SECOND;
     }
