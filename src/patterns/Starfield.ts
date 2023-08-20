@@ -7,10 +7,14 @@ export const Starfield = () =>
     u_time_factor: {
       name: "Time Factor",
       value: 1,
+      min: -5,
+      max: 5,
     },
     u_time_offset: {
       name: "Time Offset",
       value: 0,
+      min: -5,
+      max: 5,
     },
     u_meander_factor: {
       name: "Meander Factor",

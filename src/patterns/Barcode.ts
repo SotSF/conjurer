@@ -22,6 +22,7 @@ export const Barcode = () =>
     u_time_factor: {
       name: "Time Factor",
       value: 1,
+      min: -5,
       max: 5,
     },
     u_time_offset: {
