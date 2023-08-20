@@ -11,7 +11,7 @@ export const KeyboardShortcuts = memo(function KeyboardShortcuts() {
         <Kbd>←</Kbd>/<Kbd>→</Kbd>: scan backward/forward
       </Text>
       <Text userSelect="none">
-        <Kbd>+</Kbd>/<Kbd>-</Kbd>: zoom in/out
+        <Kbd>ctrl</Kbd>+<Kbd>+</Kbd>/<Kbd>-</Kbd>: zoom in/out
       </Text>
       <Text userSelect="none">
         <Kbd>cmd</Kbd>+<Kbd>s</Kbd>: save
@@ -26,10 +26,10 @@ export const KeyboardShortcuts = memo(function KeyboardShortcuts() {
         <Kbd>cmd</Kbd>+<Kbd>a</Kbd>: select all blocks
       </Text>
       <Text userSelect="none">
-        <Kbd>cmd</Kbd>+<Kbd>c</Kbd>: copy block(s)
+        <Kbd>cmd</Kbd>+<Kbd>c</Kbd>: copy block(s)/variation(s)
       </Text>
       <Text userSelect="none">
-        <Kbd>cmd</Kbd>+<Kbd>v</Kbd>: paste block(s)
+        <Kbd>cmd</Kbd>+<Kbd>v</Kbd>: paste block(s)/variation(s)
       </Text>
       <Text userSelect="none">
         <Kbd>cmd</Kbd>+<Kbd>d</Kbd>: duplicate selected block(s)/variation(s)

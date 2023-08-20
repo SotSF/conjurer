@@ -49,10 +49,9 @@ export const KeyboardControls = observer(function KeyboardControls() {
       } else if (e.key === "d" && (e.ctrlKey || e.metaKey)) {
         store.duplicateSelected();
         e.preventDefault();
-      } else if (e.key === "+" || e.key === "=") uiStore.zoomIn(10);
-      else if (e.key === "-") uiStore.zoomOut(10);
-      // else if (e.key === "z" && e.ctrlKey) store.undo();
-      // else if (e.key === "y" && e.ctrlKey) store.redo();
+      } else if ((e.key === "+" || e.key === "=") && e.ctrlKey)
+        uiStore.zoomIn(10);
+      else if (e.key === "-" && e.ctrlKey) uiStore.zoomOut(10);
     });
     window.addEventListener("keydown", handleKeyDown);
 
