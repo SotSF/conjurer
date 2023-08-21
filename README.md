@@ -77,16 +77,31 @@ Downloads all of the experience and audio files from s3 into the folder `public/
 In order to run Conjurer without internet access, such as at a festival, you can follow these below steps.
 
 1. Clone this repository as usual.
+1. Ensure you are using node 16: `nvm use 16` if you use nvm.
 1. Run `yarn` as usual to install dependencies.
 1. Run `yarn downloadCloudAssets` to download all cloud assets into the folder `public/cloud-assets`. Note that you are getting a snapshot of all of the experiences and audio files. If you make more changes to these cloud saved files, you will have to rerun this script to download the latest changed assets.
-1. Run `yarn dev` as usual to run the app with hot reloading, and visit the locally running app at http://localhost:3000.
+1. Run `yarn build`.
+1. Run `yarn dev` as usual to run the app with hot reloading, or `yarn start` to run the production build.
+1. Visit the locally running app at http://localhost:3000.
 1. Toggle the `Use local assets` button on such that it is orange:
 
 ![Use local assets button](public/use-local-assets-button.png)
 
+9. Reload the page.
+
 You are good to go! From now on, you should not need internet access for any functionality. Whenever you open an experience or audio file, it will be loaded from the `public/cloud-assets` directory, and whenever you save an experience file, it will be saved locally into that same directory.
 
 You can toggle the same button again to return to opening/saving files to the cloud. Just be careful of potentially overwriting the wrong thing.
+
+### Setting up Conjurer Playground to run via Controller
+
+1. Find your local IP address, and set `CONTROLLER_SERVER_WEBSOCKET_HOST` (`websocketHost.ts`) to that address.
+1. Run `yarn dev`, or `yarn build && yarn start`.
+1. Run `yarn controllerServer`.
+1. Open http://localhost:3000/playground.
+1. On any device on the network, visit http://<IP_ADDRESS>:3000/controller.
+
+You are good to go - when you change things with the controller, you should see the playground page update.
 
 ## Todos
 
