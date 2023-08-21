@@ -79,7 +79,9 @@ In order to run Conjurer without internet access, such as at a festival, you can
 1. Clone this repository as usual.
 1. Run `yarn` as usual to install dependencies.
 1. Run `yarn downloadCloudAssets` to download all cloud assets into the folder `public/cloud-assets`. Note that you are getting a snapshot of all of the experiences and audio files. If you make more changes to these cloud saved files, you will have to rerun this script to download the latest changed assets.
-1. Run `yarn dev` as usual to run the app with hot reloading, and visit the locally running app at http://localhost:3000.
+1. Run `yarn build`.
+1. Run `yarn dev` as usual to run the app with hot reloading, or `yarn start` to run the production build.
+1. Visit the locally running app at http://localhost:3000.
 1. Toggle the `Use local assets` button on such that it is orange:
 
 ![Use local assets button](public/use-local-assets-button.png)
