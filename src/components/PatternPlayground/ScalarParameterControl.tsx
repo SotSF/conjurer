@@ -26,6 +26,8 @@ import { runInAction } from "mobx";
 import { ParameterControlName } from "@/src/components/PatternPlayground/ParameterControlName";
 import { TbWaveSine } from "react-icons/tb";
 import { MdTrendingFlat } from "react-icons/md";
+import { PeriodicVariationControls } from "@/src/components/VariationControls/VariationControls";
+import { PeriodicVariation } from "@/src/types/Variations/PeriodicVariation";
 
 const labelStyles = {
   mt: -3,
@@ -76,6 +78,34 @@ export const ScalarParameterControl = memo(function ScalarParameterControl({
     });
   };
 
+  const onVariationModeToggle = () => {
+    const newVariationMode = variationMode === "flat" ? "periodic" : "flat";
+    setVariationMode(newVariationMode);
+
+    runInAction(() => {
+      // Also insert a variation
+      if (!block.parameterVariations[uniformName])
+        block.parameterVariations[uniformName] = [];
+
+      if (newVariationMode === "flat")
+        block.parameterVariations[uniformName]![0] = new FlatVariation(
+          DEFAULT_VARIATION_DURATION,
+          patternParam.value
+        );
+      else if (newVariationMode === "periodic")
+        block.parameterVariations[uniformName]![0] = new PeriodicVariation(
+          DEFAULT_VARIATION_DURATION,
+          "sine",
+          0.5,
+          DEFAULT_VARIATION_DURATION,
+          0,
+          0
+        );
+    });
+  };
+
+  const firstVariation = block.parameterVariations[uniformName]?.[0];
+
   const { getIncrementButtonProps, getDecrementButtonProps } = useNumberInput({
     step,
     value: valueString,
@@ -99,9 +129,7 @@ export const ScalarParameterControl = memo(function ScalarParameterControl({
                 <MdTrendingFlat size={17} />
               )
             }
-            onClick={() =>
-              setVariationMode(variationMode === "flat" ? "periodic" : "flat")
-            }
+            onClick={onVariationModeToggle}
           />
         </HStack>
         {variationMode === "flat" && (
@@ -137,6 +165,16 @@ export const ScalarParameterControl = memo(function ScalarParameterControl({
             </Button>
           </HStack>
         )}
+        {variationMode === "periodic" &&
+          firstVariation instanceof PeriodicVariation && (
+            <VStack>
+              <PeriodicVariationControls
+                uniformName={uniformName}
+                block={block}
+                variation={firstVariation}
+              />
+            </VStack>
+          )}
       </VStack>
       <VStack mx={12} flexGrow={1}>
         {variationMode === "flat" && (

@@ -252,7 +252,7 @@ type PeriodicVariationControlsProps = {
   block: Block;
 };
 
-function PeriodicVariationControls({
+export function PeriodicVariationControls({
   uniformName,
   variation,
   block,
