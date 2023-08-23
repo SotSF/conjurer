@@ -28,6 +28,7 @@ import { TbWaveSine } from "react-icons/tb";
 import { MdTrendingFlat } from "react-icons/md";
 import { PeriodicVariationControls } from "@/src/components/VariationControls/VariationControls";
 import { PeriodicVariation } from "@/src/types/Variations/PeriodicVariation";
+import { ScalarVariationGraph } from "@/src/components/VariationGraph/ScalarVariationGraph";
 
 const labelStyles = {
   mt: -3,
@@ -99,7 +100,7 @@ export const ScalarParameterControl = memo(function ScalarParameterControl({
           0.5,
           DEFAULT_VARIATION_DURATION,
           0,
-          0
+          0.5
         );
     });
   };
@@ -211,6 +212,16 @@ export const ScalarParameterControl = memo(function ScalarParameterControl({
             </SliderMark>
           </Slider>
         )}
+        {variationMode === "periodic" &&
+          firstVariation instanceof PeriodicVariation && (
+            <ScalarVariationGraph
+              uniformName={uniformName}
+              block={block}
+              variation={firstVariation}
+              width={300}
+              domain={firstVariation.computeDomain()}
+            />
+          )}
       </VStack>
     </HStack>
   );
