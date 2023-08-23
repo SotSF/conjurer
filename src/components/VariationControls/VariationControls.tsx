@@ -250,12 +250,14 @@ type PeriodicVariationControlsProps = {
   uniformName: string;
   variation: PeriodicVariation;
   block: Block;
+  matchPeriodAndDuration?: boolean;
 };
 
 export function PeriodicVariationControls({
   uniformName,
   variation,
   block,
+  matchPeriodAndDuration,
 }: PeriodicVariationControlsProps) {
   const [periodicType, setPeriodicType] = useState(variation.periodicType);
   const [amplitude, setAmplitude] = useState(variation.amplitude.toString());
@@ -349,6 +351,7 @@ export function PeriodicVariationControls({
         onChange={(valueString, valueNumber) => {
           variation.period = valueNumber;
           setPeriod(valueString);
+          if (matchPeriodAndDuration) variation.duration = valueNumber;
           block.triggerVariationReactions(uniformName);
         }}
         value={period}

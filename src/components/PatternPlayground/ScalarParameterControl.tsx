@@ -29,6 +29,7 @@ import { MdTrendingFlat } from "react-icons/md";
 import { PeriodicVariationControls } from "@/src/components/VariationControls/VariationControls";
 import { PeriodicVariation } from "@/src/types/Variations/PeriodicVariation";
 import { ScalarVariationGraph } from "@/src/components/VariationGraph/ScalarVariationGraph";
+import { observer } from "mobx-react-lite";
 
 const labelStyles = {
   mt: -3,
@@ -43,7 +44,7 @@ type ScalarParameterControlProps = {
   setParameters: (params: Record<string, ParamType>) => void;
 };
 
-export const ScalarParameterControl = memo(function ScalarParameterControl({
+export const ScalarParameterControl = observer(function ScalarParameterControl({
   block,
   uniformName,
   patternParam,
@@ -173,6 +174,7 @@ export const ScalarParameterControl = memo(function ScalarParameterControl({
                 uniformName={uniformName}
                 block={block}
                 variation={firstVariation}
+                matchPeriodAndDuration
               />
             </VStack>
           )}
