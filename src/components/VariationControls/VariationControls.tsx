@@ -272,10 +272,9 @@ export function PeriodicVariationControls({
 
   const [showingMinMax, setShowingMinMax] = useState(true);
 
-  useEffect(
-    () => onChange?.(),
-    [periodicType, amplitude, period, phase, offset, min, max, onChange]
-  );
+  useEffect(() => {
+    onChange?.();
+  }, [periodicType, amplitude, period, phase, offset, min, max, onChange]);
 
   return (
     <>

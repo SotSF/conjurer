@@ -175,7 +175,7 @@ export const ScalarParameterControl = observer(function ScalarParameterControl({
         )}
         {variationMode === "periodic" &&
           firstVariation instanceof PeriodicVariation && (
-            <VStack>
+            <VStack fontSize={12} width={40}>
               <PeriodicVariationControls
                 uniformName={uniformName}
                 block={block}
@@ -186,8 +186,9 @@ export const ScalarParameterControl = observer(function ScalarParameterControl({
             </VStack>
           )}
       </VStack>
-      <VStack mx={12} flexGrow={1}>
-        {variationMode === "flat" && (
+
+      {variationMode === "flat" && (
+        <VStack mx={12} flexGrow={1}>
           <Slider
             min={min}
             max={max}
@@ -220,9 +221,11 @@ export const ScalarParameterControl = observer(function ScalarParameterControl({
               {max}
             </SliderMark>
           </Slider>
-        )}
-        {variationMode === "periodic" &&
-          firstVariation instanceof PeriodicVariation && (
+        </VStack>
+      )}
+      {variationMode === "periodic" &&
+        firstVariation instanceof PeriodicVariation && (
+          <VStack fontSize="small" ml={4}>
             <ScalarVariationGraph
               uniformName={uniformName}
               block={block}
@@ -230,8 +233,8 @@ export const ScalarParameterControl = observer(function ScalarParameterControl({
               width={150}
               domain={firstVariation.computeDomain()}
             />
-          )}
-      </VStack>
+          </VStack>
+        )}
     </HStack>
   );
 });

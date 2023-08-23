@@ -6,7 +6,7 @@ import { RegionParams } from "wavesurfer.js/dist/plugins/regions";
 const MAX_PIXELS_PER_SECOND = 160;
 const MIN_PIXELS_PER_SECOND = 4;
 
-export type DisplayMode = "canopy" | "canopySpace" | "cartesianSpace";
+export type DisplayMode = "canopy" | "canopySpace" | "cartesianSpace" | "none";
 
 /**
  * MobX store for UI state.

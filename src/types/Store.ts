@@ -124,6 +124,8 @@ export class Store {
   initializeContext = () => {
     if (this.context === "playground") {
       this.uiStore.patternDrawerOpen = true;
+    } else if (this.context === "controller") {
+      this.uiStore.displayMode = "none";
     }
   };
 

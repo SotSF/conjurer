@@ -131,22 +131,24 @@ export const PatternPlayground = observer(function PatternPlayground() {
           )}
         </HStack>
 
-        <VStack
-          position="sticky"
-          top={0}
-          height="70vh"
-          justify="center"
-          alignItems="center"
-          overflowX="hidden"
-        >
-          <Box
-            className={styles.previewCanvas}
-            width={`${PATTERN_PREVIEW_DISPLAY_SIZE}px`}
-            height={`${PATTERN_PREVIEW_DISPLAY_SIZE}px`}
+        {uiStore.displayMode !== "none" && (
+          <VStack
+            position="sticky"
+            top={0}
+            height="70vh"
+            justify="center"
+            alignItems="center"
+            overflowX="hidden"
           >
-            <PreviewCanvas block={selectedPatternBlock} />
-          </Box>
-        </VStack>
+            <Box
+              className={styles.previewCanvas}
+              width={`${PATTERN_PREVIEW_DISPLAY_SIZE}px`}
+              height={`${PATTERN_PREVIEW_DISPLAY_SIZE}px`}
+            >
+              <PreviewCanvas block={selectedPatternBlock} />
+            </Box>
+          </VStack>
+        )}
       </GridItem>
     </Grid>
   );
