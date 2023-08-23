@@ -13,7 +13,7 @@ import {
   VStack,
   useNumberInput,
 } from "@chakra-ui/react";
-import { memo, useState } from "react";
+import { useState } from "react";
 import { Block } from "@/src/types/Block";
 import {
   ExtraParams,
@@ -30,6 +30,7 @@ import { PeriodicVariationControls } from "@/src/components/VariationControls/Va
 import { PeriodicVariation } from "@/src/types/Variations/PeriodicVariation";
 import { ScalarVariationGraph } from "@/src/components/VariationGraph/ScalarVariationGraph";
 import { observer } from "mobx-react-lite";
+import { useStore } from "@/src/types/StoreContext";
 
 const labelStyles = {
   mt: -3,
@@ -51,6 +52,7 @@ export const ScalarParameterControl = observer(function ScalarParameterControl({
   parameters,
   setParameters,
 }: ScalarParameterControlProps) {
+  const { playgroundStore } = useStore();
   const [variationMode, setVariationMode] = useState<"flat" | "periodic">(
     "flat"
   );
@@ -78,6 +80,8 @@ export const ScalarParameterControl = observer(function ScalarParameterControl({
         inputNumber
       );
     });
+
+    playgroundStore.sendControllerUpdateMessage();
   };
 
   const onVariationModeToggle = () => {
@@ -104,6 +108,8 @@ export const ScalarParameterControl = observer(function ScalarParameterControl({
           patternParam.value
         );
     });
+
+    playgroundStore.sendControllerUpdateMessage();
   };
 
   const firstVariation = block.parameterVariations[uniformName]?.[0];
@@ -175,6 +181,7 @@ export const ScalarParameterControl = observer(function ScalarParameterControl({
                 block={block}
                 variation={firstVariation}
                 matchPeriodAndDuration
+                onChange={playgroundStore.sendControllerUpdateMessage}
               />
             </VStack>
           )}
@@ -220,7 +227,7 @@ export const ScalarParameterControl = observer(function ScalarParameterControl({
               uniformName={uniformName}
               block={block}
               variation={firstVariation}
-              width={300}
+              width={150}
               domain={firstVariation.computeDomain()}
             />
           )}

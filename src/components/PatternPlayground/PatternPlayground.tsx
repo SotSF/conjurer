@@ -9,7 +9,6 @@ import { useStore } from "@/src/types/StoreContext";
 import { action, runInAction } from "mobx";
 import { DisplayModeButtons } from "@/src/components/PatternPlayground/DisplayModeButtons";
 import { SendDataButton } from "@/src/components/SendDataButton";
-import { sendControllerMessage } from "@/src/utils/controllerWebsocket";
 
 const PATTERN_PREVIEW_DISPLAY_SIZE = 600;
 
@@ -69,13 +68,8 @@ export const PatternPlayground = observer(function PatternPlayground() {
       playgroundStore.selectedPatternIndex,
       playgroundStore.selectedEffectIndices
     );
-
-    if (context === "controller")
-      sendControllerMessage({
-        type: "updateBlock",
-        transferBlock: selectedPatternBlock.serializeTransferBlock(),
-      });
-  }, [context, selectedPatternBlock, applyPatternEffects, playgroundStore.selectedEffectIndices, playgroundStore.selectedPatternIndex]);
+    playgroundStore.sendControllerUpdateMessage();
+  }, [context, selectedPatternBlock, applyPatternEffects, playgroundStore, playgroundStore.selectedEffectIndices, playgroundStore.selectedPatternIndex]);
 
   const didInitialize = useRef(false);
   useEffect(() => {
@@ -117,13 +111,7 @@ export const PatternPlayground = observer(function PatternPlayground() {
             <HStack width="100%" justify="center">
               <Button
                 size="sm"
-                onClick={() =>
-                  sendControllerMessage({
-                    type: "updateBlock",
-                    transferBlock:
-                      selectedPatternBlock.serializeTransferBlock(),
-                  })
-                }
+                onClick={playgroundStore.sendControllerUpdateMessage}
               >
                 Update
               </Button>

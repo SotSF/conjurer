@@ -22,6 +22,7 @@ type SerializedBlock = {
 };
 
 export type RootStore = {
+  context: string;
   audioStore: {
     getPeakAtTime: (time: number) => number;
   };
@@ -406,6 +407,7 @@ export class Block<T extends ExtraParams = {}> {
   serializeTransferBlock = (): TransferBlock => ({
     id: this.id,
     pattern: this.pattern.serializeTransferPattern(),
+    parameterVariations: this.serializeParameterVariations(),
     effectBlocks: this.effectBlocks.map((effectBlock) =>
       effectBlock.serializeTransferBlock()
     ),

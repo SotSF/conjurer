@@ -11,7 +11,7 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react";
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import { Variation } from "@/src/types/Variations/Variation";
 import { action } from "mobx";
 import { FaTrashAlt } from "react-icons/fa";
@@ -251,6 +251,7 @@ type PeriodicVariationControlsProps = {
   variation: PeriodicVariation;
   block: Block;
   matchPeriodAndDuration?: boolean;
+  onChange?: () => void;
 };
 
 export function PeriodicVariationControls({
@@ -258,6 +259,7 @@ export function PeriodicVariationControls({
   variation,
   block,
   matchPeriodAndDuration,
+  onChange,
 }: PeriodicVariationControlsProps) {
   const [periodicType, setPeriodicType] = useState(variation.periodicType);
   const [amplitude, setAmplitude] = useState(variation.amplitude.toString());
@@ -269,6 +271,11 @@ export function PeriodicVariationControls({
   const [max, setMax] = useState(variation.max.toString());
 
   const [showingMinMax, setShowingMinMax] = useState(true);
+
+  useEffect(
+    () => onChange?.(),
+    [periodicType, amplitude, period, phase, offset, min, max, onChange]
+  );
 
   return (
     <>

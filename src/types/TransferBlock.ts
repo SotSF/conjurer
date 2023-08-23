@@ -13,5 +13,6 @@ export type TransferPattern = {
 export type TransferBlock = {
   id: string;
   pattern: TransferPattern;
+  parameterVariations: { [key: string]: any[] | undefined };
   effectBlocks: TransferBlock[];
 };
