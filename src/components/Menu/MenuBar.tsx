@@ -3,6 +3,7 @@ import {
   Button,
   HStack,
   Heading,
+  Link,
   Menu,
   MenuButton,
   MenuDivider,
@@ -177,7 +178,6 @@ export const MenuBar = observer(function MenuBar() {
             Edit
           </MenuButton>
           <MenuList zIndex={12}>
-            {" "}
             <MenuItem
               icon={<FaRegClipboard size={17} />}
               onClick={experienceStore.copyToClipboard}
@@ -220,6 +220,22 @@ export const MenuBar = observer(function MenuBar() {
             </MenuItem>
           </MenuList>
         </Menu>
+
+        <Button
+          as={Link}
+          px={1}
+          py={0}
+          variant="ghost"
+          size="sm"
+          transition="all 0.2s"
+          borderRadius="md"
+          _hover={{ bg: "gray.500" }}
+          _focus={{ boxShadow: "outline" }}
+          href="/playground"
+          target="_blank"
+        >
+          Playground
+        </Button>
       </HStack>
     </VStack>
   );

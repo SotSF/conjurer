@@ -37,7 +37,6 @@ export class UIStore {
   }
   set displayMode(mode: DisplayMode) {
     this._displayMode = mode;
-    this.saveToLocalStorage();
   }
 
   patternDrawerOpen = false;
@@ -103,7 +102,6 @@ export class UIStore {
     if (data) {
       const localStorageUiSettings = JSON.parse(data);
       this.horizontalLayout = !!localStorageUiSettings.horizontalLayout;
-      this.displayMode = localStorageUiSettings.displayMode ?? "canopy";
       this.showingPerformance = !!localStorageUiSettings.showingPerformance;
     }
   };
@@ -114,7 +112,6 @@ export class UIStore {
       "uiStore",
       JSON.stringify({
         horizontalLayout: this.horizontalLayout,
-        displayMode: this.displayMode,
         showingPerformance: this.showingPerformance,
       })
     );
