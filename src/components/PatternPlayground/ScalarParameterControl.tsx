@@ -98,10 +98,10 @@ export const ScalarParameterControl = observer(function ScalarParameterControl({
         block.parameterVariations[uniformName]![0] = new PeriodicVariation(
           DEFAULT_VARIATION_DURATION,
           "sine",
-          0.5,
+          0,
           DEFAULT_VARIATION_DURATION,
           0,
-          0.5
+          patternParam.value
         );
     });
   };
