@@ -1,5 +1,13 @@
 import styles from "@/styles/PatternPlayground.module.css";
-import { Box, Button, Grid, GridItem, HStack, VStack } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Grid,
+  GridItem,
+  HStack,
+  Switch,
+  VStack,
+} from "@chakra-ui/react";
 import { PatternList } from "@/src/components/PatternPlayground/PatternList";
 import { PreviewCanvas } from "@/src/components/Canvas/PreviewCanvas";
 import { useCallback, useEffect, useRef } from "react";
@@ -9,7 +17,6 @@ import { useStore } from "@/src/types/StoreContext";
 import { action, runInAction } from "mobx";
 import { DisplayModeButtons } from "@/src/components/PatternPlayground/DisplayModeButtons";
 import { SendDataButton } from "@/src/components/SendDataButton";
-import { sendControllerMessage } from "@/src/utils/controllerWebsocket";
 
 const PATTERN_PREVIEW_DISPLAY_SIZE = 600;
 
@@ -69,13 +76,8 @@ export const PatternPlayground = observer(function PatternPlayground() {
       playgroundStore.selectedPatternIndex,
       playgroundStore.selectedEffectIndices
     );
-
-    if (context === "controller")
-      sendControllerMessage({
-        type: "updateBlock",
-        transferBlock: selectedPatternBlock.serializeTransferBlock(),
-      });
-  }, [context, selectedPatternBlock, applyPatternEffects, playgroundStore.selectedEffectIndices, playgroundStore.selectedPatternIndex]);
+    playgroundStore.sendControllerUpdateMessage();
+  }, [context, selectedPatternBlock, applyPatternEffects, playgroundStore, playgroundStore.selectedEffectIndices, playgroundStore.selectedPatternIndex]);
 
   const didInitialize = useRef(false);
   useEffect(() => {
@@ -87,7 +89,7 @@ export const PatternPlayground = observer(function PatternPlayground() {
 
   return (
     <Grid className={styles.grid} height="100%">
-      <GridItem area="patterns">
+      <GridItem area="patterns" mb={3}>
         <PatternList
           selectedPatternBlock={selectedPatternBlock}
           onSelectPatternBlock={onSelectPatternBlock}
@@ -110,25 +112,26 @@ export const PatternPlayground = observer(function PatternPlayground() {
         </VStack>
       </GridItem>
       <GridItem area="preview" position="relative">
+        {context === "controller" && (
+          <VStack width="100%" justify="center">
+            <Button
+              size="sm"
+              onClick={() => playgroundStore.sendControllerUpdateMessage(true)}
+            >
+              Update
+            </Button>
+            <Switch
+              size="md"
+              isChecked={playgroundStore.autoUpdate}
+              onChange={(e) => (playgroundStore.autoUpdate = e.target.checked)}
+            >
+              Auto-update
+            </Switch>
+          </VStack>
+        )}
         <HStack mt={2} pr={1} width="100%" justify="end">
           <DisplayModeButtons />
           {["playground", "default"].includes(context) && <SendDataButton />}
-          {context === "controller" && (
-            <HStack width="100%" justify="center">
-              <Button
-                size="sm"
-                onClick={() =>
-                  sendControllerMessage({
-                    type: "updateBlock",
-                    transferBlock:
-                      selectedPatternBlock.serializeTransferBlock(),
-                  })
-                }
-              >
-                Update
-              </Button>
-            </HStack>
-          )}
           {context === "default" && (
             <Button
               size="sm"
@@ -143,22 +146,24 @@ export const PatternPlayground = observer(function PatternPlayground() {
           )}
         </HStack>
 
-        <VStack
-          position="sticky"
-          top={0}
-          height="70vh"
-          justify="center"
-          alignItems="center"
-          overflowX="hidden"
-        >
-          <Box
-            className={styles.previewCanvas}
-            width={`${PATTERN_PREVIEW_DISPLAY_SIZE}px`}
-            height={`${PATTERN_PREVIEW_DISPLAY_SIZE}px`}
+        {uiStore.displayMode !== "none" && (
+          <VStack
+            position="sticky"
+            top={0}
+            height="70vh"
+            justify="center"
+            alignItems="center"
+            overflowX="hidden"
           >
-            <PreviewCanvas block={selectedPatternBlock} />
-          </Box>
-        </VStack>
+            <Box
+              className={styles.previewCanvas}
+              width={`${PATTERN_PREVIEW_DISPLAY_SIZE}px`}
+              height={`${PATTERN_PREVIEW_DISPLAY_SIZE}px`}
+            >
+              <PreviewCanvas block={selectedPatternBlock} />
+            </Box>
+          </VStack>
+        )}
       </GridItem>
     </Grid>
   );

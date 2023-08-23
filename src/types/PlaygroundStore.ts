@@ -8,14 +8,39 @@ import {
   isPaletteParam,
 } from "@/src/types/PatternParams";
 import { TransferBlock } from "@/src/types/TransferBlock";
+import { deserializeVariation } from "@/src/types/Variations/variations";
+import { sendControllerMessage } from "@/src/utils/controllerWebsocket";
 import { makeAutoObservable } from "mobx";
 
 export class PlaygroundStore {
+  _autoUpdate = true;
+  get autoUpdate() {
+    return this._autoUpdate;
+  }
+  set autoUpdate(autoUpdate: boolean) {
+    this._autoUpdate = autoUpdate;
+    this.sendControllerUpdateMessage();
+  }
+
   patternBlocks: Block[];
   effectBlocks: Block[];
 
-  selectedPatternIndex = 0;
-  selectedEffectIndices: number[] = [];
+  _selectedPatternIndex = 0;
+  get selectedPatternIndex() {
+    return this._selectedPatternIndex;
+  }
+  set selectedPatternIndex(index: number) {
+    this._selectedPatternIndex = index;
+    this.sendControllerUpdateMessage();
+  }
+
+  _selectedEffectIndices: number[] = [];
+  get selectedEffectIndices() {
+    return this._selectedEffectIndices;
+  }
+  set selectedEffectIndices(indices: number[]) {
+    this._selectedEffectIndices = indices;
+  }
 
   constructor(readonly store: RootStore) {
     this.patternBlocks = playgroundPatterns.map(
@@ -82,16 +107,29 @@ export class PlaygroundStore {
     );
   };
 
+  sendControllerUpdateMessage = (force = false) =>
+    this.store.context === "controller" &&
+    (this.autoUpdate || force) &&
+    sendControllerMessage({
+      type: "updateBlock",
+      transferBlock: this.selectedPatternBlock.serializeTransferBlock(),
+    });
+
   // TODO: refactor, make performant
   onUpdate = (transferBlock: TransferBlock) => {
-    const { pattern: transferPattern, effectBlocks: transferEffectBlocks } =
-      transferBlock;
-    this.patternBlocks.forEach((patternBlock, patternIndex) => {
-      if (patternBlock.pattern.name === transferPattern.name) {
+    const {
+      pattern: transferPattern,
+      parameterVariations: transferParameterVariations,
+      effectBlocks: transferEffectBlocks,
+    } = transferBlock;
+    this.patternBlocks.forEach(
+      (patternBlock: Block<ExtraParams>, patternIndex: number) => {
+        if (patternBlock.pattern.name !== transferPattern.name) return;
+
+        // TODO: fix duplicated code here
         const { params } = transferPattern;
         for (const [uniformName, param] of Object.entries(params)) {
           const playgroundParams = patternBlock.pattern.params as ExtraParams;
-          // TODO: fix duplicated code here
           if (playgroundParams[uniformName]) {
             if (isPaletteParam(playgroundParams[uniformName])) {
               (
@@ -101,14 +139,23 @@ export class PlaygroundStore {
               playgroundParams[uniformName].value = param.value as ParamType;
           }
         }
+        for (const parameter of Object.keys(transferParameterVariations)) {
+          patternBlock.parameterVariations[parameter] =
+            transferParameterVariations[parameter]?.map((variationData: any) =>
+              deserializeVariation(this.store, variationData)
+            );
+        }
 
         // set this pattern as selected
         this.selectedPatternIndex = patternIndex;
 
         const effectIndices: number[] = [];
         for (const transferEffectBlock of transferEffectBlocks) {
-          this.effectBlocks.forEach((effectBlock, effectIndex) => {
-            if (effectBlock.pattern.name === transferEffectBlock.pattern.name) {
+          this.effectBlocks.forEach(
+            (effectBlock: Block<ExtraParams>, effectIndex: number) => {
+              if (effectBlock.pattern.name !== transferEffectBlock.pattern.name)
+                return;
+
               const { params } = transferEffectBlock.pattern;
               for (const [uniformName, param] of Object.entries(params)) {
                 const playgroundParams = effectBlock.pattern
@@ -124,13 +171,23 @@ export class PlaygroundStore {
                 }
               }
 
+              for (const parameter of Object.keys(
+                transferEffectBlock.parameterVariations
+              )) {
+                effectBlock.parameterVariations[parameter] =
+                  transferEffectBlock.parameterVariations[parameter]?.map(
+                    (variationData: any) =>
+                      deserializeVariation(this.store, variationData)
+                  );
+              }
+
               // set this effect as selected
               effectIndices.push(effectIndex);
             }
-          });
+          );
         }
         this.selectedEffectIndices = effectIndices;
       }
-    });
+    );
   };
 }

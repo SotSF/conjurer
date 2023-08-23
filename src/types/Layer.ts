@@ -6,6 +6,7 @@ import { Opacity } from "@/src/patterns/Opacity";
 import { ExtraParams, PatternParam } from "@/src/types/PatternParams";
 
 type RootStore = {
+  context: string;
   audioStore: {
     getPeakAtTime: (time: number) => number;
     globalTime: number;

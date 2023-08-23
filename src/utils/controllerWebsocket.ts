@@ -5,16 +5,12 @@ import {
   CONTROLLER_SERVER_WEBSOCKET_PORT,
 } from "@/src/utils/websocketHost";
 
-const env = process.env.NODE_ENV;
-
 let _websocket: WebSocket;
 
 export const setupControllerWebsocket = (
   context: string,
   onUpdate?: (transferBlock: TransferBlock) => void
 ) => {
-  if (env == "production") return;
-
   console.log(
     "Reconnecting to websocket server at",
     CONTROLLER_SERVER_WEBSOCKET_HOST,
@@ -37,9 +33,7 @@ export const setupControllerWebsocket = (
 
 let lastWarned = 0;
 export const sendControllerMessage = (message: ControllerMessage) => {
-  if (env == "production") return;
-
-  if (_websocket.readyState !== _websocket.OPEN) {
+  if (!_websocket || _websocket.readyState !== _websocket.OPEN) {
     if (Date.now() - lastWarned > 5000) {
       console.warn("Websocket not open, not sending message");
       lastWarned = Date.now();

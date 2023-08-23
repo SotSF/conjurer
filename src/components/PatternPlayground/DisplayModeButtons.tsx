@@ -8,6 +8,7 @@ const displayModeTabs: DisplayMode[] = [
   "canopy",
   "canopySpace",
   "cartesianSpace",
+  "none",
 ];
 
 export const DisplayModeButtons = observer(function DisplayModeButtons() {
@@ -33,6 +34,7 @@ export const DisplayModeButtons = observer(function DisplayModeButtons() {
         <Tab>Canopy</Tab>
         <Tab>Canopy space</Tab>
         <Tab>Cartesian space</Tab>
+        <Tab>X</Tab>
       </TabList>
     </Tabs>
   );

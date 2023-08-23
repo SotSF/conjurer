@@ -22,6 +22,7 @@ type SerializedBlock = {
 };
 
 export type RootStore = {
+  context: string;
   audioStore: {
     getPeakAtTime: (time: number) => number;
   };
@@ -82,19 +83,19 @@ export class Block<T extends ExtraParams = {}> {
     this.duration = duration;
   };
 
-  updateParameters = (time: number) => {
+  updateParameters = (time: number, loopLast = false) => {
     this.pattern.params.u_time.value = time;
 
     for (const parameter of Object.keys(this.parameterVariations)) {
-      this.updateParameter(parameter, time);
+      this.updateParameter(parameter, time, loopLast);
     }
 
     for (const effect of this.effectBlocks) {
-      effect.updateParameters(time);
+      effect.updateParameters(time, loopLast);
     }
   };
 
-  updateParameter = (parameter: keyof T, time: number) => {
+  updateParameter = (parameter: keyof T, time: number, loopLast = false) => {
     const variations = this.parameterVariations[parameter];
     if (!variations) return;
 
@@ -114,8 +115,19 @@ export class Block<T extends ExtraParams = {}> {
 
     if (variations.length === 0) return;
 
-    // if the current time is beyond the end of the last variation, use the last variation's last value
     const lastVariation = variations[variations.length - 1];
+
+    // handle the case where we are looping the last variation
+    if (loopLast) {
+      const loopedTime = time % lastVariation.duration;
+      this.pattern.params[parameter].value = lastVariation.valueAtTime(
+        loopedTime,
+        this.startTime + loopedTime
+      );
+      return;
+    }
+
+    // if the current time is beyond the end of the last variation, use the last variation's last value
     this.pattern.params[parameter].value = lastVariation.valueAtTime(
       lastVariation.duration,
       this.startTime + variationTime
@@ -395,6 +407,7 @@ export class Block<T extends ExtraParams = {}> {
   serializeTransferBlock = (): TransferBlock => ({
     id: this.id,
     pattern: this.pattern.serializeTransferPattern(),
+    parameterVariations: this.serializeParameterVariations(),
     effectBlocks: this.effectBlocks.map((effectBlock) =>
       effectBlock.serializeTransferBlock()
     ),

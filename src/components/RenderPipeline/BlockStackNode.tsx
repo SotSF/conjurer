@@ -34,9 +34,7 @@ export const BlockStackNode = observer(function BlockStackNode({
     if (!parentBlock) return;
 
     if (autorun) {
-      // Don't let the elapsed time go over five minutes
-      const elapsedTime = clock.elapsedTime % (1000 * 60 * 5);
-      parentBlock.updateParameters(elapsedTime);
+      parentBlock.updateParameters(clock.elapsedTime, true);
       return;
     }
 
