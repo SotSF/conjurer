@@ -1,5 +1,13 @@
 import styles from "@/styles/PatternPlayground.module.css";
-import { Box, Button, Grid, GridItem, HStack, VStack } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Grid,
+  GridItem,
+  HStack,
+  Switch,
+  VStack,
+} from "@chakra-ui/react";
 import { PatternList } from "@/src/components/PatternPlayground/PatternList";
 import { PreviewCanvas } from "@/src/components/Canvas/PreviewCanvas";
 import { useCallback, useEffect, useRef } from "react";
@@ -81,7 +89,7 @@ export const PatternPlayground = observer(function PatternPlayground() {
 
   return (
     <Grid className={styles.grid} height="100%">
-      <GridItem area="patterns">
+      <GridItem area="patterns" mb={3}>
         <PatternList
           selectedPatternBlock={selectedPatternBlock}
           onSelectPatternBlock={onSelectPatternBlock}
@@ -104,19 +112,26 @@ export const PatternPlayground = observer(function PatternPlayground() {
         </VStack>
       </GridItem>
       <GridItem area="preview" position="relative">
+        {context === "controller" && (
+          <VStack width="100%" justify="center">
+            <Button
+              size="sm"
+              onClick={() => playgroundStore.sendControllerUpdateMessage(true)}
+            >
+              Update
+            </Button>
+            <Switch
+              size="md"
+              isChecked={playgroundStore.autoUpdate}
+              onChange={(e) => (playgroundStore.autoUpdate = e.target.checked)}
+            >
+              Auto-update
+            </Switch>
+          </VStack>
+        )}
         <HStack mt={2} pr={1} width="100%" justify="end">
           <DisplayModeButtons />
           {["playground", "default"].includes(context) && <SendDataButton />}
-          {context === "controller" && (
-            <HStack width="100%" justify="center">
-              <Button
-                size="sm"
-                onClick={playgroundStore.sendControllerUpdateMessage}
-              >
-                Update
-              </Button>
-            </HStack>
-          )}
           {context === "default" && (
             <Button
               size="sm"

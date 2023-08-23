@@ -13,6 +13,15 @@ import { sendControllerMessage } from "@/src/utils/controllerWebsocket";
 import { makeAutoObservable } from "mobx";
 
 export class PlaygroundStore {
+  _autoUpdate = true;
+  get autoUpdate() {
+    return this._autoUpdate;
+  }
+  set autoUpdate(autoUpdate: boolean) {
+    this._autoUpdate = autoUpdate;
+    this.sendControllerUpdateMessage();
+  }
+
   patternBlocks: Block[];
   effectBlocks: Block[];
 
@@ -98,8 +107,9 @@ export class PlaygroundStore {
     );
   };
 
-  sendControllerUpdateMessage = () =>
+  sendControllerUpdateMessage = (force = false) =>
     this.store.context === "controller" &&
+    (this.autoUpdate || force) &&
     sendControllerMessage({
       type: "updateBlock",
       transferBlock: this.selectedPatternBlock.serializeTransferBlock(),
