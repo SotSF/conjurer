@@ -7,13 +7,14 @@ import {
   ParamType,
   isPaletteParam,
 } from "@/src/types/PatternParams";
+import { Preset } from "@/src/types/Preset";
 import { TransferBlock } from "@/src/types/TransferBlock";
 import { deserializeVariation } from "@/src/types/Variations/variations";
 import { sendControllerMessage } from "@/src/utils/controllerWebsocket";
 import { makeAutoObservable } from "mobx";
 
 export class PlaygroundStore {
-  presets: TransferBlock[] = [];
+  presets: Preset[] = [];
 
   _autoUpdate = true;
   get autoUpdate() {
