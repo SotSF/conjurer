@@ -109,9 +109,9 @@ export class PlaygroundStore {
     const data = localStorage.getItem("playgroundStore");
     if (data) {
       const localStorageUiSettings = JSON.parse(data);
-      this.lastPatternIndexSelected =
+      this._lastPatternIndexSelected =
         localStorageUiSettings.lastPatternIndexSelected ?? 0;
-      this.lastEffectIndices = localStorageUiSettings.lastEffectIndices ?? [];
+      this._lastEffectIndices = localStorageUiSettings.lastEffectIndices ?? [];
       this.presets = localStorageUiSettings.presets ?? [];
     }
   };
