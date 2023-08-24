@@ -13,6 +13,8 @@ import { sendControllerMessage } from "@/src/utils/controllerWebsocket";
 import { makeAutoObservable } from "mobx";
 
 export class PlaygroundStore {
+  presets: TransferBlock[] = [];
+
   _autoUpdate = true;
   get autoUpdate() {
     return this._autoUpdate;
@@ -85,6 +87,22 @@ export class PlaygroundStore {
     this.saveToLocalStorage();
   }
 
+  loadPreset = (index: number) => {
+    const transferBlock = this.presets[index];
+    this.onUpdate(transferBlock);
+  };
+
+  saveCurrentPreset = () => {
+    const transferBlock = this.selectedPatternBlock.serializeTransferBlock();
+    this.presets.push(transferBlock);
+    this.saveToLocalStorage();
+  };
+
+  deletePreset = (index: number) => {
+    this.presets.splice(index, 1);
+    this.saveToLocalStorage();
+  };
+
   loadFromLocalStorage = () => {
     if (typeof window === "undefined") return;
     const data = localStorage.getItem("playgroundStore");
@@ -93,6 +111,7 @@ export class PlaygroundStore {
       this.lastPatternIndexSelected =
         localStorageUiSettings.lastPatternIndexSelected ?? 0;
       this.lastEffectIndices = localStorageUiSettings.lastEffectIndices ?? [];
+      this.presets = localStorageUiSettings.presets ?? [];
     }
   };
 
@@ -103,6 +122,7 @@ export class PlaygroundStore {
       JSON.stringify({
         lastPatternIndexSelected: this.lastPatternIndexSelected,
         lastEffectIndices: this.lastEffectIndices,
+        presets: this.presets,
       })
     );
   };
