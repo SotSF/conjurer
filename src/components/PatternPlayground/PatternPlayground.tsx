@@ -17,6 +17,7 @@ import { useStore } from "@/src/types/StoreContext";
 import { action, runInAction } from "mobx";
 import { DisplayModeButtons } from "@/src/components/PatternPlayground/DisplayModeButtons";
 import { SendDataButton } from "@/src/components/SendDataButton";
+import { PresetsList } from "@/src/components/PatternPlayground/PresetsList";
 
 const PATTERN_PREVIEW_DISPLAY_SIZE = 600;
 
@@ -90,6 +91,7 @@ export const PatternPlayground = observer(function PatternPlayground() {
   return (
     <Grid className={styles.grid} height="100%">
       <GridItem area="patterns" mb={3}>
+        <PresetsList />
         <PatternList
           selectedPatternBlock={selectedPatternBlock}
           onSelectPatternBlock={onSelectPatternBlock}
