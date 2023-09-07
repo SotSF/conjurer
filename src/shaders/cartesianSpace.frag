@@ -15,5 +15,8 @@ void main() {
     st = 1. - st * 2.;
     vec2 canopyCoordinate = cartesianToCanopyProjection(st);
 
-    gl_FragColor = texture2D(u_texture, canopyCoordinate);
+    vec4 color = texture2D(u_texture, canopyCoordinate);
+
+    color = mix(color, vec4(0., 0., 0., 1.), step(1., canopyCoordinate.y));
+    gl_FragColor = color;
 }
