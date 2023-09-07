@@ -37,6 +37,7 @@ export class UIStore {
   }
   set displayMode(mode: DisplayMode) {
     this._displayMode = mode;
+    this.saveToLocalStorage();
   }
 
   patternDrawerOpen = false;
@@ -82,11 +83,6 @@ export class UIStore {
     this.saveToLocalStorage();
   };
 
-  toggleDisplayMode = () => {
-    this.displayMode = this.displayMode === "canopy" ? "canopySpace" : "canopy";
-    this.saveToLocalStorage();
-  };
-
   togglePerformance = () => {
     this.showingPerformance = !this.showingPerformance;
     this.saveToLocalStorage();
@@ -103,6 +99,7 @@ export class UIStore {
       const localStorageUiSettings = JSON.parse(data);
       this.horizontalLayout = !!localStorageUiSettings.horizontalLayout;
       this.showingPerformance = !!localStorageUiSettings.showingPerformance;
+      this.displayMode = localStorageUiSettings.displayMode || "canopy";
     }
   };
 
@@ -113,6 +110,7 @@ export class UIStore {
       JSON.stringify({
         horizontalLayout: this.horizontalLayout,
         showingPerformance: this.showingPerformance,
+        displayMode: this.displayMode,
       })
     );
   };
