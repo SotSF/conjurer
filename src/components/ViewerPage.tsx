@@ -4,6 +4,7 @@ import { Display } from "@/src/components/Display";
 import { useEffect, useRef } from "react";
 import { useStore } from "@/src/types/StoreContext";
 import { observer } from "mobx-react-lite";
+import { KeyboardControls } from "@/src/components/KeyboardControls";
 
 export const ViewerPage = observer(function ViewerPage() {
   const store = useStore();
@@ -16,6 +17,7 @@ export const ViewerPage = observer(function ViewerPage() {
 
   return (
     <Box position="relative" w="100vw" h="100vh">
+      <KeyboardControls />
       <Grid
         templateAreas={`"display"
                         "arrangement"`}

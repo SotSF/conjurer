@@ -66,13 +66,15 @@ export const DisplayControls = observer(function DisplayControls() {
         onClick={action(() => uiStore.nextRenderTextureSize())}
         fontSize="xs"
       />
-      <IconButton
-        aria-label="Toggle performance"
-        title="Toggle performance"
-        height={6}
-        icon={<AiOutlineLineChart size={17} />}
-        onClick={action(() => uiStore.togglePerformance())}
-      />
+      {store.context !== "viewer" && (
+        <IconButton
+          aria-label="Toggle performance"
+          title="Toggle performance"
+          height={6}
+          icon={<AiOutlineLineChart size={17} />}
+          onClick={action(() => uiStore.togglePerformance())}
+        />
+      )}
     </VStack>
   );
 });
