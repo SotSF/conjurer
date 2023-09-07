@@ -6,6 +6,8 @@ import { RegionParams } from "wavesurfer.js/dist/plugins/regions";
 const MAX_PIXELS_PER_SECOND = 160;
 const MIN_PIXELS_PER_SECOND = 4;
 
+const INITIAL_RENDER_TARGET_SIZE = 256;
+
 export type DisplayMode = "canopy" | "canopySpace" | "cartesianSpace" | "none";
 
 /**
@@ -25,9 +27,17 @@ export class UIStore {
   showingMarkerEditorModal = false;
   showingPlaylistAddExperienceModal = false;
 
+  _renderTargetSize = INITIAL_RENDER_TARGET_SIZE;
+  get renderTargetSize() {
+    return this._renderTargetSize;
+  }
+  set renderTargetSize(size: number) {
+    this._renderTargetSize = size;
+    this.saveToLocalStorage();
+  }
+
   markerToEdit: Partial<RegionParams> = {};
 
-  // TODO: refactor these in display in ui differently
   keepingPlayHeadCentered = false;
   keepingPlayHeadVisible = false;
 
@@ -100,6 +110,8 @@ export class UIStore {
       this.horizontalLayout = !!localStorageUiSettings.horizontalLayout;
       this.showingPerformance = !!localStorageUiSettings.showingPerformance;
       this.displayMode = localStorageUiSettings.displayMode || "canopy";
+      this.renderTargetSize =
+        localStorageUiSettings.renderTargetSize || INITIAL_RENDER_TARGET_SIZE;
     }
   };
 
@@ -111,6 +123,7 @@ export class UIStore {
         horizontalLayout: this.horizontalLayout,
         showingPerformance: this.showingPerformance,
         displayMode: this.displayMode,
+        renderTargetSize: this.renderTargetSize,
       })
     );
   };
