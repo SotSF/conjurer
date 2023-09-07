@@ -3,13 +3,23 @@ import { observer } from "mobx-react-lite";
 import { useStore } from "@/src/types/StoreContext";
 import { action } from "mobx";
 import { FaDotCircle } from "react-icons/fa";
-import { TbLayoutRows, TbLayoutColumns } from "react-icons/tb";
+import { TbLayoutRows, TbLayoutColumns, TbRectangle } from "react-icons/tb";
 import { TbRectangleFilled } from "react-icons/tb";
 import { AiOutlineLineChart } from "react-icons/ai";
+import { DisplayMode } from "@/src/types/UIStore";
+
+const displayModes: DisplayMode[] = ["canopy", "canopySpace", "cartesianSpace"];
 
 export const DisplayControls = observer(function DisplayControls() {
   const store = useStore();
   const { uiStore } = store;
+
+  const displayModeIcons: Record<DisplayMode, JSX.Element> = {
+    canopy: <FaDotCircle size={17} />,
+    canopySpace: <TbRectangleFilled size={17} />,
+    cartesianSpace: <TbRectangle size={17} />,
+    none: <TbRectangle size={17} />,
+  };
 
   return (
     <VStack
@@ -33,19 +43,16 @@ export const DisplayControls = observer(function DisplayControls() {
         }
         onClick={action(() => uiStore.toggleLayout())}
       />
-      <IconButton
-        aria-label="Toggle canopy view"
-        title="Toggle canopy view"
-        height={6}
-        icon={
-          uiStore.displayMode === "canopySpace" ? (
-            <TbRectangleFilled size={17} />
-          ) : (
-            <FaDotCircle size={17} />
-          )
-        }
-        onClick={action(() => uiStore.toggleDisplayMode())}
-      />
+      {displayModes.map((displayMode) => (
+        <IconButton
+          key={displayMode}
+          aria-label={`Toggle ${displayMode}`}
+          title={`Toggle ${displayMode}`}
+          height={6}
+          icon={displayModeIcons[displayMode]}
+          onClick={action(() => (uiStore.displayMode = displayMode))}
+        />
+      ))}
       <IconButton
         aria-label="Toggle performance"
         title="Toggle performance"

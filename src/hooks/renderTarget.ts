@@ -3,7 +3,7 @@ import { WebGLRenderTarget } from "three";
 
 // This size greatly affects performance. Somewhat arbitrarily chosen for now. We can change this as
 // needed in the future.
-const RENDER_TARGET_SIZE = 256;
+const RENDER_TARGET_SIZE = 512;
 
 export const useRenderTarget = (
   width = RENDER_TARGET_SIZE,
