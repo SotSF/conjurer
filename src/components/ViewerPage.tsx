@@ -20,7 +20,7 @@ export const ViewerPage = observer(function ViewerPage() {
         templateAreas={`"display"
                         "arrangement"`}
         gridTemplateColumns="100vw"
-        gridTemplateRows="minmax(0,1fr) 80px"
+        gridTemplateRows="minmax(0,1fr) auto"
         height="100vh"
       >
         <GridItem area="display">

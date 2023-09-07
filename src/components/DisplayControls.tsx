@@ -30,19 +30,21 @@ export const DisplayControls = observer(function DisplayControls() {
       alignItems="flex-start"
       zIndex={1}
     >
-      <IconButton
-        aria-label="Toggle horizontal/vertical layout"
-        title="Toggle horizontal/vertical layout"
-        height={6}
-        icon={
-          uiStore.horizontalLayout ? (
-            <TbLayoutColumns size={17} />
-          ) : (
-            <TbLayoutRows size={17} />
-          )
-        }
-        onClick={action(() => uiStore.toggleLayout())}
-      />
+      {store.context !== "viewer" && (
+        <IconButton
+          aria-label="Toggle horizontal/vertical layout"
+          title="Toggle horizontal/vertical layout"
+          height={6}
+          icon={
+            uiStore.horizontalLayout ? (
+              <TbLayoutColumns size={17} />
+            ) : (
+              <TbLayoutRows size={17} />
+            )
+          }
+          onClick={action(() => uiStore.toggleLayout())}
+        />
+      )}
       {displayModes.map((displayMode) => (
         <IconButton
           key={displayMode}
