@@ -6,10 +6,13 @@ import { observer } from "mobx-react-lite";
 import { useStore } from "@/src/types/StoreContext";
 import { UserPicker } from "@/src/components/UserPicker";
 import { MenuBar } from "@/src/components/Menu/MenuBar";
+import { useState } from "react";
 
 export const Display = observer(function Display() {
   const store = useStore();
   const { uiStore } = store;
+
+  const [showAllControls, setShowAllControls] = useState(true);
 
   return (
     <Box
@@ -18,17 +21,21 @@ export const Display = observer(function Display() {
       overflow="auto"
       position="relative"
       height="100%"
+      onDoubleClick={() => setShowAllControls(!showAllControls)}
     >
-      <MenuBar />
-      <VStack position="absolute" width="100%" marginY="2" zIndex={1}>
-        <Heading className={styles.fadeOut} userSelect="none">
-          Conjurer
-        </Heading>
-      </VStack>
-      <VStack p={2} position="absolute" top={0} right={0} zIndex={1}>
-        <UserPicker />
-      </VStack>
-      <DisplayControls />
+      <Box opacity={showAllControls ? 1 : 0} transition="all 100ms">
+        <MenuBar />
+        <VStack position="absolute" width="100%" marginY="2" zIndex={1}>
+          <Heading className={styles.fadeOut} userSelect="none">
+            Conjurer
+          </Heading>
+        </VStack>
+        <VStack p={2} position="absolute" top={0} right={0} zIndex={1}>
+          <UserPicker />
+        </VStack>
+        <DisplayControls />
+      </Box>
+
       <Box height="100%" bgColor="gray.900">
         <DisplayCanvas />
       </Box>
