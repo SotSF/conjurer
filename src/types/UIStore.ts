@@ -6,6 +6,8 @@ import { RegionParams } from "wavesurfer.js/dist/plugins/regions";
 const MAX_PIXELS_PER_SECOND = 160;
 const MIN_PIXELS_PER_SECOND = 4;
 
+const INITIAL_RENDER_TARGET_SIZE = 256;
+
 export type DisplayMode = "canopy" | "canopySpace" | "cartesianSpace" | "none";
 
 /**
@@ -25,9 +27,17 @@ export class UIStore {
   showingMarkerEditorModal = false;
   showingPlaylistAddExperienceModal = false;
 
+  _renderTargetSize = INITIAL_RENDER_TARGET_SIZE;
+  get renderTargetSize() {
+    return this._renderTargetSize;
+  }
+  set renderTargetSize(size: number) {
+    this._renderTargetSize = size;
+    this.saveToLocalStorage();
+  }
+
   markerToEdit: Partial<RegionParams> = {};
 
-  // TODO: refactor these in display in ui differently
   keepingPlayHeadCentered = false;
   keepingPlayHeadVisible = false;
 
@@ -37,6 +47,7 @@ export class UIStore {
   }
   set displayMode(mode: DisplayMode) {
     this._displayMode = mode;
+    this.saveToLocalStorage();
   }
 
   patternDrawerOpen = false;
@@ -82,11 +93,6 @@ export class UIStore {
     this.saveToLocalStorage();
   };
 
-  toggleDisplayMode = () => {
-    this.displayMode = this.displayMode === "canopy" ? "canopySpace" : "canopy";
-    this.saveToLocalStorage();
-  };
-
   togglePerformance = () => {
     this.showingPerformance = !this.showingPerformance;
     this.saveToLocalStorage();
@@ -96,6 +102,14 @@ export class UIStore {
     this.showingWaveformOverlay = !this.showingWaveformOverlay;
   };
 
+  nextRenderTextureSize = () => {
+    this.renderTargetSize *= 2;
+    if (this.renderTargetSize > 1024) {
+      this.renderTargetSize = 256;
+    }
+    this.saveToLocalStorage();
+  };
+
   loadFromLocalStorage = () => {
     if (typeof window === "undefined") return;
     const data = localStorage.getItem("uiStore");
@@ -103,6 +117,9 @@ export class UIStore {
       const localStorageUiSettings = JSON.parse(data);
       this.horizontalLayout = !!localStorageUiSettings.horizontalLayout;
       this.showingPerformance = !!localStorageUiSettings.showingPerformance;
+      this.displayMode = localStorageUiSettings.displayMode || "canopy";
+      this.renderTargetSize =
+        localStorageUiSettings.renderTargetSize || INITIAL_RENDER_TARGET_SIZE;
     }
   };
 
@@ -113,6 +130,8 @@ export class UIStore {
       JSON.stringify({
         horizontalLayout: this.horizontalLayout,
         showingPerformance: this.showingPerformance,
+        displayMode: this.displayMode,
+        renderTargetSize: this.renderTargetSize,
       })
     );
   };

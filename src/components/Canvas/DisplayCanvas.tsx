@@ -9,6 +9,7 @@ import { CameraControls } from "@/src/components/CameraControls";
 import { RenderOnTimeChange } from "@/src/components/RenderOnTimeChange";
 import { WebGLRenderTarget } from "three";
 import { useState } from "react";
+import { CartesianSpaceView } from "@/src/components/Canvas/CartesianSpaceView";
 
 // when DEBUG is true, the canvas will only render when the global time changes. This is useful when
 // debugging individual frames.
@@ -31,6 +32,9 @@ export const DisplayCanvas = observer(function DisplayCanvas() {
       {renderTarget && (
         <>
           {displayMode === "canopy" && <Canopy renderTarget={renderTarget} />}
+          {displayMode === "cartesianSpace" && (
+            <CartesianSpaceView renderTarget={renderTarget} />
+          )}
           <CanopySpaceView
             renderTarget={renderTarget}
             transmitData={!uiStore.patternDrawerOpen}

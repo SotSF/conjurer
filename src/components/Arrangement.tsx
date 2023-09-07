@@ -2,8 +2,11 @@ import { Grid, GridItem } from "@chakra-ui/react";
 import { MainControls } from "@/src/components/MainControls";
 import { Timeline } from "@/src/components/Timeline";
 import { memo } from "react";
+import { useStore } from "@/src/types/StoreContext";
 
 export const Arrangement = memo(function Arrangement() {
+  const store = useStore();
+
   return (
     <Grid
       width="100%"
@@ -14,7 +17,7 @@ export const Arrangement = memo(function Arrangement() {
       gridTemplateRows="auto minmax(0,1fr)"
     >
       <GridItem area="controls">
-        <MainControls />
+        {store.context !== "viewer" && <MainControls />}
       </GridItem>
       <GridItem area="timeline" bgColor="gray.400">
         <Timeline />

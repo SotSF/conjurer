@@ -1,11 +1,17 @@
+import { useStore } from "@/src/types/StoreContext";
 import { useMemo } from "react";
 import { WebGLRenderTarget } from "three";
 
-// This size greatly affects performance. Somewhat arbitrarily chosen for now. We can change this as
-// needed in the future.
-const RENDER_TARGET_SIZE = 256;
+export const useRenderTarget = (width = 0, height = 0) => {
+  const { uiStore } = useStore();
+  const { renderTargetSize } = uiStore;
 
-export const useRenderTarget = (
-  width = RENDER_TARGET_SIZE,
-  height = RENDER_TARGET_SIZE
-) => useMemo(() => new WebGLRenderTarget(width, height), [width, height]);
+  return useMemo(
+    () =>
+      new WebGLRenderTarget(
+        width || renderTargetSize,
+        height || renderTargetSize
+      ),
+    [width, height, renderTargetSize]
+  );
+};

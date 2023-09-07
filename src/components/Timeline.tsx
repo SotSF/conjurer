@@ -54,12 +54,14 @@ export const Timeline = observer(function Timeline() {
         <WavesurferWaveform />
         <MarkerEditorModal key={uiStore.markerToEdit.id} />
       </HStack>
-      <VStack position="relative" alignItems="flex-start" spacing={0}>
-        <PlayHead />
-        {store.layers.map((layer, index) => (
-          <TimelineLayer key={index} index={index} layer={layer} />
-        ))}
-      </VStack>
+      {store.context !== "viewer" && (
+        <VStack position="relative" alignItems="flex-start" spacing={0}>
+          <PlayHead />
+          {store.layers.map((layer, index) => (
+            <TimelineLayer key={index} index={index} layer={layer} />
+          ))}
+        </VStack>
+      )}
     </Box>
   );
 });

@@ -206,6 +206,9 @@ export const MenuBar = observer(function MenuBar() {
             <MenuItem as="a" href="/controller" target="_blank">
               Controller
             </MenuItem>
+            <MenuItem as="a" href="/viewer" target="_blank">
+              Viewer
+            </MenuItem>
           </MenuList>
         </Menu>
         <Menu>
