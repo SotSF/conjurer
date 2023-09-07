@@ -8,16 +8,16 @@ import { UserPicker } from "@/src/components/UserPicker";
 import { MenuBar } from "@/src/components/Menu/MenuBar";
 
 export const Display = observer(function Display() {
-  const { uiStore } = useStore();
+  const store = useStore();
+  const { uiStore } = store;
 
   return (
     <Box
       // trigger a re-instantiation of the canvas when the layout changes
       key={`canopy-${uiStore.horizontalLayout ? "horizontal" : "vertical"}`}
-      resize={uiStore.horizontalLayout ? "vertical" : undefined}
       overflow="auto"
       position="relative"
-      height={uiStore.horizontalLayout ? "40vh" : "100vh"}
+      height="100%"
     >
       <MenuBar />
       <VStack position="absolute" width="100%" marginY="2" zIndex={1}>

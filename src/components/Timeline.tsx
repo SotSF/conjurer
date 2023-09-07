@@ -56,9 +56,10 @@ export const Timeline = observer(function Timeline() {
       </HStack>
       <VStack position="relative" alignItems="flex-start" spacing={0}>
         <PlayHead />
-        {store.layers.map((layer, index) => (
-          <TimelineLayer key={index} index={index} layer={layer} />
-        ))}
+        {store.context !== "viewer" &&
+          store.layers.map((layer, index) => (
+            <TimelineLayer key={index} index={index} layer={layer} />
+          ))}
       </VStack>
     </Box>
   );

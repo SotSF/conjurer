@@ -115,7 +115,9 @@ export class Store {
     return this.audioStore.audioState !== "paused";
   }
 
-  constructor(readonly context: "playground" | "controller" | "default") {
+  constructor(
+    readonly context: "playground" | "controller" | "viewer" | "default"
+  ) {
     makeAutoObservable(this);
 
     this.initializeContext();

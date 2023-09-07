@@ -25,7 +25,7 @@ export const DisplayControls = observer(function DisplayControls() {
     <VStack
       p={2}
       position="absolute"
-      bottom={2}
+      bottom={1}
       right={1}
       alignItems="flex-start"
       zIndex={1}
