@@ -51,8 +51,19 @@ export const DisplayControls = observer(function DisplayControls() {
           height={6}
           icon={displayModeIcons[displayMode]}
           onClick={action(() => (uiStore.displayMode = displayMode))}
+          bgColor={
+            uiStore.displayMode === displayMode ? "orange.500" : undefined
+          }
         />
       ))}
+      <IconButton
+        aria-label="Render texture size"
+        title="Render texture size"
+        height={6}
+        icon={<>{uiStore.renderTargetSize}</>}
+        onClick={action(() => uiStore.nextRenderTextureSize())}
+        fontSize="xs"
+      />
       <IconButton
         aria-label="Toggle performance"
         title="Toggle performance"

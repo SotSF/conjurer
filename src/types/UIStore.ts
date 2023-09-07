@@ -102,6 +102,14 @@ export class UIStore {
     this.showingWaveformOverlay = !this.showingWaveformOverlay;
   };
 
+  nextRenderTextureSize = () => {
+    this.renderTargetSize *= 2;
+    if (this.renderTargetSize > 1024) {
+      this.renderTargetSize = 256;
+    }
+    this.saveToLocalStorage();
+  };
+
   loadFromLocalStorage = () => {
     if (typeof window === "undefined") return;
     const data = localStorage.getItem("uiStore");
