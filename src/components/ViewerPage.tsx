@@ -13,7 +13,7 @@ export const ViewerPage = observer(function ViewerPage() {
   useEffect(() => {
     if (didInitialize.current) return;
     didInitialize.current = true;
-    store.initialize();
+    store.initializeClientSide();
   }, [store]);
 
   return (

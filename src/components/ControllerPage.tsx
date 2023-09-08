@@ -10,8 +10,8 @@ export const ControllerPage = observer(function ControllerPage() {
   useEffect(() => {
     if (initialized.current) return;
     initialized.current = true;
-    store.initialize();
+    store.initializeClientSide();
   }, [store]);
 
-  return store.initialized && <PatternPlayground />;
+  return store.initializedClientSide && <PatternPlayground />;
 });

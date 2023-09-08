@@ -32,7 +32,7 @@ export type VariationSelection = {
 export type BlockOrVariation = BlockSelection | VariationSelection;
 
 export class Store {
-  initialized = false;
+  initializedClientSide = false;
 
   audioStore = new AudioStore(this);
   uiStore = new UIStore(this.audioStore);
@@ -120,20 +120,22 @@ export class Store {
   ) {
     makeAutoObservable(this);
 
-    this.initializeContext();
+    this.initializeServerSide();
   }
 
-  initializeContext = () => {
+  initializeServerSide = () => {
     if (this.context === "playground") {
       this.uiStore.patternDrawerOpen = true;
     } else if (this.context === "controller") {
       this.uiStore.displayMode = "none";
+    } else if (this.context === "viewer") {
+      this.playlistStore.autoplay = true;
     }
   };
 
-  initialize = () => {
-    if (this.initialized) return;
-    this.initialized = true;
+  initializeClientSide = () => {
+    if (this.initializedClientSide) return;
+    this.initializedClientSide = true;
 
     if (this.context === "controller") {
       this.playgroundStore.initialize();
