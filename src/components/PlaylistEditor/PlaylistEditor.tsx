@@ -27,6 +27,8 @@ export const PlaylistEditor = observer(function PlaylistEditor() {
   const { playlistStore, uiStore } = store;
   const { experienceFilenames } = playlistStore;
 
+  const isEditable = store.context !== "viewer";
+
   return (
     <>
       <Editable
@@ -37,6 +39,7 @@ export const PlaylistEditor = observer(function PlaylistEditor() {
         fontSize={20}
         fontWeight="bold"
         textAlign="center"
+        isDisabled={!isEditable}
       >
         <EditablePreview />
         <EditableInput _placeholder={{ color: "gray.600" }} />
@@ -69,35 +72,40 @@ export const PlaylistEditor = observer(function PlaylistEditor() {
                   experienceFilename={experienceFilename}
                   index={index}
                   playlistLength={experienceFilenames.length}
+                  editable={isEditable}
                 />
               </Tr>
             ))}
           </Tbody>
         </Table>
       </TableContainer>
-      <HStack justify="end" spacing={6}>
-        <Button
-          variant="link"
-          size="sm"
-          leftIcon={<FaRegClipboard size={17} />}
-          onClick={() => playlistStore.copyToClipboard()}
-        >
-          Copy to clipboard
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          leftIcon={<MdOutlinePlaylistAdd size={20} />}
-          onClick={action(
-            () => (uiStore.showingPlaylistAddExperienceModal = true)
-          )}
-        >
-          Add experience
-        </Button>
-      </HStack>
-      <Text mt={4} fontSize="sm" textAlign="center" color="gray.500">
-        Note: playlists cannot currently be saved!
-      </Text>
+      {isEditable && (
+        <>
+          <HStack justify="end" spacing={6}>
+            <Button
+              variant="link"
+              size="sm"
+              leftIcon={<FaRegClipboard size={17} />}
+              onClick={() => playlistStore.copyToClipboard()}
+            >
+              Copy to clipboard
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              leftIcon={<MdOutlinePlaylistAdd size={20} />}
+              onClick={action(
+                () => (uiStore.showingPlaylistAddExperienceModal = true)
+              )}
+            >
+              Add experience
+            </Button>
+          </HStack>
+          <Text mt={4} fontSize="sm" textAlign="center" color="gray.500">
+            Note: playlists cannot currently be saved!
+          </Text>
+        </>
+      )}
       <AddExperienceModal />
     </>
   );
