@@ -150,6 +150,14 @@ export class Store {
       return;
     }
 
+    if (this.context === "viewer") {
+      this.playlistStore.loadExperience(
+        this.playlistStore.experienceFilenames[0]
+      );
+      this.uiStore.initialize();
+      return;
+    }
+
     // check for a username in local storage
     const username = localStorage.getItem("user");
     if (username) this._user = username;
