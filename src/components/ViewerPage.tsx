@@ -1,14 +1,13 @@
 import { Arrangement } from "@/src/components/Arrangement";
 import { Box, Grid, GridItem } from "@chakra-ui/react";
 import { Display } from "@/src/components/Display";
-import { useEffect, useRef } from "react";
+import { memo, useEffect, useRef } from "react";
 import { useStore } from "@/src/types/StoreContext";
-import { observer } from "mobx-react-lite";
 import { KeyboardControls } from "@/src/components/KeyboardControls";
 import { PlaylistDrawer } from "@/src/components/PlaylistDrawer";
 import { ViewerInstructionsModal } from "@/src/components/ViewerInstructionsModal";
 
-export const ViewerPage = observer(function ViewerPage() {
+export const ViewerPage = memo(function ViewerPage() {
   const store = useStore();
   const didInitialize = useRef(false);
   useEffect(() => {
