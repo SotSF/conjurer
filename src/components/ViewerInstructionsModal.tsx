@@ -19,6 +19,7 @@ import { action } from "mobx";
 import { useRef, useState } from "react";
 import { RiPlayList2Fill } from "react-icons/ri";
 import Image from "next/image";
+import { Rain } from "@/src/components/Rain";
 
 export const ViewerInstructionsModal = observer(
   function ViewerInstructionsModal() {
@@ -61,11 +62,14 @@ export const ViewerInstructionsModal = observer(
         </Text>
         .
       </Text>,
-      <Text key={1} lineHeight={2}>
-        In their jealous rage, they unleashed vast quantities of water, wind,
-        and mud upon the playa, seeking to disrupt the powerful acts of conjury
-        that were being performed.
-      </Text>,
+      <>
+        <Rain />
+        <Text key={1} lineHeight={2}>
+          In their jealous rage, they unleashed vast quantities of water, wind,
+          and mud upon the playa, seeking to disrupt the powerful acts of
+          conjury that were being performed.
+        </Text>
+      </>,
       <Text key={2} lineHeight={2}>
         But they acted too late.
       </Text>,
