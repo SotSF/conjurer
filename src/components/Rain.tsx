@@ -1,6 +1,11 @@
 import { useEffect } from "react";
 
-export function Rain() {
+type RainProps = {
+  mouseObject?: "Umbrella" | "Cup" | "Circle";
+  auto?: boolean;
+};
+
+export function Rain({ mouseObject, auto }: RainProps) {
   useEffect(() => {
     // Source: https://codepen.io/sheepjs/pen/nXZKLy
     const canvas = document.getElementById("canvas") as HTMLCanvasElement;
@@ -34,10 +39,10 @@ export function Rain() {
 
     var controls = {
       rain: 2,
-      Object: "Umbrella",
+      Object: mouseObject,
       alpha: 1,
       color: 200,
-      auto: false,
+      auto,
       opacity: 1,
       saturation: 100,
       lightness: 50,
@@ -46,7 +51,7 @@ export function Rain() {
       green: 55,
       blue: 72,
       multi: false,
-      speed: 2,
+      speed: 3,
     };
 
     function Rain(X: any, Y: any, number?: any) {
@@ -273,7 +278,7 @@ export function Rain() {
       update();
       render(ctx);
     })();
-  }, []);
+  }, [auto, mouseObject]);
 
   return (
     <canvas

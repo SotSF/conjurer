@@ -16,7 +16,7 @@ import {
 } from "@chakra-ui/react";
 import { useStore } from "@/src/types/StoreContext";
 import { action } from "mobx";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { RiPlayList2Fill } from "react-icons/ri";
 import Image from "next/image";
 import { Rain } from "@/src/components/Rain";
@@ -32,6 +32,13 @@ export const ViewerInstructionsModal = observer(
     const onClose = action(
       () => (uiStore.showingViewerInstructionsModal = false)
     );
+    useEffect(() => {
+      const handleKeyDown = action((e: KeyboardEvent) => {
+        if (e.key === " ") onClose();
+      });
+      window.addEventListener("keydown", handleKeyDown);
+      return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [store, uiStore, onClose]);
 
     const steps = [
       <Text key={0} lineHeight={2}>
@@ -63,7 +70,7 @@ export const ViewerInstructionsModal = observer(
         .
       </Text>,
       <>
-        <Rain />
+        <Rain mouseObject="Umbrella" />
         <Text key={1} lineHeight={2}>
           In their jealous rage, they unleashed vast quantities of water, wind,
           and mud upon the playa, seeking to disrupt the powerful acts of
@@ -73,11 +80,23 @@ export const ViewerInstructionsModal = observer(
       <Text key={2} lineHeight={2}>
         But they acted too late.
       </Text>,
-      <Text key={3} lineHeight={2}>
-        As the first raindrops fell, some lucky few inhabitants of Black Rock
-        City were actively being transformed by powerful magicks in the form of
-        ten audiovisual experiences.
-      </Text>,
+      <>
+        <Rain auto />
+        <Text key={3} lineHeight={2}>
+          As the first raindrops fell, some lucky few inhabitants of Black Rock
+          City were actively being transformed by powerful magicks in the form
+          of ten audiovisual{" "}
+          <Button
+            as="a"
+            variant="link"
+            href="https://se.cretfi.re/canopy"
+            target="_blank"
+          >
+            Canopy
+          </Button>{" "}
+          experiences.
+        </Text>
+      </>,
       <Text key={4} lineHeight={2}>
         The Servants of the Secret Fire have provided this portal in time and
         space to prove the legends true and to give you this same opportunity.
@@ -115,9 +134,7 @@ export const ViewerInstructionsModal = observer(
           Afterwards, remember to:
         </Text>
         <OrderedList fontSize="sm" textAlign="left">
-          <ListItem>
-            Rechannel your own creative energies into the world
-          </ListItem>
+          <ListItem>Channel your own creative energy into the world</ListItem>
           <ListItem>Be excellent to each other</ListItem>
         </OrderedList>
       </>,
