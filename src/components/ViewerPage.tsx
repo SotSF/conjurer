@@ -6,6 +6,7 @@ import { useStore } from "@/src/types/StoreContext";
 import { observer } from "mobx-react-lite";
 import { KeyboardControls } from "@/src/components/KeyboardControls";
 import { PlaylistDrawer } from "@/src/components/PlaylistDrawer";
+import { ViewerInstructionsModal } from "@/src/components/ViewerInstructionsModal";
 
 export const ViewerPage = observer(function ViewerPage() {
   const store = useStore();
@@ -20,6 +21,7 @@ export const ViewerPage = observer(function ViewerPage() {
     <Box position="relative" w="100vw" h="100vh">
       <KeyboardControls />
       <PlaylistDrawer />
+      <ViewerInstructionsModal />
       <Grid
         templateAreas={`"display"
                         "arrangement"`}

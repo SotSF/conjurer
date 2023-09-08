@@ -130,6 +130,7 @@ export class Store {
       this.uiStore.displayMode = "none";
     } else if (this.context === "viewer") {
       this.playlistStore.autoplay = true;
+      this.uiStore.showingViewerInstructionsModal = true;
     }
   };
 
