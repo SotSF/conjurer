@@ -9,11 +9,14 @@ import { AiOutlineLineChart } from "react-icons/ai";
 import { DisplayMode } from "@/src/types/UIStore";
 import { RiPlayList2Fill } from "react-icons/ri";
 
-const displayModes: DisplayMode[] = ["canopy", "canopySpace", "cartesianSpace"];
-
 export const DisplayControls = observer(function DisplayControls() {
   const store = useStore();
   const { uiStore } = store;
+
+  const displayModes: DisplayMode[] =
+    store.context === "viewer"
+      ? ["canopy", "cartesianSpace"]
+      : ["canopy", "canopySpace", "cartesianSpace"];
 
   const displayModeIcons: Record<DisplayMode, JSX.Element> = {
     canopy: <FaDotCircle size={17} />,
