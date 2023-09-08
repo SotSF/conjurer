@@ -1,10 +1,10 @@
 import { Grid, GridItem } from "@chakra-ui/react";
 import { MainControls } from "@/src/components/MainControls";
 import { Timeline } from "@/src/components/Timeline";
-import { memo } from "react";
 import { useStore } from "@/src/types/StoreContext";
+import { observer } from "mobx-react-lite";
 
-export const Arrangement = memo(function Arrangement() {
+export const Arrangement = observer(function Arrangement() {
   const store = useStore();
 
   return (

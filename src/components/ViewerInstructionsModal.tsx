@@ -158,7 +158,6 @@ export const ViewerInstructionsModal = observer(
                 justify="center"
               >
                 {steps[currentStep]}
-                Rain
               </VStack>
               <Button
                 ref={nextButtonRef}
@@ -175,6 +174,7 @@ export const ViewerInstructionsModal = observer(
                   alt="Secret Fire logo"
                   width={60}
                   height={80}
+                  style={{ width: "60px", height: "80px" }}
                 />
               </Button>
             </VStack>
