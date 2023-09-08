@@ -75,7 +75,10 @@ export const MenuBar = observer(function MenuBar() {
       <HStack>
         <Heading
           size="md"
-          onClick={action(() => (uiStore.showingSaveExperienceModal = true))}
+          onClick={action(() => {
+            if (store.context !== "viewer")
+              uiStore.showingSaveExperienceModal = true;
+          })}
           cursor="pointer"
         >
           {store.experienceName}

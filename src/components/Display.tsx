@@ -6,11 +6,13 @@ import { observer } from "mobx-react-lite";
 import { useStore } from "@/src/types/StoreContext";
 import { UserPicker } from "@/src/components/UserPicker";
 import { MenuBar } from "@/src/components/Menu/MenuBar";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 export const Display = observer(function Display() {
   const store = useStore();
   const { uiStore } = store;
+
+  const boxRef = useRef<HTMLDivElement>(null);
 
   const [showAllControls, setShowAllControls] = useState(true);
 
@@ -21,7 +23,10 @@ export const Display = observer(function Display() {
       overflow="auto"
       position="relative"
       height="100%"
-      onDoubleClick={() => setShowAllControls(!showAllControls)}
+      onDoubleClick={() => {
+        // setShowAllControls(!showAllControls);
+        boxRef.current?.requestFullscreen();
+      }}
     >
       <Box opacity={showAllControls ? 1 : 0} transition="all 100ms">
         <MenuBar />
@@ -37,10 +42,10 @@ export const Display = observer(function Display() {
             <UserPicker />
           )}
         </VStack>
-        <DisplayControls />
+        <DisplayControls canvasContainer={boxRef.current} />
       </Box>
 
-      <Box height="100%" bgColor="gray.900">
+      <Box ref={boxRef} height="100%" bgColor="gray.900">
         <DisplayCanvas />
       </Box>
     </Box>
