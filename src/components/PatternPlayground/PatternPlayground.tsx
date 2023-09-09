@@ -84,7 +84,7 @@ export const PatternPlayground = observer(function PatternPlayground() {
   useEffect(() => {
     if (didInitialize.current) return;
     didInitialize.current = true;
-    store.initialize();
+    store.initializeClientSide();
     applyPatternEffects(lastPatternIndexSelected, lastEffectIndices);
   }, [store, lastPatternIndexSelected, lastEffectIndices, playgroundStore.lastEffectIndices, onSelectPatternBlock, applyPatternEffects]);
 

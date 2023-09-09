@@ -26,6 +26,7 @@ export class UIStore {
   showingPaletteEditorModal = false;
   showingMarkerEditorModal = false;
   showingPlaylistAddExperienceModal = false;
+  showingViewerInstructionsModal = false;
 
   _renderTargetSize = INITIAL_RENDER_TARGET_SIZE;
   get renderTargetSize() {

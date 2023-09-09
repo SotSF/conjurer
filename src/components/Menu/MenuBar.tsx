@@ -75,176 +75,191 @@ export const MenuBar = observer(function MenuBar() {
       <HStack>
         <Heading
           size="md"
-          onClick={action(() => (uiStore.showingSaveExperienceModal = true))}
+          onClick={action(() => {
+            if (store.context !== "viewer")
+              uiStore.showingSaveExperienceModal = true;
+          })}
           cursor="pointer"
         >
           {store.experienceName}
         </Heading>
-        <Text fontSize="sm" color="gray.500" userSelect="none">
-          {store.experienceLastSavedAt
-            ? `last saved at ${Intl.DateTimeFormat("en", {
-                hour: "numeric",
-                minute: "numeric",
-                hour12: true,
-              }).format(store.experienceLastSavedAt)}`
-            : "not yet saved"}
-        </Text>
+        {store.context !== "viewer" && (
+          <Text fontSize="sm" color="gray.500" userSelect="none">
+            {store.experienceLastSavedAt
+              ? `last saved at ${Intl.DateTimeFormat("en", {
+                  hour: "numeric",
+                  minute: "numeric",
+                  hour12: true,
+                }).format(store.experienceLastSavedAt)}`
+              : "not yet saved"}
+          </Text>
+        )}
       </HStack>
       <HStack>
         <OpenExperienceModal />
         <SaveExperienceModal />
-        <Menu>
-          <MenuButton
-            as={Button}
-            px={1}
-            py={0}
-            variant="ghost"
-            size="sm"
-            transition="all 0.2s"
-            borderRadius="md"
-            _hover={{ bg: "gray.500" }}
-            _focus={{ boxShadow: "outline" }}
-          >
-            File
-          </MenuButton>
-          <MenuList zIndex={12}>
-            <MenuItem
-              icon={<FaFile size={17} />}
-              command="⌘N"
-              onClick={action(() => store.newExperience())}
-            >
-              New experience
-            </MenuItem>
-            <MenuDivider />
-            <MenuItem
-              icon={<FaFolderOpen size={17} />}
-              command="⌘O"
-              onClick={action(() => {
-                uiStore.showingOpenExperienceModal = true;
-              })}
-            >
-              Open...
-            </MenuItem>
-            <MenuItem
-              icon={<FaFolderOpen size={17} />}
-              onClick={() => experienceStore.loadFromLocalStorage("experience")}
-            >
-              Open last locally saved
-            </MenuItem>
-            <MenuItem
-              icon={<BiTimer size={18} />}
-              onClick={() => experienceStore.loadFromLocalStorage("autosave")}
-            >
-              Open last autosaved
-            </MenuItem>
-            <MenuDivider />
-            <MenuItem
-              icon={<FiSave size={17} />}
-              command="⌘S"
-              onClick={experienceStore.save}
-            >
-              Save
-            </MenuItem>
-            <MenuItem
-              icon={<FiSave size={17} />}
-              command="⌘⇧S"
-              onClick={action(() => {
-                uiStore.showingSaveExperienceModal = true;
-              })}
-            >
-              Save as...
-            </MenuItem>
-            <MenuItem
-              icon={<FiSave size={17} />}
-              onClick={() => experienceStore.saveToLocalStorage("experience")}
-            >
-              Save locally
-            </MenuItem>
-          </MenuList>
-        </Menu>
-        <Menu>
-          <MenuButton
-            as={Button}
-            px={1}
-            py={0}
-            variant="ghost"
-            size="sm"
-            transition="all 0.2s"
-            borderRadius="md"
-            _hover={{ bg: "gray.500" }}
-            _focus={{ boxShadow: "outline" }}
-          >
-            Edit
-          </MenuButton>
-          <MenuList zIndex={12}>
-            <MenuItem
-              icon={<FaRegClipboard size={17} />}
-              onClick={experienceStore.copyToClipboard}
-            >
-              Copy experience JSON to clipboard
-            </MenuItem>
-          </MenuList>
-        </Menu>
-        <Menu>
-          <MenuButton
-            as={Button}
-            px={1}
-            py={0}
-            variant="ghost"
-            size="sm"
-            transition="all 0.2s"
-            borderRadius="md"
-            _hover={{ bg: "gray.500" }}
-            _focus={{ boxShadow: "outline" }}
-          >
-            Go to
-          </MenuButton>
-          <MenuList zIndex={12}>
-            <MenuItem as="a" href="/playground" target="_blank">
-              Playground
-            </MenuItem>
-            <MenuItem as="a" href="/controller" target="_blank">
-              Controller
-            </MenuItem>
-            <MenuItem as="a" href="/viewer" target="_blank">
-              Viewer
-            </MenuItem>
-          </MenuList>
-        </Menu>
-        <Menu>
-          <MenuButton
-            as={Button}
-            px={1}
-            py={0}
-            variant="ghost"
-            size="sm"
-            transition="all 0.2s"
-            borderRadius="md"
-            _hover={{ bg: "gray.500" }}
-            _focus={{ boxShadow: "outline" }}
-          >
-            Help
-          </MenuButton>
-          <MenuList zIndex={12}>
-            <MenuItem
-              as="a"
-              href="https://github.com/SotSF/conjurer#conjurer"
-              target="_blank"
-            >
-              About Conjurer
-            </MenuItem>
-            <MenuItem onClick={onOpenKeyboardShortcuts}>
-              Keyboard shortcuts
-            </MenuItem>
-            <MenuItem
-              as="a"
-              href="https://github.com/SotSF/conjurer/issues/new/choose"
-              target="_blank"
-            >
-              Report an issue
-            </MenuItem>
-          </MenuList>
-        </Menu>
+        {store.context !== "viewer" && (
+          <>
+            <Menu>
+              <MenuButton
+                as={Button}
+                px={1}
+                py={0}
+                variant="ghost"
+                size="sm"
+                transition="all 0.2s"
+                borderRadius="md"
+                _hover={{ bg: "gray.500" }}
+                _focus={{ boxShadow: "outline" }}
+              >
+                File
+              </MenuButton>
+              <MenuList zIndex={12}>
+                <MenuItem
+                  icon={<FaFile size={17} />}
+                  command="⌘N"
+                  onClick={action(() => store.newExperience())}
+                >
+                  New experience
+                </MenuItem>
+                <MenuDivider />
+                <MenuItem
+                  icon={<FaFolderOpen size={17} />}
+                  command="⌘O"
+                  onClick={action(() => {
+                    uiStore.showingOpenExperienceModal = true;
+                  })}
+                >
+                  Open...
+                </MenuItem>
+                <MenuItem
+                  icon={<FaFolderOpen size={17} />}
+                  onClick={() =>
+                    experienceStore.loadFromLocalStorage("experience")
+                  }
+                >
+                  Open last locally saved
+                </MenuItem>
+                <MenuItem
+                  icon={<BiTimer size={18} />}
+                  onClick={() =>
+                    experienceStore.loadFromLocalStorage("autosave")
+                  }
+                >
+                  Open last autosaved
+                </MenuItem>
+                <MenuDivider />
+                <MenuItem
+                  icon={<FiSave size={17} />}
+                  command="⌘S"
+                  onClick={experienceStore.save}
+                >
+                  Save
+                </MenuItem>
+                <MenuItem
+                  icon={<FiSave size={17} />}
+                  command="⌘⇧S"
+                  onClick={action(() => {
+                    uiStore.showingSaveExperienceModal = true;
+                  })}
+                >
+                  Save as...
+                </MenuItem>
+                <MenuItem
+                  icon={<FiSave size={17} />}
+                  onClick={() =>
+                    experienceStore.saveToLocalStorage("experience")
+                  }
+                >
+                  Save locally
+                </MenuItem>
+              </MenuList>
+            </Menu>
+            <Menu>
+              <MenuButton
+                as={Button}
+                px={1}
+                py={0}
+                variant="ghost"
+                size="sm"
+                transition="all 0.2s"
+                borderRadius="md"
+                _hover={{ bg: "gray.500" }}
+                _focus={{ boxShadow: "outline" }}
+              >
+                Edit
+              </MenuButton>
+              <MenuList zIndex={12}>
+                <MenuItem
+                  icon={<FaRegClipboard size={17} />}
+                  onClick={experienceStore.copyToClipboard}
+                >
+                  Copy experience JSON to clipboard
+                </MenuItem>
+              </MenuList>
+            </Menu>
+            <Menu>
+              <MenuButton
+                as={Button}
+                px={1}
+                py={0}
+                variant="ghost"
+                size="sm"
+                transition="all 0.2s"
+                borderRadius="md"
+                _hover={{ bg: "gray.500" }}
+                _focus={{ boxShadow: "outline" }}
+              >
+                Go to
+              </MenuButton>
+              <MenuList zIndex={12}>
+                <MenuItem as="a" href="/playground" target="_blank">
+                  Playground
+                </MenuItem>
+                <MenuItem as="a" href="/controller" target="_blank">
+                  Controller
+                </MenuItem>
+                <MenuItem as="a" href="/viewer" target="_blank">
+                  Viewer
+                </MenuItem>
+              </MenuList>
+            </Menu>
+            <Menu>
+              <MenuButton
+                as={Button}
+                px={1}
+                py={0}
+                variant="ghost"
+                size="sm"
+                transition="all 0.2s"
+                borderRadius="md"
+                _hover={{ bg: "gray.500" }}
+                _focus={{ boxShadow: "outline" }}
+              >
+                Help
+              </MenuButton>
+              <MenuList zIndex={12}>
+                <MenuItem
+                  as="a"
+                  href="https://github.com/SotSF/conjurer#conjurer"
+                  target="_blank"
+                >
+                  About Conjurer
+                </MenuItem>
+                <MenuItem onClick={onOpenKeyboardShortcuts}>
+                  Keyboard shortcuts
+                </MenuItem>
+                <MenuItem
+                  as="a"
+                  href="https://github.com/SotSF/conjurer/issues/new/choose"
+                  target="_blank"
+                >
+                  Report an issue
+                </MenuItem>
+              </MenuList>
+            </Menu>
+          </>
+        )}
       </HStack>
     </VStack>
   );

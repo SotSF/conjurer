@@ -7,12 +7,21 @@ import { TbLayoutRows, TbLayoutColumns, TbRectangle } from "react-icons/tb";
 import { TbRectangleFilled } from "react-icons/tb";
 import { AiOutlineLineChart } from "react-icons/ai";
 import { DisplayMode } from "@/src/types/UIStore";
+import { RiPlayList2Fill } from "react-icons/ri";
+import { BsArrowsFullscreen } from "react-icons/bs";
 
-const displayModes: DisplayMode[] = ["canopy", "canopySpace", "cartesianSpace"];
+type DisplayControlsProps = { canvasContainer: HTMLDivElement | null };
 
-export const DisplayControls = observer(function DisplayControls() {
+export const DisplayControls = observer(function DisplayControls({
+  canvasContainer,
+}: DisplayControlsProps) {
   const store = useStore();
   const { uiStore } = store;
+
+  const displayModes: DisplayMode[] =
+    store.context === "viewer"
+      ? ["canopy", "cartesianSpace"]
+      : ["canopy", "canopySpace", "cartesianSpace"];
 
   const displayModeIcons: Record<DisplayMode, JSX.Element> = {
     canopy: <FaDotCircle size={17} />,
@@ -30,6 +39,15 @@ export const DisplayControls = observer(function DisplayControls() {
       alignItems="flex-start"
       zIndex={1}
     >
+      {store.context === "viewer" && (
+        <IconButton
+          aria-label="Show playlist"
+          title="Show playlist"
+          height={6}
+          icon={<RiPlayList2Fill size={17} />}
+          onClick={action(() => (uiStore.playlistDrawerOpen = true))}
+        />
+      )}
       {store.context !== "viewer" && (
         <IconButton
           aria-label="Toggle horizontal/vertical layout"
@@ -66,12 +84,21 @@ export const DisplayControls = observer(function DisplayControls() {
         onClick={action(() => uiStore.nextRenderTextureSize())}
         fontSize="xs"
       />
+      {store.context !== "viewer" && (
+        <IconButton
+          aria-label="Toggle performance"
+          title="Toggle performance"
+          height={6}
+          icon={<AiOutlineLineChart size={17} />}
+          onClick={action(() => uiStore.togglePerformance())}
+        />
+      )}
       <IconButton
-        aria-label="Toggle performance"
-        title="Toggle performance"
+        aria-label="Go fullscreen"
+        title="Go fullscreen"
         height={6}
-        icon={<AiOutlineLineChart size={17} />}
-        onClick={action(() => uiStore.togglePerformance())}
+        icon={<BsArrowsFullscreen size={15} />}
+        onClick={() => canvasContainer?.requestFullscreen()}
       />
     </VStack>
   );

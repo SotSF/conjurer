@@ -19,7 +19,7 @@ import { useEffect, useState } from "react";
 
 export const AudioControls = observer(function AudioControls() {
   const store = useStore();
-  const { uiStore, audioStore, initialized } = store;
+  const { uiStore, audioStore, initializedClientSide } = store;
   const { wavesurfer } = audioStore;
   const [showTooltip, setShowTooltip] = useState(false);
   const [audioVol, setAudioVol] = useState(1);
@@ -30,9 +30,9 @@ export const AudioControls = observer(function AudioControls() {
   };
 
   useEffect(() => {
-    if (!initialized) return;
+    if (!initializedClientSide) return;
     void audioStore.fetchAvailableAudioFiles();
-  }, [audioStore, initialized]);
+  }, [audioStore, initializedClientSide]);
 
   return (
     <>

@@ -1,6 +1,7 @@
 import {
   Drawer,
   DrawerBody,
+  DrawerCloseButton,
   DrawerContent,
   DrawerOverlay,
 } from "@chakra-ui/react";
@@ -24,6 +25,7 @@ export const PlaylistDrawer = observer(function PlaylistDrawer() {
     >
       <DrawerOverlay />
       <DrawerContent bgColor="gray.700">
+        <DrawerCloseButton />
         <DrawerBody>
           <PlaylistEditor />
         </DrawerBody>

@@ -48,7 +48,6 @@ export class AudioStore {
 
   constructor(readonly rootStore: RootStore) {
     makeAutoObservable(this, {
-      getSelectedAudioFileUrl: false,
       timelinePlugin: false,
       regionsPlugin: false,
       peaks: false,

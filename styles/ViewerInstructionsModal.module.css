@@ -1,0 +1,41 @@
+.fadeInRise {
+  animation-name: fadeInRise;
+  animation-duration: 0.5s;
+  animation-timing-function: ease-in-out;
+}
+
+@keyframes fadeInRise {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.vibrate {
+  animation-name: vibrate;
+  animation-duration: 0.3s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+@keyframes vibrate {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  25% {
+    transform: translate3d(0, 0.5px, 0);
+  }
+  50% {
+    transform: translate3d(-1px, 0, 0);
+  }
+  75% {
+    transform: translate3d(0, -1px, 0);
+  }
+  100% {
+    transform: translate3d(1.5px, 0, 0);
+  }
+}

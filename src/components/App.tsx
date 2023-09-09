@@ -16,7 +16,7 @@ export const App = observer(function App() {
   useEffect(() => {
     if (didInitialize.current) return;
     didInitialize.current = true;
-    store.initialize();
+    store.initializeClientSide();
   }, [store]);
 
   const gridItems = (

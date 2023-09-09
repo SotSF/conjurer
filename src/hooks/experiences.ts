@@ -5,13 +5,13 @@ export function useExperiences(
   shouldLoadExperiences: boolean,
   forLoggedInUserOnly = true
 ) {
-  const { user, initialized, experienceStore } = useStore();
+  const { user, initializedClientSide, experienceStore } = useStore();
   const [loading, setLoading] = useState(true);
   const [experiences, setExperiences] = useState<string[]>([]);
 
   useEffect(() => {
     if (
-      !initialized ||
+      !initializedClientSide ||
       !shouldLoadExperiences ||
       (forLoggedInUserOnly && !user)
     )
@@ -31,7 +31,7 @@ export function useExperiences(
 
     fetchExperiences();
   }, [
-    initialized,
+    initializedClientSide,
     user,
     experienceStore,
     shouldLoadExperiences,
