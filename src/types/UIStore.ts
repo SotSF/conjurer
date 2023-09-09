@@ -3,12 +3,16 @@ import { INITIAL_PIXELS_PER_SECOND } from "@/src/utils/time";
 import { makeAutoObservable } from "mobx";
 import { RegionParams } from "wavesurfer.js/dist/plugins/regions";
 
-const MAX_PIXELS_PER_SECOND = 160;
-const MIN_PIXELS_PER_SECOND = 4;
+export const MAX_PIXELS_PER_SECOND = 160;
+export const MIN_PIXELS_PER_SECOND = 4;
 
 const INITIAL_RENDER_TARGET_SIZE = 256;
 
 export type DisplayMode = "canopy" | "canopySpace" | "cartesianSpace" | "none";
+
+type RootStore = {
+  context: string;
+};
 
 /**
  * MobX store for UI state.
@@ -141,7 +145,8 @@ export class UIStore {
     pixelsPerSecond: this.pixelsPerSecond,
   });
 
-  deserialize = (data: any) => {
-    this.pixelsPerSecond = data?.pixelsPerSecond ?? this.pixelsPerSecond;
+  deserialize = (rootStore: RootStore, data: any) => {
+    if (rootStore.context !== "viewer")
+      this.pixelsPerSecond = data?.pixelsPerSecond ?? this.pixelsPerSecond;
   };
 }

@@ -71,11 +71,11 @@ export const ViewerInstructionsModal = observer(
         <Text key={1} lineHeight={2}>
           In their jealous rage, they unleashed{" "}
           <strong>vast quantities of water, wind, and mud</strong> upon the
-          playa, seeking to disrupt the those powerful acts of conjury.
+          playa, seeking to disrupt those powerful acts of conjury.
         </Text>
       </>,
       <Text key={2} lineHeight={2}>
-        But they acted too late.
+        But they acted too late!
       </Text>,
       <>
         <Rain auto />

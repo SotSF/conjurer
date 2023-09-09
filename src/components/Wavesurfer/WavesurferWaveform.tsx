@@ -1,7 +1,7 @@
 import { useStore } from "@/src/types/StoreContext";
 import { Box, Skeleton } from "@chakra-ui/react";
 import { observer } from "mobx-react-lite";
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useMemo } from "react";
 import { clamp } from "three/src/math/MathUtils";
 import type WaveSurfer from "wavesurfer.js";
 import type { WaveSurferOptions } from "wavesurfer.js";
@@ -78,6 +78,19 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
 
   const cloneCanvas = useCloneCanvas(clonedWaveformRef);
 
+  const timelinePluginOptions = useMemo(
+    () => ({
+      ...DEFAULT_TIMELINE_OPTIONS,
+      ...(store.context === "viewer"
+        ? {
+            primaryLabelInterval: 15,
+            secondaryLabelInterval: 0,
+          }
+        : {}),
+    }),
+    [store.context]
+  );
+
   // initialize wavesurfer
   useEffect(() => {
     if (didInitialize.current) return;
@@ -92,7 +105,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
 
       // Instantiate timeline plugin
       const timelinePlugin = (audioStore.timelinePlugin = TimelinePlugin.create(
-        DEFAULT_TIMELINE_OPTIONS
+        timelinePluginOptions
       ));
 
       // Instantiate regions plugin
@@ -185,7 +198,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
     };
 
     create();
-  }, [store.context, audioStore, audioStore.selectedAudioFile, uiStore, uiStore.pixelsPerSecond, playlistStore, cloneCanvas]);
+  }, [store.context, audioStore, audioStore.selectedAudioFile, uiStore, uiStore.pixelsPerSecond, playlistStore, cloneCanvas, timelinePluginOptions]);
 
   // on selected audio file change
   useEffect(() => {
@@ -212,7 +225,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
         // Create a new timeline plugin
         const { TimelinePlugin } = wavesurferConstructors.current;
         const timelinePlugin = (audioStore.timelinePlugin =
-          TimelinePlugin.create(DEFAULT_TIMELINE_OPTIONS));
+          TimelinePlugin.create(timelinePluginOptions));
         audioStore.wavesurfer.registerPlugin(timelinePlugin);
 
         // Load the new audio file
@@ -221,7 +234,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
     };
     changeAudioFile();
     cloneCanvas();
-  }, [audioStore, audioStore.wavesurfer, audioStore.selectedAudioFile, uiStore.pixelsPerSecond, cloneCanvas]);
+  }, [audioStore, audioStore.wavesurfer, audioStore.selectedAudioFile, uiStore.pixelsPerSecond, cloneCanvas, timelinePluginOptions]);
 
   // on loop toggle
   useEffect(() => {

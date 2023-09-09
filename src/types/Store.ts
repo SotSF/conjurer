@@ -1,5 +1,9 @@
 import { Block } from "@/src/types/Block";
-import { UIStore } from "@/src/types/UIStore";
+import {
+  MAX_PIXELS_PER_SECOND,
+  MIN_PIXELS_PER_SECOND,
+  UIStore,
+} from "@/src/types/UIStore";
 import { makeAutoObservable, configure } from "mobx";
 import { AudioStore } from "@/src/types/AudioStore";
 import { Variation } from "@/src/types/Variations/Variation";
@@ -131,6 +135,7 @@ export class Store {
     } else if (this.context === "viewer") {
       this.playlistStore.autoplay = true;
       this.uiStore.showingViewerInstructionsModal = true;
+      this.uiStore.pixelsPerSecond = MIN_PIXELS_PER_SECOND;
     }
   };
 
@@ -478,7 +483,7 @@ export class Store {
 
   deserialize = (data: any) => {
     this.audioStore.deserialize(data.audioStore);
-    this.uiStore.deserialize(data.uiStore);
+    this.uiStore.deserialize(this, data.uiStore);
     this.layers = data.layers.map((l: any) => Layer.deserialize(this, l));
     this.selectedLayer = this.layers[0];
   };
