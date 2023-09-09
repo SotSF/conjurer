@@ -2,6 +2,8 @@ import styles from "@/styles/ViewerInstructionsModal.module.css";
 import { observer } from "mobx-react-lite";
 import {
   Button,
+  Grid,
+  GridItem,
   IconButton,
   Kbd,
   ListItem,
@@ -20,6 +22,8 @@ import { useEffect, useRef, useState } from "react";
 import { RiPlayList2Fill } from "react-icons/ri";
 import Image from "next/image";
 import { Rain } from "@/src/components/Rain";
+import { FiMonitor } from "react-icons/fi";
+import { FaHeadphonesAlt } from "react-icons/fa";
 
 export const ViewerInstructionsModal = observer(
   function ViewerInstructionsModal() {
@@ -42,20 +46,13 @@ export const ViewerInstructionsModal = observer(
 
     const steps = [
       <Text key={0} lineHeight={2}>
-        Legends tell of the{" "}
-        <Button
-          as="a"
-          variant="link"
-          href="https://se.cretfi.re/"
-          target="_blank"
-        >
-          Servants of the Secret Fire
-        </Button>{" "}
-        attending Burning Man in the year 2023.
+        There is a legend that tells of a group of wizards called the{" "}
+        <strong>Servants of the Secret Fire</strong> attending Burning Man in
+        the year 2023.
       </Text>,
       <Text key={1} lineHeight={2}>
-        These same legends suggest that a singularly powerful event was held by
-        this camp - indeed, so powerful that the gods were{" "}
+        This legend suggests that this camp of wizards conjured a singularly
+        powerful event - indeed, so powerful that the gods became{" "}
         <Text
           as="span"
           position="absolute"
@@ -72,9 +69,9 @@ export const ViewerInstructionsModal = observer(
       <>
         <Rain mouseObject="Umbrella" />
         <Text key={1} lineHeight={2}>
-          In their jealous rage, they unleashed vast quantities of water, wind,
-          and mud upon the playa, seeking to disrupt the powerful acts of
-          conjury that were being performed.
+          In their jealous rage, they unleashed{" "}
+          <strong>vast quantities of water, wind, and mud</strong> upon the
+          playa, seeking to disrupt the those powerful acts of conjury.
         </Text>
       </>,
       <Text key={2} lineHeight={2}>
@@ -99,35 +96,48 @@ export const ViewerInstructionsModal = observer(
       </>,
       <Text key={4} lineHeight={2}>
         The Servants of the Secret Fire have provided this portal in time and
-        space to prove the legends true and to give you this same opportunity.
+        space so that you may experience yourself what so angered the gods that
+        day.
       </Text>,
       <>
-        <Text key={5}>
-          To properly experience for yourself what so angered the gods that day,
-          the following is recommended:
+        <Text key={5} width="100%" textAlign="left">
+          Recommendations:
         </Text>
-        <OrderedList key={7} fontSize="sm" textAlign="left">
-          <ListItem>
-            Use a <strong>desktop computer</strong> or computer with a decent
-            graphics card
-          </ListItem>
-          <ListItem>
-            Use <strong>speakers</strong> or <strong>headphones</strong> and
-            crank up the volume
-          </ListItem>
-          <ListItem>
-            If any particular song&apos;s transformative power is channeling
-            incorrectly (i.e. you don&apos;t like it) use the{" "}
-            <strong>playlist button</strong>:
+        <Grid
+          gridTemplateColumns="auto 1fr"
+          gap={2}
+          textAlign="left"
+          fontSize="sm"
+        >
+          <GridItem pt={0.5}>
+            <FiMonitor size={17} />
+          </GridItem>
+          <GridItem>
+            <Text>
+              Use a <strong>desktop computer</strong>
+            </Text>
+          </GridItem>
+          <GridItem pt={0.5}>
+            <FaHeadphonesAlt size={17} />
+          </GridItem>
+          <GridItem>
+            <Text>
+              Use <strong>speakers</strong>/<strong>headphones</strong>
+            </Text>
+          </GridItem>
+          <GridItem pt={0.5}>
+            <RiPlayList2Fill size={17} />
+          </GridItem>
+          <GridItem>
+            Browse the <strong>playlist</strong> with this button:&nbsp;
             <IconButton
               aria-label="Show playlist"
               title="Show playlist"
               height={6}
               icon={<RiPlayList2Fill size={17} />}
-            />{" "}
-            to navigate to a different track
-          </ListItem>
-        </OrderedList>
+            />
+          </GridItem>
+        </Grid>
       </>,
       <>
         <Text key={8} width="100%" textAlign="left">
