@@ -46,13 +46,15 @@ export const ViewerInstructionsModal = observer(
 
     const steps = [
       <Text key={0} lineHeight={2}>
-        There is a legend that tells of a group of wizards called the{" "}
-        <strong>Servants of the Secret Fire</strong> attending Burning Man in
-        the year 2023.
+        Legend tells of a group of wizards called
+        <br />
+        <strong>The Servants of the Secret Fire</strong>
+        <br />
+        attending Burning Man in the year 2023.
       </Text>,
       <Text key={1} lineHeight={2}>
-        This legend suggests that this camp of wizards conjured a singularly
-        powerful event - indeed, so powerful that the gods became{" "}
+        This legend suggests that this camp of wizards performed a singularly
+        powerful act - indeed, so powerful that the gods took notice and became{" "}
         <Text
           as="span"
           position="absolute"
@@ -71,7 +73,8 @@ export const ViewerInstructionsModal = observer(
         <Text key={1} lineHeight={2}>
           In their jealous rage, they unleashed{" "}
           <strong>vast quantities of water, wind, and mud</strong> upon the
-          playa, seeking to disrupt those powerful acts of conjury.
+          playa, seeking to disrupt those wizards&apos; powerful acts of
+          conjury.
         </Text>
       </>,
       <Text key={2} lineHeight={2}>
@@ -153,13 +156,14 @@ export const ViewerInstructionsModal = observer(
           It is time.
         </Text>
         <Text key={10} lineHeight={2}>
-          Press <Kbd>space</Kbd> to begin.
+          Press <Kbd>space</Kbd> or click below to begin.
         </Text>
       </>,
     ];
 
     const incrementStep = () => {
       if (currentStep >= steps.length - 1) {
+        store.togglePlaying();
         onClose();
         return;
       }
