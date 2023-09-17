@@ -44,7 +44,9 @@ export const BeatMapperPage = observer(function BeatMapperPage() {
   const [audioBuffer, setAudioBuffer] = useState<AudioBuffer | null>(null);
   const [beats, setBeats] = useState<number[]>([]);
   const [tempoCounts, setTempoCounts] = useState<TempoCount[]>([]);
+
   const [threshold, setThreshold] = useState((0.8).toString());
+  const [frequency, setFrequency] = useState((350).toString());
 
   useEffect(() => {
     if (!initialized.current) {
@@ -68,7 +70,12 @@ export const BeatMapperPage = observer(function BeatMapperPage() {
   }, [audioStore.wavesurfer, audioStore.peaks, uiStore]);
 
   useEffect(() => {
-    if (Number.isNaN(Number(threshold)) || !audioBuffer) return;
+    if (
+      Number.isNaN(Number(threshold)) ||
+      Number.isNaN(Number(frequency)) ||
+      !audioBuffer
+    )
+      return;
 
     // Create offline context
     var offlineContext = new OfflineAudioContext(
@@ -84,7 +91,7 @@ export const BeatMapperPage = observer(function BeatMapperPage() {
     // Create filter
     var filter = offlineContext.createBiquadFilter();
     filter.type = "lowpass";
-    console.log("filter frequency", filter.frequency);
+    filter.frequency.value = Number(frequency);
 
     // Pipe the song into the filter, and the filter into the offline context
     source.connect(filter);
@@ -123,7 +130,7 @@ export const BeatMapperPage = observer(function BeatMapperPage() {
       );
       setTempoCounts(sortedTempoCounts);
     };
-  }, [threshold, audioBuffer]);
+  }, [threshold, frequency, audioBuffer]);
 
   const displayTempoCounts = [...tempoCounts].slice(0, 10);
   return (
@@ -182,16 +189,22 @@ export const BeatMapperPage = observer(function BeatMapperPage() {
           </Box>
         </HStack>
       </Box>
-      <VStack m={2}>
+      <VStack m={2} width="350px">
         <ScalarInput
-          name="Threshold"
-          value={`${threshold}`}
-          onChange={(valueString, valueNumber) => setThreshold(valueString)}
+          name="Lowpass cutoff frequency (Hz)"
+          value={frequency}
+          onChange={(valueString) => setFrequency(valueString)}
+          step={50}
+        />
+        <ScalarInput
+          name="Beat detection threshold"
+          value={threshold}
+          onChange={(valueString) => setThreshold(valueString)}
           step={0.01}
         />
 
         <Text>
-          <strong>Beats detected:</strong> {beats.length}
+          <strong>Total beats detected:</strong> {beats.length}
         </Text>
         <TableContainer>
           <Table size="sm" variant="simple">
