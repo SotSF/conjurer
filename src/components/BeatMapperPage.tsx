@@ -156,48 +156,55 @@ export const BeatMapperPage = observer(function BeatMapperPage() {
 
   return (
     <>
-      <VStack
-        position="sticky"
-        top={0}
-        left={0}
-        flexShrink={0}
-        boxSizing="border-box"
-        borderRightWidth={1}
-        borderBottomWidth={1}
-        borderColor="black"
-        spacing={0}
-        width="150px"
-        zIndex={18}
-        bgColor="gray.500"
-      >
-        <TimerControls />
-        <TimerReadout />
-      </VStack>
       <Box
         ref={timelineRef}
         position="relative"
         overflow="scroll"
         overscrollBehavior="none"
+        bgColor="gray.500"
       >
-        <HStack
-          position="sticky"
-          top={0}
-          width={uiStore.timeToXPixels(MAX_TIME)}
-          spacing={0}
-          zIndex={12}
-        >
+        <HStack spacing={0} zIndex={12}>
+          <VStack
+            position="sticky"
+            left={0}
+            borderRightWidth={1}
+            borderBottomWidth={1}
+            borderColor="black"
+            spacing={0}
+            width="150px"
+            flexShrink={0}
+            bgColor="gray.500"
+            zIndex={18}
+          >
+            <TimerControls />
+            <TimerReadout />
+          </VStack>
           <WavesurferWaveform />
         </HStack>
-        <VStack
+
+        <HStack
           width={uiStore.timeToXPixels(MAX_TIME)}
-          alignItems="start"
+          height="50px"
           spacing={0}
           zIndex={12}
         >
-          <Box position="relative" height="50px">
-            <Text position="sticky" top={0} left={0}>
+          <VStack
+            position="sticky"
+            left={0}
+            borderRightWidth={1}
+            borderBottomWidth={1}
+            borderColor="black"
+            spacing={0}
+            width="150px"
+            height="100%"
+            zIndex={18}
+            bgColor="gray.500"
+          >
+            <Text textAlign="center" color="black">
               detected beats (click to align)
-            </Text>
+            </Text>{" "}
+          </VStack>
+          <Box position="relative" height="50px">
             {beats.map((beat, index) => (
               <Box
                 key={index}
@@ -212,10 +219,34 @@ export const BeatMapperPage = observer(function BeatMapperPage() {
               />
             ))}
           </Box>
+        </HStack>
+
+        <HStack
+          width={uiStore.timeToXPixels(MAX_TIME)}
+          height="50px"
+          spacing={0}
+          zIndex={12}
+        >
+          <VStack
+            position="sticky"
+            left={0}
+            borderRightWidth={1}
+            borderBottomWidth={1}
+            borderColor="black"
+            spacing={0}
+            width="150px"
+            height="100%"
+            zIndex={18}
+            bgColor="gray.500"
+          >
+            <Text textAlign="center" color="black">
+              computed beats
+            </Text>{" "}
+          </VStack>
           <Box position="relative" height="50px">
-            <Text>computed beats</Text>
             {!Number.isNaN(songTempoOffsetNumber) &&
               !Number.isNaN(songTempoNumber) &&
+              // TODO: make this number bigger and make this more efficient
               Array.from({ length: 100 }).map((_, index) => (
                 <Box
                   key={index}
@@ -230,9 +261,10 @@ export const BeatMapperPage = observer(function BeatMapperPage() {
                 />
               ))}
           </Box>
-        </VStack>
+        </HStack>
       </Box>
       <VStack m={2} width="350px">
+        <Heading size="sm">Beat computation</Heading>
         <ScalarInput
           name="Song tempo"
           value={songTempo}
