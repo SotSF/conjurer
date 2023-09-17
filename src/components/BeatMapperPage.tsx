@@ -2,6 +2,7 @@ import { observer } from "mobx-react-lite";
 import {
   Box,
   HStack,
+  Heading,
   Table,
   TableContainer,
   Tbody,
@@ -45,8 +46,17 @@ export const BeatMapperPage = observer(function BeatMapperPage() {
   const [beats, setBeats] = useState<number[]>([]);
   const [tempoCounts, setTempoCounts] = useState<TempoCount[]>([]);
 
-  const [threshold, setThreshold] = useState((0.8).toString());
-  const [frequency, setFrequency] = useState((350).toString());
+  const [threshold, setThreshold] = useState((0.72).toFixed(2));
+  const [frequency, setFrequency] = useState((150).toString());
+
+  const [songTempo, setSongTempo] = useState((112).toFixed(4));
+  const [songTempoOffset, setSongTempoOffset] = useState((0).toFixed(4));
+  const songTempoNumber = Number(songTempo);
+  const songTempoOffsetNumber = Number(songTempoOffset);
+
+  const [selectedBeatIndex, setSelectedBeatIndex] = useState<number | null>(
+    null
+  );
 
   useEffect(() => {
     if (!initialized.current) {
@@ -62,7 +72,7 @@ export const BeatMapperPage = observer(function BeatMapperPage() {
   useEffect(() => {
     audioStore.wavesurfer?.on("ready", () => {
       runInAction(() => {
-        uiStore.pixelsPerSecond = 20;
+        // uiStore.pixelsPerSecond = 80;
       });
       const buffer = audioStore.wavesurfer!.getDecodedData()!;
       setAudioBuffer(buffer);
@@ -132,7 +142,18 @@ export const BeatMapperPage = observer(function BeatMapperPage() {
     };
   }, [threshold, frequency, audioBuffer]);
 
-  const displayTempoCounts = [...tempoCounts].slice(0, 10);
+  useEffect(() => {
+    if (!audioBuffer || selectedBeatIndex == null) return;
+    let timeOffset = beats[selectedBeatIndex];
+    const beatInterval = 60 / songTempoNumber;
+    while (timeOffset > 0) timeOffset -= beatInterval;
+    timeOffset += beatInterval;
+
+    setSongTempoOffset(timeOffset.toString());
+  }, [selectedBeatIndex, beats, audioBuffer, songTempoNumber]);
+
+  const displayTempoCounts = [...tempoCounts].slice(0, 20);
+
   return (
     <>
       <VStack
@@ -167,14 +188,16 @@ export const BeatMapperPage = observer(function BeatMapperPage() {
         >
           <WavesurferWaveform />
         </HStack>
-        <HStack
-          position="sticky"
-          top={0}
+        <VStack
           width={uiStore.timeToXPixels(MAX_TIME)}
+          alignItems="start"
           spacing={0}
           zIndex={12}
         >
-          <Box position="relative" height="100px">
+          <Box position="relative" height="50px">
+            <Text position="sticky" top={0} left={0}>
+              detected beats (click to align)
+            </Text>
             {beats.map((beat, index) => (
               <Box
                 key={index}
@@ -182,14 +205,48 @@ export const BeatMapperPage = observer(function BeatMapperPage() {
                 top={0}
                 left={uiStore.timeToXPixels(beat)}
                 width="1px"
-                height="100px"
+                height="100%"
                 bgColor="white"
+                cursor="pointer"
+                onClick={() => setSelectedBeatIndex(index)}
               />
             ))}
           </Box>
-        </HStack>
+          <Box position="relative" height="50px">
+            <Text>computed beats</Text>
+            {!Number.isNaN(songTempoOffsetNumber) &&
+              !Number.isNaN(songTempoNumber) &&
+              Array.from({ length: 100 }).map((_, index) => (
+                <Box
+                  key={index}
+                  position="absolute"
+                  top={0}
+                  left={uiStore.timeToXPixels(
+                    songTempoOffsetNumber + (index * 60) / songTempoNumber
+                  )}
+                  width="1px"
+                  height="100%"
+                  bgColor="red"
+                />
+              ))}
+          </Box>
+        </VStack>
       </Box>
       <VStack m={2} width="350px">
+        <ScalarInput
+          name="Song tempo"
+          value={songTempo}
+          onChange={(valueString) => setSongTempo(valueString)}
+          step={0.01}
+        />
+        <ScalarInput
+          name="Song tempo offset"
+          value={songTempoOffset}
+          onChange={(valueString) => setSongTempoOffset(valueString)}
+          step={0.01}
+        />
+
+        <Heading size="sm">Beat detection</Heading>
         <ScalarInput
           name="Lowpass cutoff frequency (Hz)"
           value={frequency}
@@ -219,7 +276,13 @@ export const BeatMapperPage = observer(function BeatMapperPage() {
                 <Fragment key={index}>
                   <Tr>
                     <Td>
-                      <span>{tempo.toFixed(2)}</span>
+                      <Text
+                        cursor="pointer"
+                        _hover={{ textDecoration: "underline" }}
+                        onClick={() => setSongTempo(tempo.toString())}
+                      >
+                        {tempo.toFixed(2)}
+                      </Text>
                     </Td>
                     <Td>
                       <span>{count}</span>
