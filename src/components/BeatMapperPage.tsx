@@ -1,7 +1,18 @@
 import { observer } from "mobx-react-lite";
-import { Box, HStack, VStack } from "@chakra-ui/react";
+import {
+  Box,
+  HStack,
+  Table,
+  TableContainer,
+  Tbody,
+  Td,
+  Th,
+  Thead,
+  Tr,
+  VStack,
+} from "@chakra-ui/react";
 import { useStore } from "@/src/types/StoreContext";
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { WavesurferWaveform } from "@/src/components/Wavesurfer/WavesurferWaveform";
 import { MAX_TIME } from "@/src/utils/time";
 import { TimerReadout } from "@/src/components/TimerReadout";
@@ -14,7 +25,12 @@ import {
 } from "@/src/utils/audio";
 import { runInAction } from "mobx";
 
-export const Test = observer(function Test() {
+type TempoCount = {
+  tempo: number;
+  count: number;
+};
+
+export const BeatMapperPage = observer(function BeatMapperPage() {
   const store = useStore();
   const { uiStore, audioStore, playlistStore } = store;
   const timelineRef = useRef<HTMLDivElement>(null);
@@ -35,6 +51,7 @@ export const Test = observer(function Test() {
   }, [store, playlistStore, uiStore]);
 
   const [beats, setBeats] = useState<number[]>([]);
+  const [tempoCounts, setTempoCounts] = useState<TempoCount[]>([]);
 
   useEffect(() => {
     audioStore.wavesurfer?.on("ready", () => {
@@ -88,19 +105,23 @@ export const Test = observer(function Test() {
         const histogram = countIntervalsBetweenNearbyPeaks(filteredPeaks, 200);
         // console.log("histogram", histogram);
 
-        const bpmCounts = groupNeighborsByTempo(
+        const newTempoCounts = groupNeighborsByTempo(
           histogram,
           filteredBuffer.sampleRate
         );
-        console.log("bpmCounts", bpmCounts);
+        console.log("bpmCounts", newTempoCounts);
 
         // sort data by highest count
-        const sorted = bpmCounts.sort((a, b) => b.count - a.count);
-        console.log("sorted", sorted);
+        const sortedTempoCounts = newTempoCounts.sort(
+          (a, b) => b.count - a.count
+        );
+        setTempoCounts(sortedTempoCounts);
+        console.log("sortedBpmCounts", sortedTempoCounts);
       };
     });
   }, [audioStore.wavesurfer, audioStore.peaks, uiStore]);
 
+  const displayTempoCounts = [...tempoCounts].slice(0, 10);
   return (
     <>
       <VStack
@@ -123,7 +144,6 @@ export const Test = observer(function Test() {
       <Box
         ref={timelineRef}
         position="relative"
-        height="100%"
         overflow="scroll"
         overscrollBehavior="none"
       >
@@ -158,6 +178,30 @@ export const Test = observer(function Test() {
           </Box>
         </HStack>
       </Box>
+      <TableContainer position="absolute">
+        <Table size="sm" variant="simple">
+          <Thead>
+            <Tr>
+              <Th isNumeric>Tempo (BPM)</Th>
+              <Th isNumeric>Count</Th>
+            </Tr>
+          </Thead>
+          <Tbody>
+            {displayTempoCounts.map(({ tempo, count }, index) => (
+              <Fragment key={index}>
+                <Tr>
+                  <Td>
+                    <span>{tempo.toFixed(2)}</span>
+                  </Td>
+                  <Td>
+                    <span>{count}</span>
+                  </Td>
+                </Tr>
+              </Fragment>
+            ))}
+          </Tbody>
+        </Table>
+      </TableContainer>
     </>
   );
 });
