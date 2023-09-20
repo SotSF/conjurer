@@ -27,6 +27,7 @@ import {
 } from "@/src/utils/audio";
 import { runInAction } from "mobx";
 import { ScalarInput } from "@/src/components/ScalarInput";
+import { BeatGrid } from "@/src/components/BeatGrid";
 
 type TempoCount = {
   tempo: number;
@@ -163,7 +164,7 @@ export const BeatMapperPage = observer(function BeatMapperPage() {
         overscrollBehavior="none"
         bgColor="gray.500"
       >
-        <HStack spacing={0} zIndex={12}>
+        <HStack width={uiStore.timeToXPixels(MAX_TIME)} spacing={0} zIndex={12}>
           <VStack
             position="sticky"
             left={0}
@@ -244,6 +245,10 @@ export const BeatMapperPage = observer(function BeatMapperPage() {
             </Text>{" "}
           </VStack>
           <Box position="relative" height="50px">
+            {/* <BeatGrid
+              songTempo={songTempoNumber}
+              songTempoOffset={songTempoOffsetNumber}
+            /> */}
             {!Number.isNaN(songTempoOffsetNumber) &&
               !Number.isNaN(songTempoNumber) &&
               // TODO: make this number bigger and make this more efficient
