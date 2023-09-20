@@ -10,6 +10,7 @@ import { makeAutoObservable, runInAction } from "mobx";
 import type WaveSurfer from "wavesurfer.js";
 import type TimelinePlugin from "wavesurfer.js/dist/plugins/timeline";
 import type RegionsPlugin from "wavesurfer.js/dist/plugins/regions";
+import type MinimapPlugin from "wavesurfer.js/dist/plugins/minimap";
 import type { RegionParams } from "wavesurfer.js/dist/plugins/regions";
 import { filterData } from "@/src/types/audioPeaks";
 import { AudioRegion } from "@/src/types/AudioRegion";
@@ -32,6 +33,7 @@ export class AudioStore {
   wavesurfer: WaveSurfer | null = null;
   timelinePlugin: TimelinePlugin | null = null;
   regionsPlugin: RegionsPlugin | null = null;
+  minimapPlugin: MinimapPlugin | null = null;
 
   initialRegions: AudioRegion[] = [];
 
@@ -50,6 +52,7 @@ export class AudioStore {
     makeAutoObservable(this, {
       timelinePlugin: false,
       regionsPlugin: false,
+      minimapPlugin: false,
       peaks: false,
       getPeakAtTime: false,
     });

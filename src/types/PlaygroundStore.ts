@@ -106,7 +106,7 @@ export class PlaygroundStore {
 
   loadFromLocalStorage = () => {
     if (typeof window === "undefined") return;
-    const data = localStorage.getItem("playgroundStore");
+    const data = localStorage.getItem(`playgroundStore-${this.store.context}`);
     if (data) {
       const localStorageUiSettings = JSON.parse(data);
       this._lastPatternIndexSelected =
@@ -119,7 +119,7 @@ export class PlaygroundStore {
   saveToLocalStorage = () => {
     if (typeof window === "undefined") return;
     localStorage.setItem(
-      "playgroundStore",
+      `playgroundStore-${this.store.context}`,
       JSON.stringify({
         lastPatternIndexSelected: this.lastPatternIndexSelected,
         lastEffectIndices: this.lastEffectIndices,

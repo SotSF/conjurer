@@ -62,6 +62,7 @@ export const PlayHead = observer(function PlayHead() {
   return (
     <Box
       ref={playHead}
+      id="playhead"
       position="absolute"
       top={0}
       left={uiStore.timeToXPixels(audioStore.lastCursor.position)}
