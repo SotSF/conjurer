@@ -71,6 +71,17 @@ const DEFAULT_MINIMAP_OPTIONS: MinimapPluginOptions = {
   insertPosition: "beforebegin",
 };
 
+const scrollIntoView = debounce(
+  () =>
+    document.getElementById("playhead")?.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+      inline: "center",
+    }),
+  20,
+  { leading: false, trailing: true }
+);
+
 // TODO: factor some of this logic out into hooks
 export const WavesurferWaveform = observer(function WavesurferWaveform() {
   const didInitialize = useRef(false);
@@ -133,7 +144,9 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
       const regionsPlugin = (audioStore.regionsPlugin = RegionsPlugin.create());
 
       // Instantiate minimap plugin
-      const minimapPlugin = MinimapPlugin.create(DEFAULT_MINIMAP_OPTIONS);
+      const minimapPlugin = (audioStore.minimapPlugin = MinimapPlugin.create(
+        DEFAULT_MINIMAP_OPTIONS
+      ));
 
       // Instantiate wavesurfer
       // https://wavesurfer-js.org/docs/options.html
@@ -152,16 +165,6 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
         audioStore.setTimeWithCursor(Math.max(0, newTime));
       });
 
-      const scrollIntoView = debounce(
-        () =>
-          document.getElementById("playhead")?.scrollIntoView({
-            behavior: "smooth",
-            block: "nearest",
-            inline: "center",
-          }),
-        20,
-        { leading: false, trailing: true }
-      );
       minimapPlugin.on("interaction", () => {
         if (!wavesurfer) return;
         audioStore.setTimeWithCursor(Math.max(0, wavesurfer.getCurrentTime()));
@@ -249,6 +252,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
         didInitialize.current &&
         audioStore.wavesurfer &&
         wavesurferConstructors.current.TimelinePlugin &&
+        wavesurferConstructors.current.MinimapPlugin &&
         lastAudioLoaded.current !== audioStore.selectedAudioFile
       ) {
         ready.current = false;
@@ -267,6 +271,24 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
         const timelinePlugin = (audioStore.timelinePlugin =
           TimelinePlugin.create(timelinePluginOptions));
         audioStore.wavesurfer.registerPlugin(timelinePlugin);
+
+        // Destroy the old minimap plugin
+        audioStore.minimapPlugin?.destroy();
+
+        // Create a new minimap plugin
+        const { MinimapPlugin } = wavesurferConstructors.current;
+        const minimapPlugin = (audioStore.minimapPlugin = MinimapPlugin.create(
+          DEFAULT_MINIMAP_OPTIONS
+        ));
+        audioStore.wavesurfer.registerPlugin(minimapPlugin);
+
+        minimapPlugin.on("interaction", () => {
+          if (!audioStore.wavesurfer) return;
+          audioStore.setTimeWithCursor(
+            Math.max(0, audioStore.wavesurfer.getCurrentTime())
+          );
+          scrollIntoView();
+        });
 
         // Load the new audio file
         await audioStore.wavesurfer.load(audioStore.getSelectedAudioFileUrl());
