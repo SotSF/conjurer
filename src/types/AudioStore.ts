@@ -92,7 +92,8 @@ export class AudioStore {
       ?.getRegions()
       .forEach(
         (region) =>
-          region.content && region.setOptions({ drag: this.markingAudio })
+          region.content &&
+          region.setOptions({ start: region.start, drag: this.markingAudio })
       );
   };
 

@@ -9,7 +9,7 @@ type CameraControlsProps = {
 export const CameraControls = memo(function CameraControls({
   initialPosition = new Vector3(0, 0, 20),
 }: CameraControlsProps) {
-  const cameraRef = useRef<PerspectiveCameraThree>();
+  const cameraRef = useRef<PerspectiveCameraThree>(null);
   return (
     <>
       <PerspectiveCamera
@@ -19,7 +19,7 @@ export const CameraControls = memo(function CameraControls({
         near={0.1}
         far={100}
       />
-      <OrbitControls camera={cameraRef.current} />
+      <OrbitControls camera={cameraRef.current ?? undefined} />
     </>
   );
 });
