@@ -9,9 +9,12 @@ import type TimelinePlugin from "wavesurfer.js/dist/plugins/timeline";
 import type { TimelinePluginOptions } from "wavesurfer.js/dist/plugins/timeline";
 import type RegionsPlugin from "wavesurfer.js/dist/plugins/regions";
 import type { RegionParams } from "wavesurfer.js/dist/plugins/regions";
+import type MinimapPlugin from "wavesurfer.js/dist/plugins/minimap";
+import type { MinimapPluginOptions } from "wavesurfer.js/dist/plugins/minimap";
 import { action, runInAction } from "mobx";
 import { useCloneCanvas } from "@/src/components/Wavesurfer/hooks/cloneCanvas";
 import { loopRegionColor } from "@/src/types/AudioStore";
+import { debounce } from "lodash";
 
 const importWavesurferConstructors = async () => {
   // Can't be run on the server, so we need to use dynamic imports
@@ -19,15 +22,18 @@ const importWavesurferConstructors = async () => {
     { default: WaveSurfer },
     { default: TimelinePlugin },
     { default: RegionsPlugin },
+    { default: MinimapPlugin },
   ] = await Promise.all([
     import("wavesurfer.js"),
     import("wavesurfer.js/dist/plugins/timeline"),
     import("wavesurfer.js/dist/plugins/regions"),
+    import("wavesurfer.js/dist/plugins/minimap"),
   ]);
   return {
     WaveSurfer,
     TimelinePlugin,
     RegionsPlugin,
+    MinimapPlugin,
   };
 };
 
@@ -36,7 +42,7 @@ const DEFAULT_WAVESURFER_OPTIONS: Partial<WaveSurferOptions> = {
   waveColor: "#ddd",
   progressColor: "#0178FF",
   cursorColor: "#FF0000FF",
-  height: 80,
+  height: 60,
   hideScrollbar: true,
   fillParent: false,
   autoScroll: false,
@@ -45,7 +51,7 @@ const DEFAULT_WAVESURFER_OPTIONS: Partial<WaveSurferOptions> = {
 };
 
 const DEFAULT_TIMELINE_OPTIONS: TimelinePluginOptions = {
-  height: 80,
+  height: 60,
   insertPosition: "beforebegin",
   timeInterval: 0.25,
   primaryLabelInterval: 5,
@@ -54,6 +60,15 @@ const DEFAULT_TIMELINE_OPTIONS: TimelinePluginOptions = {
     fontSize: "14px",
     color: "#000000",
   },
+};
+
+const DEFAULT_MINIMAP_OPTIONS: MinimapPluginOptions = {
+  waveColor: "#bbb",
+  progressColor: "#0178FF",
+  cursorColor: "#FF0000FF",
+  container: "#minimap",
+  height: 20,
+  insertPosition: "beforebegin",
 };
 
 // TODO: factor some of this logic out into hooks
@@ -67,7 +82,13 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
     WaveSurfer: typeof WaveSurfer | null;
     TimelinePlugin: typeof TimelinePlugin | null;
     RegionsPlugin: typeof RegionsPlugin | null;
-  }>({ WaveSurfer: null, TimelinePlugin: null, RegionsPlugin: null });
+    MinimapPlugin: typeof MinimapPlugin | null;
+  }>({
+    WaveSurfer: null,
+    TimelinePlugin: null,
+    RegionsPlugin: null,
+    MinimapPlugin: null,
+  });
 
   const waveformRef = useRef<HTMLDivElement>(null);
   const clonedWaveformRef = useRef<HTMLDivElement>(null);
@@ -100,7 +121,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
       setLoading(true);
 
       // Lazy load all wave surfer dependencies
-      const { WaveSurfer, TimelinePlugin, RegionsPlugin } =
+      const { WaveSurfer, TimelinePlugin, RegionsPlugin, MinimapPlugin } =
         (wavesurferConstructors.current = await importWavesurferConstructors());
 
       // Instantiate timeline plugin
@@ -111,13 +132,16 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
       // Instantiate regions plugin
       const regionsPlugin = (audioStore.regionsPlugin = RegionsPlugin.create());
 
+      // Instantiate minimap plugin
+      const minimapPlugin = MinimapPlugin.create(DEFAULT_MINIMAP_OPTIONS);
+
       // Instantiate wavesurfer
       // https://wavesurfer-js.org/docs/options.html
       const options: WaveSurferOptions = {
         ...DEFAULT_WAVESURFER_OPTIONS,
         container: waveformRef.current!,
         minPxPerSec: uiStore.pixelsPerSecond,
-        plugins: [timelinePlugin, regionsPlugin],
+        plugins: [timelinePlugin, regionsPlugin, minimapPlugin],
         media: audioRef.current!,
       };
       const wavesurfer = WaveSurfer.create(options);
@@ -126,6 +150,22 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
       wavesurfer.on("interaction", (newTime: number) => {
         if (!wavesurfer) return;
         audioStore.setTimeWithCursor(Math.max(0, newTime));
+      });
+
+      const scrollIntoView = debounce(
+        () =>
+          document.getElementById("playhead")?.scrollIntoView({
+            behavior: "smooth",
+            block: "nearest",
+            inline: "center",
+          }),
+        20,
+        { leading: false, trailing: true }
+      );
+      minimapPlugin.on("interaction", () => {
+        if (!wavesurfer) return;
+        audioStore.setTimeWithCursor(Math.max(0, wavesurfer.getCurrentTime()));
+        scrollIntoView();
       });
 
       wavesurfer.on("ready", () => {
@@ -351,8 +391,23 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
 
   return (
     <Box width="100%" height={20} bgColor="gray.500">
+      <Box
+        id="minimap"
+        position="sticky"
+        top={0}
+        left="150px"
+        boxSizing="border-box"
+        borderBottom={1}
+        borderColor="black"
+        borderBottomStyle="dashed"
+        width="calc(100vw - 150px)"
+        height="20px"
+        zIndex={100}
+      />
       <audio ref={audioRef} />
       <Skeleton
+        position="absolute"
+        top={0}
         width="100%"
         height="100%"
         startColor="gray.500"
@@ -360,7 +415,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
         speed={0.5}
         isLoaded={!loading}
       />
-      <Box position="absolute" top={0} id="waveform" ref={waveformRef} />
+      <Box position="absolute" top="20px" id="waveform" ref={waveformRef} />
       {uiStore.showingWaveformOverlay && (
         <Box
           ref={clonedWaveformRef}
