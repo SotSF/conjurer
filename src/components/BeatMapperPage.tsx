@@ -1,6 +1,7 @@
 import { observer } from "mobx-react-lite";
 import {
   Box,
+  Button,
   Grid,
   GridItem,
   HStack,
@@ -323,6 +324,20 @@ export const BeatMapperPage = observer(function BeatMapperPage() {
               onChange={(valueString) => setSongTempoOffset(valueString)}
               step={0.01}
             />
+            <Button
+              size="sm"
+              onClick={() =>
+                localStorage.setItem(
+                  "songMetadata",
+                  JSON.stringify({
+                    songTempo: songTempoNumber,
+                    songTempoOffset: songTempoOffsetNumber,
+                  })
+                )
+              }
+            >
+              Save song metadata
+            </Button>
           </VStack>
         </GridItem>
       </Grid>
