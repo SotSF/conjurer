@@ -1,6 +1,9 @@
 import { observer } from "mobx-react-lite";
 import {
   Box,
+  Button,
+  Grid,
+  GridItem,
   HStack,
   Heading,
   Table,
@@ -28,6 +31,7 @@ import {
 import { runInAction } from "mobx";
 import { ScalarInput } from "@/src/components/ScalarInput";
 import { BeatGrid } from "@/src/components/BeatGrid";
+import { cloneAudioBuffer } from "@/src/utils/audioBuffer";
 
 type TempoCount = {
   tempo: number;
@@ -44,6 +48,7 @@ export const BeatMapperPage = observer(function BeatMapperPage() {
   useWheelZooming(timelineRef.current);
 
   const [audioBuffer, setAudioBuffer] = useState<AudioBuffer | null>(null);
+  const [songDuration, setSongDuration] = useState(0);
   const [beats, setBeats] = useState<number[]>([]);
   const [tempoCounts, setTempoCounts] = useState<TempoCount[]>([]);
 
@@ -72,11 +77,10 @@ export const BeatMapperPage = observer(function BeatMapperPage() {
 
   useEffect(() => {
     audioStore.wavesurfer?.on("ready", () => {
-      runInAction(() => {
-        // uiStore.pixelsPerSecond = 80;
-      });
+      runInAction(() => (uiStore.pixelsPerSecond = 4));
       const buffer = audioStore.wavesurfer!.getDecodedData()!;
-      setAudioBuffer(buffer);
+      setAudioBuffer(cloneAudioBuffer(buffer));
+      setSongDuration(buffer.duration);
     });
   }, [audioStore.wavesurfer, audioStore.peaks, uiStore]);
 
@@ -201,8 +205,8 @@ export const BeatMapperPage = observer(function BeatMapperPage() {
             zIndex={18}
             bgColor="gray.500"
           >
-            <Text textAlign="center" color="black">
-              detected beats (click to align)
+            <Text textAlign="center" color="black" userSelect="none">
+              Detected beats (click to align)
             </Text>{" "}
           </VStack>
           <Box position="relative" height="50px">
@@ -240,97 +244,103 @@ export const BeatMapperPage = observer(function BeatMapperPage() {
             zIndex={18}
             bgColor="gray.500"
           >
-            <Text textAlign="center" color="black">
-              computed beats
+            <Text textAlign="center" color="black" userSelect="none">
+              Computed beats
             </Text>{" "}
           </VStack>
-          <Box position="relative" height="50px">
-            {/* <BeatGrid
-              songTempo={songTempoNumber}
-              songTempoOffset={songTempoOffsetNumber}
-            /> */}
-            {!Number.isNaN(songTempoOffsetNumber) &&
-              !Number.isNaN(songTempoNumber) &&
-              // TODO: make this number bigger and make this more efficient
-              Array.from({ length: 100 }).map((_, index) => (
-                <Box
-                  key={index}
-                  position="absolute"
-                  top={0}
-                  left={uiStore.timeToXPixels(
-                    songTempoOffsetNumber + (index * 60) / songTempoNumber
-                  )}
-                  width="1px"
-                  height="100%"
-                  bgColor="red"
-                />
-              ))}
-          </Box>
+
+          <BeatGrid
+            songTempo={songTempoNumber}
+            songTempoOffset={songTempoOffsetNumber}
+            songDuration={songDuration}
+          />
         </HStack>
       </Box>
-      <VStack m={2} width="350px">
-        <Heading size="sm">Beat computation</Heading>
-        <ScalarInput
-          name="Song tempo"
-          value={songTempo}
-          onChange={(valueString) => setSongTempo(valueString)}
-          step={0.01}
-        />
-        <ScalarInput
-          name="Song tempo offset"
-          value={songTempoOffset}
-          onChange={(valueString) => setSongTempoOffset(valueString)}
-          step={0.01}
-        />
+      <Grid gridTemplateColumns="50vw 50vw">
+        <GridItem>
+          <VStack m={2} width="350px">
+            <Heading size="sm">Detected beats</Heading>
+            <ScalarInput
+              name="Lowpass cutoff frequency (Hz)"
+              value={frequency}
+              onChange={(valueString) => setFrequency(valueString)}
+              step={50}
+            />
+            <ScalarInput
+              name="Beat detection threshold"
+              value={threshold}
+              onChange={(valueString) => setThreshold(valueString)}
+              step={0.01}
+            />
 
-        <Heading size="sm">Beat detection</Heading>
-        <ScalarInput
-          name="Lowpass cutoff frequency (Hz)"
-          value={frequency}
-          onChange={(valueString) => setFrequency(valueString)}
-          step={50}
-        />
-        <ScalarInput
-          name="Beat detection threshold"
-          value={threshold}
-          onChange={(valueString) => setThreshold(valueString)}
-          step={0.01}
-        />
-
-        <Text>
-          <strong>Total beats detected:</strong> {beats.length}
-        </Text>
-        <TableContainer>
-          <Table size="sm" variant="simple">
-            <Thead>
-              <Tr>
-                <Th isNumeric>Tempo (BPM)</Th>
-                <Th isNumeric>Count</Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              {displayTempoCounts.map(({ tempo, count }, index) => (
-                <Fragment key={index}>
+            <Text>
+              <strong>Total beats detected:</strong> {beats.length}
+            </Text>
+            <TableContainer>
+              <Table size="sm" variant="simple">
+                <Thead>
                   <Tr>
-                    <Td>
-                      <Text
-                        cursor="pointer"
-                        _hover={{ textDecoration: "underline" }}
-                        onClick={() => setSongTempo(tempo.toString())}
-                      >
-                        {tempo.toFixed(2)}
-                      </Text>
-                    </Td>
-                    <Td>
-                      <span>{count}</span>
-                    </Td>
+                    <Th isNumeric>Tempo (BPM)</Th>
+                    <Th isNumeric>Count</Th>
                   </Tr>
-                </Fragment>
-              ))}
-            </Tbody>
-          </Table>
-        </TableContainer>
-      </VStack>
+                </Thead>
+                <Tbody>
+                  {displayTempoCounts.map(({ tempo, count }, index) => (
+                    <Fragment key={index}>
+                      <Tr>
+                        <Td>
+                          <Text
+                            cursor="pointer"
+                            _hover={{ textDecoration: "underline" }}
+                            onClick={() => setSongTempo(tempo.toString())}
+                            color="blue.500"
+                          >
+                            {tempo.toFixed(2)}
+                          </Text>
+                        </Td>
+                        <Td>
+                          <span>{count}</span>
+                        </Td>
+                      </Tr>
+                    </Fragment>
+                  ))}
+                </Tbody>
+              </Table>
+            </TableContainer>
+          </VStack>
+        </GridItem>
+        <GridItem>
+          <VStack m={2} width="350px">
+            <Heading size="sm">Computed beats</Heading>
+            <ScalarInput
+              name="Song tempo (BPM)"
+              value={songTempo}
+              onChange={(valueString) => setSongTempo(valueString)}
+              step={0.01}
+            />
+            <ScalarInput
+              name="Song tempo offset (seconds)"
+              value={songTempoOffset}
+              onChange={(valueString) => setSongTempoOffset(valueString)}
+              step={0.01}
+            />
+            <Button
+              size="sm"
+              onClick={() =>
+                localStorage.setItem(
+                  "songMetadata",
+                  JSON.stringify({
+                    songTempo: songTempoNumber,
+                    songTempoOffset: songTempoOffsetNumber,
+                  })
+                )
+              }
+            >
+              Save song metadata
+            </Button>
+          </VStack>
+        </GridItem>
+      </Grid>
     </>
   );
 });
