@@ -28,6 +28,7 @@ import {
 import { runInAction } from "mobx";
 import { ScalarInput } from "@/src/components/ScalarInput";
 import { BeatGrid } from "@/src/components/BeatGrid";
+import { cloneAudioBuffer } from "@/src/utils/audioBuffer";
 
 type TempoCount = {
   tempo: number;
@@ -72,11 +73,9 @@ export const BeatMapperPage = observer(function BeatMapperPage() {
 
   useEffect(() => {
     audioStore.wavesurfer?.on("ready", () => {
-      runInAction(() => {
-        // uiStore.pixelsPerSecond = 80;
-      });
+      runInAction(() => (uiStore.pixelsPerSecond = 20));
       const buffer = audioStore.wavesurfer!.getDecodedData()!;
-      setAudioBuffer(buffer);
+      setAudioBuffer(cloneAudioBuffer(buffer));
     });
   }, [audioStore.wavesurfer, audioStore.peaks, uiStore]);
 
