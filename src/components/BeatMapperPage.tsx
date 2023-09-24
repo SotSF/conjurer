@@ -253,6 +253,7 @@ export const BeatMapperPage = observer(function BeatMapperPage() {
             songTempo={songTempoNumber}
             songTempoOffset={songTempoOffsetNumber}
             songDuration={songDuration}
+            borderColor="red"
           />
         </HStack>
       </Box>

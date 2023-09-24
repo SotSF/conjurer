@@ -24,6 +24,7 @@ export class UIStore {
   horizontalLayout = true;
   showingPerformance = false;
   showingWaveformOverlay = false;
+  showingBeatGridOverlay = false;
   showingOpenExperienceModal = false;
   showingSaveExperienceModal = false;
   showingUploadAudioModal = false;
@@ -105,6 +106,10 @@ export class UIStore {
 
   toggleWaveformOverlay = () => {
     this.showingWaveformOverlay = !this.showingWaveformOverlay;
+  };
+
+  toggleBeatGridOverlay = () => {
+    this.showingBeatGridOverlay = !this.showingBeatGridOverlay;
   };
 
   nextRenderTextureSize = () => {

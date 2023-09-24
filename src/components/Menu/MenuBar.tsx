@@ -219,8 +219,11 @@ export const MenuBar = observer(function MenuBar() {
                 <MenuItem as="a" href="/controller" target="_blank">
                   Controller
                 </MenuItem>
-                <MenuItem as="a" href="/viewer" target="_blank">
-                  Viewer
+                <MenuItem as="a" href="/portal" target="_blank">
+                  Portal
+                </MenuItem>
+                <MenuItem as="a" href="/beatMapper" target="_blank">
+                  Beat Mapper
                 </MenuItem>
               </MenuList>
             </Menu>
