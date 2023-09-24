@@ -24,7 +24,7 @@ export class UIStore {
   horizontalLayout = true;
   showingPerformance = false;
   showingWaveformOverlay = false;
-  showingBeatGridOverlay = false;
+  showingBeatGridOverlay = true;
   showingOpenExperienceModal = false;
   showingSaveExperienceModal = false;
   showingUploadAudioModal = false;

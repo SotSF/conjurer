@@ -14,6 +14,7 @@ import type MinimapPlugin from "wavesurfer.js/dist/plugins/minimap";
 import type { RegionParams } from "wavesurfer.js/dist/plugins/regions";
 import { filterData } from "@/src/types/audioPeaks";
 import { AudioRegion } from "@/src/types/AudioRegion";
+import { SongMetadata } from "@/src/types/SongMetadata";
 
 export const loopRegionColor = "rgba(237, 137, 54, 0.4)";
 
@@ -47,6 +48,8 @@ export class AudioStore {
   audioState: "paused" | "starting" | "playing" = "paused";
 
   audioContext: AudioContext | null = null;
+
+  songMetadata = new SongMetadata(120, 0);
 
   constructor(readonly rootStore: RootStore) {
     makeAutoObservable(this, {

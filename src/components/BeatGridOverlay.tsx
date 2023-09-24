@@ -3,14 +3,12 @@ import { Box } from "@chakra-ui/react";
 import { useStore } from "@/src/types/StoreContext";
 import { BeatGrid } from "@/src/components/BeatGrid";
 import { useEffect, useState } from "react";
+import { runInAction } from "mobx";
 
 export const BeatGridOverlay = observer(function BeatGridOverlay() {
   const store = useStore();
   const { uiStore, audioStore } = store;
   const { showingBeatGridOverlay } = uiStore;
-
-  const [songTempo, setSongTempo] = useState(120);
-  const [songTempoOffset, setSongTempoOffset] = useState(0);
 
   useEffect(() => {
     // TODO: load this from a different source
@@ -18,9 +16,11 @@ export const BeatGridOverlay = observer(function BeatGridOverlay() {
     if (!songMetadata) return;
 
     const { songTempo, songTempoOffset } = JSON.parse(songMetadata);
-    setSongTempo(songTempo);
-    setSongTempoOffset(songTempoOffset);
-  }, []);
+    runInAction(() => {
+      audioStore.songMetadata.tempo = songTempo;
+      audioStore.songMetadata.tempoOffset = songTempoOffset;
+    });
+  }, [audioStore.songMetadata]);
 
   if (!showingBeatGridOverlay) return null;
 
@@ -36,8 +36,8 @@ export const BeatGridOverlay = observer(function BeatGridOverlay() {
       overflow="visible"
     >
       <BeatGrid
-        songTempo={songTempo}
-        songTempoOffset={songTempoOffset}
+        songTempo={audioStore.songMetadata.tempo}
+        songTempoOffset={audioStore.songMetadata.tempoOffset}
         songDuration={audioStore.wavesurfer?.getDuration() ?? 0}
       />
     </Box>
