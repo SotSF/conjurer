@@ -45,22 +45,22 @@ export const TimelineBlockStack = observer(function TimelineBlockStack({
 
   const lastMouseDown = useRef(0);
 
-  const [snapping, setSnapping] = useState(true);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const handleDrag = useCallback(
     (e: DraggableEvent, data: DraggableData) => {
-      if (snapping) {
-        // TODO: implement optional snapping here
-        const hoveredTime = uiStore.xToTime(data.x) + patternBlock.startTime;
-        const nearestBeatTime =
-          audioStore.songMetadata.nearestBeat(hoveredTime);
-        const deltaTime = nearestBeatTime - hoveredTime;
-        setPosition({ x: uiStore.timeToX(deltaTime), y: 0 });
+      if (!uiStore.snappingToBeatGrid) {
+        setPosition({ x: data.x, y: 0 });
         return;
       }
-      setPosition({ x: data.x, y: 0 });
+
+      const hoveredTime = uiStore.xToTime(data.x) + patternBlock.startTime;
+      const nearestBeatTime =
+        audioStore.songMetadata.nearestBeatTime(hoveredTime);
+      const deltaTime = nearestBeatTime - patternBlock.startTime;
+      const deltaPosition = uiStore.timeToX(deltaTime);
+      setPosition({ x: deltaPosition, y: 0 });
     },
-    [snapping, uiStore, audioStore, patternBlock]
+    [uiStore, audioStore, patternBlock]
   );
   // handle moving a block to a new start time
   const handleDragStop = action((e: DraggableEvent, data: DraggableData) => {

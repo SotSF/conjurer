@@ -15,8 +15,13 @@ export class SongMetadata {
     return 60 / this.tempo;
   }
 
-  nearestBeat = (time: number) =>
-    Math.floor((time - this.tempoOffset) / this.beatDuration) *
-      this.beatDuration +
-    this.tempoOffset;
+  nearestBeatTime = (time: number) =>
+    Math.max(
+      0,
+      Math.floor(
+        (time - this.tempoOffset + this.beatDuration / 2) / this.beatDuration
+      ) *
+        this.beatDuration +
+        this.tempoOffset
+    );
 }
