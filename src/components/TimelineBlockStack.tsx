@@ -140,8 +140,8 @@ export const TimelineBlockStack = observer(function TimelineBlockStack({
         alignItems="center"
         onClick={(e: ReactMouseEvent) => e.stopPropagation()}
       >
-        <TimelineBlockBound block={patternBlock} leftBound />
-        <TimelineBlockBound block={patternBlock} rightBound />
+        <TimelineBlockBound block={patternBlock} bound="left" />
+        <TimelineBlockBound block={patternBlock} bound="right" />
 
         <PatternOrEffectBlock
           block={patternBlock}
