@@ -25,27 +25,24 @@ export const VariationBound = memo(function VariationBound({
   const dragNodeRef = useRef(null);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const handleDrag = useCallback(
-    (e: DraggableEvent, data: DraggableData) => {
-      if (!uiStore.snappingToBeatGrid) {
-        setPosition({ x: data.x, y: 0 });
-        return;
-      }
-
-      // const hoveredTime = uiStore.xToTime(data.x) + patternBlock.startTime;
-      // const nearestBeatTime =
-      //   audioStore.songMetadata.nearestBeatTime(hoveredTime);
-      // const deltaTime = nearestBeatTime - patternBlock.startTime;
-      // const deltaPosition = uiStore.timeToX(deltaTime);
-      // setPosition({ x: deltaPosition, y: 0 });
-    },
-    [uiStore, audioStore]
+    (e: DraggableEvent, data: DraggableData) =>
+      setPosition({ x: data.x, y: 0 }),
+    []
   );
   const handleStop = action(() => {
-    block.applyVariationDurationDelta(
-      uniformName,
-      variation,
-      store.uiStore.xToTime(position.x)
-    );
+    let deltaTime = uiStore.xToTime(position.x);
+    if (uiStore.snappingToBeatGrid) {
+      const variationEndTime = block.getVariationGlobalEndTime(
+        uniformName,
+        variation
+      );
+      const hoveredTime = uiStore.xToTime(position.x) + variationEndTime;
+      const nearestBeatTime =
+        audioStore.songMetadata.nearestBeatTime(hoveredTime);
+      deltaTime = nearestBeatTime - variationEndTime;
+    }
+
+    block.applyVariationDurationDelta(uniformName, variation, deltaTime);
     setPosition({ x: 0, y: 0 });
   });
   const handleDoubleClick = action(() => {

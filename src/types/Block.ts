@@ -216,6 +216,19 @@ export class Block<T extends ExtraParams = {}> {
     if (index > -1) variations.splice(index, 0, variation.clone());
   };
 
+  // Note: not berry performant due to looping through variations
+  getVariationGlobalEndTime = (uniformName: string, variation: Variation) => {
+    const variations = this.parameterVariations[uniformName];
+    if (!variations) return this.startTime;
+
+    const index = variations.indexOf(variation);
+    if (index < 0) return this.startTime;
+
+    return variations
+      .slice(0, index + 1)
+      .reduce((total, variation) => total + variation.duration, 0);
+  };
+
   applyVariationDurationDelta = (
     uniformName: string,
     variation: Variation,
