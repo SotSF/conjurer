@@ -22,23 +22,9 @@ export const TimelineBlockBound = observer(function TimelineBlockBound({
   const [dragging, setDragging] = useState(false);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const handleDrag = useCallback(
-    (e: DraggableEvent, data: DraggableData) => {
-      if (!uiStore.snappingToBeatGrid) {
-        setPosition({ x: data.x, y: 0 });
-        return;
-      }
-
-      if (bound === "left") {
-        const hoveredTime = uiStore.xToTime(data.x) + block.startTime;
-        console.log(hoveredTime);
-        const nearestBeatTime =
-          audioStore.songMetadata.nearestBeatTime(hoveredTime);
-        const deltaTime = nearestBeatTime - block.startTime;
-        const deltaPosition = uiStore.timeToX(deltaTime);
-        setPosition({ x: deltaPosition, y: 0 });
-      }
-    },
-    [uiStore, audioStore, block, bound]
+    (e: DraggableEvent, data: DraggableData) =>
+      setPosition({ x: data.x, y: 0 }),
+    []
   );
 
   const changeBound = (delta: number) => {
@@ -47,7 +33,17 @@ export const TimelineBlockBound = observer(function TimelineBlockBound({
       block.layer?.resizeBlockRightBound(block, delta);
   };
   const handleStop = action(() => {
-    changeBound(uiStore.xToTime(position.x));
+    let deltaTime = uiStore.xToTime(position.x);
+    if (uiStore.snappingToBeatGrid) {
+      const originalBoundTime =
+        bound === "left" ? block.startTime : block.endTime;
+      const hoveredTime = uiStore.xToTime(position.x) + originalBoundTime;
+      const nearestBeatTime =
+        audioStore.songMetadata.nearestBeatTime(hoveredTime);
+      deltaTime = nearestBeatTime - originalBoundTime;
+    }
+
+    changeBound(deltaTime);
     setPosition({ x: 0, y: 0 });
     setDragging(false);
   });
