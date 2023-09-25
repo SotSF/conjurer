@@ -8,12 +8,14 @@ type BeatGridProps = {
   songTempo: number;
   songTempoOffset: number;
   songDuration: number;
+  borderColor?: string;
 };
 
 export const BeatGrid = observer(function BeatGrid({
   songTempo,
   songTempoOffset,
   songDuration,
+  borderColor,
 }: BeatGridProps) {
   const store = useStore();
   const { uiStore } = store;
@@ -25,29 +27,25 @@ export const BeatGrid = observer(function BeatGrid({
   );
 
   return (
-    <>
-      <Box
-        position="relative"
-        // width={`${canvasSize.width}px`}
-        height={"100%"}
-      >
-        {!Number.isNaN(songTempoOffset) &&
-          !Number.isNaN(songTempo) &&
-          // TODO: make this number bigger and make this more efficient
-          Array.from({ length: numberOfBeats }).map((_, index) => (
-            <Box
-              key={index}
-              position="absolute"
-              top={0}
-              left={uiStore.timeToXPixels(
-                songTempoOffset + (index * 60) / songTempo
-              )}
-              width="0px"
-              height="100%"
-              borderLeft="1px solid red"
-            />
-          ))}
-      </Box>
-    </>
+    <Box position="relative" height="100%">
+      {!Number.isNaN(songTempoOffset) &&
+        !Number.isNaN(songTempo) &&
+        Array.from({ length: numberOfBeats }).map((_, index) => (
+          <Box
+            key={index}
+            position="absolute"
+            top={0}
+            left={uiStore.timeToXPixels(
+              songTempoOffset + (index * 60) / songTempo
+            )}
+            width="0px"
+            height="100%"
+            borderLeftWidth={1}
+            borderLeftStyle="solid"
+            borderLeftColor={borderColor || "gray.500"}
+            opacity={0.5}
+          />
+        ))}
+    </Box>
   );
 });

@@ -10,10 +10,12 @@ import { TimelineLayer } from "@/src/components/TimelineLayer";
 import { TimerReadout } from "@/src/components/TimerReadout";
 import { MarkerEditorModal } from "@/src/components/MarkerEditorModal";
 import { TimerControls } from "@/src/components/TimerControls";
+import { BeatGrid } from "@/src/components/BeatGrid";
+import { BeatGridOverlay } from "@/src/components/BeatGridOverlay";
 
 export const Timeline = observer(function Timeline() {
   const store = useStore();
-  const { uiStore } = store;
+  const { uiStore, audioStore } = store;
   const timelineRef = useRef<HTMLDivElement>(null);
 
   useWheelZooming(timelineRef.current);
@@ -57,6 +59,7 @@ export const Timeline = observer(function Timeline() {
       {store.context !== "viewer" && (
         <VStack position="relative" alignItems="flex-start" spacing={0}>
           <PlayHead />
+          <BeatGridOverlay />
           {store.layers.map((layer, index) => (
             <TimelineLayer key={index} index={index} layer={layer} />
           ))}

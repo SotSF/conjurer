@@ -25,7 +25,7 @@ export const TimelineBlockStack = observer(function TimelineBlockStack({
   patternBlock,
 }: Props) {
   const store = useStore();
-  const { selectedBlocksOrVariations, uiStore } = store;
+  const { selectedBlocksOrVariations, uiStore, audioStore } = store;
 
   const dragNodeRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
@@ -46,10 +46,22 @@ export const TimelineBlockStack = observer(function TimelineBlockStack({
   const lastMouseDown = useRef(0);
 
   const [position, setPosition] = useState({ x: 0, y: 0 });
-  const handleDrag = useCallback((e: DraggableEvent, data: DraggableData) => {
-    // TODO: implement optional snapping here
-    setPosition({ x: data.x, y: 0 });
-  }, []);
+  const handleDrag = useCallback(
+    (e: DraggableEvent, data: DraggableData) => {
+      if (!uiStore.snappingToBeatGrid) {
+        setPosition({ x: data.x, y: 0 });
+        return;
+      }
+
+      const hoveredTime = uiStore.xToTime(data.x) + patternBlock.startTime;
+      const nearestBeatTime =
+        audioStore.songMetadata.nearestBeatTime(hoveredTime);
+      const deltaTime = nearestBeatTime - patternBlock.startTime;
+      const deltaPosition = uiStore.timeToX(deltaTime);
+      setPosition({ x: deltaPosition, y: 0 });
+    },
+    [uiStore, audioStore, patternBlock]
+  );
   // handle moving a block to a new start time
   const handleDragStop = action((e: DraggableEvent, data: DraggableData) => {
     if (Math.abs(position.x) < 1) return;
@@ -128,8 +140,8 @@ export const TimelineBlockStack = observer(function TimelineBlockStack({
         alignItems="center"
         onClick={(e: ReactMouseEvent) => e.stopPropagation()}
       >
-        <TimelineBlockBound block={patternBlock} leftBound />
-        <TimelineBlockBound block={patternBlock} rightBound />
+        <TimelineBlockBound block={patternBlock} bound="left" />
+        <TimelineBlockBound block={patternBlock} bound="right" />
 
         <PatternOrEffectBlock
           block={patternBlock}

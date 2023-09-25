@@ -16,6 +16,8 @@ import { useStore } from "@/src/types/StoreContext";
 import { action } from "mobx";
 import { UploadAudioModal } from "@/src/components/UploadAudioModal";
 import { useEffect, useState } from "react";
+import { RxColumns } from "react-icons/rx";
+import { PiArrowsInLineHorizontalBold } from "react-icons/pi";
 
 export const AudioControls = observer(function AudioControls() {
   const store = useStore();
@@ -119,8 +121,8 @@ export const AudioControls = observer(function AudioControls() {
         onClick={action(() => audioStore.toggleLoopingAudio())}
       />
       <IconButton
-        aria-label="Toggle waveform style"
-        title="Toggle waveform style"
+        aria-label="Show waveform overlay"
+        title="Show waveform overlay"
         height={6}
         icon={<BsSoundwave size={17} />}
         bgColor={uiStore.showingWaveformOverlay ? "orange.700" : undefined}
@@ -132,6 +134,36 @@ export const AudioControls = observer(function AudioControls() {
             : undefined
         }
         onClick={action(() => uiStore.toggleWaveformOverlay())}
+      />
+      <IconButton
+        aria-label="Show beat grid overlay"
+        title="Show beat grid overlay"
+        height={6}
+        icon={<RxColumns size={17} />}
+        bgColor={uiStore.showingBeatGridOverlay ? "orange.700" : undefined}
+        _hover={
+          uiStore.showingBeatGridOverlay
+            ? {
+                bgColor: "orange.600",
+              }
+            : undefined
+        }
+        onClick={action(() => uiStore.toggleBeatGridOverlay())}
+      />
+      <IconButton
+        aria-label="Snap to grid"
+        title="Snap to grid"
+        height={6}
+        icon={<PiArrowsInLineHorizontalBold size={17} />}
+        bgColor={uiStore.snappingToBeatGrid ? "orange.700" : undefined}
+        _hover={
+          uiStore.snappingToBeatGrid
+            ? {
+                bgColor: "orange.600",
+              }
+            : undefined
+        }
+        onClick={action(() => uiStore.toggleSnappingToBeatGrid())}
       />
       <IconButton
         aria-label="Mark audio"

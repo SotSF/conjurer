@@ -1,6 +1,6 @@
 import { ExtraParams } from "@/src/types/PatternParams";
 import { Box } from "@chakra-ui/react";
-import { memo, useRef, useState } from "react";
+import { memo, useCallback, useRef, useState } from "react";
 import { Variation } from "@/src/types/Variations/Variation";
 import Draggable, { DraggableData, DraggableEvent } from "react-draggable";
 import { useStore } from "@/src/types/StoreContext";
@@ -20,18 +20,29 @@ export const VariationBound = memo(function VariationBound({
   variation,
 }: ParameterProps) {
   const store = useStore();
+  const { uiStore, audioStore } = store;
 
   const dragNodeRef = useRef(null);
   const [position, setPosition] = useState({ x: 0, y: 0 });
-  const handleDrag = (e: DraggableEvent, data: DraggableData) => {
-    setPosition({ x: data.x, y: 0 });
-  };
+  const handleDrag = useCallback(
+    (e: DraggableEvent, data: DraggableData) =>
+      setPosition({ x: data.x, y: 0 }),
+    []
+  );
   const handleStop = action(() => {
-    block.applyVariationDurationDelta(
-      uniformName,
-      variation,
-      store.uiStore.xToTime(position.x)
-    );
+    let deltaTime = uiStore.xToTime(position.x);
+    if (uiStore.snappingToBeatGrid) {
+      const variationEndTime = block.getVariationGlobalEndTime(
+        uniformName,
+        variation
+      );
+      const hoveredTime = uiStore.xToTime(position.x) + variationEndTime;
+      const nearestBeatTime =
+        audioStore.songMetadata.nearestBeatTime(hoveredTime);
+      deltaTime = nearestBeatTime - variationEndTime;
+    }
+
+    block.applyVariationDurationDelta(uniformName, variation, deltaTime);
     setPosition({ x: 0, y: 0 });
   });
   const handleDoubleClick = action(() => {
