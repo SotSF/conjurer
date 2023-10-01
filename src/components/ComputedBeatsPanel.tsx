@@ -1,10 +1,9 @@
 import { observer } from "mobx-react-lite";
 import { Button, Heading, VStack } from "@chakra-ui/react";
 import { useStore } from "@/src/types/StoreContext";
-import { useEffect, useRef, useState } from "react";
-import { runInAction } from "mobx";
+import { action } from "mobx";
 import { ScalarInput } from "@/src/components/ScalarInput";
-import { SaveBeatsModal } from "@/src/components/SaveBeatsModal";
+import { SaveBeatMapModal } from "@/src/components/SaveBeatMapModal";
 
 type ComputedBeatsPanelProps = {
   songTempo: string;
@@ -39,10 +38,13 @@ export const ComputedBeatsPanel = observer(function ComputedBeatsPanel({
         onChange={(valueString) => setSongTempoOffset(valueString)}
         step={0.01}
       />
-      <Button size="sm" onClick={() => (uiStore.showingSaveBeatsModal = true)}>
+      <Button
+        size="sm"
+        onClick={action(() => (uiStore.showingSaveBeatMapModal = true))}
+      >
         Save computed beat data
       </Button>
-      <SaveBeatsModal />
+      <SaveBeatMapModal />
     </VStack>
   );
 });

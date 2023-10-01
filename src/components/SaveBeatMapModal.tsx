@@ -4,6 +4,7 @@ import {
   HStack,
   Input,
   InputGroup,
+  InputRightAddon,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -25,27 +26,26 @@ import {
   getS3,
 } from "@/src/utils/assets";
 
+// For reference:
 // beatMapFilename = `${beatMapName}.json`
 
-type SaveBeatsModalProps = {};
-
-export const SaveBeatsModal = observer(function SaveBeatsModal() {
+export const SaveBeatMapModal = observer(function SaveBeatMapModal() {
   const store = useStore();
-  const { beatMapStore, uiStore } = store;
+  const { audioStore, beatMapStore, uiStore } = store;
 
   const { loading, beatMaps } = useBeatMaps();
 
   const inputRef = useRef<HTMLInputElement>(null);
   const [saving, setSaving] = useState(false);
-  const [beatMapName, setBeatMapName] = useState("");
+  const { selectedAudioFile } = audioStore;
+  const selectedAudioName = selectedAudioFile.split(".")[0];
+  const [beatMapName, setBeatMapName] = useState(selectedAudioName);
 
   useEffect(() => {
     if (inputRef.current && !loading) inputRef.current.focus();
   }, [loading]);
 
-  const onClose = action(() => {
-    uiStore.showingSaveBeatsModal = false;
-  });
+  const onClose = action(() => (uiStore.showingSaveBeatMapModal = false));
 
   const saveBeatMap = async (beatMapFilename: string) => {
     if (store.usingLocalAssets) {
@@ -82,10 +82,14 @@ export const SaveBeatsModal = observer(function SaveBeatsModal() {
     setBeatMapName(newValue);
   };
 
-  const willOverwriteExistingBeatMap = beatMaps.includes(beatMapName);
+  const willOverwriteExistingBeatMap = beatMaps.includes(`${beatMapName}.json`);
 
   return (
-    <Modal onClose={onClose} isOpen={uiStore.showingSaveBeatsModal} isCentered>
+    <Modal
+      onClose={onClose}
+      isOpen={uiStore.showingSaveBeatMapModal}
+      isCentered
+    >
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>Save beat map as...</ModalHeader>
@@ -102,17 +106,22 @@ export const SaveBeatsModal = observer(function SaveBeatsModal() {
                     onChange={(e) => onBeatMapFilenameChange(e.target.value)}
                     value={beatMapName}
                   />
+                  <InputRightAddon>.json</InputRightAddon>
                 </InputGroup>
               </HStack>
               {beatMaps.length > 0 && (
                 <Text mb={4}>
-                  Be aware that you may overwrite an existing experience:
+                  Be aware that you may overwrite an existing beat map:
                 </Text>
               )}
               {beatMaps.map((b) => (
                 <Text
                   key={b}
-                  color={b === beatMapName ? "orange.400" : "chakra-body-text"}
+                  color={
+                    b === `${beatMapName}.json`
+                      ? "orange.400"
+                      : "chakra-body-text"
+                  }
                   fontWeight="bold"
                 >
                   {b}
