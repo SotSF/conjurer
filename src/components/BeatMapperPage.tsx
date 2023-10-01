@@ -32,6 +32,7 @@ import { runInAction } from "mobx";
 import { ScalarInput } from "@/src/components/ScalarInput";
 import { BeatGrid } from "@/src/components/BeatGrid";
 import { cloneAudioBuffer } from "@/src/utils/audioBuffer";
+import { AudioSelector } from "@/src/components/AudioSelector";
 
 type TempoCount = {
   tempo: number;
@@ -205,9 +206,14 @@ export const BeatMapperPage = observer(function BeatMapperPage() {
             zIndex={18}
             bgColor="gray.500"
           >
-            <Text textAlign="center" color="black" userSelect="none">
+            <Heading
+              textAlign="center"
+              color="cyan.500"
+              userSelect="none"
+              size="sm"
+            >
               Detected beats (click to align)
-            </Text>{" "}
+            </Heading>
           </VStack>
           <Box position="relative" height="50px">
             {beats.map((beat, index) => (
@@ -244,9 +250,14 @@ export const BeatMapperPage = observer(function BeatMapperPage() {
             zIndex={18}
             bgColor="gray.500"
           >
-            <Text textAlign="center" color="black" userSelect="none">
+            <Heading
+              textAlign="center"
+              color="pink.500"
+              userSelect="none"
+              size="sm"
+            >
               Computed beats
-            </Text>{" "}
+            </Heading>
           </VStack>
 
           <BeatGrid
@@ -258,9 +269,25 @@ export const BeatMapperPage = observer(function BeatMapperPage() {
         </HStack>
       </Box>
       <Grid gridTemplateColumns="50vw 50vw">
+        <GridItem colSpan={2}>
+          <VStack m={2} p={2} width="100%">
+            <Heading size="sm">Select song</Heading>
+            <HStack>
+              <AudioSelector />
+            </HStack>
+          </VStack>
+        </GridItem>
         <GridItem>
-          <VStack m={2} width="350px">
-            <Heading size="sm">Detected beats</Heading>
+          <VStack
+            borderWidth={1}
+            borderColor="cyan.500"
+            m={2}
+            p={2}
+            width="350px"
+          >
+            <Heading color="cyan.500" size="sm">
+              Detect beats
+            </Heading>
             <ScalarInput
               name="Lowpass cutoff frequency (Hz)"
               value={frequency}
@@ -273,10 +300,7 @@ export const BeatMapperPage = observer(function BeatMapperPage() {
               onChange={(valueString) => setThreshold(valueString)}
               step={0.01}
             />
-
-            <Text>
-              <strong>Total beats detected:</strong> {beats.length}
-            </Text>
+            <Heading size="sm">Total beats detected: {beats.length}</Heading>
             <TableContainer>
               <Table size="sm" variant="simple">
                 <Thead>
@@ -311,8 +335,16 @@ export const BeatMapperPage = observer(function BeatMapperPage() {
           </VStack>
         </GridItem>
         <GridItem>
-          <VStack m={2} width="350px">
-            <Heading size="sm">Computed beats</Heading>
+          <VStack
+            m={2}
+            p={2}
+            width="350px"
+            borderWidth={1}
+            borderColor="pink.500"
+          >
+            <Heading color="pink.500" size="sm">
+              Computed beats
+            </Heading>
             <ScalarInput
               name="Song tempo (BPM)"
               value={songTempo}
