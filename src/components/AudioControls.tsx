@@ -1,7 +1,6 @@
 import { observer } from "mobx-react-lite";
 import {
   IconButton,
-  Select,
   Slider,
   SliderFilledTrack,
   SliderThumb,
@@ -10,14 +9,13 @@ import {
 } from "@chakra-ui/react";
 import { BsSoundwave } from "react-icons/bs";
 import { FaVolumeMute, FaPencilAlt } from "react-icons/fa";
-import { AiOutlineCloudUpload } from "react-icons/ai";
 import { ImLoop } from "react-icons/im";
 import { useStore } from "@/src/types/StoreContext";
 import { action } from "mobx";
-import { UploadAudioModal } from "@/src/components/UploadAudioModal";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { RxColumns } from "react-icons/rx";
 import { PiArrowsInLineHorizontalBold } from "react-icons/pi";
+import { AudioSelector } from "@/src/components/AudioSelector";
 
 export const AudioControls = observer(function AudioControls() {
   const store = useStore();
@@ -31,36 +29,9 @@ export const AudioControls = observer(function AudioControls() {
     setAudioVol(value);
   };
 
-  useEffect(() => {
-    if (!initializedClientSide) return;
-    void audioStore.fetchAvailableAudioFiles();
-  }, [audioStore, initializedClientSide]);
-
   return (
     <>
-      <Select
-        size="xs"
-        width={40}
-        value={audioStore.selectedAudioFile}
-        onChange={action((e) => {
-          audioStore.selectedAudioFile = e.target.value;
-        })}
-      >
-        {audioStore.availableAudioFiles.map((audioFile) => (
-          <option key={audioFile} value={audioFile}>
-            {audioFile}
-          </option>
-        ))}
-      </Select>
-      <UploadAudioModal />
-      <IconButton
-        aria-label="Upload audio"
-        title="Upload audio"
-        height={6}
-        icon={<AiOutlineCloudUpload size={17} />}
-        isDisabled={store.usingLocalAssets}
-        onClick={action(() => (uiStore.showingUploadAudioModal = true))}
-      />
+      <AudioSelector />
       <Slider
         aria-label="Audio volume"
         title="Audio volume"
