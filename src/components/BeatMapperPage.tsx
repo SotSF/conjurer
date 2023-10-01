@@ -33,6 +33,7 @@ import { ScalarInput } from "@/src/components/ScalarInput";
 import { BeatGrid } from "@/src/components/BeatGrid";
 import { cloneAudioBuffer } from "@/src/utils/audioBuffer";
 import { AudioSelector } from "@/src/components/AudioSelector";
+import { ComputedBeatsPanel } from "@/src/components/ComputedBeatsPanel";
 
 type TempoCount = {
   tempo: number;
@@ -41,7 +42,7 @@ type TempoCount = {
 
 export const BeatMapperPage = observer(function BeatMapperPage() {
   const store = useStore();
-  const { uiStore, audioStore, playlistStore } = store;
+  const { uiStore, audioStore, playlistStore, beatMapStore } = store;
 
   const initialized = useRef(false);
   const timelineRef = useRef<HTMLDivElement>(null);
@@ -56,8 +57,12 @@ export const BeatMapperPage = observer(function BeatMapperPage() {
   const [threshold, setThreshold] = useState((0.72).toFixed(2));
   const [frequency, setFrequency] = useState((150).toString());
 
-  const [songTempo, setSongTempo] = useState((112).toFixed(4));
-  const [songTempoOffset, setSongTempoOffset] = useState((0).toFixed(4));
+  const [songTempo, setSongTempo] = useState(
+    beatMapStore.beatMap.tempo.toFixed(10)
+  );
+  const [songTempoOffset, setSongTempoOffset] = useState(
+    beatMapStore.beatMap.tempoOffset.toFixed(6)
+  );
   const songTempoNumber = Number(songTempo);
   const songTempoOffsetNumber = Number(songTempoOffset);
 
@@ -259,7 +264,6 @@ export const BeatMapperPage = observer(function BeatMapperPage() {
               Computed beats
             </Heading>
           </VStack>
-
           <BeatGrid
             songTempo={songTempoNumber}
             songTempoOffset={songTempoOffsetNumber}
@@ -335,43 +339,12 @@ export const BeatMapperPage = observer(function BeatMapperPage() {
           </VStack>
         </GridItem>
         <GridItem>
-          <VStack
-            m={2}
-            p={2}
-            width="350px"
-            borderWidth={1}
-            borderColor="pink.500"
-          >
-            <Heading color="pink.500" size="sm">
-              Computed beats
-            </Heading>
-            <ScalarInput
-              name="Song tempo (BPM)"
-              value={songTempo}
-              onChange={(valueString) => setSongTempo(valueString)}
-              step={0.01}
-            />
-            <ScalarInput
-              name="Song tempo offset (seconds)"
-              value={songTempoOffset}
-              onChange={(valueString) => setSongTempoOffset(valueString)}
-              step={0.01}
-            />
-            <Button
-              size="sm"
-              onClick={() =>
-                localStorage.setItem(
-                  "songMetadata",
-                  JSON.stringify({
-                    songTempo: songTempoNumber,
-                    songTempoOffset: songTempoOffsetNumber,
-                  })
-                )
-              }
-            >
-              Save song metadata
-            </Button>
-          </VStack>
+          <ComputedBeatsPanel
+            songTempo={songTempo}
+            setSongTempo={setSongTempo}
+            songTempoOffset={songTempoOffset}
+            setSongTempoOffset={setSongTempoOffset}
+          />
         </GridItem>
       </Grid>
     </>

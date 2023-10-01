@@ -12,6 +12,7 @@ import { Layer } from "@/src/types/Layer";
 import { setupUnityAppWebsocket } from "@/src/utils/unityWebsocket";
 import { deserializeVariation } from "@/src/types/Variations/variations";
 import { PlaylistStore } from "@/src/types/PlaylistStore";
+import { BeatMapStore } from "@/src/types/BeatMapStore";
 import { PlaygroundStore } from "@/src/types/PlaygroundStore";
 import { setupControllerWebsocket } from "@/src/utils/controllerWebsocket";
 
@@ -39,6 +40,7 @@ export class Store {
   initializedClientSide = false;
 
   audioStore = new AudioStore(this);
+  beatMapStore = new BeatMapStore(this);
   uiStore = new UIStore(this.audioStore);
   experienceStore = new ExperienceStore(this);
   playlistStore = new PlaylistStore(

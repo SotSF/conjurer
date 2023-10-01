@@ -20,7 +20,7 @@ export const VariationBound = memo(function VariationBound({
   variation,
 }: ParameterProps) {
   const store = useStore();
-  const { uiStore, audioStore } = store;
+  const { uiStore, beatMapStore } = store;
 
   const dragNodeRef = useRef(null);
   const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -37,8 +37,7 @@ export const VariationBound = memo(function VariationBound({
         variation
       );
       const hoveredTime = uiStore.xToTime(position.x) + variationEndTime;
-      const nearestBeatTime =
-        audioStore.songMetadata.nearestBeatTime(hoveredTime);
+      const nearestBeatTime = beatMapStore.beatMap.nearestBeatTime(hoveredTime);
       deltaTime = nearestBeatTime - variationEndTime;
     }
 

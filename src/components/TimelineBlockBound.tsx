@@ -16,7 +16,7 @@ export const TimelineBlockBound = observer(function TimelineBlockBound({
   bound,
 }: TimelineBlockProps) {
   const store = useStore();
-  const { uiStore, audioStore } = store;
+  const { uiStore, beatMapStore } = store;
 
   const dragNodeRef = useRef(null);
   const [dragging, setDragging] = useState(false);
@@ -38,8 +38,7 @@ export const TimelineBlockBound = observer(function TimelineBlockBound({
       const originalBoundTime =
         bound === "left" ? block.startTime : block.endTime;
       const hoveredTime = uiStore.xToTime(position.x) + originalBoundTime;
-      const nearestBeatTime =
-        audioStore.songMetadata.nearestBeatTime(hoveredTime);
+      const nearestBeatTime = beatMapStore.beatMap.nearestBeatTime(hoveredTime);
       deltaTime = nearestBeatTime - originalBoundTime;
     }
 

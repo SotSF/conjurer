@@ -33,6 +33,7 @@ export class UIStore {
   showingMarkerEditorModal = false;
   showingPlaylistAddExperienceModal = false;
   showingViewerInstructionsModal = false;
+  showingSaveBeatsModal = true;
 
   _renderTargetSize = INITIAL_RENDER_TARGET_SIZE;
   get renderTargetSize() {

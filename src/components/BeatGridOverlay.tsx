@@ -7,7 +7,7 @@ import { runInAction } from "mobx";
 
 export const BeatGridOverlay = observer(function BeatGridOverlay() {
   const store = useStore();
-  const { uiStore, audioStore } = store;
+  const { uiStore, audioStore, beatMapStore } = store;
   const { showingBeatGridOverlay } = uiStore;
 
   useEffect(() => {
@@ -17,10 +17,10 @@ export const BeatGridOverlay = observer(function BeatGridOverlay() {
 
     const { songTempo, songTempoOffset } = JSON.parse(songMetadata);
     runInAction(() => {
-      audioStore.songMetadata.tempo = songTempo;
-      audioStore.songMetadata.tempoOffset = songTempoOffset;
+      beatMapStore.beatMap.tempo = songTempo;
+      beatMapStore.beatMap.tempoOffset = songTempoOffset;
     });
-  }, [audioStore.songMetadata]);
+  }, [beatMapStore.beatMap]);
 
   if (!showingBeatGridOverlay) return null;
 
@@ -36,8 +36,8 @@ export const BeatGridOverlay = observer(function BeatGridOverlay() {
       overflow="visible"
     >
       <BeatGrid
-        songTempo={audioStore.songMetadata.tempo}
-        songTempoOffset={audioStore.songMetadata.tempoOffset}
+        songTempo={beatMapStore.beatMap.tempo}
+        songTempoOffset={beatMapStore.beatMap.tempoOffset}
         songDuration={audioStore.wavesurfer?.getDuration() ?? 0}
       />
     </Box>
