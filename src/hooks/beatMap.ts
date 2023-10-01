@@ -7,14 +7,14 @@ import {
 import { ListObjectsCommand } from "@aws-sdk/client-s3";
 import { useEffect, useState } from "react";
 
-export function useBeatMaps() {
+export function useBeatMaps(shouldLoadBeatMaps: boolean) {
   const store = useStore();
-  const { user, initializedClientSide } = store;
+  const { initializedClientSide } = store;
   const [loading, setLoading] = useState(true);
   const [beatMaps, setBeatMaps] = useState<string[]>([]);
 
   useEffect(() => {
-    if (!initializedClientSide) return;
+    if (!initializedClientSide || !shouldLoadBeatMaps) return;
 
     const fetchBeatMaps = async () => {
       setLoading(true);
@@ -31,8 +31,9 @@ export function useBeatMaps() {
         });
 
         const data = await getS3().send(listObjectsCommand);
-        beatMaps =
-          data.Contents?.map((object) => object.Key?.split("/")[1] ?? "") ?? [];
+        beatMaps = (
+          data.Contents?.map((object) => object.Key?.split("/")[1] ?? "") ?? []
+        ).filter((b) => !!b);
       }
 
       setBeatMaps(beatMaps);
@@ -40,7 +41,7 @@ export function useBeatMaps() {
     };
 
     fetchBeatMaps();
-  }, [store.usingLocalAssets, initializedClientSide, user]);
+  }, [store.usingLocalAssets, initializedClientSide, shouldLoadBeatMaps]);
 
   return { loading, beatMaps };
 }

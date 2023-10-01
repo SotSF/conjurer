@@ -477,6 +477,7 @@ export class Store {
 
   serialize = () => ({
     audioStore: this.audioStore.serialize(),
+    beatMapStore: this.beatMapStore.serialize(),
     uiStore: this.uiStore.serialize(),
     layers: this.layers.map((l) => l.serialize()),
     user: this.user,
@@ -485,6 +486,7 @@ export class Store {
 
   deserialize = (data: any) => {
     this.audioStore.deserialize(data.audioStore);
+    this.beatMapStore.deserialize(data.beatMapStore);
     this.uiStore.deserialize(this, data.uiStore);
     this.layers = data.layers.map((l: any) => Layer.deserialize(this, l));
     this.selectedLayer = this.layers[0];

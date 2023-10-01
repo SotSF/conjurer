@@ -33,7 +33,7 @@ export const SaveBeatMapModal = observer(function SaveBeatMapModal() {
   const store = useStore();
   const { audioStore, beatMapStore, uiStore } = store;
 
-  const { loading, beatMaps } = useBeatMaps();
+  const { loading, beatMaps } = useBeatMaps(uiStore.showingSaveBeatMapModal);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const [saving, setSaving] = useState(false);
@@ -49,7 +49,7 @@ export const SaveBeatMapModal = observer(function SaveBeatMapModal() {
 
   const saveBeatMap = async (beatMapFilename: string) => {
     if (store.usingLocalAssets) {
-      fetch(`/api/beatMaps/${beatMapFilename}`, {
+      fetch(`/api/beat-maps/${beatMapFilename}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -58,7 +58,7 @@ export const SaveBeatMapModal = observer(function SaveBeatMapModal() {
       });
       return;
     }
-
+    console.log(beatMapStore.beatMap.serialize(), beatMapStore.beatMap.tempo);
     const putObjectCommand = new PutObjectCommand({
       Bucket: ASSET_BUCKET_NAME,
       Key: `${BEAT_MAP_ASSET_PREFIX}${beatMapFilename}.json`,

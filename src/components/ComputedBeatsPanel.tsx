@@ -4,22 +4,23 @@ import { useStore } from "@/src/types/StoreContext";
 import { action } from "mobx";
 import { ScalarInput } from "@/src/components/ScalarInput";
 import { SaveBeatMapModal } from "@/src/components/SaveBeatMapModal";
+import { LoadBeatMapModal } from "@/src/components/LoadBeatMapModal";
 
 type ComputedBeatsPanelProps = {
-  songTempo: string;
-  setSongTempo: (value: string) => void;
-  songTempoOffset: string;
-  setSongTempoOffset: (value: string) => void;
+  tempoString: string;
+  setTempoString: (value: string) => void;
+  tempoOffsetString: string;
+  setTempoOffsetString: (value: string) => void;
 };
 
 export const ComputedBeatsPanel = observer(function ComputedBeatsPanel({
-  songTempo,
-  setSongTempo,
-  songTempoOffset,
-  setSongTempoOffset,
+  tempoString,
+  setTempoString,
+  tempoOffsetString,
+  setTempoOffsetString,
 }: ComputedBeatsPanelProps) {
   const store = useStore();
-  const { uiStore } = store;
+  const { audioStore, uiStore } = store;
 
   return (
     <VStack m={2} p={2} width="350px" borderWidth={1} borderColor="pink.500">
@@ -28,14 +29,14 @@ export const ComputedBeatsPanel = observer(function ComputedBeatsPanel({
       </Heading>
       <ScalarInput
         name="Song tempo (BPM)"
-        value={songTempo}
-        onChange={(valueString) => setSongTempo(valueString)}
+        value={tempoString}
+        onChange={(valueString) => setTempoString(valueString)}
         step={0.01}
       />
       <ScalarInput
         name="Song tempo offset (seconds)"
-        value={songTempoOffset}
-        onChange={(valueString) => setSongTempoOffset(valueString)}
+        value={tempoOffsetString}
+        onChange={(valueString) => setTempoOffsetString(valueString)}
         step={0.01}
       />
       <Button
@@ -44,7 +45,14 @@ export const ComputedBeatsPanel = observer(function ComputedBeatsPanel({
       >
         Save computed beat data
       </Button>
-      <SaveBeatMapModal />
+      <Button
+        size="sm"
+        onClick={action(() => (uiStore.showingLoadBeatMapModal = true))}
+      >
+        Open computed beat data
+      </Button>
+      <SaveBeatMapModal key={audioStore.selectedAudioFile} />
+      <LoadBeatMapModal />
     </VStack>
   );
 });

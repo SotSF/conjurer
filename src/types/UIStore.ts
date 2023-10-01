@@ -34,6 +34,7 @@ export class UIStore {
   showingPlaylistAddExperienceModal = false;
   showingViewerInstructionsModal = false;
   showingSaveBeatMapModal = false;
+  showingLoadBeatMapModal = false;
 
   _renderTargetSize = INITIAL_RENDER_TARGET_SIZE;
   get renderTargetSize() {
