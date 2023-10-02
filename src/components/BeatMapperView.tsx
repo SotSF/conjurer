@@ -146,15 +146,17 @@ export const BeatMapperView = observer(function BeatMapperView() {
     };
   }, [threshold, frequency, audioBuffer]);
 
-  useEffect(() => {
+  const onBeatSelect = action((index: number) => {
+    setSelectedBeatIndex(index);
     if (!audioBuffer || selectedBeatIndex == null) return;
+
     let timeOffset = beats[selectedBeatIndex];
     const beatInterval = 60 / beatMap.tempo;
     while (timeOffset > 0) timeOffset -= beatInterval;
     timeOffset += beatInterval;
 
-    setTempoOffsetString(timeOffset.toString());
-  }, [selectedBeatIndex, beats, audioBuffer, beatMap]);
+    setTempoOffset(timeOffset.toString());
+  });
 
   const displayTempoCounts = [...tempoCounts].slice(0, 20);
 
@@ -224,7 +226,7 @@ export const BeatMapperView = observer(function BeatMapperView() {
                 height="100%"
                 bgColor="white"
                 cursor="pointer"
-                onClick={() => setSelectedBeatIndex(index)}
+                onClick={() => onBeatSelect(index)}
               />
             ))}
           </Box>
