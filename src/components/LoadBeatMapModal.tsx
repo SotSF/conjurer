@@ -13,7 +13,7 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { useStore } from "@/src/types/StoreContext";
-import { action } from "mobx";
+import { action, runInAction } from "mobx";
 import { useBeatMaps } from "@/src/hooks/beatMap";
 
 export const LoadBeatMapModal = observer(function LoadBeatMapModal() {
@@ -26,6 +26,7 @@ export const LoadBeatMapModal = observer(function LoadBeatMapModal() {
 
   const onOpenBeatMap = async (beatMapFilename: string) => {
     await beatMapStore.load(beatMapFilename);
+    runInAction(() => (uiStore.showingBeatGridOverlay = true));
     onClose();
   };
 

@@ -16,6 +16,9 @@ import { useState } from "react";
 import { RxColumns } from "react-icons/rx";
 import { PiArrowsInLineHorizontalBold } from "react-icons/pi";
 import { AudioSelector } from "@/src/components/AudioSelector";
+import { LoadBeatMapModal } from "@/src/components/LoadBeatMapModal";
+import { RiFolderMusicLine } from "react-icons/ri";
+import { BeatMapControls } from "@/src/components/BeatMapControls";
 
 export const AudioControls = observer(function AudioControls() {
   const store = useStore();
@@ -106,36 +109,7 @@ export const AudioControls = observer(function AudioControls() {
         }
         onClick={action(() => uiStore.toggleWaveformOverlay())}
       />
-      <IconButton
-        aria-label="Show beat grid overlay"
-        title="Show beat grid overlay"
-        height={6}
-        icon={<RxColumns size={17} />}
-        bgColor={uiStore.showingBeatGridOverlay ? "orange.700" : undefined}
-        _hover={
-          uiStore.showingBeatGridOverlay
-            ? {
-                bgColor: "orange.600",
-              }
-            : undefined
-        }
-        onClick={action(() => uiStore.toggleBeatGridOverlay())}
-      />
-      <IconButton
-        aria-label="Snap to grid"
-        title="Snap to grid"
-        height={6}
-        icon={<PiArrowsInLineHorizontalBold size={17} />}
-        bgColor={uiStore.snappingToBeatGrid ? "orange.700" : undefined}
-        _hover={
-          uiStore.snappingToBeatGrid
-            ? {
-                bgColor: "orange.600",
-              }
-            : undefined
-        }
-        onClick={action(() => uiStore.toggleSnappingToBeatGrid())}
-      />
+      <BeatMapControls />
       <IconButton
         aria-label="Mark audio"
         title="Mark audio"
