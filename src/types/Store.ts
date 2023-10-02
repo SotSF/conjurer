@@ -99,7 +99,7 @@ export class Store {
   }
   set user(value: string) {
     this._user = value;
-    localStorage.setItem("user", value);
+    if (this.context === "default") localStorage.setItem("user", value);
   }
 
   private _experienceName = "untitled";
@@ -108,7 +108,8 @@ export class Store {
   }
   set experienceName(value: string) {
     this._experienceName = value;
-    localStorage.setItem("experienceName", value);
+    if (this.context === "default")
+      localStorage.setItem("experienceName", value);
   }
 
   get experienceFilename(): string {
