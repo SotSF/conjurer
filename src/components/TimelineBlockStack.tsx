@@ -25,7 +25,7 @@ export const TimelineBlockStack = observer(function TimelineBlockStack({
   patternBlock,
 }: Props) {
   const store = useStore();
-  const { selectedBlocksOrVariations, uiStore, audioStore } = store;
+  const { selectedBlocksOrVariations, uiStore, beatMapStore } = store;
 
   const dragNodeRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
@@ -54,13 +54,12 @@ export const TimelineBlockStack = observer(function TimelineBlockStack({
       }
 
       const hoveredTime = uiStore.xToTime(data.x) + patternBlock.startTime;
-      const nearestBeatTime =
-        audioStore.songMetadata.nearestBeatTime(hoveredTime);
+      const nearestBeatTime = beatMapStore.beatMap.nearestBeatTime(hoveredTime);
       const deltaTime = nearestBeatTime - patternBlock.startTime;
       const deltaPosition = uiStore.timeToX(deltaTime);
       setPosition({ x: deltaPosition, y: 0 });
     },
-    [uiStore, audioStore, patternBlock]
+    [uiStore, beatMapStore, patternBlock]
   );
   // handle moving a block to a new start time
   const handleDragStop = action((e: DraggableEvent, data: DraggableData) => {

@@ -12,6 +12,7 @@ import { Layer } from "@/src/types/Layer";
 import { setupUnityAppWebsocket } from "@/src/utils/unityWebsocket";
 import { deserializeVariation } from "@/src/types/Variations/variations";
 import { PlaylistStore } from "@/src/types/PlaylistStore";
+import { BeatMapStore } from "@/src/types/BeatMapStore";
 import { PlaygroundStore } from "@/src/types/PlaygroundStore";
 import { setupControllerWebsocket } from "@/src/utils/controllerWebsocket";
 
@@ -39,6 +40,7 @@ export class Store {
   initializedClientSide = false;
 
   audioStore = new AudioStore(this);
+  beatMapStore = new BeatMapStore(this);
   uiStore = new UIStore(this.audioStore);
   experienceStore = new ExperienceStore(this);
   playlistStore = new PlaylistStore(
@@ -97,7 +99,7 @@ export class Store {
   }
   set user(value: string) {
     this._user = value;
-    localStorage.setItem("user", value);
+    if (this.context === "default") localStorage.setItem("user", value);
   }
 
   private _experienceName = "untitled";
@@ -106,7 +108,8 @@ export class Store {
   }
   set experienceName(value: string) {
     this._experienceName = value;
-    localStorage.setItem("experienceName", value);
+    if (this.context === "default")
+      localStorage.setItem("experienceName", value);
   }
 
   get experienceFilename(): string {
@@ -475,6 +478,7 @@ export class Store {
 
   serialize = () => ({
     audioStore: this.audioStore.serialize(),
+    beatMapStore: this.beatMapStore.serialize(),
     uiStore: this.uiStore.serialize(),
     layers: this.layers.map((l) => l.serialize()),
     user: this.user,
@@ -483,6 +487,7 @@ export class Store {
 
   deserialize = (data: any) => {
     this.audioStore.deserialize(data.audioStore);
+    this.beatMapStore.deserialize(data.beatMapStore);
     this.uiStore.deserialize(this, data.uiStore);
     this.layers = data.layers.map((l: any) => Layer.deserialize(this, l));
     this.selectedLayer = this.layers[0];

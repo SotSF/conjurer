@@ -24,9 +24,7 @@ export const OpenExperienceModal = observer(function OpenExperienceModal() {
     uiStore.showingOpenExperienceModal
   );
 
-  const onClose = action(() => {
-    uiStore.showingOpenExperienceModal = false;
-  });
+  const onClose = action(() => (uiStore.showingOpenExperienceModal = false));
 
   const onOpenExperience = async (experienceFilename: string) => {
     await experienceStore.load(experienceFilename);
