@@ -11,10 +11,12 @@ import { Layer } from "@/src/types/Layer";
 import { Opacity } from "@/src/patterns/Opacity";
 import { FlatVariation } from "@/src/types/Variations/FlatVariation";
 import { defaultPatternEffectMap } from "@/src/utils/patternsEffects";
-import { TransferBlock } from "@/src/types/TransferBlock";
+import { TransferBlock, TransferPattern } from "@/src/types/TransferBlock";
 
 type SerializedBlock = {
-  pattern: string;
+  id: string;
+  // for backwards compatibility, pattern may be just the name of the pattern (string)
+  pattern: string | TransferPattern;
   parameterVariations: { [key: string]: any[] | undefined };
   startTime: number;
   duration: number;
@@ -376,8 +378,10 @@ export class Block<T extends ExtraParams = {}> {
     return serialized;
   };
 
+  // TODO: incorporate initial parameters into this
   serialize = (): SerializedBlock => ({
-    pattern: this.pattern.name,
+    id: this.id,
+    pattern: this.pattern.serialize(),
     startTime: this.startTime,
     duration: this.duration,
     parameterVariations: this.serializeParameterVariations(),
@@ -387,15 +391,18 @@ export class Block<T extends ExtraParams = {}> {
   });
 
   static deserialize = (store: RootStore, data: any, parentBlock?: Block) => {
-    const block =
-      data.pattern === "Opacity"
-        ? // TODO: make opacity less of a special case
-          new Block<ExtraParams>(store, Opacity())
-        : new Block<ExtraParams>(
-            store,
-            defaultPatternEffectMap[data.pattern].clone()
-          );
+    const patternName =
+      typeof data.pattern === "string" ? data.pattern : data.pattern.name;
 
+    const block = new Block<ExtraParams>(
+      store,
+      // TODO: make opacity less of a special case
+      patternName === "Opacity"
+        ? Opacity()
+        : defaultPatternEffectMap[patternName].clone()
+    );
+
+    if (data.id) block.id = data.id;
     block.setTiming({
       startTime: data.startTime,
       duration: data.duration,
@@ -419,7 +426,7 @@ export class Block<T extends ExtraParams = {}> {
 
   serializeTransferBlock = (): TransferBlock => ({
     id: this.id,
-    pattern: this.pattern.serializeTransferPattern(),
+    pattern: this.pattern.serialize(),
     parameterVariations: this.serializeParameterVariations(),
     effectBlocks: this.effectBlocks.map((effectBlock) =>
       effectBlock.serializeTransferBlock()

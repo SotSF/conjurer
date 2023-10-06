@@ -3,11 +3,11 @@ import { ParamType } from "@/src/types/PatternParams";
 
 type TransferParamType = ParamType | SerializedPalette;
 
-export type TransformParams = Record<string, { value: TransferParamType }>;
+export type TransferParams = Record<string, { value: TransferParamType }>;
 
 export type TransferPattern = {
   name: string;
-  params: TransformParams;
+  params: TransferParams;
 };
 
 export type TransferBlock = {
