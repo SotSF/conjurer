@@ -31,7 +31,9 @@ export const ParameterView = observer(function ParameterView({
     block.layer?.currentBlock &&
     [block, block.parentBlock].includes(block.layer.currentBlock);
 
-  const headerColor = variations.length ? "orange.400" : "gray.300";
+  // TODO: re-implement
+  // const headerColor = variations.length ? "orange.400" : "gray.300";
+  const headerColor = "orange.400";
   return (
     <Box
       width="100%"
