@@ -1,20 +1,18 @@
 import { playgroundEffects } from "@/src/effects/effects";
 import { playgroundPatterns } from "@/src/patterns/patterns";
-import { Block, RootStore } from "@/src/types/Block";
+import { Block, RootStore, SerializedBlock } from "@/src/types/Block";
 import { Palette, SerializedPalette } from "@/src/types/Palette";
 import {
   ExtraParams,
   ParamType,
   isPaletteParam,
 } from "@/src/types/PatternParams";
-import { Preset } from "@/src/types/Preset";
-import { TransferBlock } from "@/src/types/TransferBlock";
 import { deserializeVariation } from "@/src/types/Variations/variations";
 import { sendControllerMessage } from "@/src/utils/controllerWebsocket";
 import { makeAutoObservable } from "mobx";
 
 export class PlaygroundStore {
-  presets: Preset[] = [];
+  presets: SerializedBlock[] = [];
 
   _autoUpdate = true;
   get autoUpdate() {
@@ -89,13 +87,13 @@ export class PlaygroundStore {
   }
 
   loadPreset = (index: number) => {
-    const transferBlock = this.presets[index];
-    this.onUpdate(transferBlock);
+    const serializedBlock = this.presets[index];
+    this.onUpdate(serializedBlock);
   };
 
   saveCurrentPreset = () => {
-    const transferBlock = this.selectedPatternBlock.serializeTransferBlock();
-    this.presets.push(transferBlock);
+    const serializedBlock = this.selectedPatternBlock.serialize();
+    this.presets.push(serializedBlock);
     this.saveToLocalStorage();
   };
 
@@ -133,18 +131,19 @@ export class PlaygroundStore {
     (this.autoUpdate || force) &&
     sendControllerMessage({
       type: "updateBlock",
-      transferBlock: this.selectedPatternBlock.serializeTransferBlock(),
+      serializedBlock: this.selectedPatternBlock.serialize(),
     });
 
   // TODO: refactor, make performant
-  onUpdate = (transferBlock: TransferBlock) => {
+  onUpdate = (serializedBlock: SerializedBlock) => {
     const {
       pattern: transferPattern,
       parameterVariations: transferParameterVariations,
       effectBlocks: transferEffectBlocks,
-    } = transferBlock;
+    } = serializedBlock;
     this.patternBlocks.forEach(
       (patternBlock: Block<ExtraParams>, patternIndex: number) => {
+        if (typeof transferPattern === "string") return;
         if (patternBlock.pattern.name !== transferPattern.name) return;
 
         // TODO: fix duplicated code here
@@ -174,6 +173,7 @@ export class PlaygroundStore {
         for (const transferEffectBlock of transferEffectBlocks) {
           this.effectBlocks.forEach(
             (effectBlock: Block<ExtraParams>, effectIndex: number) => {
+              if (typeof transferEffectBlock.pattern === "string") return;
               if (effectBlock.pattern.name !== transferEffectBlock.pattern.name)
                 return;
 

@@ -1,5 +1,5 @@
 import { makeAutoObservable } from "mobx";
-import { BASE_UNIFORMS, Pattern } from "@/src/types/Pattern";
+import { BASE_UNIFORMS, Pattern, SerializedPattern } from "@/src/types/Pattern";
 import { ExtraParams, ParamType } from "@/src/types/PatternParams";
 import { Variation } from "@/src/types/Variations/Variation";
 import {
@@ -8,15 +8,17 @@ import {
 } from "@/src/utils/time";
 import { deserializeVariation } from "@/src/types/Variations/variations";
 import { Layer } from "@/src/types/Layer";
-import { Opacity } from "@/src/patterns/Opacity";
 import { FlatVariation } from "@/src/types/Variations/FlatVariation";
 import { defaultPatternEffectMap } from "@/src/utils/patternsEffects";
-import { TransferBlock, TransferPattern } from "@/src/types/TransferBlock";
+import { isVector4 } from "@/src/utils/object";
+import { LinearVariation4 } from "@/src/types/Variations/LinearVariation4";
+import { isPalette } from "@/src/types/Palette";
+import { PaletteVariation } from "@/src/types/Variations/PaletteVariation";
 
-type SerializedBlock = {
+export type SerializedBlock = {
   id: string;
   // for backwards compatibility, pattern may be just the name of the pattern (string)
-  pattern: string | TransferPattern;
+  pattern: string | SerializedPattern;
   parameterVariations: { [key: string]: any[] | undefined };
   startTime: number;
   duration: number;
@@ -347,38 +349,46 @@ export class Block<T extends ExtraParams = {}> {
       ]?.map((variation) => variation.serialize());
     }
 
-    // check for any parameters without variations but that have changed from their default value.
-    // insert a flat variation in this case so that we persist the difference from the default.
+    // check for any parameters without variations and insert a flat variation
     const parameterNames = Object.keys(
       defaultPatternEffectMap[this.pattern.name]?.params ?? {}
     );
+    const variationDuration = Math.min(
+      this.duration,
+      DEFAULT_VARIATION_DURATION
+    );
     for (const parameter of parameterNames) {
-      if (BASE_UNIFORMS.includes(parameter)) continue;
-
-      const defaultParameterValue =
-        defaultPatternEffectMap[this.pattern.name]?.params[parameter].value;
-      const parameterValue = this.pattern.params[parameter].value;
+      // skip this parameter if it is a base uniform or if it already has variations
       if (
-        // if this parameter has no variations,
-        (this.parameterVariations[parameter]?.length ?? 0) === 0 &&
-        // and it's a number
-        typeof parameterValue === "number" &&
-        // and it's not the default value
-        parameterValue !== defaultParameterValue
-      ) {
-        // then add a flat variation to persist the difference from the default
+        BASE_UNIFORMS.includes(parameter) ||
+        this.parameterVariations[parameter]?.length
+      )
+        continue;
+
+      const parameterValue = this.pattern.params[parameter].value;
+      if (typeof parameterValue === "number") {
         serialized[parameter as keyof T] = [
-          new FlatVariation(
-            DEFAULT_VARIATION_DURATION,
+          new FlatVariation(variationDuration, parameterValue).serialize(),
+        ];
+      } else if (isVector4(parameterValue)) {
+        serialized[parameter as keyof T] = [
+          new LinearVariation4(
+            variationDuration,
+            parameterValue,
             parameterValue
           ).serialize(),
+        ];
+      } else if (isPalette(parameterValue)) {
+        serialized[parameter as keyof T] = [
+          new PaletteVariation(variationDuration, parameterValue).serialize(),
         ];
       }
     }
     return serialized;
   };
 
-  // TODO: incorporate initial parameters into this
+  // TODO: check context or use a flag, if playground then incorporate initial parameters into
+  // serialized block
   serialize = (): SerializedBlock => ({
     id: this.id,
     pattern: this.pattern.serialize(),
@@ -396,10 +406,7 @@ export class Block<T extends ExtraParams = {}> {
 
     const block = new Block<ExtraParams>(
       store,
-      // TODO: make opacity less of a special case
-      patternName === "Opacity"
-        ? Opacity()
-        : defaultPatternEffectMap[patternName].clone()
+      defaultPatternEffectMap[patternName].clone()
     );
 
     if (data.id) block.id = data.id;
@@ -423,13 +430,4 @@ export class Block<T extends ExtraParams = {}> {
 
     return block;
   };
-
-  serializeTransferBlock = (): TransferBlock => ({
-    id: this.id,
-    pattern: this.pattern.serialize(),
-    parameterVariations: this.serializeParameterVariations(),
-    effectBlocks: this.effectBlocks.map((effectBlock) =>
-      effectBlock.serializeTransferBlock()
-    ),
-  });
 }

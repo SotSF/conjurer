@@ -1,5 +1,5 @@
+import { SerializedBlock } from "@/src/types/Block";
 import { ControllerMessage } from "@/src/types/ControllerMessage";
-import { TransferBlock } from "@/src/types/TransferBlock";
 import {
   CONTROLLER_SERVER_WEBSOCKET_HOST,
   CONTROLLER_SERVER_WEBSOCKET_PORT,
@@ -9,7 +9,7 @@ let _websocket: WebSocket;
 
 export const setupControllerWebsocket = (
   context: string,
-  onUpdate?: (transferBlock: TransferBlock) => void
+  onUpdate?: (serializedBlock: SerializedBlock) => void
 ) => {
   console.log(
     "Reconnecting to websocket server at",
@@ -27,7 +27,7 @@ export const setupControllerWebsocket = (
     const dataString = data.toString();
     const message: ControllerMessage = JSON.parse(dataString);
 
-    if (message.type === "updateBlock") onUpdate?.(message.transferBlock);
+    if (message.type === "updateBlock") onUpdate?.(message.serializedBlock);
   };
 };
 

@@ -1,4 +1,4 @@
-import { Palette, isPalette } from "@/src/types/Palette";
+import { Palette, SerializedPalette, isPalette } from "@/src/types/Palette";
 import { isVector4 } from "@/src/utils/object";
 import { Texture, Vector4 } from "three";
 
@@ -52,3 +52,8 @@ export type StandardParams = {
 export type ExtraParams = Record<string, PatternParam>;
 
 export type PatternParams = StandardParams & ExtraParams;
+
+// this type could be improved a bit
+type SerializedParamType = ParamType | SerializedPalette;
+
+export type SerializedParams = Record<string, { value: SerializedParamType }>;
