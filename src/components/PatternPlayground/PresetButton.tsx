@@ -37,7 +37,12 @@ export const PresetButton = observer(function PresetButton({
         onClick={() => playgroundStore.loadPreset(index)}
         onDoubleClick={() => setShowingEditModal(true)}
       >
-        {preset.name || `${preset.pattern.name} ${index + 1}`}
+        {preset.name ||
+          `${
+            typeof preset.pattern === "string"
+              ? preset.pattern
+              : preset.pattern.name
+          } ${index + 1}`}
       </Button>
       <IconButton
         as={Button}

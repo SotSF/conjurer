@@ -421,8 +421,9 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
         boxSizing="border-box"
         borderBottom={1}
         borderColor="black"
-        borderBottomStyle="dashed"
-        width="calc(100vw - 150px)"
+        borderBottomStyle="solid"
+        bgColor="gray.600"
+        width={`calc(${uiStore.horizontalLayout ? "100vw" : "60vw"} - 150px)`}
         height="20px"
         zIndex={100}
       />

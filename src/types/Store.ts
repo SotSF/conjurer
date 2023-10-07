@@ -1,9 +1,5 @@
 import { Block } from "@/src/types/Block";
-import {
-  MAX_PIXELS_PER_SECOND,
-  MIN_PIXELS_PER_SECOND,
-  UIStore,
-} from "@/src/types/UIStore";
+import { MIN_PIXELS_PER_SECOND, UIStore } from "@/src/types/UIStore";
 import { makeAutoObservable, configure } from "mobx";
 import { AudioStore } from "@/src/types/AudioStore";
 import { Variation } from "@/src/types/Variations/Variation";

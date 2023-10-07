@@ -1,3 +1,3 @@
-import { TransferBlock } from "@/src/types/TransferBlock";
+import { SerializedBlock } from "@/src/types/Block";
 
-export type Preset = TransferBlock & { name?: string };
+export type Preset = SerializedBlock & { name?: string };

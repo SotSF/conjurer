@@ -1,8 +1,8 @@
-import { TransferBlock } from "@/src/types/TransferBlock";
+import { SerializedBlock } from "@/src/types/Block";
 
 export type ControllerMessage =
   | {
       type: "connect";
       context: string;
     }
-  | { type: "updateBlock"; transferBlock: TransferBlock };
+  | { type: "updateBlock"; serializedBlock: SerializedBlock };
