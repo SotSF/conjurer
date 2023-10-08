@@ -10,14 +10,15 @@ import { useDataTransmission } from "@/src/hooks/dataTransmission";
 type Props = {
   renderTarget: WebGLRenderTarget;
   transmitData: boolean;
+  visible?: boolean;
 };
 
 export const CanopySpaceView = observer(function CanopySpaceView({
   renderTarget,
   transmitData,
+  visible,
 }: Props) {
   const store = useStore();
-  const { uiStore } = store;
   const outputMesh = useRef<Mesh>(null);
   const outputUniforms = useRef({
     u_texture: { value: renderTarget.texture },
@@ -36,7 +37,7 @@ export const CanopySpaceView = observer(function CanopySpaceView({
 
   // render the canopy space view
   useFrame(({ gl, camera }) => {
-    if (!outputMesh.current || uiStore.displayMode !== "canopySpace") return;
+    if (!outputMesh.current || !visible) return;
 
     gl.setRenderTarget(null);
     gl.render(outputMesh.current, camera);

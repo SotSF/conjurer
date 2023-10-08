@@ -40,11 +40,15 @@ export const PreviewCanvas = observer(function PreviewCanvas({
             <Canopy renderTarget={renderTarget} />
           )}
           {playgroundDisplayMode === "cartesianSpace" && (
-            <CartesianSpaceView renderTarget={renderTarget} />
+            <CartesianSpaceView
+              renderTarget={renderTarget}
+              visible={playgroundDisplayMode === "cartesianSpace"}
+            />
           )}
           <CanopySpaceView
             renderTarget={renderTarget}
             transmitData={uiStore.patternDrawerOpen}
+            visible={playgroundDisplayMode === "canopySpace"}
           />
         </>
       )}
