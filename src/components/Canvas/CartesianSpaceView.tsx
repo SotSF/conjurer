@@ -5,7 +5,6 @@ import vert from "@/src/shaders/default.vert";
 import fromTexture from "@/src/shaders/fromTexture.frag";
 import { observer } from "mobx-react-lite";
 import { useStore } from "@/src/types/StoreContext";
-import cartesianSpace from "@/src/shaders/cartesianSpace.frag";
 
 type Props = {
   renderTarget: WebGLRenderTarget;
@@ -19,7 +18,7 @@ export const CartesianSpaceView = observer(function CartesianSpaceView({
   const outputMesh = useRef<Mesh>(null);
   const outputUniforms = useRef({
     u_texture: { value: renderTarget.texture },
-    u_cartesianness: { value: 1 },
+    u_intensity: { value: 1 },
   });
 
   useEffect(() => {
@@ -27,7 +26,10 @@ export const CartesianSpaceView = observer(function CartesianSpaceView({
     outputUniforms.current.u_texture.value = renderTarget.texture;
   }, [renderTarget.texture]);
 
-  // TODO: implement global intensity
+  useEffect(() => {
+    if (!outputUniforms.current) return;
+    outputUniforms.current.u_intensity.value = store.globalIntensity;
+  }, [store.globalIntensity]);
 
   // render the cartesian space view
   useFrame(({ gl, camera }) => {
@@ -42,7 +44,7 @@ export const CartesianSpaceView = observer(function CartesianSpaceView({
       <planeGeometry args={[2, 2]} />
       <shaderMaterial
         uniforms={outputUniforms.current}
-        fragmentShader={cartesianSpace}
+        fragmentShader={fromTexture}
         vertexShader={vert}
       />
     </mesh>

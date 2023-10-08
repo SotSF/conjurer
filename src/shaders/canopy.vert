@@ -1,10 +1,12 @@
-#define PI 3.14159265359
+#include <conjurer_common>
+
 #define blackout_lower_bound 0.05
 #define fullbright_lower_bound 0.90
 #define minimum_brightness 0.02
 
 uniform vec3 u_view_vector;
 varying vec2 v_uv;
+varying vec2 v_normalized_uv;
 varying float v_intensity;
 
 void main() {
@@ -22,11 +24,16 @@ void main() {
     float boundedIntensity = clamp(smoothstep(blackout_lower_bound, fullbright_lower_bound, adjustedIntensity), minimum_brightness, 1.0);
     v_intensity = boundedIntensity;
 
-    // Pass uv coordinates to the fragment shader.
+    // Pass cartesian coordinates to the fragment shader.
+
+    // uv is in canopy coordinates
     // uv.x, uv.y are in the range [0, 1]
     // x represents the angle around the center of the canopy
     // y represents the distance from the apex of the canopy
-    v_uv = uv;
+
+    // Convert uv to cartesian coordinates
+    v_uv = canopyToCartesianProjection(uv);
+    v_normalized_uv = cartesianToNormalizedProjection(v_uv);
 
     gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
     gl_PointSize = 100.0 / length(cameraToPixelVector);

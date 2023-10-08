@@ -46,7 +46,7 @@ float wave(vec2 st, float edge, float size, float intensityFactor) {
 void main() {
     vec2 st = v_uv;
 
-    vec2 cartesian = canopyToHalfCartesianProjection(st) + 0.5;
+    vec2 normalizedPosition = cartesianToNormalizedProjection(st);
 
     float time = u_time * u_time_factor + u_time_offset;
 
@@ -66,7 +66,7 @@ void main() {
 
         // rotate the space for this iteration
         float angle = offset / u_waves * 2. * PI * u_spread_factor;
-        vec2 rotated = rotate2D(cartesian, angle);
+        vec2 rotated = rotate2D(normalizedPosition, angle);
 
         float waveIntensity = wave(rotated, waveLeadingEdge, u_wave_size, 1.);
 

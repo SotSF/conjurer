@@ -5,6 +5,7 @@ precision mediump float;
 #endif
 
 varying vec2 v_uv;
+varying vec2 v_normalized_uv;
 uniform float u_time;
 uniform sampler2D u_texture;
 
@@ -49,6 +50,7 @@ float construct(vec2 st, float offset) {
 
 void main() {
     vec2 st = v_uv;
+    st = cartesianToCanopyProjection(st);
 
     float time = u_time * u_time_factor + u_time_offset;
 
@@ -71,7 +73,7 @@ void main() {
         intensity += fade_factor * plot2(elevation, constructed);
     }
 
-    vec4 sampled = texture2D(u_texture, v_uv);
+    vec4 sampled = texture2D(u_texture, v_normalized_uv);
     vec3 masked = sampled.xyz * intensity;
 
     gl_FragColor = vec4(masked, 1.0);

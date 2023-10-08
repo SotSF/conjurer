@@ -1,8 +1,8 @@
+#include <conjurer_common>
+
 #ifdef GL_ES
 precision mediump float;
 #endif
-
-#define PI 3.14159265359
 
 varying vec2 v_uv;
 uniform float u_time;
@@ -19,6 +19,7 @@ vec3 colorB = vec3(0.027, 0.638, 1.000);
 
 void main() {
     vec2 st = v_uv;
+    st = cartesianToCanopyProjection(st);
 
     vec3 color = vec3(0.0);
 

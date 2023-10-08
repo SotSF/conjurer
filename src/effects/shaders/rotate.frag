@@ -1,3 +1,5 @@
+#include <conjurer_common>
+
 #ifdef GL_ES
 precision mediump float;
 #endif
@@ -12,6 +14,8 @@ varying vec2 v_uv;
 
 void main() {
     vec2 uv = v_uv;
-    uv.x = fract(v_uv.x + u_speed * u_time * 0.01 + u_offset);
+    uv = cartesianToCanopyProjection(uv);
+    uv.x = fract(uv.x + u_speed * u_time * 0.01 + u_offset);
+    uv = canopyToNormalizedProjection(uv);
     gl_FragColor = texture2D(u_texture, uv);
 }

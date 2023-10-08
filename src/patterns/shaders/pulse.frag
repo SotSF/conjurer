@@ -1,3 +1,5 @@
+#include <conjurer_common>
+
 #ifdef GL_ES
 precision mediump float;
 #endif
@@ -66,13 +68,9 @@ float triangleWave(in float x) {
     return 2. / PI * asin(sin(x));
 }
 
-float plot(vec2 st, float pct) {
-    return smoothstep(pct - 0.02, pct, st.y) -
-        smoothstep(pct, pct + 0.02, st.y);
-}
-
 void main() {
     vec2 st = v_uv;
+    st = cartesianToCanopyProjection(st);
 
     // offset the x coordinate based on the y coordinate to create a spiral
     float inverseY = 1. - st.y;

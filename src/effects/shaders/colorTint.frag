@@ -2,7 +2,7 @@
 precision mediump float;
 #endif
 
-varying vec2 v_uv;
+varying vec2 v_normalized_uv;
 uniform float u_time;
 
 uniform sampler2D u_texture;
@@ -15,7 +15,7 @@ uniform float u_intensity;
 // #define u_color vec4(1., 0., 0., 1.)
 
 void main() {
-    vec4 sampled = texture2D(u_texture, v_uv);
+    vec4 sampled = texture2D(u_texture, v_normalized_uv);
     vec4 mixed = mix(sampled, u_color, u_intensity);
 
     // any sampled pixels that are black, leave them black

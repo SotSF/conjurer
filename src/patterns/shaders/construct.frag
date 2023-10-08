@@ -51,6 +51,8 @@ float construct(vec2 st, float offset) {
 void main() {
     vec2 st = v_uv;
 
+    st = cartesianToCanopyProjection(st);
+
     float time = u_time * u_time_factor + u_time_offset;
 
     float intensity = 0.;

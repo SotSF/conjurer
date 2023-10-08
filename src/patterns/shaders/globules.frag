@@ -145,7 +145,6 @@ vec4 mainVR(in vec3 pos, in vec3 dir) {
 
 void main() {
     vec2 st = v_uv;
-    st = canopyToCartesianProjection(st);
 
     vec2 mouse = vec2(0.5);
 

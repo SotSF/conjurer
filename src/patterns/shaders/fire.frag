@@ -50,11 +50,10 @@ float snoise(vec3 uv, float res) {
 
 void main() {
     vec2 st = v_uv;
-    vec2 p = canopyToCartesianProjection(st);
 
-    float color = 1. + u_fire_power * 2. - ((u_fade_factor * 5. + 1.5) * length(2. * p));
+    float color = 1. + u_fire_power * 2. - ((u_fade_factor * 5. + 1.5) * length(2. * st));
 
-    vec3 coord = vec3(atan(p.x, p.y) / 6.2832 + .5, length(p) * .4, .5);
+    vec3 coord = vec3(atan(st.x, st.y) / 6.2832 + .5, length(st) * .4, .5);
 
     float time = u_time * u_time_factor + u_time_offset;
     for (int i = 1; i <= 7; i ++) {

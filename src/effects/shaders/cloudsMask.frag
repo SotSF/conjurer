@@ -6,7 +6,7 @@ precision mediump float;
 #define F4 0.309016994374947451
 #define PI 3.14159265359
 
-varying vec2 v_uv;
+varying vec2 v_normalized_uv;
 uniform float u_time;
 
 uniform sampler2D u_texture;
@@ -153,13 +153,7 @@ float surface(vec4 coord) {
 }
 
 void main() {
-    vec2 st = v_uv;
-
-    // Cartesian projection
-    float theta = st.x * 2.0 * 3.1415926;
-    float r = st.y * 0.88888888 + 0.111111111;
-    st.x = r * cos(theta) * 0.5;
-    st.y = r * sin(theta) * 0.5;
+    vec2 st = v_normalized_uv;
 
     float s = st.x * u_scale;
     float t = st.y * u_scale;
@@ -180,7 +174,7 @@ void main() {
 
     cloudiness = step(u_high_pass, cloudiness) * cloudiness;
 
-    vec4 sampled = texture2D(u_texture, v_uv);
+    vec4 sampled = texture2D(u_texture, st);
     vec3 masked = sampled.xyz * cloudiness;
 
     gl_FragColor = vec4(masked, 1.0);

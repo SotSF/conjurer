@@ -8,7 +8,8 @@ varying vec2 v_uv;
 varying float v_intensity;
 
 void main() {
-    vec4 sampled = texture2D(u_texture, v_uv);
+    vec2 normalized = v_uv * 0.5 + 0.5;
+    vec4 sampled = texture2D(u_texture, normalized);
     vec4 black = vec4(0.0, 0.0, 0.0, 1.0);
     vec4 color = mix(black, sampled, v_intensity);
 

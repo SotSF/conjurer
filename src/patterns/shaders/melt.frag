@@ -8,6 +8,8 @@
 // Same as my original Sine Puke, but with more rainbow, and less "newp".
 // Based on code by Spektre posted at http://stackoverflow.com/questions/3407942/rgb-values-of-visible-spectrum
 
+#include <conjurer_common>
+
 #ifdef GL_ES
 precision mediump float;
 #endif
@@ -72,16 +74,12 @@ vec3 spectral_palette(float x) {
 
 void main() {
     vec2 st = v_uv;
+    st = cartesianToCanopyProjection(st);
 
     // Rotate over time
     st.x = fract(st.x + u_rotation_speed * u_time * 0.01);
 
-    // Convert from canopy space to cartesian
-    float theta = st.x * 2.0 * 3.1415926;
-    float r = st.y * 0.88888888 + 0.111111111;
-    float x = r * cos(theta) * 0.5 + 0.5;
-    float y = r * sin(theta) * 0.5 + 0.5;
-    st = vec2(x, y) * 2.0 - 1.0;
+    st = canopyToCartesianProjection(st);
 
     float time = u_time * u_time_factor + u_time_offset;
     st.x += sin(time * 0.1) * 0.5 - 0.5;

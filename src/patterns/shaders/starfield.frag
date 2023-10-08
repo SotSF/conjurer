@@ -31,13 +31,6 @@ uniform float u_intensity;
 void main() {
     vec2 st = v_uv;
 
-    // Convert from canopy space to cartesian
-    float theta = st.x * 2.0 * 3.1415926;
-    float r = st.y * 0.88888888 + 0.111111111;
-    float x = r * cos(theta) * 0.5 + 0.5;
-    float y = r * sin(theta) * 0.5 + 0.5;
-    st = vec2(x, y) * 2.0 - 1.0;
-
     vec3 v = vec3(st, 1.0 - length(st) * 0.2);
 
     float ta = u_time * 0.1 * u_meander_factor + u_meander_offset;

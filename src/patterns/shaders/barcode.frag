@@ -26,30 +26,10 @@ uniform float u_bar_likelihood;
 // #define u_bar_fade_factor 0.25
 // #define u_bar_likelihood 0.5
 
-vec3 RGBtoHCV(in vec3 RGB) {
-    float Epsilon = 1e-9;
-    // Based on work by Sam Hocevar and Emil Persson
-    vec4 P = (RGB.g < RGB.b) ? vec4(RGB.bg, - 1.0, 2.0 / 3.0) : vec4(RGB.gb, 0.0, - 1.0 / 3.0);
-    vec4 Q = (RGB.r < P.x) ? vec4(P.xyw, RGB.r) : vec4(RGB.r, P.yzx);
-    float C = Q.x - min(Q.w, Q.y);
-    float H = abs((Q.w - Q.y) / (6.0 * C + Epsilon) + Q.z);
-    return vec3(H, C, Q.x);
-}
-
-vec3 HUEtoRGB(in float H) {
-    float R = abs(H * 6.0 - 3.0) - 1.0;
-    float G = 2.0 - abs(H * 6.0 - 2.0);
-    float B = 2.0 - abs(H * 6.0 - 4.0);
-    return clamp(vec3(R, G, B), vec3(0.0, 0.0, 0.0), vec3(1.0, 1.0, 1.0));
-}
-
-vec3 HSVtoRGB(in vec3 HSV) {
-    vec3 RGB = HUEtoRGB(HSV.x);
-    return ((RGB - 1.0) * HSV.y + 1.0) * HSV.z;
-}
-
 void main() {
     vec2 st = v_uv;
+
+    st = cartesianToCanopyProjection(st);
 
     st.x *= u_bars;
     st.y *= u_segments;
