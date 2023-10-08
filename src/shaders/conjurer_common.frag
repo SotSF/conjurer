@@ -108,9 +108,7 @@ vec2 canopyToCartesianProjection(vec2 _st) {
 
 // Converts canopy coordinates to half cartesian coordinates
 vec2 canopyToHalfCartesianProjection(vec2 _st) {
-    float theta = _st.x * 2.0 * PI;
-    float r = _st.y * 0.88888888 + 0.111111111;
-    return vec2(r * .5 * cos(theta), r * .5 * sin(theta));
+    return 0.5 * canopyToCartesianProjection(_st);
 }
 
 // Converts cartesian coordinates to normalized coordinates

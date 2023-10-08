@@ -4,8 +4,6 @@
 precision mediump float;
 #endif
 
-#define PI 3.14159265358979323846
-
 varying vec2 v_uv;
 uniform float u_time;
 uniform sampler2D u_texture;
@@ -43,15 +41,14 @@ void main(void) {
     // rotate the cell space
     st = rotate2DCentered(st, PI * u_cell_rotation_rate * u_time + PI * u_cell_rotation);
 
-    // half cartesian to cartesian
-    st *= 2.;
+    // keeping these projections for backwards compatibility
+    st = cartesianToPolarProjection(st);
+    st = canopyToNormalizedProjection(st);
 
-    // cartesian to normalized space
-    st = cartesianToNormalizedProjection(st);
-
+    vec3 black = vec3(0., 0., 0.);
     vec4 sampled = texture2D(u_texture, st);
-    // when we get close to an edge (out of pounds of the texture) use black instead
-    vec3 color = mix(sampled.xyz, vec3(0.), step(1., max(abs(st.x), abs(st.y))));
+    // when we get close to an edge (out of bounds of the texture) use black instead
+    vec3 color = mix(black, sampled.xyz, 1. - step(0.5, length(st - 0.5)));
 
     gl_FragColor = vec4(color, 1.0);
 }
