@@ -84,6 +84,13 @@ float plot(vec2 st, float pct) {
 //  (0.5, 0.5) is at the top right corner of the canopy
 //  (-0.5, -0.5) is at the bottom left corner of the canopy
 
+// ---------- NORMALIZED COORDINATES ----------
+// Normalized coordinates are the usual x,y coordinates, used in a variety of contexts.
+// Coordinate are in the range 0.0 to 1.0, where:
+//  (0, 0) is at the bottom left corner of the space
+//  (1.0, 1.0) is at the top right corner of the space
+//  (0.5, 0.5) is at the center of the space
+
 // ---------- POLAR COORDINATES ----------
 
 // Polar coordinates are the usual theta, radius coordinates, where:
@@ -101,12 +108,18 @@ vec2 canopyToCartesianProjection(vec2 _st) {
 
 // Converts canopy coordinates to half cartesian coordinates
 vec2 canopyToHalfCartesianProjection(vec2 _st) {
-    float theta = _st.x * 2.0 * PI;
-    float r = _st.y * 0.88888888 + 0.111111111;
-    return vec2(r * .5 * cos(theta), r * .5 * sin(theta));
+    return 0.5 * canopyToCartesianProjection(_st);
 }
 
-// TODO: in general, organize code below this point better
+// Converts cartesian coordinates to normalized coordinates
+vec2 cartesianToNormalizedProjection(vec2 _st) {
+    return _st * 0.5 + 0.5;
+}
+
+vec2 canopyToNormalizedProjection(vec2 _st) {
+    vec2 cartesian = canopyToCartesianProjection(_st);
+    return cartesianToNormalizedProjection(cartesian);
+}
 
 vec2 canopyToPolarProjection(vec2 _st) {
     float theta = _st.x * 2.0 * PI;
@@ -114,14 +127,12 @@ vec2 canopyToPolarProjection(vec2 _st) {
     return vec2(theta, r);
 }
 
-// TODO: check if this is cartesian or half cartesian
 vec2 cartesianToPolarProjection(vec2 _st) {
     float theta = atan(_st.y, _st.x) / PI / 2. + 0.5;
     float r = length(_st);
     return vec2(theta, r);
 }
 
-// TODO: check if this is cartesian or half cartesian
 vec2 polarToCartesianProjection(vec2 _st) {
     float theta = _st.x * 2.0 * PI;
     float r = _st.y;
@@ -134,11 +145,10 @@ float polarToCanopyRadius(float radius) {
     return canopyRadius;
 }
 
-// TODO: check if this is cartesian or half cartesian
 vec2 cartesianToCanopyProjection(vec2 _st) {
     float theta = atan(_st.y, _st.x) / PI / 2. + 0.5;
-    float polarRadius = polarToCanopyRadius(length(_st));
-    return vec2(theta, polarRadius);
+    float canopyRadius = polarToCanopyRadius(length(_st));
+    return vec2(theta, canopyRadius);
 }
 
 // requires centered cartesian space
@@ -147,7 +157,7 @@ vec2 tileCentered(vec2 _st, float _zoom) {
     return fract(_st - 0.5) - 0.5;
 }
 
-// requires bottom-left-origin cartesian space
+// requires bottom-left-origin cartesian space (normalized space)
 vec2 tile(vec2 _st, float _zoom) {
     _st *= _zoom;
     return fract(_st);
@@ -159,7 +169,7 @@ vec2 rotate2DCentered(vec2 _st, float _angle) {
     return _st;
 }
 
-// requires bottom-left-origin cartesian space
+// requires bottom-left-origin cartesian space (normalized space)
 vec2 rotate2D(vec2 _st, float _angle) {
     _st -= 0.5;
     _st = mat2(cos(_angle), - sin(_angle), sin(_angle), cos(_angle)) * _st;

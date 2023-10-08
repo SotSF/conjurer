@@ -163,7 +163,6 @@ float cnoise(vec4 P) {
 
 void main() {
   vec2 uv = v_uv;
-  uv = canopyToCartesianProjection(uv);
   vec2 pos = vec2(uv * u_period);
 
   float n = cnoise(vec4(pos, u_time * u_timeFactor, u_seed));

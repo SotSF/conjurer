@@ -1,9 +1,11 @@
 #include <conjurer_common>
+
 #ifdef GL_ES
 precision mediump float;
 #endif
 
 varying vec2 v_uv;
+varying vec2 v_normalized_uv;
 uniform float u_time;
 uniform sampler2D u_texture;
 
@@ -52,7 +54,7 @@ float circle(vec2 _st, float _radius, float _smoothEdges) {
 void main(void) {
     vec2 st = v_uv;
 
-    st = canopyToHalfCartesianProjection(st);
+    st *= 0.5;
 
     vec3 color = vec3(0.0);
 
@@ -73,7 +75,7 @@ void main(void) {
     // Draw a circle
     color += vec3(circle(fract(st), u_circle_size, u_circle_smooth));
 
-    vec4 sampled = texture2D(u_texture, v_uv);
+    vec4 sampled = texture2D(u_texture, v_normalized_uv);
     vec3 masked = sampled.xyz * color;
 
     gl_FragColor = vec4(masked, 1.0);

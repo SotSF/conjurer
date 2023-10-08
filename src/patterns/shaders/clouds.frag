@@ -155,11 +155,7 @@ float surface(vec4 coord) {
 void main() {
     vec2 st = v_uv;
 
-    // Cartesian projection
-    float theta = st.x * 2.0 * 3.1415926;
-    float r = st.y * 0.88888888 + 0.111111111;
-    st.x = r * cos(theta) * 0.5;
-    st.y = r * sin(theta) * 0.5;
+    st *= 0.5;
 
     float s = st.x * u_scale;
     float t = st.y * u_scale;

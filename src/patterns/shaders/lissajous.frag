@@ -21,13 +21,6 @@ uniform float u_toggleColor;
 void main() {
     vec2 uv = v_uv;
 
-    // Convert from canopy space to cartesian
-    float theta = uv.x * 2.0 * 3.1415926;
-    float r = uv.y * 0.88888888 + 0.111111111;
-    float x = r * cos(theta) * 0.5 + 0.5;
-    float y = r * sin(theta) * 0.5 + 0.5;
-    uv = vec2(x, y) * 2.0 - 1.0;
-
     vec3 col = vec3(0.);
     for (float i = 0.; i < u_count; i ++) {
         float x = u_a0 * sin(u_a1 * (u_time + (i * u_space)));

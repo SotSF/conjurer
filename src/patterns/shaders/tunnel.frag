@@ -4,6 +4,8 @@
 // License URL: http://creativecommons.org/licenses/by-nc-sa/3.0/
 // Source: https://www.shadertoy.com/view/4dfGDr
 
+#include <conjurer_common>
+
 #ifdef GL_ES
 precision mediump float;
 #endif
@@ -119,13 +121,11 @@ vec4 mainVR(in vec3 pos, in vec3 dir, in float time) {
 
 void main() {
     vec2 st = v_uv;
+
+    // TODO: see if these projections can be avoided in a backward compatible way
+    st = cartesianToCanopyProjection(st);
     st -= 0.15;
-    // Convert from canopy space to cartesian
-    float theta = st.x * 2.0 * 3.1415926;
-    float r = st.y * 0.88888888 + 0.111111111;
-    float x = r * cos(theta) * 0.5 + 0.5;
-    float y = r * sin(theta) * 0.5 + 0.5;
-    st = vec2(x, y) * 2.0 - 1.0;
+    st = canopyToCartesianProjection(st);
 
     float time = u_time_factor * u_time + u_time_offset;
 

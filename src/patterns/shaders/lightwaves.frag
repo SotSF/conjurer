@@ -17,7 +17,7 @@ void main() {
     float b = mix(0.01, 0.2, u_intensity);
     float t = mix(0.01, 2.0, u_timeFactor);
     float p = mix(0.5, 3.0, u_period);
-    vec2 uv = canopyToCartesianProjection(v_uv) * p;
+    vec2 uv = v_uv * p;
     for (float i = 0.0; i < 2.0; i ++) {
         uv = uv + i;
         uv *= cos(length(uv) - i + u_time * t) + sin(uv.y);

@@ -44,6 +44,7 @@ float triangleWave(in float x) {
 
 void main() {
     vec2 st = v_uv;
+    st = cartesianToCanopyProjection(st);
 
     // offset the x coordinate based on the y coordinate to create a spiral
     float inverse_y = 1. - st.y;

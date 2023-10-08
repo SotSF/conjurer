@@ -18,7 +18,6 @@ uniform float u_time_offset;
 
 void main() {
     vec2 uv = v_uv;
-    uv = canopyToCartesianProjection(uv);
     // float uv_r = sqrt(uv.x * uv.x + uv.y * uv.y);
     // float uv_theta = atan(uv.y / uv.x);
     vec3 col = vec3(0.);

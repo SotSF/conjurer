@@ -2,7 +2,7 @@ import { WebGLRenderTarget, Mesh } from "three";
 import { useFrame } from "@react-three/fiber";
 import { useEffect, useRef } from "react";
 import vert from "@/src/shaders/default.vert";
-import fromTexture from "@/src/shaders/fromTexture.frag";
+import fromTextureToCanopySpace from "@/src/shaders/fromTextureToCanopySpace.frag";
 import { observer } from "mobx-react-lite";
 import { useStore } from "@/src/types/StoreContext";
 import { useDataTransmission } from "@/src/hooks/dataTransmission";
@@ -49,7 +49,7 @@ export const CanopySpaceView = observer(function CanopySpaceView({
       <planeGeometry args={[2, 2]} />
       <shaderMaterial
         uniforms={outputUniforms.current}
-        fragmentShader={fromTexture}
+        fragmentShader={fromTextureToCanopySpace}
         vertexShader={vert}
       />
     </mesh>

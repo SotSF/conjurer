@@ -94,12 +94,7 @@ vec4 colorLine(float dist, float radius, float theta, int spiralIdx) {
 }
 
 void main() {
-    // Convert from canopy space to cartesian
-    float theta = v_uv.x * 2.0 * 3.1415926;
-    float r = v_uv.y * 0.88888888 + 0.111111111;
-    float x = r * cos(theta) * 0.5 + 0.5;
-    float y = r * sin(theta) * 0.5 + 0.5;
-    vec2 uv = vec2(x, y) * 2.0 - 1.0;
+    vec2 uv = v_uv;
 
     // Convert the cartesian coordinates to polar coordinates
     float radius = length(uv) * 300.0;

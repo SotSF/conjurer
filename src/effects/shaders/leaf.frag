@@ -15,6 +15,7 @@ uniform float u_time_factor;
 uniform float u_time_offset;
 
 varying vec2 v_uv;
+varying vec2 v_normalized_uv;
 uniform float u_time;
 uniform sampler2D u_texture;
 
@@ -26,12 +27,7 @@ vec2 tile(vec2 _st, float _zoom) {
 void main(void) {
     vec2 st = v_uv;
 
-    // Cartesian projection
-    float theta = st.x * 2.0 * 3.1415926;
-    float r = st.y * 0.88888888 + 0.111111111;
-    st.x = r * cos(theta) * 0.5;
-    st.y = r * sin(theta) * 0.5;
-
+    st *= 0.5;
     st -= u_coordinate_offset;
     st = tile(st, u_tiling);
     // st = rotateTilePattern(st);
@@ -45,9 +41,9 @@ void main(void) {
     float time = u_time * u_time_factor + u_time_offset;
     // time = 0.0;
 
-    // Draw weed leaf
+    // Draw leaf
     vec2 pos = vec2(0.5) - st;
-    r = length(pos) * 2.5;
+    float r = length(pos) * 2.5;
     float a = atan(pos.y - 0.19, pos.x);
     float f = abs(mod(a * 0.5 / PI * 16., 2.0) - 1.) + 0.15;
     // f *= abs(sin(a * 3.)) * .5;
@@ -55,7 +51,7 @@ void main(void) {
     f += .3 * sin(time * .5);
     float color = (1. - smoothstep(f, f + 0.0, r));
 
-    vec4 sampled = texture2D(u_texture, v_uv);
+    vec4 sampled = texture2D(u_texture, v_normalized_uv);
     vec3 masked = sampled.xyz * color;
 
     gl_FragColor = vec4(masked, 1.0);

@@ -60,13 +60,6 @@ vec3 spectral_colour(float l) // RGB <0,1> <- lambda l <400,700> [nm]
 
 void main() {
     vec2 st = v_uv;
-    // st -= 0.15;
-    // Convert from canopy space to cartesian
-    float theta = st.x * 2.0 * 3.1415926;
-    float r = st.y * 0.88888888 + 0.111111111;
-    float x = r * cos(theta) * 0.5 + 0.5;
-    float y = r * sin(theta) * 0.5 + 0.5;
-    st = vec2(x, y) * 2.0 - 1.0;
 
     float time = u_time * u_time_factor + u_time_offset;
 
