@@ -17,7 +17,7 @@ https://www.shadertoy.com/
 
 Here are some cool things that people have built:
 
-- [Shader Art Coding Introduction](https://www.shadertoy.com/)
+- [Shader Toy](https://www.shadertoy.com/)
 - [Tunnel](https://www.shadertoy.com/view/4dfGDr)
 - [Rainforest](https://www.shadertoy.com/view/4ttSWf)
 - [Fractal Pyramid](https://www.shadertoy.com/view/tsXBzS)
@@ -31,6 +31,7 @@ Here are some cool things that people have built:
 - [Animated easing functions](https://easings.net/)
 - [GLSL easing functions](https://thebookofshaders.com/edit.php#06/easing.frag)
 - [Noise functions](https://gist.github.com/patriciogonzalezvivo/670c22f3966e662d2f83)
+- [Introduction to Ray Marching](https://www.youtube.com/watch?v=TSAIR03FPfY)
 
 ### Color + palettes
 
