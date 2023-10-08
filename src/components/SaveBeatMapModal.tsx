@@ -58,7 +58,7 @@ export const SaveBeatMapModal = observer(function SaveBeatMapModal() {
       });
       return;
     }
-    console.log(beatMapStore.beatMap.serialize(), beatMapStore.beatMap.tempo);
+
     const putObjectCommand = new PutObjectCommand({
       Bucket: ASSET_BUCKET_NAME,
       Key: `${BEAT_MAP_ASSET_PREFIX}${beatMapFilename}.json`,

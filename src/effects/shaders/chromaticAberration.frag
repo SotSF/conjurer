@@ -16,7 +16,7 @@ uniform float u_mag_b;
 
 void main() {
     vec2 st = v_uv;
-    // TODO: probably has some bugs
+    // TODO: this ended up being slightly different after the canopy->cartesian migration, needs fix
     st = cartesianToCanopyProjection(st);
 
     vec2 dir = vec2(cos(u_theta), sin(u_theta)) * SCALE_FACTOR;

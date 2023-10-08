@@ -387,8 +387,6 @@ export class Block<T extends ExtraParams = {}> {
     return serialized;
   };
 
-  // TODO: check context or use a flag, if playground then incorporate initial parameters into
-  // serialized block
   serialize = (): SerializedBlock => ({
     id: this.id,
     pattern: this.pattern.serialize(),
