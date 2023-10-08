@@ -1,8 +1,9 @@
 import { WebGLRenderTarget } from "three";
-import { memo, useEffect } from "react";
+import { useEffect } from "react";
 import { Block } from "@/src/types/Block";
 import { useRenderTarget } from "@/src/hooks/renderTarget";
 import { BlockStackNode } from "@/src/components/RenderPipeline/BlockStackNode";
+import { observer } from "mobx-react-lite";
 
 type Props = {
   autorun?: boolean;
@@ -10,7 +11,7 @@ type Props = {
   setRenderTarget: (renderTarget: WebGLRenderTarget) => void;
 };
 
-export const SingleBlockRenderPipeline = memo(
+export const SingleBlockRenderPipeline = observer(
   function SingleBlockRenderPipeline({
     autorun,
     block,

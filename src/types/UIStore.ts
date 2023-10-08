@@ -59,6 +59,15 @@ export class UIStore {
     this.saveToLocalStorage();
   }
 
+  private _playgroundDisplayMode: DisplayMode = "canopy";
+  get playgroundDisplayMode() {
+    return this._playgroundDisplayMode;
+  }
+  set playgroundDisplayMode(mode: DisplayMode) {
+    this._playgroundDisplayMode = mode;
+    this.saveToLocalStorage();
+  }
+
   patternDrawerOpen = false;
 
   playlistDrawerOpen = false;
@@ -135,6 +144,8 @@ export class UIStore {
       this.horizontalLayout = !!localStorageUiSettings.horizontalLayout;
       this.showingPerformance = !!localStorageUiSettings.showingPerformance;
       this.displayMode = localStorageUiSettings.displayMode || "canopy";
+      this.playgroundDisplayMode =
+        localStorageUiSettings.playgroundDisplayMode || "canopy";
       this.renderTargetSize =
         localStorageUiSettings.renderTargetSize || INITIAL_RENDER_TARGET_SIZE;
     }
@@ -148,6 +159,7 @@ export class UIStore {
         horizontalLayout: this.horizontalLayout,
         showingPerformance: this.showingPerformance,
         displayMode: this.displayMode,
+        playgroundDisplayMode: this.playgroundDisplayMode,
         renderTargetSize: this.renderTargetSize,
       })
     );

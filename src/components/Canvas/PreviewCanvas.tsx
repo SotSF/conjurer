@@ -20,7 +20,7 @@ export const PreviewCanvas = observer(function PreviewCanvas({
 }: PreviewCanvasProps) {
   const store = useStore();
   const { uiStore } = store;
-  const { displayMode } = uiStore;
+  const { playgroundDisplayMode } = uiStore;
   const [renderTarget, setRenderTarget] = useState<WebGLRenderTarget | null>(
     null
   );
@@ -36,8 +36,10 @@ export const PreviewCanvas = observer(function PreviewCanvas({
       />
       {renderTarget && (
         <>
-          {displayMode === "canopy" && <Canopy renderTarget={renderTarget} />}
-          {displayMode === "cartesianSpace" && (
+          {playgroundDisplayMode === "canopy" && (
+            <Canopy renderTarget={renderTarget} />
+          )}
+          {playgroundDisplayMode === "cartesianSpace" && (
             <CartesianSpaceView renderTarget={renderTarget} />
           )}
           <CanopySpaceView
