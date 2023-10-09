@@ -166,7 +166,8 @@ void main() {
     float nz = sin(s * 2.0 * PI) * multiplier;
     float nw = sin(t * 2.0 * PI) * multiplier;
 
-    // TODO: u_time, u_speed need to be applied differently. when input to surface becomes to high, doesn't work anymore
+    // note: u_time, u_speed may need to be applied differently. when input to surface becomes to
+    // high, doesn't work anymore
     float surf = surface(vec4(nx, ny, nz, nw) + u_time * 0.05 * u_speed);
 
     float threshold_step_size = 1.0 / floor(1.0 / u_threshold_size);

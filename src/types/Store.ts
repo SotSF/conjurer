@@ -150,6 +150,7 @@ export class Store {
 
     if (this.context === "playground") {
       this.playgroundStore.initialize();
+      this.uiStore.initialize();
       setupControllerWebsocket(this.context, this.playgroundStore.onUpdate);
       return;
     }
@@ -353,9 +354,8 @@ export class Store {
     if (!blocksOrVariationsData || !blocksOrVariationsData.length) return;
 
     const firstBlockOrVariation = blocksOrVariationsData[0];
+    // check if we are pasting blocks
     if (firstBlockOrVariation.pattern) {
-      // these are blocks
-
       const layerToPasteInto = this.selectedLayer;
       if (!layerToPasteInto) return;
 

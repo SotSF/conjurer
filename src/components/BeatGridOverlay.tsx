@@ -2,25 +2,11 @@ import { observer } from "mobx-react-lite";
 import { Box } from "@chakra-ui/react";
 import { useStore } from "@/src/types/StoreContext";
 import { BeatGrid } from "@/src/components/BeatGrid";
-import { useEffect, useState } from "react";
-import { runInAction } from "mobx";
 
 export const BeatGridOverlay = observer(function BeatGridOverlay() {
   const store = useStore();
   const { uiStore, audioStore, beatMapStore } = store;
   const { showingBeatGridOverlay } = uiStore;
-
-  useEffect(() => {
-    // TODO: load this from a different source
-    const songMetadata = localStorage.getItem("songMetadata");
-    if (!songMetadata) return;
-
-    const { songTempo, songTempoOffset } = JSON.parse(songMetadata);
-    runInAction(() => {
-      beatMapStore.beatMap.tempo = songTempo;
-      beatMapStore.beatMap.tempoOffset = songTempoOffset;
-    });
-  }, [beatMapStore.beatMap]);
 
   if (!showingBeatGridOverlay) return null;
 

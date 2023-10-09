@@ -1,14 +1,6 @@
-> NOTE: this is out of date, we have a handy script now! Need to edit this page.
-
 # How to make a pattern
 
-Let's create a pattern called Blah. In total we will create two files and edit one file:
-
-- `src/patterns/shaders/blah.frag` (new)
-- `src/patterns/Blah.ts` (new)
-- `src/patterns/patterns.ts` (edit)
-
-The goal will be to create a barebones pattern that we can get to hot reload as we make changes to the shader so that we can immediately see the effects of our cool complicated maths. Yay!
+Let's create a pattern called Blah. The goal will be to create a barebones pattern that we can get to hot reload as we make changes to the shader. This way, w can immediately see the effects of our cool complicated maths. Yay!
 
 1. Follow the usual steps to install dependencies and run the dev server:
 
@@ -16,83 +8,23 @@ The goal will be to create a barebones pattern that we can get to hot reload as 
 yarn && yarn dev
 ```
 
-2. Create the shader file, `src/patterns/shaders/blah.frag`:
+2. Create the pattern with the following command:
 
-```glsl
-#include <conjurer_common>
-
-#ifdef GL_ES
-precision mediump float;
-#endif
-
-varying vec2 v_uv;
-uniform float u_time;
-
-// these are custom uniforms. we will start with two that are typically useful:
-uniform float u_time_factor;
-uniform float u_time_offset;
-// TODO: specify more uniforms here
-
-// For debugging, you can overwrite uniform values like the following and
-// hot reloading will respect the new values. Remember! Only leave these lines
-// uncommented during development, and when you are ready to commit, comment
-// them again.
-// #define u_time_factor 1.
-// #define u_time_offset 0.
-
-void main() {
-    vec2 st = v_uv;
-
-    float time = u_time * u_time_factor + u_time_offset;
-
-    vec3 color = vec3(0., sin(time), st.y);
-    gl_FragColor = vec4(color, 1.);
-}
+```
+yarn generatePattern Blah
 ```
 
-3. Create the pattern file, `src/patterns/Blah.ts`:
+This will create two files and edit one file:
 
-```typescript
-import { Pattern } from "@/src/types/Pattern";
-import blah from "./shaders/blah.frag";
+- `src/patterns/shaders/blah.frag` (new)
+- `src/patterns/Blah.ts` (new)
+- `src/patterns/patterns.ts` (edit)
 
-export { blah };
-export const Blah = () =>
-  new Pattern("Blah", blah, {
-    // define two uniforms that are typically useful
-    u_time_factor: {
-      name: "Time Factor",
-      value: 1,
-    },
-    u_time_offset: {
-      name: "Time Offset",
-      value: 0,
-    },
-    // TODO: specify more uniforms here
-  });
-```
-
-4. Edit the file `src/patterns/patterns.ts` to include your pattern:
-
-```typescript
-// ... various imports
-import { Blah } from "@/src/patterns/blah"; // <--- add this line
-
-const patternFactories: Array<() => Pattern> = [
-  LogSpirals,
-  Barcode,
-  // ... more patterns
-  Blah, // <--- add this line
-];
-
-// more stuff
-```
-
-5. View the pattern in the pattern playground! Visit http://localhost:3000/playground.
+3. View the pattern in the pattern playground! Visit http://localhost:3000/playground.
 
 You should see a new pattern called "Blah" - click it!
 
-6. Edit the shader code and make sure that the pattern is hot reloaded and shows the change in the browser.
+4. Edit the shader code and make sure that the pattern is hot reloaded and shows the change in the browser.
 
 In the shader file `src/patterns/shaders/blah.frag`, let's simply uncomment the line:
 

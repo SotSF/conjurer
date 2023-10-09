@@ -72,7 +72,6 @@ const transformer: ts.TransformerFactory<ts.Node> = (context) => {
 
     const visitor = (node: ts.Node): ts.VisitResult<ts.Node> => {
       if (ts.isImportDeclaration(node)) {
-        // TODO: maybe refactor this.
         const v = (importChild: ts.Node): ts.VisitResult<ts.Node> => {
           if (ts.isIdentifier(importChild)) {
             if (importIdentifiers.has(importChild.text)) {

@@ -111,5 +111,6 @@ void main() {
             fragColor += colorLine(abs(radius - spiralRadius), radius, theta, spiralIdx);
         }
     }
+
     gl_FragColor = fragColor;
 }

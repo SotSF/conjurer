@@ -8,13 +8,14 @@ import { useStore } from "@/src/types/StoreContext";
 
 type Props = {
   renderTarget: WebGLRenderTarget;
+  visible?: boolean;
 };
 
 export const CartesianSpaceView = observer(function CartesianSpaceView({
   renderTarget,
+  visible,
 }: Props) {
   const store = useStore();
-  const { uiStore } = store;
   const outputMesh = useRef<Mesh>(null);
   const outputUniforms = useRef({
     u_texture: { value: renderTarget.texture },
@@ -33,7 +34,7 @@ export const CartesianSpaceView = observer(function CartesianSpaceView({
 
   // render the cartesian space view
   useFrame(({ gl, camera }) => {
-    if (!outputMesh.current || uiStore.displayMode !== "cartesianSpace") return;
+    if (!outputMesh.current || !visible) return;
 
     gl.setRenderTarget(null);
     gl.render(outputMesh.current, camera);
