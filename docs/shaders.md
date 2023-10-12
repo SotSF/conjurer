@@ -17,7 +17,6 @@ https://www.shadertoy.com/
 
 Here are some cool things that people have built:
 
-- [Shader Toy](https://www.shadertoy.com/)
 - [Tunnel](https://www.shadertoy.com/view/4dfGDr)
 - [Rainforest](https://www.shadertoy.com/view/4ttSWf)
 - [Fractal Pyramid](https://www.shadertoy.com/view/tsXBzS)
@@ -26,6 +25,7 @@ Here are some cool things that people have built:
 
 - [Inigo Quilez articles](https://iquilezles.org/articles/)
   - [2D distance functions](https://iquilezles.org/articles/distfunctions2d/)
+  - [3D distance functions](https://iquilezles.org/articles/distfunctions/)
 - [Graphtoy](https://graphtoy.com/)
 - [Curve shapes](https://thebookofshaders.com/05/kynd.png)
 - [Animated easing functions](https://easings.net/)
