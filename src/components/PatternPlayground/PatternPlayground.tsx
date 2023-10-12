@@ -148,7 +148,7 @@ export const PatternPlayground = observer(function PatternPlayground() {
           )}
         </HStack>
 
-        {uiStore.displayMode !== "none" && (
+        {uiStore.playgroundDisplayMode !== "none" && (
           <VStack
             position="sticky"
             top={0}

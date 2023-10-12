@@ -143,7 +143,9 @@ vec3 render(vec2 uv) {
 
         // part 2.2.1 - calculate diffuse lighting
         vec3 lightColor = vec3(1.0);
-        vec3 lightSource = vec3(0., 0., - 1.0);
+        // vary the distance of the light source
+        vec3 lightSource = vec3(2.5, 2.5, 2.0 - sin(u_time * 0.015) * 5.);
+        // vec3 lightSource = vec3(2.5, 2.5, 1.0);
         float diffuseStrength = max(0.0, dot(normalize(lightSource), normal));
         vec3 diffuse = lightColor * diffuseStrength;
 
