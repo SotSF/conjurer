@@ -1,3 +1,4 @@
+import { PipeTime } from "@/src/patterns/PipeTime";
 import { BoxTime } from "@/src/patterns/BoxTime";
 import { Lightwaves } from "@/src/patterns/Lightwaves";
 import { Pattern } from "@/src/types/Pattern";
@@ -21,6 +22,7 @@ import { GradientCircles } from "@/src/patterns//GradientCircles";
 import { Perlin } from "@/src/patterns/Perlin";
 import { PulsePalette } from "@/src/patterns/PulsePalette";
 const patternFactories: Array<() => Pattern> = [
+    PipeTime,
     BoxTime,
     Lightwaves,
     LogSpirals,
