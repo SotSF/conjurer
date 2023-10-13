@@ -18,6 +18,7 @@ import { action, runInAction } from "mobx";
 import { DisplayModeButtons } from "@/src/components/PatternPlayground/DisplayModeButtons";
 import { SendDataButton } from "@/src/components/SendDataButton";
 import { PresetsList } from "@/src/components/PatternPlayground/PresetsList";
+import { RecordCanvasControls } from "@/src/components/PatternPlayground/RecordCanvasControls";
 
 const PATTERN_PREVIEW_DISPLAY_SIZE = 600;
 
@@ -133,6 +134,7 @@ export const PatternPlayground = observer(function PatternPlayground() {
         )}
         <HStack mt={2} pr={1} width="100%" justify="end">
           <DisplayModeButtons />
+          <RecordCanvasControls />
           {["playground", "default"].includes(context) && <SendDataButton />}
           {context === "default" && (
             <Button
