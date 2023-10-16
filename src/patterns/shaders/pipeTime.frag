@@ -8,8 +8,13 @@ varying vec2 v_uv;
 uniform float u_time;
 
 uniform Palette u_palette;
+uniform float u_time_factor;
+uniform float u_time_offset;
 
 // #define u_palette Palette(vec3(0.5774455613585161, 0.918901534803475, 0.9183302614725621), vec3(0.8214304234785681, 0.5104221980835277, 0.08214322007047792), vec3(0.711588398332782, 0.871542869224424, 0.5801340330878866), vec3(0.7204852048004471, 0.45233742857529746, 0.12917934855128466))
+
+// #define u_time_factor 0.001
+// #define u_time_offset 41.1
 
 const float NUM_OF_STEPS = 128.0;
 const float MIN_DIST_TO_SDF = 0.001;
@@ -62,20 +67,14 @@ vec2 rot45(vec2 v) {
     return vec2(v.x - v.y, v.y + v.x) * 0.707107;
 }
 
-float sdf(vec3 p, vec3 cell) {
+float sdf(vec3 p, vec3 cell, float time) {
     float m = MAX_DIST_TO_TRAVEL;
     vec3 q = p;
 
-    // identifies cell
-    // vec2 cell = floor((q.xz + CELL_SIZE * .5) / CELL_SIZE);
-    // float layer = floor((q.y + CELL_SIZE * .5) / CELL_SIZE);
-
-    // repeat the space in the xz plane
-    // q.xz = mod(q.xz + CELL_SIZE * .5, CELL_SIZE) - CELL_SIZE * .5;
-
-    // q.y = mod(q.y + CELL_SIZE * .5, CELL_SIZE) - CELL_SIZE * .5;
-
+    float pipeColumnOffset = 10. * rand(cell.xz);
+    float pumpingAction = 1. + 0.2 * pow(0.5 + 0.5 * sin(time * 7. + q.y * 2. + pipeColumnOffset), 5.);
     float CYLINDER_RADIUS = 0.2 + 0.15 * (2.5 * rand(cell.xy, cell.z) - 1.);
+    CYLINDER_RADIUS *= pumpingAction; // TODO: introduction of this line causes artifacts
     float CYLINDER_HEIGHT = CELL_SIZE * 0.5;
     float cylinder = sdCappedCylinder(q, CYLINDER_HEIGHT - 0., CYLINDER_RADIUS);
     m = min(m, cylinder);
@@ -102,6 +101,7 @@ float sdf(vec3 p, vec3 cell) {
 
 // correct way to repeat space every s units
 float repeated(vec3 p, float s) {
+    float time = u_time * u_time_factor + u_time_offset;
     vec3 id = round(p / s);
     vec3 o = sign(p - s * id); // neighbor offset direction
 
@@ -110,7 +110,7 @@ float repeated(vec3 p, float s) {
     // for (int k = 0; k < 2; k ++) for (int j = 0; j < 2; j ++) for (int i = 0; i < 2; i ++) {
             vec3 rid = id + vec3(0, i, j) * o;
             vec3 r = p - s * rid;
-            d = min(d, sdf(r, rid));
+            d = min(d, sdf(r, rid, time));
         }
     return d;
 }
@@ -118,10 +118,12 @@ float repeated(vec3 p, float s) {
 float map(vec3 p) {
     vec3 q = p;
 
+    float time = u_time * u_time_factor + u_time_offset;
+
     // move forward through space
-    q.x += 10. * sin(u_time * 0.5 * PI * 0.05);
-    q.y += 10. * sin(u_time * 0.5 * PI * 0.05);
-    q.z += u_time * .5 + 1.;
+    q.x += 10. * sin(time * 0.5 * PI * 0.05);
+    q.y += 10. * sin(time * 0.5 * PI * 0.05);
+    q.z += time * .5 + 1.;
 
     // return sdf(q, vec3(0.));
     return repeated(q, CELL_SIZE);
@@ -159,6 +161,7 @@ vec3 getNormal(vec3 p) {
 }
 
 vec3 render(vec2 uv) {
+    float time = u_time * u_time_factor + u_time_offset;
     vec3 color = vec3(0.0);
 
     // note: ro -> ray origin, rd -> ray direction
@@ -185,7 +188,7 @@ vec3 render(vec2 uv) {
         // part 2.2.1 - calculate diffuse lighting
         vec3 lightColor = vec3(1.0);
         // vary the distance of the light source
-        // vec3 lightSource = vec3(2.5, 2.5, 2.0 - sin(u_time * 0.015) * 5.);
+        // vec3 lightSource = vec3(2.5, 2.5, 2.0 - sin(time * 0.015) * 5.);
         vec3 lightSource = vec3(2.5, 2.5, - 2.0);
         float diffuseStrength = max(0.0, dot(normalize(lightSource), normal));
         vec3 diffuse = lightColor * diffuseStrength;
@@ -220,7 +223,7 @@ vec3 render(vec2 uv) {
         color = pow(color, vec3(1.0 / 2.2));
     }
 
-    float colorVariation = 0. * 0.5 * sin(u_time * 0.1);
+    float colorVariation = 0. * 0.5 * sin(time * 0.1);
     vec3 paletteColor = palette((dist / MAX_DIST_TO_TRAVEL * 8.) + colorVariation, u_palette);
     color *= paletteColor;
 

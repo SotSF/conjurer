@@ -16,4 +16,16 @@ export const PipeTime = () =>
         new Vector3(3.042, 5.63, 5.424)
       ),
     },
+    u_time_factor: {
+      name: "Time Factor",
+      value: 1,
+      min: -5,
+      max: 5,
+    },
+    u_time_offset: {
+      name: "Time Offset",
+      value: 0,
+      min: -5,
+      max: 5,
+    },
   });
