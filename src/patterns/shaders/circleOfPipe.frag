@@ -13,12 +13,12 @@ uniform float u_time_offset;
 
 // #define u_palette Palette(vec3(0.5774455613585161, 0.918901534803475, 0.9183302614725621), vec3(0.8214304234785681, 0.5104221980835277, 0.08214322007047792), vec3(0.711588398332782, 0.871542869224424, 0.5801340330878866), vec3(0.7204852048004471, 0.45233742857529746, 0.12917934855128466))
 
-// #define u_time_factor 0.001
+#define u_time_factor 0.1
 // #define u_time_offset 41.1
 
 const float NUM_OF_STEPS = 128.0;
 const float MIN_DIST_TO_SDF = 0.001;
-const float MAX_DIST_TO_TRAVEL = 50.0;
+const float MAX_DIST_TO_TRAVEL = 100.0;
 
 float opSmoothUnion(float d1, float d2, float k) {
     float h = clamp(0.5 + 0.5 * (d2 - d1) / k, 0.0, 1.0);
@@ -120,11 +120,42 @@ float limited_repeated(vec3 p, float time) {
     for (int k = 0; k < 2; k ++) for (int j = 0; j < 2; j ++) for (int i = 0; i < 2; i ++) {
                 vec3 rid = id + vec3(i, j, k) * offsetDirection;
                 // limited repetition
-                rid.xz = clamp(rid.xz, - (REPEAT_COUNT - 1.0) * 0.5, (REPEAT_COUNT - 1.0) * 0.5);
+                rid.x = clamp(rid.x, - (REPEAT_COUNT - 1.0) * 0.5, (REPEAT_COUNT - 1.0) * 0.5);
+                rid.z = clamp(rid.z, - (REPEAT_COUNT - 1.0) * 0.5, (REPEAT_COUNT - 1.0) * 0.5);
+                // rid.xz = clamp(rid.xz, - (REPEAT_COUNT - 1.0) * 0.5, (REPEAT_COUNT - 1.0) * 0.5);
                 vec3 r = p - CELL_SIZE * rid;
                 d = min(d, sdf(r, rid, time));
             }
     return d;
+}
+
+// rotational/angular repetition
+float repetition_rotational(vec3 p, int n, float time) {
+    float sp = 6.283185 / float(n);
+    float an = atan(p.z, p.x);
+    float id = floor(an / sp);
+
+    float a1 = sp * (id + 0.0);
+    float a2 = sp * (id + 1.0);
+    vec2 r1 = mat2(cos(a1), - sin(a1), sin(a1), cos(a1)) * p.xz;
+    vec2 r2 = mat2(cos(a2), - sin(a2), sin(a2), cos(a2)) * p.xz;
+
+    // return min(
+    // //
+    // sdBox(vec3(r1.x, p.y, r1.y) - vec3(2., 0., 0.), vec3(1.)),
+    // //
+    // sdBox(vec3(r2.x, p.y, r2.y) - vec3(2., 0., 0.), vec3(1.))
+    // //
+    // );
+    vec3 offset = vec3(4., 0., 0.);
+
+    return min(
+        //
+    sdf(vec3(r1.x, p.y, r1.y) - offset, vec3(id, 0., 0.), time),
+        //
+    sdf(vec3(r2.x, p.y, r2.y) - offset, vec3(id, 0., 0.), time)
+        //
+    );
 }
 
 float map(vec3 p) {
@@ -133,13 +164,15 @@ float map(vec3 p) {
     float time = u_time * u_time_factor + u_time_offset;
 
     // move through space
-    q.y += CELL_SIZE * CELLS_PER_SECOND * time;
+    // q.y += CELL_SIZE * CELLS_PER_SECOND * time;
 
     // rotate over time
-    q.xz = mat2(cos(time * 0.5), - sin(time * 0.5), sin(time * 0.5), cos(time * 0.5)) * q.xz;
+    // q.xz = mat2(cos(time * 0.5), - sin(time * 0.5), sin(time * 0.5), cos(time * 0.5)) * q.xz;
 
     // return sdf(q, vec3(0.), time);
-    return limited_repeated(q, time);
+    // return limited_repeated(q, time);
+    // q.x -= CELL_SIZE * 2.5;
+    return repetition_rotational(q, 10, time);
 }
 
 vec4 rayMarch(vec3 ro, vec3 rd, float maxDistToTravel) {
