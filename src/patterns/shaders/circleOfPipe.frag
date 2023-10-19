@@ -18,7 +18,7 @@ uniform float u_time_offset;
 
 const float NUM_OF_STEPS = 128.0;
 const float MIN_DIST_TO_SDF = 0.001;
-const float MAX_DIST_TO_TRAVEL = 512.0;
+const float MAX_DIST_TO_TRAVEL = 50.0;
 
 float opSmoothUnion(float d1, float d2, float k) {
     float h = clamp(0.5 + 0.5 * (d2 - d1) / k, 0.0, 1.0);
@@ -102,31 +102,28 @@ float sdf(vec3 p, vec3 cell, float time) {
     float pipeColumnOffset = 3. * rand(cell.xz);
     pipeColumnOffset += 0.5 * sin(time * pipeColumnOffset);
     float progress = clamp(CELLS_PER_SECOND * time - cell.y + 1. - pipeColumnOffset, 0., 1.);
+    // slowdown the beginning and end of growth
+    // progress *= - (4. * progress * progress - 4. * progress - 1.);
+
     m = smax(m, abs(p.y + 0.5 * CELL_SIZE) - CELL_SIZE * progress, 0.1);
 
     return m;
 }
 
-// correct way to repeat space every s units
+// corrected limited/finite repetition
 float REPEAT_COUNT = 5.;
-float repeated(vec3 p, float s) {
-    float time = u_time * u_time_factor + u_time_offset;
-    vec3 id = round(p / s);
-    vec3 o = sign(p - s * id); // neighbor offset direction
+float limited_repeated(vec3 p, float time) {
+    vec3 id = round(p / CELL_SIZE);
+    vec3 offsetDirection = sign(p - CELL_SIZE * id);
 
     float d = 1e20;
-    // for (int j = 0; j < 2; j ++) for (int i = 0; i < 2; i ++) {
-    // TODO: need to optimize this somehow
     for (int k = 0; k < 2; k ++) for (int j = 0; j < 2; j ++) for (int i = 0; i < 2; i ++) {
-                vec3 rid = id + vec3(k, i, j) * o;
-                vec3 r = p - s * rid;
+                vec3 rid = id + vec3(i, j, k) * offsetDirection;
+                // limited repetition
+                rid.xz = clamp(rid.xz, - (REPEAT_COUNT - 1.0) * 0.5, (REPEAT_COUNT - 1.0) * 0.5);
+                vec3 r = p - CELL_SIZE * rid;
                 d = min(d, sdf(r, rid, time));
             }
-
-    // clip repetitions after repeat count
-    d = max(d, abs(p.x) - CELL_SIZE * REPEAT_COUNT * 0.5);
-    d = max(d, abs(p.z) - CELL_SIZE * REPEAT_COUNT * 0.5);
-
     return d;
 }
 
@@ -139,12 +136,10 @@ float map(vec3 p) {
     q.y += CELL_SIZE * CELLS_PER_SECOND * time;
 
     // rotate over time
-    // TODO: causes artifacts
-    // q.xz = mat2(cos(PI * 0.5), - sin(PI * 0.5), sin(PI * 0.5), cos(PI * 0.5)) * q.xz;
-    // q.xz = mat2(cos(time * 0.5), - sin(time * 0.5), sin(time * 0.5), cos(time * 0.5)) * q.xz;
+    q.xz = mat2(cos(time * 0.5), - sin(time * 0.5), sin(time * 0.5), cos(time * 0.5)) * q.xz;
 
     // return sdf(q, vec3(0.), time);
-    return repeated(q, CELL_SIZE);
+    return limited_repeated(q, time);
 }
 
 vec4 rayMarch(vec3 ro, vec3 rd, float maxDistToTravel) {
@@ -239,8 +234,8 @@ vec3 render(vec2 uv) {
 
         // part 3.2 - ray march based on new ro + rd
         march = rayMarch(ro, rd, distToLightSource);
-        float dist = march.x;
-        if (dist < distToLightSource) {
+        float distance2 = march.x;
+        if (distance2 < distToLightSource) {
             color = color * vec3(0.25);
         }
 
