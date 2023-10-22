@@ -10,18 +10,18 @@ export const CircleOfPipe = () =>
     u_palette: {
       name: "Palette",
       value: new Palette(
-        new Vector3(0.7285298697969937, 0.6228059132971426, 0.5429350952854446),
         new Vector3(
-          0.1503807548191285,
-          0.7592828790122585,
-          0.34797927599424816
+          0.38012185644181273,
+          0.04951178654967059,
+          0.34059431907804383
         ),
         new Vector3(
-          0.3808609223727044,
-          0.40832368287880505,
-          0.7756747974006282
+          0.22842685967042442,
+          0.9069932128688625,
+          0.9174834753698677
         ),
-        new Vector3(0.7711916470325293, 0.972910878683034, 0.9122259421196939)
+        new Vector3(0.758210629593248, 0.6346634079299964, 0.7528808866039169),
+        new Vector3(0.3050300091631708, 0.06872971318578447, 0.830521052272386)
       ),
     },
     u_time_factor: {
@@ -35,5 +35,49 @@ export const CircleOfPipe = () =>
       value: 0,
       min: -5,
       max: 5,
+    },
+    u_camera_y: {
+      name: "Camera Y",
+      value: 0,
+      min: -50,
+      max: 50,
+    },
+    u_camera_distance: {
+      name: "Camera Distance",
+      value: 9,
+      min: 0,
+      max: 50,
+    },
+    u_camera_rotation_factor: {
+      name: "Camera Rotation Factor",
+      value: 0.5,
+      min: -2,
+      max: 2,
+    },
+
+    u_rust_threshold: {
+      name: "Rust Threshold",
+      value: -10,
+      min: -50,
+      max: 50,
+    },
+    u_cell_size: {
+      name: "Cell Size",
+      value: 1.5,
+      min: 0.1,
+      max: 5,
+    },
+    u_cells_per_second: {
+      name: "Cells Per Second",
+      value: 2,
+      min: 0,
+      max: 10,
+    },
+    u_repeat_count: {
+      name: "Repeat Count",
+      value: 5,
+      min: 1,
+      max: 10,
+      step: 1,
     },
   });

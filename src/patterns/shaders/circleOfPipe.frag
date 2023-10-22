@@ -10,11 +10,25 @@ uniform float u_time;
 uniform Palette u_palette;
 uniform float u_time_factor;
 uniform float u_time_offset;
+uniform float u_camera_y;
+uniform float u_camera_distance;
+uniform float u_camera_rotation_factor;
+uniform float u_rust_threshold;
+uniform float u_cell_size;
+uniform float u_cells_per_second;
+uniform float u_repeat_count;
 
 // #define u_palette Palette(vec3(0.5774455613585161, 0.918901534803475, 0.9183302614725621), vec3(0.8214304234785681, 0.5104221980835277, 0.08214322007047792), vec3(0.711588398332782, 0.871542869224424, 0.5801340330878866), vec3(0.7204852048004471, 0.45233742857529746, 0.12917934855128466))
 
 // #define u_time_factor 1.
 // #define u_time_offset 41.1
+// #define u_camera_y -25.
+// #define u_camera_distance 9.
+// #define u_camera_rotation_factor 0.1
+// #define u_rust_threshold 0.5
+// #define u_cell_size 1.5
+// #define u_cells_per_second 2.
+// #define u_repeat_count 5.
 
 const float NUM_OF_STEPS = 128.0;
 const float MIN_DIST_TO_SDF = 0.001;
@@ -70,15 +84,12 @@ float smax(float a, float b, float k) {
     return max(a, b) + h * h * 0.25 / k;
 }
 
-float CELL_SIZE = 3.;
-float CELLS_PER_SECOND = 2.;
-float REPEAT_COUNT = 5.;
 float sdf(vec3 p, vec3 cell, float time) {
     float m = MAX_DIST_TO_TRAVEL;
     vec3 q = p;
 
     float CYLINDER_RADIUS = 0.2 + 0.15 * (2.5 * rand(cell.xy, cell.z) - 1.);
-    float CYLINDER_HEIGHT = CELL_SIZE * 0.5;
+    float CYLINDER_HEIGHT = u_cell_size * 0.5;
     float cylinder = sdCappedCylinder(q, CYLINDER_HEIGHT - 0., CYLINDER_RADIUS);
     m = min(m, cylinder);
 
@@ -101,21 +112,21 @@ float sdf(vec3 p, vec3 cell, float time) {
 
     float pipeColumnOffset = 3. * rand(cell.xz);
     pipeColumnOffset += 0.5 * sin(time * pipeColumnOffset);
-    float progress = clamp(CELLS_PER_SECOND * time - cell.y + 1. - pipeColumnOffset, 0., 1.);
+    float progress = clamp(u_cells_per_second * time - cell.y + 1. - pipeColumnOffset, 0., 1.);
     // slowdown the beginning and end of growth
     // progress *= - (4. * progress * progress - 4. * progress - 1.);
 
-    m = smax(m, abs(p.y + 0.5 * CELL_SIZE) - CELL_SIZE * progress, 0.1);
+    m = smax(m, abs(p.y + 0.5 * u_cell_size) - u_cell_size * progress, 0.1);
 
     return m;
 }
 
 // corrected limited/finite repetition
 vec2 limited_repeated(vec3 p, float time) {
-    vec3 id = round(p / CELL_SIZE);
-    vec3 offsetDirection = sign(p - CELL_SIZE * id);
+    vec3 id = round(p / u_cell_size);
+    vec3 offsetDirection = sign(p - u_cell_size * id);
 
-    float bound = (REPEAT_COUNT - 1.0) * 0.5;
+    float bound = (u_repeat_count - 1.0) * 0.5;
 
     float d = 1e20;
     float objectId = 0.;
@@ -123,7 +134,7 @@ vec2 limited_repeated(vec3 p, float time) {
                 vec3 rid = id + vec3(i, j, k) * offsetDirection;
                 // limited repetition
                 rid.xz = clamp(rid.xz, - bound, bound);
-                vec3 r = p - CELL_SIZE * rid;
+                vec3 r = p - u_cell_size * rid;
                 float sdfValue = sdf(r, rid, time);
                 objectId = sdfValue < d ? rand(rid.xz) : objectId;
 
@@ -138,10 +149,9 @@ vec2 map(vec3 p) {
     float time = u_time * u_time_factor + u_time_offset;
 
     // move through space
-    q.y += CELL_SIZE * CELLS_PER_SECOND * time;
+    q.y += u_cell_size * u_cells_per_second * time;
 
     // rotate over time
-    q.xz = mat2(cos(PI * 0.5), - sin(PI * 0.5), sin(PI * 0.5), cos(PI * 0.5)) * q.xz;
     // q.xz = mat2(cos(time * 0.5), - sin(time * 0.5), sin(time * 0.5), cos(time * 0.5)) * q.xz;
 
     // return sdf(q, vec3(0.), time);
@@ -182,40 +192,85 @@ vec3 getNormal(vec3 p) {
     return normalize(normal);
 }
 
-vec3 textureColor(vec2 position, float objectId) {
+float mod289(float x) {
+    return x - floor(x * (1.0 / 289.0)) * 289.0;
+}
+vec4 mod289(vec4 x) {
+    return x - floor(x * (1.0 / 289.0)) * 289.0;
+}
+vec4 perm(vec4 x) {
+    return mod289(((x * 34.0) + 1.0) * x);
+}
+
+float noise(vec3 p) {
+    vec3 a = floor(p);
+    vec3 d = p - a;
+    d = d * d * (3.0 - 2.0 * d);
+
+    vec4 b = a.xxyy + vec4(0.0, 1.0, 0.0, 1.0);
+    vec4 k1 = perm(b.xyxy);
+    vec4 k2 = perm(k1.xyxy + b.zzww);
+
+    vec4 c = k2 + a.zzzz;
+    vec4 k3 = perm(c);
+    vec4 k4 = perm(c + 1.0);
+
+    vec4 o1 = fract(k3 * (1.0 / 41.0));
+    vec4 o2 = fract(k4 * (1.0 / 41.0));
+
+    vec4 o3 = o2 * d.z + o1 * (1.0 - d.z);
+    vec2 o4 = o3.yw * d.x + o3.xz * (1.0 - d.x);
+
+    return o4.y * d.y + o4.x * (1.0 - d.y);
+}
+
+int NUM_OCTAVES = 6;
+float fbm(vec3 x) {
+    float v = 0.0;
+    float a = 0.5;
+    vec3 shift = vec3(100);
+    for (int i = 0; i < NUM_OCTAVES; ++ i) {
+        v += a * noise(x);
+        x = x * 2.0 + shift;
+        a *= 0.5;
+    }
+    return v;
+}
+
+vec3 textureColor(vec3 position, float objectId) {
     vec3 color = vec3(1.);
     float time = u_time * u_time_factor + u_time_offset;
 
-    // Apply a pallet color based on distance
+    // Apply a pallet color based on objectId and time
     float colorVariation = 0.2 * sin(time * 0.5);
     vec3 paletteColor = palette((objectId) + colorVariation, u_palette);
     color *= paletteColor;
 
-    // if (position.y < - 7.) {
-    //     // color = vec3(0.);
-    //     color.x += pow(0.5 + 0.5 * sin(position.x * 600.), 6.);
-    //     color.y += pow(0.25 + 0.25 * sin(position.x * 600.), 6.);
-    // }
+    // apply rust based on y rust threshold
+    vec3 stationaryVerticalPosition = position;
+    stationaryVerticalPosition.y += u_cell_size * u_cells_per_second * time;
+    color.x = mix(color.x, fbm(stationaryVerticalPosition * 5.), 1. - clamp(position.y - u_rust_threshold, 0., 1.));
 
     return color;
 }
 
-float CAMERA_DISTANCE = 15.;
 vec3 render(vec2 uv) {
-    float time = u_time * u_time_factor + u_time_offset;
     vec3 color = vec3(0.0);
+    float time = u_time * u_time_factor + u_time_offset;
 
     // note: ro -> ray origin, rd -> ray direction
     // ray origin = camera position
-    vec3 ro = CAMERA_DISTANCE * vec3(0., 0., - 1.);
-    // vec3 ro = CAMERA_DISTANCE * vec3(cos(time), 0., sin(time));
+    // vec3 ro = u_camera_distance * vec3(0., 0., - 1.);
+    float cameraAngle = time * u_camera_rotation_factor;
+    vec3 ro = u_camera_distance * vec3(cos(cameraAngle), 0., sin(cameraAngle));
+    ro.y = u_camera_y;
 
     // ray direction = vector from camera position to the current pixel
     vec3 rd = normalize(vec3(uv, 1.0));
 
     // // rotate ray around y axis
-    // float angle = time + PI * 0.5;
-    // rd = mat3(cos(angle), 0.0, sin(angle), 0.0, 1.0, 0.0, - sin(angle), 0.0, cos(angle)) * rd;
+    float angle = cameraAngle + PI * 0.5;
+    rd = mat3(cos(angle), 0.0, sin(angle), 0.0, 1.0, 0.0, - sin(angle), 0.0, cos(angle)) * rd;
 
     vec2 march = rayMarch(ro, rd, MAX_DIST_TO_TRAVEL);
     float dist = march.x;
@@ -237,7 +292,7 @@ vec3 render(vec2 uv) {
         vec3 lightColor = vec3(1.0);
         // vary the distance of the light source
         // vec3 lightSource = vec3(2.5, 2.5, 2.0 - sin(time * 0.015) * 5.);
-        vec3 lightSource = vec3(2.5, 2.5, - 2.0);
+        vec3 lightSource = ro * 0.25 + vec3(0., 2.5, 0.);
         float diffuseStrength = max(0.0, dot(normalize(lightSource), normal));
         vec3 diffuse = lightColor * diffuseStrength;
 
@@ -271,7 +326,7 @@ vec3 render(vec2 uv) {
         color = pow(color, vec3(1.0 / 2.2));
 
         // part 4 - add texture
-        color *= textureColor(p.xy, objectId);
+        color *= textureColor(p, objectId);
     }
 
     return color;
