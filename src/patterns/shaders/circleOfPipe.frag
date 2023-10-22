@@ -13,7 +13,7 @@ uniform float u_time_offset;
 
 // #define u_palette Palette(vec3(0.5774455613585161, 0.918901534803475, 0.9183302614725621), vec3(0.8214304234785681, 0.5104221980835277, 0.08214322007047792), vec3(0.711588398332782, 0.871542869224424, 0.5801340330878866), vec3(0.7204852048004471, 0.45233742857529746, 0.12917934855128466))
 
-#define u_time_factor 0.1
+// #define u_time_factor 1.
 // #define u_time_offset 41.1
 
 const float NUM_OF_STEPS = 128.0;
@@ -70,14 +70,14 @@ float smax(float a, float b, float k) {
     return max(a, b) + h * h * 0.25 / k;
 }
 
-float CELL_SIZE = 1.5;
+float CELL_SIZE = 3.;
 float CELLS_PER_SECOND = 2.;
+float REPEAT_COUNT = 5.;
 float sdf(vec3 p, vec3 cell, float time) {
     float m = MAX_DIST_TO_TRAVEL;
     vec3 q = p;
 
     float CYLINDER_RADIUS = 0.2 + 0.15 * (2.5 * rand(cell.xy, cell.z) - 1.);
-    // CYLINDER_RADIUS *= pumpingAction; // TODO: introduction of this line causes artifacts
     float CYLINDER_HEIGHT = CELL_SIZE * 0.5;
     float cylinder = sdCappedCylinder(q, CYLINDER_HEIGHT - 0., CYLINDER_RADIUS);
     m = min(m, cylinder);
@@ -111,77 +111,53 @@ float sdf(vec3 p, vec3 cell, float time) {
 }
 
 // corrected limited/finite repetition
-float REPEAT_COUNT = 5.;
-float limited_repeated(vec3 p, float time) {
+vec2 limited_repeated(vec3 p, float time) {
     vec3 id = round(p / CELL_SIZE);
     vec3 offsetDirection = sign(p - CELL_SIZE * id);
 
+    float bound = (REPEAT_COUNT - 1.0) * 0.5;
+
     float d = 1e20;
+    float objectId = 0.;
     for (int k = 0; k < 2; k ++) for (int j = 0; j < 2; j ++) for (int i = 0; i < 2; i ++) {
                 vec3 rid = id + vec3(i, j, k) * offsetDirection;
                 // limited repetition
-                rid.x = clamp(rid.x, - (REPEAT_COUNT - 1.0) * 0.5, (REPEAT_COUNT - 1.0) * 0.5);
-                rid.z = clamp(rid.z, - (REPEAT_COUNT - 1.0) * 0.5, (REPEAT_COUNT - 1.0) * 0.5);
-                // rid.xz = clamp(rid.xz, - (REPEAT_COUNT - 1.0) * 0.5, (REPEAT_COUNT - 1.0) * 0.5);
+                rid.xz = clamp(rid.xz, - bound, bound);
                 vec3 r = p - CELL_SIZE * rid;
-                d = min(d, sdf(r, rid, time));
+                float sdfValue = sdf(r, rid, time);
+                objectId = sdfValue < d ? rand(rid.xz) : objectId;
+
+                d = min(d, sdfValue);
             }
-    return d;
+    return vec2(d, objectId);
 }
 
-// rotational/angular repetition
-float repetition_rotational(vec3 p, int n, float time) {
-    float sp = 6.283185 / float(n);
-    float an = atan(p.z, p.x);
-    float id = floor(an / sp);
-
-    float a1 = sp * (id + 0.0);
-    float a2 = sp * (id + 1.0);
-    vec2 r1 = mat2(cos(a1), - sin(a1), sin(a1), cos(a1)) * p.xz;
-    vec2 r2 = mat2(cos(a2), - sin(a2), sin(a2), cos(a2)) * p.xz;
-
-    // return min(
-    // //
-    // sdBox(vec3(r1.x, p.y, r1.y) - vec3(2., 0., 0.), vec3(1.)),
-    // //
-    // sdBox(vec3(r2.x, p.y, r2.y) - vec3(2., 0., 0.), vec3(1.))
-    // //
-    // );
-    vec3 offset = vec3(4., 0., 0.);
-
-    return min(
-        //
-    sdf(vec3(r1.x, p.y, r1.y) - offset, vec3(id, 0., 0.), time),
-        //
-    sdf(vec3(r2.x, p.y, r2.y) - offset, vec3(id, 0., 0.), time)
-        //
-    );
-}
-
-float map(vec3 p) {
+vec2 map(vec3 p) {
     vec3 q = p;
 
     float time = u_time * u_time_factor + u_time_offset;
 
     // move through space
-    // q.y += CELL_SIZE * CELLS_PER_SECOND * time;
+    q.y += CELL_SIZE * CELLS_PER_SECOND * time;
 
     // rotate over time
+    q.xz = mat2(cos(PI * 0.5), - sin(PI * 0.5), sin(PI * 0.5), cos(PI * 0.5)) * q.xz;
     // q.xz = mat2(cos(time * 0.5), - sin(time * 0.5), sin(time * 0.5), cos(time * 0.5)) * q.xz;
 
     // return sdf(q, vec3(0.), time);
-    // return limited_repeated(q, time);
-    // q.x -= CELL_SIZE * 2.5;
-    return repetition_rotational(q, 10, time);
+    return limited_repeated(q, time);
 }
 
-vec4 rayMarch(vec3 ro, vec3 rd, float maxDistToTravel) {
+vec2 rayMarch(vec3 ro, vec3 rd, float maxDistToTravel) {
     float dist = 0.0;
+    float objectId = 0.0;
 
-    vec3 currentPos = vec3(0.0);
     for (float i = 0.0; i < NUM_OF_STEPS; i ++) {
-        currentPos = ro + rd * dist;
-        float distToSdf = map(currentPos);
+        vec3 currentPos = ro + rd * dist;
+
+        vec2 mapped = map(currentPos);
+        float distToSdf = mapped.x;
+        objectId = mapped.y;
 
         if (distToSdf < MIN_DIST_TO_SDF) {
             break;
@@ -194,19 +170,37 @@ vec4 rayMarch(vec3 ro, vec3 rd, float maxDistToTravel) {
         }
     }
 
-    return vec4(dist, currentPos);
+    return vec2(dist, objectId);
 }
 
 vec3 getNormal(vec3 p) {
     vec2 d = vec2(0.01, 0.0);
-    float gx = map(p + d.xyy) - map(p - d.xyy);
-    float gy = map(p + d.yxy) - map(p - d.yxy);
-    float gz = map(p + d.yyx) - map(p - d.yyx);
+    float gx = map(p + d.xyy).x - map(p - d.xyy).x;
+    float gy = map(p + d.yxy).x - map(p - d.yxy).x;
+    float gz = map(p + d.yyx).x - map(p - d.yyx).x;
     vec3 normal = vec3(gx, gy, gz);
     return normalize(normal);
 }
 
-float CAMERA_DISTANCE = 7.;
+vec3 textureColor(vec2 position, float objectId) {
+    vec3 color = vec3(1.);
+    float time = u_time * u_time_factor + u_time_offset;
+
+    // Apply a pallet color based on distance
+    float colorVariation = 0.2 * sin(time * 0.5);
+    vec3 paletteColor = palette((objectId) + colorVariation, u_palette);
+    color *= paletteColor;
+
+    // if (position.y < - 7.) {
+    //     // color = vec3(0.);
+    //     color.x += pow(0.5 + 0.5 * sin(position.x * 600.), 6.);
+    //     color.y += pow(0.25 + 0.25 * sin(position.x * 600.), 6.);
+    // }
+
+    return color;
+}
+
+float CAMERA_DISTANCE = 15.;
 vec3 render(vec2 uv) {
     float time = u_time * u_time_factor + u_time_offset;
     vec3 color = vec3(0.0);
@@ -223,8 +217,10 @@ vec3 render(vec2 uv) {
     // float angle = time + PI * 0.5;
     // rd = mat3(cos(angle), 0.0, sin(angle), 0.0, 1.0, 0.0, - sin(angle), 0.0, cos(angle)) * rd;
 
-    vec4 march = rayMarch(ro, rd, MAX_DIST_TO_TRAVEL);
+    vec2 march = rayMarch(ro, rd, MAX_DIST_TO_TRAVEL);
     float dist = march.x;
+    float objectId = march.y;
+    vec3 p = ro + rd * dist;
 
     if (dist < MAX_DIST_TO_TRAVEL) {
         // part 1 - display ray marching result
@@ -232,7 +228,6 @@ vec3 render(vec2 uv) {
 
         // part 2.1 - calculate normals
         // calculate normals at the exact point where we hit SDF
-        vec3 p = ro + rd * dist;
         vec3 normal = getNormal(p);
         color = normal;
 
@@ -266,19 +261,18 @@ vec3 render(vec2 uv) {
         rd = lightDirection;
 
         // part 3.2 - ray march based on new ro + rd
-        march = rayMarch(ro, rd, distToLightSource);
-        float distance2 = march.x;
-        if (distance2 < distToLightSource) {
+        vec2 march2 = rayMarch(ro, rd, distToLightSource);
+        float dist2 = march2.x;
+        if (dist2 < distToLightSource) {
             color = color * vec3(0.25);
         }
 
         // note: add gamma correction
         color = pow(color, vec3(1.0 / 2.2));
-    }
 
-    float colorVariation = 0. * 0.5 * sin(time * 0.1);
-    vec3 paletteColor = palette((dist / 10.) + colorVariation, u_palette);
-    color *= paletteColor;
+        // part 4 - add texture
+        color *= textureColor(p.xy, objectId);
+    }
 
     return color;
 }
