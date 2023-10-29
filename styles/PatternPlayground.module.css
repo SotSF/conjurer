@@ -11,7 +11,7 @@
 }
 
 /* mobile resolution */
-@media (max-width: 800px) {
+@media (max-width: 1600px) {
   .grid {
     grid-template-areas:
       "preview"
