@@ -32,6 +32,7 @@
     "classnames": "^2.3.2",
     "framer-motion": "^10.16.4",
     "glslify-loader": "^2.0.0",
+    "gsap": "^3.12.2",
     "jimp": "^0.22.10",
     "mobx": "^6.10.2",
     "mobx-react-lite": "^4.0.5",
