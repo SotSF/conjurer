@@ -156,7 +156,10 @@ export class Store {
     if (this.context === "playground" || this.context === "pipes") {
       this.playgroundStore.initialize();
       this.uiStore.initialize();
-      if (this.context === "pipes") this.uiStore.renderTargetSize = 1024;
+      if (this.context === "pipes") {
+        this.uiStore.renderTargetSize = 1024;
+        this.uiStore.playgroundDisplayMode = "cartesianSpace";
+      }
       setupControllerWebsocket(this.context, this.playgroundStore.onUpdate);
       return;
     }
