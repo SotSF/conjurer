@@ -13,10 +13,12 @@ import { CartesianSpaceView } from "@/src/components/Canvas/CartesianSpaceView";
 
 type PreviewCanvasProps = {
   block: Block;
+  frameloop?: "always" | "demand";
 };
 
 export const PreviewCanvas = observer(function PreviewCanvas({
   block,
+  frameloop = "demand",
 }: PreviewCanvasProps) {
   const store = useStore();
   const { uiStore } = store;
@@ -26,8 +28,10 @@ export const PreviewCanvas = observer(function PreviewCanvas({
   );
 
   return (
-    <Canvas frameloop="demand">
-      <RenderingGate shouldRender={!store.playing} />
+    <Canvas frameloop={frameloop}>
+      {frameloop === "demand" && (
+        <RenderingGate shouldRender={!store.playing} />
+      )}
       <CameraControls />
       <SingleBlockRenderPipeline
         autorun

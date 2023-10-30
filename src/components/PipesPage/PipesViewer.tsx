@@ -82,7 +82,7 @@ export const PipesViewer = observer(function PipesViewer() {
               </Button>
             )}
           </VStack>
-          <PreviewCanvas block={pipesBlock} />
+          <PreviewCanvas frameloop="always" block={pipesBlock} />
         </Box>
       </VStack>
     </VStack>
