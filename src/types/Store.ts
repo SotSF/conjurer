@@ -119,7 +119,12 @@ export class Store {
   }
 
   constructor(
-    readonly context: "playground" | "controller" | "viewer" | "default"
+    readonly context:
+      | "playground"
+      | "controller"
+      | "viewer"
+      | "pipes"
+      | "default"
   ) {
     makeAutoObservable(this);
 
@@ -127,7 +132,7 @@ export class Store {
   }
 
   initializeServerSide = () => {
-    if (this.context === "playground") {
+    if (this.context === "playground" || this.context === "pipes") {
       this.uiStore.patternDrawerOpen = true;
     } else if (this.context === "controller") {
       this.uiStore.displayMode = "none";
@@ -148,7 +153,7 @@ export class Store {
       return;
     }
 
-    if (this.context === "playground") {
+    if (this.context === "playground" || this.context === "pipes") {
       this.playgroundStore.initialize();
       this.uiStore.initialize();
       setupControllerWebsocket(this.context, this.playgroundStore.onUpdate);
