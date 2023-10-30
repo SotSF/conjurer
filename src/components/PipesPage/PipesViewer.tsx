@@ -1,7 +1,7 @@
 import styles from "@/styles/PipesViewer.module.css";
 import { Box, Button, VStack } from "@chakra-ui/react";
 import { PreviewCanvas } from "@/src/components/Canvas/PreviewCanvas";
-import { ReactNode, useMemo, useState } from "react";
+import { ReactNode, memo, useMemo, useState } from "react";
 import { observer } from "mobx-react-lite";
 import { useStore } from "@/src/types/StoreContext";
 import { CircleOfPipe } from "@/src/patterns/CircleOfPipe";
@@ -15,7 +15,7 @@ const FadeText = ({ children }: { children: ReactNode }) => (
   <p className={styles.fadeInRise}>{children}</p>
 );
 
-export const PipesViewer = observer(function PipesViewer() {
+export const PipesViewer = memo(function PipesViewer() {
   const store = useStore();
 
   const pipesBlock = useMemo(() => new Block(store, CircleOfPipe()), [store]);
@@ -73,6 +73,7 @@ export const PipesViewer = observer(function PipesViewer() {
                 textAlign="center"
               >
                 <Image
+                  priority
                   src="/secret-fire-logo.svg"
                   alt="Secret Fire logo"
                   width={60}
