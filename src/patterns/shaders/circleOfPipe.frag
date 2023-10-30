@@ -14,6 +14,7 @@ uniform float u_camera_y;
 uniform float u_camera_distance;
 uniform float u_camera_rotation_factor;
 uniform float u_rust_threshold;
+uniform float u_cutoff_threshold;
 uniform float u_cell_size;
 uniform float u_cells_per_second;
 uniform float u_repeat_count;
@@ -26,6 +27,7 @@ uniform float u_repeat_count;
 // #define u_camera_distance 9.
 // #define u_camera_rotation_factor 0.1
 // #define u_rust_threshold 0.5
+// #define u_cutoff_threshold 0.5
 // #define u_cell_size 1.5
 // #define u_cells_per_second 2.
 // #define u_repeat_count 5.
@@ -140,6 +142,8 @@ vec2 limited_repeated(vec3 p, float time) {
 
                 d = min(d, sdfValue);
             }
+
+    d = smax(d, - (p.y - u_cell_size * u_cells_per_second * time - u_cutoff_threshold), 0.1);
     return vec2(d, objectId);
 }
 

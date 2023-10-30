@@ -54,10 +54,15 @@ export const CircleOfPipe = () =>
       min: -2,
       max: 2,
     },
-
     u_rust_threshold: {
       name: "Rust Threshold",
       value: -10,
+      min: -50,
+      max: 50,
+    },
+    u_cutoff_threshold: {
+      name: "Cutoff Threshold",
+      value: -100,
       min: -50,
       max: 50,
     },
@@ -77,7 +82,7 @@ export const CircleOfPipe = () =>
       name: "Repeat Count",
       value: 5,
       min: 1,
-      max: 10,
-      step: 1,
+      max: 25,
+      step: 2,
     },
   });
