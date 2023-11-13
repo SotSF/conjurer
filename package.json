@@ -34,7 +34,7 @@
     "glslify-loader": "^2.0.0",
     "gsap": "^3.12.2",
     "jimp": "^0.22.10",
-    "mobx": "^6.10.2",
+    "mobx": "^6.11.0",
     "mobx-react-lite": "^4.0.5",
     "next": "^13.5.5",
     "postprocessing": "^6.33.2",
