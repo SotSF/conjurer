@@ -1,3 +1,5 @@
+> After creating this page, I found a similar resource: [`awesome-glsl`](https://github.com/vanrez-nez/awesome-glsl).
+
 # Shader Resources
 
 ## Overview
