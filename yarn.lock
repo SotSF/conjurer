@@ -686,10 +686,10 @@
     chalk "^2.0.0"
     js-tokens "^4.0.0"
 
-"@babel/runtime@7.23.1", "@babel/runtime@^7.0.0", "@babel/runtime@^7.1.2", "@babel/runtime@^7.11.2", "@babel/runtime@^7.12.1", "@babel/runtime@^7.12.13", "@babel/runtime@^7.12.5", "@babel/runtime@^7.17.8", "@babel/runtime@^7.18.3", "@babel/runtime@^7.20.7", "@babel/runtime@^7.22.5", "@babel/runtime@^7.9.2":
-  version "7.23.1"
-  resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.23.1.tgz#72741dc4d413338a91dcb044a86f3c0bc402646d"
-  integrity sha512-hC2v6p8ZSI/W0HUzh3V8C5g+NwSKzKPtJwSpTjwl0o297GP9+ZLQSkdvHz46CM3LqyoXxq+5G9komY+eSqSO0g==
+"@babel/runtime@7.23.4", "@babel/runtime@^7.0.0", "@babel/runtime@^7.1.2", "@babel/runtime@^7.11.2", "@babel/runtime@^7.12.1", "@babel/runtime@^7.12.13", "@babel/runtime@^7.12.5", "@babel/runtime@^7.17.8", "@babel/runtime@^7.18.3", "@babel/runtime@^7.20.7", "@babel/runtime@^7.22.5", "@babel/runtime@^7.9.2":
+  version "7.23.4"
+  resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.23.4.tgz#36fa1d2b36db873d25ec631dcc4923fdc1cf2e2e"
+  integrity sha512-2Yv65nlWnWlSpe3fXEyX5i7fx5kIKo4Qbcj+hMO0odwaneFjfXw5fdum+4yL20O0QiaHpia0cYQ9xpNMqrBwHg==
   dependencies:
     regenerator-runtime "^0.14.0"
 
@@ -3154,12 +3154,12 @@ axe-core@^4.6.2:
   resolved "https://registry.yarnpkg.com/axe-core/-/axe-core-4.7.0.tgz#34ba5a48a8b564f67e103f0aa5768d76e15bbbbf"
   integrity sha512-M0JtH+hlOL5pLQwHOLNYZaXuhqmvS8oExsqB1SBYgA4Dk7u/xx+YdGHXaK5pyUfed5mYXdlYiphWq3G8cRi5JQ==
 
-axios-hooks@^5.0.1:
-  version "5.0.1"
-  resolved "https://registry.yarnpkg.com/axios-hooks/-/axios-hooks-5.0.1.tgz#3b799a3ac16f3362fb7ab05caf19e6d9cedfc517"
-  integrity sha512-FuSCfg2W/ZvOsxtO4e0vDBSn9bHJw7XhXL4Y4Veizh/2Bb7G+SDmBYTE3XGAf657HvcGlRPfkWoPNHMGW35g7g==
+axios-hooks@^5.0.2:
+  version "5.0.2"
+  resolved "https://registry.yarnpkg.com/axios-hooks/-/axios-hooks-5.0.2.tgz#9ee0c4e7de96cdc4578ccc1f162b0253dd42c5f6"
+  integrity sha512-A047WTutYx5mYzfPc+CFblEliHLlLQ9zyrCJGtQeu5RyX0aLiAaOqqSvu2C6ts4fHFZfK9IPflqppIeIjldlrg==
   dependencies:
-    "@babel/runtime" "7.23.1"
+    "@babel/runtime" "7.23.4"
     dequal "2.0.3"
     lru-cache "^10.0.1"
 
