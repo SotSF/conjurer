@@ -61,6 +61,6 @@
     "eslint-config-next": "13.5.4",
     "eslint-plugin-mobx": "^0.0.9",
     "r3f-perf": "^7.1.2",
-    "typescript": "^5.2.2"
+    "typescript": "^5.3.2"
   }
 }
