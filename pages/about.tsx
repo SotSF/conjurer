@@ -2,7 +2,7 @@ import { Box, ChakraProvider, theme } from "@chakra-ui/react";
 import Head from "next/head";
 import { AboutPage } from "@/src/components/AboutPage";
 
-export default function Portal() {
+export default function About() {
   return (
     <>
       <Head>
@@ -13,11 +13,9 @@ export default function Portal() {
       </Head>
 
       <ChakraProvider theme={theme}>
-        {/* <StoreContext.Provider value={new Store("viewer")}> */}
         <Box height="100vh" width="100vw" bgColor="gray.700">
           <AboutPage />
         </Box>
-        {/* </StoreContext.Provider> */}
       </ChakraProvider>
     </>
   );
