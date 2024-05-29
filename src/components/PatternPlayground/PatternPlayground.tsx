@@ -18,7 +18,7 @@ import { action, runInAction } from "mobx";
 import { DisplayModeButtons } from "@/src/components/PatternPlayground/DisplayModeButtons";
 import { SendDataButton } from "@/src/components/SendDataButton";
 import { PresetsList } from "@/src/components/PatternPlayground/PresetsList";
-import { RecordCanvasControls } from "@/src/components/PatternPlayground/RecordCanvasControls";
+// import { RecordCanvasControls } from "@/src/components/PatternPlayground/RecordCanvasControls";
 
 const PATTERN_PREVIEW_DISPLAY_SIZE = 600;
 
@@ -132,9 +132,9 @@ export const PatternPlayground = observer(function PatternPlayground() {
             </Switch>
           </VStack>
         )}
-        <HStack mt={2} pr={1} width="100%" justify="end">
+        <HStack my={2} pr={1} justify="center">
           <DisplayModeButtons />
-          <RecordCanvasControls />
+          {/* <RecordCanvasControls /> */}
           {["playground", "default"].includes(context) && <SendDataButton />}
           {context === "default" && (
             <Button
@@ -152,9 +152,9 @@ export const PatternPlayground = observer(function PatternPlayground() {
 
         {uiStore.playgroundDisplayMode !== "none" && (
           <VStack
+            my={2}
             position="sticky"
             top={0}
-            height="70vh"
             justify="center"
             alignItems="center"
             overflowX="hidden"

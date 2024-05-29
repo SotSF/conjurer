@@ -25,7 +25,6 @@ export const DisplayModeButtons = observer(function DisplayModeButtons() {
   return (
     <Tabs
       size="sm"
-      flexGrow={1}
       mt={2}
       mx={2}
       variant="line"

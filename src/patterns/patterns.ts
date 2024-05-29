@@ -23,38 +23,38 @@ import { GradientCircles } from "@/src/patterns//GradientCircles";
 import { Perlin } from "@/src/patterns/Perlin";
 import { PulsePalette } from "@/src/patterns/PulsePalette";
 const patternFactories: Array<() => Pattern> = [
-    CircleOfPipe,
-    PipeTime,
-    BoxTime,
-    Lightwaves,
-    LogSpirals,
-    Barcode,
-    Clouds,
-    Disc,
-    Fire,
-    Globules,
-    GradientCircles,
-    Lissajous,
-    Melt,
-    Perlin,
-    Pulse,
-    PulsePalette,
-    Rainbow,
-    Starfield,
-    SunCycle,
-    Tunnel,
-    Construct,
-    EasternRedbud,
-    Convergence,
+  PulsePalette,
+  LogSpirals,
+  Lightwaves,
+  Barcode,
+  Clouds,
+  Disc,
+  Fire,
+  Globules,
+  GradientCircles,
+  Lissajous,
+  Melt,
+  Perlin,
+  Pulse,
+  Rainbow,
+  Starfield,
+  SunCycle,
+  Tunnel,
+  Construct,
+  EasternRedbud,
+  Convergence,
+  CircleOfPipe,
+  PipeTime,
+  BoxTime,
 ];
 // Patterns that will not have their uniforms changed. These are used for checking what the default
 // uniform values are.
 const defaultPatterns: Pattern[] = patternFactories.map((f) => f());
 const defaultPatternMap: {
-    [key: string]: Pattern;
+  [key: string]: Pattern;
 } = {};
 for (const pattern of defaultPatterns)
-    defaultPatternMap[pattern.name] = pattern;
+  defaultPatternMap[pattern.name] = pattern;
 // Patterns that will have their uniforms updated by the pattern playground.
 const playgroundPatterns: Pattern[] = patternFactories.map((f) => f());
 export { defaultPatternMap, playgroundPatterns };
