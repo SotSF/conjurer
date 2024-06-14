@@ -77,7 +77,7 @@ Downloads all of the experience and audio files from s3 into the folder `public/
 In order to run Conjurer without internet access, such as at a festival, you can follow these below steps.
 
 1. Clone this repository as usual.
-1. Ensure you are using node 16: `nvm use 16` if you use nvm.
+1. Ensure you are using node 18: `nvm use 18` if you use nvm.
 1. Run `yarn` as usual to install dependencies.
 1. Run `yarn downloadCloudAssets` to download all cloud assets into the folder `public/cloud-assets`. Note that you are getting a snapshot of all of the experiences and audio files. If you make more changes to these cloud saved files, you will have to rerun this script to download the latest changed assets.
 1. Run `yarn build`.
