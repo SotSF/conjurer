@@ -1,6 +1,6 @@
 # [Conjurer](https://canopyconjurer.vercel.app)
 
-Conjurer is a web app that allows one to design audiovisual experiences for the [Canopy of Luminous Conjury](https://se.cretfi.re/canopy/), a large LED art piece by [The Servants of the Secret Fire](https://se.cretfi.re/).
+Conjurer is a web app for designing audiovisual experiences for the [Canopy of Luminous Conjury](https://se.cretfi.re/canopy/), a large LED art piece by [The Servants of the Secret Fire](https://se.cretfi.re/).
 
 ![Conjurer screenshot](public/example.png)
 
