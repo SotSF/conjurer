@@ -9,6 +9,7 @@
 # youtube-dl -f bestaudio --extract-audio --audio-format mp3 --audio-quality 256K 'https://www.youtube.com/watch?v=J-WNYs9GwKM' -o 'the-king-beetle-on-a-coconut-estate.%(ext)s'
 # youtube-dl -f bestaudio --extract-audio --audio-format mp3 --audio-quality 256K 'https://www.youtube.com/watch?v=A7KYhOGdagg' -o 'light-dr-toast.%(ext)s'
 # youtube-dl -f bestaudio --extract-audio --audio-format mp3 --audio-quality 256K 'https://www.youtube.com/watch?v=C_w9eMbGFz8' -o 'hiatus-nightjar.%(ext)s'
+# youtube-dl -f bestaudio --extract-audio --audio-format mp3 --audio-quality 256K 'https://www.youtube.com/watch?v=11x-CpGcqF8' -o 'vanille-fraise.%(ext)s'
 
 # Still need to download these:
 # youtube-dl -f bestaudio --extract-audio --audio-format mp3 --audio-quality 256K 'https://www.youtube.com/watch?v=...' -o 'cloudkicker-explorebecurious.%(ext)s'
