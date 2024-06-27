@@ -6,7 +6,7 @@ import { RegionParams } from "wavesurfer.js/dist/plugins/regions";
 export const MAX_PIXELS_PER_SECOND = 160;
 export const MIN_PIXELS_PER_SECOND = 4;
 
-const INITIAL_RENDER_TARGET_SIZE = 256;
+const INITIAL_RENDER_TARGET_SIZE = 512;
 
 export type DisplayMode = "canopy" | "canopySpace" | "cartesianSpace" | "none";
 
