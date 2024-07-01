@@ -1,6 +1,8 @@
 # Onsite setup
 
-This is the one stop shop for everything related to setting up Conjurer. It is assumed that there is no internet at the event.
+This is the one stop shop for everything related to setting up Conjurer. Just followed these 47 easy steps. What could go wrong?
+
+It is assumed that there is no internet at the event.
 
 ## Before leaving for the event
 
@@ -10,12 +12,12 @@ This is the one stop shop for everything related to setting up Conjurer. It is a
 1. Run `node -v` to ensure you are using node 18
    - For easy node version management, [install `nvm`](https://github.com/nvm-sh/nvm?tab=readme-ov-file#installing-and-updating)
    - Once it is installed, run `nvm install 18`
-   - If it is already installed, simply run `nvm use 18`
+   - If nvm and node 18 are already installed, simply run `nvm use 18`
    - Run `node -v` again to verify you are using node 18
 1. Run `yarn` to install dependencies
 1. Run `yarn dev` to run conjurer locally
 1. Visit http://localhost:3000 to test it out
-   - Log in as someone, open up an experience
+   - Log in as someone (top right button), open up an experience (File->Open...)
    - Click play and verify visuals and audio are working
 
 ### Setup Conjurer to use local assets
