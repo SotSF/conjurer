@@ -14,6 +14,7 @@ import { Melt } from "@/src/patterns/Melt";
 import { Tunnel } from "@/src/patterns/Tunnel";
 import { Rainbow } from "@/src/patterns/Rainbow";
 import { Starfield } from "@/src/patterns/Starfield";
+import { SpaceOdyssey } from "@/src/patterns/SpaceOdyssey";
 import { Globules } from "@/src/patterns/Globules";
 import { Construct } from "@/src/patterns/Construct";
 import { EasternRedbud } from "@/src/patterns/EasternRedbud";
@@ -38,6 +39,7 @@ const patternFactories: Array<() => Pattern> = [
   Pulse,
   Rainbow,
   Starfield,
+  SpaceOdyssey,
   SunCycle,
   Tunnel,
   Construct,

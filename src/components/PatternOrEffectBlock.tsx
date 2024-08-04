@@ -11,6 +11,7 @@ import { FaTrashAlt } from "react-icons/fa";
 import { HeaderRepeat } from "@/src/components/HeaderRepeat";
 import { ImLoop } from "react-icons/im";
 import { useStore } from "@/src/types/StoreContext";
+import PatternTimingModal from "./PatternTimingModal";
 
 type Props = {
   block: Block;
@@ -60,7 +61,7 @@ export const PatternOrEffectBlock = observer(function PatternOrEffectBlock({
             userSelect="none"
             textOverflow="clip"
             overflowWrap="anywhere"
-            color={color}
+            color="blue.500"
           >
             {isEffect ? "Effect" : "Pattern"}: {block.pattern.name}
           </Heading>
@@ -96,6 +97,7 @@ export const PatternOrEffectBlock = observer(function PatternOrEffectBlock({
               e.stopPropagation();
             }}
           />
+          {!isEffect && <PatternTimingModal block={block} />}
           {isEffect && (
             <HStack position="absolute" right={0}>
               {effectIndex < lastEffectIndex && (

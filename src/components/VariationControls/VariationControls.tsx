@@ -314,18 +314,22 @@ export function PeriodicVariationControls({
           <ScalarInput
             name="Min"
             onChange={(valueString, valueNumber) => {
-              variation.min = valueNumber;
               setMin(valueString);
-              block.triggerVariationReactions(uniformName);
+              if (!isNaN(valueNumber)) {
+                variation.min = valueNumber;
+                block.triggerVariationReactions(uniformName);
+              }
             }}
             value={min}
           />
           <ScalarInput
             name="Max"
             onChange={(valueString, valueNumber) => {
-              variation.max = valueNumber;
               setMax(valueString);
-              block.triggerVariationReactions(uniformName);
+              if (!isNaN(valueNumber)) {
+                variation.max = valueNumber;
+                block.triggerVariationReactions(uniformName);
+              }
             }}
             value={max}
           />

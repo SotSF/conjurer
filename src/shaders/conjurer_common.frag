@@ -69,7 +69,7 @@ float plot(vec2 st, float pct) {
 //   x goes from 0.0 to 1.0, which describes the angle around the center from 0 to 2pi
 //   y goes from 0.0 to 1.0, which describes the distance from the apex to the edge of the canopy
 
-// Cannot be coordinate can be useful to write patterns so that you can described behavior with the
+// Canopy coordinates can be useful to write patterns so that you can describe behavior with the
 // boundaries of the canopy in mind. However, the coordinate space being so specialized can be
 // limiting. Use the functions below to convert to other coordinate systems whenever desired.
 

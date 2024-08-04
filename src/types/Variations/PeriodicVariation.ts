@@ -15,8 +15,7 @@ export class PeriodicVariation extends Variation<number> {
   }
 
   set min(newMin: number) {
-    const oldMax = this.max;
-    this.amplitude = (oldMax - newMin) / 2;
+    this.amplitude = (this.max - newMin) / 2;
     this.offset = newMin + this.amplitude;
   }
 
