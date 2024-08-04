@@ -61,7 +61,7 @@ export const PatternOrEffectBlock = observer(function PatternOrEffectBlock({
             userSelect="none"
             textOverflow="clip"
             overflowWrap="anywhere"
-            color="blue.500"
+            color={color}
           >
             {isEffect ? "Effect" : "Pattern"}: {block.pattern.name}
           </Heading>
