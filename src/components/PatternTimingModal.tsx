@@ -1,3 +1,5 @@
+import { useMemo, useState } from "react";
+import { ImClock } from "react-icons/im";
 import {
   Button,
   IconButton,
@@ -11,10 +13,9 @@ import {
   VStack,
   useDisclosure,
 } from "@chakra-ui/react";
-import { ImClock } from "react-icons/im";
+
 import { Block } from "../types/Block";
 import { ScalarInput } from "./ScalarInput";
-import { useMemo, useState } from "react";
 
 type PatternTimingModalProps = {
   block: Block;

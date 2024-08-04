@@ -1,8 +1,8 @@
-import { Pattern } from "@/src/types/Pattern";
-import { Palette } from "@/src/types/Palette";
 import { Vector3 } from "three";
 
 import spaceOdyssey from "@/src/patterns/shaders/spaceOdyssey.frag";
+import { Pattern } from "@/src/types/Pattern";
+import { Palette } from "@/src/types/Palette";
 
 export { spaceOdyssey };
 export const SpaceOdyssey = () =>
