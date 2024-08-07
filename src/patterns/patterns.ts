@@ -6,6 +6,7 @@ import { Pattern } from "@/src/types/Pattern";
 import { Clouds } from "@/src/patterns/Clouds";
 import { Disc } from "@/src/patterns/Disc";
 import { SunCycle } from "@/src/patterns/SunCycle";
+import { GentleRings } from "@/src/patterns/GentleRings";
 import { LogSpirals } from "@/src/patterns/LogSpirals";
 import { Barcode } from "@/src/patterns/Barcode";
 import { Pulse } from "@/src/patterns/Pulse";
@@ -31,6 +32,7 @@ const patternFactories: Array<() => Pattern> = [
   Clouds,
   Disc,
   Fire,
+  GentleRings,
   Globules,
   GradientCircles,
   Lissajous,
