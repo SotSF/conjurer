@@ -8,8 +8,6 @@ precision mediump float;
 varying vec2 v_uv;
 uniform float u_time;
 
-uniform Palette u_palette;
-
 uniform int u_iterations;
 uniform float u_magic;
 uniform float u_step_size;
