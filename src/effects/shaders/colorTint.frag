@@ -19,6 +19,5 @@ void main() {
     vec4 mixed = mix(sampled, u_color, u_intensity);
 
     // any sampled pixels that are black, leave them black
-    mixed.xyz = step(0.000001, sampled.x * sampled.y * sampled.z) * mixed.xyz;
-    gl_FragColor = mixed;
+    gl_FragColor = sampled.rgb == vec3(0.) ? sampled : mixed;
 }

@@ -59,7 +59,7 @@ export const AddEffectButton = observer(function AddEffectButton({
           </HStack>
         </MenuButton>
         <Portal>
-          <MenuList>
+          <MenuList rootProps={{ style: { zIndex: 12 } }}>
             {playgroundEffects.map((effect) => (
               <MenuItem
                 key={effect.name}

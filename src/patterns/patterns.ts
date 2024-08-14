@@ -6,6 +6,7 @@ import { Pattern } from "@/src/types/Pattern";
 import { Clouds } from "@/src/patterns/Clouds";
 import { Disc } from "@/src/patterns/Disc";
 import { SunCycle } from "@/src/patterns/SunCycle";
+import { GentleRings } from "@/src/patterns/GentleRings";
 import { LogSpirals } from "@/src/patterns/LogSpirals";
 import { Barcode } from "@/src/patterns/Barcode";
 import { Pulse } from "@/src/patterns/Pulse";
@@ -14,6 +15,7 @@ import { Melt } from "@/src/patterns/Melt";
 import { Tunnel } from "@/src/patterns/Tunnel";
 import { Rainbow } from "@/src/patterns/Rainbow";
 import { Starfield } from "@/src/patterns/Starfield";
+import { GalaxyTour } from "@/src/patterns/GalaxyTour";
 import { SpaceOdyssey } from "@/src/patterns/SpaceOdyssey";
 import { Globules } from "@/src/patterns/Globules";
 import { Construct } from "@/src/patterns/Construct";
@@ -31,6 +33,7 @@ const patternFactories: Array<() => Pattern> = [
   Clouds,
   Disc,
   Fire,
+  GentleRings,
   Globules,
   GradientCircles,
   Lissajous,
@@ -38,6 +41,7 @@ const patternFactories: Array<() => Pattern> = [
   Perlin,
   Pulse,
   Rainbow,
+  GalaxyTour,
   Starfield,
   SpaceOdyssey,
   SunCycle,

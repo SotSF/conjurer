@@ -24,6 +24,11 @@ export const Lightwaves = () =>
       name: "Time Factor",
       value: 0,
     },
+    u_timeOffset: {
+      name: "Time Offset",
+      value: 0,
+      max: 40,
+    },
     u_period: {
       name: "Period",
       value: 0,
