@@ -31,6 +31,12 @@ export const OpenExperienceModal = observer(function OpenExperienceModal() {
     onClose();
   };
 
+  // are the last fetched experiences for a different user?
+  const areExperiencesStale =
+    experiences.length > 0 &&
+    store.user.length > 0 &&
+    !experiences[0].startsWith(store.user);
+
   return (
     <Modal
       onClose={onClose}
@@ -39,11 +45,13 @@ export const OpenExperienceModal = observer(function OpenExperienceModal() {
     >
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>Open experience</ModalHeader>
+        <ModalHeader>
+          Open experience {loading && <Spinner ml={2} />}
+        </ModalHeader>
         <ModalCloseButton />
         <ModalBody>
           {store.user ? (
-            loading ? (
+            areExperiencesStale ? (
               <Spinner />
             ) : (
               <>
