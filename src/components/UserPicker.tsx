@@ -57,6 +57,7 @@ export const UserPicker = observer(function UserPicker() {
                     width="100%"
                     onClick={action(() => {
                       store.user = user;
+                      store.uiStore.showingOpenExperienceModal = true;
                       onClose();
                     })}
                   >
@@ -76,6 +77,7 @@ export const UserPicker = observer(function UserPicker() {
                 isDisabled={!newUser}
                 onClick={action(() => {
                   store.user = newUser;
+                  store.newExperience();
                   onClose();
                 })}
               >
