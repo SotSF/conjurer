@@ -11,6 +11,7 @@ uniform Palette u_palette;
 uniform float u_time_offset;
 uniform float u_speed;
 uniform float u_tail_length;
+uniform bool u_tail_fade;
 uniform float u_blade_count;
 uniform bool u_bladient;
 uniform float u_bladient_modulation;
@@ -31,7 +32,7 @@ vec3 draw_blade(int i) {
     float pos_within_blade = fract(st.x * u_blade_count);
     float alpha = clamp(1. - fract(pos + (u_time + u_time_offset) * u_speed) / u_tail_length, 0., 1.);
     vec3 color = get_color(offset, pos_within_blade, alpha);
-    return color * alpha;
+    return color * (u_tail_fade ? alpha : step(0.01, alpha));
 }
 
 void main() {

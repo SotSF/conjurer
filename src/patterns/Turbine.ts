@@ -34,6 +34,13 @@ export const Turbine = () =>
       min: 0,
       max: 1,
     },
+    u_tail_fade: {
+      name: "Tail Fade",
+      value: 1,
+      min: 0,
+      max: 1,
+      step: 1,
+    },
     u_blade_count: {
       name: "Blade Count",
       value: 3,
