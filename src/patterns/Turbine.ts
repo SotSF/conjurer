@@ -16,6 +16,12 @@ export const Turbine = () =>
         new Vector3(0.33107, 0.79852, 0.1234)
       ),
     },
+    u_time_offset: {
+      name: "Time Offset",
+      value: 0,
+      min: -100,
+      max: 100,
+    },
     u_speed: {
       name: "Speed",
       value: 0.3,
@@ -24,7 +30,7 @@ export const Turbine = () =>
     },
     u_tail_length: {
       name: "Tail Length",
-      value: 0.2,
+      value: 0.33,
       min: 0,
       max: 1,
     },
@@ -37,9 +43,15 @@ export const Turbine = () =>
     },
     u_bladient: {
       name: "Bladient",
-      value: 0,
+      value: 1,
       min: 0,
       max: 1,
       step: 1,
+    },
+    u_blade_arc: {
+      name: "Blade Arc",
+      value: 0.2,
+      min: -1,
+      max: 1,
     },
   });
