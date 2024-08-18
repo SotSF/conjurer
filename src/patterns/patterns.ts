@@ -1,3 +1,4 @@
+import { Turbine } from "@/src/patterns/Turbine";
 import { CircleOfPipe } from "@/src/patterns/CircleOfPipe";
 import { PipeTime } from "@/src/patterns/PipeTime";
 import { BoxTime } from "@/src/patterns/BoxTime";
@@ -46,6 +47,7 @@ const patternFactories: Array<() => Pattern> = [
   SpaceOdyssey,
   SunCycle,
   Tunnel,
+  Turbine,
   Construct,
   EasternRedbud,
   Convergence,
