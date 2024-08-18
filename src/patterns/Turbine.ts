@@ -48,6 +48,12 @@ export const Turbine = () =>
       max: 1,
       step: 1,
     },
+    u_bladient_modulation: {
+      name: "Bladient Modulation",
+      value: 1,
+      min: 0.1,
+      max: 5,
+    },
     u_blade_arc: {
       name: "Blade Arc",
       value: 0.2,

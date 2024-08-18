@@ -13,11 +13,12 @@ uniform float u_speed;
 uniform float u_tail_length;
 uniform float u_blade_count;
 uniform bool u_bladient;
+uniform float u_bladient_modulation;
 uniform float u_blade_arc;
 
 vec3 get_color(float offset, float pos_within_blade, float alpha) {
     if (u_bladient) {
-        return palette(fract(offset - (1. - alpha) / u_blade_count), u_palette);
+        return palette(fract(offset - (1. - alpha) / (u_blade_count * u_bladient_modulation)), u_palette);
     } else {
         return palette(offset, u_palette);
     }
