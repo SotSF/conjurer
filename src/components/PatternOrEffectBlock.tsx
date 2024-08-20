@@ -11,7 +11,7 @@ import { FaTrashAlt } from "react-icons/fa";
 import { HeaderRepeat } from "@/src/components/HeaderRepeat";
 import { ImLoop } from "react-icons/im";
 import { useStore } from "@/src/types/StoreContext";
-import PatternTimingModal from "./PatternTimingModal";
+import { PatternTimingModal } from "./PatternTimingModal";
 
 type Props = {
   block: Block;

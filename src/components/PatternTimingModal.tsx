@@ -16,12 +16,15 @@ import {
 
 import { Block } from "../types/Block";
 import { ScalarInput } from "./ScalarInput";
+import { observer } from "mobx-react-lite";
 
 type PatternTimingModalProps = {
   block: Block;
 };
 
-export default function PatternTimingModal({ block }: PatternTimingModalProps) {
+export const PatternTimingModal = observer(function PatternTimingModal({
+  block,
+}: PatternTimingModalProps) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [startTime, setStartTime] = useState(block.startTime.toString());
   const [endTime, setEndTime] = useState(block.endTime.toString());
@@ -122,4 +125,4 @@ export default function PatternTimingModal({ block }: PatternTimingModalProps) {
       </Modal>
     </>
   );
-}
+});
