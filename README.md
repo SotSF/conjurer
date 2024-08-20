@@ -53,6 +53,16 @@ Conjurer should be running locally at http://localhost:3000.
   - Changes over time applied to a pattern/effect parameter
   - "Change the color from blue to green over 5 seconds"
 
+### Architecture
+
+Here is the zoomed out view of the architecture. Frame data is sent over websocket to the Unity app's websocket server. Ultimately this data is piped to the canopy and the canopy displays that frame.
+
+```mermaid
+graph
+  1(Conjurer frontend client)--websocket-->2(Unity websocket server)
+  2--magic-->3(Canopy)
+```
+
 ### Scripts
 
 #### `yarn generatePattern PatternName`
