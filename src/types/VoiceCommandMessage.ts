@@ -1,6 +1,12 @@
+type VoiceCommandConnectMessage = {
+  type: "connect";
+  appId: "conjurer";
+};
+
+export type VoiceCommandActionMessage = {
+  type: "action";
+} & { action: "togglePlay" | "goToBeginning" | "goToEnd" };
+
 export type VoiceCommandMessage =
-  | {
-      type: "connect";
-      appId: "conjurer";
-    }
-  | { type: "action" };
+  | VoiceCommandConnectMessage
+  | VoiceCommandActionMessage;

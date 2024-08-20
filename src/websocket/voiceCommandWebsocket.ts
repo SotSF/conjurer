@@ -1,4 +1,6 @@
+import { Store } from "@/src/types/Store";
 import { VoiceCommandMessage } from "@/src/types/VoiceCommandMessage";
+import { handleVoiceCommandActionMessage } from "@/src/websocket/voiceCommandHandler";
 import {
   VOICE_COMMAND_APP_WEBSOCKET_HOST,
   VOICE_COMMAND_APP_WEBSOCKET_PORT,
@@ -8,7 +10,7 @@ const env = process.env.NODE_ENV;
 
 let _websocket: WebSocket;
 
-export const setupVoiceCommandWebsocket = () => {
+export const setupVoiceCommandWebsocket = (store: Store) => {
   if (env == "production") return;
 
   console.log(
@@ -27,9 +29,8 @@ export const setupVoiceCommandWebsocket = () => {
     const dataString = data.toString();
     const message: VoiceCommandMessage = JSON.parse(dataString);
 
-    if (message.type === "action") {
-      console.log("Voice command received");
-    }
+    if (message.type === "action")
+      handleVoiceCommandActionMessage(store, message);
   };
 };
 

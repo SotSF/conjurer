@@ -148,7 +148,7 @@ export class Store {
     if (this.initializedClientSide) return;
     this.initializedClientSide = true;
 
-    setupVoiceCommandWebsocket();
+    setupVoiceCommandWebsocket(this);
 
     if (this.context === "controller") {
       this.playgroundStore.initialize();
