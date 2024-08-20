@@ -11,6 +11,7 @@ import { PlaylistStore } from "@/src/types/PlaylistStore";
 import { BeatMapStore } from "@/src/types/BeatMapStore";
 import { PlaygroundStore } from "@/src/types/PlaygroundStore";
 import { setupControllerWebsocket } from "@/src/websocket/controllerWebsocket";
+import { setupVoiceCommandWebsocket } from "@/src/websocket/voiceCommandWebsocket";
 
 // Enforce MobX strict mode, which can make many noisy console warnings, but can help use learn MobX better.
 // Feel free to comment out the following if you want to silence the console messages.
@@ -146,6 +147,8 @@ export class Store {
   initializeClientSide = () => {
     if (this.initializedClientSide) return;
     this.initializedClientSide = true;
+
+    setupVoiceCommandWebsocket();
 
     if (this.context === "controller") {
       this.playgroundStore.initialize();
