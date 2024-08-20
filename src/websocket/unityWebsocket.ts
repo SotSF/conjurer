@@ -1,7 +1,7 @@
 import {
   UNITY_APP_WEBSOCKET_HOST,
   UNITY_APP_WEBSOCKET_PORT,
-} from "@/src/utils/websocketHost";
+} from "@/src/websocket/websocketHost";
 
 const env = process.env.NODE_ENV;
 

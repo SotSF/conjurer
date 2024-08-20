@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { useRenderTarget } from "@/src/hooks/renderTarget";
 import { LED_COUNTS } from "@/src/utils/size";
 import { useStore } from "@/src/types/StoreContext";
-import { transmitData } from "@/src/utils/unityWebsocket";
+import { transmitData } from "@/src/websocket/unityWebsocket";
 
 export const useDataTransmission = (mesh: Mesh | null, enabled: boolean) => {
   const { sendingData } = useStore();

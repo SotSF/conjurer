@@ -3,7 +3,7 @@ import { ControllerMessage } from "@/src/types/ControllerMessage";
 import {
   CONTROLLER_SERVER_WEBSOCKET_HOST,
   CONTROLLER_SERVER_WEBSOCKET_PORT,
-} from "@/src/utils/websocketHost";
+} from "@/src/websocket/websocketHost";
 
 let _websocket: WebSocket;
 

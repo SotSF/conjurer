@@ -8,7 +8,7 @@ import {
   isPaletteParam,
 } from "@/src/types/PatternParams";
 import { deserializeVariation } from "@/src/types/Variations/variations";
-import { sendControllerMessage } from "@/src/utils/controllerWebsocket";
+import { sendControllerMessage } from "@/src/websocket/controllerWebsocket";
 import { makeAutoObservable } from "mobx";
 
 export class PlaygroundStore {

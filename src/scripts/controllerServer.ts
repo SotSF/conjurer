@@ -1,5 +1,5 @@
 import { WebSocketServer } from "ws";
-import { CONTROLLER_SERVER_WEBSOCKET_PORT } from "../utils/websocketHost";
+import { CONTROLLER_SERVER_WEBSOCKET_PORT } from "../websocket/websocketHost";
 import { inspect } from "util";
 
 // TODO: do better

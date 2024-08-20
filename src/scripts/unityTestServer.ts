@@ -1,7 +1,7 @@
 import Jimp from "jimp";
 import { WebSocketServer } from "ws";
 import { LED_COUNTS } from "../utils/size";
-import { UNITY_APP_WEBSOCKET_PORT } from "../utils/websocketHost";
+import { UNITY_APP_WEBSOCKET_PORT } from "../websocket/websocketHost";
 
 // set this to true to write the received images to disk
 const WRITE_IMAGES = true;
