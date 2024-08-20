@@ -7,12 +7,17 @@ export const handleVoiceCommandActionMessage = action(
   (store: Store, message: VoiceCommandActionMessage) => {
     console.log("Action received: ", message);
 
-    if (message.action === "togglePlay") store.togglePlaying();
-    else if (message.action === "goToBeginning")
+    const { action } = message;
+    if (action === "togglePlay") {
+      store.togglePlaying();
+    } else if (action === "goToBeginning") {
       store.audioStore.setTimeWithCursor(0);
-    else if (message.action === "goToEnd") {
+    } else if (action === "goToEnd") {
       store.audioStore.setTimeWithCursor(MAX_TIME);
       store.pause();
+    } else if (action === "selectLayer") {
+      if (message.value < 1 || message.value > store.layers.length) return;
+      store.selectedLayer = store.layers[message.value - 1];
     }
   }
 );
