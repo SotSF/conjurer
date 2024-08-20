@@ -5,9 +5,10 @@ type VoiceCommandConnectMessage = {
 
 export type VoiceCommandActionMessage = {
   type: "action";
-} & (
-  | { action: "togglePlay" | "goToBeginning" | "goToEnd" }
-  | { action: "selectLayer"; value: number }
+} & // Actions without arguments
+(| { action: "togglePlay" | "goToBeginning" | "goToEnd" }
+  // Actions with arguments
+  | { action: "selectLayer" | "goToTime"; value: number }
 );
 
 export type VoiceCommandMessage =
