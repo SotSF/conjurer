@@ -16,7 +16,10 @@ export type VoiceCommandActionMessage = {
         | "goToTime"
         | "moveBlockForwardRelative"
         | "moveBlockBackwardRelative"
-        | "moveBlockAbsolute";
+        | "moveBlockAbsolute"
+        | "extendBlockRelative"
+        | "shrinkBlockRelative"
+        | "extendBlockAbsolute";
       value: number;
     }
 );

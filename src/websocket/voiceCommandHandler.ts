@@ -48,6 +48,24 @@ export const handleVoiceCommandActionMessage = action(
       store.uiStore.zoomIn();
     } else if (action === "zoomOut") {
       store.uiStore.zoomOut();
+    } else if (
+      action === "extendBlockRelative" ||
+      action === "shrinkBlockRelative"
+    ) {
+      // only works for one block for now
+      const selectedBlock = store.singleBlockSelection;
+      if (!selectedBlock || !selectedBlock.layer) return;
+
+      const delta =
+        action === "extendBlockRelative" ? message.value : -message.value;
+      selectedBlock.layer.resizeBlockRightBound(selectedBlock, delta);
+    } else if (action === "extendBlockAbsolute") {
+      // only works for one block for now
+      const selectedBlock = store.singleBlockSelection;
+      if (!selectedBlock || !selectedBlock.layer) return;
+
+      const delta = message.value - selectedBlock.endTime;
+      selectedBlock.layer.resizeBlockRightBound(selectedBlock, delta);
     }
   }
 );
