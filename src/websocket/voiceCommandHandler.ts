@@ -37,7 +37,13 @@ export const handleVoiceCommandActionMessage = action(
 
       const delta =
         action === "moveBlockForwardRelative" ? message.value : -message.value;
-      selectedBlock.layer.attemptMoveBlock(selectedBlock, delta);
+      selectedBlock.layer.attemptMoveBlock(selectedBlock, delta, true);
+    } else if (action === "moveBlockAbsolute") {
+      // only works for one block for now
+      const selectedBlock = store.singleBlockSelection;
+      if (!selectedBlock || !selectedBlock.layer) return;
+
+      selectedBlock.layer.attemptMoveBlock(selectedBlock, message.value);
     }
   }
 );

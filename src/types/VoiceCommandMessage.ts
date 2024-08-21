@@ -13,7 +13,8 @@ export type VoiceCommandActionMessage = {
         | "selectLayer"
         | "goToTime"
         | "moveBlockForwardRelative"
-        | "moveBlockBackwardRelative";
+        | "moveBlockBackwardRelative"
+        | "moveBlockAbsolute";
       value: number;
     }
 );
