@@ -1,13 +1,13 @@
-import { HStack, IconButton, Text } from "@chakra-ui/react";
-import { Variation } from "@/src/types/Variations/Variation";
-import { observer } from "mobx-react-lite";
-import { useStore } from "@/src/types/StoreContext";
-import { MdDragIndicator } from "react-icons/md";
-import { BiDuplicate } from "react-icons/bi";
-import { TbTrashXFilled, TbTrashFilled } from "react-icons/tb";
+import { useVariationClick } from "@/src/hooks/variationClick";
 import { Block } from "@/src/types/Block";
-import { useState } from "react";
+import { useStore } from "@/src/types/StoreContext";
+import { Variation } from "@/src/types/Variations/Variation";
+import { HStack, IconButton, Text } from "@chakra-ui/react";
 import { computed } from "mobx";
+import { observer } from "mobx-react-lite";
+import { useState } from "react";
+import { MdDragIndicator } from "react-icons/md";
+import { TbTrashFilled, TbTrashXFilled } from "react-icons/tb";
 
 type VariationHandleProps = {
   block: Block;
@@ -33,26 +33,28 @@ export const VariationHandle = observer(function VariationHandle({
       )
   ).get();
 
+  const onVariationClick = useVariationClick(block, uniformName);
+
   return (
-    <HStack spacing={0} color={isSelected ? "blue.500" : "white"}>
+    <HStack
+      spacing={0}
+      color={isSelected ? "blue.500" : "white"}
+      onClick={(e) => onVariationClick(e, variation)}
+    >
       <MdDragIndicator size={18} />
-      <Text pointerEvents="none" userSelect="none" fontSize="x-small">
+      <Text userSelect="none" fontSize="x-small">
         {variation.displayName}
       </Text>
+      {/* The below component is a complete hack, it solves a weird bug with my voice
+          tools related to the dragon drop library. Please leave in place! */}
       <IconButton
-        pl={2}
         variant="unstyled"
         size="xs"
-        aria-label="Duplicate variation"
-        title="Duplicate variation"
+        m={-2}
+        aria-label="Select variation"
+        title="Select variation"
         height={6}
-        icon={<BiDuplicate size={12} />}
-        onClick={(e) => {
-          store.duplicateVariation(block, uniformName, variation);
-          e.stopPropagation();
-        }}
-        color="gray.300"
-        _hover={{ color: "blue.500" }}
+        onClick={(e) => onVariationClick(e, variation)}
       />
       <IconButton
         variant="unstyled"

@@ -16,7 +16,6 @@ import { NewVariationButtons } from "@/src/components/NewVariationButtons";
 import { observer } from "mobx-react-lite";
 import { useStore } from "@/src/types/StoreContext";
 import { VariationHandle } from "@/src/components/VariationHandle";
-import { useVariationClick } from "@/src/hooks/variationClick";
 
 type ParameterVariationsProps = {
   uniformName: string;
@@ -50,8 +49,6 @@ export const ParameterVariations = observer(function ParameterVariations({
     );
   });
 
-  const onVariationClick = useVariationClick(block, uniformName);
-
   return (
     <VStack
       spacing={0}
@@ -84,8 +81,6 @@ export const ParameterVariations = observer(function ParameterVariations({
                       justify="center"
                       spacing={0}
                       cursor="grab"
-                      role="button"
-                      onClick={(e) => onVariationClick(e, variation)}
                     >
                       <VariationHandle
                         block={block}
