@@ -253,6 +253,17 @@ export class Layer {
       : 0;
   };
 
+  attemptMoveBlock = (block: Block, desiredDeltaTime: number) => {
+    if (block.layer != this) return;
+
+    // prevent block overlaps for now by snapping to nearest valid start time
+    const validTimeDelta = this.nearestValidStartTimeDelta(
+      block,
+      desiredDeltaTime
+    );
+    this.changeBlockStartTime(block, block.startTime + validTimeDelta);
+  };
+
   resizeBlockLeftBound = (block: Block, delta: number) => {
     const desiredStartTime = block.startTime + delta;
 

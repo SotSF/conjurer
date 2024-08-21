@@ -80,6 +80,14 @@ export class Store {
 
   selectedBlocksOrVariations: Set<BlockOrVariation> = new Set();
 
+  get singleBlockSelection(): Block | null {
+    const blockSelections = Array.from(this.selectedBlocksOrVariations).filter(
+      (blockOrVariation) => blockOrVariation.type === "block"
+    ) as BlockSelection[];
+
+    return blockSelections.length === 1 ? blockSelections[0].block : null;
+  }
+
   get singleVariationSelection(): VariationSelection | null {
     const variationSelections = Array.from(
       this.selectedBlocksOrVariations

@@ -66,14 +66,9 @@ export const TimelineBlockStack = observer(function TimelineBlockStack({
     if (Math.abs(position.x) < 1) return;
     if (!patternBlock.layer) return;
 
-    // prevent block overlaps for now by snapping to nearest valid start time
-    const validTimeDelta = patternBlock.layer.nearestValidStartTimeDelta(
+    patternBlock.layer.attemptMoveBlock(
       patternBlock,
       uiStore.xToTime(position.x)
-    );
-    patternBlock.layer.changeBlockStartTime(
-      patternBlock,
-      patternBlock.startTime + validTimeDelta
     );
     setPosition({ x: 0, y: 0 });
   });

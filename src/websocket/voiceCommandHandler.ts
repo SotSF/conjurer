@@ -27,6 +27,17 @@ export const handleVoiceCommandActionMessage = action(
         MAX_TIME
       );
       store.audioStore.setTimeWithCursor(time);
+    } else if (
+      action === "moveBlockForwardRelative" ||
+      action === "moveBlockBackwardRelative"
+    ) {
+      // only works for one block for now
+      const selectedBlock = store.singleBlockSelection;
+      if (!selectedBlock || !selectedBlock.layer) return;
+
+      const delta =
+        action === "moveBlockForwardRelative" ? message.value : -message.value;
+      selectedBlock.layer.attemptMoveBlock(selectedBlock, delta);
     }
   }
 );
