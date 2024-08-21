@@ -7,7 +7,7 @@ import { clamp } from "three/src/math/MathUtils";
 
 export const handleVoiceCommandActionMessage = action(
   (store: Store, message: VoiceCommandActionMessage) => {
-    console.log("Action received: ", message);
+    // console.log("Action received: ", message);
 
     const { action } = message;
     if (action === "togglePlay") {
@@ -44,6 +44,10 @@ export const handleVoiceCommandActionMessage = action(
       if (!selectedBlock || !selectedBlock.layer) return;
 
       selectedBlock.layer.attemptMoveBlock(selectedBlock, message.value);
+    } else if (action === "zoomIn") {
+      store.uiStore.zoomIn();
+    } else if (action === "zoomOut") {
+      store.uiStore.zoomOut();
     }
   }
 );

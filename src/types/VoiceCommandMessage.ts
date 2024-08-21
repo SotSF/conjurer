@@ -6,7 +6,9 @@ type VoiceCommandConnectMessage = {
 export type VoiceCommandActionMessage = {
   type: "action";
 } & ( // Actions without arguments
-  | { action: "togglePlay" | "goToBeginning" | "goToEnd" }
+  | {
+      action: "togglePlay" | "goToBeginning" | "goToEnd" | "zoomIn" | "zoomOut";
+    }
   // Actions with arguments
   | {
       action:
