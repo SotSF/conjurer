@@ -11,6 +11,7 @@ import { PlaylistStore } from "@/src/types/PlaylistStore";
 import { BeatMapStore } from "@/src/types/BeatMapStore";
 import { PlaygroundStore } from "@/src/types/PlaygroundStore";
 import { setupControllerWebsocket } from "@/src/websocket/controllerWebsocket";
+import { setupVoiceCommandWebsocket } from "@/src/websocket/voiceCommandWebsocket";
 
 // Enforce MobX strict mode, which can make many noisy console warnings, but can help use learn MobX better.
 // Feel free to comment out the following if you want to silence the console messages.
@@ -79,6 +80,14 @@ export class Store {
 
   selectedBlocksOrVariations: Set<BlockOrVariation> = new Set();
 
+  get singleBlockSelection(): Block | null {
+    const blockSelections = Array.from(this.selectedBlocksOrVariations).filter(
+      (blockOrVariation) => blockOrVariation.type === "block"
+    ) as BlockSelection[];
+
+    return blockSelections.length === 1 ? blockSelections[0].block : null;
+  }
+
   get singleVariationSelection(): VariationSelection | null {
     const variationSelections = Array.from(
       this.selectedBlocksOrVariations
@@ -146,6 +155,8 @@ export class Store {
   initializeClientSide = () => {
     if (this.initializedClientSide) return;
     this.initializedClientSide = true;
+
+    setupVoiceCommandWebsocket(this);
 
     if (this.context === "controller") {
       this.playgroundStore.initialize();

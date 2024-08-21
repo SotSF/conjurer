@@ -63,19 +63,30 @@ export const DisplayControls = observer(function DisplayControls({
           onClick={action(() => uiStore.toggleLayout())}
         />
       )}
-      {displayModes.map((displayMode) => (
-        <IconButton
-          key={displayMode}
-          aria-label={`Toggle ${displayMode}`}
-          title={`Toggle ${displayMode}`}
-          height={6}
-          icon={displayModeIcons[displayMode]}
-          onClick={action(() => (uiStore.displayMode = displayMode))}
-          bgColor={
-            uiStore.displayMode === displayMode ? "orange.500" : undefined
-          }
-        />
-      ))}
+      <VStack gap={0}>
+        {displayModes.map((displayMode, index) => (
+          <IconButton
+            key={displayMode}
+            aria-label={`Toggle ${displayMode}`}
+            title={`Toggle ${displayMode}`}
+            height={6}
+            borderTopRadius={index === 0 ? undefined : 0}
+            borderBottomRadius={
+              index === displayModes.length - 1 ? undefined : 0
+            }
+            borderStyle="solid"
+            borderColor="gray.400"
+            borderTopWidth={index === 0 ? 0 : 0.5}
+            borderBottomWidth={index === displayModes.length - 1 ? 0 : 0.5}
+            icon={displayModeIcons[displayMode]}
+            onClick={action(() => (uiStore.displayMode = displayMode))}
+            bgColor={
+              uiStore.displayMode === displayMode ? "orange.500" : undefined
+            }
+          />
+        ))}
+      </VStack>
+
       <IconButton
         aria-label="Render texture size"
         title="Render texture size"

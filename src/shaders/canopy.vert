@@ -36,5 +36,5 @@ void main() {
     v_normalized_uv = cartesianToNormalizedProjection(v_uv);
 
     gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-    gl_PointSize = 100.0 / length(cameraToPixelVector);
+    gl_PointSize = 150.0 / length(cameraToPixelVector);
 }
