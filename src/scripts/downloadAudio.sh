@@ -10,6 +10,7 @@
 # yt-dlp -f bestaudio --extract-audio --audio-format mp3 --audio-quality 256K 'https://www.youtube.com/watch?v=A7KYhOGdagg' -o 'light-dr-toast.%(ext)s'
 # yt-dlp -f bestaudio --extract-audio --audio-format mp3 --audio-quality 256K 'https://www.youtube.com/watch?v=C_w9eMbGFz8' -o 'hiatus-nightjar.%(ext)s'
 # yt-dlp -f bestaudio --extract-audio --audio-format mp3 --audio-quality 256K 'https://www.youtube.com/watch?v=11x-CpGcqF8' -o 'vanille-fraise.%(ext)s'
+# yt-dlp -f bestaudio --extract-audio --audio-format mp3 --audio-quality 256K 'https://www.youtube.com/watch?v=SDNA934EEVk' -o 'tycho-a-walk.%(ext)s'
 
 # Still need to download these:
 # yt-dlp -f bestaudio --extract-audio --audio-format mp3 --audio-quality 256K 'https://www.youtube.com/watch?v=...' -o 'cloudkicker-explorebecurious.%(ext)s'
