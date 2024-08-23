@@ -176,9 +176,10 @@ export class Store {
     }
 
     if (this.context === "viewer") {
-      this.playlistStore.loadExperience(
-        this.playlistStore.experienceFilenames[0]
-      );
+      this.experienceStore.loadExperienceFromParams() ||
+        this.playlistStore.loadExperience(
+          this.playlistStore.experienceFilenames[0]
+        );
       this.uiStore.initialize();
       return;
     }

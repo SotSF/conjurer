@@ -133,6 +133,13 @@ export class ExperienceStore {
     this.rootStore.deserialize(initialExperience);
   };
 
+  loadExperienceFromParams = () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const experience = urlParams.get("experience");
+    if (experience) void this.load(experience);
+    return !!experience;
+  };
+
   stringifyExperience = (): string =>
     JSON.stringify(this.rootStore.serialize(), (_, val) =>
       // round numbers to 6 decimal places, which saves space and is probably enough precision
