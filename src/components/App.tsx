@@ -32,7 +32,7 @@ export const App = observer(function App() {
 
   return (
     <Box position="relative" w="100vw" h="100vh">
-      <KeyboardControls />
+      <KeyboardControls editMode />
       <PatternDrawer />
       <PlaylistDrawer />
       {uiStore.horizontalLayout ? (

@@ -3,19 +3,25 @@ import { action } from "mobx";
 import { observer } from "mobx-react-lite";
 import { useEffect } from "react";
 
-export const KeyboardControls = observer(function KeyboardControls() {
+type Props = {
+  editMode?: boolean;
+};
+
+export const KeyboardControls = observer(function KeyboardControls({
+  editMode = false,
+}: Props) {
   const store = useStore();
   const { uiStore, experienceStore, audioStore } = store;
 
   useEffect(() => {
     const handleKeyDown = action((e: KeyboardEvent) => {
-      if (e.key === "s" && e.shiftKey && (e.ctrlKey || e.metaKey)) {
+      if (editMode && e.key === "s" && e.shiftKey && (e.ctrlKey || e.metaKey)) {
         uiStore.showingSaveExperienceModal = true;
         e.preventDefault();
-      } else if (e.key === "s" && (e.ctrlKey || e.metaKey)) {
+      } else if (editMode && e.key === "s" && (e.ctrlKey || e.metaKey)) {
         experienceStore.save();
         e.preventDefault();
-      } else if (e.key === "n" && (e.ctrlKey || e.metaKey)) {
+      } else if (editMode && e.key === "n" && (e.ctrlKey || e.metaKey)) {
         store.newExperience();
         e.preventDefault();
       }
@@ -37,26 +43,30 @@ export const KeyboardControls = observer(function KeyboardControls() {
       } else if (e.key === "ArrowRight") {
         audioStore.skipForward();
         e.preventDefault();
-      } else if (e.key === "o" && (e.ctrlKey || e.metaKey)) {
+      } else if (editMode && e.key === "o" && (e.ctrlKey || e.metaKey)) {
         uiStore.showingOpenExperienceModal = true;
         e.preventDefault();
-      } else if (e.key === "a" && (e.ctrlKey || e.metaKey)) {
+      } else if (editMode && e.key === "a" && (e.ctrlKey || e.metaKey)) {
         store.selectAllBlocks();
         e.preventDefault();
-      } else if (e.key === "Escape") store.deselectAll();
-      else if (e.key === "Delete" || e.key === "Backspace") {
+      } else if (editMode && e.key === "Escape") store.deselectAll();
+      else if ((editMode && e.key === "Delete") || e.key === "Backspace") {
         store.deleteSelected();
-      } else if (e.key === "d" && (e.ctrlKey || e.metaKey)) {
+      } else if (editMode && e.key === "d" && (e.ctrlKey || e.metaKey)) {
         store.duplicateSelected();
         e.preventDefault();
-      } else if ((e.key === "+" || e.key === "=") && e.ctrlKey)
+      } else if (editMode && (e.key === "+" || e.key === "=") && e.ctrlKey)
         uiStore.zoomIn(10);
-      else if (e.key === "-" && e.ctrlKey) uiStore.zoomOut(10);
+      else if (editMode && e.key === "-" && e.ctrlKey) uiStore.zoomOut(10);
     });
     window.addEventListener("keydown", handleKeyDown);
 
     const handleCopy = (e: ClipboardEvent) => {
-      if (!e.clipboardData || document.activeElement?.nodeName === "INPUT")
+      if (
+        !editMode ||
+        !e.clipboardData ||
+        document.activeElement?.nodeName === "INPUT"
+      )
         return;
 
       store.copyToClipboard(e.clipboardData);
@@ -65,7 +75,11 @@ export const KeyboardControls = observer(function KeyboardControls() {
     window.addEventListener("copy", handleCopy);
 
     const handlePaste = (e: ClipboardEvent) => {
-      if (!e.clipboardData || document.activeElement?.nodeName === "INPUT")
+      if (
+        !editMode ||
+        !e.clipboardData ||
+        document.activeElement?.nodeName === "INPUT"
+      )
         return;
 
       store.pasteFromClipboard(e.clipboardData);
@@ -78,7 +92,7 @@ export const KeyboardControls = observer(function KeyboardControls() {
       window.removeEventListener("copy", handleCopy);
       window.removeEventListener("paste", handlePaste);
     };
-  }, [store, uiStore, experienceStore, audioStore]);
+  }, [store, uiStore, experienceStore, audioStore, editMode]);
 
   return null;
 });

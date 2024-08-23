@@ -24,8 +24,7 @@ export const ViewerPage = memo(function ViewerPage({
 
   return (
     <Box position="relative" w="100vw" h="100vh">
-      {/* // TODO: adjust keyboard controls */}
-      <KeyboardControls />
+      <KeyboardControls editMode={false} />
       <PlaylistDrawer />
       {portalNarrative && <PortalNarrativeModal />}
       <Grid
