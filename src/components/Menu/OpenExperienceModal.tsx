@@ -55,7 +55,7 @@ export const OpenExperienceModal = observer(function OpenExperienceModal() {
               <Spinner />
             ) : (
               <>
-                {experiences.length === 0 && (
+                {experiences.length === 0 && !loading && (
                   <Text color="gray.400">
                     {store.user} has no saved experiences yet!
                   </Text>
