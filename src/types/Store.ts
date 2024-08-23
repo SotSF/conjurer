@@ -308,13 +308,15 @@ export class Store {
   deleteSelected = () => {
     if (this.selectedBlocksOrVariations.size === 0) return;
 
+    let blockRemoved = false;
     for (const blockOrVariation of Array.from(
       this.selectedBlocksOrVariations
     )) {
-      if (blockOrVariation.type === "block")
+      if (blockOrVariation.type === "block") {
         // TODO: better generalize for multiple layers
         this.layers.forEach((l) => l.removeBlock(blockOrVariation.block));
-      else if (blockOrVariation.type === "variation")
+        blockRemoved = true;
+      } else if (blockOrVariation.type === "variation")
         this.deleteVariation(
           blockOrVariation.block,
           blockOrVariation.uniformName,
@@ -322,7 +324,10 @@ export class Store {
         );
     }
 
-    this.selectedBlocksOrVariations = new Set();
+    if (blockRemoved) {
+      // when deleting a variation, we select the next variation, so we don't want to deselect everything
+      this.selectedBlocksOrVariations = new Set();
+    }
   };
 
   addVariation = (block: Block, uniformName: string, variation: Variation) => {
@@ -347,8 +352,11 @@ export class Store {
     uniformName: string,
     variation: Variation
   ) => {
-    block.removeVariation(uniformName, variation);
-    this.deselectVariation(block, uniformName, variation);
+    const removeIndex = block.removeVariation(uniformName, variation);
+    const nextVariation = block.findVariationAtIndex(uniformName, removeIndex);
+
+    if (nextVariation) this.selectVariation(block, uniformName, nextVariation);
+    else this.deselectVariation(block, uniformName, variation);
   };
 
   copyToClipboard = (clipboardData: DataTransfer) => {

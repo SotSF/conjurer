@@ -17,7 +17,7 @@ export default function Portal() {
       <ChakraProvider theme={theme}>
         <StoreContext.Provider value={new Store("viewer")}>
           <Box height="100vh" width="100vw" bgColor="gray.700">
-            <ViewerPage />
+            <ViewerPage portalNarrative />
           </Box>
         </StoreContext.Provider>
       </ChakraProvider>

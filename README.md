@@ -63,6 +63,15 @@ graph
   2--magic-->3(Canopy)
 ```
 
+### Pages
+
+- https://canopyconjurer.vercel.app/ - main page where experiences can be edited and viewed
+- https://canopyconjurer.vercel.app/viewer - view-only page
+- https://canopyconjurer.vercel.app/portal - view-only page that tells a story
+- https://canopyconjurer.vercel.app/playground - page for tinkering with patterns+effects, can be used to VJ
+- https://canopyconjurer.vercel.app/controller - controller page can control playground page (requires running controllerServer)
+- https://canopyconjurer.vercel.app/beatMapper - page for constructing a beat map for a song
+
 ### Scripts
 
 #### `yarn generatePattern PatternName`

@@ -5,9 +5,15 @@ import { memo, useEffect, useRef } from "react";
 import { useStore } from "@/src/types/StoreContext";
 import { KeyboardControls } from "@/src/components/KeyboardControls";
 import { PlaylistDrawer } from "@/src/components/PlaylistDrawer";
-import { ViewerInstructionsModal } from "@/src/components/ViewerInstructionsModal";
+import { PortalNarrativeModal } from "@/src/components/PortalNarrativeModal";
 
-export const ViewerPage = memo(function ViewerPage() {
+type Props = {
+  portalNarrative?: boolean;
+};
+
+export const ViewerPage = memo(function ViewerPage({
+  portalNarrative = false,
+}: Props) {
   const store = useStore();
   const didInitialize = useRef(false);
   useEffect(() => {
@@ -18,9 +24,9 @@ export const ViewerPage = memo(function ViewerPage() {
 
   return (
     <Box position="relative" w="100vw" h="100vh">
-      <KeyboardControls />
+      <KeyboardControls editMode={false} />
       <PlaylistDrawer />
-      <ViewerInstructionsModal />
+      {portalNarrative && <PortalNarrativeModal />}
       <Grid
         templateAreas={`"display"
                         "arrangement"`}
