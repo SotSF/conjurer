@@ -94,6 +94,10 @@ Starts a websocket server at port 8080 on localhost. For development use only, t
 
 Downloads all of the experience and audio files from s3 into the folder `public/cloud-assets`. Conjurer can then read from these files when in "local asset mode", useful for situations when internet is not available. See section below for more details.
 
+#### `ANALYZE=true yarn build`
+
+Use webpack analyzer to analyze the bundle. Will launch three tabs in your browser with bundle size details.
+
 ### Setting up Conjurer Playground to run via Controller
 
 1. Find your local IP address, and set `CONTROLLER_SERVER_WEBSOCKET_HOST` (`websocketHost.ts`) to that address.
