@@ -3,8 +3,10 @@ import { StoreContext } from "@/src/types/StoreContext";
 import { Box, ChakraProvider, theme } from "@chakra-ui/react";
 import Head from "next/head";
 import { ViewerPage } from "@/src/components/ViewerPage";
+import { useMemo } from "react";
 
 export default function Portal() {
+  const store = useMemo(() => new Store("viewer"), []);
   return (
     <>
       <Head>
@@ -15,7 +17,7 @@ export default function Portal() {
       </Head>
 
       <ChakraProvider theme={theme}>
-        <StoreContext.Provider value={new Store("viewer")}>
+        <StoreContext.Provider value={store}>
           <Box height="100vh" width="100vw" bgColor="gray.700">
             <ViewerPage portalNarrative />
           </Box>
