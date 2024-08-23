@@ -5,10 +5,9 @@ import {
   WebGLRenderTarget,
 } from "three";
 import { useFrame, useThree } from "@react-three/fiber";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import canopyVert from "@/src/shaders/canopy.vert";
 import fromTextureCircularMask from "@/src/shaders/fromTextureCircularMask.frag";
-import canopyGeometry from "@/src/data/canopyGeometry.json";
 import {
   BloomEffect,
   EffectComposer,
@@ -16,11 +15,21 @@ import {
   RenderPass,
 } from "postprocessing";
 
-type CanopyViewProps = {
-  renderTarget: WebGLRenderTarget;
+type CanopyGeometry = {
+  position: number[];
+  uv: number[];
+  normal: number[];
 };
 
-export const Canopy = function Canopy({ renderTarget }: CanopyViewProps) {
+type CanopyViewProps = {
+  renderTarget: WebGLRenderTarget;
+  canopyGeometry: CanopyGeometry;
+};
+
+const CanopyView = function CanopyView({
+  renderTarget,
+  canopyGeometry,
+}: CanopyViewProps) {
   const { gl, camera } = useThree();
   const scene = useRef<Scene>(null);
 
@@ -49,7 +58,7 @@ export const Canopy = function Canopy({ renderTarget }: CanopyViewProps) {
       new BufferAttribute(new Float32Array(canopyGeometry.normal), 3)
     );
     return geometry;
-  }, []);
+  }, [canopyGeometry]);
 
   // build an EffectComposer with imperative style three js because of shortcomings of
   // Drei <EffectComposer> (lack of render priority, ability to specify scene/singular mesh to render)
@@ -92,5 +101,21 @@ export const Canopy = function Canopy({ renderTarget }: CanopyViewProps) {
         />
       </points>
     </scene>
+  );
+};
+
+type CanopyProps = { renderTarget: WebGLRenderTarget };
+
+// Lazy load the canopy geometry
+export const Canopy = function Canopy({ renderTarget }: CanopyProps) {
+  const [canopyGeometry, setCanopyGeometry] = useState<CanopyGeometry>();
+  useEffect(() => {
+    import("@/src/data/canopyGeometry.json").then((data) =>
+      setCanopyGeometry(data)
+    );
+  }, []);
+  if (!canopyGeometry) return null;
+  return (
+    <CanopyView renderTarget={renderTarget} canopyGeometry={canopyGeometry} />
   );
 };
