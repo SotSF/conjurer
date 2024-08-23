@@ -192,15 +192,24 @@ export class Block<T extends ExtraParams = {}> {
     }
   };
 
-  removeVariation = (uniformName: string, variation: Variation) => {
+  removeVariation = (uniformName: string, variation: Variation): number => {
     const variations = this.parameterVariations[uniformName];
-    if (!variations) return;
+    if (!variations) return -1;
 
     const index = variations.indexOf(variation);
     if (index > -1) {
       variations.splice(index, 1);
       this.triggerVariationReactions(uniformName);
+      return index;
     }
+    return -1;
+  };
+
+  findVariationAtIndex = (uniformName: string, index: number) => {
+    const variations = this.parameterVariations[uniformName];
+    if (!variations) return null;
+
+    return variations[index];
   };
 
   duplicateVariation = (
