@@ -204,6 +204,8 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
 
         const audioBuffer = wavesurfer.getDecodedData();
         if (audioBuffer) audioStore.computePeaks(audioBuffer);
+
+        if (audioStore.audioState === "starting") wavesurfer.play();
       });
 
       wavesurfer.on(

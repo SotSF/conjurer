@@ -184,6 +184,7 @@ export class Store {
           this.playlistStore.experienceFilenames[0]
         );
       this.uiStore.initialize(this.embeddedViewer);
+      if (this.embeddedViewer) this.play();
       return;
     }
 
