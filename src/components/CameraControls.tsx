@@ -14,7 +14,7 @@ export const CameraControls = observer(
     const cameraRef = useRef<PerspectiveCameraThree>(null);
     const initialPositionRef = useRef(new Vector3(0, 0, 20));
 
-    useTravelingCamera(cameraRef.current, embeddedViewer);
+    useTravelingCamera(cameraRef, embeddedViewer);
 
     return (
       <>
