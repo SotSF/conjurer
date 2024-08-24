@@ -81,7 +81,7 @@ const CanopyView = function CanopyView({
         camera,
         new BloomEffect({
           luminanceThreshold: 0.001,
-          intensity: 0.2,
+          intensity: 0.7,
         })
       )
     );
