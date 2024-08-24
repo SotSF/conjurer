@@ -63,7 +63,7 @@ const DEFAULT_TIMELINE_OPTIONS: TimelinePluginOptions = {
 };
 
 const DEFAULT_MINIMAP_HEIGHT = 20;
-const EMBEDDED_MINIMAP_HEIGHT = 42;
+const EMBEDDED_MINIMAP_HEIGHT = 40;
 
 const DEFAULT_MINIMAP_OPTIONS: MinimapPluginOptions = {
   waveColor: "#bbb",
@@ -434,7 +434,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
         top={0}
         left="150px"
         boxSizing="border-box"
-        borderBottom={1}
+        borderBottom={embeddedViewer ? 0 : 1}
         borderColor="black"
         borderBottomStyle="solid"
         bgColor="gray.600"

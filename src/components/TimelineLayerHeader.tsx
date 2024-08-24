@@ -38,6 +38,7 @@ export const TimelineLayerHeader = observer(function TimelineLayerHeader({
       spacing={0}
       zIndex={11}
       boxSizing="border-box"
+      borderTopWidth={index === 0 ? 1 : 0}
       borderRightWidth={1}
       borderBottomWidth={1}
       borderColor="black"

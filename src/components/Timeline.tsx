@@ -42,7 +42,6 @@ export const Timeline = observer(function Timeline() {
           flexShrink={0}
           boxSizing="border-box"
           borderRightWidth={1}
-          borderBottomWidth={1}
           borderColor="black"
           spacing={0}
           width="150px"
