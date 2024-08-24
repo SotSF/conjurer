@@ -18,7 +18,15 @@ export default function Test() {
       <ChakraProvider theme={theme}>
         <StoreContext.Provider value={store}>
           <Box height="100vh" width="100vw" bgColor="gray.700">
-            <p>testing</p>
+            <p>Embedded conjurer test:</p>
+            <iframe
+              width="800"
+              height="675"
+              src="http://localhost:3000//viewer?experience=joe-night-jar&embedded=true"
+              title="Conjurer"
+              allow="autoplay; clipboard-write; encrypted-media; picture-in-picture"
+              allowFullScreen
+            ></iframe>
           </Box>
         </StoreContext.Provider>
       </ChakraProvider>

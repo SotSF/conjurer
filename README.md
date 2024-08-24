@@ -71,6 +71,7 @@ graph
 - https://canopyconjurer.vercel.app/playground - page for tinkering with patterns+effects, can be used to VJ
 - https://canopyconjurer.vercel.app/controller - controller page can control playground page (requires running controllerServer)
 - https://canopyconjurer.vercel.app/beatMapper - page for constructing a beat map for a song
+- https://canopyconjurer.vercel.app/test - test page for checking out the embedded Conjurer viewer
 
 ### Scripts
 
