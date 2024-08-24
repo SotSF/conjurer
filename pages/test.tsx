@@ -2,10 +2,16 @@ import { Store } from "@/src/types/Store";
 import { StoreContext } from "@/src/types/StoreContext";
 import { Box, ChakraProvider, theme } from "@chakra-ui/react";
 import Head from "next/head";
-import { useMemo } from "react";
+import { memo, useEffect, useMemo, useState } from "react";
 
 export default function Test() {
+  // Note: currently the store is not used on this page, only in the iframe
   const store = useMemo(() => new Store("viewer"), []);
+  const [initialized, setInitialized] = useState(false);
+  useEffect(() => {
+    if (!initialized) setInitialized(true);
+  }, [initialized]);
+
   return (
     <>
       <Head>
@@ -17,19 +23,25 @@ export default function Test() {
 
       <ChakraProvider theme={theme}>
         <StoreContext.Provider value={store}>
-          <Box height="100vh" width="100vw" bgColor="gray.700">
+          <Box height="100vh" width="100vw" bgColor="gray.700" p={2}>
             <p>Embedded conjurer test:</p>
-            <iframe
-              width="800"
-              height="675"
-              src="http://localhost:3000//viewer?experience=joe-night-jar&embedded=true"
-              title="Conjurer"
-              allow="autoplay; clipboard-write; encrypted-media; picture-in-picture"
-              allowFullScreen
-            ></iframe>
+            {initialized && <EmbedTest />}
           </Box>
         </StoreContext.Provider>
       </ChakraProvider>
     </>
   );
 }
+
+const EmbedTest = memo(function EmbedTest() {
+  return (
+    <iframe
+      width="800"
+      height="675"
+      src={`${window.location.origin}/viewer?experience=joe-night-jar&embedded=true`}
+      title="Conjurer"
+      allow="autoplay; fullscreen"
+      allowFullScreen
+    />
+  );
+});

@@ -364,7 +364,7 @@ export class Store {
   };
 
   copyLinkToExperience = () => {
-    const url = new URL(`${window.location.href}/viewer`);
+    const url = new URL(`${window.location.origin}/viewer`);
     url.searchParams.set("experience", this.experienceFilename);
     navigator.clipboard.writeText(url.toString());
   };
