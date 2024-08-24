@@ -205,7 +205,9 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
         const audioBuffer = wavesurfer.getDecodedData();
         if (audioBuffer) audioStore.computePeaks(audioBuffer);
 
-        if (audioStore.audioState === "starting") wavesurfer.play();
+        if (audioStore.audioState === "starting")
+          // will throw an error NotAllowedError if autoplay is blocked
+          wavesurfer.play().catch((e) => console.error(e));
       });
 
       wavesurfer.on(

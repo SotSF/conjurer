@@ -8,6 +8,7 @@ import { action } from "mobx";
 export const TimerControls = observer(function TimerControls() {
   const store = useStore();
   const { audioStore } = store;
+  const playing = audioStore.audioState === "playing";
 
   return (
     <HStack width="100%" justify="center" py={2} spacing={1} overflowX="clip">
@@ -22,10 +23,10 @@ export const TimerControls = observer(function TimerControls() {
       <IconButton
         aria-label="Play"
         title="Play"
-        color={store.playing ? "orange" : "green"}
+        color={playing ? "orange" : "green"}
         height={6}
         bgColor="gray.600"
-        icon={store.playing ? <FaPause size={10} /> : <FaPlay size={10} />}
+        icon={playing ? <FaPause size={10} /> : <FaPlay size={10} />}
         onClick={action(store.togglePlaying)}
       />
       <IconButton
