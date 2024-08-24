@@ -360,6 +360,12 @@ export class Store {
     else this.deselectVariation(block, uniformName, variation);
   };
 
+  copyLinkToExperience = () => {
+    const url = new URL(`${window.location.href}/viewer`);
+    url.searchParams.set("experience", this.experienceFilename);
+    navigator.clipboard.writeText(url.toString());
+  };
+
   copyToClipboard = (clipboardData: DataTransfer) => {
     if (this.selectedBlocksOrVariations.size === 0) return;
 
