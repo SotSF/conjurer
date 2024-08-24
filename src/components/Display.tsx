@@ -10,7 +10,7 @@ import { useRef, useState } from "react";
 
 export const Display = observer(function Display() {
   const store = useStore();
-  const { uiStore } = store;
+  const { uiStore, embeddedViewer } = store;
 
   const boxRef = useRef<HTMLDivElement>(null);
 
@@ -28,22 +28,24 @@ export const Display = observer(function Display() {
         boxRef.current?.requestFullscreen();
       }}
     >
-      <Box opacity={showAllControls ? 1 : 0} transition="all 100ms">
-        <MenuBar />
-        <VStack position="absolute" width="100%" marginY="2" zIndex={1}>
-          <Heading className={styles.fadeOut} userSelect="none">
-            Conjurer
-          </Heading>
-        </VStack>
-        <VStack p={2} position="absolute" top={0} right={0} zIndex={1}>
-          {store.context === "viewer" ? (
-            <Text fontWeight={"bold"}>by {store.user}</Text>
-          ) : (
-            <UserPicker />
-          )}
-        </VStack>
-        <DisplayControls canvasContainer={boxRef.current} />
-      </Box>
+      {!embeddedViewer && (
+        <Box opacity={showAllControls ? 1 : 0} transition="all 100ms">
+          <MenuBar />
+          <VStack position="absolute" width="100%" marginY="2" zIndex={1}>
+            <Heading className={styles.fadeOut} userSelect="none">
+              Conjurer
+            </Heading>
+          </VStack>
+          <VStack p={2} position="absolute" top={0} right={0} zIndex={1}>
+            {store.context === "viewer" ? (
+              <Text fontWeight={"bold"}>by {store.user}</Text>
+            ) : (
+              <UserPicker />
+            )}
+          </VStack>
+          <DisplayControls canvasContainer={boxRef.current} />
+        </Box>
+      )}
 
       <Box ref={boxRef} height="100%" bgColor="gray.900">
         <DisplayCanvas />

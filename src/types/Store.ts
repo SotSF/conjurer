@@ -50,6 +50,7 @@ export class Store {
   layers: Layer[] = [];
 
   sendingData = false;
+  embeddedViewer = false;
 
   _globalIntensity = 1;
   get globalIntensity(): number {
@@ -176,11 +177,13 @@ export class Store {
     }
 
     if (this.context === "viewer") {
+      this.embeddedViewer =
+        new URLSearchParams(window.location.search).get("embedded") === "true";
       this.experienceStore.loadExperienceFromParams() ||
         this.playlistStore.loadExperience(
           this.playlistStore.experienceFilenames[0]
         );
-      this.uiStore.initialize();
+      this.uiStore.initialize(this.embeddedViewer);
       return;
     }
 
