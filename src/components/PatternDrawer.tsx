@@ -12,7 +12,7 @@ import { action } from "mobx";
 import { PatternPlayground } from "@/src/components/PatternPlayground/PatternPlayground";
 import Link from "next/link";
 
-export const PatternDrawer = observer(function PatternDrawer() {
+const PatternDrawer = observer(function PatternDrawer() {
   const store = useStore();
   const { uiStore } = store;
   const { patternDrawerOpen } = uiStore;
@@ -39,3 +39,5 @@ export const PatternDrawer = observer(function PatternDrawer() {
     </Drawer>
   );
 });
+
+export default PatternDrawer;

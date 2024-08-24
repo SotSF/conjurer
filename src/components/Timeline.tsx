@@ -15,7 +15,7 @@ import { BeatGridOverlay } from "@/src/components/BeatGridOverlay";
 
 export const Timeline = observer(function Timeline() {
   const store = useStore();
-  const { uiStore, audioStore } = store;
+  const { uiStore, embeddedViewer } = store;
   const timelineRef = useRef<HTMLDivElement>(null);
 
   useWheelZooming(timelineRef.current);
@@ -42,7 +42,6 @@ export const Timeline = observer(function Timeline() {
           flexShrink={0}
           boxSizing="border-box"
           borderRightWidth={1}
-          borderBottomWidth={1}
           borderColor="black"
           spacing={0}
           width="150px"
@@ -50,7 +49,7 @@ export const Timeline = observer(function Timeline() {
           bgColor="gray.500"
         >
           <TimerControls />
-          <TimerReadout />
+          {!embeddedViewer && <TimerReadout />}
         </VStack>
 
         <WavesurferWaveform />

@@ -62,12 +62,15 @@ const DEFAULT_TIMELINE_OPTIONS: TimelinePluginOptions = {
   },
 };
 
+const DEFAULT_MINIMAP_HEIGHT = 20;
+const EMBEDDED_MINIMAP_HEIGHT = 40;
+
 const DEFAULT_MINIMAP_OPTIONS: MinimapPluginOptions = {
   waveColor: "#bbb",
   progressColor: "#0178FF",
   cursorColor: "#FF0000FF",
   container: "#minimap",
-  height: 20,
+  height: DEFAULT_MINIMAP_HEIGHT,
   insertPosition: "beforebegin",
 };
 
@@ -106,7 +109,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
   const audioRef = useRef<HTMLAudioElement>(null);
 
   const store = useStore();
-  const { audioStore, uiStore, playlistStore } = store;
+  const { audioStore, uiStore, playlistStore, embeddedViewer } = store;
 
   const cloneCanvas = useCloneCanvas(clonedWaveformRef);
 
@@ -144,9 +147,12 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
       const regionsPlugin = (audioStore.regionsPlugin = RegionsPlugin.create());
 
       // Instantiate minimap plugin
-      const minimapPlugin = (audioStore.minimapPlugin = MinimapPlugin.create(
-        DEFAULT_MINIMAP_OPTIONS
-      ));
+      const minimapPlugin = (audioStore.minimapPlugin = MinimapPlugin.create({
+        ...DEFAULT_MINIMAP_OPTIONS,
+        height: embeddedViewer
+          ? EMBEDDED_MINIMAP_HEIGHT
+          : DEFAULT_MINIMAP_HEIGHT,
+      }));
 
       // Instantiate wavesurfer
       // https://wavesurfer-js.org/docs/options.html
@@ -198,6 +204,10 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
 
         const audioBuffer = wavesurfer.getDecodedData();
         if (audioBuffer) audioStore.computePeaks(audioBuffer);
+
+        if (audioStore.audioState === "starting")
+          // will throw an error NotAllowedError if autoplay is blocked
+          wavesurfer.play().catch((e) => console.error(e));
       });
 
       wavesurfer.on(
@@ -241,7 +251,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
     };
 
     create();
-  }, [store.context, audioStore, audioStore.selectedAudioFile, uiStore, uiStore.pixelsPerSecond, playlistStore, cloneCanvas, timelinePluginOptions]);
+  }, [store.context, audioStore, audioStore.selectedAudioFile, uiStore, uiStore.pixelsPerSecond, playlistStore, cloneCanvas, timelinePluginOptions, embeddedViewer]);
 
   // on selected audio file change
   useEffect(() => {
@@ -277,9 +287,12 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
 
         // Create a new minimap plugin
         const { MinimapPlugin } = wavesurferConstructors.current;
-        const minimapPlugin = (audioStore.minimapPlugin = MinimapPlugin.create(
-          DEFAULT_MINIMAP_OPTIONS
-        ));
+        const minimapPlugin = (audioStore.minimapPlugin = MinimapPlugin.create({
+          ...DEFAULT_MINIMAP_OPTIONS,
+          height: embeddedViewer
+            ? EMBEDDED_MINIMAP_HEIGHT
+            : DEFAULT_MINIMAP_HEIGHT,
+        }));
         audioStore.wavesurfer.registerPlugin(minimapPlugin);
 
         minimapPlugin.on("interaction", () => {
@@ -296,7 +309,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
     };
     changeAudioFile();
     cloneCanvas();
-  }, [audioStore, audioStore.wavesurfer, audioStore.selectedAudioFile, uiStore.pixelsPerSecond, cloneCanvas, timelinePluginOptions]);
+  }, [audioStore, audioStore.wavesurfer, audioStore.selectedAudioFile, uiStore.pixelsPerSecond, cloneCanvas, timelinePluginOptions, embeddedViewer]);
 
   // on loop toggle
   useEffect(() => {
@@ -412,19 +425,25 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
   }, [audioStore.lastCursor, audioStore.wavesurfer]);
 
   return (
-    <Box width="100%" height={20} bgColor="gray.500">
+    <Box
+      width="100%"
+      height={embeddedViewer ? `${EMBEDDED_MINIMAP_HEIGHT}px` : 20}
+      bgColor="gray.500"
+    >
       <Box
         id="minimap"
         position="sticky"
         top={0}
         left="150px"
         boxSizing="border-box"
-        borderBottom={1}
+        borderBottom={embeddedViewer ? 0 : 1}
         borderColor="black"
         borderBottomStyle="solid"
         bgColor="gray.600"
         width={`calc(${uiStore.horizontalLayout ? "100vw" : "60vw"} - 150px)`}
-        height="20px"
+        height={`${
+          embeddedViewer ? EMBEDDED_MINIMAP_HEIGHT : DEFAULT_MINIMAP_HEIGHT
+        }px`}
         zIndex={100}
       />
       <audio ref={audioRef} />
@@ -435,10 +454,16 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
         height="100%"
         startColor="gray.500"
         endColor="gray.700"
-        speed={0.5}
+        speed={0.4}
         isLoaded={!loading}
       />
-      <Box position="absolute" top="20px" id="waveform" ref={waveformRef} />
+      <Box
+        position="absolute"
+        top="20px"
+        id="waveform"
+        display={embeddedViewer ? "none" : "block"}
+        ref={waveformRef}
+      />
       {uiStore.showingWaveformOverlay && (
         <Box
           ref={clonedWaveformRef}

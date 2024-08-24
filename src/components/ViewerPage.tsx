@@ -1,11 +1,14 @@
 import { Arrangement } from "@/src/components/Arrangement";
 import { Box, Grid, GridItem } from "@chakra-ui/react";
 import { Display } from "@/src/components/Display";
-import { memo, useEffect, useRef } from "react";
+import { lazy, memo, useEffect, useRef } from "react";
 import { useStore } from "@/src/types/StoreContext";
 import { KeyboardControls } from "@/src/components/KeyboardControls";
 import { PlaylistDrawer } from "@/src/components/PlaylistDrawer";
-import { PortalNarrativeModal } from "@/src/components/PortalNarrativeModal";
+
+const PortalNarrativeModal = lazy(
+  () => import("@/src/components/PortalNarrativeModal")
+);
 
 type Props = {
   portalNarrative?: boolean;

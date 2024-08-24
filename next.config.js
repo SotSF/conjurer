@@ -1,6 +1,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  productionBrowserSourceMaps: false,
+  experimental: {
+    optimizePackageImports: [
+      "recharts",
+      "@aws-sdk/client-s3",
+      "@aws-sdk/credential-providers",
+    ],
+  },
   webpack: (config, options) => {
     config.module.rules.push({
       test: /\.(glsl|vs|fs|vert|frag)$/,
@@ -13,5 +21,10 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
 };
+
+// const withBundleAnalyzer = require("@next/bundle-analyzer")({
+//   enabled: process.env.ANALYZE === "true",
+// });
+// module.exports = withBundleAnalyzer(nextConfig);
 
 module.exports = nextConfig;

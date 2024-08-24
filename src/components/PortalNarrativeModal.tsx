@@ -25,7 +25,7 @@ import { Rain } from "@/src/components/Rain";
 import { FiMonitor } from "react-icons/fi";
 import { FaHeadphonesAlt } from "react-icons/fa";
 
-export const PortalNarrativeModal = observer(function PortalNarrativeModal() {
+const PortalNarrativeModal = observer(function PortalNarrativeModal() {
   const store = useStore();
   const { uiStore } = store;
 
@@ -216,3 +216,5 @@ export const PortalNarrativeModal = observer(function PortalNarrativeModal() {
     </Modal>
   );
 });
+
+export default PortalNarrativeModal;

@@ -22,6 +22,7 @@
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
     "@hello-pangea/dnd": "^16.3.0",
+    "@next/bundle-analyzer": "^14.2.6",
     "@react-three/drei": "^9.87.0",
     "@react-three/fiber": "^8.14.5",
     "@types/recharts": "^1.8.25",

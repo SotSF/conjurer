@@ -71,6 +71,7 @@ graph
 - https://canopyconjurer.vercel.app/playground - page for tinkering with patterns+effects, can be used to VJ
 - https://canopyconjurer.vercel.app/controller - controller page can control playground page (requires running controllerServer)
 - https://canopyconjurer.vercel.app/beatMapper - page for constructing a beat map for a song
+- https://canopyconjurer.vercel.app/test - test page for checking out the embedded Conjurer viewer
 
 ### Scripts
 
@@ -93,6 +94,10 @@ Starts a websocket server at port 8080 on localhost. For development use only, t
 #### `yarn downloadCloudAssets`
 
 Downloads all of the experience and audio files from s3 into the folder `public/cloud-assets`. Conjurer can then read from these files when in "local asset mode", useful for situations when internet is not available. See section below for more details.
+
+#### `ANALYZE=true yarn build`
+
+Use webpack analyzer to analyze the bundle. Will launch three tabs in your browser with bundle size details.
 
 ### Setting up Conjurer Playground to run via Controller
 

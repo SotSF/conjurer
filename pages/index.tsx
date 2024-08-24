@@ -1,10 +1,12 @@
+import { App } from "@/src/components/App";
 import { Store } from "@/src/types/Store";
 import { StoreContext } from "@/src/types/StoreContext";
-import { App } from "@/src/components/App";
 import { ChakraProvider, theme } from "@chakra-ui/react";
 import Head from "next/head";
+import { useMemo } from "react";
 
 export default function Home() {
+  const store = useMemo(() => new Store("default"), []);
   return (
     <>
       <Head>
@@ -15,7 +17,7 @@ export default function Home() {
       </Head>
 
       <ChakraProvider theme={theme}>
-        <StoreContext.Provider value={new Store("default")}>
+        <StoreContext.Provider value={store}>
           <App />
         </StoreContext.Provider>
       </ChakraProvider>

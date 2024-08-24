@@ -11,6 +11,7 @@ import { action } from "mobx";
 import { AudioControls } from "@/src/components/AudioControls";
 import { IntensitySlider } from "@/src/components/IntensitySlider";
 import { SendDataButton } from "@/src/components/SendDataButton";
+import { FaShareAlt } from "react-icons/fa";
 
 export const MainControls = observer(function MainControls() {
   const store = useStore();
@@ -107,6 +108,13 @@ export const MainControls = observer(function MainControls() {
         )}
       />
       <IntensitySlider />
+      <IconButton
+        aria-label="Copy link to experience"
+        title="Copy link to experience"
+        height={6}
+        icon={<FaShareAlt size={17} />}
+        onClick={store.copyLinkToExperience}
+      />
       <IconButton
         aria-label="Show playlist"
         title="Show playlist"

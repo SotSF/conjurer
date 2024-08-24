@@ -78,8 +78,9 @@ export class UIStore {
     makeAutoObservable(this);
   }
 
-  initialize = () => {
-    this.loadFromLocalStorage();
+  initialize = (embeddedViewer = false) => {
+    if (embeddedViewer) this.setEmbeddedDefaults();
+    else this.loadFromLocalStorage();
   };
 
   timeToXPixels = (time: number) => `${time * this.pixelsPerSecond}px`;
@@ -130,10 +131,16 @@ export class UIStore {
 
   nextRenderTextureSize = () => {
     this.renderTargetSize *= 2;
-    if (this.renderTargetSize > 1024) {
-      this.renderTargetSize = 256;
-    }
+    if (this.renderTargetSize > 1024) this.renderTargetSize = 256;
     this.saveToLocalStorage();
+  };
+
+  setEmbeddedDefaults = () => {
+    this.horizontalLayout = true;
+    this.showingPerformance = false;
+    this.displayMode = "canopy";
+    this.playgroundDisplayMode = "none";
+    this.renderTargetSize = INITIAL_RENDER_TARGET_SIZE;
   };
 
   loadFromLocalStorage = () => {

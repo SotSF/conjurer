@@ -50,6 +50,7 @@ export class Store {
   layers: Layer[] = [];
 
   sendingData = false;
+  embeddedViewer = false;
 
   _globalIntensity = 1;
   get globalIntensity(): number {
@@ -176,10 +177,14 @@ export class Store {
     }
 
     if (this.context === "viewer") {
-      this.playlistStore.loadExperience(
-        this.playlistStore.experienceFilenames[0]
-      );
-      this.uiStore.initialize();
+      this.embeddedViewer =
+        new URLSearchParams(window.location.search).get("embedded") === "true";
+      this.experienceStore.loadExperienceFromParams() ||
+        this.playlistStore.loadExperience(
+          this.playlistStore.experienceFilenames[0]
+        );
+      this.uiStore.initialize(this.embeddedViewer);
+      if (this.embeddedViewer) this.play();
       return;
     }
 
@@ -357,6 +362,12 @@ export class Store {
 
     if (nextVariation) this.selectVariation(block, uniformName, nextVariation);
     else this.deselectVariation(block, uniformName, variation);
+  };
+
+  copyLinkToExperience = () => {
+    const url = new URL(`${window.location.origin}/viewer`);
+    url.searchParams.set("experience", this.experienceFilename);
+    navigator.clipboard.writeText(url.toString());
   };
 
   copyToClipboard = (clipboardData: DataTransfer) => {
