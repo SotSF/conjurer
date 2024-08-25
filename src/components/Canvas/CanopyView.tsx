@@ -21,6 +21,22 @@ type CanopyGeometry = {
   normal: number[];
 };
 
+type CanopyProps = { renderTarget: WebGLRenderTarget };
+
+export const Canopy = function Canopy({ renderTarget }: CanopyProps) {
+  const [canopyGeometry, setCanopyGeometry] = useState<CanopyGeometry>();
+  useEffect(() => {
+    // Lazy load the canopy geometry
+    import("@/src/data/canopyGeometry.json").then((data) =>
+      setCanopyGeometry(data)
+    );
+  }, []);
+  if (!canopyGeometry) return null;
+  return (
+    <CanopyView renderTarget={renderTarget} canopyGeometry={canopyGeometry} />
+  );
+};
+
 type CanopyViewProps = {
   renderTarget: WebGLRenderTarget;
   canopyGeometry: CanopyGeometry;
@@ -101,21 +117,5 @@ const CanopyView = function CanopyView({
         />
       </points>
     </scene>
-  );
-};
-
-type CanopyProps = { renderTarget: WebGLRenderTarget };
-
-// Lazy load the canopy geometry
-export const Canopy = function Canopy({ renderTarget }: CanopyProps) {
-  const [canopyGeometry, setCanopyGeometry] = useState<CanopyGeometry>();
-  useEffect(() => {
-    import("@/src/data/canopyGeometry.json").then((data) =>
-      setCanopyGeometry(data)
-    );
-  }, []);
-  if (!canopyGeometry) return null;
-  return (
-    <CanopyView renderTarget={renderTarget} canopyGeometry={canopyGeometry} />
   );
 };
