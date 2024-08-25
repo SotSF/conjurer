@@ -63,7 +63,8 @@ export const BlockStackNode = observer(function BlockStackNode({
       />
       {parentBlock?.effectBlocks.map((effect, i) => {
         const isEven = i % 2 === 0;
-        const swap = evenNumberOfEffects ? isEven : !isEven;
+        // we want XNOR logical operation here, equivalent to strict equal for booleans
+        const swap = evenNumberOfEffects === isEven;
         return (
           <BlockNode
             key={effect.id}
