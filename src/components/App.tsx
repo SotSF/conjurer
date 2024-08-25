@@ -1,24 +1,34 @@
 import { Arrangement } from "@/src/components/Arrangement";
 import { Box, Grid, GridItem } from "@chakra-ui/react";
 import { Display } from "@/src/components/Display";
-import { lazy, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useStore } from "@/src/types/StoreContext";
 import { observer } from "mobx-react-lite";
 import { KeyboardControls } from "@/src/components/KeyboardControls";
 import { AddPatternButton } from "@/src/components/AddPatternButton";
 import { PlaylistDrawer } from "@/src/components/PlaylistDrawer";
-
-const PatternDrawer = lazy(() => import("@/src/components/PatternDrawer"));
+import { PatternDrawer } from "@/src/components/PatternDrawer";
 
 export const App = observer(function App() {
   const store = useStore();
-  const { uiStore } = store;
+  const { uiStore, experienceStore } = store;
   const didInitialize = useRef(false);
   useEffect(() => {
     if (didInitialize.current) return;
     didInitialize.current = true;
     store.initializeClientSide();
   }, [store]);
+
+  useEffect(() => {
+    if (store.playing) return;
+
+    // autosave every 30 seconds
+    const interval = setInterval(
+      () => experienceStore.saveToLocalStorage("autosave"),
+      30 * 1000
+    );
+    return () => clearInterval(interval);
+  }, [store.playing, experienceStore]);
 
   const gridItems = (
     <>

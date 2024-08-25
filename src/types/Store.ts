@@ -207,11 +207,6 @@ export class Store {
       this.experienceStore.load(`${this.user}-${experienceName}`);
     } else this.experienceStore.loadInitialExperience();
 
-    // set up an autosave interval
-    setInterval(() => {
-      if (!this.playing) this.experienceStore.saveToLocalStorage("autosave");
-    }, 60 * 1000);
-
     this.uiStore.initialize();
   };
 
