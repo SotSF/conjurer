@@ -1,14 +1,13 @@
 import { Arrangement } from "@/src/components/Arrangement";
 import { Box, Grid, GridItem } from "@chakra-ui/react";
 import { Display } from "@/src/components/Display";
-import { lazy, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useStore } from "@/src/types/StoreContext";
 import { observer } from "mobx-react-lite";
 import { KeyboardControls } from "@/src/components/KeyboardControls";
 import { AddPatternButton } from "@/src/components/AddPatternButton";
 import { PlaylistDrawer } from "@/src/components/PlaylistDrawer";
-
-const PatternDrawer = lazy(() => import("@/src/components/PatternDrawer"));
+import { PatternDrawer } from "@/src/components/PatternDrawer";
 
 export const App = observer(function App() {
   const store = useStore();
