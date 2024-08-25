@@ -6,9 +6,9 @@ import { RenderPipeline } from "@/src/components/RenderPipeline/RenderPipeline";
 import { CanopySpaceView } from "@/src/components/Canvas/CanopySpaceView";
 import { CameraControls } from "@/src/components/CameraControls";
 import { RenderOnTimeChange } from "@/src/components/RenderOnTimeChange";
-import { WebGLRenderTarget } from "three";
-import { lazy, useState } from "react";
+import { lazy } from "react";
 import { CartesianSpaceView } from "@/src/components/Canvas/CartesianSpaceView";
+import { useRenderTarget } from "@/src/hooks/renderTarget";
 
 const Perf = lazy(() =>
   import("r3f-perf").then((module) => ({ default: module.Perf }))
@@ -22,16 +22,14 @@ export const DisplayCanvas = observer(function DisplayCanvas() {
   const { uiStore, experienceName } = useStore();
   const { displayMode, showingPerformance } = uiStore;
 
-  const [renderTarget, setRenderTarget] = useState<WebGLRenderTarget | null>(
-    null
-  );
+  const renderTarget = useRenderTarget();
 
   return (
     <Canvas key={experienceName} frameloop={DEBUG ? "demand" : "always"}>
       {DEBUG && <RenderOnTimeChange />}
       {showingPerformance && <Perf />}
       <CameraControls />
-      <RenderPipeline setRenderTarget={setRenderTarget} />
+      <RenderPipeline renderTargetZ={renderTarget} />
       {renderTarget && (
         <>
           {displayMode === "canopy" && <Canopy renderTarget={renderTarget} />}
