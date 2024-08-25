@@ -109,6 +109,15 @@ Use webpack analyzer to analyze the bundle. Will launch three tabs in your brows
 
 You are good to go - when you change things with the controller, you should see the playground page update.
 
+### Performance issues / memory leaks
+
+This is a big React app, hastily designed, that's doing a lot of expensive CPU/GPU things, so it has been difficult to keep it running smoothly. Here are some random thoughts associated with performance:
+
+- You may encounter some memory leaks related to the hot module reloading/fast refresh when running the app locally. Just reloading or even hard reloading the tab in firefox doesn't free all of the used memory in my experience, so for the best results, if you have been changing code and the app has been hot reloading, you should periodically close the tab and open a new one.
+- Memory leaks are apparently much easier to accomplish in React than I realized: https://schiener.io/2024-03-03/react-closures
+- Careful with setTimeout chains/setInterval. Make sure there is a way to clean them up on hot reloads. useEffect is a good way to do this.
+- If the app slows down a bunch, use the browser profiler to identify where it's spending time. If it's spending time in the garbage collector/cycle collector, it's likely a memory leak issue. At the time of writing, running locally with devtools open the app should use about 1GB of memory.
+
 ## Todos
 
 To dos are captured in the [wiki](https://github.com/SotSF/conjurer/wiki), and occasionally are captured as issues.
