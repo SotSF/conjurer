@@ -65,13 +65,13 @@ graph
 
 ### Pages
 
-- https://canopyconjurer.vercel.app/ - main page where experiences can be edited and viewed
-- https://canopyconjurer.vercel.app/viewer - view-only page
-- https://canopyconjurer.vercel.app/portal - view-only page that tells a story
-- https://canopyconjurer.vercel.app/playground - page for tinkering with patterns+effects, can be used to VJ
-- https://canopyconjurer.vercel.app/controller - controller page can control playground page (requires running controllerServer)
-- https://canopyconjurer.vercel.app/beatMapper - page for constructing a beat map for a song
-- https://canopyconjurer.vercel.app/test - test page for checking out the embedded Conjurer viewer
+- [/](https://canopyconjurer.vercel.app/) - main page where experiences can be edited and viewed
+- [/viewer](https://canopyconjurer.vercel.app/viewer) - view-only page
+- [/portal](https://canopyconjurer.vercel.app/portal) - view-only page that tells a story
+- [/playground](https://canopyconjurer.vercel.app/playground) - page for tinkering with patterns+effects, can be used to VJ
+- [/controller](https://canopyconjurer.vercel.app/controller) - controller page can control playground page (requires running controllerServer)
+- [/beatMapper](https://canopyconjurer.vercel.app/beatMapper) - page for constructing a beat map for a song (work in progress)
+- [/test](https://canopyconjurer.vercel.app/test) - test page for the embedded Conjurer viewer
 
 ### Scripts
 
