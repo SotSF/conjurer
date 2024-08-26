@@ -6,13 +6,9 @@ import {
   VOICE_COMMAND_APP_WEBSOCKET_PORT,
 } from "@/src/websocket/websocketHost";
 
-const env = process.env.NODE_ENV;
-
 let _websocket: WebSocket;
 
 export const setupVoiceCommandWebsocket = (store: Store) => {
-  if (env == "production") return;
-
   console.log(
     "Reconnecting to voice command websocket server at",
     VOICE_COMMAND_APP_WEBSOCKET_HOST,
@@ -21,6 +17,10 @@ export const setupVoiceCommandWebsocket = (store: Store) => {
   _websocket = new WebSocket(
     `ws://${VOICE_COMMAND_APP_WEBSOCKET_HOST}:${VOICE_COMMAND_APP_WEBSOCKET_PORT}`
   );
+  _websocket.onerror = () =>
+    console.log(
+      "Failed to connect to voice command websocket server (which is likely not a real problem for you)"
+    );
   _websocket.binaryType = "blob";
 
   _websocket.onopen = () => sendMessage({ type: "connect", appId: "conjurer" });
