@@ -31,6 +31,8 @@ export const transmitData = (data: Uint8Array) => {
   }
 
   if (_websocket.readyState !== _websocket.OPEN) {
+    if (_websocket.readyState === _websocket.CONNECTING) return;
+
     if (Date.now() - lastWarned > 5000) {
       console.warn("Websocket not open, not sending data");
       lastWarned = Date.now();
