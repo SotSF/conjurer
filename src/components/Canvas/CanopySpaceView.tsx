@@ -1,6 +1,6 @@
 import { WebGLRenderTarget, Mesh } from "three";
 import { useFrame } from "@react-three/fiber";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import fromTextureToCanopySpace from "@/src/shaders/fromTextureToCanopySpace.frag";
 import { observer } from "mobx-react-lite";
 import { useStore } from "@/src/types/StoreContext";
@@ -19,7 +19,7 @@ export const CanopySpaceView = observer(function CanopySpaceView({
   visible,
 }: Props) {
   const store = useStore();
-  const outputMesh = useRef<Mesh>(null);
+  const [outputMesh, setOutputMesh] = useState<Mesh | null>(null);
   const outputUniforms = useRef({
     u_texture: { value: renderTarget.texture },
     u_intensity: { value: 1 },
@@ -37,16 +37,16 @@ export const CanopySpaceView = observer(function CanopySpaceView({
 
   // render the canopy space view
   useFrame(({ gl, camera }) => {
-    if (!outputMesh.current || !visible) return;
+    if (!outputMesh || !visible) return;
 
     gl.setRenderTarget(null);
-    gl.render(outputMesh.current, camera);
+    gl.render(outputMesh, camera);
   }, 1000);
 
-  useDataTransmission(outputMesh.current, transmitData);
+  useDataTransmission(outputMesh, transmitData);
 
   return (
-    <mesh ref={outputMesh}>
+    <mesh ref={(meshRef) => setOutputMesh(meshRef)}>
       <planeGeometry args={[2, 2]} />
       <shaderMaterial
         uniforms={outputUniforms.current}
