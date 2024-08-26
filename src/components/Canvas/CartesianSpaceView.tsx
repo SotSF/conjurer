@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import fromTexture from "@/src/shaders/fromTexture.frag";
 import { observer } from "mobx-react-lite";
 import { useStore } from "@/src/types/StoreContext";
-import { vertexShader } from "@/src/shaders/vertexShader";
+import { makeVertexShader } from "@/src/shaders/vertexShader";
 
 type Props = {
   renderTarget: WebGLRenderTarget;
@@ -46,7 +46,7 @@ export const CartesianSpaceView = observer(function CartesianSpaceView({
       <shaderMaterial
         uniforms={outputUniforms.current}
         fragmentShader={fromTexture}
-        vertexShader={vertexShader()}
+        vertexShader={makeVertexShader()}
       />
     </mesh>
   );

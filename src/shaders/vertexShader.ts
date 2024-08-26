@@ -1,6 +1,6 @@
-type Varying = "v_uv" | "v_normalized_uv";
+export type Varying = "v_uv" | "v_normalized_uv";
 
-export const vertexShader = (varyings: Varying[] = ["v_uv"]) => {
+export const makeVertexShader = (varyings: Varying[] = ["v_uv"]) => {
   const includeUV = varyings.includes("v_uv");
   const includeNormalizedUV = varyings.includes("v_normalized_uv");
 

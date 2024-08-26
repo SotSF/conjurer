@@ -1,3 +1,4 @@
+import defaultVertexShader from "@/src/shaders/default.vert";
 import black from "@/src/shaders/black.frag";
 import conjurerCommon from "@/src/shaders/conjurer_common.frag";
 import { WebGLRenderTarget, ShaderChunk } from "three";
@@ -58,6 +59,7 @@ export const BlockStackNode = observer(function BlockStackNode({
         priority={basePriority + 1}
         shaderMaterialKey={parentBlock?.id}
         uniforms={parentBlock?.pattern.params}
+        vertexShader={parentBlock?.pattern.vertexShader ?? defaultVertexShader}
         fragmentShader={parentBlock?.pattern.src ?? black}
         renderTargetOut={evenNumberOfEffects ? renderTargetOut : renderTargetIn}
       />
@@ -70,6 +72,7 @@ export const BlockStackNode = observer(function BlockStackNode({
             key={effect.id}
             priority={basePriority + i + 2}
             uniforms={effect.pattern.params}
+            vertexShader={effect.pattern.vertexShader}
             fragmentShader={effect.pattern.src}
             renderTargetIn={swap ? renderTargetOut : renderTargetIn}
             renderTargetOut={swap ? renderTargetIn : renderTargetOut}
