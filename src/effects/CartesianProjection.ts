@@ -9,5 +9,5 @@ export const CartesianProjection = () =>
     {
       u_cartesianness: { name: "Cartesianness", value: 0.5 },
     },
-    true
+    ["v_normalized_uv"]
   );

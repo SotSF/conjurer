@@ -6,7 +6,7 @@ import {
   isPaletteParam,
 } from "./PatternParams";
 import { isPalette } from "@/src/types/Palette";
-import { makeVertexShader } from "@/src/shaders/vertexShader";
+import { makeVertexShader, Varying } from "@/src/shaders/vertexShader";
 
 export type SerializedPattern = {
   name: string;
@@ -17,7 +17,6 @@ export const BASE_UNIFORMS = ["u_time", "u_texture"];
 
 export class Pattern<T extends ExtraParams = ExtraParams> {
   name: string;
-  isEffect: boolean;
   fragmentShader: string;
   vertexShader: string;
   params: StandardParams & T;
@@ -26,14 +25,11 @@ export class Pattern<T extends ExtraParams = ExtraParams> {
     name: string,
     src: string,
     parameters: T = {} as T,
-    isEffect = false
+    vertexShaderVaryings: Varying[] = ["v_uv"]
   ) {
     this.name = name;
-    this.isEffect = isEffect;
     this.fragmentShader = src;
-    this.vertexShader = makeVertexShader(
-      isEffect ? ["v_uv", "v_normalized_uv"] : ["v_uv"]
-    );
+    this.vertexShader = makeVertexShader(vertexShaderVaryings);
 
     this.params = {
       u_time: {
@@ -61,7 +57,13 @@ export class Pattern<T extends ExtraParams = ExtraParams> {
       }
     }
 
-    return new Pattern<T>(this.name, this.fragmentShader, clonedParams, this.isEffect);
+    const pattern = new Pattern<T>(
+      this.name,
+      this.fragmentShader,
+      clonedParams
+    );
+    pattern.vertexShader = this.vertexShader;
+    return pattern;
   };
 
   serialize = (): SerializedPattern => {

@@ -56,5 +56,5 @@ export const ConstructMask = () =>
         value: 1.5,
       },
     },
-    true
+    ["v_uv", "v_normalized_uv"]
   );

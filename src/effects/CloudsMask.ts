@@ -24,5 +24,5 @@ export const CloudsMask = () =>
         value: 0.15,
       },
     },
-    true
+    ["v_normalized_uv"]
   );

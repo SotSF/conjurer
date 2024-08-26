@@ -30,5 +30,5 @@ export const Leaf = () =>
         value: 0.5,
       },
     },
-    true
+    ["v_uv", "v_normalized_uv"]
   );

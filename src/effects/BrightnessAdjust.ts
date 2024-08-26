@@ -12,5 +12,5 @@ export const BrightnessAdjust = () =>
         value: 1,
       },
     },
-    true
+    ["v_normalized_uv"]
   );

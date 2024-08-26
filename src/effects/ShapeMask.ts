@@ -19,5 +19,5 @@ export const ShapeMask = () =>
         step: 1,
       },
     },
-    true
+    ["v_uv", "v_normalized_uv"]
   );
