@@ -1,4 +1,5 @@
-import black from "@/src/shaders/black.frag";
+import defaultVertexShader from "@/src/shaders/default.vert";
+import blackFragmentShader from "@/src/shaders/black.frag";
 import conjurerCommon from "@/src/shaders/conjurer_common.frag";
 import { WebGLRenderTarget, ShaderChunk } from "three";
 import { useFrame, useThree } from "@react-three/fiber";
@@ -58,7 +59,10 @@ export const BlockStackNode = observer(function BlockStackNode({
         priority={basePriority + 1}
         shaderMaterialKey={parentBlock?.id}
         uniforms={parentBlock?.pattern.params}
-        fragmentShader={parentBlock?.pattern.src ?? black}
+        vertexShader={parentBlock?.pattern.vertexShader ?? defaultVertexShader}
+        fragmentShader={
+          parentBlock?.pattern.fragmentShader ?? blackFragmentShader
+        }
         renderTargetOut={evenNumberOfEffects ? renderTargetOut : renderTargetIn}
       />
       {parentBlock?.effectBlocks.map((effect, i) => {
@@ -70,7 +74,8 @@ export const BlockStackNode = observer(function BlockStackNode({
             key={effect.id}
             priority={basePriority + i + 2}
             uniforms={effect.pattern.params}
-            fragmentShader={effect.pattern.src}
+            vertexShader={effect.pattern.vertexShader}
+            fragmentShader={effect.pattern.fragmentShader}
             renderTargetIn={swap ? renderTargetOut : renderTargetIn}
             renderTargetOut={swap ? renderTargetIn : renderTargetOut}
           />

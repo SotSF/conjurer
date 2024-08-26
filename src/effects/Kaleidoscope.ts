@@ -9,6 +9,6 @@ export const Kaleidoscope = () =>
       value: 4,
       min: 1,
       max: 16,
-      step: 1
-    }
+      step: 1,
+    },
   });

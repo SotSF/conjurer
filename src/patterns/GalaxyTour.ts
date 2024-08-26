@@ -1,6 +1,5 @@
 import { Pattern } from "@/src/types/Pattern";
-import { Palette } from "@/src/types/Palette";
-import { Vector3, Vector4 } from "three";
+import { Vector4 } from "three";
 
 import galaxyTour from "@/src/patterns/shaders/galaxyTour.frag";
 

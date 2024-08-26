@@ -6,6 +6,7 @@ import {
   isPaletteParam,
 } from "./PatternParams";
 import { isPalette } from "@/src/types/Palette";
+import { makeVertexShader, Varying } from "@/src/shaders/vertexShader";
 
 export type SerializedPattern = {
   name: string;
@@ -16,12 +17,19 @@ export const BASE_UNIFORMS = ["u_time", "u_texture"];
 
 export class Pattern<T extends ExtraParams = ExtraParams> {
   name: string;
-  src: string;
+  fragmentShader: string;
+  vertexShader: string;
   params: StandardParams & T;
 
-  constructor(name: string, src: string, parameters: T = {} as T) {
+  constructor(
+    name: string,
+    src: string,
+    parameters: T = {} as T,
+    vertexShaderVaryings: Varying[] = ["v_uv"]
+  ) {
     this.name = name;
-    this.src = src;
+    this.fragmentShader = src;
+    this.vertexShader = makeVertexShader(vertexShaderVaryings);
 
     this.params = {
       u_time: {
@@ -49,7 +57,12 @@ export class Pattern<T extends ExtraParams = ExtraParams> {
       }
     }
 
-    const pattern = new Pattern<T>(this.name, this.src, clonedParams);
+    const pattern = new Pattern<T>(
+      this.name,
+      this.fragmentShader,
+      clonedParams
+    );
+    pattern.vertexShader = this.vertexShader;
     return pattern;
   };
 

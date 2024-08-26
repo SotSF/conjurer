@@ -6,7 +6,7 @@
 
 uniform vec3 u_view_vector;
 varying vec2 v_uv;
-varying vec2 v_normalized_uv;
+// varying vec2 v_normalized_uv;
 varying float v_intensity;
 
 void main() {
@@ -33,7 +33,9 @@ void main() {
 
     // Convert uv to cartesian coordinates
     v_uv = canopyToCartesianProjection(uv);
-    v_normalized_uv = cartesianToNormalizedProjection(v_uv);
+
+    // This varying is currently not being used by the fragment shader
+    // v_normalized_uv = cartesianToNormalizedProjection(v_uv);
 
     gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
     gl_PointSize = 150.0 / length(cameraToPixelVector);

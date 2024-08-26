@@ -1,12 +1,12 @@
 import { WebGLRenderTarget } from "three";
 import { useFrame } from "@react-three/fiber";
 import { memo, useRef } from "react";
-import vert from "@/src/shaders/default.vert";
 
 type BlockNodeProps = {
   shaderMaterialKey?: string;
   uniforms?: any;
-  fragmentShader?: string;
+  vertexShader: string;
+  fragmentShader: string;
   priority: number;
   renderTargetIn?: WebGLRenderTarget;
   renderTargetOut: WebGLRenderTarget;
@@ -15,7 +15,8 @@ type BlockNodeProps = {
 export const BlockNode = memo(function BlockNode({
   shaderMaterialKey,
   uniforms = {},
-  fragmentShader = "void main() { gl_FragColor = vec4(1.0); }",
+  vertexShader,
+  fragmentShader,
   priority,
   renderTargetIn,
   renderTargetOut,
@@ -39,7 +40,7 @@ export const BlockNode = memo(function BlockNode({
       <shaderMaterial
         key={shaderMaterialKey}
         uniforms={uniforms}
-        vertexShader={vert}
+        vertexShader={vertexShader}
         fragmentShader={fragmentShader}
       />
     </mesh>

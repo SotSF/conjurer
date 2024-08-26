@@ -1,11 +1,11 @@
 import { WebGLRenderTarget, Mesh } from "three";
 import { useFrame } from "@react-three/fiber";
 import { useEffect, useRef } from "react";
-import vert from "@/src/shaders/default.vert";
 import fromTextureToCanopySpace from "@/src/shaders/fromTextureToCanopySpace.frag";
 import { observer } from "mobx-react-lite";
 import { useStore } from "@/src/types/StoreContext";
 import { useDataTransmission } from "@/src/hooks/dataTransmission";
+import { makeVertexShader } from "@/src/shaders/vertexShader";
 
 type Props = {
   renderTarget: WebGLRenderTarget;
@@ -51,7 +51,7 @@ export const CanopySpaceView = observer(function CanopySpaceView({
       <shaderMaterial
         uniforms={outputUniforms.current}
         fragmentShader={fromTextureToCanopySpace}
-        vertexShader={vert}
+        vertexShader={makeVertexShader()}
       />
     </mesh>
   );

@@ -4,15 +4,20 @@ import shapeMask from "@/src/effects/shaders/shapeMask.frag";
 
 export { shapeMask };
 export const ShapeMask = () =>
-  new Pattern("Shape Mask", shapeMask, {
-    u_radius: {
-      name: "Radius",
-      value: 0.5,
-    },
-    u_inverse: {
-      name: "Inverse",
+  new Pattern(
+    "Shape Mask",
+    shapeMask,
+    {
+      u_radius: {
+        name: "Radius",
+        value: 0.5,
+      },
+      u_inverse: {
+        name: "Inverse",
 
-      value: 0,
-      step: 1,
+        value: 0,
+        step: 1,
+      },
     },
-  });
+    ["v_uv", "v_normalized_uv"]
+  );
