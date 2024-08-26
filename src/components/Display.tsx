@@ -14,6 +14,7 @@ export const Display = observer(function Display() {
 
   const boxRef = useRef<HTMLDivElement>(null);
 
+  // TODO: hide controls some other way than double click
   const [showAllControls, setShowAllControls] = useState(true);
 
   return (

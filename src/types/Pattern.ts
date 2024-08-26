@@ -18,7 +18,7 @@ export const BASE_UNIFORMS = ["u_time", "u_texture"];
 export class Pattern<T extends ExtraParams = ExtraParams> {
   name: string;
   isEffect: boolean;
-  src: string;
+  fragmentShader: string;
   vertexShader: string;
   params: StandardParams & T;
 
@@ -30,7 +30,7 @@ export class Pattern<T extends ExtraParams = ExtraParams> {
   ) {
     this.name = name;
     this.isEffect = isEffect;
-    this.src = src;
+    this.fragmentShader = src;
     this.vertexShader = makeVertexShader(
       isEffect ? ["v_uv", "v_normalized_uv"] : ["v_uv"]
     );
@@ -61,7 +61,7 @@ export class Pattern<T extends ExtraParams = ExtraParams> {
       }
     }
 
-    return new Pattern<T>(this.name, this.src, clonedParams, this.isEffect);
+    return new Pattern<T>(this.name, this.fragmentShader, clonedParams, this.isEffect);
   };
 
   serialize = (): SerializedPattern => {

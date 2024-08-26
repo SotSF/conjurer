@@ -60,7 +60,7 @@ export const BlockStackNode = observer(function BlockStackNode({
         shaderMaterialKey={parentBlock?.id}
         uniforms={parentBlock?.pattern.params}
         vertexShader={parentBlock?.pattern.vertexShader ?? defaultVertexShader}
-        fragmentShader={parentBlock?.pattern.src ?? black}
+        fragmentShader={parentBlock?.pattern.fragmentShader ?? black}
         renderTargetOut={evenNumberOfEffects ? renderTargetOut : renderTargetIn}
       />
       {parentBlock?.effectBlocks.map((effect, i) => {
@@ -73,7 +73,7 @@ export const BlockStackNode = observer(function BlockStackNode({
             priority={basePriority + i + 2}
             uniforms={effect.pattern.params}
             vertexShader={effect.pattern.vertexShader}
-            fragmentShader={effect.pattern.src}
+            fragmentShader={effect.pattern.fragmentShader}
             renderTargetIn={swap ? renderTargetOut : renderTargetIn}
             renderTargetOut={swap ? renderTargetIn : renderTargetOut}
           />
