@@ -4,6 +4,7 @@ import { DEFAULT_BLOCK_DURATION } from "@/src/utils/time";
 import { makeAutoObservable } from "mobx";
 import { Opacity } from "@/src/patterns/Opacity";
 import { ExtraParams, PatternParam } from "@/src/types/PatternParams";
+import { generateId } from "@/src/utils/id";
 
 type RootStore = {
   context: string;
@@ -14,7 +15,7 @@ type RootStore = {
 };
 
 export class Layer {
-  id: string = Math.random().toString(16).slice(2); // unique id
+  id: string = generateId();
   name = "";
 
   patternBlocks: Block[] = [];

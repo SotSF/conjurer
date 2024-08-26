@@ -1,3 +1,4 @@
+import { generateId } from "@/src/utils/id";
 import { RegionParams } from "wavesurfer.js/dist/plugins/regions";
 
 // Mirrors the RegionParams interface from wavesurfer.js
@@ -14,7 +15,7 @@ export class AudioRegion {
   maxLength?: number;
 
   constructor(region: Partial<RegionParams>) {
-    this.id = region.id || Math.random().toString(16).slice(2);
+    this.id = region.id || generateId();
     this.start = region.start || 0;
     this.end = region.end;
     this.drag = region.drag || false;

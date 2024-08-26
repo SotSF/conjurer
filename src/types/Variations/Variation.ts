@@ -1,4 +1,5 @@
 import { ParamType } from "@/src/types/PatternParams";
+import { generateId } from "@/src/utils/id";
 
 export type RootStore = {
   audioStore: { getPeakAtTime: (time: number) => number };
@@ -15,7 +16,7 @@ type VariationType =
   | "palette";
 
 export abstract class Variation<T extends ParamType = ParamType> {
-  id: string = Math.random().toString(16).slice(2); // unique id
+  id: string = generateId();
   type: VariationType;
   duration: number;
 

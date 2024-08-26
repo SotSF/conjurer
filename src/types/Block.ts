@@ -14,6 +14,7 @@ import { isVector4 } from "@/src/utils/object";
 import { LinearVariation4 } from "@/src/types/Variations/LinearVariation4";
 import { isPalette } from "@/src/types/Palette";
 import { PaletteVariation } from "@/src/types/Variations/PaletteVariation";
+import { generateId } from "@/src/utils/id";
 
 export type SerializedBlock = {
   id: string;
@@ -33,7 +34,7 @@ export type RootStore = {
 };
 
 export class Block<T extends ExtraParams = {}> {
-  id: string = Math.random().toString(16).slice(2); // unique id
+  id: string = generateId();
   pattern: Pattern<T>;
   parameterVariations: { [K in keyof T]?: Variation[] } = {};
 
@@ -75,6 +76,11 @@ export class Block<T extends ExtraParams = {}> {
       updateParameter: false,
     });
   }
+
+  regenerateId = () => {
+    this.id = generateId();
+    this.effectBlocks.forEach((effectBlock) => effectBlock.regenerateId());
+  };
 
   setTiming = ({
     startTime,
