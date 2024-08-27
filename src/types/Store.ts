@@ -396,6 +396,7 @@ export class Store {
       const blocksToPaste = blocksOrVariationsData.map((b: any) =>
         Block.deserialize(this, b)
       );
+      blocksToPaste.forEach((block) => block.regenerateId());
       this.selectedBlocksOrVariations = new Set();
       for (const blockToPaste of blocksToPaste) {
         const nextGap = layerToPasteInto.nextFiniteGap(

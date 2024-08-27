@@ -32,15 +32,17 @@ export const TimelineBlockStack = observer(function TimelineBlockStack({
     if (!dragNodeRef.current) return;
 
     // Anytime the TimelineBlockStack is resized,
-    new ResizeObserver(() => {
-      // recompute the height of the layer
-      patternBlock.layer?.recomputeHeight();
+    new ResizeObserver(
+      action(() => {
+        // recompute the height of the layer
+        patternBlock.layer?.recomputeHeight();
 
-      // recompute the number of header repetitions
-      patternBlock.recomputeHeaderRepetitions(
-        dragNodeRef.current?.clientWidth ?? 0
-      );
-    }).observe(dragNodeRef.current);
+        // recompute the number of header repetitions
+        patternBlock.recomputeHeaderRepetitions(
+          dragNodeRef.current?.clientWidth ?? 0
+        );
+      })
+    ).observe(dragNodeRef.current);
   }, [dragNodeRef, patternBlock.layer, patternBlock]);
 
   const lastMouseDown = useRef(0);

@@ -66,6 +66,8 @@ export const handleVoiceCommandActionMessage = action(
 
       const delta = message.value - selectedBlock.endTime;
       selectedBlock.layer.resizeBlockRightBound(selectedBlock, delta);
+    } else if (action === "copyExperience") {
+      store.experienceStore.copyToClipboard();
     }
   }
 );

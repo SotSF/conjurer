@@ -50,7 +50,9 @@ export const PlaylistEditor = observer(function PlaylistEditor() {
           my={2}
           isChecked={playlistStore.autoplay}
           size="sm"
-          onChange={({ target }) => (playlistStore.autoplay = target.checked)}
+          onChange={action(
+            ({ target }) => (playlistStore.autoplay = target.checked)
+          )}
         >
           Autoplay next experience in playlist
         </Checkbox>

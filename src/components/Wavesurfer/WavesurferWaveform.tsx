@@ -15,6 +15,7 @@ import { action, runInAction } from "mobx";
 import { useCloneCanvas } from "@/src/components/Wavesurfer/hooks/cloneCanvas";
 import { loopRegionColor } from "@/src/types/AudioStore";
 import { debounce } from "lodash";
+import { generateId } from "@/src/utils/id";
 
 const importWavesurferConstructors = async () => {
   // Can't be run on the server, so we need to use dynamic imports
@@ -382,7 +383,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
         action((newTime: number) => {
           uiStore.showingMarkerEditorModal = true;
           uiStore.markerToEdit = {
-            id: Math.random().toString(36).substring(7),
+            id: generateId(),
             start: newTime,
           };
         })

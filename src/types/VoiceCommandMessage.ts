@@ -7,7 +7,13 @@ export type VoiceCommandActionMessage = {
   type: "action";
 } & ( // Actions without arguments
   | {
-      action: "togglePlay" | "goToBeginning" | "goToEnd" | "zoomIn" | "zoomOut";
+      action:
+        | "togglePlay"
+        | "goToBeginning"
+        | "goToEnd"
+        | "zoomIn"
+        | "zoomOut"
+        | "copyExperience";
     }
   // Actions with arguments
   | {
