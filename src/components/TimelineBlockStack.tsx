@@ -70,7 +70,8 @@ export const TimelineBlockStack = observer(function TimelineBlockStack({
 
     patternBlock.layer.attemptMoveBlock(
       patternBlock,
-      uiStore.xToTime(position.x)
+      uiStore.xToTime(position.x),
+      true
     );
     setPosition({ x: 0, y: 0 });
   });
