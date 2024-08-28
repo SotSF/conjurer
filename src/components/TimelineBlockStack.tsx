@@ -50,6 +50,9 @@ export const TimelineBlockStack = observer(function TimelineBlockStack({
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const handleDrag = useCallback(
     (e: DraggableEvent, data: DraggableData) => {
+      // rango voice commands (which are not trusted) should not trigger dragging
+      if (!e.isTrusted) return;
+
       if (!uiStore.snappingToBeatGrid) {
         setPosition({ x: data.x, y: 0 });
         return;
