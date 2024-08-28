@@ -14,12 +14,7 @@ import {
   EffectPass,
   RenderPass,
 } from "postprocessing";
-
-type CanopyGeometry = {
-  position: number[];
-  uv: number[];
-  normal: number[];
-};
+import { CanopyGeometry } from "@/src/types/CanopyGeometry";
 
 type CanopyProps = { renderTarget: WebGLRenderTarget };
 
@@ -61,6 +56,11 @@ const CanopyView = function CanopyView({
 
   const bufferGeometry = useMemo(() => {
     const geometry = new BufferGeometry();
+    console.log(
+      canopyGeometry.position.length +
+        canopyGeometry.uv.length +
+        canopyGeometry.normal.length
+    );
     geometry.setAttribute(
       "position",
       new BufferAttribute(new Float32Array(canopyGeometry.position), 3)

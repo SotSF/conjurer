@@ -8,16 +8,28 @@ import {
 import { catenary } from "../utils/catenary";
 import * as fs from "fs";
 import { Vector2 } from "three";
+import { CanopyGeometry } from "../types/CanopyGeometry";
 
-export const saveJson = (filename: string, data: any) =>
+const CANOPY_GEOMETRY_OUTPUT_PATH = "./src/data/canopyGeometry";
+const JSON_DECIMAL_PLACES = 3;
+
+const saveJson = (filename: string, data: CanopyGeometry) =>
   fs.writeFileSync(
     filename,
     JSON.stringify(data, (key, val) =>
-      val.toFixed ? Number(val.toFixed(3)) : val
+      val.toFixed ? Number(val.toFixed(JSON_DECIMAL_PLACES)) : val
     )
   );
 
-const CANOPY_GEOMETRY_OUTPUT_PATH = "./src/data/canopyGeometry.json";
+const saveBinary = (filename: string, data: CanopyGeometry) => {
+  const float32Array = new Float32Array([
+    ...data.position,
+    ...data.uv,
+    ...data.normal,
+  ]);
+  const buffer = Buffer.from(float32Array.buffer);
+  fs.writeFileSync(filename, buffer);
+};
 
 const main = async () => {
   console.log("Generating canopy geometry...");
@@ -71,7 +83,11 @@ const main = async () => {
     }
   }
 
-  saveJson(CANOPY_GEOMETRY_OUTPUT_PATH, { position, uv, normal });
+  const canopyGeometry = { position, uv, normal };
+
+  saveJson(`${CANOPY_GEOMETRY_OUTPUT_PATH}.json`, canopyGeometry);
+  saveBinary(`${CANOPY_GEOMETRY_OUTPUT_PATH}.bin`, canopyGeometry);
+
   console.log("Complete!", CANOPY_GEOMETRY_OUTPUT_PATH);
 };
 
