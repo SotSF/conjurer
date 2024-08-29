@@ -1,3 +1,4 @@
+import { useSaveExperience } from "@/src/hooks/experience";
 import { useStore } from "@/src/types/StoreContext";
 import { action } from "mobx";
 import { observer } from "mobx-react-lite";
@@ -13,13 +14,15 @@ export const KeyboardControls = observer(function KeyboardControls({
   const store = useStore();
   const { uiStore, experienceStore, audioStore } = store;
 
+  const { saveExperience } = useSaveExperience();
+
   useEffect(() => {
     const handleKeyDown = action((e: KeyboardEvent) => {
       if (editMode && e.key === "s" && e.shiftKey && (e.ctrlKey || e.metaKey)) {
         uiStore.attemptShowSaveExperienceModal();
         e.preventDefault();
       } else if (editMode && e.key === "s" && (e.ctrlKey || e.metaKey)) {
-        experienceStore.save();
+        saveExperience();
         e.preventDefault();
       } else if (editMode && e.key === "n" && (e.ctrlKey || e.metaKey)) {
         store.newExperience();

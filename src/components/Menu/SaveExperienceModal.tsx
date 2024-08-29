@@ -17,12 +17,13 @@ import {
 } from "@chakra-ui/react";
 import { useStore } from "@/src/types/StoreContext";
 import { useEffect, useRef, useState } from "react";
-import { action, runInAction } from "mobx";
+import { action } from "mobx";
 import { trpc } from "@/src/utils/trpc";
+import { useSaveExperience } from "@/src/hooks/experience";
 
 export const SaveExperienceModal = observer(function SaveExperienceModal() {
   const store = useStore();
-  const { experienceStore, uiStore, user, usingLocalAssets } = store;
+  const { uiStore, user, usingLocalAssets } = store;
 
   const {
     isPending,
@@ -32,6 +33,8 @@ export const SaveExperienceModal = observer(function SaveExperienceModal() {
     { user, usingLocalAssets },
     { enabled: uiStore.showingSaveExperienceModal }
   );
+
+  const { saveExperience } = useSaveExperience();
 
   const inputRef = useRef<HTMLInputElement>(null);
   const [saving, setSaving] = useState(false);
@@ -44,15 +47,13 @@ export const SaveExperienceModal = observer(function SaveExperienceModal() {
 
   const onClose = action(() => (uiStore.showingSaveExperienceModal = false));
 
-  const onSaveExperience = async () => {
+  const onSaveExperience = action(async () => {
     setSaving(true);
-    runInAction(() => {
-      store.experienceName = experienceName;
-    });
-    await experienceStore.save();
+    store.experienceName = experienceName;
+    await saveExperience();
     setSaving(false);
     onClose();
-  };
+  });
 
   const onExperienceNameChange = (newValue: string) => {
     // sanitize file name

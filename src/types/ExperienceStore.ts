@@ -35,32 +35,6 @@ export class ExperienceStore {
     makeAutoObservable(this);
   }
 
-  save = () => {
-    this.rootStore.experienceLastSavedAt = Date.now();
-    const experienceFilename = `${this.rootStore.user}-${
-      this.rootStore.experienceName || "untitled"
-    }`;
-
-    if (this.rootStore.usingLocalAssets) {
-      fetch(`/api/experiences/${experienceFilename}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ experience: this.stringifyExperience() }),
-      });
-      return;
-    }
-
-    const putObjectCommand = new PutObjectCommand({
-      Bucket: ASSET_BUCKET_NAME,
-      Key: `${EXPERIENCE_ASSET_PREFIX}${experienceFilename}.json`,
-      Body: this.stringifyExperience(),
-    });
-
-    return getS3().send(putObjectCommand);
-  };
-
   load = async (experienceFilename: string) => {
     this.rootStore.user = extractUserFromFilename(experienceFilename);
     this.rootStore.experienceName =
