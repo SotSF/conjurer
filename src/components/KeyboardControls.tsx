@@ -95,7 +95,7 @@ export const KeyboardControls = observer(function KeyboardControls({
       window.removeEventListener("copy", handleCopy);
       window.removeEventListener("paste", handlePaste);
     };
-  }, [store, uiStore, experienceStore, audioStore, editMode]);
+  }, [store, uiStore, experienceStore, audioStore, editMode, saveExperience]);
 
   return null;
 });
