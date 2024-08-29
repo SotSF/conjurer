@@ -38,7 +38,9 @@ export class UIStore {
   showingSaveBeatMapModal = false;
   showingLoadBeatMapModal = false;
 
-  _renderTargetSize = INITIAL_RENDER_TARGET_SIZE;
+  pendingAction: "open" | "save" | "" = "";
+
+  private _renderTargetSize = INITIAL_RENDER_TARGET_SIZE;
   get renderTargetSize() {
     return this._renderTargetSize;
   }
@@ -134,10 +136,33 @@ export class UIStore {
   attemptShowOpenExperienceModal = () => {
     if (!this.rootStore.user) {
       this.showingUserPickerModal = true;
+      this.pendingAction = "open";
       return;
     }
 
     this.showingOpenExperienceModal = true;
+  };
+
+  attemptShowSaveExperienceModal = () => {
+    if (!this.rootStore.user) {
+      this.showingUserPickerModal = true;
+      this.pendingAction = "save";
+      return;
+    }
+
+    this.showingSaveExperienceModal = true;
+  };
+
+  showPendingModal = () => {
+    switch (this.pendingAction) {
+      case "open":
+        this.showingOpenExperienceModal = true;
+        break;
+      case "save":
+        this.showingSaveExperienceModal = true;
+        break;
+    }
+    this.pendingAction = "";
   };
 
   nextRenderTextureSize = () => {

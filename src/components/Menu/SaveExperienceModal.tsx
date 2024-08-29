@@ -16,30 +16,33 @@ import {
   Text,
 } from "@chakra-ui/react";
 import { useStore } from "@/src/types/StoreContext";
-import { useExperiences } from "@/src/hooks/experiences";
 import { useEffect, useRef, useState } from "react";
 import { action, runInAction } from "mobx";
+import { trpc } from "@/src/utils/trpc";
 
 export const SaveExperienceModal = observer(function SaveExperienceModal() {
   const store = useStore();
-  const { experienceStore, uiStore } = store;
+  const { experienceStore, uiStore, user } = store;
 
-  const { loading, experiences } = useExperiences(
-    uiStore.showingSaveExperienceModal
+  const {
+    isPending,
+    isError,
+    data: experiences,
+  } = trpc.experience.listExperiences.useQuery(
+    { user },
+    { enabled: uiStore.showingSaveExperienceModal }
   );
 
   const inputRef = useRef<HTMLInputElement>(null);
   const [saving, setSaving] = useState(false);
   const [experienceName, setExperienceName] = useState("");
-  const experienceFilename = `${store.user}-${experienceName}`;
+  const experienceFilename = `${user}-${experienceName}`;
 
   useEffect(() => {
-    if (inputRef.current && !loading) inputRef.current.focus();
-  }, [loading]);
+    if (inputRef.current && !isPending) inputRef.current.focus();
+  }, [isPending]);
 
-  const onClose = action(() => {
-    uiStore.showingSaveExperienceModal = false;
-  });
+  const onClose = action(() => (uiStore.showingSaveExperienceModal = false));
 
   const onSaveExperience = async () => {
     setSaving(true);
@@ -52,13 +55,16 @@ export const SaveExperienceModal = observer(function SaveExperienceModal() {
   };
 
   const onExperienceNameChange = (newValue: string) => {
-    // sanitize file name for s3
+    // sanitize file name
     newValue = newValue.replace(/[^a-z0-9]/gi, "-").toLowerCase();
     setExperienceName(newValue);
   };
 
-  const willOverwriteExistingExperience =
-    experiences.includes(experienceFilename);
+  if (isError) return null;
+
+  const willOverwriteExistingExperience = (experiences ?? []).includes(
+    experienceFilename
+  );
 
   return (
     <Modal
@@ -71,14 +77,14 @@ export const SaveExperienceModal = observer(function SaveExperienceModal() {
         <ModalHeader>Save experience as...</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          {store.user ? (
-            loading ? (
+          {user ? (
+            isPending ? (
               <Spinner />
             ) : (
               <>
                 <HStack mb={2} spacing={0}>
                   <InputGroup>
-                    <InputLeftAddon pr={1}>{store.user}-</InputLeftAddon>
+                    <InputLeftAddon pr={1}>{user}-</InputLeftAddon>
                     <Input
                       ref={inputRef}
                       onChange={(e) => onExperienceNameChange(e.target.value)}

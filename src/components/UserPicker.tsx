@@ -72,7 +72,7 @@ export const UserPicker = observer(function UserPicker() {
                     width="100%"
                     onClick={action(() => {
                       store.user = user;
-                      store.uiStore.attemptShowOpenExperienceModal();
+                      store.uiStore.showPendingModal();
                       onClose();
                     })}
                   >

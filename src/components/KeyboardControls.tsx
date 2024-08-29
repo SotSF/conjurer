@@ -16,7 +16,7 @@ export const KeyboardControls = observer(function KeyboardControls({
   useEffect(() => {
     const handleKeyDown = action((e: KeyboardEvent) => {
       if (editMode && e.key === "s" && e.shiftKey && (e.ctrlKey || e.metaKey)) {
-        uiStore.showingSaveExperienceModal = true;
+        uiStore.attemptShowSaveExperienceModal();
         e.preventDefault();
       } else if (editMode && e.key === "s" && (e.ctrlKey || e.metaKey)) {
         experienceStore.save();

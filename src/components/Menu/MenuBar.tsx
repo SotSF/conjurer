@@ -75,10 +75,10 @@ export const MenuBar = observer(function MenuBar() {
       <HStack>
         <Heading
           size="md"
-          onClick={action(() => {
-            if (store.context !== "viewer")
-              uiStore.showingSaveExperienceModal = true;
-          })}
+          onClick={() =>
+            store.context !== "viewer" &&
+            uiStore.attemptShowSaveExperienceModal()
+          }
           cursor="pointer"
         >
           {store.experienceName}
@@ -157,9 +157,7 @@ export const MenuBar = observer(function MenuBar() {
                 <MenuItem
                   icon={<FiSave size={17} />}
                   command="⌘⇧S"
-                  onClick={action(() => {
-                    uiStore.showingSaveExperienceModal = true;
-                  })}
+                  onClick={uiStore.attemptShowSaveExperienceModal}
                 >
                   Save as...
                 </MenuItem>
