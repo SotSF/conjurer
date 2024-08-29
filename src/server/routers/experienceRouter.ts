@@ -1,9 +1,11 @@
+import * as fs from "fs";
 import { publicProcedure, router } from "@/src/server/trpc";
 import { ListObjectsCommand } from "@aws-sdk/client-s3";
 import {
   ASSET_BUCKET_NAME,
   EXPERIENCE_ASSET_PREFIX,
   getS3,
+  LOCAL_ASSET_PATH,
 } from "@/src/utils/assets";
 import { z } from "zod";
 
@@ -11,24 +13,26 @@ export const experienceRouter = router({
   listExperiences: publicProcedure
     .input(
       z.object({
+        usingLocalAssets: z.boolean(),
         user: z.string(),
       })
     )
     .query(async ({ input }) => {
       let experienceFilenames: string[] = [];
-      // TODO:
-      // if (this.rootStore.usingLocalAssets) {
-      //   const response = await fetch("/api/experiences");
-      //   experienceFilenames = (await response.json()).experienceFilenames;
+      if (input.usingLocalAssets) {
+        experienceFilenames = fs
+          .readdirSync(`${LOCAL_ASSET_PATH}${EXPERIENCE_ASSET_PREFIX}`)
+          .map((file) => file.toString());
+      } else {
+        const listObjectsCommand = new ListObjectsCommand({
+          Bucket: ASSET_BUCKET_NAME,
+          Prefix: EXPERIENCE_ASSET_PREFIX,
+        });
 
-      const listObjectsCommand = new ListObjectsCommand({
-        Bucket: ASSET_BUCKET_NAME,
-        Prefix: EXPERIENCE_ASSET_PREFIX,
-      });
-
-      const data = await getS3().send(listObjectsCommand);
-      experienceFilenames =
-        data.Contents?.map((object) => object.Key?.split("/")[1] ?? "") ?? [];
+        const data = await getS3().send(listObjectsCommand);
+        experienceFilenames =
+          data.Contents?.map((object) => object.Key?.split("/")[1] ?? "") ?? [];
+      }
 
       return (
         experienceFilenames

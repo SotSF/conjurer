@@ -22,7 +22,7 @@ import { trpc } from "@/src/utils/trpc";
 
 export const UserPicker = observer(function UserPicker() {
   const store = useStore();
-  const { uiStore, user } = store;
+  const { uiStore, user, usingLocalAssets } = store;
 
   const [newUser, setNewUser] = useState("");
 
@@ -31,7 +31,7 @@ export const UserPicker = observer(function UserPicker() {
     isError,
     data: experiences,
   } = trpc.experience.listExperiences.useQuery(
-    { user: "" },
+    { user: "", usingLocalAssets },
     { enabled: uiStore.showingUserPickerModal }
   );
 
