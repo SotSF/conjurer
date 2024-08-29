@@ -2679,10 +2679,42 @@
   dependencies:
     tslib "^2.4.0"
 
+"@tanstack/query-core@5.52.2":
+  version "5.52.2"
+  resolved "https://registry.yarnpkg.com/@tanstack/query-core/-/query-core-5.52.2.tgz#a023864a892fda9858b724d667eb19cd84ce054a"
+  integrity sha512-9vvbFecK4A0nDnrc/ks41e3UHONF1DAnGz8Tgbxkl59QcvKWmc0ewhYuIKRh8NC4ja5LTHT9EH16KHbn2AIYWA==
+
+"@tanstack/react-query@^5.52.2":
+  version "5.52.2"
+  resolved "https://registry.yarnpkg.com/@tanstack/react-query/-/react-query-5.52.2.tgz#3fffbc86351edcaeec335bc8958bcab4204bd169"
+  integrity sha512-d4OwmobpP+6+SvuAxW1RzAY95Pv87Gu+0GjtErzFOUXo+n0FGcwxKvzhswCsXKxsgnAr3bU2eJ2u+GXQAutkCQ==
+  dependencies:
+    "@tanstack/query-core" "5.52.2"
+
 "@tokenizer/token@^0.3.0":
   version "0.3.0"
   resolved "https://registry.yarnpkg.com/@tokenizer/token/-/token-0.3.0.tgz#fe98a93fe789247e998c75e74e9c7c63217aa276"
   integrity sha512-OvjF+z51L3ov0OyAU0duzsYuvO01PH7x4t6DJx+guahgTnBHkhJdG7soQeTSFLWN3efnHyibZ4Z8l2EuWwJN3A==
+
+"@trpc/client@^11.0.0-rc.487":
+  version "11.0.0-rc.487"
+  resolved "https://registry.yarnpkg.com/@trpc/client/-/client-11.0.0-rc.487.tgz#e7c48ad0671777c98eca67e080224f1c504c1368"
+  integrity sha512-6M/DAqdABdYwkeRwKZZ5b2kApIL4QRTNKHljNWwvu62Bs/OPqXbdaGaIWVzMCU5TE798mWfPV8GKen3fNWWZHw==
+
+"@trpc/next@^11.0.0-rc.487":
+  version "11.0.0-rc.487"
+  resolved "https://registry.yarnpkg.com/@trpc/next/-/next-11.0.0-rc.487.tgz#3498d95e0ddde05054864c140e33c66d51c12b14"
+  integrity sha512-fHnf9cu6DXYZ7cEKEqAMAs83dcUXV8rWHOTs0oRSvPDov5Fa8gvOl7OyLpkdmDONfsuzROL/hWTR39mm8fUMtQ==
+
+"@trpc/react-query@^11.0.0-rc.487":
+  version "11.0.0-rc.487"
+  resolved "https://registry.yarnpkg.com/@trpc/react-query/-/react-query-11.0.0-rc.487.tgz#14ffb171c3c64e400260d798cd6aecc024c9ca1e"
+  integrity sha512-pZmyC9vNMqBsOtEIqUE+qA9b0arYtHccMO9vWabhzEaN8mrQiCn7LUDvhE1p/AS3HBq0wff9h6hq5gNv8jcczg==
+
+"@trpc/server@^11.0.0-rc.487":
+  version "11.0.0-rc.487"
+  resolved "https://registry.yarnpkg.com/@trpc/server/-/server-11.0.0-rc.487.tgz#763fdc0caab7457a758c3127ff7d5f9efb99da2a"
+  integrity sha512-Hpoe23ct/bm9lIsAQ4wVqBvV3YyU/c7xT+rKIVM7rG+E+BOtCYugJKUKTOpKG5mZBqIEGBgZNacP3QyTrG3igg==
 
 "@tsconfig/node10@^1.0.7":
   version "1.0.9"
@@ -6764,6 +6796,11 @@ yocto-queue@^0.1.0:
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/yocto-queue/-/yocto-queue-0.1.0.tgz#0294eb3dee05028d31ee1a5fa2c556a6aaf10a1b"
   integrity sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==
+
+zod@^3.23.8:
+  version "3.23.8"
+  resolved "https://registry.yarnpkg.com/zod/-/zod-3.23.8.tgz#e37b957b5d52079769fb8097099b592f0ef4067d"
+  integrity sha512-XBx9AXhXktjUqnepgTiE5flcKIYWi/rme0Eaj+5Y0lftuGBq+jyRu/md4WnuxqgP1ubdpNCsYEYPxrzVHD8d6g==
 
 zstddec@^0.0.2:
   version "0.0.2"
