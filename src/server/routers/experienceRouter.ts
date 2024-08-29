@@ -28,7 +28,6 @@ export const experienceRouter = router({
           Bucket: ASSET_BUCKET_NAME,
           Prefix: EXPERIENCE_ASSET_PREFIX,
         });
-
         const data = await getS3().send(listObjectsCommand);
         experienceFilenames =
           data.Contents?.map((object) => object.Key?.split("/")[1] ?? "") ?? [];
