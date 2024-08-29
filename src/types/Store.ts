@@ -38,7 +38,7 @@ export class Store {
 
   audioStore = new AudioStore(this);
   beatMapStore = new BeatMapStore(this);
-  uiStore = new UIStore(this.audioStore);
+  uiStore = new UIStore(this, this.audioStore);
   experienceStore = new ExperienceStore(this);
   playlistStore = new PlaylistStore(
     this,

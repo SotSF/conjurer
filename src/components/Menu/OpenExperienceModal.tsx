@@ -20,11 +20,14 @@ export const OpenExperienceModal = observer(function OpenExperienceModal() {
   const store = useStore();
   const { experienceStore, uiStore, user } = store;
 
-  const { isPending, data } = trpc.experience.getExperiences.useQuery(
+  const {
+    isPending,
+    isError,
+    data: experiences,
+  } = trpc.experience.getExperiences.useQuery(
     { user },
     { enabled: uiStore.showingOpenExperienceModal }
   );
-  const experiences = data ?? [];
 
   const onClose = action(() => (uiStore.showingOpenExperienceModal = false));
 
@@ -32,6 +35,8 @@ export const OpenExperienceModal = observer(function OpenExperienceModal() {
     await experienceStore.load(experienceFilename);
     onClose();
   };
+
+  if (isError) return null;
 
   return (
     <Modal
@@ -46,27 +51,21 @@ export const OpenExperienceModal = observer(function OpenExperienceModal() {
         </ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          {user ? (
-            <>
-              {!isPending && experiences.length === 0 && (
-                <Text color="gray.400">
-                  {user} has no saved experiences yet!
-                </Text>
-              )}
-              <VStack align="flex-start" spacing={0}>
-                {experiences.map((experience) => (
-                  <Button
-                    key={experience}
-                    variant="ghost"
-                    onClick={() => onOpenExperience(experience)}
-                  >
-                    {experience}
-                  </Button>
-                ))}
-              </VStack>
-            </>
-          ) : (
-            <Text>Please log in first!</Text>
+          {!isPending && experiences.length === 0 && (
+            <Text color="gray.400">{user} has no saved experiences yet!</Text>
+          )}
+          {!isPending && (
+            <VStack align="flex-start" spacing={0}>
+              {experiences.map((experience) => (
+                <Button
+                  key={experience}
+                  variant="ghost"
+                  onClick={() => onOpenExperience(experience)}
+                >
+                  {experience}
+                </Button>
+              ))}
+            </VStack>
           )}
         </ModalBody>
         <ModalFooter>

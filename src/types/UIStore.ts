@@ -12,6 +12,7 @@ export type DisplayMode = "canopy" | "canopySpace" | "cartesianSpace" | "none";
 
 type RootStore = {
   context: string;
+  user: string;
 };
 
 /**
@@ -27,6 +28,7 @@ export class UIStore {
   showingBeatGridOverlay = false;
   snappingToBeatGrid = false;
   showingOpenExperienceModal = false;
+  showingUserPickerModal = false;
   showingSaveExperienceModal = false;
   showingUploadAudioModal = false;
   showingPaletteEditorModal = false;
@@ -74,7 +76,7 @@ export class UIStore {
 
   pixelsPerSecond = INITIAL_PIXELS_PER_SECOND; // the zoom of the timeline
 
-  constructor(readonly audioStore: AudioStore) {
+  constructor(readonly rootStore: RootStore, readonly audioStore: AudioStore) {
     makeAutoObservable(this);
   }
 
@@ -127,6 +129,15 @@ export class UIStore {
 
   toggleSnappingToBeatGrid = () => {
     this.snappingToBeatGrid = !this.snappingToBeatGrid;
+  };
+
+  attemptShowOpenExperienceModal = () => {
+    if (!this.rootStore.user) {
+      this.showingUserPickerModal = true;
+      return;
+    }
+
+    this.showingOpenExperienceModal = true;
   };
 
   nextRenderTextureSize = () => {

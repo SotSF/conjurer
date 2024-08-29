@@ -118,7 +118,7 @@ export const MenuBar = observer(function MenuBar() {
                 <MenuItem
                   icon={<FaFile size={17} />}
                   command="⌘N"
-                  onClick={action(() => store.newExperience())}
+                  onClick={store.newExperience}
                 >
                   New experience
                 </MenuItem>
@@ -126,9 +126,7 @@ export const MenuBar = observer(function MenuBar() {
                 <MenuItem
                   icon={<FaFolderOpen size={17} />}
                   command="⌘O"
-                  onClick={action(() => {
-                    uiStore.showingOpenExperienceModal = true;
-                  })}
+                  onClick={uiStore.attemptShowOpenExperienceModal}
                 >
                   Open...
                 </MenuItem>

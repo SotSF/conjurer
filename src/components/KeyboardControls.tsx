@@ -44,7 +44,7 @@ export const KeyboardControls = observer(function KeyboardControls({
         audioStore.skipForward();
         e.preventDefault();
       } else if (editMode && e.key === "o" && (e.ctrlKey || e.metaKey)) {
-        uiStore.showingOpenExperienceModal = true;
+        uiStore.attemptShowOpenExperienceModal();
         e.preventDefault();
       } else if (editMode && e.key === "a" && (e.ctrlKey || e.metaKey)) {
         store.selectAllBlocks();
