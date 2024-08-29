@@ -13,23 +13,18 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { useStore } from "@/src/types/StoreContext";
-import { useExperiences } from "@/src/hooks/experiences";
 import { action } from "mobx";
 import { trpc } from "@/src/utils/trpc";
 
 export const OpenExperienceModal = observer(function OpenExperienceModal() {
   const store = useStore();
-  const { experienceStore, uiStore } = store;
+  const { experienceStore, uiStore, user } = store;
 
-  const result = trpc.getAllExperiences.useQuery(undefined, {
-    enabled: uiStore.showingOpenExperienceModal,
-  });
-  console.log(result.status);
-  console.log(result.data);
-
-  const { loading, experiences } = useExperiences(
-    uiStore.showingOpenExperienceModal
+  const { isPending, data } = trpc.experience.getExperiences.useQuery(
+    { user },
+    { enabled: uiStore.showingOpenExperienceModal }
   );
+  const experiences = data ?? [];
 
   const onClose = action(() => (uiStore.showingOpenExperienceModal = false));
 
@@ -37,12 +32,6 @@ export const OpenExperienceModal = observer(function OpenExperienceModal() {
     await experienceStore.load(experienceFilename);
     onClose();
   };
-
-  // are the last fetched experiences for a different user?
-  const areExperiencesStale =
-    experiences.length > 0 &&
-    store.user.length > 0 &&
-    !experiences[0].startsWith(store.user);
 
   return (
     <Modal
@@ -53,33 +42,29 @@ export const OpenExperienceModal = observer(function OpenExperienceModal() {
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>
-          Open experience {loading && <Spinner ml={2} />}
+          Open experience {isPending && <Spinner ml={2} />}
         </ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          {store.user ? (
-            areExperiencesStale ? (
-              <Spinner />
-            ) : (
-              <>
-                {experiences.length === 0 && !loading && (
-                  <Text color="gray.400">
-                    {store.user} has no saved experiences yet!
-                  </Text>
-                )}
-                <VStack align="flex-start" spacing={0}>
-                  {experiences.map((experience) => (
-                    <Button
-                      key={experience}
-                      variant="ghost"
-                      onClick={() => onOpenExperience(experience)}
-                    >
-                      {experience}
-                    </Button>
-                  ))}
-                </VStack>
-              </>
-            )
+          {user ? (
+            <>
+              {!isPending && experiences.length === 0 && (
+                <Text color="gray.400">
+                  {user} has no saved experiences yet!
+                </Text>
+              )}
+              <VStack align="flex-start" spacing={0}>
+                {experiences.map((experience) => (
+                  <Button
+                    key={experience}
+                    variant="ghost"
+                    onClick={() => onOpenExperience(experience)}
+                  >
+                    {experience}
+                  </Button>
+                ))}
+              </VStack>
+            </>
           ) : (
             <Text>Please log in first!</Text>
           )}
