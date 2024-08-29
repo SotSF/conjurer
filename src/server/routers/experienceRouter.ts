@@ -8,7 +8,7 @@ import {
 import { z } from "zod";
 
 export const experienceRouter = router({
-  getExperiences: publicProcedure
+  listExperiences: publicProcedure
     .input(
       z.object({
         user: z.string(),

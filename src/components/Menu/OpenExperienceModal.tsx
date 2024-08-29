@@ -24,7 +24,7 @@ export const OpenExperienceModal = observer(function OpenExperienceModal() {
     isPending,
     isError,
     data: experiences,
-  } = trpc.experience.getExperiences.useQuery(
+  } = trpc.experience.listExperiences.useQuery(
     { user },
     { enabled: uiStore.showingOpenExperienceModal }
   );
