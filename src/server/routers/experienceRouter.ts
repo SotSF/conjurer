@@ -16,6 +16,11 @@ export const experienceRouter = router({
     )
     .query(async ({ input }) => {
       let experienceFilenames: string[] = [];
+      // TODO:
+      // if (this.rootStore.usingLocalAssets) {
+      //   const response = await fetch("/api/experiences");
+      //   experienceFilenames = (await response.json()).experienceFilenames;
+
       const listObjectsCommand = new ListObjectsCommand({
         Bucket: ASSET_BUCKET_NAME,
         Prefix: EXPERIENCE_ASSET_PREFIX,
