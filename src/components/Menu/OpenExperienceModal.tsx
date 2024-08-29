@@ -15,10 +15,17 @@ import {
 import { useStore } from "@/src/types/StoreContext";
 import { useExperiences } from "@/src/hooks/experiences";
 import { action } from "mobx";
+import { trpc } from "@/src/utils/trpc";
 
 export const OpenExperienceModal = observer(function OpenExperienceModal() {
   const store = useStore();
   const { experienceStore, uiStore } = store;
+
+  const result = trpc.getAllExperiences.useQuery(undefined, {
+    enabled: uiStore.showingOpenExperienceModal,
+  });
+  console.log(result.status);
+  console.log(result.data);
 
   const { loading, experiences } = useExperiences(
     uiStore.showingOpenExperienceModal

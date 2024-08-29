@@ -56,11 +56,6 @@ const CanopyView = function CanopyView({
 
   const bufferGeometry = useMemo(() => {
     const geometry = new BufferGeometry();
-    console.log(
-      canopyGeometry.position.length +
-        canopyGeometry.uv.length +
-        canopyGeometry.normal.length
-    );
     geometry.setAttribute(
       "position",
       new BufferAttribute(new Float32Array(canopyGeometry.position), 3)
