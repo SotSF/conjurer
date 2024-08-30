@@ -1,6 +1,10 @@
 import * as fs from "fs";
 import { publicProcedure, router } from "@/src/server/trpc";
-import { ListObjectsCommand, PutObjectCommand } from "@aws-sdk/client-s3";
+import {
+  GetObjectCommand,
+  ListObjectsCommand,
+  PutObjectCommand,
+} from "@aws-sdk/client-s3";
 import {
   ASSET_BUCKET_NAME,
   EXPERIENCE_ASSET_PREFIX,
@@ -66,5 +70,38 @@ export const experienceRouter = router({
       });
 
       return getS3().send(putObjectCommand);
+    }),
+
+  loadExperience: publicProcedure
+    .input(
+      z.object({
+        experienceFilename: z.string(),
+        usingLocalAssets: z.boolean(),
+      })
+    )
+    .query(async ({ input }) => {
+      if (input.usingLocalAssets) {
+        const experience = fs
+          .readFileSync(
+            `${LOCAL_ASSET_PATH}${EXPERIENCE_ASSET_PREFIX}${input.experienceFilename}.json`
+          )
+          .toString();
+        return { experience };
+      }
+
+      const getObjectCommand = new GetObjectCommand({
+        Bucket: ASSET_BUCKET_NAME,
+        Key: `${EXPERIENCE_ASSET_PREFIX}${input.experienceFilename}.json`,
+        ResponseCacheControl: "no-store",
+      });
+
+      try {
+        const experienceData = await getS3().send(getObjectCommand);
+        const experienceString = await experienceData.Body?.transformToString();
+        return { experience: experienceString ?? "" };
+      } catch (err) {
+        console.log(err);
+        return { experience: "" };
+      }
     }),
 });

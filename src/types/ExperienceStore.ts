@@ -31,6 +31,8 @@ interface RootStore {
 }
 
 export class ExperienceStore {
+  experienceToLoad = "";
+
   constructor(readonly rootStore: RootStore) {
     makeAutoObservable(this);
   }
@@ -65,7 +67,7 @@ export class ExperienceStore {
   };
 
   loadFromString = (experienceString: string) => {
-    this.rootStore.deserialize(this.parseExperience(experienceString));
+    this.rootStore.deserialize(JSON.parse(experienceString));
   };
 
   loadEmptyExperience = () => {
@@ -91,8 +93,6 @@ export class ExperienceStore {
       val?.toFixed ? Number(val.toFixed(6)) : val
     );
 
-  parseExperience = (experience: string): any => JSON.parse(experience);
-
   copyToClipboard = () => {
     if (typeof window === "undefined") return;
     navigator.clipboard.writeText(this.stringifyExperience());
@@ -106,7 +106,6 @@ export class ExperienceStore {
   loadFromLocalStorage = (key: string) => {
     if (typeof window === "undefined") return;
     const experience = window.localStorage.getItem(key);
-    if (experience)
-      this.rootStore.deserialize(this.parseExperience(experience));
+    if (experience) this.loadFromString(experience);
   };
 }
