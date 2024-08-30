@@ -3,10 +3,8 @@ import {
   ASSET_BUCKET_REGION,
   AUDIO_ASSET_PREFIX,
   LOCAL_ASSET_DIRECTORY,
-  getS3,
 } from "@/src/utils/assets";
-import { ListObjectsCommand, PutObjectCommand } from "@aws-sdk/client-s3";
-import { makeAutoObservable, runInAction } from "mobx";
+import { makeAutoObservable } from "mobx";
 import type WaveSurfer from "wavesurfer.js";
 import type TimelinePlugin from "wavesurfer.js/dist/plugins/timeline";
 import type RegionsPlugin from "wavesurfer.js/dist/plugins/regions";
@@ -125,15 +123,6 @@ export class AudioStore {
     this.availableAudioFiles = await trpcClient.audio.listAudioFiles.query({
       usingLocalAssets: this.rootStore.usingLocalAssets,
     });
-  };
-
-  uploadAudioFile = async (file: File) => {
-    const putObjectCommand = new PutObjectCommand({
-      Bucket: ASSET_BUCKET_NAME,
-      Key: `${AUDIO_ASSET_PREFIX}${file.name}`,
-      Body: file,
-    });
-    return getS3().send(putObjectCommand);
   };
 
   // Timer relevant code - perhaps extract this to a separate file
