@@ -1,4 +1,4 @@
-import { httpBatchLink } from "@trpc/client";
+import { createTRPCClient, httpBatchLink } from "@trpc/client";
 import { createTRPCNext } from "@trpc/next";
 import type { AppRouter } from "../server/routers/_app";
 
@@ -19,18 +19,14 @@ function getBaseUrl() {
   return `http://localhost:${process.env.PORT ?? 3000}`;
 }
 
+// tRPC hooks for use in React components
 export const trpc = createTRPCNext<AppRouter>({
   config(opts) {
     return {
       links: [
         httpBatchLink({
-          /**
-           * If you want to use SSR, you need to use the server's full URL
-           * @link https://trpc.io/docs/v11/ssr
-           **/
           url: `${getBaseUrl()}/api/trpc`,
 
-          // You can pass any HTTP headers you wish here
           async headers() {
             return {
               // authorization: getAuthCookie(),
@@ -40,8 +36,21 @@ export const trpc = createTRPCNext<AppRouter>({
       ],
     };
   },
-  /**
-   * @link https://trpc.io/docs/v11/ssr
-   **/
+  // TODO: look into this https://trpc.io/docs/v11/ssr
   ssr: false,
+});
+
+// tRPC client for use in non-React code
+export const trpcClient = createTRPCClient<AppRouter>({
+  links: [
+    httpBatchLink({
+      url: `${getBaseUrl()}/api/trpc`,
+
+      async headers() {
+        return {
+          // authorization: getAuthCookie(),
+        };
+      },
+    }),
+  ],
 });

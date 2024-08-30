@@ -35,7 +35,7 @@ export const PlaylistItem = observer(function PlaylistItem({
   const [loadingExperience, setLoadingExperience] = useState(false);
   const onPlayClick = async () => {
     setLoadingExperience(true);
-    playlistStore.loadAndPlayExperience(experienceFilename);
+    await playlistStore.loadAndPlayExperience(experienceFilename);
     setLoadingExperience(false);
   };
   const onPauseClick = () => {
@@ -43,7 +43,7 @@ export const PlaylistItem = observer(function PlaylistItem({
   };
   const onSelect = async () => {
     setLoadingExperience(true);
-    experienceStore.load(experienceFilename);
+    await experienceStore.load(experienceFilename);
     setLoadingExperience(false);
   };
 

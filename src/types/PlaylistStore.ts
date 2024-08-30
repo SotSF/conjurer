@@ -56,7 +56,7 @@ export class PlaylistStore {
     this.experienceFilenames = experienceFilenames;
   };
 
-  loadAndPlayExperience = (experienceFilename: string) => {
+  loadAndPlayExperience = async (experienceFilename: string) => {
     this.rootStore.pause();
 
     if (this.rootStore.experienceFilename === experienceFilename) {
@@ -65,8 +65,8 @@ export class PlaylistStore {
       return;
     }
 
-    this.experienceStore.load(experienceFilename);
-    this.playExperienceWhenReady();
+    await this.experienceStore.load(experienceFilename);
+    await this.playExperienceWhenReady();
   };
 
   playExperienceWhenReady = () =>

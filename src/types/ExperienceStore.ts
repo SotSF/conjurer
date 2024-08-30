@@ -1,6 +1,8 @@
 import { makeAutoObservable } from "mobx";
 import initialExperience from "@/src/data/initialExperience.json";
 import emptyExperience from "@/src/data/emptyExperience.json";
+import { trpcClient } from "@/src/utils/trpc";
+import { extractPartsFromExperienceFilename } from "@/src/utils/experience";
 
 // Define a new RootStore interface here so that we avoid circular dependencies
 interface RootStore {
@@ -13,14 +15,22 @@ interface RootStore {
 }
 
 export class ExperienceStore {
-  experienceToLoad = "";
-
   constructor(readonly rootStore: RootStore) {
     makeAutoObservable(this);
   }
 
-  load = (experienceFilename: string) => {
-    this.experienceToLoad = experienceFilename;
+  load = async (experienceFilename: string) => {
+    const { experience } = await trpcClient.experience.loadExperience.query({
+      experienceFilename,
+      usingLocalAssets: this.rootStore.usingLocalAssets,
+    });
+
+    const { user, experienceName } =
+      extractPartsFromExperienceFilename(experienceFilename);
+    this.rootStore.user = user;
+    this.rootStore.experienceName = experienceName;
+    this.rootStore.experienceLastSavedAt = Date.now();
+    this.loadFromString(experience);
   };
 
   loadFromString = (experienceString: string) => {

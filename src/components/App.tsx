@@ -8,7 +8,6 @@ import { KeyboardControls } from "@/src/components/KeyboardControls";
 import { AddPatternButton } from "@/src/components/AddPatternButton";
 import { PlaylistDrawer } from "@/src/components/PlaylistDrawer";
 import { PatternDrawer } from "@/src/components/PatternDrawer";
-import { ExperienceLoader } from "@/src/components/ExperienceLoader";
 
 export const App = observer(function App() {
   const store = useStore();
@@ -44,7 +43,6 @@ export const App = observer(function App() {
 
   return (
     <Box position="relative" w="100vw" h="100vh">
-      <ExperienceLoader />
       <KeyboardControls editMode />
       <PatternDrawer />
       <PlaylistDrawer />
