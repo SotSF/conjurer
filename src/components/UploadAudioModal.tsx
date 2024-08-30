@@ -76,7 +76,7 @@ export const UploadAudioModal = observer(function UploadAudioModal() {
                   ...styles,
                 },
               }}
-              onChange={(e) => {
+              onChange={() => {
                 if (!inputRef.current?.files?.length) return;
                 setAudioFilename(inputRef.current?.files[0]?.name);
               }}

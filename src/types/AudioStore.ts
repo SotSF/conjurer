@@ -14,6 +14,7 @@ import type MinimapPlugin from "wavesurfer.js/dist/plugins/minimap";
 import type { RegionParams } from "wavesurfer.js/dist/plugins/regions";
 import { filterData } from "@/src/types/audioPeaks";
 import { AudioRegion } from "@/src/types/AudioRegion";
+import { trpcClient } from "@/src/utils/trpc";
 
 export const loopRegionColor = "rgba(237, 137, 54, 0.4)";
 
@@ -121,27 +122,8 @@ export class AudioStore {
     if (this.audioInitialized && !forceReload) return;
     this.audioInitialized = true;
 
-    if (this.rootStore.usingLocalAssets) {
-      const response = await fetch("/api/audio");
-      const { audioFilenames } = await response.json();
-      runInAction(() => {
-        this.availableAudioFiles = audioFilenames;
-      });
-      return;
-    }
-
-    const listObjectsCommand = new ListObjectsCommand({
-      Bucket: ASSET_BUCKET_NAME,
-      Prefix: AUDIO_ASSET_PREFIX,
-    });
-    const data = await getS3().send(listObjectsCommand);
-
-    runInAction(() => {
-      this.availableAudioFiles = [];
-      data.Contents?.forEach((object) => {
-        const audioFile = object.Key?.split("/")[1];
-        if (audioFile) this.availableAudioFiles.push(audioFile);
-      });
+    this.availableAudioFiles = await trpcClient.audio.listAudioFiles.query({
+      usingLocalAssets: this.rootStore.usingLocalAssets,
     });
   };
 
