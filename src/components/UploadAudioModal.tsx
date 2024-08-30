@@ -12,11 +12,9 @@ export const UploadAudioModal = observer(function UploadAudioModal() {
   const store = useStore();
   const { uiStore } = store;
 
-  const onClose = action(() => (uiStore.showingUploadAudioModal = false));
-
   return (
     <Modal
-      onClose={onClose}
+      onClose={action(() => (uiStore.showingUploadAudioModal = false))}
       isOpen={uiStore.showingUploadAudioModal}
       isCentered
     >
