@@ -72,7 +72,7 @@ export const experienceRouter = router({
       return getS3().send(putObjectCommand);
     }),
 
-  loadExperience: publicProcedure
+  getExperience: publicProcedure
     .input(
       z.object({
         experienceFilename: z.string(),

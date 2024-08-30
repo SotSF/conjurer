@@ -1,12 +1,10 @@
-import { action, makeAutoObservable, runInAction } from "mobx";
+import { makeAutoObservable, runInAction } from "mobx";
 import initialPlaylist from "@/src/data/initialPlaylist.json";
 import { ExperienceStore } from "@/src/types/ExperienceStore";
 import { AudioStore } from "@/src/types/AudioStore";
 
 // Define a new RootStore interface here so that we avoid circular dependencies
 interface RootStore {
-  user: string;
-  experienceName: string;
   experienceFilename: string;
   play: () => void;
   pause: () => void;

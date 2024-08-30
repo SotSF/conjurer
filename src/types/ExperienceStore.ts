@@ -20,7 +20,7 @@ export class ExperienceStore {
   }
 
   load = async (experienceFilename: string) => {
-    const { experience } = await trpcClient.experience.loadExperience.query({
+    const { experience } = await trpcClient.experience.getExperience.query({
       experienceFilename,
       usingLocalAssets: this.rootStore.usingLocalAssets,
     });
