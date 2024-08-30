@@ -18,16 +18,7 @@ import {
 import { useStore } from "@/src/types/StoreContext";
 import { useEffect, useRef, useState } from "react";
 import { action } from "mobx";
-import { PutObjectCommand } from "@aws-sdk/client-s3";
-import {
-  ASSET_BUCKET_NAME,
-  BEAT_MAP_ASSET_PREFIX,
-  getS3,
-} from "@/src/utils/assets";
 import { trpc } from "@/src/utils/trpc";
-
-// For reference:
-// beatMapFilename = `${beatMapName}.json`
 
 export const SaveBeatMapModal = observer(function SaveBeatMapModal() {
   const store = useStore();
@@ -56,34 +47,12 @@ export const SaveBeatMapModal = observer(function SaveBeatMapModal() {
 
   const onClose = action(() => (uiStore.showingSaveBeatMapModal = false));
 
-  const saveBeatMap = async (beatMapFilename: string) => {
-    if (store.usingLocalAssets) {
-      fetch(`/api/beat-maps/${beatMapFilename}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ beatMap: beatMapStore.serialize() }),
-      });
-      return;
-    }
-
-    const putObjectCommand = new PutObjectCommand({
-      Bucket: ASSET_BUCKET_NAME,
-      Key: `${BEAT_MAP_ASSET_PREFIX}${beatMapFilename}.json`,
-      Body: JSON.stringify(beatMapStore.beatMap.serialize()),
-    });
-
-    return getS3().send(putObjectCommand);
-  };
-
-  const onSaveBeatMap = async () => {
+  const onSaveBeatMap = action(async () => {
     setSaving(true);
-
-    await saveBeatMap(beatMapName);
+    await beatMapStore.save(beatMapName, beatMapStore.stringifyBeatMap());
     setSaving(false);
     onClose();
-  };
+  });
 
   const onBeatMapFilenameChange = (newValue: string) => {
     // sanitize file name for s3

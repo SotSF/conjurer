@@ -13,7 +13,7 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { useStore } from "@/src/types/StoreContext";
-import { action, runInAction } from "mobx";
+import { action } from "mobx";
 import { trpc } from "@/src/utils/trpc";
 
 export const LoadBeatMapModal = observer(function LoadBeatMapModal() {
@@ -33,11 +33,11 @@ export const LoadBeatMapModal = observer(function LoadBeatMapModal() {
 
   const onClose = action(() => (uiStore.showingLoadBeatMapModal = false));
 
-  const onOpenBeatMap = async (beatMapFilename: string) => {
+  const onOpenBeatMap = action(async (beatMapFilename: string) => {
     await beatMapStore.load(beatMapFilename);
-    runInAction(() => (uiStore.showingBeatGridOverlay = true));
+    uiStore.showingBeatGridOverlay = true;
     onClose();
-  };
+  });
 
   if (isError) return;
 

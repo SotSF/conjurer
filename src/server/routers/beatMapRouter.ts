@@ -1,6 +1,10 @@
 import * as fs from "fs";
 import { publicProcedure, router } from "@/src/server/trpc";
-import { GetObjectCommand, ListObjectsCommand } from "@aws-sdk/client-s3";
+import {
+  GetObjectCommand,
+  ListObjectsCommand,
+  PutObjectCommand,
+} from "@aws-sdk/client-s3";
 import {
   ASSET_BUCKET_NAME,
   BEAT_MAP_ASSET_PREFIX,
@@ -35,36 +39,10 @@ export const beatMapRouter = router({
       return beatMaps.filter((b) => !!b);
     }),
 
-  // saveExperience: publicProcedure
-  //   .input(
-  //     z.object({
-  //       experience: z.string(),
-  //       filename: z.string(),
-  //       usingLocalAssets: z.boolean(),
-  //     })
-  //   )
-  //   .mutation(async ({ input }) => {
-  //     if (input.usingLocalAssets) {
-  //       fs.writeFileSync(
-  //         `${LOCAL_ASSET_PATH}${EXPERIENCE_ASSET_PREFIX}${input.filename}.json`,
-  //         input.experience
-  //       );
-  //       return;
-  //     }
-
-  //     const putObjectCommand = new PutObjectCommand({
-  //       Bucket: ASSET_BUCKET_NAME,
-  //       Key: `${EXPERIENCE_ASSET_PREFIX}${input.filename}.json`,
-  //       Body: input.experience,
-  //     });
-
-  //     return getS3().send(putObjectCommand);
-  //   }),
-
   getBeatMap: publicProcedure
     .input(
       z.object({
-        beatMapFilename: z.string(),
+        beatMapName: z.string(),
         usingLocalAssets: z.boolean(),
       })
     )
@@ -73,7 +51,7 @@ export const beatMapRouter = router({
         // TODO: implement this
         const beatMap = fs
           .readFileSync(
-            `${LOCAL_ASSET_PATH}${BEAT_MAP_ASSET_PREFIX}${input.beatMapFilename}.json`
+            `${LOCAL_ASSET_PATH}${BEAT_MAP_ASSET_PREFIX}${input.beatMapName}.json`
           )
           .toString();
         return { beatMap };
@@ -81,7 +59,7 @@ export const beatMapRouter = router({
 
       const getObjectCommand = new GetObjectCommand({
         Bucket: ASSET_BUCKET_NAME,
-        Key: `${BEAT_MAP_ASSET_PREFIX}${input.beatMapFilename}.json`,
+        Key: `${BEAT_MAP_ASSET_PREFIX}${input.beatMapName}.json`,
         ResponseCacheControl: "no-store",
       });
 
@@ -93,5 +71,32 @@ export const beatMapRouter = router({
         console.log(err);
         return { beatMap: "" };
       }
+    }),
+
+  saveBeatMap: publicProcedure
+    .input(
+      z.object({
+        beatMap: z.string(),
+        beatMapName: z.string(),
+        usingLocalAssets: z.boolean(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      if (input.usingLocalAssets) {
+        // TODO: implement this
+        fs.writeFileSync(
+          `${LOCAL_ASSET_PATH}${BEAT_MAP_ASSET_PREFIX}${input.beatMapName}.json`,
+          input.beatMapName
+        );
+        return;
+      }
+
+      const putObjectCommand = new PutObjectCommand({
+        Bucket: ASSET_BUCKET_NAME,
+        Key: `${BEAT_MAP_ASSET_PREFIX}${input.beatMapName}.json`,
+        Body: input.beatMapName,
+      });
+
+      return getS3().send(putObjectCommand);
     }),
 });
