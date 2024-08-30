@@ -18,13 +18,13 @@ import {
 import { useStore } from "@/src/types/StoreContext";
 import { useEffect, useRef, useState } from "react";
 import { action } from "mobx";
-import { useBeatMaps } from "@/src/hooks/beatMap";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import {
   ASSET_BUCKET_NAME,
   BEAT_MAP_ASSET_PREFIX,
   getS3,
 } from "@/src/utils/assets";
+import { trpc } from "@/src/utils/trpc";
 
 // For reference:
 // beatMapFilename = `${beatMapName}.json`
@@ -33,7 +33,16 @@ export const SaveBeatMapModal = observer(function SaveBeatMapModal() {
   const store = useStore();
   const { audioStore, beatMapStore, uiStore } = store;
 
-  const { loading, beatMaps } = useBeatMaps(uiStore.showingSaveBeatMapModal);
+  const {
+    isPending,
+    isError,
+    data: beatMaps,
+  } = trpc.beatMap.listBeatMaps.useQuery(
+    {
+      usingLocalAssets: store.usingLocalAssets,
+    },
+    { enabled: uiStore.showingLoadBeatMapModal }
+  );
 
   const inputRef = useRef<HTMLInputElement>(null);
   const [saving, setSaving] = useState(false);
@@ -42,8 +51,8 @@ export const SaveBeatMapModal = observer(function SaveBeatMapModal() {
   const [beatMapName, setBeatMapName] = useState(selectedAudioName);
 
   useEffect(() => {
-    if (inputRef.current && !loading) inputRef.current.focus();
-  }, [loading]);
+    if (inputRef.current && !isPending) inputRef.current.focus();
+  }, [isPending]);
 
   const onClose = action(() => (uiStore.showingSaveBeatMapModal = false));
 
@@ -82,7 +91,11 @@ export const SaveBeatMapModal = observer(function SaveBeatMapModal() {
     setBeatMapName(newValue);
   };
 
-  const willOverwriteExistingBeatMap = beatMaps.includes(`${beatMapName}.json`);
+  if (isError) return;
+
+  const willOverwriteExistingBeatMap = beatMaps?.includes(
+    `${beatMapName}.json`
+  );
 
   return (
     <Modal
@@ -95,7 +108,7 @@ export const SaveBeatMapModal = observer(function SaveBeatMapModal() {
         <ModalHeader>Save beat map as...</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          {loading ? (
+          {isPending ? (
             <Spinner />
           ) : (
             <>

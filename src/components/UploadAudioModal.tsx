@@ -4,6 +4,7 @@ import { useStore } from "@/src/types/StoreContext";
 import { action } from "mobx";
 import { lazy, Suspense } from "react";
 
+// lazy load to keep the S3 client out of the initial bundle
 const UploadAudioModalContent = lazy(
   () => import("@/src/components/UploadAudioModalContent")
 );

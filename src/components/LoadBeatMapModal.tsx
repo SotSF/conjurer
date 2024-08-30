@@ -14,13 +14,22 @@ import {
 } from "@chakra-ui/react";
 import { useStore } from "@/src/types/StoreContext";
 import { action, runInAction } from "mobx";
-import { useBeatMaps } from "@/src/hooks/beatMap";
+import { trpc } from "@/src/utils/trpc";
 
 export const LoadBeatMapModal = observer(function LoadBeatMapModal() {
   const store = useStore();
   const { beatMapStore, uiStore } = store;
 
-  const { loading, beatMaps } = useBeatMaps(uiStore.showingLoadBeatMapModal);
+  const {
+    isPending,
+    isError,
+    data: beatMaps,
+  } = trpc.beatMap.listBeatMaps.useQuery(
+    {
+      usingLocalAssets: store.usingLocalAssets,
+    },
+    { enabled: uiStore.showingLoadBeatMapModal }
+  );
 
   const onClose = action(() => (uiStore.showingLoadBeatMapModal = false));
 
@@ -29,6 +38,8 @@ export const LoadBeatMapModal = observer(function LoadBeatMapModal() {
     runInAction(() => (uiStore.showingBeatGridOverlay = true));
     onClose();
   };
+
+  if (isError) return;
 
   return (
     <Modal
@@ -41,7 +52,7 @@ export const LoadBeatMapModal = observer(function LoadBeatMapModal() {
         <ModalHeader>Open beat map</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          {loading ? (
+          {isPending ? (
             <Spinner />
           ) : (
             <>
