@@ -1,4 +1,4 @@
-import { makeAutoObservable, runInAction } from "mobx";
+import { action, makeAutoObservable, runInAction } from "mobx";
 import initialPlaylist from "@/src/data/initialPlaylist.json";
 import { ExperienceStore } from "@/src/types/ExperienceStore";
 import { AudioStore } from "@/src/types/AudioStore";
@@ -56,11 +56,7 @@ export class PlaylistStore {
     this.experienceFilenames = experienceFilenames;
   };
 
-  loadExperience = async (experienceFilename: string) => {
-    await this.experienceStore.load(experienceFilename);
-  };
-
-  loadAndPlayExperience = async (experienceFilename: string) => {
+  loadAndPlayExperience = (experienceFilename: string) => {
     this.rootStore.pause();
 
     if (this.rootStore.experienceFilename === experienceFilename) {
@@ -69,8 +65,8 @@ export class PlaylistStore {
       return;
     }
 
-    await this.loadExperience(experienceFilename);
-    await this.playExperienceWhenReady();
+    this.experienceStore.load(experienceFilename);
+    this.playExperienceWhenReady();
   };
 
   playExperienceWhenReady = () =>

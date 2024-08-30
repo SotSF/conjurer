@@ -13,10 +13,7 @@ import { FaPause, FaPlay, FaTrashAlt } from "react-icons/fa";
 import { useState } from "react";
 import { useStore } from "@/src/types/StoreContext";
 import { observer } from "mobx-react-lite";
-import {
-  extractExperienceNameFromFileName,
-  extractUserFromFilename,
-} from "@/src/types/ExperienceStore";
+import { extractPartsFromExperienceFilename } from "@/src/utils/experience";
 
 type PlaylistItemControlsProps = {
   experienceFilename: string;
@@ -32,13 +29,13 @@ export const PlaylistItem = observer(function PlaylistItem({
   editable,
 }: PlaylistItemControlsProps) {
   const store = useStore();
-  const { playlistStore } = store;
+  const { experienceStore, playlistStore } = store;
 
   const [mousingOver, setMousingOver] = useState(false);
   const [loadingExperience, setLoadingExperience] = useState(false);
   const onPlayClick = async () => {
     setLoadingExperience(true);
-    await playlistStore.loadAndPlayExperience(experienceFilename);
+    playlistStore.loadAndPlayExperience(experienceFilename);
     setLoadingExperience(false);
   };
   const onPauseClick = () => {
@@ -46,7 +43,7 @@ export const PlaylistItem = observer(function PlaylistItem({
   };
   const onSelect = async () => {
     setLoadingExperience(true);
-    await playlistStore.loadExperience(experienceFilename);
+    experienceStore.load(experienceFilename);
     setLoadingExperience(false);
   };
 
@@ -59,6 +56,9 @@ export const PlaylistItem = observer(function PlaylistItem({
     _hover: { textDecoration: "underline" },
     onClick: onSelect,
   };
+
+  const { user, experienceName } =
+    extractPartsFromExperienceFilename(experienceFilename);
 
   return (
     <>
@@ -108,15 +108,11 @@ export const PlaylistItem = observer(function PlaylistItem({
       </Td>
 
       <Td>
-        <Text {...textProps}>
-          {extractUserFromFilename(experienceFilename)}
-        </Text>
+        <Text {...textProps}>{user}</Text>
       </Td>
 
       <Td>
-        <Text {...textProps}>
-          {extractExperienceNameFromFileName(experienceFilename)}
-        </Text>
+        <Text {...textProps}>{experienceName}</Text>
       </Td>
 
       <Td px={0}>

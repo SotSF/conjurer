@@ -31,10 +31,6 @@ export const OpenExperienceModal = observer(function OpenExperienceModal() {
 
   const onClose = action(() => (uiStore.showingOpenExperienceModal = false));
 
-  const onOpenExperience = action(
-    (experience: string) => (experienceStore.experienceToLoad = experience)
-  );
-
   if (isError) return null;
 
   return (
@@ -60,7 +56,7 @@ export const OpenExperienceModal = observer(function OpenExperienceModal() {
                   key={experience}
                   variant="ghost"
                   onClick={action(() => {
-                    onOpenExperience(experience);
+                    experienceStore.load(experience);
                     onClose();
                   })}
                 >
