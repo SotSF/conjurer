@@ -8,10 +8,10 @@ import {
 import {
   ASSET_BUCKET_NAME,
   BEAT_MAP_ASSET_PREFIX,
-  getS3,
   LOCAL_ASSET_PATH,
 } from "@/src/utils/assets";
 import { z } from "zod";
+import { getS3 } from "@/src/utils/s3";
 
 export const beatMapRouter = router({
   listBeatMaps: publicProcedure

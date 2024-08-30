@@ -5,9 +5,9 @@ import { ListObjectsCommand } from "@aws-sdk/client-s3";
 import {
   ASSET_BUCKET_NAME,
   AUDIO_ASSET_PREFIX,
-  getS3,
   LOCAL_ASSET_PATH,
 } from "@/src/utils/assets";
+import { getS3 } from "@/src/utils/s3";
 
 export const audioRouter = router({
   listAudioFiles: publicProcedure

@@ -1,8 +1,5 @@
-import {
-  ASSET_BUCKET_NAME,
-  AUDIO_ASSET_PREFIX,
-  getS3,
-} from "@/src/utils/assets";
+import { ASSET_BUCKET_NAME, AUDIO_ASSET_PREFIX } from "@/src/utils/assets";
+import { getS3 } from "@/src/utils/s3";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 
 export const uploadAudioFile = async (file: File) => {
