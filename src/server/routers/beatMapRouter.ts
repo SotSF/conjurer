@@ -94,7 +94,7 @@ export const beatMapRouter = router({
       const putObjectCommand = new PutObjectCommand({
         Bucket: ASSET_BUCKET_NAME,
         Key: `${BEAT_MAP_ASSET_PREFIX}${input.beatMapName}.json`,
-        Body: input.beatMapName,
+        Body: input.beatMap,
       });
 
       return getS3().send(putObjectCommand);

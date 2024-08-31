@@ -38,6 +38,7 @@ export class BeatMapStore {
       beatMapName,
       usingLocalAssets: this.rootStore.usingLocalAssets,
     });
+
   stringifyBeatMap = () => JSON.stringify(this.beatMap.serialize());
 
   loadFromString = (beatMapString: string) => {
