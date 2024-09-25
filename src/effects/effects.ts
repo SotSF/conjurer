@@ -4,6 +4,7 @@ import { ColorTint } from "@/src/effects/ColorTint";
 import { Shaper } from "@/src/effects/Shaper";
 import { Leaf } from "@/src/effects/Leaf";
 import { Rotate } from "./Rotate";
+import { RotateRing } from "./RotateRing";
 import { ChromaticAberration } from "./ChromaticAberration";
 import { Tiler } from "@/src/effects/Tiler";
 import { CloudsMask } from "@/src/effects/CloudsMask";
@@ -21,6 +22,7 @@ const effectFactories: Array<() => Pattern> = [
   ColorTint,
   CartesianProjection,
   Rotate,
+  RotateRing,
   ChromaticAberration,
   CloudsMask,
   ConstructMask,
