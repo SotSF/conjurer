@@ -7,6 +7,8 @@ export const useSaveExperience = () => {
   const { experienceStore, user, experienceName, usingLocalAssets } = store;
   const saveExperienceMutation = trpc.experience.saveExperience.useMutation();
 
+  const utils = trpc.useUtils();
+
   const saveExperience = action(async () => {
     store.experienceLastSavedAt = Date.now();
     const filename = `${user}-${experienceName || "untitled"}`;
@@ -15,6 +17,9 @@ export const useSaveExperience = () => {
       experience: experienceStore.stringifyExperience(),
       filename,
     });
+    // TODO: make this actually work...
+    utils.invalidate(undefined);
+    // utils.invalidate(undefined, { queryKey: ["experience"] });
   });
 
   return { saveExperience };
