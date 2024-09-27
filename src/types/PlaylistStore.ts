@@ -5,8 +5,6 @@ import { AudioStore } from "@/src/types/AudioStore";
 
 // Define a new RootStore interface here so that we avoid circular dependencies
 interface RootStore {
-  user: string;
-  experienceName: string;
   experienceFilename: string;
   play: () => void;
   pause: () => void;
@@ -56,10 +54,6 @@ export class PlaylistStore {
     this.experienceFilenames = experienceFilenames;
   };
 
-  loadExperience = async (experienceFilename: string) => {
-    await this.experienceStore.load(experienceFilename);
-  };
-
   loadAndPlayExperience = async (experienceFilename: string) => {
     this.rootStore.pause();
 
@@ -69,7 +63,7 @@ export class PlaylistStore {
       return;
     }
 
-    await this.loadExperience(experienceFilename);
+    await this.experienceStore.load(experienceFilename);
     await this.playExperienceWhenReady();
   };
 

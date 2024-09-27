@@ -3,10 +3,8 @@ import {
   ASSET_BUCKET_REGION,
   AUDIO_ASSET_PREFIX,
   LOCAL_ASSET_DIRECTORY,
-  getS3,
 } from "@/src/utils/assets";
-import { ListObjectsCommand, PutObjectCommand } from "@aws-sdk/client-s3";
-import { makeAutoObservable, runInAction } from "mobx";
+import { makeAutoObservable } from "mobx";
 import type WaveSurfer from "wavesurfer.js";
 import type TimelinePlugin from "wavesurfer.js/dist/plugins/timeline";
 import type RegionsPlugin from "wavesurfer.js/dist/plugins/regions";
@@ -14,6 +12,7 @@ import type MinimapPlugin from "wavesurfer.js/dist/plugins/minimap";
 import type { RegionParams } from "wavesurfer.js/dist/plugins/regions";
 import { filterData } from "@/src/types/audioPeaks";
 import { AudioRegion } from "@/src/types/AudioRegion";
+import { trpcClient } from "@/src/utils/trpc";
 
 export const loopRegionColor = "rgba(237, 137, 54, 0.4)";
 
@@ -121,37 +120,9 @@ export class AudioStore {
     if (this.audioInitialized && !forceReload) return;
     this.audioInitialized = true;
 
-    if (this.rootStore.usingLocalAssets) {
-      const response = await fetch("/api/audio");
-      const { audioFilenames } = await response.json();
-      runInAction(() => {
-        this.availableAudioFiles = audioFilenames;
-      });
-      return;
-    }
-
-    const listObjectsCommand = new ListObjectsCommand({
-      Bucket: ASSET_BUCKET_NAME,
-      Prefix: AUDIO_ASSET_PREFIX,
+    this.availableAudioFiles = await trpcClient.audio.listAudioFiles.query({
+      usingLocalAssets: this.rootStore.usingLocalAssets,
     });
-    const data = await getS3().send(listObjectsCommand);
-
-    runInAction(() => {
-      this.availableAudioFiles = [];
-      data.Contents?.forEach((object) => {
-        const audioFile = object.Key?.split("/")[1];
-        if (audioFile) this.availableAudioFiles.push(audioFile);
-      });
-    });
-  };
-
-  uploadAudioFile = async (file: File) => {
-    const putObjectCommand = new PutObjectCommand({
-      Bucket: ASSET_BUCKET_NAME,
-      Key: `${AUDIO_ASSET_PREFIX}${file.name}`,
-      Body: file,
-    });
-    return getS3().send(putObjectCommand);
   };
 
   // Timer relevant code - perhaps extract this to a separate file

@@ -1,3 +1,4 @@
+import { useSaveExperience } from "@/src/hooks/experience";
 import { useStore } from "@/src/types/StoreContext";
 import { action } from "mobx";
 import { observer } from "mobx-react-lite";
@@ -13,13 +14,15 @@ export const KeyboardControls = observer(function KeyboardControls({
   const store = useStore();
   const { uiStore, experienceStore, audioStore } = store;
 
+  const { saveExperience } = useSaveExperience();
+
   useEffect(() => {
     const handleKeyDown = action((e: KeyboardEvent) => {
       if (editMode && e.key === "s" && e.shiftKey && (e.ctrlKey || e.metaKey)) {
-        uiStore.showingSaveExperienceModal = true;
+        uiStore.attemptShowSaveExperienceModal();
         e.preventDefault();
       } else if (editMode && e.key === "s" && (e.ctrlKey || e.metaKey)) {
-        experienceStore.save();
+        saveExperience();
         e.preventDefault();
       } else if (editMode && e.key === "n" && (e.ctrlKey || e.metaKey)) {
         store.newExperience();
@@ -44,7 +47,7 @@ export const KeyboardControls = observer(function KeyboardControls({
         audioStore.skipForward();
         e.preventDefault();
       } else if (editMode && e.key === "o" && (e.ctrlKey || e.metaKey)) {
-        uiStore.showingOpenExperienceModal = true;
+        uiStore.attemptShowOpenExperienceModal();
         e.preventDefault();
       } else if (editMode && e.key === "a" && (e.ctrlKey || e.metaKey)) {
         store.selectAllBlocks();
@@ -92,7 +95,7 @@ export const KeyboardControls = observer(function KeyboardControls({
       window.removeEventListener("copy", handleCopy);
       window.removeEventListener("paste", handlePaste);
     };
-  }, [store, uiStore, experienceStore, audioStore, editMode]);
+  }, [store, uiStore, experienceStore, audioStore, editMode, saveExperience]);
 
   return null;
 });

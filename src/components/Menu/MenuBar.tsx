@@ -25,12 +25,14 @@ import { FiSave } from "react-icons/fi";
 import { useStore } from "@/src/types/StoreContext";
 import { OpenExperienceModal } from "@/src/components/Menu/OpenExperienceModal";
 import { SaveExperienceModal } from "@/src/components/Menu/SaveExperienceModal";
-import { action } from "mobx";
 import { KeyboardShortcuts } from "@/src/components/KeyboardShortcuts";
+import { useSaveExperience } from "@/src/hooks/experience";
 
 export const MenuBar = observer(function MenuBar() {
   const store = useStore();
   const { experienceStore, uiStore } = store;
+
+  const { saveExperience } = useSaveExperience();
 
   const {
     isOpen: isKeyboardShortcutsOpen,
@@ -75,10 +77,10 @@ export const MenuBar = observer(function MenuBar() {
       <HStack>
         <Heading
           size="md"
-          onClick={action(() => {
-            if (store.context !== "viewer")
-              uiStore.showingSaveExperienceModal = true;
-          })}
+          onClick={() =>
+            store.context !== "viewer" &&
+            uiStore.attemptShowSaveExperienceModal()
+          }
           cursor="pointer"
         >
           {store.experienceName}
@@ -118,7 +120,7 @@ export const MenuBar = observer(function MenuBar() {
                 <MenuItem
                   icon={<FaFile size={17} />}
                   command="⌘N"
-                  onClick={action(() => store.newExperience())}
+                  onClick={store.newExperience}
                 >
                   New experience
                 </MenuItem>
@@ -126,9 +128,7 @@ export const MenuBar = observer(function MenuBar() {
                 <MenuItem
                   icon={<FaFolderOpen size={17} />}
                   command="⌘O"
-                  onClick={action(() => {
-                    uiStore.showingOpenExperienceModal = true;
-                  })}
+                  onClick={uiStore.attemptShowOpenExperienceModal}
                 >
                   Open...
                 </MenuItem>
@@ -152,16 +152,14 @@ export const MenuBar = observer(function MenuBar() {
                 <MenuItem
                   icon={<FiSave size={17} />}
                   command="⌘S"
-                  onClick={experienceStore.save}
+                  onClick={saveExperience}
                 >
                   Save
                 </MenuItem>
                 <MenuItem
                   icon={<FiSave size={17} />}
                   command="⌘⇧S"
-                  onClick={action(() => {
-                    uiStore.showingSaveExperienceModal = true;
-                  })}
+                  onClick={uiStore.attemptShowSaveExperienceModal}
                 >
                   Save as...
                 </MenuItem>

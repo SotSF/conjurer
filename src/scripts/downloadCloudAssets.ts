@@ -1,4 +1,4 @@
-import { getS3 } from "../utils/assets";
+import { getS3 } from "../utils/s3";
 import {
   backupExperiences,
   downloadAudio,

@@ -38,7 +38,7 @@ export class Store {
 
   audioStore = new AudioStore(this);
   beatMapStore = new BeatMapStore(this);
-  uiStore = new UIStore(this.audioStore);
+  uiStore = new UIStore(this, this.audioStore);
   experienceStore = new ExperienceStore(this);
   playlistStore = new PlaylistStore(
     this,
@@ -179,10 +179,8 @@ export class Store {
     if (this.context === "viewer") {
       this.embeddedViewer =
         new URLSearchParams(window.location.search).get("embedded") === "true";
-      this.experienceStore.loadExperienceFromParams() ||
-        this.playlistStore.loadExperience(
-          this.playlistStore.experienceFilenames[0]
-        );
+      this.experienceStore.loadFromParams() ||
+        this.experienceStore.load(this.playlistStore.experienceFilenames[0]);
       this.uiStore.initialize(this.embeddedViewer);
       if (this.embeddedViewer) this.play();
       return;

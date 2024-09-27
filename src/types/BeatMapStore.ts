@@ -1,11 +1,6 @@
 import { makeAutoObservable } from "mobx";
 import { BeatMap } from "./BeatMap";
-import { GetObjectCommand } from "@aws-sdk/client-s3";
-import {
-  ASSET_BUCKET_NAME,
-  BEAT_MAP_ASSET_PREFIX,
-  getS3,
-} from "@/src/utils/assets";
+import { trpcClient } from "@/src/utils/trpc";
 
 const removeExtension = (filename: string) =>
   filename.substring(0, filename.lastIndexOf("."));
@@ -17,6 +12,8 @@ interface RootStore {
   deserialize: (data: any) => void;
 }
 
+// For reference:
+// beatMapFilename = `${beatMapName}.json`
 export class BeatMapStore {
   beatMap: BeatMap = new BeatMap(120, 0);
   selectedBeatMapName: string | null = null;
@@ -26,35 +23,23 @@ export class BeatMapStore {
   }
 
   load = async (beatMapFilename: string) => {
-    if (this.rootStore.usingLocalAssets) {
-      // TODO: implement this
-      const response = await fetch(`/api/beat-maps/${beatMapFilename}`);
-      const { beatMap } = await response.json();
-      // this.loadFromString(beatMap);
-      this.selectedBeatMapName = removeExtension(beatMapFilename);
-      return;
-    }
+    const beatMapName = removeExtension(beatMapFilename);
+    const { beatMap } = await trpcClient.beatMap.getBeatMap.query({
+      beatMapName,
+      usingLocalAssets: this.rootStore.usingLocalAssets,
+    });
+    this.loadFromString(beatMap);
+    this.selectedBeatMapName = beatMapName;
+  };
 
-    const getObjectCommand = new GetObjectCommand({
-      Bucket: ASSET_BUCKET_NAME,
-      Key: `${BEAT_MAP_ASSET_PREFIX}${beatMapFilename}`,
-      ResponseCacheControl: "no-store",
+  save = async (beatMapName: string, beatMap: string) =>
+    trpcClient.beatMap.saveBeatMap.mutate({
+      beatMap,
+      beatMapName,
+      usingLocalAssets: this.rootStore.usingLocalAssets,
     });
 
-    try {
-      const beatMapData = await getS3().send(getObjectCommand);
-      const beatMapString = await beatMapData.Body?.transformToString();
-      if (beatMapString) {
-        this.loadFromString(beatMapString);
-        console.log(beatMapString);
-        this.selectedBeatMapName = removeExtension(beatMapFilename);
-        console.log(this.selectedBeatMapName);
-        console.log(this.beatMap.tempo);
-      }
-    } catch (err) {
-      console.log(err);
-    }
-  };
+  stringifyBeatMap = () => JSON.stringify(this.beatMap.serialize());
 
   loadFromString = (beatMapString: string) => {
     this.beatMap.deserialize(JSON.parse(beatMapString));

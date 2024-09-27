@@ -7,26 +7,27 @@ import {
   ModalContent,
   ModalHeader,
   ModalOverlay,
+  Spinner,
   VStack,
 } from "@chakra-ui/react";
 import { useStore } from "@/src/types/StoreContext";
-import { useEffect, useState } from "react";
 import { action } from "mobx";
+import { trpc } from "@/src/utils/trpc";
 
 export const AddExperienceModal = observer(function AddExperienceModal() {
   const store = useStore();
-  const { uiStore, experienceStore, playlistStore } = store;
+  const { uiStore, playlistStore, usingLocalAssets } = store;
 
-  const [experienceFilenames, setExperienceFilenames] = useState<string[]>([]);
+  const {
+    isPending,
+    isError,
+    data: experiences,
+  } = trpc.experience.listExperiences.useQuery(
+    { user: "", usingLocalAssets },
+    { enabled: uiStore.showingPlaylistAddExperienceModal }
+  );
 
-  useEffect(() => {
-    const fetchAvailableExperiences = async () => {
-      setExperienceFilenames(
-        await experienceStore.fetchAvailableExperiences("")
-      );
-    };
-    fetchAvailableExperiences();
-  }, [experienceStore]);
+  if (isError) return null;
 
   const onClose = action(
     () => (uiStore.showingPlaylistAddExperienceModal = false)
@@ -40,18 +41,21 @@ export const AddExperienceModal = observer(function AddExperienceModal() {
     >
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>Add experience to playlist</ModalHeader>
+        <ModalHeader>
+          Add experience to playlist {isPending && <Spinner />}
+        </ModalHeader>
         <ModalBody>
           <VStack height="60vh" overflowY="scroll">
-            {experienceFilenames.map((experienceFilename) => (
-              <Button
-                key={experienceFilename}
-                variant="link"
-                onClick={() => playlistStore.addExperience(experienceFilename)}
-              >
-                {experienceFilename}
-              </Button>
-            ))}
+            {!isPending &&
+              experiences.map((experience) => (
+                <Button
+                  key={experience}
+                  variant="link"
+                  onClick={() => playlistStore.addExperience(experience)}
+                >
+                  {experience}
+                </Button>
+              ))}
           </VStack>
         </ModalBody>
         <ModalCloseButton />

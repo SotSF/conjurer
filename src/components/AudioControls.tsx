@@ -13,11 +13,7 @@ import { ImLoop } from "react-icons/im";
 import { useStore } from "@/src/types/StoreContext";
 import { action } from "mobx";
 import { useState } from "react";
-import { RxColumns } from "react-icons/rx";
-import { PiArrowsInLineHorizontalBold } from "react-icons/pi";
 import { AudioSelector } from "@/src/components/AudioSelector";
-import { LoadBeatMapModal } from "@/src/components/LoadBeatMapModal";
-import { RiFolderMusicLine } from "react-icons/ri";
 import { BeatMapControls } from "@/src/components/BeatMapControls";
 
 export const AudioControls = observer(function AudioControls() {

@@ -12,6 +12,7 @@ export type DisplayMode = "canopy" | "canopySpace" | "cartesianSpace" | "none";
 
 type RootStore = {
   context: string;
+  user: string;
 };
 
 /**
@@ -27,6 +28,7 @@ export class UIStore {
   showingBeatGridOverlay = false;
   snappingToBeatGrid = false;
   showingOpenExperienceModal = false;
+  showingUserPickerModal = false;
   showingSaveExperienceModal = false;
   showingUploadAudioModal = false;
   showingPaletteEditorModal = false;
@@ -36,7 +38,9 @@ export class UIStore {
   showingSaveBeatMapModal = false;
   showingLoadBeatMapModal = false;
 
-  _renderTargetSize = INITIAL_RENDER_TARGET_SIZE;
+  pendingAction: "open" | "save" | "" = "";
+
+  private _renderTargetSize = INITIAL_RENDER_TARGET_SIZE;
   get renderTargetSize() {
     return this._renderTargetSize;
   }
@@ -74,7 +78,7 @@ export class UIStore {
 
   pixelsPerSecond = INITIAL_PIXELS_PER_SECOND; // the zoom of the timeline
 
-  constructor(readonly audioStore: AudioStore) {
+  constructor(readonly rootStore: RootStore, readonly audioStore: AudioStore) {
     makeAutoObservable(this);
   }
 
@@ -127,6 +131,38 @@ export class UIStore {
 
   toggleSnappingToBeatGrid = () => {
     this.snappingToBeatGrid = !this.snappingToBeatGrid;
+  };
+
+  attemptShowOpenExperienceModal = () => {
+    if (!this.rootStore.user) {
+      this.showingUserPickerModal = true;
+      this.pendingAction = "open";
+      return;
+    }
+
+    this.showingOpenExperienceModal = true;
+  };
+
+  attemptShowSaveExperienceModal = () => {
+    if (!this.rootStore.user) {
+      this.showingUserPickerModal = true;
+      this.pendingAction = "save";
+      return;
+    }
+
+    this.showingSaveExperienceModal = true;
+  };
+
+  showPendingModal = () => {
+    switch (this.pendingAction) {
+      case "open":
+        this.showingOpenExperienceModal = true;
+        break;
+      case "save":
+        this.showingSaveExperienceModal = true;
+        break;
+    }
+    this.pendingAction = "";
   };
 
   nextRenderTextureSize = () => {

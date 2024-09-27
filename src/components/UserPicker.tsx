@@ -13,43 +13,58 @@ import {
   Spinner,
   Text,
   VStack,
-  useDisclosure,
 } from "@chakra-ui/react";
 import { FaUser } from "react-icons/fa";
 import { useStore } from "@/src/types/StoreContext";
 import { action } from "mobx";
 import { observer } from "mobx-react-lite";
-import { useExperiences } from "@/src/hooks/experiences";
+import { trpc } from "@/src/utils/trpc";
 
 export const UserPicker = observer(function UserPicker() {
   const store = useStore();
-
-  const { isOpen, onOpen, onClose } = useDisclosure({});
+  const { uiStore, user, usingLocalAssets } = store;
 
   const [newUser, setNewUser] = useState("");
 
-  const { loading, experiences } = useExperiences(true, false);
-  const usersWithDuplicates = experiences
+  const {
+    isPending,
+    isError,
+    data: experiences,
+  } = trpc.experience.listExperiences.useQuery(
+    { user: "", usingLocalAssets },
+    { enabled: uiStore.showingUserPickerModal }
+  );
+
+  const usersWithDuplicates = (experiences ?? [])
     .map((experience) => experience.split("-")[0] || "")
     .filter((user) => !!user);
   const users = Array.from(new Set(usersWithDuplicates));
 
+  const onClose = action(() => (uiStore.showingUserPickerModal = false));
+
+  if (isError) return null;
+
   return (
     <>
-      <Button variant="ghost" onClick={onOpen} leftIcon={<FaUser />} size="xs">
-        {store.user || "Log in"}
+      <Button
+        variant="ghost"
+        onClick={action(() => (uiStore.showingUserPickerModal = true))}
+        leftIcon={<FaUser />}
+        size="xs"
+      >
+        {user || "Log in"}
       </Button>
 
-      <Modal isOpen={isOpen} onClose={onClose}>
+      <Modal isOpen={uiStore.showingUserPickerModal} onClose={onClose}>
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>Time to &quot;log in&quot;</ModalHeader>
+          <ModalHeader>
+            Time to &quot;log in&quot; {isPending && <Spinner />}
+          </ModalHeader>
           <ModalCloseButton />
           <ModalBody>
             <VStack alignItems="center">
-              {loading ? (
-                <Spinner />
-              ) : (
+              {!isPending &&
                 users.map((user) => (
                   <Button
                     key={user}
@@ -57,14 +72,13 @@ export const UserPicker = observer(function UserPicker() {
                     width="100%"
                     onClick={action(() => {
                       store.user = user;
-                      store.uiStore.showingOpenExperienceModal = true;
+                      store.uiStore.showPendingModal();
                       onClose();
                     })}
                   >
                     {user}
                   </Button>
-                ))
-              )}
+                ))}
             </VStack>
 
             <Text my={4}>Click a name above or type a new name:</Text>
