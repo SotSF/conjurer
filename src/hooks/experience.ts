@@ -14,7 +14,7 @@ export const useSaveExperience = () => {
     const filename = `${user}-${experienceName || "untitled"}`;
     saveExperienceMutation.mutate({
       usingLocalAssets,
-      experience: experienceStore.stringifyExperience(),
+      experience: experienceStore.stringifyExperience(usingLocalAssets),
       filename,
     });
     // TODO: make this actually work...
