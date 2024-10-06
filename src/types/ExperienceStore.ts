@@ -54,15 +54,18 @@ export class ExperienceStore {
     return !!experience;
   };
 
-  stringifyExperience = (): string =>
-    JSON.stringify(this.rootStore.serialize(), (_, val) =>
-      // round numbers to 6 decimal places, which saves space and is probably enough precision
-      val?.toFixed ? Number(val.toFixed(6)) : val
+  stringifyExperience = (pretty: boolean = false): string =>
+    JSON.stringify(
+      this.rootStore.serialize(),
+      (_, val) =>
+        // round numbers to 6 decimal places, which saves space and is probably enough precision
+        val?.toFixed ? Number(val.toFixed(6)) : val,
+      pretty ? 2 : 0
     );
 
   copyToClipboard = () => {
     if (typeof window === "undefined") return;
-    navigator.clipboard.writeText(this.stringifyExperience());
+    navigator.clipboard.writeText(this.stringifyExperience(true));
   };
 
   saveToLocalStorage = (key: string) => {
