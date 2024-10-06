@@ -33,6 +33,7 @@ export type BlockOrVariation = BlockSelection | VariationSelection;
 
 export class Store {
   initializedClientSide = false;
+  version = 2;
 
   audioStore = new AudioStore(this);
   beatMapStore = new BeatMapStore(this);
@@ -476,7 +477,7 @@ export class Store {
     }
   };
 
-  serialize = (): Experience => ({
+  serialize = () => ({
     id: this.experienceId,
     name: this.experienceName,
     user: this.userStore.me!,
@@ -486,7 +487,7 @@ export class Store {
     data: { layers: this.layers.map((l) => l.serialize()) },
   });
 
-  deserialize = (experience: Experience) => {
+  deserialize = (data: any) => {
     this.experienceId = experience.id;
     this.experienceName = experience.name;
     this.audioStore.selectedSong = experience.song || NO_SONG;
@@ -495,7 +496,6 @@ export class Store {
     this.layers = experience.data.layers.map((l: any) =>
       Layer.deserialize(this, l),
     );
-
     // Select first layer
     this.selectedLayer = this.layers[0];
   };
