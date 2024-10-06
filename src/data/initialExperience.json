@@ -151,21 +151,7 @@
             }
           ]
         }
-      ],
-      "opacityBlock": {
-        "pattern": "Opacity",
-        "startTime": 0,
-        "duration": 3600,
-        "parameterVariations": {
-          "u_opacity": [
-            { "type": "flat", "duration": 41.8257, "value": 1 },
-            { "type": "linear", "duration": 8.8333, "from": 1, "to": 0 },
-            { "type": "flat", "duration": 122, "value": 1 },
-            { "type": "flat", "duration": 2, "value": 0.5 }
-          ]
-        },
-        "effectBlocks": []
-      }
+      ]
     },
     {
       "id": "90debf99b7c2e",
@@ -177,16 +163,7 @@
           "parameterVariations": {},
           "effectBlocks": []
         }
-      ],
-      "opacityBlock": {
-        "pattern": "Opacity",
-        "startTime": 0,
-        "duration": 3600,
-        "parameterVariations": {
-          "u_opacity": [{ "type": "flat", "duration": 9.8282, "value": 1 }]
-        },
-        "effectBlocks": []
-      }
+      ]
     }
   ],
   "user": "",

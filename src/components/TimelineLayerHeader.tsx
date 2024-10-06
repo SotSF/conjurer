@@ -1,7 +1,6 @@
 import { observer } from "mobx-react-lite";
 import { useStore } from "@/src/types/StoreContext";
 import {
-  Button,
   Editable,
   EditableInput,
   EditablePreview,
@@ -96,25 +95,6 @@ export const TimelineLayerHeader = observer(function TimelineLayerHeader({
           />
         )}
       </VStack>
-      <HStack justify="center" spacing={0}>
-        <Button
-          mb={2}
-          color={layer.showingOpacityControls ? "white" : "black"}
-          size="sm"
-          fontSize={11}
-          variant="ghost"
-          bgColor={layer.showingOpacityControls ? "blue.800" : "transparent"}
-          _hover={{
-            bgColor: layer.showingOpacityControls ? "blue.800" : "transparent",
-          }}
-          onClick={action((e) => {
-            layer.showingOpacityControls = !layer.showingOpacityControls;
-            e.stopPropagation();
-          })}
-        >
-          {layer.showingOpacityControls ? "Editing" : "Edit"} layer opacity
-        </Button>
-      </HStack>
     </VStack>
   );
 });
