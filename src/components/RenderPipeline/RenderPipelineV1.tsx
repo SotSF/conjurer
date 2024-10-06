@@ -1,9 +1,9 @@
-import { LayerNode } from "@/src/components/RenderPipeline/LayerNode";
 import { useStore } from "@/src/types/StoreContext";
 import { MergeNode } from "@/src/components/RenderPipeline/MergeNode";
 import { useRenderTarget } from "@/src/hooks/renderTarget";
 import { observer } from "mobx-react-lite";
 import { WebGLRenderTarget } from "three";
+import { BlockStackNode } from "./BlockStackNode";
 
 type Props = {
   renderTargetZ: WebGLRenderTarget;
@@ -47,10 +47,9 @@ export const RenderPipelineV1 = observer(function RenderPipeline({
   */
   if (activeLayers.length === 1) {
     return (
-      <LayerNode
-        key={activeLayers[0].id}
-        priority={0}
-        layer={activeLayers[0]}
+      <BlockStackNode
+        basePriority={0}
+        parentBlock={activeLayers[0].currentBlock}
         renderTargetIn={renderTargetA}
         renderTargetOut={renderTargetZ}
       />
@@ -59,10 +58,10 @@ export const RenderPipelineV1 = observer(function RenderPipeline({
     return (
       <>
         {activeLayers.map((layer, index) => (
-          <LayerNode
+          <BlockStackNode
             key={layer.id}
-            priority={index}
-            layer={layer}
+            basePriority={index * 100}
+            parentBlock={layer.currentBlock}
             renderTargetIn={index === 0 ? renderTargetA : renderTargetC}
             renderTargetOut={index === 0 ? renderTargetB : renderTargetD}
           />
