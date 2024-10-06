@@ -20,7 +20,6 @@ export class Layer {
 
   patternBlocks: Block[] = [];
   visible = true;
-  showingOpacityControls = false;
 
   height = 350;
 
