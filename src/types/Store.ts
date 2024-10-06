@@ -35,6 +35,7 @@ export type BlockOrVariation = BlockSelection | VariationSelection;
 
 export class Store {
   initializedClientSide = false;
+  version = 2;
 
   audioStore = new AudioStore(this);
   beatMapStore = new BeatMapStore(this);
@@ -506,6 +507,7 @@ export class Store {
   };
 
   serialize = () => ({
+    version: this.version,
     audioStore: this.audioStore.serialize(),
     beatMapStore: this.beatMapStore.serialize(),
     uiStore: this.uiStore.serialize(),
@@ -515,6 +517,7 @@ export class Store {
   });
 
   deserialize = (data: any) => {
+    this.version = data.version ?? 1;
     this.audioStore.deserialize(data.audioStore);
     this.beatMapStore.deserialize(data.beatMapStore);
     this.uiStore.deserialize(this, data.uiStore);
