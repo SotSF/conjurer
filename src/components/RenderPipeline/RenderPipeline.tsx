@@ -70,9 +70,7 @@ export const RenderPipeline = observer(function RenderPipeline({
         <MergeNode
           priority={1000}
           renderTargetIn1={renderTargetB}
-          opacity1={activeLayers[0].opacityParameter}
           renderTargetIn2={renderTargetD}
-          opacity2={activeLayers[1].opacityParameter}
           renderTargetOut={renderTargetZ}
         />
       )}

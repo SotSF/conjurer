@@ -7,7 +7,6 @@ import { Layer } from "@/src/types/Layer";
 import { action } from "mobx";
 import { useRef } from "react";
 import { TimelineLayerHeader } from "@/src/components/TimelineLayerHeader";
-import { LayerOpacityVariations } from "@/src/components/LayerOpacityVariations";
 
 type TimelineLayerProps = {
   index: number;
@@ -63,7 +62,6 @@ export const TimelineLayer = observer(function TimelineLayer({
           <TimelineBlockStack key={block.id} patternBlock={block} />
         ))}
       </Box>
-      <LayerOpacityVariations layer={layer} />
     </HStack>
   );
 });

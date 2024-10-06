@@ -19,12 +19,6 @@ export class Layer {
   name = "";
 
   patternBlocks: Block[] = [];
-  opacityBlock: Block<ExtraParams>;
-
-  get opacityParameter() {
-    return this.opacityBlock.pattern.params.u_opacity as PatternParam<number>;
-  }
-
   visible = true;
   showingOpacityControls = false;
 
@@ -61,7 +55,6 @@ export class Layer {
   }
 
   constructor(readonly store: RootStore) {
-    this.opacityBlock = new Block(store, Opacity());
     makeAutoObservable(this, {
       store: false,
       _lastComputedCurrentBlock: false, // don't make this observable, since it's just a cache
@@ -326,7 +319,6 @@ export class Layer {
     id: this.id,
     name: this.name,
     patternBlocks: this.patternBlocks.map((b) => b.serialize()),
-    opacityBlock: this.opacityBlock.serialize(),
   });
 
   static deserialize = (store: RootStore, data: any) => {
@@ -337,7 +329,6 @@ export class Layer {
       Block.deserialize(store, b)
     );
     layer.patternBlocks.forEach((b) => (b.layer = layer));
-    layer.opacityBlock = Block.deserialize(store, data.opacityBlock);
     return layer;
   };
 }

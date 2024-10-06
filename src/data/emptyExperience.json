@@ -7,29 +7,11 @@
   "layers": [
     {
       "id": "6bdeca3da54078",
-      "patternBlocks": [],
-      "opacityBlock": {
-        "pattern": "Opacity",
-        "startTime": 0,
-        "duration": 3600,
-        "parameterVariations": {
-          "u_opacity": []
-        },
-        "effectBlocks": []
-      }
+      "patternBlocks": []
     },
     {
       "id": "90debf99b7c2e",
-      "patternBlocks": [],
-      "opacityBlock": {
-        "pattern": "Opacity",
-        "startTime": 0,
-        "duration": 3600,
-        "parameterVariations": {
-          "u_opacity": []
-        },
-        "effectBlocks": []
-      }
+      "patternBlocks": []
     }
   ],
   "user": "",

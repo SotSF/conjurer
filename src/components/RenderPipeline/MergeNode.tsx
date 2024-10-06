@@ -8,29 +8,23 @@ import { makeVertexShader } from "@/src/shaders/vertexShader";
 type MergeNodeProps = {
   priority: number;
   renderTargetIn1: WebGLRenderTarget;
-  opacity1: PatternParam<number>;
   renderTargetIn2: WebGLRenderTarget;
-  opacity2: PatternParam<number>;
   renderTargetOut: WebGLRenderTarget;
 };
 
 export const MergeNode = memo(function MergeNode({
   priority,
   renderTargetIn1,
-  opacity1,
   renderTargetIn2,
-  opacity2,
   renderTargetOut,
 }: MergeNodeProps) {
   const mesh = useRef<THREE.Mesh>(null);
   const uniforms = useMemo(
     () => ({
-      u_alpha1: opacity1,
-      u_alpha2: opacity2,
       u_texture1: { value: renderTargetIn1.texture },
       u_texture2: { value: renderTargetIn2.texture },
     }),
-    [renderTargetIn1, opacity1, renderTargetIn2, opacity2]
+    [renderTargetIn1, renderTargetIn2]
   );
 
   useFrame(({ gl, camera }) => {
