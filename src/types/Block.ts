@@ -30,6 +30,7 @@ export type RootStore = {
   context: string;
   audioStore: {
     getPeakAtTime: (time: number) => number;
+    globalTime: number;
   };
 };
 
@@ -322,6 +323,11 @@ export class Block<T extends ExtraParams = {}> {
     if (index > -1) {
       this.effectBlocks.splice(index, 1);
     }
+  };
+
+  isActive = () => {
+    const { globalTime } = this.store.audioStore;
+    return this.startTime <= globalTime && globalTime < this.endTime;
   };
 
   /**
