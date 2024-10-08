@@ -10,6 +10,7 @@ export const useSaveExperience = () => {
   const utils = trpc.useUtils();
 
   const saveExperience = action(async () => {
+    store.hasSaved = true;
     store.experienceLastSavedAt = Date.now();
     const filename = `${user}-${experienceName || "untitled"}`;
     saveExperienceMutation.mutate({

@@ -85,7 +85,7 @@ export const MenuBar = observer(function MenuBar() {
         >
           {store.experienceName}
         </Heading>
-        {store.context !== "viewer" && (
+        {store.context !== "viewer" && store.hasSaved && (
           <Text fontSize="sm" color="gray.500" userSelect="none">
             {store.experienceLastSavedAt
               ? `last saved at ${Intl.DateTimeFormat("en", {

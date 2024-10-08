@@ -122,6 +122,7 @@ export class Store {
     return `${this.user}-${this.experienceName}`;
   }
 
+  hasSaved = false;
   experienceLastSavedAt = 0;
 
   get playing() {
@@ -220,6 +221,7 @@ export class Store {
   newExperience = () => {
     this.experienceStore.saveToLocalStorage("autosave");
     this.experienceName = "untitled";
+    this.hasSaved = false;
     this.experienceLastSavedAt = 0;
     this.experienceStore.loadEmptyExperience();
   };

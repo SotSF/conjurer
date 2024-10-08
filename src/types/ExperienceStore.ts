@@ -8,6 +8,7 @@ import { extractPartsFromExperienceFilename } from "@/src/utils/experience";
 interface RootStore {
   user: string;
   experienceName: string;
+  hasSaved: boolean;
   experienceLastSavedAt: number;
   usingLocalAssets: boolean;
   serialize: () => any;
@@ -29,6 +30,7 @@ export class ExperienceStore {
       extractPartsFromExperienceFilename(experienceFilename);
     this.rootStore.user = user;
     this.rootStore.experienceName = experienceName;
+    this.rootStore.hasSaved = false;
     this.rootStore.experienceLastSavedAt = Date.now();
     this.loadFromString(experience);
   };
