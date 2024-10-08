@@ -19,6 +19,8 @@ import { NO_SONG } from "@/src/types/Song";
 import { Context, Role } from "@/src/types/context";
 import "@/src/utils/mobx";
 import { UserStore } from "@/src/types/UserStore";
+import { LayerV1 } from "./Layer/LayerV1";
+import { LayerV2 } from "./Layer/LayerV2";
 
 export type BlockSelection = { type: "block"; block: Block };
 
@@ -262,7 +264,7 @@ export class Store {
 
   selectAllBlocks = () => {
     const allBlocks = this.layers
-      .flatMap((l) => l.patternBlocks)
+      .flatMap((l) => l.getAllBlocks())
       .map((block) => ({
         type: "block" as const,
         block,
@@ -369,7 +371,7 @@ export class Store {
       blocksToPaste.forEach((block) => block.regenerateId());
       this.selectedBlocksOrVariations = new Set();
       for (const blockToPaste of blocksToPaste) {
-        const nextGap = layerToPasteInto.nextFiniteGap(
+        const nextGap = layerToPasteInto.getNextValidStartAndDuration(
           this.audioStore.globalTime,
           blockToPaste.duration,
         );
@@ -417,7 +419,7 @@ export class Store {
       this.selectedBlocksOrVariations = new Set();
       for (const selectedBlock of selectedBlocks) {
         const newBlock = selectedBlock.clone();
-        const nextGap = layerToPasteInto.nextFiniteGap(
+        const nextGap = layerToPasteInto.getNextValidStartAndDuration(
           selectedBlock.endTime,
           selectedBlock.duration,
         );
@@ -487,15 +489,19 @@ export class Store {
     data: { layers: this.layers.map((l) => l.serialize()) },
   });
 
-  deserialize = (data: any) => {
+  deserialize = (experience: any) => {
     this.experienceId = experience.id;
     this.experienceName = experience.name;
     this.audioStore.selectedSong = experience.song || NO_SONG;
     this.experienceStatus = experience.status;
     this.experienceVersion = experience.version;
-    this.layers = experience.data.layers.map((l: any) =>
-      Layer.deserialize(this, l),
-    );
+
+    if (this.experienceVersion === 1) {
+      this.layers = experience.layers.map((l: any) => LayerV1.deserialize(this, l));
+    } else {
+      this.layers = experience.layers.map((l: any) => LayerV2.deserialize(this, l));
+    }
+
     // Select first layer
     this.selectedLayer = this.layers[0];
   };

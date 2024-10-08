@@ -4,6 +4,7 @@ import { useRenderTarget } from "@/src/hooks/renderTarget";
 import { observer } from "mobx-react-lite";
 import { WebGLRenderTarget } from "three";
 import { BlockStackNode } from "./BlockStackNode";
+import { LayerV1 } from "@/src/types/Layer/LayerV1";
 
 type Props = {
   renderTargetZ: WebGLRenderTarget;
@@ -20,9 +21,8 @@ export const RenderPipelineV1 = observer(function RenderPipeline({
   const renderTargetC = useRenderTarget();
   const renderTargetD = useRenderTarget();
 
-  const activeLayers = store.layers.filter(
-    (layer) => layer.visible && !!layer.currentBlock
-  );
+  const layers = store.layers as LayerV1[];
+  const activeLayers = layers.filter((l) => l.visible && !!l.currentBlock);
 
   /*
   Because this can all get pretty confusing and it's a custom rendering pipeline, here are the broad
