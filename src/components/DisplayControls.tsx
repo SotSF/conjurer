@@ -118,7 +118,11 @@ export const DisplayControls = observer(function DisplayControls({
         height={6}
         icon={<BsBagHeartFill size={15} />}
         onClick={async () => {
-          console.log(await trpcClient.getAllUsers.query());
+          console.log(
+            await trpcClient.getAllUsers.query({
+              usingLocalDatabase: store.usingLocalAssets,
+            })
+          );
         }}
       />
     </VStack>
