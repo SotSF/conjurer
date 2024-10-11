@@ -3,15 +3,26 @@ import { createClient } from "@libsql/client";
 import * as schema from "./schema";
 import fs from "fs";
 
-// Check if local database file exists
-if (!fs.existsSync("./local.db")) {
-  // TODO:
-  console.log("Local database file does not exist. Creating it now...");
-  fs.writeFileSync("./local.db", "");
-}
+export const localDatabaseNotFoundMessage =
+  "Local database file not found. Run `yarn db:download` to create it.";
 
-const client = createClient({
-  url: "file:./local.db",
-});
+export let localDB: ReturnType<typeof drizzle> | null = null;
 
-export const localDB = drizzle(client, { schema });
+export const connectToLocalDatabase = () => {
+  if (process.env.NODE_ENV === "production") return false;
+
+  if (!fs.existsSync("./local.db")) {
+    console.error(localDatabaseNotFoundMessage);
+    return false;
+  }
+
+  const client = createClient({
+    url: "file:./local.db",
+  });
+
+  localDB = drizzle(client, { schema });
+
+  return true;
+};
+
+connectToLocalDatabase();
