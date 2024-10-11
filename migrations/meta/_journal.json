@@ -8,6 +8,13 @@
       "when": 1728608989069,
       "tag": "0000_unique_genesis",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1728633538608,
+      "tag": "0001_late_warbound",
+      "breakpoints": true
     }
   ]
 }
