@@ -1,5 +1,6 @@
 import { cloudDB } from "@/src/db/cloud";
 import { localDB } from "@/src/db/local";
+import { TRPCClientError } from "@trpc/client";
 import { initTRPC } from "@trpc/server";
 import { z } from "zod";
 
@@ -16,10 +17,18 @@ export const withDatabaseProcedure = t.procedure
       usingLocalDatabase: z.boolean(),
     })
   )
-  .use(async (opts) =>
-    opts.next({
+  .use(async (opts) => {
+    // if in production and using local database, throw error
+    if (
+      process.env.NODE_ENV === "production" &&
+      opts.input.usingLocalDatabase
+    ) {
+      throw new TRPCClientError("Cannot use local database in production");
+    }
+
+    return opts.next({
       ctx: {
         db: opts.input.usingLocalDatabase ? localDB : cloudDB,
       },
-    })
-  );
+    });
+  });

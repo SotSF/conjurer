@@ -56,21 +56,23 @@ export const MainControls = observer(function MainControls() {
         onClick={action(() => uiStore.zoomOut(50))}
       />
       <SendDataButton />
-      <IconButton
-        aria-label="Use local assets"
-        title="Use local assets"
-        height={6}
-        bgColor={store.usingLocalAssets ? "orange.700" : undefined}
-        _hover={
-          store.usingLocalAssets
-            ? {
-                bgColor: "orange.600",
-              }
-            : undefined
-        }
-        icon={<GiDesert size={17} />}
-        onClick={store.toggleUsingLocalAssets}
-      />
+      {process.env.NODE_ENV !== "production" && (
+        <IconButton
+          aria-label="Use local assets"
+          title="Use local assets"
+          height={6}
+          bgColor={store.usingLocalAssets ? "orange.700" : undefined}
+          _hover={
+            store.usingLocalAssets
+              ? {
+                  bgColor: "orange.600",
+                }
+              : undefined
+          }
+          icon={<GiDesert size={17} />}
+          onClick={store.toggleUsingLocalAssets}
+        />
+      )}
       <IconButton
         aria-label="Keep playhead centered"
         title="Keep playhead centered"
