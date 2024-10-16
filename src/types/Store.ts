@@ -12,6 +12,8 @@ import { BeatMapStore } from "@/src/types/BeatMapStore";
 import { PlaygroundStore } from "@/src/types/PlaygroundStore";
 import { setupControllerWebsocket } from "@/src/websocket/controllerWebsocket";
 import { setupVoiceCommandWebsocket } from "@/src/websocket/voiceCommandWebsocket";
+import { LayerV1 } from "./Layer/LayerV1";
+import { LayerV2 } from "./Layer/LayerV2";
 
 // Enforce MobX strict mode, which can make many noisy console warnings, but can help use learn MobX better.
 // Feel free to comment out the following if you want to silence the console messages.
@@ -35,6 +37,7 @@ export type BlockOrVariation = BlockSelection | VariationSelection;
 
 export class Store {
   initializedClientSide = false;
+  version = 2;
 
   audioStore = new AudioStore(this);
   beatMapStore = new BeatMapStore(this);
@@ -292,7 +295,7 @@ export class Store {
 
   selectAllBlocks = () => {
     const allBlocks = this.layers
-      .flatMap((l) => l.patternBlocks)
+      .flatMap((l) => l.getAllBlocks())
       .map((block) => ({
         type: "block" as const,
         block,
@@ -399,7 +402,7 @@ export class Store {
       blocksToPaste.forEach((block) => block.regenerateId());
       this.selectedBlocksOrVariations = new Set();
       for (const blockToPaste of blocksToPaste) {
-        const nextGap = layerToPasteInto.nextFiniteGap(
+        const nextGap = layerToPasteInto.getNextValidStartAndDuration(
           this.audioStore.globalTime,
           blockToPaste.duration
         );
@@ -447,7 +450,7 @@ export class Store {
       this.selectedBlocksOrVariations = new Set();
       for (const selectedBlock of selectedBlocks) {
         const newBlock = selectedBlock.clone();
-        const nextGap = layerToPasteInto.nextFiniteGap(
+        const nextGap = layerToPasteInto.getNextValidStartAndDuration(
           selectedBlock.endTime,
           selectedBlock.duration
         );
@@ -508,6 +511,7 @@ export class Store {
   };
 
   serialize = () => ({
+    version: this.version,
     audioStore: this.audioStore.serialize(),
     beatMapStore: this.beatMapStore.serialize(),
     uiStore: this.uiStore.serialize(),
@@ -517,10 +521,17 @@ export class Store {
   });
 
   deserialize = (data: any) => {
+    this.version = data.version ?? 1;
     this.audioStore.deserialize(data.audioStore);
     this.beatMapStore.deserialize(data.beatMapStore);
     this.uiStore.deserialize(this, data.uiStore);
-    this.layers = data.layers.map((l: any) => Layer.deserialize(this, l));
+
+    if (this.version === 1) {
+      this.layers = data.layers.map((l: any) => LayerV1.deserialize(this, l));
+    } else {
+      this.layers = data.layers.map((l: any) => LayerV2.deserialize(this, l));
+    }
+
     this.selectedLayer = this.layers[0];
   };
 }

@@ -1,10 +1,9 @@
 import { Block } from "@/src/types/Block";
 import { binarySearchForBlockAtTime } from "@/src/utils/algorithm";
 import { DEFAULT_BLOCK_DURATION } from "@/src/utils/time";
-import { makeAutoObservable } from "mobx";
-import { Opacity } from "@/src/patterns/Opacity";
-import { ExtraParams, PatternParam } from "@/src/types/PatternParams";
+import { makeAutoObservable, observable } from "mobx";
 import { generateId } from "@/src/utils/id";
+import { Layer } from ".";
 
 type RootStore = {
   context: string;
@@ -14,16 +13,22 @@ type RootStore = {
   };
 };
 
-export class Layer {
-  id: string = generateId();
-  name = "";
+export type ActivePatternsWindow = {
+  startTime: number;
+  endTime: number;
+  patterns: string[];
+};
 
+export class LayerV1 extends Layer {
   patternBlocks: Block[] = [];
-  visible = true;
-
-  height = 350;
-
   _lastComputedCurrentBlock: Block | null = null;
+
+  constructor(readonly store: RootStore) {
+    super(store, {
+      // don't make this observable, since it's just a cache
+      _lastComputedCurrentBlock: false,
+    });
+  }
 
   // returns the block that the global time is inside of, or null if none
   // runs every frame, so we keep this performant with caching + a binary search
@@ -44,20 +49,6 @@ export class Layer {
     this._lastComputedCurrentBlock =
       this.patternBlocks[currentBlockIndex] ?? null;
     return this._lastComputedCurrentBlock;
-  }
-
-  get endTime() {
-    if (this.patternBlocks.length === 0) return 0;
-
-    const lastBlock = this.patternBlocks[this.patternBlocks.length - 1];
-    return lastBlock.endTime;
-  }
-
-  constructor(readonly store: RootStore) {
-    makeAutoObservable(this, {
-      store: false,
-      _lastComputedCurrentBlock: false, // don't make this observable, since it's just a cache
-    });
   }
 
   insertCloneOfBlock = (block: Block) => {
@@ -87,6 +78,10 @@ export class Layer {
     block.layer = null;
     this._lastComputedCurrentBlock = null;
   };
+
+  getAllBlocks(): Block[] {
+    return this.patternBlocks;
+  }
 
   /**
    * Changes a blocks starting time, and reorders it in the list of blocks
@@ -189,6 +184,10 @@ export class Layer {
         ? Math.min(gap.duration, maxDuration)
         : maxDuration,
     };
+  };
+
+  getNextValidStartAndDuration = (fromTime: number, maxDuration: number) => {
+    return this.nextFiniteGap(fromTime, maxDuration);
   };
 
   nearestValidStartTimeDelta = (block: Block, desiredDeltaTime: number) => {
@@ -321,7 +320,7 @@ export class Layer {
   });
 
   static deserialize = (store: RootStore, data: any) => {
-    const layer = new Layer(store);
+    const layer = new LayerV1(store);
     if (data.id) layer.id = data.id;
     layer.name = data.name ?? "";
     layer.patternBlocks = data.patternBlocks.map((b: any) =>
