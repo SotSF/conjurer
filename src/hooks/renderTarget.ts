@@ -33,5 +33,5 @@ export const useRenderTargets = (
           height || renderTargetSize
         )
     );
-  }, [layer, width, height, renderTargetSize]);
+  }, [layer.maxConcurrentBlocks, width, height, renderTargetSize]);
 };

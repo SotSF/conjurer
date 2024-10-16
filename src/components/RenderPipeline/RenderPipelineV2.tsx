@@ -27,20 +27,19 @@ type LayerNodeProps = {
 const LayerNode = observer(({ layer, destinationTarget }: LayerNodeProps) => {
   const renderTargets = useRenderTargets(layer);
   const blocks = layer.activeBlocks;
-  const index = 0;
   return (
     <>
       {blocks.map((block, i) => (
         <BlockStackNode
           key={block.id}
-          basePriority={index * 100}
+          basePriority={i * 100}
           parentBlock={block}
           renderTargetIn={renderTargets[0]}
           renderTargetOut={renderTargets[i + 1]}
         />
       ))}
       <MergeNodes
-        inputs={renderTargets}
+        inputs={renderTargets.slice(1, blocks.length + 1)}
         destinationTarget={destinationTarget}
       />
     </>
@@ -62,7 +61,7 @@ const MergeNodes = observer(
       return (
         <MergeNode
           key={i}
-          priority={i}
+          priority={10_000 + i}
           renderTargetIn1={isEven ? pingTarget : pongTarget}
           renderTargetIn2={inputTarget}
           renderTargetOut={
