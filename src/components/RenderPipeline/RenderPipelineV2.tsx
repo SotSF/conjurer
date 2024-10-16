@@ -24,7 +24,7 @@ type LayerNodeProps = {
   destinationTarget: WebGLRenderTarget;
 };
 
-function LayerNode({ layer, destinationTarget }: LayerNodeProps) {
+const LayerNode = observer(({ layer, destinationTarget }: LayerNodeProps) => {
   const renderTargets = useRenderTargets(layer);
   const blocks = layer.activeBlocks;
   const index = 0;
@@ -45,30 +45,31 @@ function LayerNode({ layer, destinationTarget }: LayerNodeProps) {
       />
     </>
   );
-}
+});
 
-function MergeNodes({
-  inputs,
-  destinationTarget,
-}: {
+type MergeNodesProps = {
   inputs: WebGLRenderTarget[];
   destinationTarget: WebGLRenderTarget;
-}) {
-  const pingTarget = useRenderTarget();
-  const pongTarget = useRenderTarget();
-  return inputs.map((inputTarget, i) => {
-    const isEven = i % 2 === 0;
-    const isLast = i === inputs.length - 1;
-    return (
-      <MergeNode
-        key={i}
-        priority={i}
-        renderTargetIn1={isEven ? pingTarget : pongTarget}
-        renderTargetIn2={inputTarget}
-        renderTargetOut={
-          isLast ? destinationTarget : isEven ? pongTarget : pingTarget
-        }
-      />
-    );
-  });
-}
+};
+
+const MergeNodes = observer(
+  ({ inputs, destinationTarget }: MergeNodesProps) => {
+    const pingTarget = useRenderTarget();
+    const pongTarget = useRenderTarget();
+    return inputs.map((inputTarget, i) => {
+      const isEven = i % 2 === 0;
+      const isLast = i === inputs.length - 1;
+      return (
+        <MergeNode
+          key={i}
+          priority={i}
+          renderTargetIn1={isEven ? pingTarget : pongTarget}
+          renderTargetIn2={inputTarget}
+          renderTargetOut={
+            isLast ? destinationTarget : isEven ? pongTarget : pingTarget
+          }
+        />
+      );
+    });
+  }
+);
