@@ -5,28 +5,52 @@ import { generateId } from "@/src/utils/id";
 import { Layer } from ".";
 import { BlockMap } from "../BlockMap";
 
-export class LayerV2 extends Layer {
-  id: string = generateId();
+export class LayerV2 implements Layer {
+  id = generateId();
   name = "";
-
-  patternBlocks = new BlockMap();
+  height = 350;
   visible = true;
 
-  height = 350;
+  patternBlocks = new BlockMap();
 
-  _lastComputedCurrentBlock: Block | null = null;
+  _lastComputedWindowStartTime: number = -1;
   _maxConcurrentBlocks: number | null = null;
+  _activeBlocks: Block[] = [];
+
+  constructor(readonly store: RootStore) {
+    makeAutoObservable(this, {
+      store: false,
+      _lastComputedWindowStartTime: false,
+      _maxConcurrentBlocks: false,
+      _activeBlocks: false,
+    });
+  }
 
   get activeBlocks(): Block[] {
     const currentWindow = this.patternBlocks.getActivePatternsWindow(
       this.store.audioStore.globalTime
     );
 
-    if (!currentWindow) return [];
+    if (!currentWindow) {
+      if (this._lastComputedWindowStartTime !== -1) {
+        this._activeBlocks = [];
+        this._lastComputedWindowStartTime = -1;
+      }
+
+      return this._activeBlocks;
+    }
+
+    if (this._lastComputedWindowStartTime === currentWindow.startTime) {
+      return this._activeBlocks;
+    }
+
+    this._lastComputedWindowStartTime = currentWindow.startTime;
     const { patterns } = currentWindow;
-    return patterns
+    this._activeBlocks = patterns
       .map((patternId) => this.patternBlocks.map.get(patternId))
       .filter((b) => b !== undefined);
+
+    return this._activeBlocks;
   }
 
   get maxConcurrentBlocks() {
@@ -76,17 +100,11 @@ export class LayerV2 extends Layer {
    */
   changeBlockStartTime = (block: Block, newStartTime: number) => {
     block.startTime = newStartTime;
-    this.reorderBlock(block);
-  };
-
-  reorderBlock = (block: Block) => {
-    this.removeBlock(block);
-    this.addBlock(block);
   };
 
   attemptMoveBlock = (block: Block, desiredTime: number, relative = false) => {
     if (block.layer != this) return;
-    this.changeBlockStartTime(block, block.startTime);
+    block.startTime = desiredTime;
   };
 
   resizeBlockLeftBound = (block: Block, delta: number) => {

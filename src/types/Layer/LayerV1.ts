@@ -19,12 +19,19 @@ export type ActivePatternsWindow = {
   patterns: string[];
 };
 
-export class LayerV1 extends Layer {
+export class LayerV1 implements Layer {
+  id = generateId();
+  name = "";
+  height = 350;
+  visible = true;
+
   patternBlocks: Block[] = [];
   _lastComputedCurrentBlock: Block | null = null;
 
   constructor(readonly store: RootStore) {
-    super(store, {
+    makeAutoObservable(this, {
+      store: false,
+
       // don't make this observable, since it's just a cache
       _lastComputedCurrentBlock: false,
     });
