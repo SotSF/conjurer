@@ -61,9 +61,12 @@ export class BlockMap {
     const blocks = this.getAllBlocks();
     const patternStartTimes = blocks.map((b) => b.startTime);
     const patternEndTimes = blocks.map((b) => b.endTime);
-    const allTimes = [...patternStartTimes, ...patternEndTimes].sort();
-    const windows: ActivePatternsWindow[] = [];
+    const allTimes = new Float64Array([
+      ...patternStartTimes,
+      ...patternEndTimes,
+    ]).toSorted();
 
+    const windows: ActivePatternsWindow[] = [];
     for (let i = 0; i < allTimes.length - 1; i++) {
       const startTime = allTimes[i];
       const endTime = allTimes[i + 1];
