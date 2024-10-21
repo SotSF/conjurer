@@ -30,7 +30,7 @@ CREATE TABLE `songs` (
 	`updated_at` integer
 );
 --> statement-breakpoint
-CREATE UNIQUE INDEX `experience_author_index` ON `songs` (`artist`,`name`);--> statement-breakpoint
+CREATE UNIQUE INDEX `song_name_artist_index` ON `songs` (`artist`,`name`);--> statement-breakpoint
 CREATE TABLE `users` (
 	`id` integer PRIMARY KEY NOT NULL,
 	`username` text NOT NULL,

@@ -2,4 +2,4 @@
 [ -f local.db ] && rm local.db
 
 # Download the database from the server
-turso db shell test-db .dump | sqlite3 local.db
+turso db shell conjurer-db .dump | sqlite3 local.db

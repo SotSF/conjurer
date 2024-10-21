@@ -38,7 +38,7 @@ export const songsTable = sqliteTable(
     ),
   },
   (table) => ({
-    experienceAuthorIndex: uniqueIndex("experience_author_index").on(
+    songNameArtistIndex: uniqueIndex("song_name_artist_index").on(
       table.artist,
       table.name
     ),

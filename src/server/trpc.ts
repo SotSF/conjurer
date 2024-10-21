@@ -1,9 +1,5 @@
-import { cloudDB } from "@/src/db/cloud";
-import {
-  connectToLocalDatabase,
-  localDatabaseNotFoundMessage,
-  localDB,
-} from "@/src/db/local";
+import { getProdDatabase } from "@/src/db/prod";
+import { getLocalDatabase } from "@/src/db/local";
 import { TRPCClientError } from "@trpc/client";
 import { initTRPC } from "@trpc/server";
 import { z } from "zod";
@@ -24,17 +20,18 @@ export const withDatabaseProcedure = publicProcedure
   .use(async (opts) => {
     const { usingLocalDatabase } = opts.input;
 
-    if (!usingLocalDatabase) {
-      return opts.next({ ctx: { db: cloudDB } });
+    if (usingLocalDatabase && process.env.NODE_ENV === "production") {
+      throw new TRPCClientError("Local database cannot be used in production");
     }
 
-    if (process.env.NODE_ENV === "production") {
-      throw new TRPCClientError("Cannot use local database in production");
+    try {
+      return opts.next({
+        ctx: {
+          db: usingLocalDatabase ? getLocalDatabase() : getProdDatabase(),
+        },
+      });
+    } catch (e) {
+      console.error(e);
+      throw new TRPCClientError("Database connection error, check log");
     }
-
-    if (!localDB && !connectToLocalDatabase()) {
-      throw new TRPCClientError(localDatabaseNotFoundMessage);
-    }
-
-    return opts.next({ ctx: { db: localDB } });
   });
