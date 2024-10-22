@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "yarn db:local:setup && next dev",
     "prod": "src/scripts/try-start-unity-bridge.sh; next dev",
     "build": "next build",
     "start": "next start",
@@ -11,7 +11,7 @@
     "db:generate": "drizzle-kit generate --config=drizzle-local.config.ts",
     "db:local:migrate": "drizzle-kit migrate --config=drizzle-local.config.ts",
     "db:local:studio": "drizzle-kit studio --config=drizzle-local.config.ts",
-    "db:local:setup": "drizzle-kit migrate --config=drizzle-local.config.ts",
+    "db:local:setup": "src/scripts/setupDatabase.sh",
     "db:prod:migrate": "drizzle-kit migrate --config=drizzle-prod.config.ts",
     "db:prod:studio": "drizzle-kit studio --config=drizzle-prod.config.ts",
     "db:prod:download": "src/scripts/downloadDatabase.sh",

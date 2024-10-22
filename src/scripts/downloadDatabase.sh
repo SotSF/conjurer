@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Remove local database if it exists already
 [ -f local.db ] && rm local.db
 
