@@ -70,6 +70,15 @@ export class Store {
     localStorage.setItem("usingLocalAssets", String(value));
   }
 
+  private _usingLocalDatabase = false;
+  get usingLocalDatabase(): boolean {
+    return this._usingLocalDatabase;
+  }
+  set usingLocalDatabase(value: boolean) {
+    this._usingLocalDatabase = value;
+    localStorage.setItem("usingLocalDatabase", String(value));
+  }
+
   private _selectedLayer: Layer = this.layers[0]; // a layer is always selected
   get selectedLayer() {
     return this._selectedLayer;
@@ -199,6 +208,11 @@ export class Store {
     const usingLocalAssets = localStorage.getItem("usingLocalAssets");
     if (usingLocalAssets) this._usingLocalAssets = usingLocalAssets === "true";
 
+    // check for a usingLocalDatabase in local storage
+    const usingLocalDatabase = localStorage.getItem("usingLocalDatabase");
+    if (usingLocalDatabase)
+      this._usingLocalDatabase = usingLocalDatabase === "true";
+
     // check for an experience name in local storage
     const experienceName = localStorage.getItem("experienceName");
     if (experienceName) {
@@ -216,6 +230,10 @@ export class Store {
 
   toggleUsingLocalAssets = () => {
     this.usingLocalAssets = !this.usingLocalAssets;
+  };
+
+  toggleUsingLocalDatabase = () => {
+    this.usingLocalDatabase = !this.usingLocalDatabase;
   };
 
   newExperience = () => {

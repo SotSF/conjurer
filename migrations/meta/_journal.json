@@ -1,0 +1,13 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1729593123501,
+      "tag": "0000_giant_captain_midlands",
+      "breakpoints": true
+    }
+  ]
+}
