@@ -8,8 +8,7 @@ import { TbRectangleFilled } from "react-icons/tb";
 import { AiOutlineLineChart } from "react-icons/ai";
 import { DisplayMode } from "@/src/types/UIStore";
 import { RiPlayList2Fill } from "react-icons/ri";
-import { BsArrowsFullscreen, BsBagHeartFill } from "react-icons/bs";
-import { trpcClient } from "@/src/utils/trpc";
+import { BsArrowsFullscreen } from "react-icons/bs";
 
 type DisplayControlsProps = { canvasContainer: HTMLDivElement | null };
 
@@ -111,19 +110,6 @@ export const DisplayControls = observer(function DisplayControls({
         height={6}
         icon={<BsArrowsFullscreen size={15} />}
         onClick={() => canvasContainer?.requestFullscreen()}
-      />
-      <IconButton
-        aria-label="Print all users all users to console log"
-        title="Print all users all users to console log"
-        height={6}
-        icon={<BsBagHeartFill size={15} />}
-        onClick={async () => {
-          console.log(
-            await trpcClient.getAllUsers.query({
-              usingLocalDatabase: store.usingLocalAssets,
-            })
-          );
-        }}
       />
     </VStack>
   );
