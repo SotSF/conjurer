@@ -22,5 +22,3 @@ export const getLocalDatabase = () => {
 
   return localDB;
 };
-
-getLocalDatabase();
