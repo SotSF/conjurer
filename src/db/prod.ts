@@ -22,5 +22,3 @@ export const getProdDatabase = () => {
 
   return prodDB;
 };
-
-getProdDatabase();

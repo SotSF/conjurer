@@ -25,6 +25,8 @@ yarn dev
 
 Conjurer should be running locally at http://localhost:3000.
 
+Note that you will be using a local database by default. You will need to define `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN` in `.env.local` to access the prod database. Ask for credentials to the Turso dashboard to generate a token.
+
 ### Tips
 
 - In this repo, patterns/effects at their core are just fragment shaders. They may seem scary at first, but with a proper introduction like in [The Book of Shaders](https://thebookofshaders.com/), you too could wield their considerable power!
