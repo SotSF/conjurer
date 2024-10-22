@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import {
+  index,
   integer,
   sqliteTable,
   text,
@@ -48,22 +49,29 @@ export const songsTable = sqliteTable(
 export type InsertSong = typeof songsTable.$inferInsert;
 export type SelectSong = typeof songsTable.$inferSelect;
 
-export const experiencesTable = sqliteTable("experiences", {
-  id: integer("id").primaryKey(),
-  name: text("name").unique().notNull(),
-  songId: integer("song_id")
-    .notNull()
-    .references(() => songsTable.id, { onDelete: "cascade" }),
-  data: text({ mode: "json" }),
-  version: integer("version").default(0),
+export const experiencesTable = sqliteTable(
+  "experiences",
+  {
+    id: integer("id").primaryKey(),
+    name: text("name").unique().notNull(),
+    songId: integer("song_id")
+      .notNull()
+      .references(() => songsTable.id, { onDelete: "cascade" }),
+    status: text("status").default("inprogress"),
+    data: text({ mode: "json" }),
+    version: integer("version").default(0),
 
-  createdAt: text("created_at")
-    .default(sql`(CURRENT_TIMESTAMP)`)
-    .notNull(),
-  updatedAt: integer("updated_at", { mode: "timestamp" }).$onUpdate(
-    () => new Date()
-  ),
-});
+    createdAt: text("created_at")
+      .default(sql`(CURRENT_TIMESTAMP)`)
+      .notNull(),
+    updatedAt: integer("updated_at", { mode: "timestamp" }).$onUpdate(
+      () => new Date()
+    ),
+  },
+  (table) => ({
+    status_index: index("status_index").on(table.status),
+  })
+);
 
 export type InsertExperience = typeof experiencesTable.$inferInsert;
 export type SelectExperience = typeof experiencesTable.$inferSelect;

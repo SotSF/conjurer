@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "385afed5-1530-4c63-ab01-7e2869e4e7e4",
+  "id": "d1347104-5689-4731-b09f-86ebbdcd9a96",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "authorship": {
@@ -109,6 +109,14 @@
           "notNull": true,
           "autoincrement": false
         },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": "'inprogress'"
+        },
         "data": {
           "name": "data",
           "type": "text",
@@ -147,6 +155,13 @@
             "name"
           ],
           "isUnique": true
+        },
+        "status_index": {
+          "name": "status_index",
+          "columns": [
+            "status"
+          ],
+          "isUnique": false
         }
       },
       "foreignKeys": {

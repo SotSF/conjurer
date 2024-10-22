@@ -13,6 +13,7 @@ CREATE TABLE `experiences` (
 	`id` integer PRIMARY KEY NOT NULL,
 	`name` text NOT NULL,
 	`song_id` integer NOT NULL,
+	`status` text DEFAULT 'inprogress',
 	`data` text,
 	`version` integer DEFAULT 0,
 	`created_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL,
@@ -21,6 +22,7 @@ CREATE TABLE `experiences` (
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX `experiences_name_unique` ON `experiences` (`name`);--> statement-breakpoint
+CREATE INDEX `status_index` ON `experiences` (`status`);--> statement-breakpoint
 CREATE TABLE `songs` (
 	`id` integer PRIMARY KEY NOT NULL,
 	`name` text NOT NULL,
