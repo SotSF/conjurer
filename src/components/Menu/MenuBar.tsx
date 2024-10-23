@@ -96,6 +96,30 @@ export const MenuBar = observer(function MenuBar() {
               : "not yet saved"}
           </Text>
         )}
+        {process.env.NODE_ENV !== "production" && (
+          <>
+            <Button
+              variant="ghost"
+              size="sm"
+              color={store.usingLocalAssets ? "orange.500" : "green.500"}
+              onClick={store.toggleUsingLocalAssets}
+            >
+              {store.usingLocalAssets
+                ? "using local assets"
+                : "using prod assets"}
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              color={store.usingLocalDatabase ? "orange.500" : "green.500"}
+              onClick={store.toggleUsingLocalDatabase}
+            >
+              {store.usingLocalDatabase
+                ? "using local database"
+                : "using prod database"}
+            </Button>
+          </>
+        )}
       </HStack>
       <HStack>
         <OpenExperienceModal />

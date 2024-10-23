@@ -70,7 +70,7 @@ export class Store {
     localStorage.setItem("usingLocalAssets", String(value));
   }
 
-  private _usingLocalDatabase = false;
+  private _usingLocalDatabase = process.env.NODE_ENV !== "production";
   get usingLocalDatabase(): boolean {
     return this._usingLocalDatabase;
   }
@@ -195,13 +195,14 @@ export class Store {
     const globalIntensity = localStorage.getItem("globalIntensity");
     if (globalIntensity) this._globalIntensity = Number(globalIntensity);
 
-    // check for a usingLocalAssets in local storage
+    // check for a usingLocalAssets in local storage (not honored in production)
     const usingLocalAssets = localStorage.getItem("usingLocalAssets");
-    if (usingLocalAssets) this._usingLocalAssets = usingLocalAssets === "true";
+    if (usingLocalAssets && process.env.NODE_ENV !== "production")
+      this._usingLocalAssets = usingLocalAssets === "true";
 
-    // check for a usingLocalDatabase in local storage
+    // check for a usingLocalDatabase in local storage (not honored in production)
     const usingLocalDatabase = localStorage.getItem("usingLocalDatabase");
-    if (usingLocalDatabase)
+    if (usingLocalDatabase && process.env.NODE_ENV !== "production")
       this._usingLocalDatabase = usingLocalDatabase === "true";
 
     // check for an experience name in local storage
