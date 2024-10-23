@@ -12,7 +12,6 @@ import type MinimapPlugin from "wavesurfer.js/dist/plugins/minimap";
 import type { RegionParams } from "wavesurfer.js/dist/plugins/regions";
 import { filterData } from "@/src/types/audioPeaks";
 import { AudioRegion } from "@/src/types/AudioRegion";
-import { trpcClient } from "@/src/utils/trpc";
 
 export const loopRegionColor = "rgba(237, 137, 54, 0.4)";
 
@@ -25,7 +24,6 @@ interface RootStore {
 
 export class AudioStore {
   audioInitialized = false;
-  availableAudioFiles: string[] = [];
   selectedAudioFile: string = "";
   audioMuted = false;
 
@@ -115,17 +113,6 @@ export class AudioStore {
     this.rootStore.usingLocalData
       ? `${location.href}/${LOCAL_ASSET_DIRECTORY}${AUDIO_ASSET_PREFIX}${this.selectedAudioFile}`
       : `https://${ASSET_BUCKET_NAME}.s3.${ASSET_BUCKET_REGION}.amazonaws.com/${AUDIO_ASSET_PREFIX}${this.selectedAudioFile}`;
-
-  fetchAvailableAudioFiles = async (forceReload = false) => {
-    if (this.audioInitialized && !forceReload) return;
-    this.audioInitialized = true;
-
-    this.availableAudioFiles = (
-      await trpcClient.song.listSongs.query({
-        usingLocalData: this.rootStore.usingLocalData,
-      })
-    ).map((song) => song.s3Path);
-  };
 
   // Timer relevant code - perhaps extract this to a separate file
 

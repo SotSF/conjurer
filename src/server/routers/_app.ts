@@ -1,4 +1,3 @@
-import { audioRouter } from "@/src/server/routers/audioRouter";
 import { experienceRouter } from "@/src/server/routers/experienceRouter";
 import { router } from "../trpc";
 import { beatMapRouter } from "@/src/server/routers/beatMapRouter";
@@ -8,9 +7,7 @@ import { songRouter } from "@/src/server/routers/songRouter";
 export const appRouter = router({
   user: userRouter,
   song: songRouter,
-
   experience: experienceRouter,
-  audio: audioRouter,
   beatMap: beatMapRouter,
 });
 
