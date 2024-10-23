@@ -20,25 +20,22 @@ import { action } from "mobx";
 import { observer } from "mobx-react-lite";
 import { trpc } from "@/src/utils/trpc";
 
-export const UserPicker = observer(function UserPicker() {
+export const LoginModal = observer(function LoginModal() {
   const store = useStore();
-  const { uiStore, user, usingLocalAssets } = store;
+  const { uiStore, user, usingLocalDatabase } = store;
 
   const [newUser, setNewUser] = useState("");
 
   const {
     isPending,
     isError,
-    data: experiences,
-  } = trpc.experience.listExperiences.useQuery(
-    { user: "", usingLocalAssets },
+    data: users,
+  } = trpc.user.listUsers.useQuery(
+    { usingLocalDatabase },
     { enabled: uiStore.showingUserPickerModal }
   );
 
-  const usersWithDuplicates = (experiences ?? [])
-    .map((experience) => experience.split("-")[0] || "")
-    .filter((user) => !!user);
-  const users = Array.from(new Set(usersWithDuplicates));
+  const createUser = trpc.user.createUser.useMutation();
 
   const onClose = action(() => (uiStore.showingUserPickerModal = false));
 
@@ -67,16 +64,16 @@ export const UserPicker = observer(function UserPicker() {
               {!isPending &&
                 users.map((user) => (
                   <Button
-                    key={user}
+                    key={user.id}
                     leftIcon={<FaUser />}
                     width="100%"
                     onClick={action(() => {
-                      store.user = user;
+                      store.user = user.username;
                       store.uiStore.showPendingModal();
                       onClose();
                     })}
                   >
-                    {user}
+                    {user.username}
                   </Button>
                 ))}
             </VStack>
@@ -88,14 +85,21 @@ export const UserPicker = observer(function UserPicker() {
                 onChange={(e) => setNewUser(e.target.value)}
               />
               <Button
-                isDisabled={!newUser}
-                onClick={action(() => {
+                isDisabled={
+                  !newUser || users?.some((u) => u.username === newUser)
+                }
+                onClick={action(async () => {
+                  await createUser.mutateAsync({
+                    usingLocalDatabase,
+                    username: newUser,
+                  });
                   store.user = newUser;
+                  setNewUser("");
                   store.newExperience();
                   onClose();
                 })}
               >
-                Create
+                {createUser.isPending ? <Spinner /> : "Create"}
               </Button>
             </HStack>
           </ModalBody>

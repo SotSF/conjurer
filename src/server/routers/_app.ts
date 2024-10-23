@@ -1,18 +1,14 @@
 import { audioRouter } from "@/src/server/routers/audioRouter";
 import { experienceRouter } from "@/src/server/routers/experienceRouter";
-import { router, withDatabaseProcedure } from "../trpc";
+import { router } from "../trpc";
 import { beatMapRouter } from "@/src/server/routers/beatMapRouter";
-import { usersTable } from "@/src/db/schema";
+import { userRouter } from "@/src/server/routers/userRouter";
 
 export const appRouter = router({
+  user: userRouter,
   experience: experienceRouter,
   audio: audioRouter,
   beatMap: beatMapRouter,
-
-  // temporary
-  getAllUsers: withDatabaseProcedure.query(async ({ ctx }) => {
-    return await ctx.db.select().from(usersTable).execute();
-  }),
 });
 
 // export type definition of API

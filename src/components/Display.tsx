@@ -4,7 +4,7 @@ import { DisplayCanvas } from "@/src/components/Canvas/DisplayCanvas";
 import { DisplayControls } from "@/src/components/DisplayControls";
 import { observer } from "mobx-react-lite";
 import { useStore } from "@/src/types/StoreContext";
-import { UserPicker } from "@/src/components/UserPicker";
+import { LoginModal } from "@/src/components/LoginModal";
 import { MenuBar } from "@/src/components/Menu/MenuBar";
 import { useRef, useState } from "react";
 
@@ -41,7 +41,7 @@ export const Display = observer(function Display() {
             {store.context === "viewer" ? (
               <Text fontWeight={"bold"}>by {store.user}</Text>
             ) : (
-              <UserPicker />
+              <LoginModal />
             )}
           </VStack>
           <DisplayControls canvasContainer={boxRef.current} />
