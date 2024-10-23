@@ -10,7 +10,7 @@ interface RootStore {
   experienceName: string;
   hasSaved: boolean;
   experienceLastSavedAt: number;
-  usingLocalAssets: boolean;
+  usingLocalData: boolean;
   serialize: () => any;
   deserialize: (data: any) => void;
 }
@@ -23,7 +23,7 @@ export class ExperienceStore {
   load = async (experienceFilename: string) => {
     const { experience } = await trpcClient.experience.getExperience.query({
       experienceFilename,
-      usingLocalAssets: this.rootStore.usingLocalAssets,
+      usingLocalData: this.rootStore.usingLocalData,
     });
 
     const { user, experienceName } =

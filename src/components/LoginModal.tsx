@@ -22,7 +22,7 @@ import { trpc } from "@/src/utils/trpc";
 
 export const LoginModal = observer(function LoginModal() {
   const store = useStore();
-  const { uiStore, user, usingLocalDatabase } = store;
+  const { uiStore, user, usingLocalData } = store;
 
   const [newUser, setNewUser] = useState("");
 
@@ -31,7 +31,7 @@ export const LoginModal = observer(function LoginModal() {
     isError,
     data: users,
   } = trpc.user.listUsers.useQuery(
-    { usingLocalDatabase },
+    { usingLocalData },
     { enabled: uiStore.showingUserPickerModal }
   );
 
@@ -90,7 +90,7 @@ export const LoginModal = observer(function LoginModal() {
                 }
                 onClick={action(async () => {
                   await createUser.mutateAsync({
-                    usingLocalDatabase,
+                    usingLocalData,
                     username: newUser,
                   });
                   store.user = newUser;

@@ -1,6 +1,5 @@
 import { router, withDatabaseProcedure } from "@/src/server/trpc";
 import { usersTable } from "@/src/db/schema";
-import { create } from "domain";
 import { z } from "zod";
 
 export const userRouter = router({

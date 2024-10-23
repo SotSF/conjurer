@@ -22,7 +22,7 @@ import { trpc } from "@/src/utils/trpc";
 
 export const SaveBeatMapModal = observer(function SaveBeatMapModal() {
   const store = useStore();
-  const { audioStore, beatMapStore, uiStore } = store;
+  const { audioStore, beatMapStore, uiStore,usingLocalData } = store;
 
   const {
     isPending,
@@ -30,7 +30,7 @@ export const SaveBeatMapModal = observer(function SaveBeatMapModal() {
     data: beatMaps,
   } = trpc.beatMap.listBeatMaps.useQuery(
     {
-      usingLocalAssets: store.usingLocalAssets,
+      usingLocalData,
     },
     { enabled: uiStore.showingLoadBeatMapModal }
   );

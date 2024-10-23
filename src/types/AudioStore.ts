@@ -20,7 +20,7 @@ export const PEAK_DATA_SAMPLE_RATE = 60;
 
 // Define a new RootStore interface here so that we avoid circular dependencies
 interface RootStore {
-  usingLocalAssets: boolean;
+  usingLocalData: boolean;
 }
 
 export class AudioStore {
@@ -112,7 +112,7 @@ export class AudioStore {
   };
 
   getSelectedAudioFileUrl = () =>
-    this.rootStore.usingLocalAssets
+    this.rootStore.usingLocalData
       ? `${location.href}/${LOCAL_ASSET_DIRECTORY}${AUDIO_ASSET_PREFIX}${this.selectedAudioFile}`
       : `https://${ASSET_BUCKET_NAME}.s3.${ASSET_BUCKET_REGION}.amazonaws.com/${AUDIO_ASSET_PREFIX}${this.selectedAudioFile}`;
 
@@ -121,7 +121,7 @@ export class AudioStore {
     this.audioInitialized = true;
 
     this.availableAudioFiles = await trpcClient.audio.listAudioFiles.query({
-      usingLocalAssets: this.rootStore.usingLocalAssets,
+      usingLocalData: this.rootStore.usingLocalData,
     });
   };
 

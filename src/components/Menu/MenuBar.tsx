@@ -97,28 +97,14 @@ export const MenuBar = observer(function MenuBar() {
           </Text>
         )}
         {process.env.NODE_ENV !== "production" && (
-          <>
-            <Button
-              variant="ghost"
-              size="sm"
-              color={store.usingLocalAssets ? "orange.500" : "green.500"}
-              onClick={store.toggleUsingLocalAssets}
-            >
-              {store.usingLocalAssets
-                ? "using local assets"
-                : "using prod assets"}
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              color={store.usingLocalDatabase ? "orange.500" : "green.500"}
-              onClick={store.toggleUsingLocalDatabase}
-            >
-              {store.usingLocalDatabase
-                ? "using local database"
-                : "using prod database"}
-            </Button>
-          </>
+          <Button
+            variant="ghost"
+            size="sm"
+            color={store.usingLocalData ? "orange.500" : "green.500"}
+            onClick={store.toggleUsingLocalData}
+          >
+            {store.usingLocalData ? "using local data" : "using prod data"}
+          </Button>
         )}
       </HStack>
       <HStack>

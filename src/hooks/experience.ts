@@ -4,7 +4,7 @@ import { action } from "mobx";
 
 export const useSaveExperience = () => {
   const store = useStore();
-  const { experienceStore, user, experienceName, usingLocalAssets } = store;
+  const { experienceStore, user, experienceName, usingLocalData } = store;
   const saveExperienceMutation = trpc.experience.saveExperience.useMutation();
 
   const utils = trpc.useUtils();
@@ -14,8 +14,8 @@ export const useSaveExperience = () => {
     store.experienceLastSavedAt = Date.now();
     const filename = `${user}-${experienceName || "untitled"}`;
     saveExperienceMutation.mutate({
-      usingLocalAssets,
-      experience: experienceStore.stringifyExperience(usingLocalAssets),
+      usingLocalData,
+      experience: experienceStore.stringifyExperience(usingLocalData),
       filename,
     });
     // TODO: make this actually work...

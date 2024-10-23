@@ -17,13 +17,13 @@ export const experienceRouter = router({
   listExperiences: publicProcedure
     .input(
       z.object({
-        usingLocalAssets: z.boolean(),
+        usingLocalData: z.boolean(),
         user: z.string(),
       })
     )
     .query(async ({ input }) => {
       let experienceFilenames: string[] = [];
-      if (input.usingLocalAssets) {
+      if (input.usingLocalData) {
         experienceFilenames = fs
           .readdirSync(`${LOCAL_ASSET_PATH}${EXPERIENCE_ASSET_PREFIX}`)
           .map((file) => file.toString());
@@ -51,11 +51,11 @@ export const experienceRouter = router({
       z.object({
         experience: z.string(),
         filename: z.string(),
-        usingLocalAssets: z.boolean(),
+        usingLocalData: z.boolean(),
       })
     )
     .mutation(async ({ input }) => {
-      if (input.usingLocalAssets) {
+      if (input.usingLocalData) {
         fs.writeFileSync(
           `${LOCAL_ASSET_PATH}${EXPERIENCE_ASSET_PREFIX}${input.filename}.json`,
           input.experience
@@ -76,11 +76,11 @@ export const experienceRouter = router({
     .input(
       z.object({
         experienceFilename: z.string(),
-        usingLocalAssets: z.boolean(),
+        usingLocalData: z.boolean(),
       })
     )
     .query(async ({ input }) => {
-      if (input.usingLocalAssets) {
+      if (input.usingLocalData) {
         const experience = fs
           .readFileSync(
             `${LOCAL_ASSET_PATH}${EXPERIENCE_ASSET_PREFIX}${input.experienceFilename}.json`

@@ -14,20 +14,20 @@ export const publicProcedure = t.procedure;
 export const withDatabaseProcedure = publicProcedure
   .input(
     z.object({
-      usingLocalDatabase: z.boolean(),
+      usingLocalData: z.boolean(),
     })
   )
   .use(async (opts) => {
-    const { usingLocalDatabase } = opts.input;
+    const { usingLocalData } = opts.input;
 
-    if (usingLocalDatabase && process.env.NODE_ENV === "production") {
+    if (usingLocalData && process.env.NODE_ENV === "production") {
       throw new TRPCClientError("Local database cannot be used in production");
     }
 
     try {
       return opts.next({
         ctx: {
-          db: usingLocalDatabase ? getLocalDatabase() : getProdDatabase(),
+          db: usingLocalData ? getLocalDatabase() : getProdDatabase(),
         },
       });
     } catch (e) {

@@ -61,22 +61,13 @@ export class Store {
     localStorage.setItem("globalIntensity", String(value));
   }
 
-  private _usingLocalAssets = false;
-  get usingLocalAssets(): boolean {
-    return this._usingLocalAssets;
+  private _usingLocalData = process.env.NODE_ENV !== "production";
+  get usingLocalData(): boolean {
+    return this._usingLocalData;
   }
-  set usingLocalAssets(value: boolean) {
-    this._usingLocalAssets = value;
-    localStorage.setItem("usingLocalAssets", String(value));
-  }
-
-  private _usingLocalDatabase = process.env.NODE_ENV !== "production";
-  get usingLocalDatabase(): boolean {
-    return this._usingLocalDatabase;
-  }
-  set usingLocalDatabase(value: boolean) {
-    this._usingLocalDatabase = value;
-    localStorage.setItem("usingLocalDatabase", String(value));
+  set usingLocalData(value: boolean) {
+    this._usingLocalData = value;
+    localStorage.setItem("usingLocalData", String(value));
   }
 
   private _selectedLayer: Layer = this.layers[0]; // a layer is always selected
@@ -195,15 +186,10 @@ export class Store {
     const globalIntensity = localStorage.getItem("globalIntensity");
     if (globalIntensity) this._globalIntensity = Number(globalIntensity);
 
-    // check for a usingLocalAssets in local storage (not honored in production)
-    const usingLocalAssets = localStorage.getItem("usingLocalAssets");
-    if (usingLocalAssets && process.env.NODE_ENV !== "production")
-      this._usingLocalAssets = usingLocalAssets === "true";
-
-    // check for a usingLocalDatabase in local storage (not honored in production)
-    const usingLocalDatabase = localStorage.getItem("usingLocalDatabase");
-    if (usingLocalDatabase && process.env.NODE_ENV !== "production")
-      this._usingLocalDatabase = usingLocalDatabase === "true";
+    // check for a usingLocalData in local storage (not honored in production)
+    const usingLocalData = localStorage.getItem("usingLocalData");
+    if (usingLocalData && process.env.NODE_ENV !== "production")
+      this._usingLocalData = usingLocalData === "true";
 
     // check for an experience name in local storage
     const experienceName = localStorage.getItem("experienceName");
@@ -220,12 +206,8 @@ export class Store {
     if (this.sendingData) setupUnityAppWebsocket();
   };
 
-  toggleUsingLocalAssets = () => {
-    this.usingLocalAssets = !this.usingLocalAssets;
-  };
-
-  toggleUsingLocalDatabase = () => {
-    this.usingLocalDatabase = !this.usingLocalDatabase;
+  toggleUsingLocalData = () => {
+    this.usingLocalData = !this.usingLocalData;
   };
 
   newExperience = () => {

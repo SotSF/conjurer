@@ -16,14 +16,14 @@ import { trpc } from "@/src/utils/trpc";
 
 export const AddExperienceModal = observer(function AddExperienceModal() {
   const store = useStore();
-  const { uiStore, playlistStore, usingLocalAssets } = store;
+  const { uiStore, playlistStore, usingLocalData } = store;
 
   const {
     isPending,
     isError,
     data: experiences,
   } = trpc.experience.listExperiences.useQuery(
-    { user: "", usingLocalAssets },
+    { user: "", usingLocalData },
     { enabled: uiStore.showingPlaylistAddExperienceModal }
   );
 

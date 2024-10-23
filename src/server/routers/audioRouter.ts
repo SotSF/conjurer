@@ -13,11 +13,11 @@ export const audioRouter = router({
   listAudioFiles: publicProcedure
     .input(
       z.object({
-        usingLocalAssets: z.boolean(),
+        usingLocalData: z.boolean(),
       })
     )
     .query(async ({ input }) => {
-      if (input.usingLocalAssets) {
+      if (input.usingLocalData) {
         return fs
           .readdirSync(`${LOCAL_ASSET_PATH}${AUDIO_ASSET_PREFIX}`)
           .map((file) => file.toString());

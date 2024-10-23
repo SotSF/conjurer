@@ -23,14 +23,14 @@ import { useSaveExperience } from "@/src/hooks/experience";
 
 export const SaveExperienceModal = observer(function SaveExperienceModal() {
   const store = useStore();
-  const { uiStore, user, usingLocalAssets } = store;
+  const { uiStore, user, usingLocalData } = store;
 
   const {
     isPending,
     isError,
     data: experiences,
   } = trpc.experience.listExperiences.useQuery(
-    { user, usingLocalAssets },
+    { user, usingLocalData },
     { enabled: uiStore.showingSaveExperienceModal }
   );
 
