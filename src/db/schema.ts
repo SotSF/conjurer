@@ -10,7 +10,7 @@ import {
 export const usersTable = sqliteTable("users", {
   id: integer("id").primaryKey(),
   username: text("username").unique().notNull(),
-  isAdmin: integer("is_admin", { mode: "boolean" }).default(false),
+  isAdmin: integer("is_admin", { mode: "boolean" }).notNull().default(false),
 
   createdAt: text("created_at")
     .default(sql`(CURRENT_TIMESTAMP)`)

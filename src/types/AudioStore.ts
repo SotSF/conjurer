@@ -120,9 +120,11 @@ export class AudioStore {
     if (this.audioInitialized && !forceReload) return;
     this.audioInitialized = true;
 
-    this.availableAudioFiles = await trpcClient.audio.listAudioFiles.query({
-      usingLocalData: this.rootStore.usingLocalData,
-    });
+    this.availableAudioFiles = (
+      await trpcClient.song.listSongs.query({
+        usingLocalData: this.rootStore.usingLocalData,
+      })
+    ).map((song) => song.s3Path);
   };
 
   // Timer relevant code - perhaps extract this to a separate file

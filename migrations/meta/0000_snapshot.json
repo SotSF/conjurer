@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "894f099e-549a-4616-874f-46e545ccd5b0",
+  "id": "cd7f5101-c3cc-45a4-9929-3a490b9b11d6",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "authorship": {
@@ -268,7 +268,7 @@
           "name": "is_admin",
           "type": "integer",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false,
           "default": false
         },

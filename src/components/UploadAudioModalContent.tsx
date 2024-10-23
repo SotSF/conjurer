@@ -14,11 +14,14 @@ import {
 import { useStore } from "@/src/types/StoreContext";
 import { useRef, useState } from "react";
 import { action } from "mobx";
-import { uploadAudioFile } from "@/src/utils/uploadAudio";
+import {
+  uploadAudioFileToS3,
+  uploadAudioFileToServer,
+} from "@/src/utils/uploadAudio";
 
 const UploadAudioModalContent = observer(function UploadAudioModalContent() {
   const store = useStore();
-  const { uiStore, audioStore } = store;
+  const { uiStore, audioStore, usingLocalData } = store;
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -31,9 +34,14 @@ const UploadAudioModalContent = observer(function UploadAudioModalContent() {
 
   const onUpload = async () => {
     if (!inputRef.current?.files?.length) return;
+    const fileToUpload = inputRef.current.files[0];
 
     setUploading(true);
-    await uploadAudioFile(inputRef.current.files[0]);
+    if (usingLocalData) {
+      await uploadAudioFileToServer(fileToUpload);
+    } else {
+      await uploadAudioFileToS3(fileToUpload);
+    }
     await audioStore.fetchAvailableAudioFiles(true);
     setUploading(false);
 

@@ -37,7 +37,7 @@ export const AudioSelector = observer(function AudioSelector() {
         title="Upload audio"
         height={6}
         icon={<AiOutlineCloudUpload size={17} />}
-        isDisabled={store.usingLocalData}
+        // isDisabled={store.usingLocalData}
         onClick={action(() => (uiStore.showingUploadAudioModal = true))}
       />
     </>

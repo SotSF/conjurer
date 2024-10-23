@@ -36,7 +36,7 @@ CREATE UNIQUE INDEX `song_name_artist_index` ON `songs` (`artist`,`name`);--> st
 CREATE TABLE `users` (
 	`id` integer PRIMARY KEY NOT NULL,
 	`username` text NOT NULL,
-	`is_admin` integer DEFAULT false,
+	`is_admin` integer DEFAULT false NOT NULL,
 	`created_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL,
 	`updated_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL
 );
