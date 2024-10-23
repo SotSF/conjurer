@@ -15,9 +15,10 @@ export const usersTable = sqliteTable("users", {
   createdAt: text("created_at")
     .default(sql`(CURRENT_TIMESTAMP)`)
     .notNull(),
-  updatedAt: integer("updated_at", { mode: "timestamp" }).$onUpdate(
-    () => new Date()
-  ),
+  updatedAt: text("updated_at")
+    .default(sql`(CURRENT_TIMESTAMP)`)
+    .notNull()
+    .$onUpdate(() => sql`(CURRENT_TIMESTAMP)`),
 });
 
 export type InsertUser = typeof usersTable.$inferInsert;
@@ -34,9 +35,10 @@ export const songsTable = sqliteTable(
     createdAt: text("created_at")
       .default(sql`(CURRENT_TIMESTAMP)`)
       .notNull(),
-    updatedAt: integer("updated_at", { mode: "timestamp" }).$onUpdate(
-      () => new Date()
-    ),
+    updatedAt: text("updated_at")
+      .default(sql`(CURRENT_TIMESTAMP)`)
+      .notNull()
+      .$onUpdate(() => sql`(CURRENT_TIMESTAMP)`),
   },
   (table) => ({
     songNameArtistIndex: uniqueIndex("song_name_artist_index").on(
@@ -64,9 +66,10 @@ export const experiencesTable = sqliteTable(
     createdAt: text("created_at")
       .default(sql`(CURRENT_TIMESTAMP)`)
       .notNull(),
-    updatedAt: integer("updated_at", { mode: "timestamp" }).$onUpdate(
-      () => new Date()
-    ),
+    updatedAt: text("updated_at")
+      .default(sql`(CURRENT_TIMESTAMP)`)
+      .notNull()
+      .$onUpdate(() => sql`(CURRENT_TIMESTAMP)`),
   },
   (table) => ({
     status_index: index("status_index").on(table.status),
@@ -90,9 +93,10 @@ export const authorshipTable = sqliteTable(
     createdAt: text("created_at")
       .default(sql`(CURRENT_TIMESTAMP)`)
       .notNull(),
-    updatedAt: integer("updated_at", { mode: "timestamp" }).$onUpdate(
-      () => new Date()
-    ),
+    updatedAt: text("updated_at")
+      .default(sql`(CURRENT_TIMESTAMP)`)
+      .notNull()
+      .$onUpdate(() => sql`(CURRENT_TIMESTAMP)`),
   },
   (table) => ({
     experienceAuthorIndex: uniqueIndex("experience_author_index").on(

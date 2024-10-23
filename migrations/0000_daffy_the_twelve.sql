@@ -3,7 +3,7 @@ CREATE TABLE `authorship` (
 	`user_id` integer NOT NULL,
 	`experience_id` integer NOT NULL,
 	`created_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL,
-	`updated_at` integer,
+	`updated_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL,
 	FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE cascade,
 	FOREIGN KEY (`experience_id`) REFERENCES `experiences`(`id`) ON UPDATE no action ON DELETE cascade
 );
@@ -17,7 +17,7 @@ CREATE TABLE `experiences` (
 	`data` text,
 	`version` integer DEFAULT 0,
 	`created_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL,
-	`updated_at` integer,
+	`updated_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL,
 	FOREIGN KEY (`song_id`) REFERENCES `songs`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
@@ -29,7 +29,7 @@ CREATE TABLE `songs` (
 	`artist` text DEFAULT '',
 	`s3_path` text NOT NULL,
 	`created_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL,
-	`updated_at` integer
+	`updated_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX `song_name_artist_index` ON `songs` (`artist`,`name`);--> statement-breakpoint
@@ -38,7 +38,7 @@ CREATE TABLE `users` (
 	`username` text NOT NULL,
 	`is_admin` integer DEFAULT false,
 	`created_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL,
-	`updated_at` integer
+	`updated_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX `users_username_unique` ON `users` (`username`);
