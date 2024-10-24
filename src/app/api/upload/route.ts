@@ -18,7 +18,7 @@ export const POST = async (req: Request, res: Response) => {
   }
 
   const buffer = Buffer.from(await file.arrayBuffer());
-  const filename = file.name.replaceAll(" ", "_");
+  const filename = formData.get("filename") as string;
 
   try {
     await writeFile(

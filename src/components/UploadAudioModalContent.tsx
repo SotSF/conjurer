@@ -20,6 +20,7 @@ import {
   uploadAudioFileToServer,
 } from "@/src/utils/uploadAudio";
 import { trpc } from "@/src/utils/trpc";
+import { sanitize } from "@/src/utils/sanitize";
 
 const UploadAudioModalContent = observer(function UploadAudioModalContent() {
   const store = useStore();
@@ -43,16 +44,17 @@ const UploadAudioModalContent = observer(function UploadAudioModalContent() {
     const fileToUpload = inputRef.current.files[0];
 
     setUploading(true);
+    const filename = `${sanitize(artistName)} - ${sanitize(songName)}.mp3`;
     if (usingLocalData) {
-      await uploadAudioFileToServer(fileToUpload);
+      await uploadAudioFileToServer(fileToUpload, filename);
     } else {
-      await uploadAudioFileToS3(fileToUpload);
+      await uploadAudioFileToS3(fileToUpload, filename);
     }
     await createSong.mutateAsync({
       usingLocalData,
       name: songName,
       artist: artistName,
-      filename: fileToUpload.name,
+      filename,
     });
     await utils.song.listSongs.invalidate();
     setUploading(false);
@@ -70,7 +72,7 @@ const UploadAudioModalContent = observer(function UploadAudioModalContent() {
           <Input
             ref={inputRef}
             type="file"
-            accept="audio/*"
+            accept=".mp3"
             pl={0}
             mb={4}
             sx={{
