@@ -52,7 +52,7 @@ const UploadAudioModalContent = observer(function UploadAudioModalContent() {
       usingLocalData,
       name: songName,
       artist: artistName,
-      s3Path: fileToUpload.name,
+      filename: fileToUpload.name,
     });
     await utils.song.listSongs.invalidate();
     setUploading(false);

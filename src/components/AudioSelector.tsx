@@ -28,8 +28,8 @@ export const AudioSelector = observer(function AudioSelector() {
           (e) => (audioStore.selectedAudioFile = e.target.value)
         )}
       >
-        {songs.map(({ artist, name, s3Path }) => (
-          <option key={s3Path} value={s3Path}>
+        {songs.map(({ artist, name, filename }) => (
+          <option key={filename} value={filename}>
             {artist} - {name}
           </option>
         ))}

@@ -30,7 +30,7 @@ export const songsTable = sqliteTable(
     id: integer("id").primaryKey(),
     name: text("name").notNull(),
     artist: text("artist").default(""),
-    s3Path: text("s3_path").notNull(),
+    filename: text("filename").notNull(),
 
     createdAt: text("created_at")
       .default(sql`(CURRENT_TIMESTAMP)`)
@@ -56,9 +56,7 @@ export const experiencesTable = sqliteTable(
   {
     id: integer("id").primaryKey(),
     name: text("name").unique().notNull(),
-    songId: integer("song_id")
-      .notNull()
-      .references(() => songsTable.id, { onDelete: "cascade" }),
+    songId: integer("song_id").notNull(),
     status: text("status").default("inprogress"),
     data: text({ mode: "json" }),
     version: integer("version").default(0),

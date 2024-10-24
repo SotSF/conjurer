@@ -11,14 +11,14 @@ export const songRouter = router({
       z.object({
         name: z.string(),
         artist: z.string(),
-        s3Path: z.string(),
+        filename: z.string(),
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const { name, artist, s3Path } = input;
+      const { name, artist, filename } = input;
       const [song] = await ctx.db
         .insert(songsTable)
-        .values({ name, artist, s3Path })
+        .values({ name, artist, filename })
         .returning()
         .execute();
       return song;

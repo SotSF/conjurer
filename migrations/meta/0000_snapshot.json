@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "cd7f5101-c3cc-45a4-9929-3a490b9b11d6",
+  "id": "671bd43e-7b94-4673-80b5-335b66edebe6",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "authorship": {
@@ -166,21 +166,7 @@
           "isUnique": false
         }
       },
-      "foreignKeys": {
-        "experiences_song_id_songs_id_fk": {
-          "name": "experiences_song_id_songs_id_fk",
-          "tableFrom": "experiences",
-          "tableTo": "songs",
-          "columnsFrom": [
-            "song_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
+      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
@@ -209,8 +195,8 @@
           "autoincrement": false,
           "default": "''"
         },
-        "s3_path": {
-          "name": "s3_path",
+        "filename": {
+          "name": "filename",
           "type": "text",
           "primaryKey": false,
           "notNull": true,

@@ -17,8 +17,7 @@ CREATE TABLE `experiences` (
 	`data` text,
 	`version` integer DEFAULT 0,
 	`created_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL,
-	`updated_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL,
-	FOREIGN KEY (`song_id`) REFERENCES `songs`(`id`) ON UPDATE no action ON DELETE cascade
+	`updated_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX `experiences_name_unique` ON `experiences` (`name`);--> statement-breakpoint
@@ -27,7 +26,7 @@ CREATE TABLE `songs` (
 	`id` integer PRIMARY KEY NOT NULL,
 	`name` text NOT NULL,
 	`artist` text DEFAULT '',
-	`s3_path` text NOT NULL,
+	`filename` text NOT NULL,
 	`created_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL,
 	`updated_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL
 );
