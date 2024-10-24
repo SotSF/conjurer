@@ -12,7 +12,7 @@ import {
 } from "@/src/utils/assets";
 import { z } from "zod";
 import { getS3 } from "@/src/utils/s3";
-import { users } from "@/src/db/schema";
+import { experiences, users, usersToExperiences } from "@/src/db/schema";
 import { eq } from "drizzle-orm";
 
 export const experienceRouter = router({
@@ -29,47 +29,56 @@ export const experienceRouter = router({
           .execute();
       }
 
-      const user = await ctx.db.query.users
-        .findFirst({ where: eq(users.username, input.username) })
-        .execute();
-      if (!user) return [];
+      return await ctx.db
+        .select({ id: experiences.id, name: experiences.name })
+        .from(usersToExperiences)
+        .leftJoin(users, eq(usersToExperiences.userId, users.id))
+        .leftJoin(
+          experiences,
+          eq(usersToExperiences.experienceId, experiences.id)
+        )
+        .where(eq(users.username, input.username))
+        .all();
 
-      return await ctx.db.query.experiences
-        .findMany({
-          columns: { name: true },
-          with: {
-            usersToExperiences: {
-              where: eq(users.id, user.id),
-            },
-          },
-        })
-        .execute();
+      // Originally used this, uses db.query which is nice but requires 2 queries
+      // const user = await ctx.db.query.users
+      //   .findFirst({ where: eq(users.username, input.username) })
+      //   .execute();
+      // if (!user) return [];
+
+      // return await ctx.db.query.experiences
+      //   .findMany({
+      //     columns: { name: true },
+      //     with: {
+      //       usersToExperiences: {
+      //         where: eq(users.id, user.id),
+      //       },
+      //     },
+      //   })
+      //   .execute();
     }),
 
-  saveExperience: publicProcedure
+  saveExperience: withDatabaseProcedure
     .input(
       z.object({
-        experience: z.string(),
-        filename: z.string(),
-        usingLocalData: z.boolean(),
+        id: z.number().optional(),
+        name: z.string(),
+        songId: z.number(),
+        data: z.string(),
+        status: z.string(),
+        version: z.number(),
       })
     )
-    .mutation(async ({ input }) => {
-      if (input.usingLocalData) {
-        fs.writeFileSync(
-          `${LOCAL_ASSET_PATH}${EXPERIENCE_ASSET_PREFIX}${input.filename}.json`,
-          input.experience
-        );
-        return;
-      }
-
-      const putObjectCommand = new PutObjectCommand({
-        Bucket: ASSET_BUCKET_NAME,
-        Key: `${EXPERIENCE_ASSET_PREFIX}${input.filename}.json`,
-        Body: input.experience,
-      });
-
-      return getS3().send(putObjectCommand);
+    .mutation(async ({ ctx, input }) => {
+      const { id, name, songId, data, status, version } = input;
+      await ctx.db
+        .insert(experiences)
+        .values({ id, name, songId, data, status, version })
+        .onConflictDoUpdate({
+          target: [experiences.id],
+          set: { name, songId, data, status, version },
+        })
+        .execute();
     }),
 
   getExperience: publicProcedure

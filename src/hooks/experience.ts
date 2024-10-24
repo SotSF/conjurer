@@ -12,15 +12,13 @@ export const useSaveExperience = () => {
   const saveExperience = action(async () => {
     store.hasSaved = true;
     store.experienceLastSavedAt = Date.now();
-    const filename = `${user}-${experienceName || "untitled"}`;
     saveExperienceMutation.mutate({
       usingLocalData,
-      experience: experienceStore.stringifyExperience(usingLocalData),
-      filename,
+      username: user,
+      filename: experienceName,
+      experience: experienceStore.stringifyExperience(),
     });
-    // TODO: make this actually work...
-    utils.invalidate(undefined);
-    // utils.invalidate(undefined, { queryKey: ["experience"] });
+    utils.experience.invalidate();
   });
 
   return { saveExperience };
