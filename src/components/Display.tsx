@@ -14,7 +14,6 @@ export const Display = observer(function Display() {
 
   const boxRef = useRef<HTMLDivElement>(null);
 
-  // TODO: hide controls some other way than double click
   const [showAllControls, setShowAllControls] = useState(true);
 
   return (
@@ -25,8 +24,8 @@ export const Display = observer(function Display() {
       position="relative"
       height="100%"
       onDoubleClick={() => {
+        // TODO: hide controls some other way than double click
         // setShowAllControls(!showAllControls);
-        boxRef.current?.requestFullscreen();
       }}
     >
       {!embeddedViewer && (
