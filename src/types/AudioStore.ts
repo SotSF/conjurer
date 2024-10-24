@@ -134,8 +134,9 @@ export class AudioStore {
     this.lastCursorPosition = time;
     this.globalTime = time;
 
-    if (this.wavesurfer.getCurrentTime() === time) return;
-    this.wavesurfer.seekTo(time / this.wavesurfer.getDuration());
+    const duration = this.wavesurfer.getDuration();
+    if (this.wavesurfer.getCurrentTime() === time || duration === 0) return;
+    this.wavesurfer.seekTo(time / duration);
   };
 
   skipForward = () => this.setTimeWithCursor(this.globalTime + 0.01);

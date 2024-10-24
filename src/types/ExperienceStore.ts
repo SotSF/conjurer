@@ -44,6 +44,11 @@ export class ExperienceStore {
   };
 
   loadInitialExperience = () => {
+    if (process.env.NODE_ENV === "development") {
+      this.loadEmptyExperience();
+      return;
+    }
+
     // load initial experience from file. if you would like to change this, click the clipboard
     // button in the UI and paste the contents into the data/initialExperience.json file.
     this.rootStore.deserialize(initialExperience);

@@ -13,9 +13,9 @@ CREATE TABLE `experiences` (
 	`id` integer PRIMARY KEY NOT NULL,
 	`name` text NOT NULL,
 	`song_id` integer NOT NULL,
-	`status` text DEFAULT 'inprogress',
-	`data` text,
-	`version` integer DEFAULT 0,
+	`status` text DEFAULT 'inprogress' NOT NULL,
+	`data` text NOT NULL,
+	`version` integer DEFAULT 0 NOT NULL,
 	`created_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL,
 	`updated_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL
 );
@@ -25,7 +25,7 @@ CREATE INDEX `status_index` ON `experiences` (`status`);--> statement-breakpoint
 CREATE TABLE `songs` (
 	`id` integer PRIMARY KEY NOT NULL,
 	`name` text NOT NULL,
-	`artist` text DEFAULT '',
+	`artist` text DEFAULT '' NOT NULL,
 	`filename` text NOT NULL,
 	`created_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL,
 	`updated_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL

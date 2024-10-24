@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "671bd43e-7b94-4673-80b5-335b66edebe6",
+  "id": "29139275-5105-44ae-88d0-81cb1bab4003",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "authorship": {
@@ -114,7 +114,7 @@
           "name": "status",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false,
           "default": "'inprogress'"
         },
@@ -122,14 +122,14 @@
           "name": "data",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         },
         "version": {
           "name": "version",
           "type": "integer",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false,
           "default": 0
         },
@@ -191,7 +191,7 @@
           "name": "artist",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false,
           "default": "''"
         },

@@ -39,7 +39,7 @@ const UploadAudioModalContent = observer(function UploadAudioModalContent() {
 
   const utils = trpc.useUtils();
   const createSong = trpc.song.createSong.useMutation();
-  const onUpload = async () => {
+  const onUpload = action(async () => {
     if (!inputRef.current?.files?.length) return;
     const fileToUpload = inputRef.current.files[0];
 
@@ -59,8 +59,13 @@ const UploadAudioModalContent = observer(function UploadAudioModalContent() {
     await utils.song.listSongs.invalidate();
     setUploading(false);
 
+    // if this is the first song to be uploaded, select it
+    if (!store.audioStore.selectedAudioFile) {
+      store.audioStore.selectedAudioFile = filename;
+    }
+
     onClose();
-  };
+  });
 
   return (
     <ModalContent>

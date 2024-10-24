@@ -304,6 +304,11 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
           scrollIntoView();
         });
 
+        if (!audioStore.selectedAudioFile) {
+          audioStore.wavesurfer.empty();
+          return;
+        }
+
         // Load the new audio file
         await audioStore.wavesurfer.load(audioStore.getSelectedAudioFileUrl());
       }
@@ -456,7 +461,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
         startColor="gray.500"
         endColor="gray.700"
         speed={0.4}
-        isLoaded={!loading}
+        isLoaded={!loading || !audioStore.selectedAudioFile}
       />
       <Box
         position="absolute"
