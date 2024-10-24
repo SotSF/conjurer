@@ -30,7 +30,7 @@ export const SaveExperienceModal = observer(function SaveExperienceModal() {
     isError,
     data: experiences,
   } = trpc.experience.listExperiences.useQuery(
-    { user, usingLocalData },
+    { username: user, usingLocalData },
     { enabled: uiStore.showingSaveExperienceModal }
   );
 
@@ -63,8 +63,8 @@ export const SaveExperienceModal = observer(function SaveExperienceModal() {
 
   if (isError) return null;
 
-  const willOverwriteExistingExperience = (experiences ?? []).includes(
-    experienceFilename
+  const willOverwriteExistingExperience = (experiences ?? []).some(
+    ({ name }) => name === experienceFilename
   );
 
   return (
@@ -100,15 +100,15 @@ export const SaveExperienceModal = observer(function SaveExperienceModal() {
                 )}
                 {experiences.map((experience) => (
                   <Text
-                    key={experience}
+                    key={experience.name}
                     color={
-                      experience === experienceFilename
+                      experience.name === experienceFilename
                         ? "orange.400"
                         : "chakra-body-text"
                     }
                     fontWeight="bold"
                   >
-                    {experience}
+                    {experience.name}
                   </Text>
                 ))}
               </>

@@ -1,10 +1,10 @@
 import { router, withDatabaseProcedure } from "@/src/server/trpc";
-import { songsTable } from "@/src/db/schema";
+import { songs } from "@/src/db/schema";
 import { z } from "zod";
 
 export const songRouter = router({
   listSongs: withDatabaseProcedure.query(async ({ ctx }) => {
-    return await ctx.db.select().from(songsTable).execute();
+    return await ctx.db.select().from(songs).execute();
   }),
   createSong: withDatabaseProcedure
     .input(
@@ -17,7 +17,7 @@ export const songRouter = router({
     .mutation(async ({ ctx, input }) => {
       const { name, artist, filename } = input;
       const [song] = await ctx.db
-        .insert(songsTable)
+        .insert(songs)
         .values({ name, artist, filename })
         .returning()
         .execute();

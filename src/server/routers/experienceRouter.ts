@@ -1,10 +1,10 @@
 import * as fs from "fs";
-import { publicProcedure, router } from "@/src/server/trpc";
 import {
-  GetObjectCommand,
-  ListObjectsCommand,
-  PutObjectCommand,
-} from "@aws-sdk/client-s3";
+  publicProcedure,
+  router,
+  withDatabaseProcedure,
+} from "@/src/server/trpc";
+import { GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import {
   ASSET_BUCKET_NAME,
   EXPERIENCE_ASSET_PREFIX,
@@ -12,38 +12,38 @@ import {
 } from "@/src/utils/assets";
 import { z } from "zod";
 import { getS3 } from "@/src/utils/s3";
+import { users } from "@/src/db/schema";
+import { eq } from "drizzle-orm";
 
 export const experienceRouter = router({
-  listExperiences: publicProcedure
+  listExperiences: withDatabaseProcedure
     .input(
       z.object({
-        usingLocalData: z.boolean(),
-        user: z.string(),
+        username: z.string().optional(),
       })
     )
-    .query(async ({ input }) => {
-      let experienceFilenames: string[] = [];
-      if (input.usingLocalData) {
-        experienceFilenames = fs
-          .readdirSync(`${LOCAL_ASSET_PATH}${EXPERIENCE_ASSET_PREFIX}`)
-          .map((file) => file.toString());
-      } else {
-        const listObjectsCommand = new ListObjectsCommand({
-          Bucket: ASSET_BUCKET_NAME,
-          Prefix: EXPERIENCE_ASSET_PREFIX,
-        });
-        const data = await getS3().send(listObjectsCommand);
-        experienceFilenames =
-          data.Contents?.map((object) => object.Key?.split("/")[1] ?? "") ?? [];
+    .query(async ({ ctx, input }) => {
+      if (!input.username) {
+        return await ctx.db.query.experiences
+          .findMany({ columns: { name: true } })
+          .execute();
       }
 
-      return (
-        experienceFilenames
-          // filter down to only the desired user's experiences
-          .filter((e) => e.startsWith(input.user))
-          // remove .json extension
-          .map((e) => e.replaceAll(".json", "")) ?? []
-      );
+      const user = await ctx.db.query.users
+        .findFirst({ where: eq(users.username, input.username) })
+        .execute();
+      if (!user) return [];
+
+      return await ctx.db.query.experiences
+        .findMany({
+          columns: { name: true },
+          with: {
+            usersToExperiences: {
+              where: eq(users.id, user.id),
+            },
+          },
+        })
+        .execute();
     }),
 
   saveExperience: publicProcedure

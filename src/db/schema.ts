@@ -1,4 +1,4 @@
-import { sql } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import {
   index,
   integer,
@@ -7,7 +7,7 @@ import {
   uniqueIndex,
 } from "drizzle-orm/sqlite-core";
 
-export const usersTable = sqliteTable("users", {
+export const users = sqliteTable("users", {
   id: integer("id").primaryKey(),
   username: text("username").unique().notNull(),
   isAdmin: integer("is_admin", { mode: "boolean" }).notNull().default(false),
@@ -21,10 +21,14 @@ export const usersTable = sqliteTable("users", {
     .$onUpdate(() => sql`(CURRENT_TIMESTAMP)`),
 });
 
-export type InsertUser = typeof usersTable.$inferInsert;
-export type SelectUser = typeof usersTable.$inferSelect;
+export const usersRelations = relations(users, ({ many }) => ({
+  usersToExperiences: many(usersToExperiences),
+}));
 
-export const songsTable = sqliteTable(
+export type InsertUser = typeof users.$inferInsert;
+export type SelectUser = typeof users.$inferSelect;
+
+export const songs = sqliteTable(
   "songs",
   {
     id: integer("id").primaryKey(),
@@ -48,10 +52,14 @@ export const songsTable = sqliteTable(
   })
 );
 
-export type InsertSong = typeof songsTable.$inferInsert;
-export type SelectSong = typeof songsTable.$inferSelect;
+export const songsRelations = relations(songs, ({ many }) => ({
+  experiences: many(experiences),
+}));
 
-export const experiencesTable = sqliteTable(
+export type InsertSong = typeof songs.$inferInsert;
+export type SelectSong = typeof songs.$inferSelect;
+
+export const experiences = sqliteTable(
   "experiences",
   {
     id: integer("id").primaryKey(),
@@ -74,19 +82,24 @@ export const experiencesTable = sqliteTable(
   })
 );
 
-export type InsertExperience = typeof experiencesTable.$inferInsert;
-export type SelectExperience = typeof experiencesTable.$inferSelect;
+export const experiencesRelations = relations(experiences, ({ one, many }) => ({
+  song: one(songs, { fields: [experiences.songId], references: [songs.id] }),
+  usersToExperiences: many(usersToExperiences),
+}));
 
-export const authorshipTable = sqliteTable(
-  "authorship",
+export type InsertExperience = typeof experiences.$inferInsert;
+export type SelectExperience = typeof experiences.$inferSelect;
+
+export const usersToExperiences = sqliteTable(
+  "users_to_experiences",
   {
     id: integer("id").primaryKey(),
     userId: integer("user_id")
       .notNull()
-      .references(() => usersTable.id, { onDelete: "cascade" }),
+      .references(() => users.id, { onDelete: "cascade" }),
     experienceId: integer("experience_id")
       .notNull()
-      .references(() => experiencesTable.id, { onDelete: "cascade" }),
+      .references(() => experiences.id, { onDelete: "cascade" }),
 
     createdAt: text("created_at")
       .default(sql`(CURRENT_TIMESTAMP)`)
@@ -97,14 +110,28 @@ export const authorshipTable = sqliteTable(
       .$onUpdate(() => sql`(CURRENT_TIMESTAMP)`),
   },
   (table) => ({
-    experienceAuthorIndex: uniqueIndex("experience_author_index").on(
+    userExperienceIndex: uniqueIndex("user_experience_index").on(
       table.userId,
       table.experienceId
     ),
   })
 );
 
-export type InsertAuthorship = typeof authorshipTable.$inferInsert;
-export type SelectAuthorship = typeof authorshipTable.$inferSelect;
+export const usersToExperiencesRelations = relations(
+  usersToExperiences,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [usersToExperiences.userId],
+      references: [users.id],
+    }),
+    experience: one(experiences, {
+      fields: [usersToExperiences.experienceId],
+      references: [experiences.id],
+    }),
+  })
+);
+
+export type InsertAuthorship = typeof usersToExperiences.$inferInsert;
+export type SelectAuthorship = typeof usersToExperiences.$inferSelect;
 
 // TODO: playlists table

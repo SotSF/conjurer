@@ -25,7 +25,7 @@ export const OpenExperienceModal = observer(function OpenExperienceModal() {
     isError,
     data: experiences,
   } = trpc.experience.listExperiences.useQuery(
-    { user, usingLocalData },
+    { username: user, usingLocalData },
     { enabled: uiStore.showingOpenExperienceModal }
   );
 
@@ -53,14 +53,14 @@ export const OpenExperienceModal = observer(function OpenExperienceModal() {
             <VStack align="flex-start" spacing={0}>
               {experiences.map((experience) => (
                 <Button
-                  key={experience}
+                  key={experience.name}
                   variant="ghost"
                   onClick={action(() => {
-                    experienceStore.load(experience);
+                    experienceStore.load(experience.name);
                     onClose();
                   })}
                 >
-                  {experience}
+                  {experience.name}
                 </Button>
               ))}
             </VStack>
