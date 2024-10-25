@@ -12,6 +12,8 @@ import { BeatMapStore } from "@/src/types/BeatMapStore";
 import { PlaygroundStore } from "@/src/types/PlaygroundStore";
 import { setupControllerWebsocket } from "@/src/websocket/controllerWebsocket";
 import { setupVoiceCommandWebsocket } from "@/src/websocket/voiceCommandWebsocket";
+import { ExperienceStatus, SerialExperience } from "@/src/types/Experience";
+import { Song } from "@/src/types/Song";
 
 // Enforce MobX strict mode, which can make many noisy console warnings, but can help use learn MobX better.
 // Feel free to comment out the following if you want to silence the console messages.
@@ -124,6 +126,9 @@ export class Store {
 
   hasSaved = false;
   experienceLastSavedAt = 0;
+  experienceVersion = 1;
+  experienceStatus: ExperienceStatus = "inprogress";
+  experienceId: number | undefined = undefined;
 
   get playing() {
     return this.audioStore.audioState !== "paused";
@@ -191,12 +196,15 @@ export class Store {
     if (usingLocalData && process.env.NODE_ENV !== "production")
       this._usingLocalData = usingLocalData === "true";
 
-    // check for an experience name in local storage
-    const experienceName = localStorage.getItem("experienceName");
-    if (experienceName) {
-      this._experienceName = experienceName;
-      this.experienceStore.load(`${this.user}-${experienceName}`);
-    } else this.experienceStore.loadInitialExperience();
+    // TODO:
+    // // check for an experience name in local storage
+    // const experienceName = localStorage.getItem("experienceName");
+    // if (experienceName) {
+    //   this._experienceName = experienceName;
+    //   this.experienceStore.load(`${this.user}-${experienceName}`);
+    // } else this.experienceStore.loadEmptyExperience();
+
+    this.experienceStore.loadEmptyExperience();
 
     this.uiStore.initialize();
   };
@@ -211,8 +219,6 @@ export class Store {
   };
 
   newExperience = () => {
-    this.experienceStore.saveToLocalStorage("autosave");
-    this.experienceName = "untitled";
     this.hasSaved = false;
     this.experienceLastSavedAt = 0;
     this.experienceStore.loadEmptyExperience();
@@ -499,20 +505,25 @@ export class Store {
     }
   };
 
-  serialize = () => ({
-    audioStore: this.audioStore.serialize(),
-    beatMapStore: this.beatMapStore.serialize(),
-    uiStore: this.uiStore.serialize(),
-    layers: this.layers.map((l) => l.serialize()),
-    user: this.user,
-    savedAt: Date.now(),
+  serialize = (): SerialExperience => ({
+    id: this.experienceId,
+    name: this.experienceName,
+    song: this.audioStore.selectedSong,
+    status: this.experienceStatus,
+    version: this.experienceVersion,
+    data: { layers: this.layers.map((l) => l.serialize()) },
   });
 
-  deserialize = (data: any) => {
-    this.audioStore.deserialize(data.audioStore);
-    this.beatMapStore.deserialize(data.beatMapStore);
-    this.uiStore.deserialize(this, data.uiStore);
-    this.layers = data.layers.map((l: any) => Layer.deserialize(this, l));
+  deserialize = (experience: SerialExperience) => {
+    this.experienceId = experience.id;
+    this.experienceName = experience.name;
+    this.audioStore.selectedSong = experience.song;
+    this.experienceStatus = experience.status;
+    this.experienceVersion = experience.version;
+    this.layers = experience.data.layers.map((l: any) =>
+      Layer.deserialize(this, l)
+    );
+
     this.selectedLayer = this.layers[0];
   };
 }

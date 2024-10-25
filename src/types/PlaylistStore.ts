@@ -77,8 +77,6 @@ export class PlaylistStore {
     });
 
   playNextExperience = async () => {
-    this.experienceStore.saveToLocalStorage("autosave");
-
     const currentIndex = this.experienceFilenames.indexOf(
       this.rootStore.experienceFilename
     );

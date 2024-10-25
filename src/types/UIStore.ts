@@ -191,6 +191,9 @@ export class UIStore {
         localStorageUiSettings.playgroundDisplayMode || "canopy";
       this.renderTargetSize =
         localStorageUiSettings.renderTargetSize || INITIAL_RENDER_TARGET_SIZE;
+      if (this.rootStore.context !== "viewer")
+        this.pixelsPerSecond =
+          localStorageUiSettings.pixelsPerSecond || INITIAL_PIXELS_PER_SECOND;
     }
   };
 
@@ -204,16 +207,8 @@ export class UIStore {
         displayMode: this.displayMode,
         playgroundDisplayMode: this.playgroundDisplayMode,
         renderTargetSize: this.renderTargetSize,
+        pixelsPerSecond: this.pixelsPerSecond,
       })
     );
-  };
-
-  serialize = () => ({
-    pixelsPerSecond: this.pixelsPerSecond,
-  });
-
-  deserialize = (rootStore: RootStore, data: any) => {
-    if (rootStore.context !== "viewer")
-      this.pixelsPerSecond = data?.pixelsPerSecond ?? this.pixelsPerSecond;
   };
 }

@@ -24,7 +24,7 @@ import { sanitize } from "@/src/utils/sanitize";
 
 const UploadAudioModalContent = observer(function UploadAudioModalContent() {
   const store = useStore();
-  const { uiStore, usingLocalData } = store;
+  const { audioStore, uiStore, usingLocalData } = store;
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -50,7 +50,7 @@ const UploadAudioModalContent = observer(function UploadAudioModalContent() {
     } else {
       await uploadAudioFileToS3(fileToUpload, filename);
     }
-    await createSong.mutateAsync({
+    const newSong = await createSong.mutateAsync({
       usingLocalData,
       name: songName,
       artist: artistName,
@@ -59,11 +59,7 @@ const UploadAudioModalContent = observer(function UploadAudioModalContent() {
     await utils.song.listSongs.invalidate();
     setUploading(false);
 
-    // if this is the first song to be uploaded, select it
-    if (!store.audioStore.selectedAudioFile) {
-      store.audioStore.selectedAudioFile = filename;
-    }
-
+    audioStore.selectedSong = newSong;
     onClose();
   });
 

@@ -12,6 +12,7 @@ import type MinimapPlugin from "wavesurfer.js/dist/plugins/minimap";
 import type { RegionParams } from "wavesurfer.js/dist/plugins/regions";
 import { filterData } from "@/src/types/audioPeaks";
 import { AudioRegion } from "@/src/types/AudioRegion";
+import { NO_SONG, Song } from "@/src/types/Song";
 
 export const loopRegionColor = "rgba(237, 137, 54, 0.4)";
 
@@ -24,7 +25,7 @@ interface RootStore {
 
 export class AudioStore {
   audioInitialized = false;
-  selectedAudioFile: string = "";
+  selectedSong: Song = NO_SONG;
   audioMuted = false;
 
   wavesurfer: WaveSurfer | null = null;
@@ -109,10 +110,10 @@ export class AudioStore {
     this.regionsPlugin?.addRegion(this.loopRegion);
   };
 
-  getSelectedAudioFileUrl = () =>
+  getSelectedSongUrl = () =>
     this.rootStore.usingLocalData
-      ? `${location.href}/${LOCAL_ASSET_DIRECTORY}${AUDIO_ASSET_PREFIX}${this.selectedAudioFile}`
-      : `https://${ASSET_BUCKET_NAME}.s3.${ASSET_BUCKET_REGION}.amazonaws.com/${AUDIO_ASSET_PREFIX}${this.selectedAudioFile}`;
+      ? `${location.href}/${LOCAL_ASSET_DIRECTORY}${AUDIO_ASSET_PREFIX}${this.selectedSong.filename}`
+      : `https://${ASSET_BUCKET_NAME}.s3.${ASSET_BUCKET_REGION}.amazonaws.com/${AUDIO_ASSET_PREFIX}${this.selectedSong.filename}`;
 
   // Timer relevant code - perhaps extract this to a separate file
 
@@ -170,18 +171,17 @@ export class AudioStore {
     this._lastCursor = { position: time < 0 ? 0 : time };
   }
 
-  // Serialization
+  // TODO: reimplement audio regions
+  // serialize = () => ({
+  //   selectedSong: this.selectedSong,
+  //   // audioRegions: this.regionsPlugin
+  //   //   ?.getRegions()
+  //   //   .map((region) => new AudioRegion(region).serialize()),
+  // });
 
-  serialize = () => ({
-    selectedAudioFile: this.selectedAudioFile,
-    audioRegions: this.regionsPlugin
-      ?.getRegions()
-      .map((region) => new AudioRegion(region).serialize()),
-  });
-
-  deserialize = (data: any) => {
-    this.selectedAudioFile = data.selectedAudioFile;
-    this.initialRegions =
-      data.audioRegions?.map((region: any) => new AudioRegion(region)) ?? [];
-  };
+  // deserialize = (data: any) => {
+  //   this.selectedSong = data.selectedSong;
+  //   // this.initialRegions =
+  //   //   data.audioRegions?.map((region: any) => new AudioRegion(region)) ?? [];
+  // };
 }

@@ -1,8 +1,8 @@
 import { makeAutoObservable } from "mobx";
-import initialExperience from "@/src/data/initialExperience.json";
-import emptyExperience from "@/src/data/emptyExperience.json";
 import { trpcClient } from "@/src/utils/trpc";
 import { extractPartsFromExperienceFilename } from "@/src/utils/experience";
+import { SerialExperience, EXPERIENCE_VERSION } from "@/src/types/Experience";
+import { NO_SONG } from "@/src/types/Song";
 
 // Define a new RootStore interface here so that we avoid circular dependencies
 interface RootStore {
@@ -11,8 +11,8 @@ interface RootStore {
   hasSaved: boolean;
   experienceLastSavedAt: number;
   usingLocalData: boolean;
-  serialize: () => any;
-  deserialize: (data: any) => void;
+  serialize: () => SerialExperience;
+  deserialize: (data: SerialExperience) => void;
 }
 
 export class ExperienceStore {
@@ -20,6 +20,7 @@ export class ExperienceStore {
     makeAutoObservable(this);
   }
 
+  // TODO:
   load = async (experienceFilename: string) => {
     const { experience } = await trpcClient.experience.getExperience.query({
       experienceFilename,
@@ -40,20 +41,17 @@ export class ExperienceStore {
   };
 
   loadEmptyExperience = () => {
-    this.rootStore.deserialize(emptyExperience);
+    this.rootStore.deserialize({
+      id: undefined,
+      name: `untitled ${Date.now()}`,
+      song: NO_SONG,
+      status: "inprogress",
+      version: EXPERIENCE_VERSION,
+      data: { layers: [{ patternBlocks: [] }, { patternBlocks: [] }] },
+    });
   };
 
-  loadInitialExperience = () => {
-    if (process.env.NODE_ENV === "development") {
-      this.loadEmptyExperience();
-      return;
-    }
-
-    // load initial experience from file. if you would like to change this, click the clipboard
-    // button in the UI and paste the contents into the data/initialExperience.json file.
-    this.rootStore.deserialize(initialExperience);
-  };
-
+  // TODO:
   loadFromParams = () => {
     const urlParams = new URLSearchParams(window.location.search);
     const experience = urlParams.get("experience");
@@ -73,16 +71,5 @@ export class ExperienceStore {
   copyToClipboard = () => {
     if (typeof window === "undefined") return;
     navigator.clipboard.writeText(this.stringifyExperience(true));
-  };
-
-  saveToLocalStorage = (key: string) => {
-    if (typeof window === "undefined") return;
-    window.localStorage.setItem(key, this.stringifyExperience());
-  };
-
-  loadFromLocalStorage = (key: string) => {
-    if (typeof window === "undefined") return;
-    const experience = window.localStorage.getItem(key);
-    if (experience) this.loadFromString(experience);
   };
 }

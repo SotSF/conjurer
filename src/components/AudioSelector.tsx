@@ -5,6 +5,7 @@ import { useStore } from "@/src/types/StoreContext";
 import { action } from "mobx";
 import { UploadAudioModal } from "@/src/components/UploadAudioModal";
 import { trpc } from "@/src/utils/trpc";
+import { NO_SONG, Song } from "@/src/types/Song";
 
 export const AudioSelector = observer(function AudioSelector() {
   const store = useStore();
@@ -18,19 +19,22 @@ export const AudioSelector = observer(function AudioSelector() {
     return <Spinner />;
   }
 
+  const songsWithNoSongOption: Song[] = [NO_SONG, ...songs];
   return (
     <>
       <Select
         size="xs"
         width={40}
-        value={audioStore.selectedAudioFile}
-        onChange={action(
-          (e) => (audioStore.selectedAudioFile = e.target.value)
-        )}
+        value={audioStore.selectedSong.filename}
+        onChange={action((e) => {
+          audioStore.selectedSong = songsWithNoSongOption.find(
+            (song) => song.filename === e.target.value
+          )!;
+        })}
       >
-        {songs.map(({ artist, name, filename }) => (
-          <option key={filename} value={filename}>
-            {artist} - {name}
+        {songsWithNoSongOption.map((song) => (
+          <option key={song.filename} value={song.filename}>
+            {song.artist} - {song.name}
           </option>
         ))}
       </Select>

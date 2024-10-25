@@ -252,7 +252,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
     };
 
     create();
-  }, [store.context, audioStore, audioStore.selectedAudioFile, uiStore, uiStore.pixelsPerSecond, playlistStore, cloneCanvas, timelinePluginOptions, embeddedViewer]);
+  }, [store.context, audioStore, audioStore.selectedSong, uiStore, uiStore.pixelsPerSecond, playlistStore, cloneCanvas, timelinePluginOptions, embeddedViewer]);
 
   // on selected audio file change
   useEffect(() => {
@@ -264,10 +264,10 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
         audioStore.wavesurfer &&
         wavesurferConstructors.current.TimelinePlugin &&
         wavesurferConstructors.current.MinimapPlugin &&
-        lastAudioLoaded.current !== audioStore.selectedAudioFile
+        lastAudioLoaded.current !== audioStore.selectedSong.filename
       ) {
         ready.current = false;
-        lastAudioLoaded.current = audioStore.selectedAudioFile;
+        lastAudioLoaded.current = audioStore.selectedSong.filename;
         audioStore.wavesurfer.stop();
         audioStore.setTimeWithCursor(0);
         setLoading(true);
@@ -304,18 +304,17 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
           scrollIntoView();
         });
 
-        if (!audioStore.selectedAudioFile) {
+        if (!audioStore.selectedSong.filename) {
           audioStore.wavesurfer.empty();
-          return;
+        } else {
+          // Load the new audio file
+          await audioStore.wavesurfer.load(audioStore.getSelectedSongUrl());
         }
-
-        // Load the new audio file
-        await audioStore.wavesurfer.load(audioStore.getSelectedAudioFileUrl());
       }
     };
     changeAudioFile();
     cloneCanvas();
-  }, [audioStore, audioStore.wavesurfer, audioStore.selectedAudioFile, uiStore.pixelsPerSecond, cloneCanvas, timelinePluginOptions, embeddedViewer]);
+  }, [audioStore, audioStore.wavesurfer, audioStore.selectedSong, uiStore.pixelsPerSecond, cloneCanvas, timelinePluginOptions, embeddedViewer]);
 
   // on loop toggle
   useEffect(() => {
@@ -461,7 +460,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
         startColor="gray.500"
         endColor="gray.700"
         speed={0.4}
-        isLoaded={!loading || !audioStore.selectedAudioFile}
+        isLoaded={!loading || !audioStore.selectedSong.filename}
       />
       <Box
         position="absolute"
