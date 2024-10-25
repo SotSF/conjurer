@@ -10,7 +10,7 @@ import { makeVertexShader, Varying } from "@/src/shaders/vertexShader";
 
 export type SerializedPattern = {
   name: string;
-  params: SerializedParams;
+  params?: SerializedParams;
 };
 
 export const BASE_UNIFORMS = ["u_time", "u_texture"];
@@ -66,7 +66,9 @@ export class Pattern<T extends ExtraParams = ExtraParams> {
     return pattern;
   };
 
-  serialize = (): SerializedPattern => {
+  serialize = (includeParams = false): SerializedPattern => {
+    if (!includeParams) return { name: this.name };
+
     const transferParams: SerializedParams = {};
     for (const [key, param] of Object.entries(this.params)) {
       if (BASE_UNIFORMS.includes(key)) continue;
@@ -74,7 +76,6 @@ export class Pattern<T extends ExtraParams = ExtraParams> {
         transferParams[key] = { value: param.value.serialize() };
       else transferParams[key] = { value: param.value };
     }
-
     return {
       name: this.name,
       params: transferParams,

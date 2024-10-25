@@ -404,7 +404,7 @@ export class Block<T extends ExtraParams = {}> {
 
   serialize = (): SerializedBlock => ({
     id: this.id,
-    pattern: this.pattern.serialize(),
+    pattern: this.pattern.serialize(this.store.context === "controller"),
     startTime: this.startTime,
     duration: this.duration,
     parameterVariations: this.serializeParameterVariations(),
