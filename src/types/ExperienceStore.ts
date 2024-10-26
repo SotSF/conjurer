@@ -24,7 +24,10 @@ export class ExperienceStore {
       experienceName,
       usingLocalData: this.rootStore.usingLocalData,
     });
-    if (!experience) return;
+    if (!experience) {
+      this.loadEmptyExperience();
+      return;
+    }
 
     this.rootStore.deserialize(experience);
     runInAction(() => {

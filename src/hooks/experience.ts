@@ -1,6 +1,6 @@
 import { useStore } from "@/src/types/StoreContext";
 import { trpc } from "@/src/utils/trpc";
-import { action } from "mobx";
+import { runInAction } from "mobx";
 
 export const useSaveExperience = () => {
   const store = useStore();
@@ -9,23 +9,31 @@ export const useSaveExperience = () => {
 
   const utils = trpc.useUtils();
 
-  const saveExperience = action(async () => {
-    store.hasSaved = true;
-    store.experienceLastSavedAt = Date.now();
-    saveExperienceMutation.mutate(
-      {
-        usingLocalData,
-        ...store.serialize(),
-        username: store.user,
-      },
-      {
-        onSuccess: (id) => {
-          utils.experience.listExperiences.invalidate({ username: store.user });
-          store.experienceId = id;
-        },
-      }
-    );
-  });
+  const saveExperience = async (saveMetadata?: {
+    id?: number;
+    name: string;
+  }) => {
+    const savePayload = {
+      usingLocalData,
+      ...store.serialize(),
+      username: store.user,
+    };
+    if (saveMetadata) {
+      savePayload.id = saveMetadata.id;
+      savePayload.name = saveMetadata.name;
+    }
+    // Error handling is left to the consumer of `saveExperience`
+    const savedId = await saveExperienceMutation.mutateAsync(savePayload);
+
+    runInAction(() => {
+      store.hasSaved = true;
+      store.experienceLastSavedAt = Date.now();
+      store.experienceId = savedId;
+      store.experienceName = savePayload.name;
+    });
+
+    utils.experience.listExperiences.invalidate({ username: store.user });
+  };
 
   return { saveExperience };
 };

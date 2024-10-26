@@ -84,6 +84,13 @@ export const MenuBar = observer(function MenuBar() {
         >
           {store.experienceName}
         </Heading>
+        {store.context !== "viewer" &&
+          !store.hasSaved &&
+          !store.experienceId && (
+            <Text ml={2} fontSize="sm" color="red.500" userSelect="none">
+              not yet saved
+            </Text>
+          )}
         {store.context !== "viewer" && store.hasSaved && (
           <Text fontSize="sm" color="gray.500" userSelect="none">
             {store.experienceLastSavedAt
@@ -145,7 +152,7 @@ export const MenuBar = observer(function MenuBar() {
                 <MenuItem
                   icon={<FiSave size={17} />}
                   command="⌘S"
-                  onClick={saveExperience}
+                  onClick={() => saveExperience()}
                 >
                   Save
                 </MenuItem>

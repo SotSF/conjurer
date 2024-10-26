@@ -3,6 +3,7 @@ import { z } from "zod";
 import { experiences, users, usersToExperiences } from "@/src/db/schema";
 import { eq } from "drizzle-orm";
 import { EXPERIENCE_STATUSES } from "@/src/types/Experience";
+import { TRPCError } from "@trpc/server";
 
 export const experienceRouter = router({
   listExperiences: databaseProcedure
@@ -80,7 +81,6 @@ export const experienceRouter = router({
       const { id, name, song, data, status, version } = input;
       const { id: songId } = song;
 
-      // TODO: handle case where no id is provided and there is a name conflict (shouldn't overwrite)
       const [affectedExperience] = await ctx.db
         .insert(experiences)
         .values({ id, name, songId, data, status, version })
@@ -88,8 +88,17 @@ export const experienceRouter = router({
           target: [experiences.id],
           set: { name, songId, data, status, version },
         })
+        .onConflictDoNothing({ target: [experiences.name] })
         .returning({ id: experiences.id })
         .execute();
+
+      if (!affectedExperience) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message:
+            "Could not save experience because someone has already taken that name. Experience names must be globally unique. Please try a different name.",
+        });
+      }
 
       await ctx.db
         .insert(usersToExperiences)

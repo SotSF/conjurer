@@ -3,8 +3,6 @@ import {
   Button,
   HStack,
   Input,
-  InputGroup,
-  InputLeftAddon,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -14,6 +12,7 @@ import {
   ModalOverlay,
   Spinner,
   Text,
+  useToast,
 } from "@chakra-ui/react";
 import { useStore } from "@/src/types/StoreContext";
 import { useEffect, useRef, useState } from "react";
@@ -38,33 +37,52 @@ export const SaveExperienceModal = observer(function SaveExperienceModal() {
 
   const inputRef = useRef<HTMLInputElement>(null);
   const [saving, setSaving] = useState(false);
-  const [experienceName, setExperienceName] = useState("");
-  const experienceFilename = `${user}-${experienceName}`;
+  const [newExperienceName, setNewExperienceName] = useState("");
 
   useEffect(() => {
     if (inputRef.current && !isPending) inputRef.current.focus();
   }, [isPending]);
 
+  const toast = useToast();
+
+  if (isError) return null;
+
   const onClose = action(() => (uiStore.showingSaveExperienceModal = false));
 
-  const onSaveExperience = action(async () => {
+  const onSaveExperience = async () => {
     setSaving(true);
-    store.experienceName = experienceName;
-    await saveExperience();
+    try {
+      await saveExperience({ name: newExperienceName });
+    } catch (e: any) {
+      toast({
+        title: "Failed to save experience",
+        description: e && e.message,
+        status: "error",
+        duration: 15_000,
+        isClosable: true,
+      });
+
+      console.error(e);
+      setSaving(false);
+      return;
+    }
+
     setSaving(false);
     onClose();
-  });
+  };
 
   const onExperienceNameChange = (newValue: string) => {
     // sanitize file name
     newValue = newValue.replace(/[^a-z0-9]/gi, "-").toLowerCase();
-    setExperienceName(newValue);
+    setNewExperienceName(newValue);
   };
 
-  if (isError) return null;
-
   const willOverwriteExistingExperience = (experiences ?? []).some(
-    ({ name }) => name === experienceFilename
+    ({ name }) => name === newExperienceName
+  );
+
+  const sortedExperiences = (experiences ?? []).sort((a, b) =>
+    a.name.localeCompare(b.name)
   );
 
   return (
@@ -84,25 +102,22 @@ export const SaveExperienceModal = observer(function SaveExperienceModal() {
             ) : (
               <>
                 <HStack mb={2} spacing={0}>
-                  <InputGroup>
-                    <InputLeftAddon pr={1}>{user}-</InputLeftAddon>
-                    <Input
-                      ref={inputRef}
-                      onChange={(e) => onExperienceNameChange(e.target.value)}
-                      value={experienceName}
-                    />
-                  </InputGroup>
+                  <Input
+                    ref={inputRef}
+                    onChange={(e) => onExperienceNameChange(e.target.value)}
+                    value={newExperienceName}
+                  />
                 </HStack>
                 {experiences.length > 0 && (
-                  <Text mb={4}>
-                    Be aware that you may overwrite an existing experience:
+                  <Text my={4}>
+                    You cannot choose the name of an existing experience:
                   </Text>
                 )}
-                {experiences.map((experience) => (
+                {sortedExperiences.map((experience) => (
                   <Text
                     key={experience.name}
                     color={
-                      experience.name === experienceFilename
+                      experience.name === newExperienceName
                         ? "orange.400"
                         : "chakra-body-text"
                     }
@@ -119,17 +134,12 @@ export const SaveExperienceModal = observer(function SaveExperienceModal() {
         </ModalBody>
         <ModalFooter>
           <Button
-            isDisabled={saving || !experienceName}
-            onClick={() => onSaveExperience()}
-            colorScheme={willOverwriteExistingExperience ? "red" : "gray"}
+            isDisabled={
+              saving || !newExperienceName || willOverwriteExistingExperience
+            }
+            onClick={onSaveExperience}
           >
-            {saving ? (
-              <Spinner />
-            ) : willOverwriteExistingExperience ? (
-              "Overwrite"
-            ) : (
-              "Save"
-            )}
+            {saving ? <Spinner /> : "Save"}
           </Button>
         </ModalFooter>
       </ModalContent>

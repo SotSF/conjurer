@@ -133,6 +133,7 @@ export class UIStore {
     this.snappingToBeatGrid = !this.snappingToBeatGrid;
   };
 
+  // TODO: can be removed when authentication is implemented
   attemptShowOpenExperienceModal = () => {
     if (!this.rootStore.user) {
       this.showingUserPickerModal = true;

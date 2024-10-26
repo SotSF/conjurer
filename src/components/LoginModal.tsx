@@ -37,7 +37,10 @@ export const LoginModal = observer(function LoginModal() {
 
   const createUser = trpc.user.createUser.useMutation();
 
-  const onClose = action(() => (uiStore.showingUserPickerModal = false));
+  const onClose = action(() => {
+    uiStore.showingUserPickerModal = false;
+    setNewUser("");
+  });
 
   if (isError) return null;
 
@@ -69,6 +72,7 @@ export const LoginModal = observer(function LoginModal() {
                     width="100%"
                     onClick={action(() => {
                       store.user = user.username;
+                      experienceStore.loadEmptyExperience();
                       store.uiStore.showPendingModal();
                       onClose();
                     })}
@@ -94,7 +98,6 @@ export const LoginModal = observer(function LoginModal() {
                     username: newUser,
                   });
                   store.user = newUser;
-                  setNewUser("");
                   experienceStore.loadEmptyExperience();
                   onClose();
                 })}
