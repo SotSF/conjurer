@@ -81,18 +81,25 @@ export const experienceRouter = router({
       const { id, name, song, data, status, version } = input;
       const { id: songId } = song;
 
-      const [affectedExperience] = await ctx.db
+      if (id) {
+        // If an id is provided then we are updating an existing experience
+        await ctx.db
+          .update(experiences)
+          .set({ name, songId, data, status, version })
+          .where(eq(experiences.id, id))
+          .execute();
+        return id;
+      }
+
+      // If no id is provided then we are inserting a new experience
+      const [updatedExperience] = await ctx.db
         .insert(experiences)
-        .values({ id, name, songId, data, status, version })
-        .onConflictDoUpdate({
-          target: [experiences.id],
-          set: { name, songId, data, status, version },
-        })
+        .values({ name, songId, data, status, version })
         .onConflictDoNothing({ target: [experiences.name] })
         .returning({ id: experiences.id })
         .execute();
 
-      if (!affectedExperience) {
+      if (!updatedExperience) {
         throw new TRPCError({
           code: "BAD_REQUEST",
           message:
@@ -104,12 +111,12 @@ export const experienceRouter = router({
         .insert(usersToExperiences)
         .values({
           userId: ctx.user.id,
-          experienceId: affectedExperience.id,
+          experienceId: updatedExperience.id,
         })
         .onConflictDoNothing()
         .execute();
 
-      return affectedExperience.id;
+      return updatedExperience.id;
     }),
 
   getExperience: databaseProcedure

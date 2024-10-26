@@ -12,7 +12,6 @@ import {
   ModalOverlay,
   Spinner,
   Text,
-  useToast,
 } from "@chakra-ui/react";
 import { useStore } from "@/src/types/StoreContext";
 import { useEffect, useRef, useState } from "react";
@@ -43,8 +42,6 @@ export const SaveExperienceModal = observer(function SaveExperienceModal() {
     if (inputRef.current && !isPending) inputRef.current.focus();
   }, [isPending]);
 
-  const toast = useToast();
-
   if (isError) return null;
 
   const onClose = action(() => (uiStore.showingSaveExperienceModal = false));
@@ -54,15 +51,6 @@ export const SaveExperienceModal = observer(function SaveExperienceModal() {
     try {
       await saveExperience({ name: newExperienceName });
     } catch (e: any) {
-      toast({
-        title: "Failed to save experience",
-        description: e && e.message,
-        status: "error",
-        duration: 15_000,
-        isClosable: true,
-      });
-
-      console.error(e);
       setSaving(false);
       return;
     }

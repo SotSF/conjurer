@@ -107,7 +107,16 @@ export const MenuBar = observer(function MenuBar() {
             variant="ghost"
             size="sm"
             color={store.usingLocalData ? "orange.500" : "green.500"}
-            onClick={store.toggleUsingLocalData}
+            onClick={() => {
+              if (
+                confirm(
+                  "Switching data sources requires reloading the page - are you sure?"
+                )
+              ) {
+                store.toggleUsingLocalData();
+                window.location.reload();
+              }
+            }}
           >
             {store.usingLocalData ? "using local data" : "using prod data"}
           </Button>

@@ -65,21 +65,23 @@ export const LoginModal = observer(function LoginModal() {
           <ModalBody>
             <VStack alignItems="center">
               {!isPending &&
-                users.map((user) => (
-                  <Button
-                    key={user.id}
-                    leftIcon={<FaUser />}
-                    width="100%"
-                    onClick={action(() => {
-                      store.user = user.username;
-                      experienceStore.loadEmptyExperience();
-                      store.uiStore.showPendingModal();
-                      onClose();
-                    })}
-                  >
-                    {user.username}
-                  </Button>
-                ))}
+                users
+                  .filter(({ username }) => username !== user)
+                  .map((user) => (
+                    <Button
+                      key={user.id}
+                      leftIcon={<FaUser />}
+                      width="100%"
+                      onClick={action(() => {
+                        store.user = user.username;
+                        experienceStore.loadEmptyExperience();
+                        store.uiStore.showingOpenExperienceModal = true;
+                        onClose();
+                      })}
+                    >
+                      {user.username}
+                    </Button>
+                  ))}
             </VStack>
 
             <Text my={4}>Click a name above or type a new name:</Text>

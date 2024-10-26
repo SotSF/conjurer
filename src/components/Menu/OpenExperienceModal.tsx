@@ -15,6 +15,7 @@ import {
 import { useStore } from "@/src/types/StoreContext";
 import { action } from "mobx";
 import { trpc } from "@/src/utils/trpc";
+import { GiSparkles } from "react-icons/gi";
 
 export const OpenExperienceModal = observer(function OpenExperienceModal() {
   const store = useStore();
@@ -34,11 +35,7 @@ export const OpenExperienceModal = observer(function OpenExperienceModal() {
   if (isError) return null;
 
   return (
-    <Modal
-      onClose={onClose}
-      isOpen={uiStore.showingOpenExperienceModal}
-      isCentered
-    >
+    <Modal onClose={onClose} isOpen={uiStore.showingOpenExperienceModal}>
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>
@@ -50,11 +47,12 @@ export const OpenExperienceModal = observer(function OpenExperienceModal() {
             <Text color="gray.400">{user} has no saved experiences yet!</Text>
           )}
           {!isPending && (
-            <VStack align="flex-start" spacing={0}>
+            <VStack alignItems="center">
               {experiences.map((experience) => (
                 <Button
                   key={experience.name}
-                  variant="ghost"
+                  leftIcon={<GiSparkles />}
+                  width="100%"
                   onClick={action(() => {
                     experienceStore.load(experience.name);
                     onClose();

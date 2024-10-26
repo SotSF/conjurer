@@ -1,5 +1,6 @@
 import { useStore } from "@/src/types/StoreContext";
 import { trpc } from "@/src/utils/trpc";
+import { useToast } from "@chakra-ui/react";
 import { runInAction } from "mobx";
 
 export const useSaveExperience = () => {
@@ -8,6 +9,7 @@ export const useSaveExperience = () => {
   const saveExperienceMutation = trpc.experience.saveExperience.useMutation();
 
   const utils = trpc.useUtils();
+  const toast = useToast();
 
   const saveExperience = async (saveMetadata?: {
     id?: number;
@@ -22,14 +24,34 @@ export const useSaveExperience = () => {
       savePayload.id = saveMetadata.id;
       savePayload.name = saveMetadata.name;
     }
-    // Error handling is left to the consumer of `saveExperience`
-    const savedId = await saveExperienceMutation.mutateAsync(savePayload);
+
+    let savedId;
+    try {
+      savedId = await saveExperienceMutation.mutateAsync(savePayload);
+    } catch (e: any) {
+      console.error(e);
+      toast({
+        title: "Failed to save experience",
+        description: e && e.message,
+        status: "error",
+        duration: 15_000,
+        isClosable: true,
+      });
+      throw e;
+    }
 
     runInAction(() => {
       store.hasSaved = true;
       store.experienceLastSavedAt = Date.now();
       store.experienceId = savedId;
       store.experienceName = savePayload.name;
+    });
+
+    toast({
+      title: "Experience saved",
+      status: "success",
+      duration: 3000,
+      isClosable: true,
     });
 
     utils.experience.listExperiences.invalidate({ username: store.user });
