@@ -56,6 +56,7 @@ export const SaveExperienceModal = observer(function SaveExperienceModal() {
     }
 
     setSaving(false);
+    setNewExperienceName("");
     onClose();
   };
 
@@ -123,7 +124,10 @@ export const SaveExperienceModal = observer(function SaveExperienceModal() {
         <ModalFooter>
           <Button
             isDisabled={
-              saving || !newExperienceName || willOverwriteExistingExperience
+              saving ||
+              !newExperienceName ||
+              newExperienceName === "untitled" ||
+              willOverwriteExistingExperience
             }
             onClick={onSaveExperience}
           >

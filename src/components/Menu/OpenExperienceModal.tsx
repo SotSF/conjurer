@@ -35,7 +35,11 @@ export const OpenExperienceModal = observer(function OpenExperienceModal() {
   if (isError) return null;
 
   return (
-    <Modal onClose={onClose} isOpen={uiStore.showingOpenExperienceModal}>
+    <Modal
+      onClose={onClose}
+      isOpen={uiStore.showingOpenExperienceModal}
+      isCentered
+    >
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>

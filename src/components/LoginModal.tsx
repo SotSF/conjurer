@@ -55,7 +55,11 @@ export const LoginModal = observer(function LoginModal() {
         {user || "Log in"}
       </Button>
 
-      <Modal isOpen={uiStore.showingUserPickerModal} onClose={onClose}>
+      <Modal
+        isOpen={uiStore.showingUserPickerModal}
+        onClose={onClose}
+        isCentered
+      >
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>

@@ -15,6 +15,13 @@ export const useSaveExperience = () => {
     id?: number;
     name: string;
   }) => {
+    if ((saveMetadata?.name ?? store.experienceName) === "untitled") {
+      runInAction(() => {
+        store.uiStore.showingSaveExperienceModal = true;
+      });
+      return;
+    }
+
     const savePayload = {
       usingLocalData,
       ...store.serialize(),

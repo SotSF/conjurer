@@ -39,7 +39,7 @@ export class ExperienceStore {
   loadEmptyExperience = () => {
     this.rootStore.deserialize({
       id: undefined,
-      name: `untitled ${Date.now()}`,
+      name: "untitled",
       song: NO_SONG,
       status: "inprogress",
       version: EXPERIENCE_VERSION,

@@ -57,7 +57,7 @@ export const PatternTimingModal = observer(function PatternTimingModal({
         onClick={onOpen}
       />
 
-      <Modal isOpen={isOpen} onClose={onClose}>
+      <Modal isOpen={isOpen} onClose={onClose} isCentered>
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>Adjust Pattern Timing</ModalHeader>

@@ -72,6 +72,7 @@ export const PresetButton = observer(function PresetButton({
         <Modal
           isOpen={showingEditModal}
           onClose={() => setShowingEditModal(false)}
+          isCentered
         >
           <ModalOverlay />
           <ModalContent>

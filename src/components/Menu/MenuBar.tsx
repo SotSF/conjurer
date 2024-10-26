@@ -53,6 +53,7 @@ export const MenuBar = observer(function MenuBar() {
       <Modal
         isOpen={isKeyboardShortcutsOpen}
         onClose={onCloseKeyboardShortcuts}
+        isCentered
       >
         <ModalOverlay />
         <ModalContent>
