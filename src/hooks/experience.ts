@@ -32,7 +32,7 @@ export const useSaveExperience = () => {
       savePayload.name = saveMetadata.name;
     }
 
-    let savedId;
+    let savedId: number;
     try {
       savedId = await saveExperienceMutation.mutateAsync(savePayload);
     } catch (e: any) {
