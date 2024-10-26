@@ -1,20 +1,9 @@
-import * as fs from "fs";
-import {
-  publicProcedure,
-  router,
-  withDatabaseProcedure,
-} from "@/src/server/trpc";
-import { GetObjectCommand } from "@aws-sdk/client-s3";
-import {
-  ASSET_BUCKET_NAME,
-  EXPERIENCE_ASSET_PREFIX,
-  LOCAL_ASSET_PATH,
-} from "@/src/utils/assets";
+import { router, withDatabaseProcedure } from "@/src/server/trpc";
 import { z } from "zod";
-import { getS3 } from "@/src/utils/s3";
 import { experiences, users, usersToExperiences } from "@/src/db/schema";
 import { eq } from "drizzle-orm";
 import { TRPCClientError } from "@trpc/client";
+import { EXPERIENCE_STATUSES } from "@/src/types/Experience";
 
 export const experienceRouter = router({
   listExperiences: withDatabaseProcedure
@@ -62,16 +51,19 @@ export const experienceRouter = router({
         .execute();
       if (!user) return [];
 
-      return await ctx.db.query.experiences
-        .findMany({
-          columns: { name: true },
-          with: {
-            usersToExperiences: {
-              where: eq(users.id, user.id),
+      return (
+        await ctx.db.query.usersToExperiences
+          .findMany({
+            where: eq(usersToExperiences.userId, user.id),
+            columns: {},
+            with: {
+              experience: {
+                columns: { id: true, name: true },
+              },
             },
-          },
-        })
-        .execute();
+          })
+          .execute()
+      ).map(({ experience }) => experience);
     }),
 
   saveExperience: withDatabaseProcedure
@@ -81,7 +73,7 @@ export const experienceRouter = router({
         name: z.string(),
         song: z.object({ id: z.number() }),
         data: z.any(),
-        status: z.string(),
+        status: z.enum(EXPERIENCE_STATUSES),
         version: z.number(),
         username: z.string(),
       })
@@ -122,36 +114,19 @@ export const experienceRouter = router({
       return affectedExperience.id;
     }),
 
-  getExperience: publicProcedure
+  getExperience: withDatabaseProcedure
     .input(
       z.object({
-        experienceFilename: z.string(),
+        experienceName: z.string(),
         usingLocalData: z.boolean(),
       })
     )
-    .query(async ({ input }) => {
-      if (input.usingLocalData) {
-        const experience = fs
-          .readFileSync(
-            `${LOCAL_ASSET_PATH}${EXPERIENCE_ASSET_PREFIX}${input.experienceFilename}.json`
-          )
-          .toString();
-        return { experience };
-      }
-
-      const getObjectCommand = new GetObjectCommand({
-        Bucket: ASSET_BUCKET_NAME,
-        Key: `${EXPERIENCE_ASSET_PREFIX}${input.experienceFilename}.json`,
-        ResponseCacheControl: "no-store",
-      });
-
-      try {
-        const experienceData = await getS3().send(getObjectCommand);
-        const experienceString = await experienceData.Body?.transformToString();
-        return { experience: experienceString ?? "" };
-      } catch (err) {
-        console.log(err);
-        return { experience: "" };
-      }
+    .query(async ({ ctx, input }) => {
+      return await ctx.db.query.experiences
+        .findFirst({
+          with: { song: true },
+          where: eq(experiences.name, input.experienceName),
+        })
+        .execute();
     }),
 });

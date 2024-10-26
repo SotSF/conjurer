@@ -1,3 +1,4 @@
+import type { ExperienceStatus } from "@/src/types/Experience";
 import { relations, sql } from "drizzle-orm";
 import {
   index,
@@ -65,7 +66,10 @@ export const experiences = sqliteTable(
     id: integer("id").primaryKey(),
     name: text("name").unique().notNull(),
     songId: integer("song_id").notNull(),
-    status: text("status").notNull().default("inprogress"),
+    status: text("status")
+      .$type<ExperienceStatus>()
+      .notNull()
+      .default("inprogress"),
     data: text({ mode: "json" }).notNull(),
     version: integer("version").notNull().default(0),
 

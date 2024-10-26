@@ -13,7 +13,7 @@ import { PlaygroundStore } from "@/src/types/PlaygroundStore";
 import { setupControllerWebsocket } from "@/src/websocket/controllerWebsocket";
 import { setupVoiceCommandWebsocket } from "@/src/websocket/voiceCommandWebsocket";
 import { ExperienceStatus, SerialExperience } from "@/src/types/Experience";
-import { Song } from "@/src/types/Song";
+import { NO_SONG, Song } from "@/src/types/Song";
 
 // Enforce MobX strict mode, which can make many noisy console warnings, but can help use learn MobX better.
 // Feel free to comment out the following if you want to silence the console messages.
@@ -517,13 +517,14 @@ export class Store {
   deserialize = (experience: SerialExperience) => {
     this.experienceId = experience.id;
     this.experienceName = experience.name;
-    this.audioStore.selectedSong = experience.song;
+    this.audioStore.selectedSong = experience.song || NO_SONG;
     this.experienceStatus = experience.status;
     this.experienceVersion = experience.version;
     this.layers = experience.data.layers.map((l: any) =>
       Layer.deserialize(this, l)
     );
 
+    // Select first layer
     this.selectedLayer = this.layers[0];
   };
 }

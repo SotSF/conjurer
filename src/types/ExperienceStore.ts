@@ -1,6 +1,5 @@
 import { makeAutoObservable } from "mobx";
 import { trpcClient } from "@/src/utils/trpc";
-import { extractPartsFromExperienceFilename } from "@/src/utils/experience";
 import { SerialExperience, EXPERIENCE_VERSION } from "@/src/types/Experience";
 import { NO_SONG } from "@/src/types/Song";
 
@@ -20,22 +19,19 @@ export class ExperienceStore {
     makeAutoObservable(this);
   }
 
-  // TODO:
-  load = async (experienceFilename: string) => {
-    const { experience } = await trpcClient.experience.getExperience.query({
-      experienceFilename,
+  load = async (experienceName: string) => {
+    const experience = await trpcClient.experience.getExperience.query({
+      experienceName,
       usingLocalData: this.rootStore.usingLocalData,
     });
+    if (!experience) return;
 
-    const { user, experienceName } =
-      extractPartsFromExperienceFilename(experienceFilename);
-    this.rootStore.user = user;
-    this.rootStore.experienceName = experienceName;
+    this.rootStore.deserialize(experience);
     this.rootStore.hasSaved = false;
     this.rootStore.experienceLastSavedAt = Date.now();
-    this.loadFromString(experience);
   };
 
+  // TODO:
   loadFromString = (experienceString: string) => {
     this.rootStore.deserialize(JSON.parse(experienceString));
   };
