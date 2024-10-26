@@ -12,7 +12,11 @@ import { BeatMapStore } from "@/src/types/BeatMapStore";
 import { PlaygroundStore } from "@/src/types/PlaygroundStore";
 import { setupControllerWebsocket } from "@/src/websocket/controllerWebsocket";
 import { setupVoiceCommandWebsocket } from "@/src/websocket/voiceCommandWebsocket";
-import { ExperienceStatus, SerialExperience } from "@/src/types/Experience";
+import {
+  EXPERIENCE_VERSION,
+  ExperienceStatus,
+  SerialExperience,
+} from "@/src/types/Experience";
 import { NO_SONG } from "@/src/types/Song";
 
 // Enforce MobX strict mode, which can make many noisy console warnings, but can help use learn MobX better.
@@ -63,7 +67,7 @@ export class Store {
     localStorage.setItem("globalIntensity", String(value));
   }
 
-  private _usingLocalData = process.env.NODE_ENV !== "production";
+  private _usingLocalData = process.env.NEXT_PUBLIC_NODE_ENV !== "production";
   get usingLocalData(): boolean {
     return this._usingLocalData;
   }
@@ -122,7 +126,7 @@ export class Store {
 
   hasSaved = false;
   experienceLastSavedAt = 0;
-  experienceVersion = 1;
+  experienceVersion = EXPERIENCE_VERSION;
   experienceStatus: ExperienceStatus = "inprogress";
   experienceId: number | undefined = undefined;
 
@@ -154,7 +158,8 @@ export class Store {
     if (this.initializedClientSide) return;
     this.initializedClientSide = true;
 
-    setupVoiceCommandWebsocket(this);
+    if (process.env.NEXT_PUBLIC_ENABLE_VOICE === "true")
+      setupVoiceCommandWebsocket(this);
 
     if (this.context === "controller") {
       this.playgroundStore.initialize();
@@ -189,7 +194,7 @@ export class Store {
 
     // check for a usingLocalData in local storage (not honored in production)
     const usingLocalData = localStorage.getItem("usingLocalData");
-    if (usingLocalData && process.env.NODE_ENV !== "production")
+    if (usingLocalData && process.env.NEXT_PUBLIC_NODE_ENV !== "production")
       this._usingLocalData = usingLocalData === "true";
 
     // check for an experience name in local storage

@@ -69,7 +69,9 @@ const UploadAudioModalContent = observer(function UploadAudioModalContent() {
       <ModalCloseButton />
       <ModalBody>
         <>
-          <Text mb={4}>Select an audio file from your computer to upload.</Text>
+          <Text mb={4}>
+            Select an MP3 audio file from your computer to upload.
+          </Text>
           <Input
             ref={inputRef}
             type="file"

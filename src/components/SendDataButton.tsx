@@ -6,7 +6,7 @@ import { useStore } from "@/src/types/StoreContext";
 export const SendDataButton = observer(function SendDataButton() {
   const store = useStore();
 
-  if (process.env.NODE_ENV === "production") return null;
+  if (process.env.NEXT_PUBLIC_NODE_ENV === "production") return null;
 
   return (
     <IconButton

@@ -103,7 +103,7 @@ export const MenuBar = observer(function MenuBar() {
               : "not yet saved"}
           </Text>
         )}
-        {process.env.NODE_ENV !== "production" && (
+        {process.env.NEXT_PUBLIC_NODE_ENV !== "production" && (
           <Button
             variant="ghost"
             size="sm"
