@@ -22,7 +22,7 @@ import { trpc } from "@/src/utils/trpc";
 
 export const LoginModal = observer(function LoginModal() {
   const store = useStore();
-  const { uiStore, user, usingLocalData } = store;
+  const { experienceStore, uiStore, user, usingLocalData } = store;
 
   const [newUser, setNewUser] = useState("");
 
@@ -95,7 +95,7 @@ export const LoginModal = observer(function LoginModal() {
                   });
                   store.user = newUser;
                   setNewUser("");
-                  store.newExperience();
+                  experienceStore.loadEmptyExperience();
                   onClose();
                 })}
               >

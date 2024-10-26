@@ -209,12 +209,6 @@ export class Store {
     this.usingLocalData = !this.usingLocalData;
   };
 
-  newExperience = () => {
-    this.hasSaved = false;
-    this.experienceLastSavedAt = 0;
-    this.experienceStore.loadEmptyExperience();
-  };
-
   selectBlock = (block: Block) => {
     this.selectedBlocksOrVariations = new Set([{ type: "block", block }]);
   };

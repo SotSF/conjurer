@@ -129,7 +129,7 @@ export const MenuBar = observer(function MenuBar() {
                 <MenuItem
                   icon={<FaFile size={17} />}
                   command="⌘N"
-                  onClick={store.newExperience}
+                  onClick={experienceStore.loadEmptyExperience}
                 >
                   New experience
                 </MenuItem>

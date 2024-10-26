@@ -1,4 +1,4 @@
-import { makeAutoObservable } from "mobx";
+import { makeAutoObservable, runInAction } from "mobx";
 import { trpcClient } from "@/src/utils/trpc";
 import { SerialExperience, EXPERIENCE_VERSION } from "@/src/types/Experience";
 import { NO_SONG } from "@/src/types/Song";
@@ -27,9 +27,10 @@ export class ExperienceStore {
     if (!experience) return;
 
     this.rootStore.deserialize(experience);
-    this.rootStore.experienceName = experienceName;
-    this.rootStore.hasSaved = false;
-    this.rootStore.experienceLastSavedAt = Date.now();
+    runInAction(() => {
+      this.rootStore.hasSaved = false;
+      this.rootStore.experienceLastSavedAt = Date.now();
+    });
   };
 
   loadEmptyExperience = () => {
@@ -41,6 +42,9 @@ export class ExperienceStore {
       version: EXPERIENCE_VERSION,
       data: { layers: [{ patternBlocks: [] }, { patternBlocks: [] }] },
     });
+
+    this.rootStore.hasSaved = false;
+    this.rootStore.experienceLastSavedAt = 0;
   };
 
   loadFromParams = () => {

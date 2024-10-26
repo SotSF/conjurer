@@ -10,7 +10,6 @@ import { TimelineLayer } from "@/src/components/TimelineLayer";
 import { TimerReadout } from "@/src/components/TimerReadout";
 import { MarkerEditorModal } from "@/src/components/MarkerEditorModal";
 import { TimerControls } from "@/src/components/TimerControls";
-import { BeatGrid } from "@/src/components/BeatGrid";
 import { BeatGridOverlay } from "@/src/components/BeatGridOverlay";
 
 export const Timeline = observer(function Timeline() {
