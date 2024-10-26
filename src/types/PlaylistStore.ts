@@ -3,9 +3,10 @@ import initialPlaylist from "@/src/data/initialPlaylist.json";
 import { ExperienceStore } from "@/src/types/ExperienceStore";
 import { AudioStore } from "@/src/types/AudioStore";
 
+// TODO: fix for migration
 // Define a new RootStore interface here so that we avoid circular dependencies
 interface RootStore {
-  experienceFilename: string;
+  experienceName: string;
   play: () => void;
   pause: () => void;
 }
@@ -57,7 +58,7 @@ export class PlaylistStore {
   loadAndPlayExperience = async (experienceFilename: string) => {
     this.rootStore.pause();
 
-    if (this.rootStore.experienceFilename === experienceFilename) {
+    if (this.rootStore.experienceName === experienceFilename) {
       this.audioStore.setTimeWithCursor(0);
       this.rootStore.play();
       return;
@@ -78,7 +79,7 @@ export class PlaylistStore {
 
   playNextExperience = async () => {
     const currentIndex = this.experienceFilenames.indexOf(
-      this.rootStore.experienceFilename
+      this.rootStore.experienceName
     );
     if (currentIndex < 0) return;
 

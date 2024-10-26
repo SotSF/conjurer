@@ -1,12 +1,12 @@
-import { router, withDatabaseProcedure } from "@/src/server/trpc";
+import { router, databaseProcedure } from "@/src/server/trpc";
 import { users } from "@/src/db/schema";
 import { z } from "zod";
 
 export const userRouter = router({
-  listUsers: withDatabaseProcedure.query(async ({ ctx }) => {
+  listUsers: databaseProcedure.query(async ({ ctx }) => {
     return await ctx.db.select().from(users).execute();
   }),
-  createUser: withDatabaseProcedure
+  createUser: databaseProcedure
     .input(
       z.object({
         username: z.string(),

@@ -1,12 +1,11 @@
-import { router, withDatabaseProcedure } from "@/src/server/trpc";
+import { router, databaseProcedure, userProcedure } from "@/src/server/trpc";
 import { z } from "zod";
 import { experiences, users, usersToExperiences } from "@/src/db/schema";
 import { eq } from "drizzle-orm";
-import { TRPCClientError } from "@trpc/client";
 import { EXPERIENCE_STATUSES } from "@/src/types/Experience";
 
 export const experienceRouter = router({
-  listExperiences: withDatabaseProcedure
+  listExperiences: databaseProcedure
     .input(
       z.object({
         username: z.string().optional(),
@@ -66,7 +65,7 @@ export const experienceRouter = router({
       ).map(({ experience }) => experience);
     }),
 
-  saveExperience: withDatabaseProcedure
+  saveExperience: userProcedure
     .input(
       z.object({
         id: z.number().optional(),
@@ -75,21 +74,11 @@ export const experienceRouter = router({
         data: z.any(),
         status: z.enum(EXPERIENCE_STATUSES),
         version: z.number(),
-        username: z.string(),
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const { id, name, song, data, status, version, username } = input;
+      const { id, name, song, data, status, version } = input;
       const { id: songId } = song;
-
-      // TODO: incorporate this as middleware
-      const user = await ctx.db.query.users
-        .findFirst({ where: eq(users.username, username) })
-        .execute();
-
-      if (!user) {
-        throw new TRPCClientError("User not found");
-      }
 
       // TODO: handle case where no id is provided and there is a name conflict (shouldn't overwrite)
       const [affectedExperience] = await ctx.db
@@ -105,7 +94,7 @@ export const experienceRouter = router({
       await ctx.db
         .insert(usersToExperiences)
         .values({
-          userId: user.id,
+          userId: ctx.user.id,
           experienceId: affectedExperience.id,
         })
         .onConflictDoNothing()
@@ -114,7 +103,7 @@ export const experienceRouter = router({
       return affectedExperience.id;
     }),
 
-  getExperience: withDatabaseProcedure
+  getExperience: databaseProcedure
     .input(
       z.object({
         experienceName: z.string(),

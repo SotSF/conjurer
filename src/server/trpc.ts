@@ -3,6 +3,8 @@ import { getLocalDatabase } from "@/src/db/local";
 import { TRPCClientError } from "@trpc/client";
 import { initTRPC } from "@trpc/server";
 import { z } from "zod";
+import { eq } from "drizzle-orm";
+import { users } from "@/src/db/schema";
 
 const t = initTRPC.create();
 
@@ -10,22 +12,21 @@ const t = initTRPC.create();
 export const router = t.router;
 export const publicProcedure = t.procedure;
 
-// TODO: later on call this authedProcedure
-export const withDatabaseProcedure = publicProcedure
+export const databaseProcedure = publicProcedure
   .input(
     z.object({
       usingLocalData: z.boolean(),
     })
   )
-  .use(async (opts) => {
-    const { usingLocalData } = opts.input;
+  .use(async ({ input, next }) => {
+    const { usingLocalData } = input;
 
     if (usingLocalData && process.env.NODE_ENV === "production") {
       throw new TRPCClientError("Local database cannot be used in production");
     }
 
     try {
-      return opts.next({
+      return next({
         ctx: {
           db: usingLocalData ? getLocalDatabase() : getProdDatabase(),
         },
@@ -34,4 +35,25 @@ export const withDatabaseProcedure = publicProcedure
       console.error(e);
       throw new TRPCClientError("Database connection error, check log");
     }
+  });
+
+// TODO: later on call this authedProcedure
+export const userProcedure = databaseProcedure
+  .input(
+    z.object({
+      username: z.string(),
+    })
+  )
+  .use(async ({ ctx, input, next }) => {
+    const { username } = input;
+
+    const user = await ctx.db.query.users
+      .findFirst({ where: eq(users.username, username) })
+      .execute();
+
+    if (!user) {
+      throw new TRPCClientError("User not found");
+    }
+
+    return next({ ctx: { ...ctx, user } });
   });

@@ -1,12 +1,12 @@
-import { router, withDatabaseProcedure } from "@/src/server/trpc";
+import { router, databaseProcedure } from "@/src/server/trpc";
 import { songs } from "@/src/db/schema";
 import { z } from "zod";
 
 export const songRouter = router({
-  listSongs: withDatabaseProcedure.query(async ({ ctx }) => {
+  listSongs: databaseProcedure.query(async ({ ctx }) => {
     return await ctx.db.select().from(songs).execute();
   }),
-  createSong: withDatabaseProcedure
+  createSong: databaseProcedure
     .input(
       z.object({
         name: z.string(),

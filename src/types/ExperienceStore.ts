@@ -27,13 +27,9 @@ export class ExperienceStore {
     if (!experience) return;
 
     this.rootStore.deserialize(experience);
+    this.rootStore.experienceName = experienceName;
     this.rootStore.hasSaved = false;
     this.rootStore.experienceLastSavedAt = Date.now();
-  };
-
-  // TODO:
-  loadFromString = (experienceString: string) => {
-    this.rootStore.deserialize(JSON.parse(experienceString));
   };
 
   loadEmptyExperience = () => {
@@ -47,7 +43,6 @@ export class ExperienceStore {
     });
   };
 
-  // TODO:
   loadFromParams = () => {
     const urlParams = new URLSearchParams(window.location.search);
     const experience = urlParams.get("experience");

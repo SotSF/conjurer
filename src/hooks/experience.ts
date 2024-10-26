@@ -25,7 +25,6 @@ export const useSaveExperience = () => {
         },
       }
     );
-    utils.experience.invalidate();
   });
 
   return { saveExperience };

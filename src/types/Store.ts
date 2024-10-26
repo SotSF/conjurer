@@ -13,7 +13,7 @@ import { PlaygroundStore } from "@/src/types/PlaygroundStore";
 import { setupControllerWebsocket } from "@/src/websocket/controllerWebsocket";
 import { setupVoiceCommandWebsocket } from "@/src/websocket/voiceCommandWebsocket";
 import { ExperienceStatus, SerialExperience } from "@/src/types/Experience";
-import { NO_SONG, Song } from "@/src/types/Song";
+import { NO_SONG } from "@/src/types/Song";
 
 // Enforce MobX strict mode, which can make many noisy console warnings, but can help use learn MobX better.
 // Feel free to comment out the following if you want to silence the console messages.
@@ -120,10 +120,6 @@ export class Store {
       localStorage.setItem("experienceName", value);
   }
 
-  get experienceFilename(): string {
-    return `${this.user}-${this.experienceName}`;
-  }
-
   hasSaved = false;
   experienceLastSavedAt = 0;
   experienceVersion = 1;
@@ -196,15 +192,10 @@ export class Store {
     if (usingLocalData && process.env.NODE_ENV !== "production")
       this._usingLocalData = usingLocalData === "true";
 
-    // TODO:
-    // // check for an experience name in local storage
-    // const experienceName = localStorage.getItem("experienceName");
-    // if (experienceName) {
-    //   this._experienceName = experienceName;
-    //   this.experienceStore.load(`${this.user}-${experienceName}`);
-    // } else this.experienceStore.loadEmptyExperience();
-
-    this.experienceStore.loadEmptyExperience();
+    // check for an experience name in local storage
+    const experienceName = localStorage.getItem("experienceName");
+    if (experienceName) this.experienceStore.load(experienceName);
+    else this.experienceStore.loadEmptyExperience();
 
     this.uiStore.initialize();
   };
@@ -359,7 +350,7 @@ export class Store {
 
   copyLinkToExperience = () => {
     const url = new URL(`${window.location.origin}/viewer`);
-    url.searchParams.set("experience", this.experienceFilename);
+    url.searchParams.set("experience", this.experienceName);
     navigator.clipboard.writeText(url.toString());
   };
 
