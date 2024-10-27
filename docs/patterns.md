@@ -1,6 +1,6 @@
 # How to make a pattern
 
-Let's create a pattern called Blah. The goal will be to create a barebones pattern that we can get to hot reload as we make changes to the shader. This way, w can immediately see the effects of our cool complicated maths. Yay!
+Let's create a pattern called Blah. The goal will be to create a barebones pattern that we can get to hot reload as we make changes to the shader. This way, we can immediately see the effects of our cool complicated maths. Yay!
 
 1. Follow the usual steps to install dependencies and run the dev server:
 
