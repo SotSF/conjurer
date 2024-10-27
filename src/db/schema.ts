@@ -1,4 +1,4 @@
-import type { ExperienceStatus } from "@/src/types/Experience";
+import type { ExperienceStatus } from "../types/Experience";
 import { relations, sql } from "drizzle-orm";
 import {
   index,

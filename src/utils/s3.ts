@@ -1,4 +1,4 @@
-import { ASSET_BUCKET_REGION } from "@/src/utils/assets";
+import { ASSET_BUCKET_REGION } from "../utils/assets";
 import { S3Client } from "@aws-sdk/client-s3";
 import { fromCognitoIdentityPool } from "@aws-sdk/credential-providers";
 

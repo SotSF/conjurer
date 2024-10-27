@@ -11,9 +11,10 @@ export const AudioSelector = observer(function AudioSelector() {
   const store = useStore();
   const { uiStore, audioStore, usingLocalData } = store;
 
-  const { isPending, data: songs } = trpc.song.listSongs.useQuery({
-    usingLocalData,
-  });
+  const { isPending, data: songs } = trpc.song.listSongs.useQuery(
+    { usingLocalData },
+    { refetchOnWindowFocus: false }
+  );
 
   if (isPending || !songs) {
     return <Spinner />;
