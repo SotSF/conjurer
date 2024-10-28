@@ -49,7 +49,8 @@ Ask for credentials to the Turso dashboard to generate your own token.
 - We use [`react-icons`](https://react-icons.github.io/react-icons/search). Just search for what you want and import the icon from the correct place using the 2-letter prefix (check out other examples in this repo).
 - We use [`recharts`](https://recharts.org/en-US/api) to do some simple graphs for parameter variations.
 - We use [`wavesurfer.js`](https://wavesurfer-js.org/) for all of our audio needs.
-- We use [Turso](https://docs.turso.tech/introduction) to host our database along with [Drizzle ORM](https://orm.drizzle.team/docs/overview).
+- We use [Turso](https://docs.turso.tech/introduction) to host our production database along with [Drizzle ORM](https://orm.drizzle.team/docs/overview).
+- When running conjurer locally, we instead use a local SQLite database file (`./local.db`). You can run `yarn db:local:studio` to poke around the database via web UI to learn our data models.
 - We use [tRPC](https://trpc.io/docs/), which lets you do remote procedure calls (RPCs) from the client to the server. That means you can just write a javascript function in a router file `/src/server/routers/*Router.ts` and then call it from the client. The rest is abstracted away, so no need to fetch etc.
 
 ### Concepts
