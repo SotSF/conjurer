@@ -13,17 +13,16 @@ import { FaPause, FaPlay, FaTrashAlt } from "react-icons/fa";
 import { useState } from "react";
 import { useStore } from "@/src/types/StoreContext";
 import { observer } from "mobx-react-lite";
-import { extractPartsFromExperienceFilename } from "@/src/utils/experience";
 
 type PlaylistItemControlsProps = {
-  experienceFilename: string;
+  experienceName: string;
   index: number;
   playlistLength: number;
   editable?: boolean;
 };
 
 export const PlaylistItem = observer(function PlaylistItem({
-  experienceFilename,
+  experienceName,
   index,
   playlistLength,
   editable,
@@ -35,7 +34,7 @@ export const PlaylistItem = observer(function PlaylistItem({
   const [loadingExperience, setLoadingExperience] = useState(false);
   const onPlayClick = async () => {
     setLoadingExperience(true);
-    await playlistStore.loadAndPlayExperience(experienceFilename);
+    await playlistStore.loadAndPlayExperience(experienceName);
     setLoadingExperience(false);
   };
   const onPauseClick = () => {
@@ -43,11 +42,11 @@ export const PlaylistItem = observer(function PlaylistItem({
   };
   const onSelect = async () => {
     setLoadingExperience(true);
-    await experienceStore.load(experienceFilename);
+    await experienceStore.load(experienceName);
     setLoadingExperience(false);
   };
 
-  const isSelectedExperience = store.experienceName === experienceFilename;
+  const isSelectedExperience = store.experienceName === experienceName;
 
   const textProps = {
     color: isSelectedExperience ? "blue.400" : undefined,
@@ -56,9 +55,6 @@ export const PlaylistItem = observer(function PlaylistItem({
     _hover: { textDecoration: "underline" },
     onClick: onSelect,
   };
-
-  const { user, experienceName } =
-    extractPartsFromExperienceFilename(experienceFilename);
 
   return (
     <>
@@ -105,10 +101,6 @@ export const PlaylistItem = observer(function PlaylistItem({
             </Button>
           )}
         </HStack>
-      </Td>
-
-      <Td>
-        <Text {...textProps}>{user}</Text>
       </Td>
 
       <Td>

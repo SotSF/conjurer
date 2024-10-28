@@ -1,19 +1,19 @@
 {
-  "name": "Burning Man event playlist",
-  "experienceFilenames": [
-    "milo-cosmos",
-    "joe-penumbra",
-    "joe-dream-police",
-    "somya-for-the-uncles-and-aunties",
-    "ben-crossing-mars",
-    "ben-concerning-hobbits",
-    "joe-beetleking",
-    "ben-the-blue-whale",
-    "joe-night-jar",
-    "joe-light",
-    "joe-wandersail",
-    "ben-queen-of-all-everything",
-    "justyn-no-skin",
-    "justyn-phantom"
+  "name": "Default playlist",
+  "experienceNames": [
+    "cosmos",
+    "penumbra",
+    "dream-police",
+    "for-the-uncles-and-aunties",
+    "crossing-mars",
+    "concerning-hobbits",
+    "beetleking",
+    "the-blue-whale",
+    "night-jar",
+    "light",
+    "wandersail",
+    "queen-of-all-everything",
+    "no-skin",
+    "phantom"
   ]
 }

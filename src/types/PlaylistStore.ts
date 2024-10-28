@@ -3,7 +3,6 @@ import initialPlaylist from "@/src/data/initialPlaylist.json";
 import { ExperienceStore } from "@/src/types/ExperienceStore";
 import { AudioStore } from "@/src/types/AudioStore";
 
-// TODO: fix for migration
 // Define a new RootStore interface here so that we avoid circular dependencies
 interface RootStore {
   experienceName: string;
@@ -13,7 +12,7 @@ interface RootStore {
 
 export class PlaylistStore {
   name: string = "";
-  experienceFilenames: string[] = [];
+  experienceNames: string[] = [];
 
   autoplay = false;
 
@@ -29,42 +28,42 @@ export class PlaylistStore {
 
   initialize = () => {
     this.name = initialPlaylist.name;
-    this.experienceFilenames = initialPlaylist.experienceFilenames;
+    this.experienceNames = initialPlaylist.experienceNames;
   };
 
-  addExperience = (experienceFilename: string) => {
-    const experienceFilenames = [...this.experienceFilenames];
-    experienceFilenames.push(experienceFilename);
-    this.experienceFilenames = experienceFilenames;
+  addExperience = (experienceName: string) => {
+    const experienceNames = [...this.experienceNames];
+    experienceNames.push(experienceName);
+    this.experienceNames = experienceNames;
   };
 
   reorderExperience = (currentIndex: number, delta: number) => {
     const newIndex = currentIndex + delta;
-    if (newIndex < 0 || newIndex > this.experienceFilenames.length - 1) return;
+    if (newIndex < 0 || newIndex > this.experienceNames.length - 1) return;
 
-    const experienceFilenames = [...this.experienceFilenames];
-    const [removed] = experienceFilenames.splice(currentIndex, 1);
-    experienceFilenames.splice(newIndex, 0, removed);
+    const experienceNames = [...this.experienceNames];
+    const [removed] = experienceNames.splice(currentIndex, 1);
+    experienceNames.splice(newIndex, 0, removed);
 
-    this.experienceFilenames = experienceFilenames;
+    this.experienceNames = experienceNames;
   };
 
   removeExperience = (index: number) => {
-    const experienceFilenames = [...this.experienceFilenames];
-    experienceFilenames.splice(index, 1);
-    this.experienceFilenames = experienceFilenames;
+    const experienceNames = [...this.experienceNames];
+    experienceNames.splice(index, 1);
+    this.experienceNames = experienceNames;
   };
 
-  loadAndPlayExperience = async (experienceFilename: string) => {
+  loadAndPlayExperience = async (experienceName: string) => {
     this.rootStore.pause();
 
-    if (this.rootStore.experienceName === experienceFilename) {
+    if (this.rootStore.experienceName === experienceName) {
       this.audioStore.setTimeWithCursor(0);
       this.rootStore.play();
       return;
     }
 
-    await this.experienceStore.load(experienceFilename);
+    await this.experienceStore.load(experienceName);
     await this.playExperienceWhenReady();
   };
 
@@ -78,15 +77,15 @@ export class PlaylistStore {
     });
 
   playNextExperience = async () => {
-    const currentIndex = this.experienceFilenames.indexOf(
+    const currentIndex = this.experienceNames.indexOf(
       this.rootStore.experienceName
     );
     if (currentIndex < 0) return;
 
     const nextIndex = currentIndex + 1;
-    if (nextIndex > this.experienceFilenames.length - 1) return;
+    if (nextIndex > this.experienceNames.length - 1) return;
 
-    await this.loadAndPlayExperience(this.experienceFilenames[nextIndex]);
+    await this.loadAndPlayExperience(this.experienceNames[nextIndex]);
   };
 
   copyToClipboard = () => {
@@ -98,6 +97,6 @@ export class PlaylistStore {
 
   serialize = () => ({
     name: this.name,
-    experienceFilenames: this.experienceFilenames,
+    experienceNames: this.experienceNames,
   });
 }

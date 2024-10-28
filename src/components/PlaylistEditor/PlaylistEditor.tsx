@@ -25,7 +25,7 @@ import { AddExperienceModal } from "@/src/components/PlaylistEditor/AddExperienc
 export const PlaylistEditor = observer(function PlaylistEditor() {
   const store = useStore();
   const { playlistStore, uiStore } = store;
-  const { experienceFilenames } = playlistStore;
+  const { experienceNames } = playlistStore;
 
   const isEditable = store.context !== "viewer";
 
@@ -63,17 +63,16 @@ export const PlaylistEditor = observer(function PlaylistEditor() {
           <Thead>
             <Tr>
               <Th isNumeric>#</Th>
-              <Th>User</Th>
               <Th>Experience name</Th>
             </Tr>
           </Thead>
           <Tbody>
-            {experienceFilenames.map((experienceFilename, index) => (
-              <Tr key={experienceFilename}>
+            {experienceNames.map((experienceName, index) => (
+              <Tr key={experienceName}>
                 <PlaylistItem
-                  experienceFilename={experienceFilename}
+                  experienceName={experienceName}
                   index={index}
-                  playlistLength={experienceFilenames.length}
+                  playlistLength={experienceNames.length}
                   editable={isEditable}
                 />
               </Tr>

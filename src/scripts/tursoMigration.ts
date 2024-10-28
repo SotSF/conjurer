@@ -3,7 +3,6 @@ import { ASSET_BUCKET_NAME, EXPERIENCE_ASSET_PREFIX } from "../utils/assets";
 import { getS3 } from "../utils/s3";
 import { getLocalDatabase } from "../db/local";
 import * as schema from "../db/schema";
-import { extractPartsFromExperienceFilename } from "../utils/experience";
 
 const songMap: Record<
   string,
@@ -83,6 +82,17 @@ const songMap: Record<
   "tycho-a-walk.mp3": { artist: "Tycho", song: "A Walk" },
   "vanille-fraise.mp3": { artist: "L'Impératrice", song: "Vanille Fraise" },
   "zhu-only.mp3": { artist: "ZHU", song: "Only" },
+};
+
+// Experience filename format: <user>-<experienceName>.json
+const extractPartsFromExperienceFilename = (
+  filename: string
+): { user: string; experienceName: string } => {
+  const parts = filename.split("-");
+  return {
+    user: parts[0],
+    experienceName: parts.length < 2 ? "untitled" : parts.slice(1).join("-"),
+  };
 };
 
 const getExperiences = async () => {
