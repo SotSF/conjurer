@@ -1,33 +1,41 @@
 import { observer } from "mobx-react-lite";
-import { IconButton, Select } from "@chakra-ui/react";
+import { IconButton, Select, Spinner } from "@chakra-ui/react";
 import { AiOutlineCloudUpload } from "react-icons/ai";
 import { useStore } from "@/src/types/StoreContext";
 import { action } from "mobx";
 import { UploadAudioModal } from "@/src/components/UploadAudioModal";
-import { useEffect } from "react";
+import { trpc } from "@/src/utils/trpc";
+import { NO_SONG, Song } from "@/src/types/Song";
 
 export const AudioSelector = observer(function AudioSelector() {
   const store = useStore();
-  const { uiStore, audioStore, initializedClientSide } = store;
+  const { uiStore, audioStore, usingLocalData } = store;
 
-  useEffect(() => {
-    if (!initializedClientSide) return;
-    void audioStore.fetchAvailableAudioFiles();
-  }, [audioStore, initializedClientSide]);
+  const { isPending, data: songs } = trpc.song.listSongs.useQuery(
+    { usingLocalData },
+    { refetchOnWindowFocus: false }
+  );
 
+  if (isPending || !songs) {
+    return <Spinner />;
+  }
+
+  const songsWithNoSongOption: Song[] = [NO_SONG, ...songs];
   return (
     <>
       <Select
         size="xs"
         width={40}
-        value={audioStore.selectedAudioFile}
+        value={audioStore.selectedSong.filename}
         onChange={action((e) => {
-          audioStore.selectedAudioFile = e.target.value;
+          audioStore.selectedSong = songsWithNoSongOption.find(
+            (song) => song.filename === e.target.value
+          )!;
         })}
       >
-        {audioStore.availableAudioFiles.map((audioFile) => (
-          <option key={audioFile} value={audioFile}>
-            {audioFile}
+        {songsWithNoSongOption.map((song) => (
+          <option key={song.filename} value={song.filename}>
+            {song.artist} - {song.name}
           </option>
         ))}
       </Select>
@@ -37,7 +45,6 @@ export const AudioSelector = observer(function AudioSelector() {
         title="Upload audio"
         height={6}
         icon={<AiOutlineCloudUpload size={17} />}
-        isDisabled={store.usingLocalAssets}
         onClick={action(() => (uiStore.showingUploadAudioModal = true))}
       />
     </>

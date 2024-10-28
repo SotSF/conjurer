@@ -7,7 +7,7 @@ const removeExtension = (filename: string) =>
 
 // Define a new RootStore interface here so that we avoid circular dependencies
 interface RootStore {
-  usingLocalAssets: boolean;
+  usingLocalData: boolean;
   serialize: () => any;
   deserialize: (data: any) => void;
 }
@@ -26,7 +26,7 @@ export class BeatMapStore {
     const beatMapName = removeExtension(beatMapFilename);
     const { beatMap } = await trpcClient.beatMap.getBeatMap.query({
       beatMapName,
-      usingLocalAssets: this.rootStore.usingLocalAssets,
+      usingLocalData: this.rootStore.usingLocalData,
     });
     this.loadFromString(beatMap);
     this.selectedBeatMapName = beatMapName;
@@ -36,7 +36,7 @@ export class BeatMapStore {
     trpcClient.beatMap.saveBeatMap.mutate({
       beatMap,
       beatMapName,
-      usingLocalAssets: this.rootStore.usingLocalAssets,
+      usingLocalData: this.rootStore.usingLocalData,
     });
 
   stringifyBeatMap = () => JSON.stringify(this.beatMap.serialize());

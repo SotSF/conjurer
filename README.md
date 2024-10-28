@@ -122,8 +122,8 @@ This is a big React app, hastily designed, that's doing a lot of expensive CPU/G
 
 ## Todos
 
-To dos are captured in the [wiki](https://github.com/SotSF/conjurer/wiki), and occasionally are captured as issues.
+To dos are captured as issues. Feel free to poke around the open issues, ask questions, and open a PR if you feel so inclined.
 
 ## Contributing
 
-Please do! This is a group effort, and any help is welcome.
+Please do! This is a group effort, and any help is welcome. Feature ideas or bug reports via issues would be great.

@@ -1,90 +1,9 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "d1347104-5689-4731-b09f-86ebbdcd9a96",
+  "id": "1185bae5-5133-4d1b-bb63-d0daf1e9a784",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
-    "authorship": {
-      "name": "authorship",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "integer",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "user_id": {
-          "name": "user_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "experience_id": {
-          "name": "experience_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "(CURRENT_TIMESTAMP)"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        }
-      },
-      "indexes": {
-        "experience_author_index": {
-          "name": "experience_author_index",
-          "columns": [
-            "user_id",
-            "experience_id"
-          ],
-          "isUnique": true
-        }
-      },
-      "foreignKeys": {
-        "authorship_user_id_users_id_fk": {
-          "name": "authorship_user_id_users_id_fk",
-          "tableFrom": "authorship",
-          "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "authorship_experience_id_experiences_id_fk": {
-          "name": "authorship_experience_id_experiences_id_fk",
-          "tableFrom": "authorship",
-          "tableTo": "experiences",
-          "columnsFrom": [
-            "experience_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
-    },
     "experiences": {
       "name": "experiences",
       "columns": {
@@ -113,7 +32,7 @@
           "name": "status",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false,
           "default": "'inprogress'"
         },
@@ -121,14 +40,14 @@
           "name": "data",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         },
         "version": {
           "name": "version",
           "type": "integer",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false,
           "default": 0
         },
@@ -142,10 +61,11 @@
         },
         "updated_at": {
           "name": "updated_at",
-          "type": "integer",
+          "type": "text",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(CURRENT_TIMESTAMP)"
         }
       },
       "indexes": {
@@ -164,21 +84,7 @@
           "isUnique": false
         }
       },
-      "foreignKeys": {
-        "experiences_song_id_songs_id_fk": {
-          "name": "experiences_song_id_songs_id_fk",
-          "tableFrom": "experiences",
-          "tableTo": "songs",
-          "columnsFrom": [
-            "song_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
+      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
@@ -203,12 +109,12 @@
           "name": "artist",
           "type": "text",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false,
           "default": "''"
         },
-        "s3_path": {
-          "name": "s3_path",
+        "filename": {
+          "name": "filename",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
@@ -224,10 +130,11 @@
         },
         "updated_at": {
           "name": "updated_at",
-          "type": "integer",
+          "type": "text",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(CURRENT_TIMESTAMP)"
         }
       },
       "indexes": {
@@ -265,7 +172,7 @@
           "name": "is_admin",
           "type": "integer",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false,
           "default": false
         },
@@ -279,10 +186,11 @@
         },
         "updated_at": {
           "name": "updated_at",
-          "type": "integer",
+          "type": "text",
           "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(CURRENT_TIMESTAMP)"
         }
       },
       "indexes": {
@@ -295,6 +203,88 @@
         }
       },
       "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "users_to_experiences": {
+      "name": "users_to_experiences",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "experience_id": {
+          "name": "experience_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(CURRENT_TIMESTAMP)"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(CURRENT_TIMESTAMP)"
+        }
+      },
+      "indexes": {
+        "user_experience_index": {
+          "name": "user_experience_index",
+          "columns": [
+            "user_id",
+            "experience_id"
+          ],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "users_to_experiences_user_id_users_id_fk": {
+          "name": "users_to_experiences_user_id_users_id_fk",
+          "tableFrom": "users_to_experiences",
+          "tableTo": "users",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "users_to_experiences_experience_id_experiences_id_fk": {
+          "name": "users_to_experiences_experience_id_experiences_id_fk",
+          "tableFrom": "users_to_experiences",
+          "tableTo": "experiences",
+          "columnsFrom": [
+            "experience_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     }

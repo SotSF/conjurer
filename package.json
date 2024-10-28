@@ -16,6 +16,7 @@
     "db:prod:studio": "drizzle-kit studio --config=drizzle-prod.config.ts",
     "db:prod:download": "src/scripts/downloadDatabase.sh",
     "generateCanopy": "ts-node --project tsconfig.script.json src/scripts/generateCanopy.ts",
+    "tursoMigration": "src/scripts/tursoMigration.sh",
     "downloadCloudAssets": "ts-node --project tsconfig.script.json src/scripts/downloadCloudAssets.ts",
     "backupLocalExperienceAssets": "ts-node --project tsconfig.script.json src/scripts/backupLocalExperienceAssets.ts",
     "backup": "ts-node --project tsconfig.script.json src/scripts/backupLocalExperienceAssets.ts",

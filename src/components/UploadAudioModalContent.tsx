@@ -1,6 +1,7 @@
 import { observer } from "mobx-react-lite";
 import {
   Button,
+  HStack,
   Input,
   ModalBody,
   ModalCloseButton,
@@ -14,31 +15,53 @@ import {
 import { useStore } from "@/src/types/StoreContext";
 import { useRef, useState } from "react";
 import { action } from "mobx";
-import { uploadAudioFile } from "@/src/utils/uploadAudio";
+import {
+  uploadAudioFileToS3,
+  uploadAudioFileToServer,
+} from "@/src/utils/uploadAudio";
+import { trpc } from "@/src/utils/trpc";
+import { sanitize } from "@/src/utils/sanitize";
 
 const UploadAudioModalContent = observer(function UploadAudioModalContent() {
   const store = useStore();
-  const { uiStore, audioStore } = store;
+  const { audioStore, uiStore, usingLocalData } = store;
 
   const inputRef = useRef<HTMLInputElement>(null);
 
   const [uploading, setUploading] = useState(false);
   const [, setAudioFilename] = useState("");
+  const [songName, setSongName] = useState("");
+  const [artistName, setArtistName] = useState("");
 
   const styles = useMultiStyleConfig("Button", { variant: "outline" });
 
   const onClose = action(() => (uiStore.showingUploadAudioModal = false));
 
-  const onUpload = async () => {
+  const utils = trpc.useUtils();
+  const createSong = trpc.song.createSong.useMutation();
+  const onUpload = action(async () => {
     if (!inputRef.current?.files?.length) return;
+    const fileToUpload = inputRef.current.files[0];
 
     setUploading(true);
-    await uploadAudioFile(inputRef.current.files[0]);
-    await audioStore.fetchAvailableAudioFiles(true);
+    const filename = `${sanitize(artistName)} - ${sanitize(songName)}.mp3`;
+    if (usingLocalData) {
+      await uploadAudioFileToServer(fileToUpload, filename);
+    } else {
+      await uploadAudioFileToS3(fileToUpload, filename);
+    }
+    const newSong = await createSong.mutateAsync({
+      usingLocalData,
+      name: songName,
+      artist: artistName,
+      filename,
+    });
+    await utils.song.listSongs.invalidate();
     setUploading(false);
 
+    audioStore.selectedSong = newSong;
     onClose();
-  };
+  });
 
   return (
     <ModalContent>
@@ -47,19 +70,14 @@ const UploadAudioModalContent = observer(function UploadAudioModalContent() {
       <ModalBody>
         <>
           <Text mb={4}>
-            Select an audio file from your computer to upload. Note that
-            whatever file name you upload the file with will be the permanent
-            name of the audio file, so make sure it&apos;s something descriptive
-            and be careful not to accidentally overwrite an existing file.
-          </Text>
-          <Text mb={4}>
-            If you would like to have a file deleted, contact Ben.
+            Select an MP3 audio file from your computer to upload.
           </Text>
           <Input
             ref={inputRef}
             type="file"
-            accept="audio/*"
+            accept=".mp3"
             pl={0}
+            mb={4}
             sx={{
               "::file-selector-button": {
                 border: "none",
@@ -73,11 +91,30 @@ const UploadAudioModalContent = observer(function UploadAudioModalContent() {
               setAudioFilename(inputRef.current?.files[0]?.name);
             }}
           />
+          <HStack mb={4}>
+            <Text w={32}>Song name</Text>
+            <Input
+              value={songName}
+              onChange={(e) => setSongName(e.target.value)}
+            />
+          </HStack>
+          <HStack>
+            <Text w={32}>Artist</Text>
+            <Input
+              value={artistName}
+              onChange={(e) => setArtistName(e.target.value)}
+            />
+          </HStack>
         </>
       </ModalBody>
       <ModalFooter>
         <Button
-          isDisabled={uploading || !inputRef.current?.files?.length}
+          isDisabled={
+            uploading ||
+            !inputRef.current?.files?.length ||
+            !songName ||
+            !artistName
+          }
           onClick={onUpload}
         >
           {uploading ? <Spinner /> : "Upload"}

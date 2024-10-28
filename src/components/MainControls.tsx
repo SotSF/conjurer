@@ -4,7 +4,6 @@ import { RiZoomInLine, RiZoomOutLine } from "react-icons/ri";
 import { HiZoomIn, HiZoomOut } from "react-icons/hi";
 import { RxAlignCenterHorizontally } from "react-icons/rx";
 import { TbArrowBigRightLines } from "react-icons/tb";
-import { GiDesert } from "react-icons/gi";
 import { RiPlayList2Fill } from "react-icons/ri";
 import { useStore } from "@/src/types/StoreContext";
 import { action } from "mobx";
@@ -56,23 +55,6 @@ export const MainControls = observer(function MainControls() {
         onClick={action(() => uiStore.zoomOut(50))}
       />
       <SendDataButton />
-      {process.env.NODE_ENV !== "production" && (
-        <IconButton
-          aria-label="Use local assets"
-          title="Use local assets"
-          height={6}
-          bgColor={store.usingLocalAssets ? "orange.700" : undefined}
-          _hover={
-            store.usingLocalAssets
-              ? {
-                  bgColor: "orange.600",
-                }
-              : undefined
-          }
-          icon={<GiDesert size={17} />}
-          onClick={store.toggleUsingLocalAssets}
-        />
-      )}
       <IconButton
         aria-label="Keep playhead centered"
         title="Keep playhead centered"

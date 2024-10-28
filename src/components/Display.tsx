@@ -4,7 +4,7 @@ import { DisplayCanvas } from "@/src/components/Canvas/DisplayCanvas";
 import { DisplayControls } from "@/src/components/DisplayControls";
 import { observer } from "mobx-react-lite";
 import { useStore } from "@/src/types/StoreContext";
-import { UserPicker } from "@/src/components/UserPicker";
+import { LoginModal } from "@/src/components/LoginModal";
 import { MenuBar } from "@/src/components/Menu/MenuBar";
 import { useRef, useState } from "react";
 
@@ -14,7 +14,6 @@ export const Display = observer(function Display() {
 
   const boxRef = useRef<HTMLDivElement>(null);
 
-  // TODO: hide controls some other way than double click
   const [showAllControls, setShowAllControls] = useState(true);
 
   return (
@@ -25,8 +24,8 @@ export const Display = observer(function Display() {
       position="relative"
       height="100%"
       onDoubleClick={() => {
+        // TODO: hide controls some other way than double click
         // setShowAllControls(!showAllControls);
-        boxRef.current?.requestFullscreen();
       }}
     >
       {!embeddedViewer && (
@@ -41,7 +40,7 @@ export const Display = observer(function Display() {
             {store.context === "viewer" ? (
               <Text fontWeight={"bold"}>by {store.user}</Text>
             ) : (
-              <UserPicker />
+              <LoginModal />
             )}
           </VStack>
           <DisplayControls canvasContainer={boxRef.current} />

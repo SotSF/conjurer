@@ -12,6 +12,12 @@ import { BeatMapStore } from "@/src/types/BeatMapStore";
 import { PlaygroundStore } from "@/src/types/PlaygroundStore";
 import { setupControllerWebsocket } from "@/src/websocket/controllerWebsocket";
 import { setupVoiceCommandWebsocket } from "@/src/websocket/voiceCommandWebsocket";
+import {
+  EXPERIENCE_VERSION,
+  ExperienceStatus,
+  SerialExperience,
+} from "@/src/types/Experience";
+import { NO_SONG } from "@/src/types/Song";
 
 // Enforce MobX strict mode, which can make many noisy console warnings, but can help use learn MobX better.
 // Feel free to comment out the following if you want to silence the console messages.
@@ -61,22 +67,13 @@ export class Store {
     localStorage.setItem("globalIntensity", String(value));
   }
 
-  private _usingLocalAssets = false;
-  get usingLocalAssets(): boolean {
-    return this._usingLocalAssets;
+  private _usingLocalData = process.env.NEXT_PUBLIC_NODE_ENV !== "production";
+  get usingLocalData(): boolean {
+    return this._usingLocalData;
   }
-  set usingLocalAssets(value: boolean) {
-    this._usingLocalAssets = value;
-    localStorage.setItem("usingLocalAssets", String(value));
-  }
-
-  private _usingLocalDatabase = false;
-  get usingLocalDatabase(): boolean {
-    return this._usingLocalDatabase;
-  }
-  set usingLocalDatabase(value: boolean) {
-    this._usingLocalDatabase = value;
-    localStorage.setItem("usingLocalDatabase", String(value));
+  set usingLocalData(value: boolean) {
+    this._usingLocalData = value;
+    localStorage.setItem("usingLocalData", String(value));
   }
 
   private _selectedLayer: Layer = this.layers[0]; // a layer is always selected
@@ -127,12 +124,11 @@ export class Store {
       localStorage.setItem("experienceName", value);
   }
 
-  get experienceFilename(): string {
-    return `${this.user}-${this.experienceName}`;
-  }
-
   hasSaved = false;
   experienceLastSavedAt = 0;
+  experienceVersion = EXPERIENCE_VERSION;
+  experienceStatus: ExperienceStatus = "inprogress";
+  experienceId: number | undefined = undefined;
 
   get playing() {
     return this.audioStore.audioState !== "paused";
@@ -162,7 +158,8 @@ export class Store {
     if (this.initializedClientSide) return;
     this.initializedClientSide = true;
 
-    setupVoiceCommandWebsocket(this);
+    if (process.env.NEXT_PUBLIC_ENABLE_VOICE === "true")
+      setupVoiceCommandWebsocket(this);
 
     if (this.context === "controller") {
       this.playgroundStore.initialize();
@@ -195,21 +192,15 @@ export class Store {
     const globalIntensity = localStorage.getItem("globalIntensity");
     if (globalIntensity) this._globalIntensity = Number(globalIntensity);
 
-    // check for a usingLocalAssets in local storage
-    const usingLocalAssets = localStorage.getItem("usingLocalAssets");
-    if (usingLocalAssets) this._usingLocalAssets = usingLocalAssets === "true";
-
-    // check for a usingLocalDatabase in local storage
-    const usingLocalDatabase = localStorage.getItem("usingLocalDatabase");
-    if (usingLocalDatabase)
-      this._usingLocalDatabase = usingLocalDatabase === "true";
+    // check for a usingLocalData in local storage (not honored in production)
+    const usingLocalData = localStorage.getItem("usingLocalData");
+    if (usingLocalData && process.env.NEXT_PUBLIC_NODE_ENV !== "production")
+      this._usingLocalData = usingLocalData === "true";
 
     // check for an experience name in local storage
     const experienceName = localStorage.getItem("experienceName");
-    if (experienceName) {
-      this._experienceName = experienceName;
-      this.experienceStore.load(`${this.user}-${experienceName}`);
-    } else this.experienceStore.loadInitialExperience();
+    if (experienceName) this.experienceStore.load(experienceName);
+    else this.experienceStore.loadEmptyExperience();
 
     this.uiStore.initialize();
   };
@@ -219,20 +210,8 @@ export class Store {
     if (this.sendingData) setupUnityAppWebsocket();
   };
 
-  toggleUsingLocalAssets = () => {
-    this.usingLocalAssets = !this.usingLocalAssets;
-  };
-
-  toggleUsingLocalDatabase = () => {
-    this.usingLocalDatabase = !this.usingLocalDatabase;
-  };
-
-  newExperience = () => {
-    this.experienceStore.saveToLocalStorage("autosave");
-    this.experienceName = "untitled";
-    this.hasSaved = false;
-    this.experienceLastSavedAt = 0;
-    this.experienceStore.loadEmptyExperience();
+  toggleUsingLocalData = () => {
+    this.usingLocalData = !this.usingLocalData;
   };
 
   selectBlock = (block: Block) => {
@@ -370,7 +349,7 @@ export class Store {
 
   copyLinkToExperience = () => {
     const url = new URL(`${window.location.origin}/viewer`);
-    url.searchParams.set("experience", this.experienceFilename);
+    url.searchParams.set("experience", this.experienceName);
     navigator.clipboard.writeText(url.toString());
   };
 
@@ -516,20 +495,26 @@ export class Store {
     }
   };
 
-  serialize = () => ({
-    audioStore: this.audioStore.serialize(),
-    beatMapStore: this.beatMapStore.serialize(),
-    uiStore: this.uiStore.serialize(),
-    layers: this.layers.map((l) => l.serialize()),
-    user: this.user,
-    savedAt: Date.now(),
+  serialize = (): SerialExperience => ({
+    id: this.experienceId,
+    name: this.experienceName,
+    song: this.audioStore.selectedSong,
+    status: this.experienceStatus,
+    version: this.experienceVersion,
+    data: { layers: this.layers.map((l) => l.serialize()) },
   });
 
-  deserialize = (data: any) => {
-    this.audioStore.deserialize(data.audioStore);
-    this.beatMapStore.deserialize(data.beatMapStore);
-    this.uiStore.deserialize(this, data.uiStore);
-    this.layers = data.layers.map((l: any) => Layer.deserialize(this, l));
+  deserialize = (experience: SerialExperience) => {
+    this.experienceId = experience.id;
+    this.experienceName = experience.name;
+    this.audioStore.selectedSong = experience.song || NO_SONG;
+    this.experienceStatus = experience.status;
+    this.experienceVersion = experience.version;
+    this.layers = experience.data.layers.map((l: any) =>
+      Layer.deserialize(this, l)
+    );
+
+    // Select first layer
     this.selectedLayer = this.layers[0];
   };
 }

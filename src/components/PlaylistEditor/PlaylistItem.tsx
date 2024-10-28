@@ -47,7 +47,7 @@ export const PlaylistItem = observer(function PlaylistItem({
     setLoadingExperience(false);
   };
 
-  const isSelectedExperience = store.experienceFilename === experienceFilename;
+  const isSelectedExperience = store.experienceName === experienceFilename;
 
   const textProps = {
     color: isSelectedExperience ? "blue.400" : undefined,

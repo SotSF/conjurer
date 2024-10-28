@@ -20,27 +20,27 @@ import { action } from "mobx";
 import { observer } from "mobx-react-lite";
 import { trpc } from "@/src/utils/trpc";
 
-export const UserPicker = observer(function UserPicker() {
+export const LoginModal = observer(function LoginModal() {
   const store = useStore();
-  const { uiStore, user, usingLocalAssets } = store;
+  const { experienceStore, uiStore, user, usingLocalData } = store;
 
   const [newUser, setNewUser] = useState("");
 
   const {
     isPending,
     isError,
-    data: experiences,
-  } = trpc.experience.listExperiences.useQuery(
-    { user: "", usingLocalAssets },
+    data: users,
+  } = trpc.user.listUsers.useQuery(
+    { usingLocalData },
     { enabled: uiStore.showingUserPickerModal }
   );
 
-  const usersWithDuplicates = (experiences ?? [])
-    .map((experience) => experience.split("-")[0] || "")
-    .filter((user) => !!user);
-  const users = Array.from(new Set(usersWithDuplicates));
+  const createUser = trpc.user.createUser.useMutation();
 
-  const onClose = action(() => (uiStore.showingUserPickerModal = false));
+  const onClose = action(() => {
+    uiStore.showingUserPickerModal = false;
+    setNewUser("");
+  });
 
   if (isError) return null;
 
@@ -55,7 +55,11 @@ export const UserPicker = observer(function UserPicker() {
         {user || "Log in"}
       </Button>
 
-      <Modal isOpen={uiStore.showingUserPickerModal} onClose={onClose}>
+      <Modal
+        isOpen={uiStore.showingUserPickerModal}
+        onClose={onClose}
+        isCentered
+      >
         <ModalOverlay />
         <ModalContent>
           <ModalHeader>
@@ -65,20 +69,23 @@ export const UserPicker = observer(function UserPicker() {
           <ModalBody>
             <VStack alignItems="center">
               {!isPending &&
-                users.map((user) => (
-                  <Button
-                    key={user}
-                    leftIcon={<FaUser />}
-                    width="100%"
-                    onClick={action(() => {
-                      store.user = user;
-                      store.uiStore.showPendingModal();
-                      onClose();
-                    })}
-                  >
-                    {user}
-                  </Button>
-                ))}
+                users
+                  .filter(({ username }) => username !== user)
+                  .map((user) => (
+                    <Button
+                      key={user.id}
+                      leftIcon={<FaUser />}
+                      width="100%"
+                      onClick={action(() => {
+                        store.user = user.username;
+                        experienceStore.loadEmptyExperience();
+                        store.uiStore.showingOpenExperienceModal = true;
+                        onClose();
+                      })}
+                    >
+                      {user.username}
+                    </Button>
+                  ))}
             </VStack>
 
             <Text my={4}>Click a name above or type a new name:</Text>
@@ -88,14 +95,20 @@ export const UserPicker = observer(function UserPicker() {
                 onChange={(e) => setNewUser(e.target.value)}
               />
               <Button
-                isDisabled={!newUser}
-                onClick={action(() => {
+                isDisabled={
+                  !newUser || users?.some((u) => u.username === newUser)
+                }
+                onClick={action(async () => {
+                  await createUser.mutateAsync({
+                    usingLocalData,
+                    username: newUser,
+                  });
                   store.user = newUser;
-                  store.newExperience();
+                  experienceStore.loadEmptyExperience();
                   onClose();
                 })}
               >
-                Create
+                {createUser.isPending ? <Spinner /> : "Create"}
               </Button>
             </HStack>
           </ModalBody>

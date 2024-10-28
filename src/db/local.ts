@@ -3,7 +3,7 @@ import { createClient } from "@libsql/client";
 import * as schema from "./schema";
 import fs from "fs";
 
-let localDB: ReturnType<typeof drizzle> | null = null;
+let localDB: ReturnType<typeof drizzle<typeof schema>> | null = null;
 
 export const getLocalDatabase = () => {
   if (localDB) return localDB;

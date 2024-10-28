@@ -145,6 +145,7 @@ export class PlaygroundStore {
       (patternBlock: Block<ExtraParams>, patternIndex: number) => {
         if (typeof transferPattern === "string") return;
         if (patternBlock.pattern.name !== transferPattern.name) return;
+        if (!transferPattern.params) return;
 
         // TODO: fix duplicated code here
         const { params } = transferPattern;
@@ -176,6 +177,7 @@ export class PlaygroundStore {
               if (typeof transferEffectBlock.pattern === "string") return;
               if (effectBlock.pattern.name !== transferEffectBlock.pattern.name)
                 return;
+              if (!transferEffectBlock.pattern.params) return;
 
               const { params } = transferEffectBlock.pattern;
               for (const [uniformName, param] of Object.entries(params)) {

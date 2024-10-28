@@ -12,7 +12,7 @@ import type MinimapPlugin from "wavesurfer.js/dist/plugins/minimap";
 import type { RegionParams } from "wavesurfer.js/dist/plugins/regions";
 import { filterData } from "@/src/types/audioPeaks";
 import { AudioRegion } from "@/src/types/AudioRegion";
-import { trpcClient } from "@/src/utils/trpc";
+import { NO_SONG, Song } from "@/src/types/Song";
 
 export const loopRegionColor = "rgba(237, 137, 54, 0.4)";
 
@@ -20,13 +20,12 @@ export const PEAK_DATA_SAMPLE_RATE = 60;
 
 // Define a new RootStore interface here so that we avoid circular dependencies
 interface RootStore {
-  usingLocalAssets: boolean;
+  usingLocalData: boolean;
 }
 
 export class AudioStore {
   audioInitialized = false;
-  availableAudioFiles: string[] = [];
-  selectedAudioFile: string = "";
+  selectedSong: Song = NO_SONG;
   audioMuted = false;
 
   wavesurfer: WaveSurfer | null = null;
@@ -111,19 +110,10 @@ export class AudioStore {
     this.regionsPlugin?.addRegion(this.loopRegion);
   };
 
-  getSelectedAudioFileUrl = () =>
-    this.rootStore.usingLocalAssets
-      ? `${location.href}/${LOCAL_ASSET_DIRECTORY}${AUDIO_ASSET_PREFIX}${this.selectedAudioFile}`
-      : `https://${ASSET_BUCKET_NAME}.s3.${ASSET_BUCKET_REGION}.amazonaws.com/${AUDIO_ASSET_PREFIX}${this.selectedAudioFile}`;
-
-  fetchAvailableAudioFiles = async (forceReload = false) => {
-    if (this.audioInitialized && !forceReload) return;
-    this.audioInitialized = true;
-
-    this.availableAudioFiles = await trpcClient.audio.listAudioFiles.query({
-      usingLocalAssets: this.rootStore.usingLocalAssets,
-    });
-  };
+  getSelectedSongUrl = () =>
+    this.rootStore.usingLocalData
+      ? `${location.origin}/${LOCAL_ASSET_DIRECTORY}${AUDIO_ASSET_PREFIX}${this.selectedSong.filename}`
+      : `https://${ASSET_BUCKET_NAME}.s3.${ASSET_BUCKET_REGION}.amazonaws.com/${AUDIO_ASSET_PREFIX}${this.selectedSong.filename}`;
 
   // Timer relevant code - perhaps extract this to a separate file
 
@@ -145,8 +135,9 @@ export class AudioStore {
     this.lastCursorPosition = time;
     this.globalTime = time;
 
-    if (this.wavesurfer.getCurrentTime() === time) return;
-    this.wavesurfer.seekTo(time / this.wavesurfer.getDuration());
+    const duration = this.wavesurfer.getDuration();
+    if (this.wavesurfer.getCurrentTime() === time || duration === 0) return;
+    this.wavesurfer.seekTo(time / duration);
   };
 
   skipForward = () => this.setTimeWithCursor(this.globalTime + 0.01);
@@ -180,18 +171,17 @@ export class AudioStore {
     this._lastCursor = { position: time < 0 ? 0 : time };
   }
 
-  // Serialization
+  // TODO: reimplement audio regions
+  // serialize = () => ({
+  //   selectedSong: this.selectedSong,
+  //   // audioRegions: this.regionsPlugin
+  //   //   ?.getRegions()
+  //   //   .map((region) => new AudioRegion(region).serialize()),
+  // });
 
-  serialize = () => ({
-    selectedAudioFile: this.selectedAudioFile,
-    audioRegions: this.regionsPlugin
-      ?.getRegions()
-      .map((region) => new AudioRegion(region).serialize()),
-  });
-
-  deserialize = (data: any) => {
-    this.selectedAudioFile = data.selectedAudioFile;
-    this.initialRegions =
-      data.audioRegions?.map((region: any) => new AudioRegion(region)) ?? [];
-  };
+  // deserialize = (data: any) => {
+  //   this.selectedSong = data.selectedSong;
+  //   // this.initialRegions =
+  //   //   data.audioRegions?.map((region: any) => new AudioRegion(region)) ?? [];
+  // };
 }

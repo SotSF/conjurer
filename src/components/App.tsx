@@ -11,24 +11,13 @@ import { PatternDrawer } from "@/src/components/PatternDrawer";
 
 export const App = observer(function App() {
   const store = useStore();
-  const { uiStore, experienceStore } = store;
+  const { uiStore } = store;
   const didInitialize = useRef(false);
   useEffect(() => {
     if (didInitialize.current) return;
     didInitialize.current = true;
     store.initializeClientSide();
   }, [store]);
-
-  useEffect(() => {
-    if (store.playing) return;
-
-    // autosave every 30 seconds
-    const interval = setInterval(
-      () => experienceStore.saveToLocalStorage("autosave"),
-      30 * 1000
-    );
-    return () => clearInterval(interval);
-  }, [store.playing, experienceStore]);
 
   const gridItems = (
     <>

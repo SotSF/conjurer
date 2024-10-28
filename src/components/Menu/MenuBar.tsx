@@ -19,7 +19,6 @@ import {
   VStack,
   useDisclosure,
 } from "@chakra-ui/react";
-import { BiTimer } from "react-icons/bi";
 import { FaFile, FaFolderOpen, FaRegClipboard } from "react-icons/fa";
 import { FiSave } from "react-icons/fi";
 import { useStore } from "@/src/types/StoreContext";
@@ -54,6 +53,7 @@ export const MenuBar = observer(function MenuBar() {
       <Modal
         isOpen={isKeyboardShortcutsOpen}
         onClose={onCloseKeyboardShortcuts}
+        isCentered
       >
         <ModalOverlay />
         <ModalContent>
@@ -85,6 +85,13 @@ export const MenuBar = observer(function MenuBar() {
         >
           {store.experienceName}
         </Heading>
+        {store.context !== "viewer" &&
+          !store.hasSaved &&
+          !store.experienceId && (
+            <Text ml={2} fontSize="sm" color="red.500" userSelect="none">
+              not yet saved
+            </Text>
+          )}
         {store.context !== "viewer" && store.hasSaved && (
           <Text fontSize="sm" color="gray.500" userSelect="none">
             {store.experienceLastSavedAt
@@ -95,6 +102,25 @@ export const MenuBar = observer(function MenuBar() {
                 }).format(store.experienceLastSavedAt)}`
               : "not yet saved"}
           </Text>
+        )}
+        {process.env.NEXT_PUBLIC_NODE_ENV !== "production" && (
+          <Button
+            variant="ghost"
+            size="sm"
+            color={store.usingLocalData ? "orange.500" : "green.500"}
+            onClick={() => {
+              if (
+                confirm(
+                  "Switching data sources requires reloading the page - are you sure?"
+                )
+              ) {
+                store.toggleUsingLocalData();
+                window.location.reload();
+              }
+            }}
+          >
+            {store.usingLocalData ? "using local data" : "using prod data"}
+          </Button>
         )}
       </HStack>
       <HStack>
@@ -120,7 +146,7 @@ export const MenuBar = observer(function MenuBar() {
                 <MenuItem
                   icon={<FaFile size={17} />}
                   command="⌘N"
-                  onClick={store.newExperience}
+                  onClick={experienceStore.loadEmptyExperience}
                 >
                   New experience
                 </MenuItem>
@@ -132,27 +158,11 @@ export const MenuBar = observer(function MenuBar() {
                 >
                   Open...
                 </MenuItem>
-                <MenuItem
-                  icon={<FaFolderOpen size={17} />}
-                  onClick={() =>
-                    experienceStore.loadFromLocalStorage("experience")
-                  }
-                >
-                  Open last locally saved
-                </MenuItem>
-                <MenuItem
-                  icon={<BiTimer size={18} />}
-                  onClick={() =>
-                    experienceStore.loadFromLocalStorage("autosave")
-                  }
-                >
-                  Open last autosaved
-                </MenuItem>
                 <MenuDivider />
                 <MenuItem
                   icon={<FiSave size={17} />}
                   command="⌘S"
-                  onClick={saveExperience}
+                  onClick={() => saveExperience()}
                 >
                   Save
                 </MenuItem>
@@ -162,14 +172,6 @@ export const MenuBar = observer(function MenuBar() {
                   onClick={uiStore.attemptShowSaveExperienceModal}
                 >
                   Save as...
-                </MenuItem>
-                <MenuItem
-                  icon={<FiSave size={17} />}
-                  onClick={() =>
-                    experienceStore.saveToLocalStorage("experience")
-                  }
-                >
-                  Save locally
                 </MenuItem>
               </MenuList>
             </Menu>

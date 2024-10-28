@@ -1,8 +1,7 @@
-import { makeAutoObservable } from "mobx";
-import initialExperience from "@/src/data/initialExperience.json";
-import emptyExperience from "@/src/data/emptyExperience.json";
+import { makeAutoObservable, runInAction } from "mobx";
 import { trpcClient } from "@/src/utils/trpc";
-import { extractPartsFromExperienceFilename } from "@/src/utils/experience";
+import { SerialExperience, EXPERIENCE_VERSION } from "@/src/types/Experience";
+import { NO_SONG } from "@/src/types/Song";
 
 // Define a new RootStore interface here so that we avoid circular dependencies
 interface RootStore {
@@ -10,9 +9,9 @@ interface RootStore {
   experienceName: string;
   hasSaved: boolean;
   experienceLastSavedAt: number;
-  usingLocalAssets: boolean;
-  serialize: () => any;
-  deserialize: (data: any) => void;
+  usingLocalData: boolean;
+  serialize: () => SerialExperience;
+  deserialize: (data: SerialExperience) => void;
 }
 
 export class ExperienceStore {
@@ -20,33 +19,35 @@ export class ExperienceStore {
     makeAutoObservable(this);
   }
 
-  load = async (experienceFilename: string) => {
-    const { experience } = await trpcClient.experience.getExperience.query({
-      experienceFilename,
-      usingLocalAssets: this.rootStore.usingLocalAssets,
+  load = async (experienceName: string) => {
+    const experience = await trpcClient.experience.getExperience.query({
+      experienceName,
+      usingLocalData: this.rootStore.usingLocalData,
     });
+    if (!experience) {
+      this.loadEmptyExperience();
+      return;
+    }
 
-    const { user, experienceName } =
-      extractPartsFromExperienceFilename(experienceFilename);
-    this.rootStore.user = user;
-    this.rootStore.experienceName = experienceName;
-    this.rootStore.hasSaved = false;
-    this.rootStore.experienceLastSavedAt = Date.now();
-    this.loadFromString(experience);
-  };
-
-  loadFromString = (experienceString: string) => {
-    this.rootStore.deserialize(JSON.parse(experienceString));
+    this.rootStore.deserialize(experience);
+    runInAction(() => {
+      this.rootStore.hasSaved = false;
+      this.rootStore.experienceLastSavedAt = Date.now();
+    });
   };
 
   loadEmptyExperience = () => {
-    this.rootStore.deserialize(emptyExperience);
-  };
+    this.rootStore.deserialize({
+      id: undefined,
+      name: "untitled",
+      song: NO_SONG,
+      status: "inprogress",
+      version: EXPERIENCE_VERSION,
+      data: { layers: [{ patternBlocks: [] }, { patternBlocks: [] }] },
+    });
 
-  loadInitialExperience = () => {
-    // load initial experience from file. if you would like to change this, click the clipboard
-    // button in the UI and paste the contents into the data/initialExperience.json file.
-    this.rootStore.deserialize(initialExperience);
+    this.rootStore.hasSaved = false;
+    this.rootStore.experienceLastSavedAt = 0;
   };
 
   loadFromParams = () => {
@@ -68,16 +69,5 @@ export class ExperienceStore {
   copyToClipboard = () => {
     if (typeof window === "undefined") return;
     navigator.clipboard.writeText(this.stringifyExperience(true));
-  };
-
-  saveToLocalStorage = (key: string) => {
-    if (typeof window === "undefined") return;
-    window.localStorage.setItem(key, this.stringifyExperience());
-  };
-
-  loadFromLocalStorage = (key: string) => {
-    if (typeof window === "undefined") return;
-    const experience = window.localStorage.getItem(key);
-    if (experience) this.loadFromString(experience);
   };
 }

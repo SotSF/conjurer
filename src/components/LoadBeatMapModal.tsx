@@ -18,7 +18,7 @@ import { trpc } from "@/src/utils/trpc";
 
 export const LoadBeatMapModal = observer(function LoadBeatMapModal() {
   const store = useStore();
-  const { beatMapStore, uiStore } = store;
+  const { beatMapStore, uiStore, usingLocalData } = store;
 
   const {
     isPending,
@@ -26,7 +26,7 @@ export const LoadBeatMapModal = observer(function LoadBeatMapModal() {
     data: beatMaps,
   } = trpc.beatMap.listBeatMaps.useQuery(
     {
-      usingLocalAssets: store.usingLocalAssets,
+      usingLocalData,
     },
     { enabled: uiStore.showingLoadBeatMapModal }
   );

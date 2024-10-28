@@ -2,7 +2,7 @@ import { drizzle } from "drizzle-orm/libsql";
 import { createClient } from "@libsql/client";
 import * as schema from "./schema";
 
-let prodDB: ReturnType<typeof drizzle> | null = null;
+let prodDB: ReturnType<typeof drizzle<typeof schema>> | null = null;
 
 export const getProdDatabase = () => {
   if (prodDB) return prodDB;

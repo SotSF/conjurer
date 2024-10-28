@@ -25,7 +25,7 @@ export const KeyboardControls = observer(function KeyboardControls({
         saveExperience();
         e.preventDefault();
       } else if (editMode && e.key === "n" && (e.ctrlKey || e.metaKey)) {
-        store.newExperience();
+        experienceStore.loadEmptyExperience();
         e.preventDefault();
       }
 

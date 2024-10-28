@@ -15,17 +15,18 @@ import {
 import { useStore } from "@/src/types/StoreContext";
 import { action } from "mobx";
 import { trpc } from "@/src/utils/trpc";
+import { GiSparkles } from "react-icons/gi";
 
 export const OpenExperienceModal = observer(function OpenExperienceModal() {
   const store = useStore();
-  const { experienceStore, uiStore, user, usingLocalAssets } = store;
+  const { experienceStore, uiStore, user, usingLocalData } = store;
 
   const {
     isPending,
     isError,
     data: experiences,
   } = trpc.experience.listExperiences.useQuery(
-    { user, usingLocalAssets },
+    { username: user, usingLocalData },
     { enabled: uiStore.showingOpenExperienceModal }
   );
 
@@ -50,17 +51,18 @@ export const OpenExperienceModal = observer(function OpenExperienceModal() {
             <Text color="gray.400">{user} has no saved experiences yet!</Text>
           )}
           {!isPending && (
-            <VStack align="flex-start" spacing={0}>
+            <VStack alignItems="center">
               {experiences.map((experience) => (
                 <Button
-                  key={experience}
-                  variant="ghost"
+                  key={experience.name}
+                  leftIcon={<GiSparkles />}
+                  width="100%"
                   onClick={action(() => {
-                    experienceStore.load(experience);
+                    experienceStore.load(experience.name);
                     onClose();
                   })}
                 >
-                  {experience}
+                  {experience.name}
                 </Button>
               ))}
             </VStack>
