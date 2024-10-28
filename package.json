@@ -15,6 +15,7 @@
     "db:prod:migrate": "drizzle-kit migrate --config=drizzle-prod.config.ts",
     "db:prod:studio": "drizzle-kit studio --config=drizzle-prod.config.ts",
     "db:prod:download": "src/scripts/downloadDatabase.sh",
+    "db:prod:backup": "src/scripts/backupDatabase.sh",
     "generateCanopy": "ts-node --project tsconfig.script.json src/scripts/generateCanopy.ts",
     "tursoMigration": "src/scripts/tursoMigration.sh",
     "downloadCloudAudio": "ts-node --project tsconfig.script.json src/scripts/downloadCloudAssets.ts",
