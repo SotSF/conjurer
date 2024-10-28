@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "yarn db:local:setup && next dev",
-    "prod": "src/scripts/try-start-unity-bridge.sh; next dev",
+    "canopy": "src/scripts/try-start-unity-bridge.sh; yarn db:local:setup && next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
