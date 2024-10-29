@@ -9,11 +9,11 @@ It is assumed that there is no internet at the event.
 ### Update Conjurer
 
 1. Run `git pull` to fetch the latest code (or `git clone` this repository)
-1. Run `node -v` to ensure you are using node 18
+1. Run `node -v` to ensure you are using node 20
    - For easy node version management, [install `nvm`](https://github.com/nvm-sh/nvm?tab=readme-ov-file#installing-and-updating)
-   - Once it is installed, run `nvm install 18`
-   - If nvm and node 18 are already installed, simply run `nvm use 18`
-   - Run `node -v` again to verify you are using node 18
+   - Once it is installed, run `nvm install 20`
+   - If nvm and node 20 are already installed, simply run `nvm use 20`
+   - Run `node -v` again to verify you are using node 20
 1. Run `yarn` to install dependencies
 1. Run `yarn dev` to run conjurer locally
 1. Visit http://localhost:3000 to test it out
