@@ -105,13 +105,13 @@ export class Store {
     return variationSelections.length === 1 ? variationSelections[0] : null;
   }
 
-  private _user = "";
-  get user(): string {
-    return this._user;
+  private _username = "";
+  get username(): string {
+    return this._username;
   }
-  set user(value: string) {
-    this._user = value;
-    if (this.context === "default") localStorage.setItem("user", value);
+  set username(value: string) {
+    this._username = value;
+    if (this.context === "default") localStorage.setItem("username", value);
   }
 
   private _experienceName = "untitled";
@@ -186,7 +186,7 @@ export class Store {
 
     // check for a username in local storage
     const username = localStorage.getItem("user");
-    if (username) this._user = username;
+    if (username) this._username = username;
 
     // check for a global intensity in local storage
     const globalIntensity = localStorage.getItem("globalIntensity");

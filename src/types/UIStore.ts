@@ -12,7 +12,7 @@ export type DisplayMode = "canopy" | "canopySpace" | "cartesianSpace" | "none";
 
 type RootStore = {
   context: string;
-  user: string;
+  username: string;
 };
 
 /**
@@ -135,7 +135,7 @@ export class UIStore {
 
   // TODO: can be removed when authentication is implemented
   attemptShowOpenExperienceModal = () => {
-    if (!this.rootStore.user) {
+    if (!this.rootStore.username) {
       this.showingUserPickerModal = true;
       this.pendingAction = "open";
       return;
@@ -145,7 +145,7 @@ export class UIStore {
   };
 
   attemptShowSaveExperienceModal = () => {
-    if (!this.rootStore.user) {
+    if (!this.rootStore.username) {
       this.showingUserPickerModal = true;
       this.pendingAction = "save";
       return;

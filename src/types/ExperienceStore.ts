@@ -5,7 +5,6 @@ import { NO_SONG } from "@/src/types/Song";
 
 // Define a new RootStore interface here so that we avoid circular dependencies
 interface RootStore {
-  user: string;
   experienceName: string;
   hasSaved: boolean;
   experienceLastSavedAt: number;

@@ -5,7 +5,7 @@ import { runInAction } from "mobx";
 
 export const useSaveExperience = () => {
   const store = useStore();
-  const { usingLocalData } = store;
+  const { username, usingLocalData } = store;
   const saveExperienceMutation = trpc.experience.saveExperience.useMutation();
 
   const utils = trpc.useUtils();
@@ -25,7 +25,7 @@ export const useSaveExperience = () => {
     const savePayload = {
       usingLocalData,
       ...store.serialize(),
-      username: store.user,
+      username,
     };
     if (saveMetadata) {
       savePayload.id = saveMetadata.id;
@@ -61,7 +61,7 @@ export const useSaveExperience = () => {
       isClosable: true,
     });
 
-    utils.experience.listExperiences.invalidate({ username: store.user });
+    utils.experience.listExperiences.invalidate({ username: store.username });
   };
 
   return { saveExperience };

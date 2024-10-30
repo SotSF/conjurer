@@ -38,7 +38,7 @@ export const Display = observer(function Display() {
           </VStack>
           <VStack p={2} position="absolute" top={0} right={0} zIndex={1}>
             {store.context === "viewer" ? (
-              <Text fontWeight={"bold"}>by {store.user}</Text>
+              <Text fontWeight={"bold"}>by {store.username}</Text>
             ) : (
               <LoginModal />
             )}

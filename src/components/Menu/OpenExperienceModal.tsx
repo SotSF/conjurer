@@ -19,14 +19,14 @@ import { GiSparkles } from "react-icons/gi";
 
 export const OpenExperienceModal = observer(function OpenExperienceModal() {
   const store = useStore();
-  const { experienceStore, uiStore, user, usingLocalData } = store;
+  const { experienceStore, uiStore, username, usingLocalData } = store;
 
   const {
     isPending,
     isError,
     data: experiences,
   } = trpc.experience.listExperiences.useQuery(
-    { username: user, usingLocalData },
+    { username, usingLocalData },
     { enabled: uiStore.showingOpenExperienceModal }
   );
 
@@ -48,7 +48,9 @@ export const OpenExperienceModal = observer(function OpenExperienceModal() {
         <ModalCloseButton />
         <ModalBody>
           {!isPending && experiences.length === 0 && (
-            <Text color="gray.400">{user} has no saved experiences yet!</Text>
+            <Text color="gray.400">
+              {username} has no saved experiences yet!
+            </Text>
           )}
           {!isPending && (
             <VStack alignItems="center">
