@@ -6,19 +6,13 @@ import { EXPERIENCE_STATUSES } from "@/src/types/Experience";
 import { TRPCError } from "@trpc/server";
 
 export const experienceRouter = router({
-  listExperiences: databaseProcedure
+  listExperiencesForUser: databaseProcedure
     .input(
       z.object({
-        username: z.string().optional(),
+        username: z.string(),
       })
     )
     .query(async ({ ctx, input }) => {
-      if (!input.username) {
-        return await ctx.db.query.experiences
-          .findMany({ columns: { id: true, name: true } })
-          .execute();
-      }
-
       // Approach 1: uses db.select and only requires one query, but the types are nullable in the end for some reason
       // return await ctx.db
       //   .select({ id: experiences.id, name: experiences.name })
@@ -57,13 +51,53 @@ export const experienceRouter = router({
             where: eq(usersToExperiences.userId, user.id),
             columns: {},
             with: {
-              experience: {
-                columns: { id: true, name: true },
-              },
+              experience: { columns: { id: true, name: true } },
             },
           })
           .execute()
       ).map(({ experience }) => experience);
+    }),
+
+  listExperiencesAndUsers: databaseProcedure
+    .input(
+      z.object({
+        username: z.string().optional(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      if (!input.username) {
+        return await ctx.db.query.usersToExperiences
+          .findMany({
+            columns: {},
+            with: {
+              user: { columns: { username: true } },
+              experience: {
+                columns: { id: true, name: true, status: true },
+                with: { song: true },
+              },
+            },
+          })
+          .execute();
+      }
+
+      const user = await ctx.db.query.users
+        .findFirst({ where: eq(users.username, input.username) })
+        .execute();
+      if (!user) return [];
+
+      return await ctx.db.query.usersToExperiences
+        .findMany({
+          where: eq(usersToExperiences.userId, user.id),
+          columns: {},
+          with: {
+            user: { columns: { username: true } },
+            experience: {
+              columns: { id: true, name: true, status: true },
+              with: { song: { columns: { name: true, artist: true } } },
+            },
+          },
+        })
+        .execute();
     }),
 
   saveExperience: userProcedure

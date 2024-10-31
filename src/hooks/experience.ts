@@ -61,7 +61,8 @@ export const useSaveExperience = () => {
       isClosable: true,
     });
 
-    utils.experience.listExperiences.invalidate({ username: store.username });
+    utils.experience.listExperiencesForUser.invalidate();
+    utils.experience.listExperiencesAndUsers.invalidate();
   };
 
   return { saveExperience };

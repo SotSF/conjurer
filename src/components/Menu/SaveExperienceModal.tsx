@@ -27,7 +27,7 @@ export const SaveExperienceModal = observer(function SaveExperienceModal() {
     isPending,
     isError,
     data: experiences,
-  } = trpc.experience.listExperiences.useQuery(
+  } = trpc.experience.listExperiencesForUser.useQuery(
     { username, usingLocalData },
     { enabled: uiStore.showingSaveExperienceModal }
   );

@@ -21,8 +21,8 @@ export const AddExperienceModal = observer(function AddExperienceModal() {
   const {
     isPending,
     isError,
-    data: experiences,
-  } = trpc.experience.listExperiences.useQuery(
+    data: experiencesAndUsers,
+  } = trpc.experience.listExperiencesAndUsers.useQuery(
     { usingLocalData },
     { enabled: uiStore.showingPlaylistAddExperienceModal }
   );
@@ -47,7 +47,7 @@ export const AddExperienceModal = observer(function AddExperienceModal() {
         <ModalBody>
           <VStack height="60vh" overflowY="scroll">
             {!isPending &&
-              experiences.map((experience) => (
+              experiencesAndUsers.map(({ experience }) => (
                 <Button
                   key={experience.name}
                   variant="link"
