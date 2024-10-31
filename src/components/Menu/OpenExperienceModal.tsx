@@ -30,7 +30,7 @@ export const OpenExperienceModal = observer(function OpenExperienceModal() {
   const store = useStore();
   const { experienceStore, uiStore, username, usingLocalData } = store;
 
-  const [filterMyExperiencesOnly, setFilterMyExperiencesOnly] = useState(true);
+  const [viewingAllExperiences, setViewingAllExperiences] = useState(false);
   const [isLoadingNewExperience, setIsLoadingNewExperience] = useState(false);
 
   const {
@@ -40,7 +40,7 @@ export const OpenExperienceModal = observer(function OpenExperienceModal() {
     isRefetching,
   } = trpc.experience.listExperiencesAndUsers.useQuery(
     {
-      username: filterMyExperiencesOnly ? username : undefined,
+      username: viewingAllExperiences ? undefined : username,
       usingLocalData,
     },
     { enabled: uiStore.showingOpenExperienceModal }
@@ -81,18 +81,18 @@ export const OpenExperienceModal = observer(function OpenExperienceModal() {
           )}
           <Switch
             mb={4}
-            isChecked={filterMyExperiencesOnly}
-            onChange={(e) => setFilterMyExperiencesOnly(e.target.checked)}
+            isChecked={viewingAllExperiences}
+            onChange={(e) => setViewingAllExperiences(e.target.checked)}
           >
-            Only my experiences
+            View all experiences
           </Switch>
           {!isPending && (
             <TableContainer>
-              <Table size="sm">
+              <Table size="sm" variant="striped" colorScheme="blue">
                 <Thead>
                   <Tr>
-                    <Th>Author</Th>
                     <Th>Name</Th>
+                    <Th>Author</Th>
                     <Th>Song</Th>
                     <Th />
                   </Tr>
@@ -100,13 +100,12 @@ export const OpenExperienceModal = observer(function OpenExperienceModal() {
                 <Tbody>
                   {sortedExperiencesAndUsers.map(({ user, experience }) => (
                     <Tr key={experience.id}>
-                      <Td>{user.username}</Td>
                       <Td>
                         <Button
                           ml={-3}
                           size="md"
                           height={8}
-                          variant="ghost"
+                          variant="solid"
                           onClick={action(async () => {
                             setIsLoadingNewExperience(true);
                             await experienceStore.load(experience.name);
@@ -117,6 +116,7 @@ export const OpenExperienceModal = observer(function OpenExperienceModal() {
                           {experience.name}
                         </Button>
                       </Td>
+                      <Td>{user.username}</Td>
                       <Td>
                         {experience.song?.artist} - {experience.song?.name}
                       </Td>
