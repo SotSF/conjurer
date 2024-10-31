@@ -39,6 +39,9 @@ export const MenuBar = observer(function MenuBar() {
     onClose: onCloseKeyboardShortcuts,
   } = useDisclosure();
 
+  // Don't show the menu bar if there's no experience loaded yet
+  if (!store.experienceName) return null;
+
   return (
     <VStack
       p={2}

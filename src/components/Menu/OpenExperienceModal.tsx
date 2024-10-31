@@ -16,6 +16,7 @@ import { useStore } from "@/src/types/StoreContext";
 import { action } from "mobx";
 import { trpc } from "@/src/utils/trpc";
 import { GiSparkles } from "react-icons/gi";
+import { useState } from "react";
 
 export const OpenExperienceModal = observer(function OpenExperienceModal() {
   const store = useStore();
@@ -25,14 +26,21 @@ export const OpenExperienceModal = observer(function OpenExperienceModal() {
     isPending,
     isError,
     data: experiences,
+    isRefetching,
   } = trpc.experience.listExperiences.useQuery(
     { username, usingLocalData },
     { enabled: uiStore.showingOpenExperienceModal }
   );
 
+  const [isLoadingNewExperience, setIsLoadingNewExperience] = useState(false);
+
   const onClose = action(() => (uiStore.showingOpenExperienceModal = false));
 
   if (isError) return null;
+
+  const sortedExperiences = (experiences ?? []).sort((a, b) =>
+    a.name.localeCompare(b.name)
+  );
 
   return (
     <Modal
@@ -43,7 +51,10 @@ export const OpenExperienceModal = observer(function OpenExperienceModal() {
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>
-          Open experience {isPending && <Spinner ml={2} />}
+          Open experience{" "}
+          {(isPending || isRefetching || isLoadingNewExperience) && (
+            <Spinner ml={2} />
+          )}
         </ModalHeader>
         <ModalCloseButton />
         <ModalBody>
@@ -54,15 +65,18 @@ export const OpenExperienceModal = observer(function OpenExperienceModal() {
           )}
           {!isPending && (
             <VStack alignItems="center">
-              {experiences.map((experience) => (
+              {sortedExperiences.map((experience) => (
                 <Button
-                  key={experience.name}
+                  key={experience.id}
                   leftIcon={<GiSparkles />}
                   width="100%"
-                  onClick={action(() => {
-                    experienceStore.load(experience.name);
+                  onClick={action(async () => {
+                    setIsLoadingNewExperience(true);
+                    await experienceStore.load(experience.name);
+                    setIsLoadingNewExperience(false);
                     onClose();
                   })}
+                  disabled={isLoadingNewExperience}
                 >
                   {experience.name}
                 </Button>

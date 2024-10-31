@@ -1,23 +1,24 @@
 import { Arrangement } from "@/src/components/Arrangement";
 import { Box, Grid, GridItem } from "@chakra-ui/react";
 import { Display } from "@/src/components/Display";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { useStore } from "@/src/types/StoreContext";
 import { observer } from "mobx-react-lite";
 import { KeyboardControls } from "@/src/components/KeyboardControls";
 import { AddPatternButton } from "@/src/components/AddPatternButton";
 import { PlaylistDrawer } from "@/src/components/PlaylistDrawer";
 import { PatternDrawer } from "@/src/components/PatternDrawer";
+import { useRouter } from "next/router";
 
 export const App = observer(function App() {
   const store = useStore();
-  const { uiStore } = store;
-  const didInitialize = useRef(false);
+  const { uiStore, experienceStore } = store;
+
+  const router = useRouter();
   useEffect(() => {
-    if (didInitialize.current) return;
-    didInitialize.current = true;
-    store.initializeClientSide();
-  }, [store]);
+    if (store.initializedClientSide || !router.query.experienceName) return;
+    store.initializeClientSide(router.query.experienceName as string);
+  }, [store, experienceStore, store.experienceName, router.query.experienceName]);
 
   const gridItems = (
     <>

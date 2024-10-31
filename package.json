@@ -18,7 +18,7 @@
     "db:prod:backup": "src/scripts/backupDatabase.sh",
     "generateCanopy": "ts-node --project tsconfig.script.json src/scripts/generateCanopy.ts",
     "tursoMigration": "src/scripts/tursoMigration.sh",
-    "downloadCloudAudio": "ts-node --project tsconfig.script.json src/scripts/downloadCloudAssets.ts",
+    "downloadCloudAudio": "ts-node --project tsconfig.script.json src/scripts/downloadCloudAudio.ts",
     "unityTestServer": "ts-node --project tsconfig.script.json src/scripts/unityTestServer.ts",
     "controllerServer": "ts-node --project tsconfig.script.json src/scripts/controllerServer.ts",
     "generatePattern": "ts-node --project tsconfig.script.json src/scripts/generatePattern.ts"

@@ -114,14 +114,16 @@ export class Store {
     if (this.context === "default") localStorage.setItem("username", value);
   }
 
-  private _experienceName = "untitled";
+  private _experienceName = "";
   get experienceName(): string {
     return this._experienceName;
   }
   set experienceName(value: string) {
     this._experienceName = value;
-    if (this.context === "default")
+    if (this.context === "default") {
       localStorage.setItem("experienceName", value);
+      window.history.pushState({}, "", `/experience/${value}`);
+    }
   }
 
   hasSaved = false;
@@ -154,7 +156,7 @@ export class Store {
     }
   };
 
-  initializeClientSide = () => {
+  initializeClientSide = (initialExperienceName?: string) => {
     if (this.initializedClientSide) return;
     this.initializedClientSide = true;
 
@@ -197,9 +199,8 @@ export class Store {
     if (usingLocalData && process.env.NEXT_PUBLIC_NODE_ENV !== "production")
       this._usingLocalData = usingLocalData === "true";
 
-    // check for an experience name in local storage
-    const experienceName = localStorage.getItem("experienceName");
-    if (experienceName) this.experienceStore.load(experienceName);
+    // load experience from path parameter if provided (e.g. /experience/my-experience)
+    if (initialExperienceName) this.experienceStore.load(initialExperienceName);
     else this.experienceStore.loadEmptyExperience();
 
     this.uiStore.initialize();
