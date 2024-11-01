@@ -88,7 +88,7 @@ export const OpenExperienceModal = observer(function OpenExperienceModal() {
           </Switch>
           {!isPending && (
             <TableContainer>
-              <Table size="sm" variant="striped" colorScheme="blue">
+              <Table size="sm" colorScheme="blue">
                 <Thead>
                   <Tr>
                     <Th>Name</Th>

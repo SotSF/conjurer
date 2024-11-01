@@ -10,7 +10,7 @@ import { PlaylistDrawer } from "@/src/components/PlaylistDrawer";
 import { PatternDrawer } from "@/src/components/PatternDrawer";
 import { useRouter } from "next/router";
 
-export const App = observer(function App() {
+export const ExperienceEditor = observer(function ExperienceEditor() {
   const store = useStore();
   const { uiStore, experienceStore } = store;
 

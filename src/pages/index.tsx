@@ -1,4 +1,4 @@
-import { App } from "@/src/components/App";
+import { ExperienceEditor } from "@/src/components/ExperienceEditor";
 import { Store } from "@/src/types/Store";
 import { StoreContext } from "@/src/types/StoreContext";
 import { ChakraProvider, theme } from "@chakra-ui/react";
@@ -6,7 +6,7 @@ import Head from "next/head";
 import { useMemo } from "react";
 
 export default function Home() {
-  const store = useMemo(() => new Store("default"), []);
+  const store = useMemo(() => new Store("experienceEditor"), []);
   return (
     <>
       <Head>
@@ -18,7 +18,7 @@ export default function Home() {
 
       <ChakraProvider theme={theme}>
         <StoreContext.Provider value={store}>
-          <App />
+          <ExperienceEditor />
         </StoreContext.Provider>
       </ChakraProvider>
     </>

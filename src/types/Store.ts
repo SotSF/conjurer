@@ -111,7 +111,8 @@ export class Store {
   }
   set username(value: string) {
     this._username = value;
-    if (this.context === "default") localStorage.setItem("username", value);
+    if (this.context === "experienceEditor")
+      localStorage.setItem("username", value);
   }
 
   private _experienceName = "";
@@ -120,7 +121,7 @@ export class Store {
   }
   set experienceName(value: string) {
     this._experienceName = value;
-    if (this.context === "default") {
+    if (this.context === "experienceEditor") {
       localStorage.setItem("experienceName", value);
       window.history.pushState({}, "", `/experience/${value}`);
     }
@@ -137,7 +138,11 @@ export class Store {
   }
 
   constructor(
-    readonly context: "playground" | "controller" | "viewer" | "default"
+    readonly context:
+      | "playground"
+      | "controller"
+      | "viewer"
+      | "experienceEditor"
   ) {
     makeAutoObservable(this);
 
