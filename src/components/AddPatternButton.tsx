@@ -8,9 +8,8 @@ export const AddPatternButton = observer(function AddPatternButton() {
   const store = useStore();
   const { uiStore } = store;
 
-  const placement = { [uiStore.horizontalLayout ? "right" : "left"]: 0 };
   return (
-    <Box position="absolute" bottom={0} {...placement} m={4}>
+    <Box position="absolute" bottom={0} right={0} m={4}>
       <Button
         variant="solid"
         bgColor="gray.600"
@@ -19,7 +18,6 @@ export const AddPatternButton = observer(function AddPatternButton() {
         onClick={action(() => {
           store.pause();
           uiStore.patternDrawerOpen = true;
-          store.sendingData = false;
         })}
         zIndex={100}
       >
