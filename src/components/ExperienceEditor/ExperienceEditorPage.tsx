@@ -6,12 +6,11 @@ import { useStore } from "@/src/types/StoreContext";
 import { observer } from "mobx-react-lite";
 import { KeyboardControls } from "@/src/components/KeyboardControls";
 import { AddPatternButton } from "@/src/components/AddPatternButton";
-import { PlaylistDrawer } from "@/src/components/PlaylistDrawer";
 import { PatternDrawer } from "@/src/components/PatternDrawer";
 import { useRouter } from "next/router";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 
-export const ExperienceEditor = observer(function ExperienceEditor() {
+export const ExperienceEditorPage = observer(function ExperienceEditorPage() {
   const store = useStore();
   const { uiStore, experienceStore } = store;
 
@@ -37,7 +36,6 @@ export const ExperienceEditor = observer(function ExperienceEditor() {
       </PanelGroup>
       <KeyboardControls editMode />
       <PatternDrawer />
-      <PlaylistDrawer />
       <AddPatternButton />
     </Box>
   );

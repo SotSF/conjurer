@@ -143,6 +143,7 @@ export class Store {
       | "controller"
       | "viewer"
       | "experienceEditor"
+      | "playlistEditor"
   ) {
     makeAutoObservable(this);
 

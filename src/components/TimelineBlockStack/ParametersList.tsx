@@ -1,6 +1,6 @@
 import { Block } from "@/src/types/Block";
 import { ExtraParams } from "@/src/types/PatternParams";
-import { ParameterView } from "@/src/components/ParameterView";
+import { ParameterView } from "@/src/components/TimelineBlockStack/ParameterView";
 import { VStack } from "@chakra-ui/react";
 import { memo } from "react";
 

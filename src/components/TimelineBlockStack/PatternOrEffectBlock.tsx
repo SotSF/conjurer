@@ -5,13 +5,13 @@ import { observer } from "mobx-react-lite";
 import { MouseEvent as ReactMouseEvent, useState } from "react";
 import { MdDragIndicator } from "react-icons/md";
 import { BsArrowsCollapse, BsArrowsExpand } from "react-icons/bs";
-import { ParametersList } from "@/src/components/ParametersList";
 import { RxCaretDown, RxCaretUp } from "react-icons/rx";
 import { FaTrashAlt } from "react-icons/fa";
-import { HeaderRepeat } from "@/src/components/HeaderRepeat";
+import { HeaderRepeat } from "@/src/components/TimelineBlockStack/HeaderRepeat";
 import { ImLoop } from "react-icons/im";
 import { useStore } from "@/src/types/StoreContext";
-import { PatternTimingModal } from "./PatternTimingModal";
+import { PatternTimingModal } from "@/src/components/TimelineBlockStack/PatternTimingModal";
+import { ParametersList } from "@/src/components/TimelineBlockStack/ParametersList";
 
 type Props = {
   block: Block;

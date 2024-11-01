@@ -1,12 +1,12 @@
 import { observer } from "mobx-react-lite";
-import { TimelineBlockStack } from "@/src/components/TimelineBlockStack";
 import { useStore } from "@/src/types/StoreContext";
 import { Box, HStack } from "@chakra-ui/react";
 import { MAX_TIME } from "@/src/utils/time";
 import { Layer } from "@/src/types/Layer";
 import { action } from "mobx";
 import { useRef } from "react";
-import { TimelineLayerHeader } from "@/src/components/TimelineLayerHeader";
+import { TimelineLayerHeader } from "@/src/components/Timeline/TimelineLayerHeader";
+import { TimelineBlockStack } from "@/src/components/TimelineBlockStack/TimelineBlockStack";
 
 type TimelineLayerProps = {
   index: number;

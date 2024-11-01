@@ -1,4 +1,4 @@
-import { ExperienceEditor } from "@/src/components/ExperienceEditor";
+import { ExperienceEditorPage } from "@/src/components/ExperienceEditor/ExperienceEditorPage";
 import { Store } from "@/src/types/Store";
 import { StoreContext } from "@/src/types/StoreContext";
 import { ChakraProvider, theme } from "@chakra-ui/react";
@@ -18,7 +18,7 @@ export default function Home() {
 
       <ChakraProvider theme={theme}>
         <StoreContext.Provider value={store}>
-          <ExperienceEditor />
+          <ExperienceEditorPage />
         </StoreContext.Provider>
       </ChakraProvider>
     </>

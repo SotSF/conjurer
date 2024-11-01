@@ -14,8 +14,8 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 
-import { Block } from "../types/Block";
-import { ScalarInput } from "./ScalarInput";
+import { Block } from "@/src/types/Block";
+import { ScalarInput } from "@/src/components/ScalarInput";
 import { observer } from "mobx-react-lite";
 
 type PatternTimingModalProps = {

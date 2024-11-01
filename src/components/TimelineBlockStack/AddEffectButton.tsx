@@ -13,7 +13,7 @@ import {
 import { action } from "mobx";
 import { FiPlusSquare } from "react-icons/fi";
 import { playgroundEffects } from "@/src/effects/effects";
-import { HeaderRepeat } from "@/src/components/HeaderRepeat";
+import { HeaderRepeat } from "@/src/components/TimelineBlockStack/HeaderRepeat";
 import { observer } from "mobx-react-lite";
 
 type Props = {
