@@ -10,11 +10,12 @@ import {
 } from "@chakra-ui/react";
 import { RxCaretDown, RxCaretUp } from "react-icons/rx";
 import { action } from "mobx";
-import { FaPause, FaPencilAlt, FaPlay, FaTrashAlt } from "react-icons/fa";
+import { FaPause, FaPencilAlt, FaPlay } from "react-icons/fa";
 import { useState } from "react";
 import { useStore } from "@/src/types/StoreContext";
 import { observer } from "mobx-react-lite";
 import { useRouter } from "next/router";
+import { ImCross } from "react-icons/im";
 
 type PlaylistItemControlsProps = {
   experienceName: string;
@@ -174,11 +175,11 @@ export const PlaylistItem = observer(function PlaylistItem({
               />
               <IconButton
                 variant="link"
-                aria-label="Delete experience"
-                title="Delete experience"
+                aria-label="Remove experience from playlist"
+                title="Remove experience from playlist"
                 height={6}
                 _hover={{ color: "red.500" }}
-                icon={<FaTrashAlt size={10} />}
+                icon={<ImCross size={10} />}
                 onClick={action(() => playlistStore.removeExperience(index))}
               />
             </>

@@ -112,8 +112,8 @@ export class Store {
   }
   set username(value: string) {
     this._username = value;
-    if (this.context === "experienceEditor")
-      localStorage.setItem("username", value);
+    localStorage.setItem("username", value);
+    console.log("writing username");
   }
 
   private _experienceName = "";
@@ -187,7 +187,7 @@ export class Store {
     }
 
     // check for a username in local storage
-    const username = localStorage.getItem("user");
+    const username = localStorage.getItem("username");
     if (username) this._username = username;
 
     // check for a global intensity in local storage

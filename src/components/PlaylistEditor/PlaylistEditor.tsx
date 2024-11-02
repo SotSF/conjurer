@@ -27,11 +27,11 @@ export const PlaylistEditor = observer(function PlaylistEditor() {
   const { playlistStore, uiStore } = store;
   const { experienceNames } = playlistStore;
 
-  const isEditable = store.context !== "viewer";
+  const isEditable = !!store.username;
 
   return (
-    <VStack justify="center" height="100%" overflow="scroll">
-      <HStack justify="center" align="center">
+    <VStack m={2} justify="start" alignItems={"start"} flexBasis={"70rem"}>
+      <HStack m={4} justify="start" align="center">
         <Editable
           placeholder="Playlist name"
           value={playlistStore.name}
@@ -65,9 +65,7 @@ export const PlaylistEditor = observer(function PlaylistEditor() {
         </Button>
       </HStack>
 
-      <VStack mb={4}></VStack>
-
-      <TableContainer maxWidth="80%">
+      <TableContainer>
         <Table size="sm" variant="simple">
           <Thead>
             <Tr>
