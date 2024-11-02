@@ -70,6 +70,12 @@ export class PlaylistStore {
     await this.playExperienceWhenReady();
   };
 
+  loadFirstExperience = async () => {
+    if (this.experienceNames.length === 0) return;
+
+    await this.experienceStore.load(this.experienceNames[0]);
+  }
+
   playExperienceWhenReady = () =>
     new Promise<void>((resolve) => {
       this.audioStore.wavesurfer?.once("ready", () => {

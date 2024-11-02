@@ -28,7 +28,6 @@ import { OpenExperienceModal } from "@/src/components/Menu/OpenExperienceModal";
 import { SaveExperienceModal } from "@/src/components/Menu/SaveExperienceModal";
 import { KeyboardShortcuts } from "@/src/components/KeyboardShortcuts";
 import { useSaveExperience } from "@/src/hooks/experience";
-import { TbLayoutColumns, TbLayoutRows } from "react-icons/tb";
 import { DisplayMode } from "@/src/types/UIStore";
 import { action } from "mobx";
 
@@ -93,22 +92,20 @@ export const MenuBar = observer(function MenuBar() {
         >
           {store.experienceName}
         </Heading>
-        {store.context !== "viewer" &&
+        {store.context === "experienceEditor" &&
           !store.hasSaved &&
           !store.experienceId && (
             <Text ml={2} fontSize="sm" color="red.500" userSelect="none">
               not yet saved
             </Text>
           )}
-        {store.context !== "viewer" && store.hasSaved && (
+        {store.context === "experienceEditor" && store.hasSaved && (
           <Text fontSize="sm" color="gray.500" userSelect="none">
-            {store.experienceLastSavedAt
-              ? `last saved at ${Intl.DateTimeFormat("en", {
-                  hour: "numeric",
-                  minute: "numeric",
-                  hour12: true,
-                }).format(store.experienceLastSavedAt)}`
-              : "not yet saved"}
+            {`last saved at ${Intl.DateTimeFormat("en", {
+              hour: "numeric",
+              minute: "numeric",
+              hour12: true,
+            }).format(store.experienceLastSavedAt)}`}
           </Text>
         )}
         {process.env.NEXT_PUBLIC_NODE_ENV !== "production" && (
@@ -221,17 +218,25 @@ export const MenuBar = observer(function MenuBar() {
                 View
               </MenuButton>
               <MenuList zIndex={12}>
-                <MenuOptionGroup
-                  defaultValue={uiStore.renderTargetSize.toString()}
-                  title="App orientation"
-                  type="radio"
-                  value={uiStore.horizontalLayout ? "horizontal" : "vertical"}
-                  onChange={uiStore.toggleLayout}
-                >
-                  <MenuItemOption value="horizontal">Horizontal</MenuItemOption>
-                  <MenuItemOption value="vertical">Vertical</MenuItemOption>
-                </MenuOptionGroup>
-                <MenuDivider />
+                {store.context === "experienceEditor" && (
+                  <>
+                    <MenuOptionGroup
+                      defaultValue={uiStore.renderTargetSize.toString()}
+                      title="App orientation"
+                      type="radio"
+                      value={
+                        uiStore.horizontalLayout ? "horizontal" : "vertical"
+                      }
+                      onChange={uiStore.toggleLayout}
+                    >
+                      <MenuItemOption value="horizontal">
+                        Horizontal
+                      </MenuItemOption>
+                      <MenuItemOption value="vertical">Vertical</MenuItemOption>
+                    </MenuOptionGroup>
+                    <MenuDivider />
+                  </>
+                )}
                 <MenuOptionGroup
                   defaultValue={uiStore.renderTargetSize.toString()}
                   title="Render size (resolution)"
