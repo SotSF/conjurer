@@ -20,7 +20,7 @@ import { action } from "mobx";
 import { observer } from "mobx-react-lite";
 import { trpc } from "@/src/utils/trpc";
 
-export const LoginModal = observer(function LoginModal() {
+export const LoginButton = observer(function LoginButton() {
   const store = useStore();
   const { experienceStore, uiStore, usingLocalData } = store;
 

@@ -4,3 +4,5 @@ export type Context =
   | "viewer"
   | "experienceEditor"
   | "playlistEditor";
+
+export type Role = "emcee" | "experience creator";

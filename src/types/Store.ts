@@ -18,7 +18,7 @@ import {
   Experience,
 } from "@/src/types/Experience";
 import { NO_SONG } from "@/src/types/Song";
-import { Context } from "@/src/types/context";
+import { Context, Role } from "@/src/types/context";
 
 // Enforce MobX strict mode, which can make many noisy console warnings, but can help use learn MobX better.
 // Feel free to comment out the following if you want to silence the console messages.
@@ -106,6 +106,18 @@ export class Store {
     return variationSelections.length === 1 ? variationSelections[0] : null;
   }
 
+  private _role: Role = "emcee";
+  get role(): string {
+    return this._role;
+  }
+  set role(value: Role) {
+    this._role = value;
+    localStorage.setItem("role", value);
+  }
+  get roleText(): string {
+    return this._role === "emcee" ? "Emcee" : "Experience Creator";
+  }
+
   private _username = "";
   get username(): string {
     return this._username;
@@ -113,7 +125,6 @@ export class Store {
   set username(value: string) {
     this._username = value;
     localStorage.setItem("username", value);
-    console.log("writing username");
   }
 
   private _experienceName = "";
@@ -185,6 +196,10 @@ export class Store {
       if (this.embeddedViewer) this.play();
       return;
     }
+
+    // check for a role in local storage
+    const role = localStorage.getItem("role");
+    if (role) this._role = role as Role;
 
     // check for a username in local storage
     const username = localStorage.getItem("username");
