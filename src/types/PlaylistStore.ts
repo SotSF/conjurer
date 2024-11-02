@@ -17,6 +17,7 @@ export class PlaylistStore {
   experienceNames: string[] = [];
 
   autoplay = ["playlistEditor", "viewer"].includes(this.rootStore.context);
+  // TODO: implement shuffle
   shuffle = false;
 
   constructor(
@@ -74,7 +75,7 @@ export class PlaylistStore {
     if (this.experienceNames.length === 0) return;
 
     await this.experienceStore.load(this.experienceNames[0]);
-  }
+  };
 
   playExperienceWhenReady = () =>
     new Promise<void>((resolve) => {

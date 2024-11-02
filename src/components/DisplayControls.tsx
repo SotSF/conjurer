@@ -8,14 +8,15 @@ export const DisplayControls = function DisplayControls({
 }: DisplayControlsProps) {
   return (
     <VStack
-      p={2}
+      p={1}
       position="absolute"
-      bottom={1}
-      right={1}
+      bottom={2}
+      right={0}
       alignItems="flex-start"
       zIndex={1}
     >
       <IconButton
+        variant={"ghost"}
         aria-label="Go fullscreen"
         title="Go fullscreen"
         height={6}

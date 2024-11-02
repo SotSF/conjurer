@@ -154,10 +154,6 @@ export const PlaylistItem = observer(function PlaylistItem({
         </Text>
       </Td>
 
-      <Td>
-        <Text {...textProps}>Ready</Text>
-      </Td>
-
       <Td px={0}>
         <HStack height={10} alignItems="center" spacing={0}>
           {editable && (

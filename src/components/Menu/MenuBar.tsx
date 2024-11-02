@@ -203,7 +203,7 @@ export const MenuBar = observer(function MenuBar() {
                 </MenuItem>
               </MenuList>
             </Menu>
-            <Menu closeOnSelect={false}>
+            <Menu>
               <MenuButton
                 as={Button}
                 px={1}

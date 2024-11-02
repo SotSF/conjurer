@@ -71,7 +71,6 @@ export const PlaylistEditor = observer(function PlaylistEditor() {
             <Tr>
               <Th isNumeric>#</Th>
               <Th>Experience name</Th>
-              <Th>Status</Th>
             </Tr>
           </Thead>
           <Tbody>
