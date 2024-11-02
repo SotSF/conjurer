@@ -2,9 +2,11 @@ import { makeAutoObservable, runInAction } from "mobx";
 import initialPlaylist from "@/src/data/initialPlaylist.json";
 import { ExperienceStore } from "@/src/types/ExperienceStore";
 import { AudioStore } from "@/src/types/AudioStore";
+import { Context } from "@/src/types/context";
 
 // Define a new RootStore interface here so that we avoid circular dependencies
 interface RootStore {
+  context: Context;
   experienceName: string;
   play: () => void;
   pause: () => void;
@@ -14,7 +16,8 @@ export class PlaylistStore {
   name: string = "";
   experienceNames: string[] = [];
 
-  autoplay = false;
+  autoplay = ["playlistEditor", "viewer"].includes(this.rootStore.context);
+  shuffle = false;
 
   constructor(
     readonly rootStore: RootStore,

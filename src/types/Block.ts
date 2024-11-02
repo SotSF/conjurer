@@ -15,6 +15,7 @@ import { LinearVariation4 } from "@/src/types/Variations/LinearVariation4";
 import { isPalette } from "@/src/types/Palette";
 import { PaletteVariation } from "@/src/types/Variations/PaletteVariation";
 import { generateId } from "@/src/utils/id";
+import { Context } from "@/src/types/context";
 
 export type SerializedBlock = {
   id: string;
@@ -27,7 +28,7 @@ export type SerializedBlock = {
 };
 
 export type RootStore = {
-  context: string;
+  context: Context;
   audioStore: {
     getPeakAtTime: (time: number) => number;
   };

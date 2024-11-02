@@ -1,4 +1,5 @@
 import { AudioStore } from "@/src/types/AudioStore";
+import { Context } from "@/src/types/context";
 import { INITIAL_PIXELS_PER_SECOND } from "@/src/utils/time";
 import { makeAutoObservable } from "mobx";
 import { RegionParams } from "wavesurfer.js/dist/plugins/regions";
@@ -11,7 +12,7 @@ const INITIAL_RENDER_TARGET_SIZE = 512;
 export type DisplayMode = "canopy" | "canopySpace" | "cartesianSpace" | "none";
 
 type RootStore = {
-  context: string;
+  context: Context;
   username: string;
 };
 
@@ -73,8 +74,6 @@ export class UIStore {
   }
 
   patternDrawerOpen = false;
-
-  playlistDrawerOpen = false;
 
   pixelsPerSecond = INITIAL_PIXELS_PER_SECOND; // the zoom of the timeline
 

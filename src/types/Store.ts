@@ -18,6 +18,7 @@ import {
   SerialExperience,
 } from "@/src/types/Experience";
 import { NO_SONG } from "@/src/types/Song";
+import { Context } from "@/src/types/context";
 
 // Enforce MobX strict mode, which can make many noisy console warnings, but can help use learn MobX better.
 // Feel free to comment out the following if you want to silence the console messages.
@@ -137,26 +138,19 @@ export class Store {
     return this.audioStore.audioState !== "paused";
   }
 
-  constructor(
-    readonly context:
-      | "playground"
-      | "controller"
-      | "viewer"
-      | "experienceEditor"
-      | "playlistEditor"
-  ) {
+  constructor(readonly context: Context) {
     makeAutoObservable(this);
 
     this.initializeServerSide();
   }
 
   initializeServerSide = () => {
+    // TODO: can move all of these into the field initialization code in their respective stores
     if (this.context === "playground") {
       this.uiStore.patternDrawerOpen = true;
     } else if (this.context === "controller") {
       this.uiStore.displayMode = "none";
     } else if (this.context === "viewer") {
-      this.playlistStore.autoplay = true;
       this.uiStore.showingViewerInstructionsModal = true;
       this.uiStore.pixelsPerSecond = MIN_PIXELS_PER_SECOND;
     }

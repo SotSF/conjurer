@@ -1,6 +1,5 @@
 import {
   Button,
-  Checkbox,
   Editable,
   EditableInput,
   EditablePreview,
@@ -21,6 +20,7 @@ import { MdOutlinePlaylistAdd } from "react-icons/md";
 import { FaRegClipboard } from "react-icons/fa";
 import { action } from "mobx";
 import { AddExperienceModal } from "@/src/components/PlaylistEditor/AddExperienceModal";
+import { BiShuffle } from "react-icons/bi";
 
 export const PlaylistEditor = observer(function PlaylistEditor() {
   const store = useStore();
@@ -31,32 +31,41 @@ export const PlaylistEditor = observer(function PlaylistEditor() {
 
   return (
     <>
-      <Editable
-        flexGrow={1}
-        placeholder="Playlist name"
-        value={playlistStore.name}
-        onChange={action((value) => (playlistStore.name = value))}
-        fontSize={20}
-        fontWeight="bold"
-        textAlign="center"
-        isDisabled={!isEditable}
-      >
-        <EditablePreview />
-        <EditableInput _placeholder={{ color: "gray.600" }} />
-      </Editable>
-
-      <VStack mb={4}>
-        <Checkbox
-          my={2}
-          isChecked={playlistStore.autoplay}
-          size="sm"
-          onChange={action(
-            ({ target }) => (playlistStore.autoplay = target.checked)
-          )}
+      <HStack justify="center" align="center">
+        <Editable
+          placeholder="Playlist name"
+          value={playlistStore.name}
+          onChange={action((value) => (playlistStore.name = value))}
+          fontSize={20}
+          fontWeight="bold"
+          textAlign="center"
+          isDisabled={!isEditable}
         >
-          Autoplay next experience in playlist
-        </Checkbox>
-      </VStack>
+          <EditablePreview />
+          <EditableInput _placeholder={{ color: "gray.600" }} />
+        </Editable>
+        <Button
+          ml={2}
+          size="xs"
+          variant="outline"
+          onClick={action(
+            () => (playlistStore.shuffle = !playlistStore.shuffle)
+          )}
+          leftIcon={<BiShuffle size={14} />}
+          bgColor={playlistStore.shuffle ? "orange.600" : undefined}
+          _hover={
+            playlistStore.shuffle
+              ? {
+                  bgColor: "orange.600",
+                }
+              : undefined
+          }
+        >
+          Shuffle
+        </Button>
+      </HStack>
+
+      <VStack mb={4}></VStack>
 
       <TableContainer>
         <Table size="sm" variant="simple">
