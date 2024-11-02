@@ -138,4 +138,79 @@ export const usersToExperiencesRelations = relations(
 export type InsertAuthorship = typeof usersToExperiences.$inferInsert;
 export type SelectAuthorship = typeof usersToExperiences.$inferSelect;
 
-// TODO: playlists table
+export const playlists = sqliteTable(
+  "playlists",
+  {
+    id: integer("id").primaryKey(),
+    name: text("name").notNull(),
+    userId: integer("user_id")
+      .notNull()
+      .references(() => users.id),
+    isLocked: integer("is_locked", { mode: "boolean" })
+      .notNull()
+      .default(false),
+
+    createdAt: text("created_at")
+      .default(sql`(CURRENT_TIMESTAMP)`)
+      .notNull(),
+    updatedAt: text("updated_at")
+      .default(sql`(CURRENT_TIMESTAMP)`)
+      .notNull()
+      .$onUpdate(() => sql`(CURRENT_TIMESTAMP)`),
+  },
+  (table) => ({
+    playlistNameIndex: index("playlist_user_index").on(table.userId),
+  })
+);
+
+export const playlistsRelations = relations(playlists, ({ one, many }) => ({
+  user: one(users, { fields: [playlists.userId], references: [users.id] }),
+  playlistExperiences: many(playlistExperiences),
+}));
+
+export type InsertPlaylist = typeof playlists.$inferInsert;
+export type SelectPlaylist = typeof playlists.$inferSelect;
+
+export const playlistExperiences = sqliteTable(
+  "playlist_experiences",
+  {
+    id: integer("id").primaryKey(),
+    playlistId: integer("playlist_id")
+      .notNull()
+      .references(() => playlists.id, { onDelete: "cascade" }),
+    experienceId: integer("experience_id")
+      .notNull()
+      .references(() => experiences.id, { onDelete: "cascade" }),
+
+    createdAt: text("created_at")
+      .default(sql`(CURRENT_TIMESTAMP)`)
+      .notNull(),
+    updatedAt: text("updated_at")
+      .default(sql`(CURRENT_TIMESTAMP)`)
+      .notNull()
+      .$onUpdate(() => sql`(CURRENT_TIMESTAMP)`),
+  },
+  (table) => ({
+    playlistExperienceIndex: uniqueIndex("playlist_experience_index").on(
+      table.playlistId,
+      table.experienceId
+    ),
+  })
+);
+
+export const playlistExperiencesRelations = relations(
+  playlistExperiences,
+  ({ one }) => ({
+    playlist: one(playlists, {
+      fields: [playlistExperiences.playlistId],
+      references: [playlists.id],
+    }),
+    experience: one(experiences, {
+      fields: [playlistExperiences.experienceId],
+      references: [experiences.id],
+    }),
+  })
+);
+
+export type InsertPlaylistExperience = typeof playlistExperiences.$inferInsert;
+export type SelectPlaylistExperience = typeof playlistExperiences.$inferSelect;
