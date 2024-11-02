@@ -7,7 +7,9 @@ import {
   MenuButton,
   MenuDivider,
   MenuItem,
+  MenuItemOption,
   MenuList,
+  MenuOptionGroup,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -26,6 +28,9 @@ import { OpenExperienceModal } from "@/src/components/Menu/OpenExperienceModal";
 import { SaveExperienceModal } from "@/src/components/Menu/SaveExperienceModal";
 import { KeyboardShortcuts } from "@/src/components/KeyboardShortcuts";
 import { useSaveExperience } from "@/src/hooks/experience";
+import { TbLayoutColumns, TbLayoutRows } from "react-icons/tb";
+import { DisplayMode } from "@/src/types/UIStore";
+import { action } from "mobx";
 
 export const MenuBar = observer(function MenuBar() {
   const store = useStore();
@@ -201,7 +206,7 @@ export const MenuBar = observer(function MenuBar() {
                 </MenuItem>
               </MenuList>
             </Menu>
-            <Menu>
+            <Menu closeOnSelect={false}>
               <MenuButton
                 as={Button}
                 px={1}
@@ -213,21 +218,59 @@ export const MenuBar = observer(function MenuBar() {
                 _hover={{ bg: "gray.500" }}
                 _focus={{ boxShadow: "outline" }}
               >
-                Go to
+                View
               </MenuButton>
               <MenuList zIndex={12}>
-                <MenuItem as="a" href="/playground" target="_blank">
-                  Playground
-                </MenuItem>
-                <MenuItem as="a" href="/controller" target="_blank">
-                  Controller
-                </MenuItem>
-                <MenuItem as="a" href="/portal" target="_blank">
-                  Portal
-                </MenuItem>
-                <MenuItem as="a" href="/beatMapper" target="_blank">
-                  Beat Mapper
-                </MenuItem>
+                <MenuOptionGroup
+                  defaultValue={uiStore.renderTargetSize.toString()}
+                  title="App orientation"
+                  type="radio"
+                  value={uiStore.horizontalLayout ? "horizontal" : "vertical"}
+                  onChange={uiStore.toggleLayout}
+                >
+                  <MenuItemOption value="horizontal">Horizontal</MenuItemOption>
+                  <MenuItemOption value="vertical">Vertical</MenuItemOption>
+                </MenuOptionGroup>
+                <MenuDivider />
+                <MenuOptionGroup
+                  defaultValue={uiStore.renderTargetSize.toString()}
+                  title="Render size (resolution)"
+                  type="radio"
+                  value={uiStore.renderTargetSize.toString()}
+                  onChange={action(
+                    (value) =>
+                      (uiStore.renderTargetSize = parseInt(value as string))
+                  )}
+                >
+                  <MenuItemOption value="256">256 x 256</MenuItemOption>
+                  <MenuItemOption value="512">512 x 512</MenuItemOption>
+                  <MenuItemOption value="1024">1024 x 1024</MenuItemOption>
+                </MenuOptionGroup>
+                <MenuDivider />
+                <MenuOptionGroup
+                  defaultValue={uiStore.displayMode}
+                  title="Display mode"
+                  type="radio"
+                  value={uiStore.displayMode}
+                  onChange={action(
+                    (value) => (uiStore.displayMode = value as DisplayMode)
+                  )}
+                >
+                  <MenuItemOption value="canopy">Canopy</MenuItemOption>
+                  <MenuItemOption value="cartesianSpace">
+                    Cartesian space
+                  </MenuItemOption>
+                  <MenuItemOption value="canopySpace">
+                    Canopy space
+                  </MenuItemOption>
+                </MenuOptionGroup>
+                <MenuDivider />
+                <MenuItemOption
+                  isChecked={uiStore.showingPerformance}
+                  onClick={uiStore.togglePerformance}
+                >
+                  Show performance overlay
+                </MenuItemOption>
               </MenuList>
             </Menu>
             <Menu>
