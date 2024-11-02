@@ -15,7 +15,7 @@ import { setupVoiceCommandWebsocket } from "@/src/websocket/voiceCommandWebsocke
 import {
   EXPERIENCE_VERSION,
   ExperienceStatus,
-  SerialExperience,
+  Experience,
 } from "@/src/types/Experience";
 import { NO_SONG } from "@/src/types/Song";
 import { Context } from "@/src/types/context";
@@ -496,7 +496,7 @@ export class Store {
     }
   };
 
-  serialize = (): SerialExperience => ({
+  serialize = (): Experience => ({
     id: this.experienceId,
     name: this.experienceName,
     song: this.audioStore.selectedSong,
@@ -505,7 +505,7 @@ export class Store {
     data: { layers: this.layers.map((l) => l.serialize()) },
   });
 
-  deserialize = (experience: SerialExperience) => {
+  deserialize = (experience: Experience) => {
     this.experienceId = experience.id;
     this.experienceName = experience.name;
     this.audioStore.selectedSong = experience.song || NO_SONG;

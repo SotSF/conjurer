@@ -1,6 +1,6 @@
 import { makeAutoObservable, runInAction } from "mobx";
 import { trpcClient } from "@/src/utils/trpc";
-import { SerialExperience, EXPERIENCE_VERSION } from "@/src/types/Experience";
+import { Experience, EXPERIENCE_VERSION } from "@/src/types/Experience";
 import { NO_SONG } from "@/src/types/Song";
 
 // Define a new RootStore interface here so that we avoid circular dependencies
@@ -9,8 +9,8 @@ interface RootStore {
   hasSaved: boolean;
   experienceLastSavedAt: number;
   usingLocalData: boolean;
-  serialize: () => SerialExperience;
-  deserialize: (data: SerialExperience) => void;
+  serialize: () => Experience;
+  deserialize: (data: Experience) => void;
 }
 
 export class ExperienceStore {
