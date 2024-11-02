@@ -154,41 +154,13 @@ export const PlaylistItem = observer(function PlaylistItem({
       </Td>
 
       <Td>
-        <Text {...textProps}>Todo</Text>
+        <Text {...textProps}>Ready</Text>
       </Td>
 
       <Td px={0}>
         <HStack height={10} alignItems="center" spacing={0}>
           {editable && (
             <>
-              <VStack spacing={0}>
-                {index > 0 && (
-                  <IconButton
-                    variant="link"
-                    aria-label="Move up"
-                    title="Move up"
-                    height={4}
-                    _hover={{ color: "blue.500" }}
-                    icon={<RxCaretUp size={20} />}
-                    onClick={action(() =>
-                      playlistStore.reorderExperience(index, -1)
-                    )}
-                  />
-                )}
-                {index < playlistLength - 1 && (
-                  <IconButton
-                    variant="link"
-                    aria-label="Move down"
-                    title="Move down"
-                    height={4}
-                    _hover={{ color: "blue.500" }}
-                    icon={<RxCaretDown size={20} />}
-                    onClick={action(() =>
-                      playlistStore.reorderExperience(index, 1)
-                    )}
-                  />
-                )}
-              </VStack>
               <IconButton
                 variant="link"
                 aria-label="Edit experience"
