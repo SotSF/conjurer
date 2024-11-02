@@ -30,7 +30,7 @@ export const PlaylistEditor = observer(function PlaylistEditor() {
   const isEditable = store.context !== "viewer";
 
   return (
-    <>
+    <VStack justify="center" height="100%" overflow="scroll">
       <HStack justify="center" align="center">
         <Editable
           placeholder="Playlist name"
@@ -67,12 +67,13 @@ export const PlaylistEditor = observer(function PlaylistEditor() {
 
       <VStack mb={4}></VStack>
 
-      <TableContainer>
+      <TableContainer maxWidth="80%">
         <Table size="sm" variant="simple">
           <Thead>
             <Tr>
               <Th isNumeric>#</Th>
               <Th>Experience name</Th>
+              <Th>Status</Th>
             </Tr>
           </Thead>
           <Tbody>
@@ -111,12 +112,9 @@ export const PlaylistEditor = observer(function PlaylistEditor() {
               Add experience
             </Button>
           </HStack>
-          <Text mt={4} fontSize="sm" textAlign="center" color="gray.500">
-            Note: playlists cannot currently be saved!
-          </Text>
         </>
       )}
       <AddExperienceModal />
-    </>
+    </VStack>
   );
 });
