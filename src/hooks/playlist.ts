@@ -38,6 +38,9 @@ export const useSavePlaylist = () => {
     }
 
     utils.playlist.listPlaylistsForUser.invalidate();
+    utils.playlist.getPlaylist.invalidate({ id: savedId });
+
+    return savedId;
   };
 
   return { savePlaylist };

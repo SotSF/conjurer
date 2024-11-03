@@ -122,6 +122,7 @@ export const PlaylistEditor = observer(function PlaylistEditor() {
               experiences.map((experience, index) => (
                 <Tr key={experience.id}>
                   <PlaylistItem
+                    playlist={playlist}
                     experience={experience}
                     index={index}
                     playlistLength={experiences.length}

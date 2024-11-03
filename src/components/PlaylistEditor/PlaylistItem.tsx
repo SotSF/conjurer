@@ -17,8 +17,12 @@ import { observer } from "mobx-react-lite";
 import { useRouter } from "next/router";
 import { ImCross } from "react-icons/im";
 import { Experience } from "@/src/types/Experience";
+import { useSavePlaylist } from "@/src/hooks/playlist";
+import { reorder } from "@/src/utils/algorithm";
+import { Playlist } from "@/src/types/Playlist";
 
 type PlaylistItemControlsProps = {
+  playlist: Playlist;
   experience: Experience;
   index: number;
   playlistLength: number;
@@ -26,6 +30,7 @@ type PlaylistItemControlsProps = {
 };
 
 export const PlaylistItem = observer(function PlaylistItem({
+  playlist,
   experience,
   index,
   playlistLength,
@@ -35,6 +40,8 @@ export const PlaylistItem = observer(function PlaylistItem({
   const { experienceStore, playlistStore } = store;
 
   const router = useRouter();
+
+  const { savePlaylist } = useSavePlaylist();
 
   const [mousingOver, setMousingOver] = useState(false);
   const [loadingExperience, setLoadingExperience] = useState(false);
@@ -125,9 +132,16 @@ export const PlaylistItem = observer(function PlaylistItem({
                     height={4}
                     _hover={{ color: "blue.500" }}
                     icon={<RxCaretUp size={20} />}
-                    onClick={action(() =>
-                      playlistStore.reorderExperience(index, -1)
-                    )}
+                    onClick={() =>
+                      savePlaylist({
+                        ...playlist,
+                        orderedExperienceIds: reorder(
+                          playlist.orderedExperienceIds,
+                          index,
+                          -1
+                        ),
+                      })
+                    }
                   />
                 )}
                 {index < playlistLength - 1 && (
@@ -138,9 +152,16 @@ export const PlaylistItem = observer(function PlaylistItem({
                     height={4}
                     _hover={{ color: "blue.500" }}
                     icon={<RxCaretDown size={20} />}
-                    onClick={action(() =>
-                      playlistStore.reorderExperience(index, 1)
-                    )}
+                    onClick={() =>
+                      savePlaylist({
+                        ...playlist,
+                        orderedExperienceIds: reorder(
+                          playlist.orderedExperienceIds,
+                          index,
+                          1
+                        ),
+                      })
+                    }
                   />
                 )}
               </VStack>
@@ -156,7 +177,7 @@ export const PlaylistItem = observer(function PlaylistItem({
       </Td>
 
       <Td>
-        <Text {...textProps} fontWeight="bold">
+        <Text {...textProps}>
           {experience.song.artist} - {experience.song.name}
         </Text>
       </Td>

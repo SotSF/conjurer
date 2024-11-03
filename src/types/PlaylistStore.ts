@@ -45,17 +45,6 @@ export class PlaylistStore {
     this.experienceNames = experienceNames;
   };
 
-  reorderExperience = (currentIndex: number, delta: number) => {
-    const newIndex = currentIndex + delta;
-    if (newIndex < 0 || newIndex > this.experienceNames.length - 1) return;
-
-    const experienceNames = [...this.experienceNames];
-    const [removed] = experienceNames.splice(currentIndex, 1);
-    experienceNames.splice(newIndex, 0, removed);
-
-    this.experienceNames = experienceNames;
-  };
-
   removeExperience = (index: number) => {
     const experienceNames = [...this.experienceNames];
     experienceNames.splice(index, 1);
