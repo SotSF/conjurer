@@ -3,6 +3,7 @@ import initialPlaylist from "@/src/data/initialPlaylist.json";
 import { ExperienceStore } from "@/src/types/ExperienceStore";
 import { AudioStore } from "@/src/types/AudioStore";
 import { Context } from "@/src/types/context";
+import { Playlist } from "@/src/types/Playlist";
 
 // Define a new RootStore interface here so that we avoid circular dependencies
 interface RootStore {
@@ -17,8 +18,11 @@ export class PlaylistStore {
   experienceNames: string[] = [];
 
   autoplay = ["playlistEditor", "viewer"].includes(this.rootStore.context);
-  // TODO: implement shuffle
+  // TODO: implement
   shuffle = false;
+  loop = false;
+
+  selectedPlaylistId: number | null = null;
 
   constructor(
     readonly rootStore: RootStore,

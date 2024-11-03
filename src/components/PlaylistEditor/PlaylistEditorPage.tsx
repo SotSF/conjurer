@@ -7,10 +7,10 @@ import { KeyboardControls } from "@/src/components/KeyboardControls";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { TimerAndWaveform } from "@/src/components/Timeline/TimerAndWaveform";
 import { PlaylistEditor } from "@/src/components/PlaylistEditor/PlaylistEditor";
+import { Library } from "@/src/components/PlaylistEditor/Library";
 
 export const PlaylistEditorPage = observer(function PlaylistEditorPage() {
   const store = useStore();
-  const { uiStore } = store;
 
   useEffect(() => {
     if (store.initializedClientSide) return;
@@ -19,19 +19,25 @@ export const PlaylistEditorPage = observer(function PlaylistEditorPage() {
 
   return (
     <Box position="relative" w="100vw" h="100vh">
-      <PanelGroup
-        autoSaveId="experienceEditor"
-        direction={uiStore.horizontalLayout ? "vertical" : "horizontal"}
-      >
-        <Panel defaultSize={45}>
-          <Display />
+      <PanelGroup autoSaveId="playlistEditor-1" direction="horizontal">
+        <Panel defaultSize={25} minSize={20}>
+          <Library />
         </Panel>
         <PanelResizeHandle />
         <Panel>
-          <TimerAndWaveform />
-          <PlaylistEditor />
+          <PanelGroup autoSaveId="playlistEditor-2" direction="vertical">
+            <Panel defaultSize={45}>
+              <Display />
+            </Panel>
+            <PanelResizeHandle />
+            <Panel>
+              <TimerAndWaveform />
+              <PlaylistEditor />
+            </Panel>
+          </PanelGroup>
         </Panel>
       </PanelGroup>
+
       <KeyboardControls editMode={false} />
     </Box>
   );

@@ -16,16 +16,17 @@ import { useStore } from "@/src/types/StoreContext";
 import { observer } from "mobx-react-lite";
 import { useRouter } from "next/router";
 import { ImCross } from "react-icons/im";
+import { Experience } from "@/src/types/Experience";
 
 type PlaylistItemControlsProps = {
-  experienceName: string;
+  experience: Experience;
   index: number;
   playlistLength: number;
   editable?: boolean;
 };
 
 export const PlaylistItem = observer(function PlaylistItem({
-  experienceName,
+  experience,
   index,
   playlistLength,
   editable,
@@ -40,7 +41,7 @@ export const PlaylistItem = observer(function PlaylistItem({
   const onPlayClick = async () => {
     if (loadingExperience) return;
     setLoadingExperience(true);
-    await playlistStore.loadAndPlayExperience(experienceName);
+    await playlistStore.loadAndPlayExperience(experience.name);
     setLoadingExperience(false);
   };
   const onPauseClick = () => {
@@ -50,11 +51,11 @@ export const PlaylistItem = observer(function PlaylistItem({
   const onSelect = async () => {
     if (loadingExperience) return;
     setLoadingExperience(true);
-    await experienceStore.load(experienceName);
+    await experienceStore.load(experience.name);
     setLoadingExperience(false);
   };
 
-  const isSelectedExperience = store.experienceName === experienceName;
+  const isSelectedExperience = store.experienceName === experience.name;
 
   const textProps = {
     color: isSelectedExperience ? "blue.400" : undefined,
@@ -150,7 +151,13 @@ export const PlaylistItem = observer(function PlaylistItem({
 
       <Td>
         <Text {...textProps} fontWeight="bold">
-          {experienceName}
+          {experience.name}
+        </Text>
+      </Td>
+
+      <Td>
+        <Text {...textProps} fontWeight="bold">
+          {experience.song.artist} - {experience.song.name}
         </Text>
       </Td>
 
@@ -166,7 +173,7 @@ export const PlaylistItem = observer(function PlaylistItem({
                 _hover={{ color: "orange.500" }}
                 icon={<FaPencilAlt size={10} />}
                 onClick={action(() =>
-                  router.push(`/experience/${experienceName}`)
+                  router.push(`/experience/${experience.name}`)
                 )}
               />
               <IconButton

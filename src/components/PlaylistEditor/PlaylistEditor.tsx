@@ -1,5 +1,6 @@
 import {
   Button,
+  ButtonGroup,
   Editable,
   EditableInput,
   EditablePreview,
@@ -7,6 +8,7 @@ import {
   Table,
   TableContainer,
   Tbody,
+  Td,
   Text,
   Th,
   Thead,
@@ -21,83 +23,128 @@ import { FaRegClipboard } from "react-icons/fa";
 import { action } from "mobx";
 import { AddExperienceModal } from "@/src/components/PlaylistEditor/AddExperienceModal";
 import { BiShuffle } from "react-icons/bi";
+import { ImLoop } from "react-icons/im";
+import { trpc } from "@/src/utils/trpc";
+import { useState } from "react";
+import { Playlist } from "@/src/types/Playlist";
+import { useSavePlaylist } from "@/src/hooks/playlist";
+import { PlaylistNameEditable } from "@/src/components/PlaylistEditor/PlaylistNameEditable";
 
 export const PlaylistEditor = observer(function PlaylistEditor() {
   const store = useStore();
-  const { playlistStore, uiStore } = store;
+  const { username, usingLocalData, playlistStore, uiStore } = store;
   const { experienceNames } = playlistStore;
 
   const isEditable = !!store.username;
 
+  const { isPending, isError, data } = trpc.playlist.getPlaylist.useQuery(
+    {
+      usingLocalData,
+      id: playlistStore.selectedPlaylistId!,
+    },
+    {
+      enabled: playlistStore.selectedPlaylistId !== null,
+    }
+  );
+
+  if (isPending || isError) return null;
+
+  const { playlist, experiences } = data;
+
   return (
-    <VStack m={2} justify="start" alignItems={"start"} flexBasis={"70rem"}>
-      <HStack m={4} justify="start" align="center">
-        <Editable
-          placeholder="Playlist name"
-          value={playlistStore.name}
-          onChange={action((value) => (playlistStore.name = value))}
-          fontSize={20}
-          fontWeight="bold"
-          textAlign="center"
-          isDisabled={!isEditable}
-        >
-          <EditablePreview />
-          <EditableInput _placeholder={{ color: "gray.600" }} />
-        </Editable>
-        <Button
-          ml={2}
-          size="xs"
-          variant="outline"
-          onClick={action(
-            () => (playlistStore.shuffle = !playlistStore.shuffle)
-          )}
-          leftIcon={<BiShuffle size={14} />}
-          bgColor={playlistStore.shuffle ? "orange.600" : undefined}
-          _hover={
-            playlistStore.shuffle
-              ? {
-                  bgColor: "orange.600",
-                }
-              : undefined
-          }
-        >
-          Shuffle
-        </Button>
+    <VStack m={6} justify="start" alignItems={"start"} flexBasis={"70rem"}>
+      <HStack justify="start" align="center" spacing={4}>
+        <PlaylistNameEditable
+          key={playlist.id + playlist.name}
+          playlist={playlist}
+          isEditable={isEditable}
+        />
+        <ButtonGroup isAttached size="xs" variant="outline">
+          <Button
+            onClick={action(
+              () => (playlistStore.shuffle = !playlistStore.shuffle)
+            )}
+            leftIcon={<BiShuffle size={14} />}
+            bgColor={playlistStore.shuffle ? "orange.600" : undefined}
+            _hover={
+              playlistStore.shuffle
+                ? {
+                    bgColor: "orange.600",
+                  }
+                : undefined
+            }
+          >
+            Shuffle
+          </Button>
+          <Button
+            onClick={action(() => (playlistStore.loop = !playlistStore.loop))}
+            leftIcon={<ImLoop size={14} />}
+            bgColor={playlistStore.shuffle ? "orange.600" : undefined}
+            _hover={
+              playlistStore.loop
+                ? {
+                    bgColor: "orange.600",
+                  }
+                : undefined
+            }
+          >
+            Loop all
+          </Button>
+        </ButtonGroup>
+      </HStack>
+      <HStack justify="start" align="center" spacing={4}>
+        <Text fontSize="md" color="gray.400">
+          {playlist.user.username} • {experiences.length} experiences
+        </Text>
       </HStack>
 
-      <TableContainer>
+      <TableContainer m={4}>
         <Table size="sm" variant="simple">
           <Thead>
             <Tr>
               <Th isNumeric>#</Th>
-              <Th>Experience name</Th>
+              <Th>Experience</Th>
+              <Th>Song</Th>
+              <Th></Th>
             </Tr>
           </Thead>
           <Tbody>
-            {experienceNames.map((experienceName, index) => (
-              <Tr key={experienceName}>
-                <PlaylistItem
-                  experienceName={experienceName}
-                  index={index}
-                  playlistLength={experienceNames.length}
-                  editable={isEditable}
-                />
-              </Tr>
-            ))}
+            {experiences.length === 0 ? (
+              <>
+                <Tr>
+                  <Td>-</Td>
+                  <Td>
+                    <Text>No experiences added yet!</Text>
+                  </Td>
+                </Tr>
+              </>
+            ) : (
+              experiences.map((experience, index) => (
+                <Tr key={experience.id}>
+                  <PlaylistItem
+                    experience={experience}
+                    index={index}
+                    playlistLength={experiences.length}
+                    editable={isEditable}
+                  />
+                </Tr>
+              ))
+            )}
           </Tbody>
         </Table>
       </TableContainer>
+
       {isEditable && (
         <>
           <HStack justify="end" spacing={6}>
-            <Button
+            {/* <Button
               variant="link"
               size="sm"
               leftIcon={<FaRegClipboard size={17} />}
               onClick={() => playlistStore.copyToClipboard()}
             >
               Copy to clipboard
-            </Button>
+            </Button> */}
             <Button
               variant="outline"
               size="sm"

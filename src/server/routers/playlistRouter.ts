@@ -33,7 +33,7 @@ export const playlistRouter = router({
 
       const playlistExperiences = await ctx.db.query.experiences.findMany({
         where: inArray(experiences.id, playlist.orderedExperienceIds),
-        columns: { id: true, name: true, status: true },
+        columns: { id: true, name: true, status: true, version: true },
         with: {
           song: true,
         },
@@ -76,13 +76,28 @@ export const playlistRouter = router({
         return id;
       }
 
-      return await ctx.db
+      const [newPlaylist] = await ctx.db
         .insert(playlists)
         .values({
           ...playlistData,
           userId: ctx.user.id,
         })
         .returning({ id: playlists.id })
+        .execute();
+
+      return newPlaylist.id;
+    }),
+
+  deletePlaylist: userProcedure
+    .input(
+      z.object({
+        id: z.number(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db
+        .delete(playlists)
+        .where(eq(playlists.id, input.id))
         .execute();
     }),
 
@@ -97,6 +112,7 @@ export const playlistRouter = router({
           orderedExperienceIds: true,
           isLocked: true,
         },
+        with: { user: true },
       })
       .execute();
   }),
