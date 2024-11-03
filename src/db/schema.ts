@@ -150,6 +150,10 @@ export const playlists = sqliteTable(
     isLocked: integer("is_locked", { mode: "boolean" })
       .notNull()
       .default(false),
+    orderedExperienceIds: text({ mode: "json" })
+      .$type<number[]>()
+      .notNull()
+      .default([]),
 
     createdAt: text("created_at")
       .default(sql`(CURRENT_TIMESTAMP)`)
@@ -164,53 +168,9 @@ export const playlists = sqliteTable(
   })
 );
 
-export const playlistsRelations = relations(playlists, ({ one, many }) => ({
+export const playlistsRelations = relations(playlists, ({ one }) => ({
   user: one(users, { fields: [playlists.userId], references: [users.id] }),
-  playlistExperiences: many(playlistExperiences),
 }));
 
 export type InsertPlaylist = typeof playlists.$inferInsert;
 export type SelectPlaylist = typeof playlists.$inferSelect;
-
-export const playlistExperiences = sqliteTable(
-  "playlist_experiences",
-  {
-    id: integer("id").primaryKey(),
-    playlistId: integer("playlist_id")
-      .notNull()
-      .references(() => playlists.id, { onDelete: "cascade" }),
-    experienceId: integer("experience_id")
-      .notNull()
-      .references(() => experiences.id, { onDelete: "cascade" }),
-
-    createdAt: text("created_at")
-      .default(sql`(CURRENT_TIMESTAMP)`)
-      .notNull(),
-    updatedAt: text("updated_at")
-      .default(sql`(CURRENT_TIMESTAMP)`)
-      .notNull()
-      .$onUpdate(() => sql`(CURRENT_TIMESTAMP)`),
-  },
-  (table) => ({
-    playlistIdExperienceIdIndex: uniqueIndex(
-      "playlist_id_experience_id_index"
-    ).on(table.playlistId, table.experienceId),
-  })
-);
-
-export const playlistExperiencesRelations = relations(
-  playlistExperiences,
-  ({ one }) => ({
-    playlist: one(playlists, {
-      fields: [playlistExperiences.playlistId],
-      references: [playlists.id],
-    }),
-    experience: one(experiences, {
-      fields: [playlistExperiences.experienceId],
-      references: [experiences.id],
-    }),
-  })
-);
-
-export type InsertPlaylistExperience = typeof playlistExperiences.$inferInsert;
-export type SelectPlaylistExperience = typeof playlistExperiences.$inferSelect;
