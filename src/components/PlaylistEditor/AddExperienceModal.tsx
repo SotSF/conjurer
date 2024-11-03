@@ -1,6 +1,5 @@
 import { observer } from "mobx-react-lite";
 import {
-  Button,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -8,24 +7,33 @@ import {
   ModalHeader,
   ModalOverlay,
   Spinner,
-  VStack,
+  Switch,
+  Text,
 } from "@chakra-ui/react";
 import { useStore } from "@/src/types/StoreContext";
 import { action } from "mobx";
-import { trpc } from "@/src/utils/trpc";
+import { ExperiencesTable } from "@/src/components/ExperiencesTable/ExperiencesTable";
+import { useState } from "react";
+import { Playlist } from "@/src/types/Playlist";
+import { useSavePlaylist } from "@/src/hooks/playlist";
+import { useExperiencesAndUsers } from "@/src/hooks/experiencesAndUsers";
 
-export const AddExperienceModal = observer(function AddExperienceModal() {
+export const AddExperienceModal = observer(function AddExperienceModal({
+  playlist,
+}: {
+  playlist: Playlist;
+}) {
   const store = useStore();
-  const { uiStore, playlistStore, usingLocalData } = store;
+  const { username, uiStore } = store;
 
-  const {
-    isPending,
-    isError,
-    data: experiencesAndUsers,
-  } = trpc.experience.listExperiencesAndUsers.useQuery(
-    { usingLocalData },
-    { enabled: uiStore.showingPlaylistAddExperienceModal }
-  );
+  const [viewingAllExperiences, setViewingAllExperiences] = useState(false);
+
+  const { isPending, isError, experiencesAndUsers } = useExperiencesAndUsers({
+    username: viewingAllExperiences ? undefined : username,
+    enabled: uiStore.showingPlaylistAddExperienceModal,
+  });
+
+  const { savePlaylist } = useSavePlaylist();
 
   if (isError) return null;
 
@@ -38,6 +46,7 @@ export const AddExperienceModal = observer(function AddExperienceModal() {
       onClose={onClose}
       isOpen={uiStore.showingPlaylistAddExperienceModal}
       isCentered
+      size="4xl"
     >
       <ModalOverlay />
       <ModalContent>
@@ -45,18 +54,33 @@ export const AddExperienceModal = observer(function AddExperienceModal() {
           Add experience to playlist {isPending && <Spinner />}
         </ModalHeader>
         <ModalBody>
-          <VStack height="60vh" overflowY="scroll">
-            {!isPending &&
-              experiencesAndUsers.map(({ experience }) => (
-                <Button
-                  key={experience.name}
-                  variant="link"
-                  onClick={() => playlistStore.addExperience(experience.name)}
-                >
-                  {experience.name}
-                </Button>
-              ))}
-          </VStack>
+          {!isPending && experiencesAndUsers.length === 0 && (
+            <Text color="gray.400">
+              {username} has no saved experiences yet!
+            </Text>
+          )}
+          <Switch
+            mb={4}
+            isChecked={viewingAllExperiences}
+            onChange={(e) => setViewingAllExperiences(e.target.checked)}
+          >
+            View all experiences
+          </Switch>
+          {!isPending && (
+            <ExperiencesTable
+              experiencesAndUsers={experiencesAndUsers}
+              onLoadExperience={action((experience) => {
+                savePlaylist({
+                  ...playlist,
+                  orderedExperienceIds: [
+                    ...playlist.orderedExperienceIds,
+                    experience.id!,
+                  ],
+                });
+                onClose();
+              })}
+            />
+          )}
         </ModalBody>
         <ModalCloseButton />
       </ModalContent>

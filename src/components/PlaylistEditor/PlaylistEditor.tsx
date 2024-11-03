@@ -143,7 +143,7 @@ export const PlaylistEditor = observer(function PlaylistEditor() {
           </HStack>
         </>
       )}
-      <AddExperienceModal />
+      <AddExperienceModal playlist={playlist} />
     </VStack>
   );
 });

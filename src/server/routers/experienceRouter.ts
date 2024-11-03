@@ -61,7 +61,7 @@ export const experienceRouter = router({
             with: {
               user: { columns: { username: true } },
               experience: {
-                columns: { id: true, name: true, status: true },
+                columns: { id: true, name: true, status: true, version: true },
                 with: { song: true },
               },
             },
@@ -81,7 +81,7 @@ export const experienceRouter = router({
           with: {
             user: { columns: { username: true } },
             experience: {
-              columns: { id: true, name: true, status: true },
+              columns: { id: true, name: true, status: true, version: true },
               with: { song: { columns: { name: true, artist: true } } },
             },
           },
