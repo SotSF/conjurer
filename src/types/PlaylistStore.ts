@@ -45,12 +45,6 @@ export class PlaylistStore {
     this.experienceNames = experienceNames;
   };
 
-  removeExperience = (index: number) => {
-    const experienceNames = [...this.experienceNames];
-    experienceNames.splice(index, 1);
-    this.experienceNames = experienceNames;
-  };
-
   loadAndPlayExperience = async (experienceName: string) => {
     this.rootStore.pause();
 

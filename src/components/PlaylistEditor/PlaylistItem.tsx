@@ -204,7 +204,14 @@ export const PlaylistItem = observer(function PlaylistItem({
                 height={6}
                 _hover={{ color: "red.500" }}
                 icon={<ImCross size={10} />}
-                onClick={action(() => playlistStore.removeExperience(index))}
+                onClick={() => {
+                  savePlaylist({
+                    ...playlist,
+                    orderedExperienceIds: playlist.orderedExperienceIds.filter(
+                      (id) => id !== experience.id
+                    ),
+                  });
+                }}
               />
             </>
           )}
