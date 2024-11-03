@@ -1,9 +1,6 @@
 import {
   Button,
   ButtonGroup,
-  Editable,
-  EditableInput,
-  EditablePreview,
   HStack,
   Table,
   TableContainer,
@@ -19,21 +16,16 @@ import { useStore } from "@/src/types/StoreContext";
 import { observer } from "mobx-react-lite";
 import { PlaylistItem } from "@/src/components/PlaylistEditor/PlaylistItem";
 import { MdOutlinePlaylistAdd } from "react-icons/md";
-import { FaRegClipboard } from "react-icons/fa";
 import { action } from "mobx";
 import { AddExperienceModal } from "@/src/components/PlaylistEditor/AddExperienceModal";
 import { BiShuffle } from "react-icons/bi";
 import { ImLoop } from "react-icons/im";
 import { trpc } from "@/src/utils/trpc";
-import { useState } from "react";
-import { Playlist } from "@/src/types/Playlist";
-import { useSavePlaylist } from "@/src/hooks/playlist";
 import { PlaylistNameEditable } from "@/src/components/PlaylistEditor/PlaylistNameEditable";
 
 export const PlaylistEditor = observer(function PlaylistEditor() {
   const store = useStore();
-  const { username, usingLocalData, playlistStore, uiStore } = store;
-  const { experienceNames } = playlistStore;
+  const { usingLocalData, playlistStore, uiStore } = store;
 
   const isEditable = !!store.username;
 
@@ -138,14 +130,6 @@ export const PlaylistEditor = observer(function PlaylistEditor() {
       {isEditable && (
         <>
           <HStack justify="end" spacing={6}>
-            {/* <Button
-              variant="link"
-              size="sm"
-              leftIcon={<FaRegClipboard size={17} />}
-              onClick={() => playlistStore.copyToClipboard()}
-            >
-              Copy to clipboard
-            </Button> */}
             <Button
               variant="outline"
               size="sm"

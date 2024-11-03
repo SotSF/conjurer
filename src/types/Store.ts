@@ -191,7 +191,7 @@ export class Store {
       this.embeddedViewer =
         new URLSearchParams(window.location.search).get("embedded") === "true";
       this.experienceStore.loadFromParams() ||
-        this.experienceStore.load(this.playlistStore.experienceNames[0]);
+        this.experienceStore.loadEmptyExperience();
       this.uiStore.initialize(this.embeddedViewer);
       if (this.embeddedViewer) this.play();
       return;

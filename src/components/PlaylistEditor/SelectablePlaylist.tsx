@@ -29,10 +29,7 @@ export const SelectablePlaylist = observer(function SelectablePlaylist({
       justify="space-between"
       align="center"
       role="button"
-      onClick={action(() => {
-        playlistStore.selectedPlaylistId = playlist.id;
-        // console.log("selectedPlaylistId", playlistStore.selectedPlaylistId);
-      })}
+      onClick={action(() => (playlistStore.selectedPlaylistId = playlist.id))}
       bgColor={isSelected ? "gray.600" : undefined}
       _hover={{
         bgColor: isSelected ? "gray.500" : "gray.600",

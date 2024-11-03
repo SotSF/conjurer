@@ -1,9 +1,7 @@
-import { makeAutoObservable, runInAction } from "mobx";
-import initialPlaylist from "@/src/data/initialPlaylist.json";
+import { makeAutoObservable } from "mobx";
 import { ExperienceStore } from "@/src/types/ExperienceStore";
 import { AudioStore } from "@/src/types/AudioStore";
 import { Context } from "@/src/types/context";
-import { Playlist } from "@/src/types/Playlist";
 
 // Define a new RootStore interface here so that we avoid circular dependencies
 interface RootStore {
@@ -14,9 +12,6 @@ interface RootStore {
 }
 
 export class PlaylistStore {
-  name: string = "";
-  experienceNames: string[] = [];
-
   autoplay = ["playlistEditor", "viewer"].includes(this.rootStore.context);
   // TODO: implement
   shuffle = false;
@@ -30,20 +25,7 @@ export class PlaylistStore {
     readonly experienceStore: ExperienceStore
   ) {
     makeAutoObservable(this);
-
-    runInAction(() => this.initialize());
   }
-
-  initialize = () => {
-    this.name = initialPlaylist.name;
-    this.experienceNames = initialPlaylist.experienceNames;
-  };
-
-  addExperience = (experienceName: string) => {
-    const experienceNames = [...this.experienceNames];
-    experienceNames.push(experienceName);
-    this.experienceNames = experienceNames;
-  };
 
   loadAndPlayExperience = async (experienceName: string) => {
     this.rootStore.pause();
@@ -59,9 +41,8 @@ export class PlaylistStore {
   };
 
   loadFirstExperience = async () => {
-    if (this.experienceNames.length === 0) return;
-
-    await this.experienceStore.load(this.experienceNames[0]);
+    // TODO: implement
+    // await this.experienceStore.load();
   };
 
   playExperienceWhenReady = () =>
@@ -74,26 +55,13 @@ export class PlaylistStore {
     });
 
   playNextExperience = async () => {
-    const currentIndex = this.experienceNames.indexOf(
-      this.rootStore.experienceName
-    );
-    if (currentIndex < 0) return;
-
-    const nextIndex = currentIndex + 1;
-    if (nextIndex > this.experienceNames.length - 1) return;
-
-    await this.loadAndPlayExperience(this.experienceNames[nextIndex]);
+    // TODO: implement
+    // const currentIndex = this.experienceNames.indexOf(
+    //   this.rootStore.experienceName
+    // );
+    // if (currentIndex < 0) return;
+    // const nextIndex = currentIndex + 1;
+    // if (nextIndex > this.experienceNames.length - 1) return;
+    // await this.loadAndPlayExperience(this.experienceNames[nextIndex]);
   };
-
-  copyToClipboard = () => {
-    if (typeof window === "undefined") return;
-    navigator.clipboard.writeText(this.stringifyPlaylist());
-  };
-
-  stringifyPlaylist = () => JSON.stringify(this.serialize());
-
-  serialize = () => ({
-    name: this.name,
-    experienceNames: this.experienceNames,
-  });
 }
