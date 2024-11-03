@@ -143,6 +143,7 @@ export const playlists = sqliteTable(
   {
     id: integer("id").primaryKey(),
     name: text("name").notNull(),
+    description: text("description").notNull().default(""),
     userId: integer("user_id")
       .notNull()
       .references(() => users.id),
@@ -159,7 +160,7 @@ export const playlists = sqliteTable(
       .$onUpdate(() => sql`(CURRENT_TIMESTAMP)`),
   },
   (table) => ({
-    playlistNameIndex: index("playlist_user_index").on(table.userId),
+    userIdIndex: index("user_id_index").on(table.userId),
   })
 );
 
@@ -191,10 +192,9 @@ export const playlistExperiences = sqliteTable(
       .$onUpdate(() => sql`(CURRENT_TIMESTAMP)`),
   },
   (table) => ({
-    playlistExperienceIndex: uniqueIndex("playlist_experience_index").on(
-      table.playlistId,
-      table.experienceId
-    ),
+    playlistIdExperienceIdIndex: uniqueIndex(
+      "playlist_id_experience_id_index"
+    ).on(table.playlistId, table.experienceId),
   })
 );
 
