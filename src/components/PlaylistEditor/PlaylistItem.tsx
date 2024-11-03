@@ -76,51 +76,6 @@ export const PlaylistItem = observer(function PlaylistItem({
     <>
       <Td>
         <HStack height={4} spacing={0} justify="end">
-          <Box
-            m={0}
-            onPointerEnter={() => setMousingOver(true)}
-            onPointerLeave={() => setMousingOver(false)}
-          >
-            {isSelectedExperience && loadingExperience ? (
-              <Spinner />
-            ) : isSelectedExperience ? (
-              <IconButton
-                variant="unstyled"
-                aria-label="Play"
-                title="Play"
-                color={store.playing ? "orange" : "green"}
-                height={6}
-                icon={
-                  <HStack justify="center">
-                    {store.playing ? (
-                      <FaPause size={10} />
-                    ) : (
-                      <FaPlay size={10} />
-                    )}
-                  </HStack>
-                }
-                onClick={store.playing ? onPauseClick : onPlayClick}
-              />
-            ) : mousingOver ? (
-              <IconButton
-                variant="unstyled"
-                aria-label="Play"
-                title="Play"
-                color="green"
-                height={6}
-                icon={
-                  <HStack justify="center">
-                    <FaPlay size={10} />
-                  </HStack>
-                }
-                onClick={onPlayClick}
-              />
-            ) : (
-              <Button variant="unstyled" onClick={onPlayClick} fontSize={14}>
-                {index + 1}
-              </Button>
-            )}
-          </Box>
           {editable && (
             <>
               <VStack spacing={0}>
@@ -167,6 +122,51 @@ export const PlaylistItem = observer(function PlaylistItem({
               </VStack>
             </>
           )}
+          <Box
+            m={0}
+            onPointerEnter={() => setMousingOver(true)}
+            onPointerLeave={() => setMousingOver(false)}
+          >
+            {isSelectedExperience && loadingExperience ? (
+              <Spinner />
+            ) : isSelectedExperience ? (
+              <IconButton
+                variant="unstyled"
+                aria-label="Play"
+                title="Play"
+                color={store.playing ? "orange" : "green"}
+                height={6}
+                icon={
+                  <HStack justify="center">
+                    {store.playing ? (
+                      <FaPause size={10} />
+                    ) : (
+                      <FaPlay size={10} />
+                    )}
+                  </HStack>
+                }
+                onClick={store.playing ? onPauseClick : onPlayClick}
+              />
+            ) : mousingOver ? (
+              <IconButton
+                variant="unstyled"
+                aria-label="Play"
+                title="Play"
+                color="green"
+                height={6}
+                icon={
+                  <HStack justify="center">
+                    <FaPlay size={10} />
+                  </HStack>
+                }
+                onClick={onPlayClick}
+              />
+            ) : (
+              <Button variant="unstyled" onClick={onPlayClick} fontSize={14}>
+                {index + 1}
+              </Button>
+            )}
+          </Box>
         </HStack>
       </Td>
 
