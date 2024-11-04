@@ -56,7 +56,7 @@ export const Library = observer(function Library() {
             variant="outline"
             size="sm"
             leftIcon={<FaPlus size={14} />}
-            onClick={action(async () => {
+            onClick={async () => {
               const newPlaylist = await createPlaylist.mutateAsync({
                 username,
                 usingLocalData,
@@ -64,9 +64,11 @@ export const Library = observer(function Library() {
                 description: "New Playlist",
                 orderedExperienceIds: [],
               });
-              playlistStore.selectedPlaylist = newPlaylist;
+              runInAction(() => {
+                playlistStore.selectedPlaylist = newPlaylist;
+              });
               utils.playlist.listPlaylistsForUser.invalidate();
-            })}
+            }}
           >
             Playlist
           </Button>

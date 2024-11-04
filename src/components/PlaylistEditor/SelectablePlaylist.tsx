@@ -2,7 +2,7 @@ import { HStack, IconButton, Text, VStack } from "@chakra-ui/react";
 import { useStore } from "@/src/types/StoreContext";
 import { observer } from "mobx-react-lite";
 import { FaTrashAlt } from "react-icons/fa";
-import { action } from "mobx";
+import { action, runInAction } from "mobx";
 import { trpc } from "@/src/utils/trpc";
 import { Playlist } from "@/src/types/Playlist";
 
@@ -67,8 +67,11 @@ export const SelectablePlaylist = observer(function SelectablePlaylist({
               id: playlist.id,
             });
             utils.playlist.listPlaylistsForUser.invalidate();
+
             if (playlistStore.selectedPlaylist?.id === playlist.id) {
-              playlistStore.selectedPlaylist = null;
+              runInAction(() => {
+                playlistStore.selectedPlaylist = null;
+              });
             }
           })}
         />
