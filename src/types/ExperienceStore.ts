@@ -18,21 +18,30 @@ export class ExperienceStore {
     makeAutoObservable(this);
   }
 
-  load = async (experienceName: string) => {
-    const experience = await trpcClient.experience.getExperience.query({
-      experienceName,
-      usingLocalData: this.rootStore.usingLocalData,
-    });
-    if (!experience) {
-      this.loadEmptyExperience();
-      return;
-    }
-
+  loadExperience = (experience: Experience) => {
     this.rootStore.deserialize(experience);
     runInAction(() => {
       this.rootStore.hasSaved = false;
       this.rootStore.experienceLastSavedAt = Date.now();
     });
+  };
+
+  load = async (experienceName: string) => {
+    const experience = await trpcClient.experience.getExperience.query({
+      experienceName,
+      usingLocalData: this.rootStore.usingLocalData,
+    });
+    if (!experience) this.loadEmptyExperience();
+    else this.loadExperience(experience);
+  };
+
+  loadById = async (experienceId: number) => {
+    const experience = await trpcClient.experience.getExperienceById.query({
+      experienceId,
+      usingLocalData: this.rootStore.usingLocalData,
+    });
+    if (!experience) this.loadEmptyExperience();
+    else this.loadExperience(experience);
   };
 
   loadEmptyExperience = () => {

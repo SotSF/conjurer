@@ -46,9 +46,9 @@ export const PlaylistItem = observer(function PlaylistItem({
   const [mousingOver, setMousingOver] = useState(false);
   const [loadingExperience, setLoadingExperience] = useState(false);
   const onPlayClick = async () => {
-    if (loadingExperience) return;
+    if (loadingExperience || !experience.id) return;
     setLoadingExperience(true);
-    await playlistStore.loadAndPlayExperience(experience.name);
+    await playlistStore.loadAndPlayExperience(experience.id);
     setLoadingExperience(false);
   };
   const onPauseClick = () => {

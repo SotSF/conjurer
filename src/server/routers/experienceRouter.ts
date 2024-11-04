@@ -157,4 +157,20 @@ export const experienceRouter = router({
         })
         .execute();
     }),
+
+    getExperienceById: databaseProcedure
+    .input(
+      z.object({
+        experienceId: z.number(),
+        usingLocalData: z.boolean(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      return await ctx.db.query.experiences
+        .findFirst({
+          with: { song: true },
+          where: eq(experiences.id, input.experienceId),
+        })
+        .execute();
+    }),
 });

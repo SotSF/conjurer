@@ -8,6 +8,7 @@ import { Playlist } from "@/src/types/Playlist";
 interface RootStore {
   context: Context;
   experienceName: string;
+  experienceId: number | undefined;
   play: () => void;
   pause: () => void;
 }
@@ -28,16 +29,16 @@ export class PlaylistStore {
     makeAutoObservable(this);
   }
 
-  loadAndPlayExperience = async (experienceName: string) => {
+  loadAndPlayExperience = async (experienceId: number) => {
     this.rootStore.pause();
 
-    if (this.rootStore.experienceName === experienceName) {
+    if (this.rootStore.experienceId === experienceId) {
       this.audioStore.setTimeWithCursor(0);
       this.rootStore.play();
       return;
     }
 
-    await this.experienceStore.load(experienceName);
+    await this.experienceStore.loadById(experienceId);
     await this.playExperienceWhenReady();
   };
 
@@ -51,13 +52,28 @@ export class PlaylistStore {
     });
 
   playNextExperience = async () => {
-    // TODO: implement
-    // const currentIndex = this.experienceNames.indexOf(
-    //   this.rootStore.experienceName
-    // );
-    // if (currentIndex < 0) return;
-    // const nextIndex = currentIndex + 1;
-    // if (nextIndex > this.experienceNames.length - 1) return;
-    // await this.loadAndPlayExperience(this.experienceNames[nextIndex]);
+    if (!this.selectedPlaylist?.orderedExperienceIds.length) return;
+
+    if (!this.rootStore.experienceId) {
+      await this.loadAndPlayExperience(
+        this.selectedPlaylist.orderedExperienceIds[0]
+      );
+      return;
+    }
+
+    const currentIndex = this.selectedPlaylist?.orderedExperienceIds.indexOf(
+      this.rootStore.experienceId
+    );
+    let nextIndex = currentIndex + 1;
+
+    if (currentIndex < 0) return;
+    if (nextIndex > this.selectedPlaylist.orderedExperienceIds.length - 1) {
+      if (this.loopingPlaylist) nextIndex = 0;
+      else return;
+    }
+
+    await this.loadAndPlayExperience(
+      this.selectedPlaylist.orderedExperienceIds[nextIndex]
+    );
   };
 }
