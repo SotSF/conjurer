@@ -1,14 +1,10 @@
 export const reorder: <T>(
-  inputArray: T[],
-  currentIndex: number,
-  delta: number
-) => T[] = (inputArray, currentIndex, delta) => {
-  const newIndex = currentIndex + delta;
-  if (newIndex < 0 || newIndex > inputArray.length - 1) return inputArray;
-
-  const newArray = [...inputArray];
-  const [removed] = newArray.splice(currentIndex, 1);
-  newArray.splice(newIndex, 0, removed);
-
-  return newArray;
+  list: T[],
+  startIndex: number,
+  endIndex: number
+) => T[] = (list, startIndex, endIndex) => {
+  const result = Array.from(list);
+  const [removed] = result.splice(startIndex, 1);
+  result.splice(endIndex, 0, removed);
+  return result;
 };

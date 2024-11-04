@@ -2,7 +2,7 @@ import { Button, HStack, Text, VStack } from "@chakra-ui/react";
 import { useStore } from "@/src/types/StoreContext";
 import { observer } from "mobx-react-lite";
 import { FaPlus } from "react-icons/fa";
-import { action } from "mobx";
+import { action, runInAction } from "mobx";
 import { trpc } from "@/src/utils/trpc";
 import { SelectablePlaylist } from "@/src/components/PlaylistEditor/SelectablePlaylist";
 import { useEffect } from "react";
@@ -28,7 +28,9 @@ export const Library = observer(function Library() {
   useEffect(() => {
     if (!playlists || playlists.length === 0 || playlistStore.selectedPlaylist)
       return;
-    playlistStore.selectedPlaylist = playlists[0];
+    runInAction(() => {
+      playlistStore.selectedPlaylist = playlists[0];
+    });
   }, [playlists]);
 
   if (isPending || isError) return null;

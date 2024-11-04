@@ -1,3 +1,4 @@
+import { Playlist } from "@/src/types/Playlist";
 import { useStore } from "@/src/types/StoreContext";
 import { trpc } from "@/src/utils/trpc";
 import { useToast } from "@chakra-ui/react";
@@ -22,9 +23,9 @@ export const useSavePlaylist = () => {
       ...saveMetadata,
     };
 
-    let savedId: number;
+    let savedPlaylist;
     try {
-      savedId = await savePlaylistMutation.mutateAsync(savePayload);
+      savedPlaylist = await savePlaylistMutation.mutateAsync(savePayload);
     } catch (e: any) {
       console.error(e);
       toast({
@@ -37,10 +38,15 @@ export const useSavePlaylist = () => {
       throw e;
     }
 
-    utils.playlist.listPlaylistsForUser.invalidate();
-    utils.playlist.getPlaylist.invalidate({ id: savedId });
+    await Promise.all([
+      utils.playlist.listPlaylistsForUser.invalidate(),
+      utils.playlist.getPlaylist.invalidate({
+        usingLocalData,
+        id: savedPlaylist.id,
+      }),
+    ]);
 
-    return savedId;
+    return savedPlaylist;
   };
 
   return { savePlaylist };

@@ -15,11 +15,3 @@ export function binarySearchForBlockAtTime(
     return binarySearchForBlockAtTime(blocks, time, start, mid - 1);
   return binarySearchForBlockAtTime(blocks, time, mid + 1, end);
 }
-
-export const reorder = (list: any[], startIndex: number, endIndex: number) => {
-  const result = Array.from(list);
-  const [removed] = result.splice(startIndex, 1);
-  result.splice(endIndex, 0, removed);
-
-  return result;
-};

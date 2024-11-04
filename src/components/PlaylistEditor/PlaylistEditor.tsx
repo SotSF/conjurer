@@ -83,7 +83,7 @@ export const PlaylistEditor = observer(function PlaylistEditor() {
                 (playlistStore.loopingPlaylist = !playlistStore.loopingPlaylist)
             )}
             leftIcon={<ImLoop size={14} />}
-            bgColor={playlistStore.shufflingPlaylist ? "orange.600" : undefined}
+            bgColor={playlistStore.loopingPlaylist ? "orange.600" : undefined}
             _hover={
               playlistStore.loopingPlaylist
                 ? {

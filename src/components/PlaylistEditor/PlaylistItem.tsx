@@ -18,8 +18,8 @@ import { useRouter } from "next/router";
 import { ImCross } from "react-icons/im";
 import { Experience } from "@/src/types/Experience";
 import { useSavePlaylist } from "@/src/hooks/playlist";
-import { reorder } from "@/src/utils/algorithm";
 import { Playlist } from "@/src/types/Playlist";
+import { reorder } from "@/src/utils/array";
 
 type PlaylistItemControlsProps = {
   playlist: Playlist;
@@ -93,7 +93,7 @@ export const PlaylistItem = observer(function PlaylistItem({
                         orderedExperienceIds: reorder(
                           playlist.orderedExperienceIds,
                           index,
-                          -1
+                          index - 1
                         ),
                       })
                     }
@@ -113,7 +113,7 @@ export const PlaylistItem = observer(function PlaylistItem({
                         orderedExperienceIds: reorder(
                           playlist.orderedExperienceIds,
                           index,
-                          1
+                          index + 1
                         ),
                       })
                     }

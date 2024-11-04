@@ -67,6 +67,9 @@ export const SelectablePlaylist = observer(function SelectablePlaylist({
               id: playlist.id,
             });
             utils.playlist.listPlaylistsForUser.invalidate();
+            if (playlistStore.selectedPlaylist?.id === playlist.id) {
+              playlistStore.selectedPlaylist = null;
+            }
           })}
         />
       )}

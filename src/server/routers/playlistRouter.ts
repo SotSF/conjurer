@@ -75,16 +75,16 @@ export const playlistRouter = router({
           .where(eq(playlists.id, id))
           .returning()
           .execute();
+      } else {
+        [upsertedPlaylist] = await ctx.db
+          .insert(playlists)
+          .values({
+            ...playlistData,
+            userId: ctx.user.id,
+          })
+          .returning()
+          .execute();
       }
-
-      [upsertedPlaylist] = await ctx.db
-        .insert(playlists)
-        .values({
-          ...playlistData,
-          userId: ctx.user.id,
-        })
-        .returning()
-        .execute();
 
       return (await ctx.db.query.playlists
         .findFirst({

@@ -8,7 +8,7 @@ import {
   OnDragEndResponder,
 } from "@hello-pangea/dnd";
 import { Fragment } from "react";
-import { reorder } from "@/src/utils/algorithm";
+import { reorder } from "@/src/utils/array";
 import { Block } from "@/src/types/Block";
 import { action } from "mobx";
 import { VariationBound } from "@/src/components/ParameterVariations/VariationBound";
