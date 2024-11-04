@@ -44,14 +44,14 @@ export const PlaylistEditor = observer(function PlaylistEditor() {
   );
 
   useEffect(() => {
-    if (!data?.experiences.length || store.experienceName) return;
+    if (!data?.experiencesAndUsers.length || store.experienceName) return;
     // once experiences are fetched, load the first experience in the playlist
-    store.experienceStore.load(data.experiences[0].name);
-  }, [data?.experiences]);
+    store.experienceStore.load(data.experiencesAndUsers[0].experience.name);
+  }, [data?.experiencesAndUsers]);
 
   if (isPending || isError) return null;
 
-  const { playlist, experiences } = data;
+  const { playlist, experiencesAndUsers } = data;
 
   return (
     <VStack m={6} justify="start" alignItems="start" flexBasis="70rem">
@@ -101,7 +101,7 @@ export const PlaylistEditor = observer(function PlaylistEditor() {
       </HStack>
       <HStack justify="start" align="center" spacing={4}>
         <Text fontSize="md" color="gray.400">
-          {playlist.user.username} • {experiences.length} experiences
+          {playlist.user.username} • {experiencesAndUsers.length} experiences
         </Text>
       </HStack>
 
@@ -111,12 +111,13 @@ export const PlaylistEditor = observer(function PlaylistEditor() {
             <Tr>
               <Th isNumeric>#</Th>
               <Th>Experience</Th>
+              <Th>Author</Th>
               <Th>Song</Th>
               <Th></Th>
             </Tr>
           </Thead>
           <Tbody>
-            {experiences.length === 0 ? (
+            {experiencesAndUsers.length === 0 ? (
               <>
                 <Tr>
                   <Td>-</Td>
@@ -126,13 +127,14 @@ export const PlaylistEditor = observer(function PlaylistEditor() {
                 </Tr>
               </>
             ) : (
-              experiences.map((experience, index) => (
+              experiencesAndUsers.map(({ experience, user }, index) => (
                 <Tr key={experience.id}>
                   <PlaylistItem
                     playlist={playlist}
                     experience={experience}
+                    user={user}
                     index={index}
-                    playlistLength={experiences.length}
+                    playlistLength={experiencesAndUsers.length}
                     editable={isEditable}
                   />
                 </Tr>

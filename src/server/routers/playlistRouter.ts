@@ -8,7 +8,7 @@ import {
 } from "@/src/db/schema";
 import { asc, eq, inArray } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
-import { MY_EXPERIENCES_SMART_PLAYLIST } from "@/src/types/Playlist";
+import { MY_EXPERIENCES_SMART_PLAYLIST, Playlist } from "@/src/types/Playlist";
 import { ConjurerDatabase } from "@/src/db/type";
 
 const getMyExperiencesSmartPlaylist = async (ctx: {
@@ -39,7 +39,7 @@ export const playlistRouter = router({
       })
     )
     .query(async ({ ctx, input }) => {
-      let playlist;
+      let playlist: Playlist | undefined;
       if (input.id === MY_EXPERIENCES_SMART_PLAYLIST.id) {
         playlist = await getMyExperiencesSmartPlaylist(ctx);
       } else {
@@ -63,22 +63,31 @@ export const playlistRouter = router({
           message: "Playlist not found",
         });
 
-      const playlistExperiences = await ctx.db.query.experiences.findMany({
-        where: inArray(experiences.id, playlist.orderedExperienceIds),
-        columns: { id: true, name: true, status: true, version: true },
-        with: {
-          song: true,
-        },
-      });
+      const experiencesAndUsers = await ctx.db.query.usersToExperiences
+        .findMany({
+          where: inArray(
+            usersToExperiences.experienceId,
+            playlist.orderedExperienceIds
+          ),
+          columns: {},
+          with: {
+            user: { columns: { id: true, username: true } },
+            experience: {
+              columns: { id: true, name: true, status: true, version: true },
+              with: { song: true },
+            },
+          },
+        })
+        .execute();
 
       // Sort the experiences in the order they are in the playlist
-      playlistExperiences.sort(
+      experiencesAndUsers.sort(
         (a, b) =>
-          playlist.orderedExperienceIds.indexOf(a.id) -
-          playlist.orderedExperienceIds.indexOf(b.id)
+          playlist.orderedExperienceIds.indexOf(a.experience.id) -
+          playlist.orderedExperienceIds.indexOf(b.experience.id)
       );
 
-      return { playlist, experiences: playlistExperiences };
+      return { playlist, experiencesAndUsers };
     }),
 
   savePlaylist: userProcedure

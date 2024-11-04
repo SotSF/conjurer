@@ -24,6 +24,7 @@ import { reorder } from "@/src/utils/array";
 type PlaylistItemControlsProps = {
   playlist: Playlist;
   experience: Experience;
+  user: { username: string };
   index: number;
   playlistLength: number;
   editable?: boolean;
@@ -32,6 +33,7 @@ type PlaylistItemControlsProps = {
 export const PlaylistItem = observer(function PlaylistItem({
   playlist,
   experience,
+  user,
   index,
   playlistLength,
   editable,
@@ -174,6 +176,10 @@ export const PlaylistItem = observer(function PlaylistItem({
         <Text {...textProps} fontWeight="bold">
           {experience.name}
         </Text>
+      </Td>
+
+      <Td>
+        <Text {...textProps}>{user.username}</Text>
       </Td>
 
       <Td>
