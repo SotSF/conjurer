@@ -6,7 +6,7 @@ import { KeyboardControls } from "@/src/components/KeyboardControls";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { TimerAndWaveform } from "@/src/components/Timeline/TimerAndWaveform";
 import { PlaylistEditor } from "@/src/components/PlaylistEditor/PlaylistEditor";
-import { Library } from "@/src/components/PlaylistEditor/Library";
+import { PlaylistLibrary } from "@/src/components/PlaylistEditor/PlaylistLibrary";
 
 export const PlaylistEditorPage = function PlaylistEditorPage() {
   const store = useStore();
@@ -20,7 +20,7 @@ export const PlaylistEditorPage = function PlaylistEditorPage() {
     <Box position="relative" w="100vw" h="100vh">
       <PanelGroup autoSaveId="playlistEditor-1" direction="horizontal">
         <Panel defaultSize={25} minSize={20}>
-          <Library />
+          <PlaylistLibrary />
         </Panel>
         <PanelResizeHandle />
         <Panel>

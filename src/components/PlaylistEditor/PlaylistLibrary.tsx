@@ -2,12 +2,12 @@ import { Button, HStack, Text, VStack } from "@chakra-ui/react";
 import { useStore } from "@/src/types/StoreContext";
 import { observer } from "mobx-react-lite";
 import { FaPlus } from "react-icons/fa";
-import { action, runInAction } from "mobx";
+import { runInAction } from "mobx";
 import { trpc } from "@/src/utils/trpc";
 import { SelectablePlaylist } from "@/src/components/PlaylistEditor/SelectablePlaylist";
 import { useEffect } from "react";
 
-export const Library = observer(function Library() {
+export const PlaylistLibrary = observer(function PlaylistLibrary() {
   const store = useStore();
   const { username, usingLocalData, playlistStore } = store;
 
@@ -44,8 +44,8 @@ export const Library = observer(function Library() {
       bgColor="gray.800"
       borderStyle="solid"
       borderRightWidth={1}
-      spacing={2}
       py={4}
+      spacing={1}
     >
       <HStack px={4} width="100%" justify="space-between" align="center">
         <Text fontSize="2xl" fontWeight="bold">
@@ -74,6 +74,8 @@ export const Library = observer(function Library() {
           </Button>
         )}
       </HStack>
+
+      <VStack width="100%" height={1}></VStack>
 
       <VStack width="100%" spacing={0}>
         {playlists.map((playlist) => (

@@ -33,6 +33,7 @@ export const SelectablePlaylist = observer(function SelectablePlaylist({
       bgColor={isSelected ? "gray.600" : undefined}
       _hover={{
         bgColor: isSelected ? "gray.500" : "gray.600",
+        transition: "background-color 0.2s",
       }}
     >
       <VStack width="100%" height="100%" justify="start" alignItems="start">

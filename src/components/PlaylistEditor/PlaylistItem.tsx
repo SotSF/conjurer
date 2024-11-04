@@ -190,7 +190,7 @@ export const PlaylistItem = observer(function PlaylistItem({
 
       <Td px={0}>
         <HStack height={10} alignItems="center" spacing={0}>
-          {editable && (
+          {store.username === user.username && (
             <>
               <IconButton
                 variant="link"
@@ -203,6 +203,10 @@ export const PlaylistItem = observer(function PlaylistItem({
                   router.push(`/experience/${experience.name}`)
                 )}
               />
+            </>
+          )}
+          {editable && (
+            <>
               <IconButton
                 variant="link"
                 aria-label="Remove experience from playlist"
