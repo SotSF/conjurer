@@ -22,6 +22,7 @@ import { BiShuffle } from "react-icons/bi";
 import { ImLoop } from "react-icons/im";
 import { trpc } from "@/src/utils/trpc";
 import { PlaylistNameEditable } from "@/src/components/PlaylistEditor/PlaylistNameEditable";
+import { useEffect } from "react";
 
 export const PlaylistEditor = observer(function PlaylistEditor() {
   const store = useStore();
@@ -38,6 +39,12 @@ export const PlaylistEditor = observer(function PlaylistEditor() {
       enabled: playlistStore.selectedPlaylistId !== null,
     }
   );
+
+  useEffect(() => {
+    if (!data?.experiences.length || store.experienceName) return;
+    // once experiences are fetched, load the first experience in the playlist
+    store.experienceStore.load(data.experiences[0].name);
+  }, [data?.experiences]);
 
   if (isPending || isError) return null;
 
