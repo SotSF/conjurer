@@ -5,6 +5,7 @@ import { FaPlus } from "react-icons/fa";
 import { action } from "mobx";
 import { trpc } from "@/src/utils/trpc";
 import { SelectablePlaylist } from "@/src/components/PlaylistEditor/SelectablePlaylist";
+import { useEffect } from "react";
 
 export const Library = observer(function Library() {
   const store = useStore();
@@ -23,6 +24,16 @@ export const Library = observer(function Library() {
     usingLocalData,
     username,
   });
+
+  useEffect(() => {
+    if (
+      !playlists ||
+      playlists.length === 0 ||
+      playlistStore.selectedPlaylistId
+    )
+      return;
+    playlistStore.selectedPlaylistId = playlists[0].id;
+  }, [playlists]);
 
   if (isPending || isError) return null;
 

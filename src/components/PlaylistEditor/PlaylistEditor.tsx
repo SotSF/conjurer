@@ -44,7 +44,7 @@ export const PlaylistEditor = observer(function PlaylistEditor() {
   const { playlist, experiences } = data;
 
   return (
-    <VStack m={6} justify="start" alignItems={"start"} flexBasis={"70rem"}>
+    <VStack m={6} justify="start" alignItems="start" flexBasis="70rem">
       <HStack justify="start" align="center" spacing={4}>
         <PlaylistNameEditable
           key={playlist.id + playlist.name}
