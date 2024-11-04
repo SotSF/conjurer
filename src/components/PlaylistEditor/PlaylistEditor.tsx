@@ -33,10 +33,10 @@ export const PlaylistEditor = observer(function PlaylistEditor() {
   const { isPending, isError, data } = trpc.playlist.getPlaylist.useQuery(
     {
       usingLocalData,
-      id: playlistStore.selectedPlaylistId!,
+      id: playlistStore.selectedPlaylist?.id!,
     },
     {
-      enabled: playlistStore.selectedPlaylistId !== null,
+      enabled: playlistStore.selectedPlaylist !== null,
     }
   );
 
@@ -61,12 +61,14 @@ export const PlaylistEditor = observer(function PlaylistEditor() {
         <ButtonGroup isAttached size="xs" variant="outline">
           <Button
             onClick={action(
-              () => (playlistStore.shuffle = !playlistStore.shuffle)
+              () =>
+                (playlistStore.shufflingPlaylist =
+                  !playlistStore.shufflingPlaylist)
             )}
             leftIcon={<BiShuffle size={14} />}
-            bgColor={playlistStore.shuffle ? "orange.600" : undefined}
+            bgColor={playlistStore.shufflingPlaylist ? "orange.600" : undefined}
             _hover={
-              playlistStore.shuffle
+              playlistStore.shufflingPlaylist
                 ? {
                     bgColor: "orange.600",
                   }
@@ -76,11 +78,14 @@ export const PlaylistEditor = observer(function PlaylistEditor() {
             Shuffle
           </Button>
           <Button
-            onClick={action(() => (playlistStore.loop = !playlistStore.loop))}
+            onClick={action(
+              () =>
+                (playlistStore.loopingPlaylist = !playlistStore.loopingPlaylist)
+            )}
             leftIcon={<ImLoop size={14} />}
-            bgColor={playlistStore.shuffle ? "orange.600" : undefined}
+            bgColor={playlistStore.shufflingPlaylist ? "orange.600" : undefined}
             _hover={
-              playlistStore.loop
+              playlistStore.loopingPlaylist
                 ? {
                     bgColor: "orange.600",
                   }

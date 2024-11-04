@@ -2,6 +2,7 @@ import { makeAutoObservable } from "mobx";
 import { ExperienceStore } from "@/src/types/ExperienceStore";
 import { AudioStore } from "@/src/types/AudioStore";
 import { Context } from "@/src/types/context";
+import { Playlist } from "@/src/types/Playlist";
 
 // Define a new RootStore interface here so that we avoid circular dependencies
 interface RootStore {
@@ -14,10 +15,10 @@ interface RootStore {
 export class PlaylistStore {
   autoplay = ["playlistEditor", "viewer"].includes(this.rootStore.context);
   // TODO: implement
-  shuffle = false;
-  loop = false;
+  shufflingPlaylist = false;
+  loopingPlaylist = false;
 
-  selectedPlaylistId: number | null = null;
+  selectedPlaylist: Playlist | null = null;
 
   constructor(
     readonly rootStore: RootStore,
@@ -38,11 +39,6 @@ export class PlaylistStore {
 
     await this.experienceStore.load(experienceName);
     await this.playExperienceWhenReady();
-  };
-
-  loadFirstExperience = async () => {
-    // TODO: implement
-    // await this.experienceStore.load();
   };
 
   playExperienceWhenReady = () =>

@@ -26,13 +26,9 @@ export const Library = observer(function Library() {
   });
 
   useEffect(() => {
-    if (
-      !playlists ||
-      playlists.length === 0 ||
-      playlistStore.selectedPlaylistId
-    )
+    if (!playlists || playlists.length === 0 || playlistStore.selectedPlaylist)
       return;
-    playlistStore.selectedPlaylistId = playlists[0].id;
+    playlistStore.selectedPlaylist = playlists[0];
   }, [playlists]);
 
   if (isPending || isError) return null;
@@ -59,14 +55,14 @@ export const Library = observer(function Library() {
             size="sm"
             leftIcon={<FaPlus size={14} />}
             onClick={action(async () => {
-              const newPlaylistId = await createPlaylist.mutateAsync({
+              const newPlaylist = await createPlaylist.mutateAsync({
                 username,
                 usingLocalData,
                 name: "New Playlist",
                 description: "New Playlist",
                 orderedExperienceIds: [],
               });
-              playlistStore.selectedPlaylistId = newPlaylistId;
+              playlistStore.selectedPlaylist = newPlaylist;
               utils.playlist.listPlaylistsForUser.invalidate();
             })}
           >

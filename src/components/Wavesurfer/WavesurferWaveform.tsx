@@ -215,7 +215,8 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
         "finish",
         action(() => {
           audioStore.audioState = "paused";
-          if (playlistStore.autoplay) playlistStore.playNextExperience();
+          if (store.context === "playlistEditor")
+            playlistStore.playNextExperience();
         })
       );
 

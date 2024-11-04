@@ -216,9 +216,8 @@ export class Store {
 
     // load experience from path parameter if provided (e.g. /experience/my-experience)
     if (initialExperienceName) this.experienceStore.load(initialExperienceName);
-    else if (this.context === "playlistEditor")
-      this.playlistStore.loadFirstExperience();
-    else this.experienceStore.loadEmptyExperience();
+    else if (this.context !== "playlistEditor")
+      this.experienceStore.loadEmptyExperience();
 
     this.uiStore.initialize();
   };

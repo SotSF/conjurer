@@ -16,7 +16,7 @@ export const SelectablePlaylist = observer(function SelectablePlaylist({
 
   const isEditable = store.username === playlist.user.username;
 
-  const isSelected = playlistStore.selectedPlaylistId === playlist.id;
+  const isSelected = playlistStore.selectedPlaylist?.id === playlist.id;
 
   const utils = trpc.useUtils();
   const deletePlaylist = trpc.playlist.deletePlaylist.useMutation();
@@ -29,7 +29,7 @@ export const SelectablePlaylist = observer(function SelectablePlaylist({
       justify="space-between"
       align="center"
       role="button"
-      onClick={action(() => (playlistStore.selectedPlaylistId = playlist.id))}
+      onClick={action(() => (playlistStore.selectedPlaylist = playlist))}
       bgColor={isSelected ? "gray.600" : undefined}
       _hover={{
         bgColor: isSelected ? "gray.500" : "gray.600",

@@ -67,25 +67,37 @@ export const playlistRouter = router({
         orderedExperienceIds,
       };
 
+      let upsertedPlaylist;
       if (id) {
-        await ctx.db
+        [upsertedPlaylist] = await ctx.db
           .update(playlists)
           .set(playlistData)
           .where(eq(playlists.id, id))
+          .returning()
           .execute();
-        return id;
       }
 
-      const [newPlaylist] = await ctx.db
+      [upsertedPlaylist] = await ctx.db
         .insert(playlists)
         .values({
           ...playlistData,
           userId: ctx.user.id,
         })
-        .returning({ id: playlists.id })
+        .returning()
         .execute();
 
-      return newPlaylist.id;
+      return (await ctx.db.query.playlists
+        .findFirst({
+          where: eq(playlists.id, upsertedPlaylist.id),
+          columns: {
+            id: true,
+            name: true,
+            description: true,
+            orderedExperienceIds: true,
+          },
+          with: { user: true },
+        })
+        .execute())!;
     }),
 
   deletePlaylist: userProcedure
