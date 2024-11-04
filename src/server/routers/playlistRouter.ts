@@ -27,6 +27,7 @@ const getMyExperiencesSmartPlaylist = async (ctx: {
 
   return {
     ...MY_EXPERIENCES_SMART_PLAYLIST,
+    name: `Experiences by ${ctx.user.username}`,
     orderedExperienceIds: myExperienceIds,
   };
 };

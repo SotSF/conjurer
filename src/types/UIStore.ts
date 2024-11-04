@@ -84,6 +84,10 @@ export class UIStore {
   initialize = (embeddedViewer = false) => {
     if (embeddedViewer) this.setEmbeddedDefaults();
     else this.loadFromLocalStorage();
+
+    if (!this.rootStore.username) {
+      this.showingUserPickerModal = true;
+    }
   };
 
   timeToXPixels = (time: number) => `${time * this.pixelsPerSecond}px`;

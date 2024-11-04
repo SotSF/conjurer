@@ -148,14 +148,18 @@ export const MenuBar = observer(function MenuBar() {
                 File
               </MenuButton>
               <MenuList zIndex={12}>
-                <MenuItem
-                  icon={<FaFile size={17} />}
-                  command="⌘N"
-                  onClick={experienceStore.loadEmptyExperience}
-                >
-                  New experience
-                </MenuItem>
-                <MenuDivider />
+                {store.context === "experienceEditor" && (
+                  <>
+                    <MenuItem
+                      icon={<FaFile size={17} />}
+                      command="⌘N"
+                      onClick={experienceStore.loadEmptyExperience}
+                    >
+                      New experience
+                    </MenuItem>
+                    <MenuDivider />
+                  </>
+                )}
                 <MenuItem
                   icon={<FaFolderOpen size={17} />}
                   command="⌘O"
@@ -163,21 +167,25 @@ export const MenuBar = observer(function MenuBar() {
                 >
                   Open...
                 </MenuItem>
-                <MenuDivider />
-                <MenuItem
-                  icon={<FiSave size={17} />}
-                  command="⌘S"
-                  onClick={() => saveExperience()}
-                >
-                  Save
-                </MenuItem>
-                <MenuItem
-                  icon={<FiSave size={17} />}
-                  command="⌘⇧S"
-                  onClick={uiStore.attemptShowSaveExperienceModal}
-                >
-                  Save as...
-                </MenuItem>
+                {store.context === "experienceEditor" && (
+                  <>
+                    <MenuDivider />
+                    <MenuItem
+                      icon={<FiSave size={17} />}
+                      command="⌘S"
+                      onClick={() => saveExperience()}
+                    >
+                      Save
+                    </MenuItem>
+                    <MenuItem
+                      icon={<FiSave size={17} />}
+                      command="⌘⇧S"
+                      onClick={uiStore.attemptShowSaveExperienceModal}
+                    >
+                      Save as...
+                    </MenuItem>
+                  </>
+                )}
               </MenuList>
             </Menu>
             <Menu>
@@ -300,9 +308,11 @@ export const MenuBar = observer(function MenuBar() {
                 >
                   About Conjurer
                 </MenuItem>
-                <MenuItem onClick={onOpenKeyboardShortcuts}>
-                  Keyboard shortcuts
-                </MenuItem>
+                {store.context === "experienceEditor" && (
+                  <MenuItem onClick={onOpenKeyboardShortcuts}>
+                    Keyboard shortcuts
+                  </MenuItem>
+                )}
                 <MenuItem
                   as="a"
                   href="https://github.com/SotSF/conjurer/issues/new/choose"

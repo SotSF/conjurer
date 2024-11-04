@@ -78,8 +78,10 @@ export const LoginButton = observer(function LoginButton() {
                       width="100%"
                       onClick={action(() => {
                         store.username = user.username;
-                        experienceStore.loadEmptyExperience();
-                        store.uiStore.showingOpenExperienceModal = true;
+                        if (store.context === "experienceEditor") {
+                          experienceStore.loadEmptyExperience();
+                          uiStore.showingOpenExperienceModal = true;
+                        }
                         onClose();
                       })}
                     >

@@ -99,6 +99,14 @@ export const PlaylistEditor = observer(function PlaylistEditor() {
           </Button>
         </ButtonGroup>
       </HStack>
+      {playlist.description && (
+        <HStack justify="start" align="center" spacing={4}>
+          <Text fontSize="md" color="gray.400">
+            {playlist.description}
+            {/* TODO: make this editable */}
+          </Text>
+        </HStack>
+      )}
       <HStack justify="start" align="center" spacing={4}>
         <Text fontSize="md" color="gray.400">
           {playlist.user.username} • {experiencesAndUsers.length} experiences
