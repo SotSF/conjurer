@@ -30,8 +30,10 @@ export const PlaylistEditorPage = function PlaylistEditorPage() {
             </Panel>
             <PanelResizeHandle />
             <Panel>
-              <TimerAndWaveform />
-              <PlaylistEditor />
+              <Box height="100%" overflowX="hidden" overflowY="auto">
+                <TimerAndWaveform />
+                <PlaylistEditor />
+              </Box>
             </Panel>
           </PanelGroup>
         </Panel>
