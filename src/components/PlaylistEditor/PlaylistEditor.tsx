@@ -26,17 +26,20 @@ import { useEffect } from "react";
 
 export const PlaylistEditor = observer(function PlaylistEditor() {
   const store = useStore();
-  const { usingLocalData, playlistStore, uiStore } = store;
+  const { username, usingLocalData, playlistStore, uiStore } = store;
+  const { selectedPlaylist } = playlistStore;
 
-  const isEditable = !!store.username;
+  const isEditable =
+    !!store.username && store.username === selectedPlaylist?.user.username;
 
   const { isPending, isError, data } = trpc.playlist.getPlaylist.useQuery(
     {
       usingLocalData,
-      id: playlistStore.selectedPlaylist?.id!,
+      username,
+      id: selectedPlaylist?.id!,
     },
     {
-      enabled: playlistStore.selectedPlaylist !== null,
+      enabled: selectedPlaylist !== null,
     }
   );
 

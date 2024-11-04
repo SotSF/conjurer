@@ -1,29 +1,61 @@
-import { router, databaseProcedure, userProcedure } from "@/src/server/trpc";
+import { router, userProcedure } from "@/src/server/trpc";
 import { z } from "zod";
-import { experiences, playlists } from "@/src/db/schema";
-import { eq, inArray } from "drizzle-orm";
+import {
+  experiences,
+  playlists,
+  SelectUser,
+  usersToExperiences,
+} from "@/src/db/schema";
+import { asc, eq, inArray } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
+import { MY_EXPERIENCES_SMART_PLAYLIST } from "@/src/types/Playlist";
+import { ConjurerDatabase } from "@/src/db/type";
+
+const getMyExperiencesSmartPlaylist = async (ctx: {
+  db: ConjurerDatabase;
+  user: SelectUser;
+}) => {
+  const myExperienceIds = (
+    await ctx.db.query.usersToExperiences
+      .findMany({
+        where: eq(usersToExperiences.userId, ctx.user.id),
+        columns: { experienceId: true },
+        orderBy: [asc(usersToExperiences.id)],
+      })
+      .execute()
+  ).map(({ experienceId }) => experienceId);
+
+  return {
+    ...MY_EXPERIENCES_SMART_PLAYLIST,
+    orderedExperienceIds: myExperienceIds,
+  };
+};
 
 export const playlistRouter = router({
-  getPlaylist: databaseProcedure
+  getPlaylist: userProcedure
     .input(
       z.object({
         id: z.number(),
       })
     )
     .query(async ({ ctx, input }) => {
-      const playlist = await ctx.db.query.playlists
-        .findFirst({
-          where: eq(playlists.id, input.id),
-          columns: {
-            id: true,
-            name: true,
-            description: true,
-            orderedExperienceIds: true,
-          },
-          with: { user: true },
-        })
-        .execute();
+      let playlist;
+      if (input.id === MY_EXPERIENCES_SMART_PLAYLIST.id) {
+        playlist = await getMyExperiencesSmartPlaylist(ctx);
+      } else {
+        playlist = await ctx.db.query.playlists
+          .findFirst({
+            where: eq(playlists.id, input.id),
+            columns: {
+              id: true,
+              name: true,
+              description: true,
+              orderedExperienceIds: true,
+            },
+            with: { user: true },
+          })
+          .execute();
+      }
 
       if (!playlist)
         throw new TRPCError({
@@ -114,7 +146,7 @@ export const playlistRouter = router({
     }),
 
   listPlaylistsForUser: userProcedure.query(async ({ ctx }) => {
-    return await ctx.db.query.playlists
+    const databasePlaylists = await ctx.db.query.playlists
       .findMany({
         where: eq(playlists.userId, ctx.user.id),
         columns: {
@@ -127,5 +159,7 @@ export const playlistRouter = router({
         with: { user: true },
       })
       .execute();
+
+    return [await getMyExperiencesSmartPlaylist(ctx), ...databasePlaylists];
   }),
 });

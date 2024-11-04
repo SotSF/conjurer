@@ -2,8 +2,9 @@ import { drizzle } from "drizzle-orm/libsql";
 import { createClient } from "@libsql/client";
 import * as schema from "./schema";
 import fs from "fs";
+import { ConjurerDatabase } from "@/src/db/type";
 
-let localDB: ReturnType<typeof drizzle<typeof schema>> | null = null;
+let localDB: ConjurerDatabase | null = null;
 
 export const getLocalDatabase = () => {
   if (localDB) return localDB;
