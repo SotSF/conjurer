@@ -8242,9 +8242,9 @@ watchpack@^2.4.1:
     graceful-fs "^4.1.2"
 
 wavesurfer.js@^7.3.4:
-  version "7.3.4"
-  resolved "https://registry.yarnpkg.com/wavesurfer.js/-/wavesurfer.js-7.3.4.tgz#294a322b70ae3748f59bc9b0e9de92413f21f49c"
-  integrity sha512-x2Ue4Dh+4RoaWay3LOLHhXgkdxPAIoC/BcbXh0yk8WNhQH2NboPoa52XXoCo4jEfjSe1bc7nxuM5vBIxUMZyBA==
+  version "7.8.8"
+  resolved "https://registry.yarnpkg.com/wavesurfer.js/-/wavesurfer.js-7.8.8.tgz#5ace659a8eae615aaed943d417e036bef31d007e"
+  integrity sha512-FNiJ6RCAu4TijRcwdaqlN19+Y+Hhqb7Nfo2P4LudzhNnQRMKvF3QmXd9+KHlQZrSjexeK3WbY4COsxgGJkxMag==
 
 web-streams-polyfill@^3.0.3:
   version "3.3.3"

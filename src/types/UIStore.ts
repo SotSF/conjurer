@@ -75,6 +75,7 @@ export class UIStore {
 
   patternDrawerOpen = false;
 
+  canTimelineZoom = this.rootStore.context === "experienceEditor";
   pixelsPerSecond = INITIAL_PIXELS_PER_SECOND; // the zoom of the timeline
 
   constructor(readonly rootStore: RootStore, readonly audioStore: AudioStore) {

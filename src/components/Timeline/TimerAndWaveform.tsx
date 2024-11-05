@@ -1,5 +1,5 @@
 import { observer } from "mobx-react-lite";
-import { HStack, VStack } from "@chakra-ui/react";
+import { Box, HStack, VStack } from "@chakra-ui/react";
 import { useStore } from "@/src/types/StoreContext";
 import { WavesurferWaveform } from "@/src/components/Wavesurfer/WavesurferWaveform";
 import { MAX_TIME } from "@/src/utils/time";
@@ -11,11 +11,16 @@ export const TimerAndWaveform = observer(function TimerAndWaveform() {
   const store = useStore();
   const { uiStore, embeddedViewer } = store;
 
+  const width = uiStore.canTimelineZoom
+    ? uiStore.timeToXPixels(MAX_TIME)
+    : "100%";
+
   return (
     <HStack
       position="sticky"
       top={0}
-      width={uiStore.timeToXPixels(MAX_TIME)}
+      width={width}
+      maxWidth={width}
       spacing={0}
       zIndex={12}
     >

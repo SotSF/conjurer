@@ -43,9 +43,7 @@ const DEFAULT_WAVESURFER_OPTIONS: Partial<WaveSurferOptions> = {
   waveColor: "#ddd",
   progressColor: "#0178FF",
   cursorColor: "#FF0000FF",
-  height: 60,
   hideScrollbar: true,
-  fillParent: false,
   autoScroll: false,
   autoCenter: false,
   interact: true,
@@ -160,7 +158,11 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
       const options: WaveSurferOptions = {
         ...DEFAULT_WAVESURFER_OPTIONS,
         container: waveformRef.current!,
-        minPxPerSec: uiStore.pixelsPerSecond,
+        height: uiStore.canTimelineZoom ? 60 : 80,
+        fillParent: !uiStore.canTimelineZoom,
+        minPxPerSec: uiStore.canTimelineZoom
+          ? uiStore.pixelsPerSecond
+          : undefined,
         plugins: [timelinePlugin, regionsPlugin, minimapPlugin],
         media: audioRef.current!,
       };
@@ -200,7 +202,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
         );
         if (audioStore.audioMuted) wavesurfer.setMuted(true);
 
-        wavesurfer.zoom(uiStore.pixelsPerSecond);
+        uiStore.canTimelineZoom && wavesurfer.zoom(uiStore.pixelsPerSecond);
         wavesurfer.seekTo(0);
 
         const audioBuffer = wavesurfer.getDecodedData();
@@ -417,7 +419,8 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
   // on zoom change
   useEffect(() => {
     if (!audioStore.wavesurfer || !ready.current) return;
-    audioStore.wavesurfer.zoom(uiStore.pixelsPerSecond);
+    uiStore.canTimelineZoom &&
+      audioStore.wavesurfer.zoom(uiStore.pixelsPerSecond);
     cloneCanvas();
   }, [cloneCanvas, uiStore.pixelsPerSecond, audioStore.wavesurfer]);
 
@@ -430,7 +433,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
     audioStore.wavesurfer.seekTo(clamp(progress, 0, 1));
   }, [audioStore.lastCursor, audioStore.wavesurfer]);
 
-  return (
+  return uiStore.canTimelineZoom ? (
     <Box
       width="100%"
       height={embeddedViewer ? `${EMBEDDED_MINIMAP_HEIGHT}px` : 20}
@@ -478,6 +481,28 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
           pointerEvents="none"
         />
       )}
+    </Box>
+  ) : (
+    <Box position="relative" flexGrow={1} height={20} bgColor="gray.500">
+      <audio ref={audioRef} />
+      <Skeleton
+        position="absolute"
+        top={0}
+        width="100%"
+        height="100%"
+        startColor="gray.500"
+        endColor="gray.700"
+        speed={0.4}
+        isLoaded={!loading || !audioStore.selectedSong.filename}
+      />
+      <Box
+        position="absolute"
+        top="0"
+        width="100%"
+        id="waveform"
+        display="block"
+        ref={waveformRef}
+      />
     </Box>
   );
 });
