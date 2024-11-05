@@ -4,7 +4,6 @@ import { Display } from "@/src/components/Display";
 import { lazy, memo, useEffect, useRef } from "react";
 import { useStore } from "@/src/types/StoreContext";
 import { KeyboardControls } from "@/src/components/KeyboardControls";
-import { PlaylistDrawer } from "@/src/components/PlaylistEditor/PlaylistDrawer";
 
 const PortalNarrativeModal = lazy(
   () => import("@/src/components/PortalNarrativeModal")
@@ -28,7 +27,6 @@ export const ViewerPage = memo(function ViewerPage({
   return (
     <Box position="relative" w="100vw" h="100vh">
       <KeyboardControls editMode={false} />
-      <PlaylistDrawer />
       {portalNarrative && <PortalNarrativeModal />}
       <Grid
         templateAreas={`"display"
