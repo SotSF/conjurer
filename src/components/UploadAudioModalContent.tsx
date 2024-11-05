@@ -14,7 +14,7 @@ import {
 } from "@chakra-ui/react";
 import { useStore } from "@/src/types/StoreContext";
 import { useRef, useState } from "react";
-import { action } from "mobx";
+import { action, runInAction } from "mobx";
 import {
   uploadAudioFileToS3,
   uploadAudioFileToServer,
@@ -59,7 +59,9 @@ const UploadAudioModalContent = observer(function UploadAudioModalContent() {
     await utils.song.listSongs.invalidate();
     setUploading(false);
 
-    audioStore.selectedSong = newSong;
+    runInAction(() => {
+      audioStore.selectedSong = newSong;
+    });
     onClose();
   });
 

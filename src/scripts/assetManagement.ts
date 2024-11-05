@@ -47,7 +47,7 @@ export const downloadAudio = async (s3: S3Client) => {
     if (audioData?.length)
       fs.writeFileSync(
         `${LOCAL_ASSET_PATH}${AUDIO_ASSET_PREFIX}${filename}`,
-        Buffer.from(audioData)
+        new Uint8Array(Buffer.from(audioData))
       );
   }
 };

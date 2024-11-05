@@ -26,7 +26,7 @@ export const POST = async (req: Request, res: Response) => {
         process.cwd(),
         `public/${LOCAL_ASSET_DIRECTORY}${AUDIO_ASSET_PREFIX}${filename}`
       ),
-      buffer
+      new Uint8Array(buffer)
     );
     return NextResponse.json({ Message: "Success", status: 201 });
   } catch (error) {
