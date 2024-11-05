@@ -200,6 +200,7 @@ export class Store {
     // check for a role in local storage
     const role = localStorage.getItem("role");
     if (role) this._role = role as Role;
+    if (this.context === "playlistEditor") this._role = "emcee";
 
     // check for a username in local storage
     const username = localStorage.getItem("username");

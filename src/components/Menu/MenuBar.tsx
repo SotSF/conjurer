@@ -286,6 +286,31 @@ export const MenuBar = observer(function MenuBar() {
                 </MenuItemOption>
               </MenuList>
             </Menu>
+            {process.env.NEXT_PUBLIC_NODE_ENV !== "production" && (
+              <Menu closeOnSelect={false}>
+                <MenuButton
+                  as={Button}
+                  px={1}
+                  py={0}
+                  variant="ghost"
+                  size="sm"
+                  transition="all 0.2s"
+                  borderRadius="md"
+                  _hover={{ bg: "gray.500" }}
+                  _focus={{ boxShadow: "outline" }}
+                >
+                  Tools
+                </MenuButton>
+                <MenuList zIndex={12}>
+                  <MenuItemOption
+                    isChecked={store.sendingData}
+                    onClick={store.toggleSendingData}
+                  >
+                    Transmit data to canopy
+                  </MenuItemOption>
+                </MenuList>
+              </Menu>
+            )}
             <Menu>
               <MenuButton
                 as={Button}

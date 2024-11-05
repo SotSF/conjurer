@@ -23,6 +23,8 @@ import { ImLoop } from "react-icons/im";
 import { trpc } from "@/src/utils/trpc";
 import { PlaylistNameEditable } from "@/src/components/PlaylistEditor/PlaylistNameEditable";
 import { useEffect } from "react";
+import { FaPlus } from "react-icons/fa";
+import { useRouter } from "next/router";
 
 export const PlaylistEditor = observer(function PlaylistEditor() {
   const store = useStore();
@@ -48,6 +50,8 @@ export const PlaylistEditor = observer(function PlaylistEditor() {
     // once experiences are fetched, load the first experience in the playlist
     store.experienceStore.load(data.experiencesAndUsers[0].experience.name);
   }, [data?.experiencesAndUsers]);
+
+  const router = useRouter();
 
   if (isPending || isError) return null;
 
@@ -98,6 +102,19 @@ export const PlaylistEditor = observer(function PlaylistEditor() {
             Loop all
           </Button>
         </ButtonGroup>
+        <Button
+          justifySelf="end"
+          variant="solid"
+          colorScheme="blue"
+          size="sm"
+          leftIcon={<FaPlus size={14} />}
+          onClick={() => {
+            store.role = "experience creator";
+            router.push("/experience/untitled");
+          }}
+        >
+          New experience
+        </Button>
       </HStack>
       {playlist.description && (
         <HStack justify="start" align="center" spacing={4}>

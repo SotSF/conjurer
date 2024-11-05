@@ -85,9 +85,7 @@ export class UIStore {
     if (embeddedViewer) this.setEmbeddedDefaults();
     else this.loadFromLocalStorage();
 
-    if (!this.rootStore.username) {
-      this.showingUserPickerModal = true;
-    }
+    if (!this.rootStore.username) this.showingUserPickerModal = true;
   };
 
   timeToXPixels = (time: number) => `${time * this.pixelsPerSecond}px`;
@@ -195,7 +193,7 @@ export class UIStore {
         localStorageUiSettings.playgroundDisplayMode || "canopy";
       this.renderTargetSize =
         localStorageUiSettings.renderTargetSize || INITIAL_RENDER_TARGET_SIZE;
-      if (this.rootStore.context !== "viewer")
+      if (this.rootStore.context === "experienceEditor")
         this.pixelsPerSecond =
           localStorageUiSettings.pixelsPerSecond || INITIAL_PIXELS_PER_SECOND;
     }
