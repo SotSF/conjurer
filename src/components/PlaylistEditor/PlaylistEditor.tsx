@@ -42,6 +42,7 @@ export const PlaylistEditor = observer(function PlaylistEditor() {
     },
     {
       enabled: selectedPlaylist !== null,
+      staleTime: 1000 * 60 * 10,
     }
   );
 

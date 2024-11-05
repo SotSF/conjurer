@@ -20,10 +20,13 @@ export const PlaylistLibrary = observer(function PlaylistLibrary() {
     isPending,
     isError,
     data: playlists,
-  } = trpc.playlist.listPlaylistsForUser.useQuery({
-    usingLocalData,
-    username,
-  });
+  } = trpc.playlist.listPlaylistsForUser.useQuery(
+    {
+      usingLocalData,
+      username,
+    },
+    { staleTime: 1000 * 60 * 10 }
+  );
 
   useEffect(() => {
     if (!playlists || playlists.length === 0 || playlistStore.selectedPlaylist)
