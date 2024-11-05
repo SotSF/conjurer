@@ -7,33 +7,26 @@ import type WaveSurfer from "wavesurfer.js";
 import type { WaveSurferOptions } from "wavesurfer.js";
 import type TimelinePlugin from "wavesurfer.js/dist/plugins/timeline";
 import type { TimelinePluginOptions } from "wavesurfer.js/dist/plugins/timeline";
-import type RegionsPlugin from "wavesurfer.js/dist/plugins/regions";
-import type { RegionParams } from "wavesurfer.js/dist/plugins/regions";
 import type MinimapPlugin from "wavesurfer.js/dist/plugins/minimap";
 import type { MinimapPluginOptions } from "wavesurfer.js/dist/plugins/minimap";
 import { action, runInAction } from "mobx";
 import { useCloneCanvas } from "@/src/components/Wavesurfer/hooks/cloneCanvas";
-import { loopRegionColor } from "@/src/types/AudioStore";
 import { debounce } from "lodash";
-import { generateId } from "@/src/utils/id";
 
 const importWavesurferConstructors = async () => {
   // Can't be run on the server, so we need to use dynamic imports
   const [
     { default: WaveSurfer },
     { default: TimelinePlugin },
-    { default: RegionsPlugin },
     { default: MinimapPlugin },
   ] = await Promise.all([
     import("wavesurfer.js"),
     import("wavesurfer.js/dist/plugins/timeline"),
-    import("wavesurfer.js/dist/plugins/regions"),
     import("wavesurfer.js/dist/plugins/minimap"),
   ]);
   return {
     WaveSurfer,
     TimelinePlugin,
-    RegionsPlugin,
     MinimapPlugin,
   };
 };
@@ -43,23 +36,19 @@ const DEFAULT_WAVESURFER_OPTIONS: Partial<WaveSurferOptions> = {
   waveColor: "#ddd",
   progressColor: "#0178FF",
   cursorColor: "#FF0000FF",
-  height: 60,
   hideScrollbar: true,
-  fillParent: false,
   autoScroll: false,
   autoCenter: false,
   interact: true,
 };
 
 const DEFAULT_TIMELINE_OPTIONS: TimelinePluginOptions = {
-  height: 60,
   insertPosition: "beforebegin",
   timeInterval: 0.25,
-  primaryLabelInterval: 5,
-  secondaryLabelInterval: 1,
   style: {
     fontSize: "14px",
     color: "#000000",
+    zIndex: "100",
   },
 };
 
@@ -96,12 +85,10 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
   const wavesurferConstructors = useRef<{
     WaveSurfer: typeof WaveSurfer | null;
     TimelinePlugin: typeof TimelinePlugin | null;
-    RegionsPlugin: typeof RegionsPlugin | null;
     MinimapPlugin: typeof MinimapPlugin | null;
   }>({
     WaveSurfer: null,
     TimelinePlugin: null,
-    RegionsPlugin: null,
     MinimapPlugin: null,
   });
 
@@ -114,18 +101,12 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
 
   const cloneCanvas = useCloneCanvas(clonedWaveformRef);
 
-  const timelinePluginOptions = useMemo(
-    () => ({
-      ...DEFAULT_TIMELINE_OPTIONS,
-      ...(store.context === "viewer"
-        ? {
-            primaryLabelInterval: 15,
-            secondaryLabelInterval: 0,
-          }
-        : {}),
-    }),
-    [store.context]
-  );
+  const timelinePluginOptions = {
+    ...DEFAULT_TIMELINE_OPTIONS,
+    height: uiStore.canTimelineZoom ? 60 : 80,
+    primaryLabelInterval: uiStore.canTimelineZoom ? 5 : 30,
+    secondaryLabelInterval: uiStore.canTimelineZoom ? 1 : 0,
+  };
 
   // initialize wavesurfer
   useEffect(() => {
@@ -136,16 +117,13 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
       setLoading(true);
 
       // Lazy load all wave surfer dependencies
-      const { WaveSurfer, TimelinePlugin, RegionsPlugin, MinimapPlugin } =
+      const { WaveSurfer, TimelinePlugin, MinimapPlugin } =
         (wavesurferConstructors.current = await importWavesurferConstructors());
 
       // Instantiate timeline plugin
       const timelinePlugin = (audioStore.timelinePlugin = TimelinePlugin.create(
         timelinePluginOptions
       ));
-
-      // Instantiate regions plugin
-      const regionsPlugin = (audioStore.regionsPlugin = RegionsPlugin.create());
 
       // Instantiate minimap plugin
       const minimapPlugin = (audioStore.minimapPlugin = MinimapPlugin.create({
@@ -160,8 +138,12 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
       const options: WaveSurferOptions = {
         ...DEFAULT_WAVESURFER_OPTIONS,
         container: waveformRef.current!,
-        minPxPerSec: uiStore.pixelsPerSecond,
-        plugins: [timelinePlugin, regionsPlugin, minimapPlugin],
+        height: uiStore.canTimelineZoom ? 60 : 80,
+        fillParent: !uiStore.canTimelineZoom,
+        minPxPerSec: uiStore.canTimelineZoom
+          ? uiStore.pixelsPerSecond
+          : undefined,
+        plugins: [timelinePlugin, minimapPlugin],
         media: audioRef.current!,
       };
       const wavesurfer = WaveSurfer.create(options);
@@ -180,27 +162,10 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
 
       wavesurfer.on("ready", () => {
         ready.current = true;
-        if (
-          store.context !== "viewer" &&
-          audioStore.initialRegions.length > 0
-        ) {
-          regionsPlugin.clearRegions();
-          audioStore.initialRegions.forEach((region) => {
-            regionsPlugin.addRegion(region.withNewContentElement());
-          });
-        }
-        regionsPlugin.on(
-          "region-double-clicked",
-          action((region: RegionParams) => {
-            // only edit regions that have content
-            if (!region.content) return;
-            uiStore.showingMarkerEditorModal = true;
-            uiStore.markerToEdit = region;
-          })
-        );
+
         if (audioStore.audioMuted) wavesurfer.setMuted(true);
 
-        wavesurfer.zoom(uiStore.pixelsPerSecond);
+        uiStore.canTimelineZoom && wavesurfer.zoom(uiStore.pixelsPerSecond);
         wavesurfer.seekTo(0);
 
         const audioBuffer = wavesurfer.getDecodedData();
@@ -215,7 +180,8 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
         "finish",
         action(() => {
           audioStore.audioState = "paused";
-          if (playlistStore.autoplay) playlistStore.playNextExperience();
+          if (store.context === "playlistEditor")
+            playlistStore.playNextExperience();
         })
       );
 
@@ -316,87 +282,6 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
     cloneCanvas();
   }, [audioStore, audioStore.wavesurfer, audioStore.selectedSong, uiStore.pixelsPerSecond, cloneCanvas, timelinePluginOptions, embeddedViewer]);
 
-  // on loop toggle
-  useEffect(() => {
-    if (!didInitialize.current || !ready.current) return;
-
-    let disableDragSelection = () => {};
-    const toggleLoopingMode = action(async () => {
-      if (!didInitialize.current || !audioStore.regionsPlugin) return;
-
-      const regionsPlugin = audioStore.regionsPlugin;
-      if (!audioStore.loopingAudio) {
-        regionsPlugin.unAll();
-        regionsPlugin
-          .getRegions()
-          // remove the looped region, if any. looped regions will not have content
-          .forEach((region) => !region.content && region.remove());
-        audioStore.loopRegion = null;
-        return;
-      }
-
-      disableDragSelection = regionsPlugin.enableDragSelection({
-        color: loopRegionColor,
-      });
-
-      regionsPlugin.on(
-        "region-created",
-        action((newRegion: RegionParams) => {
-          regionsPlugin.getRegions().forEach(
-            (region) =>
-              // remove the last looped region, if any. looped regions will not have content
-              region !== newRegion && !region.content && region.remove()
-          );
-          audioStore.loopRegion = newRegion;
-          if (!audioStore.wavesurfer) return;
-          audioStore.setTimeWithCursor(Math.max(0, newRegion.start));
-        })
-      );
-      regionsPlugin.on(
-        "region-updated",
-        action((region: RegionParams) => {
-          audioStore.loopRegion = region;
-          if (!audioStore.wavesurfer) return;
-          audioStore.setTimeWithCursor(Math.max(0, region.start));
-        })
-      );
-    });
-    toggleLoopingMode();
-    return disableDragSelection;
-  }, [audioStore, audioStore.loopingAudio]);
-
-  // on marker mode toggle
-  useEffect(() => {
-    if (!didInitialize.current || !ready.current) return;
-
-    let disableCreateByClick = () => {};
-    const toggleMarkingMode = action(async () => {
-      const { wavesurfer, regionsPlugin } = audioStore;
-      if (
-        !didInitialize.current ||
-        !audioStore.regionsPlugin ||
-        !wavesurfer ||
-        !regionsPlugin
-      )
-        return;
-
-      if (!audioStore.markingAudio) return;
-
-      disableCreateByClick = wavesurfer.on(
-        "interaction",
-        action((newTime: number) => {
-          uiStore.showingMarkerEditorModal = true;
-          uiStore.markerToEdit = {
-            id: generateId(),
-            start: newTime,
-          };
-        })
-      );
-    });
-    toggleMarkingMode();
-    return disableCreateByClick;
-  }, [uiStore, audioStore, audioStore.markingAudio]);
-
   // on audio state change
   useEffect(() => {
     if (!didInitialize.current || !ready.current) return;
@@ -416,7 +301,8 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
   // on zoom change
   useEffect(() => {
     if (!audioStore.wavesurfer || !ready.current) return;
-    audioStore.wavesurfer.zoom(uiStore.pixelsPerSecond);
+    uiStore.canTimelineZoom &&
+      audioStore.wavesurfer.zoom(uiStore.pixelsPerSecond);
     cloneCanvas();
   }, [cloneCanvas, uiStore.pixelsPerSecond, audioStore.wavesurfer]);
 
@@ -429,7 +315,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
     audioStore.wavesurfer.seekTo(clamp(progress, 0, 1));
   }, [audioStore.lastCursor, audioStore.wavesurfer]);
 
-  return (
+  return uiStore.canTimelineZoom ? (
     <Box
       width="100%"
       height={embeddedViewer ? `${EMBEDDED_MINIMAP_HEIGHT}px` : 20}
@@ -477,6 +363,28 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
           pointerEvents="none"
         />
       )}
+    </Box>
+  ) : (
+    <Box position="relative" flexGrow={1} height={20} bgColor="gray.500">
+      <audio ref={audioRef} />
+      <Skeleton
+        position="absolute"
+        top={0}
+        width="100%"
+        height="100%"
+        startColor="gray.500"
+        endColor="gray.700"
+        speed={0.4}
+        isLoaded={!loading || !audioStore.selectedSong.filename}
+      />
+      <Box
+        position="absolute"
+        top="0"
+        width="100%"
+        id="waveform"
+        display="block"
+        ref={waveformRef}
+      />
     </Box>
   );
 });

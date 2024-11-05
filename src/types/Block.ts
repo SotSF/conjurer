@@ -15,6 +15,7 @@ import { LinearVariation4 } from "@/src/types/Variations/LinearVariation4";
 import { isPalette } from "@/src/types/Palette";
 import { PaletteVariation } from "@/src/types/Variations/PaletteVariation";
 import { generateId } from "@/src/utils/id";
+import { Context } from "@/src/types/context";
 
 export type SerializedBlock = {
   id: string;
@@ -27,7 +28,7 @@ export type SerializedBlock = {
 };
 
 export type RootStore = {
-  context: string;
+  context: Context;
   audioStore: {
     getPeakAtTime: (time: number) => number;
   };
@@ -235,7 +236,7 @@ export class Block<T extends ExtraParams = {}> {
     if (index > -1) variations.splice(index, 0, variation.clone());
   };
 
-  // Note: not berry performant due to looping through variations
+  // Note: not very performant due to looping through variations
   getVariationGlobalEndTime = (uniformName: string, variation: Variation) => {
     const variations = this.parameterVariations[uniformName];
     if (!variations) return this.startTime;

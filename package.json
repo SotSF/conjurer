@@ -18,7 +18,7 @@
     "db:prod:backup": "src/scripts/backupDatabase.sh",
     "generateCanopy": "ts-node --project tsconfig.script.json src/scripts/generateCanopy.ts",
     "tursoMigration": "src/scripts/tursoMigration.sh",
-    "downloadCloudAudio": "ts-node --project tsconfig.script.json src/scripts/downloadCloudAssets.ts",
+    "downloadCloudAudio": "ts-node --project tsconfig.script.json src/scripts/downloadCloudAudio.ts",
     "unityTestServer": "ts-node --project tsconfig.script.json src/scripts/unityTestServer.ts",
     "controllerServer": "ts-node --project tsconfig.script.json src/scripts/controllerServer.ts",
     "generatePattern": "ts-node --project tsconfig.script.json src/scripts/generatePattern.ts"
@@ -61,6 +61,7 @@
     "react-dom": "^18.3.1",
     "react-draggable": "^4.4.6",
     "react-icons": "^4.11.0",
+    "react-resizable-panels": "^2.1.6",
     "recharts": "^2.8.0",
     "splines": "jonathanlurie/splines",
     "three": "^0.157.0",

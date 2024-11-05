@@ -1,7 +1,7 @@
 import { AudioStore } from "@/src/types/AudioStore";
+import { Context } from "@/src/types/context";
 import { INITIAL_PIXELS_PER_SECOND } from "@/src/utils/time";
 import { makeAutoObservable } from "mobx";
-import { RegionParams } from "wavesurfer.js/dist/plugins/regions";
 
 export const MAX_PIXELS_PER_SECOND = 160;
 export const MIN_PIXELS_PER_SECOND = 4;
@@ -11,8 +11,8 @@ const INITIAL_RENDER_TARGET_SIZE = 512;
 export type DisplayMode = "canopy" | "canopySpace" | "cartesianSpace" | "none";
 
 type RootStore = {
-  context: string;
-  user: string;
+  context: Context;
+  username: string;
 };
 
 /**
@@ -49,8 +49,6 @@ export class UIStore {
     this.saveToLocalStorage();
   }
 
-  markerToEdit: Partial<RegionParams> = {};
-
   keepingPlayHeadCentered = false;
   keepingPlayHeadVisible = false;
 
@@ -74,8 +72,7 @@ export class UIStore {
 
   patternDrawerOpen = false;
 
-  playlistDrawerOpen = false;
-
+  canTimelineZoom = this.rootStore.context === "experienceEditor";
   pixelsPerSecond = INITIAL_PIXELS_PER_SECOND; // the zoom of the timeline
 
   constructor(readonly rootStore: RootStore, readonly audioStore: AudioStore) {
@@ -85,6 +82,8 @@ export class UIStore {
   initialize = (embeddedViewer = false) => {
     if (embeddedViewer) this.setEmbeddedDefaults();
     else this.loadFromLocalStorage();
+
+    if (!this.rootStore.username) this.showingUserPickerModal = true;
   };
 
   timeToXPixels = (time: number) => `${time * this.pixelsPerSecond}px`;
@@ -135,7 +134,7 @@ export class UIStore {
 
   // TODO: can be removed when authentication is implemented
   attemptShowOpenExperienceModal = () => {
-    if (!this.rootStore.user) {
+    if (!this.rootStore.username) {
       this.showingUserPickerModal = true;
       this.pendingAction = "open";
       return;
@@ -145,7 +144,7 @@ export class UIStore {
   };
 
   attemptShowSaveExperienceModal = () => {
-    if (!this.rootStore.user) {
+    if (!this.rootStore.username) {
       this.showingUserPickerModal = true;
       this.pendingAction = "save";
       return;
@@ -192,7 +191,7 @@ export class UIStore {
         localStorageUiSettings.playgroundDisplayMode || "canopy";
       this.renderTargetSize =
         localStorageUiSettings.renderTargetSize || INITIAL_RENDER_TARGET_SIZE;
-      if (this.rootStore.context !== "viewer")
+      if (this.rootStore.context === "experienceEditor")
         this.pixelsPerSecond =
           localStorageUiSettings.pixelsPerSecond || INITIAL_PIXELS_PER_SECOND;
     }

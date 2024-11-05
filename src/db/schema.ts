@@ -138,4 +138,39 @@ export const usersToExperiencesRelations = relations(
 export type InsertAuthorship = typeof usersToExperiences.$inferInsert;
 export type SelectAuthorship = typeof usersToExperiences.$inferSelect;
 
-// TODO: playlists table
+export const playlists = sqliteTable(
+  "playlists",
+  {
+    id: integer("id").primaryKey(),
+    name: text("name").notNull(),
+    description: text("description").notNull().default(""),
+    userId: integer("user_id")
+      .notNull()
+      .references(() => users.id),
+    isLocked: integer("is_locked", { mode: "boolean" })
+      .notNull()
+      .default(false),
+    orderedExperienceIds: text({ mode: "json" })
+      .$type<number[]>()
+      .notNull()
+      .default([]),
+
+    createdAt: text("created_at")
+      .default(sql`(CURRENT_TIMESTAMP)`)
+      .notNull(),
+    updatedAt: text("updated_at")
+      .default(sql`(CURRENT_TIMESTAMP)`)
+      .notNull()
+      .$onUpdate(() => sql`(CURRENT_TIMESTAMP)`),
+  },
+  (table) => ({
+    userIdIndex: index("user_id_index").on(table.userId),
+  })
+);
+
+export const playlistsRelations = relations(playlists, ({ one }) => ({
+  user: one(users, { fields: [playlists.userId], references: [users.id] }),
+}));
+
+export type InsertPlaylist = typeof playlists.$inferInsert;
+export type SelectPlaylist = typeof playlists.$inferSelect;

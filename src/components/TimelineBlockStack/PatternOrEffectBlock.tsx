@@ -5,13 +5,11 @@ import { observer } from "mobx-react-lite";
 import { MouseEvent as ReactMouseEvent, useState } from "react";
 import { MdDragIndicator } from "react-icons/md";
 import { BsArrowsCollapse, BsArrowsExpand } from "react-icons/bs";
-import { ParametersList } from "@/src/components/ParametersList";
 import { RxCaretDown, RxCaretUp } from "react-icons/rx";
 import { FaTrashAlt } from "react-icons/fa";
-import { HeaderRepeat } from "@/src/components/HeaderRepeat";
-import { ImLoop } from "react-icons/im";
-import { useStore } from "@/src/types/StoreContext";
-import { PatternTimingModal } from "./PatternTimingModal";
+import { HeaderRepeat } from "@/src/components/TimelineBlockStack/HeaderRepeat";
+import { PatternTimingModal } from "@/src/components/TimelineBlockStack/PatternTimingModal";
+import { ParametersList } from "@/src/components/TimelineBlockStack/ParametersList";
 
 type Props = {
   block: Block;
@@ -26,7 +24,6 @@ export const PatternOrEffectBlock = observer(function PatternOrEffectBlock({
   isSelected,
   effectIndex = -1,
 }: Props) {
-  const { audioStore } = useStore();
   const [expandMode, setExpandMode] = useState<"expanded" | "collapsed">(
     "collapsed"
   );
@@ -65,18 +62,6 @@ export const PatternOrEffectBlock = observer(function PatternOrEffectBlock({
           >
             {isEffect ? "Effect" : "Pattern"}: {block.pattern.name}
           </Heading>
-          <IconButton
-            variant="ghost"
-            size="xs"
-            aria-label="Loop"
-            title="Loop"
-            height={6}
-            icon={<ImLoop size={15} />}
-            onClick={(e) => {
-              audioStore.loopAudio(block.startTime, block.endTime);
-              e.stopPropagation();
-            }}
-          />
           <IconButton
             variant="ghost"
             size="xs"

@@ -1,7 +1,7 @@
 import { getProdDatabase } from "@/src/db/prod";
 import { getLocalDatabase } from "@/src/db/local";
 import { TRPCClientError } from "@trpc/client";
-import { initTRPC } from "@trpc/server";
+import { initTRPC, TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { eq } from "drizzle-orm";
 import { users } from "@/src/db/schema";
@@ -37,7 +37,7 @@ export const databaseProcedure = publicProcedure
     }
   });
 
-// TODO: later on call this authedProcedure
+// TODO: later on implement this as authedProcedure
 export const userProcedure = databaseProcedure
   .input(
     z.object({
@@ -51,9 +51,8 @@ export const userProcedure = databaseProcedure
       .findFirst({ where: eq(users.username, username) })
       .execute();
 
-    if (!user) {
-      throw new TRPCClientError("User not found");
-    }
+    if (!user)
+      throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
 
     return next({ ctx: { ...ctx, user } });
   });

@@ -28,7 +28,7 @@ const saveBinary = (filename: string, data: CanopyGeometry) => {
     ...data.normal,
   ]);
   const buffer = Buffer.from(float32Array.buffer);
-  fs.writeFileSync(filename, buffer);
+  fs.writeFileSync(filename, new Uint8Array(buffer));
 };
 
 const main = async () => {

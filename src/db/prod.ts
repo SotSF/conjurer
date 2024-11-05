@@ -1,8 +1,9 @@
 import { drizzle } from "drizzle-orm/libsql";
 import { createClient } from "@libsql/client";
 import * as schema from "./schema";
+import { ConjurerDatabase } from "@/src/db/type";
 
-let prodDB: ReturnType<typeof drizzle<typeof schema>> | null = null;
+let prodDB: ConjurerDatabase | null = null;
 
 export const getProdDatabase = () => {
   if (prodDB) return prodDB;

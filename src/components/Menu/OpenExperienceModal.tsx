@@ -9,26 +9,27 @@ import {
   ModalHeader,
   ModalOverlay,
   Spinner,
+  Switch,
   Text,
-  VStack,
 } from "@chakra-ui/react";
 import { useStore } from "@/src/types/StoreContext";
 import { action } from "mobx";
-import { trpc } from "@/src/utils/trpc";
-import { GiSparkles } from "react-icons/gi";
+import { useState } from "react";
+import { ExperiencesTable } from "@/src/components/ExperiencesTable/ExperiencesTable";
+import { useExperiencesAndUsers } from "@/src/hooks/experiencesAndUsers";
 
 export const OpenExperienceModal = observer(function OpenExperienceModal() {
   const store = useStore();
-  const { experienceStore, uiStore, user, usingLocalData } = store;
+  const { experienceStore, uiStore, username } = store;
 
-  const {
-    isPending,
-    isError,
-    data: experiences,
-  } = trpc.experience.listExperiences.useQuery(
-    { username: user, usingLocalData },
-    { enabled: uiStore.showingOpenExperienceModal }
-  );
+  const [viewingAllExperiences, setViewingAllExperiences] = useState(false);
+  const [isLoadingNewExperience, setIsLoadingNewExperience] = useState(false);
+
+  const { isPending, isError, isRefetching, experiencesAndUsers } =
+    useExperiencesAndUsers({
+      username: viewingAllExperiences ? undefined : username,
+      enabled: uiStore.showingOpenExperienceModal,
+    });
 
   const onClose = action(() => (uiStore.showingOpenExperienceModal = false));
 
@@ -39,33 +40,40 @@ export const OpenExperienceModal = observer(function OpenExperienceModal() {
       onClose={onClose}
       isOpen={uiStore.showingOpenExperienceModal}
       isCentered
+      size="4xl"
     >
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>
-          Open experience {isPending && <Spinner ml={2} />}
+          Open experience{" "}
+          {(isPending || isRefetching || isLoadingNewExperience) && (
+            <Spinner ml={2} />
+          )}
         </ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          {!isPending && experiences.length === 0 && (
-            <Text color="gray.400">{user} has no saved experiences yet!</Text>
+          {!isPending && experiencesAndUsers.length === 0 && (
+            <Text color="gray.400">
+              {username} has no saved experiences yet!
+            </Text>
           )}
+          <Switch
+            mb={4}
+            isChecked={viewingAllExperiences}
+            onChange={(e) => setViewingAllExperiences(e.target.checked)}
+          >
+            View all experiences
+          </Switch>
           {!isPending && (
-            <VStack alignItems="center">
-              {experiences.map((experience) => (
-                <Button
-                  key={experience.name}
-                  leftIcon={<GiSparkles />}
-                  width="100%"
-                  onClick={action(() => {
-                    experienceStore.load(experience.name);
-                    onClose();
-                  })}
-                >
-                  {experience.name}
-                </Button>
-              ))}
-            </VStack>
+            <ExperiencesTable
+              experiencesAndUsers={experiencesAndUsers}
+              onLoadExperience={action(async (experience) => {
+                setIsLoadingNewExperience(true);
+                await experienceStore.load(experience.name);
+                setIsLoadingNewExperience(false);
+                onClose();
+              })}
+            />
           )}
         </ModalBody>
         <ModalFooter>

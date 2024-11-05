@@ -132,6 +132,24 @@ This is a big React app, hastily designed, that's doing a lot of expensive CPU/G
 - Careful with setTimeout chains/setInterval. Make sure there is a way to clean them up on hot reloads. useEffect is a good way to do this.
 - If the app slows down a bunch, use the browser profiler to identify where it's spending time. If it's spending time in the garbage collector/cycle collector, it's likely a memory leak issue. At the time of writing, running locally with devtools open the app should use about 1GB of memory.
 
+### Deploying
+
+We host Conjurer on Vercel. Vercel does not allow you to deploy an organization repo like `sotsf/conjurer` on their free hobby tier. So instead, we deploy `brollin/conjurer`. It is an exact copy of the `sotsf/conjurer` repo,
+
+To deploy, all you have to do is to push a new commit to the `main` branch of the `brollin/conjurer` repo. First you will need to be a collaborator on the `brollin/conjurer` repo, so just ask Ben for that.
+
+For ease, you can clone `sotsf/conjurer`. Then you can set up a new remote called `prod` to point at `brollin/conjurer`:
+
+```
+git remote add prod ssh://git@github.com/brollin/conjurer.git
+```
+
+And then to deploy would just look like:
+
+```
+git remote add prod ssh://git@github.com/brollin/conjurer.git
+```
+
 ## Todos
 
 To dos are captured as issues. Feel free to poke around the open issues, ask questions, and open a PR if you feel so inclined.

@@ -2,12 +2,11 @@ import { Block } from "@/src/types/Block";
 import { binarySearchForBlockAtTime } from "@/src/utils/algorithm";
 import { DEFAULT_BLOCK_DURATION } from "@/src/utils/time";
 import { makeAutoObservable } from "mobx";
-import { Opacity } from "@/src/patterns/Opacity";
-import { ExtraParams, PatternParam } from "@/src/types/PatternParams";
 import { generateId } from "@/src/utils/id";
+import { Context } from "@/src/types/context";
 
 type RootStore = {
-  context: string;
+  context: Context;
   audioStore: {
     getPeakAtTime: (time: number) => number;
     globalTime: number;

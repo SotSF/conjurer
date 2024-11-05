@@ -15,9 +15,10 @@ import { setupVoiceCommandWebsocket } from "@/src/websocket/voiceCommandWebsocke
 import {
   EXPERIENCE_VERSION,
   ExperienceStatus,
-  SerialExperience,
+  Experience,
 } from "@/src/types/Experience";
 import { NO_SONG } from "@/src/types/Song";
+import { Context, Role } from "@/src/types/context";
 
 // Enforce MobX strict mode, which can make many noisy console warnings, but can help use learn MobX better.
 // Feel free to comment out the following if you want to silence the console messages.
@@ -105,23 +106,37 @@ export class Store {
     return variationSelections.length === 1 ? variationSelections[0] : null;
   }
 
-  private _user = "";
-  get user(): string {
-    return this._user;
+  private _role: Role = "emcee";
+  get role(): string {
+    return this._role;
   }
-  set user(value: string) {
-    this._user = value;
-    if (this.context === "default") localStorage.setItem("user", value);
+  set role(value: Role) {
+    this._role = value;
+    localStorage.setItem("role", value);
+  }
+  get roleText(): string {
+    return this._role === "emcee" ? "Emcee" : "Experience Creator";
   }
 
-  private _experienceName = "untitled";
+  private _username = "";
+  get username(): string {
+    return this._username;
+  }
+  set username(value: string) {
+    this._username = value;
+    localStorage.setItem("username", value);
+  }
+
+  private _experienceName = "";
   get experienceName(): string {
     return this._experienceName;
   }
   set experienceName(value: string) {
     this._experienceName = value;
-    if (this.context === "default")
+    if (this.context === "experienceEditor") {
       localStorage.setItem("experienceName", value);
+      window.history.pushState({}, "", `/experience/${value}`);
+    }
   }
 
   hasSaved = false;
@@ -134,27 +149,25 @@ export class Store {
     return this.audioStore.audioState !== "paused";
   }
 
-  constructor(
-    readonly context: "playground" | "controller" | "viewer" | "default"
-  ) {
+  constructor(readonly context: Context) {
     makeAutoObservable(this);
 
     this.initializeServerSide();
   }
 
   initializeServerSide = () => {
+    // TODO: can move all of these into the field initialization code in their respective stores
     if (this.context === "playground") {
       this.uiStore.patternDrawerOpen = true;
     } else if (this.context === "controller") {
       this.uiStore.displayMode = "none";
     } else if (this.context === "viewer") {
-      this.playlistStore.autoplay = true;
       this.uiStore.showingViewerInstructionsModal = true;
       this.uiStore.pixelsPerSecond = MIN_PIXELS_PER_SECOND;
     }
   };
 
-  initializeClientSide = () => {
+  initializeClientSide = (initialExperienceName?: string) => {
     if (this.initializedClientSide) return;
     this.initializedClientSide = true;
 
@@ -178,15 +191,20 @@ export class Store {
       this.embeddedViewer =
         new URLSearchParams(window.location.search).get("embedded") === "true";
       this.experienceStore.loadFromParams() ||
-        this.experienceStore.load(this.playlistStore.experienceNames[0]);
+        this.experienceStore.loadEmptyExperience();
       this.uiStore.initialize(this.embeddedViewer);
       if (this.embeddedViewer) this.play();
       return;
     }
 
+    // check for a role in local storage
+    const role = localStorage.getItem("role");
+    if (role) this._role = role as Role;
+    if (this.context === "playlistEditor") this._role = "emcee";
+
     // check for a username in local storage
-    const username = localStorage.getItem("user");
-    if (username) this._user = username;
+    const username = localStorage.getItem("username");
+    if (username) this._username = username;
 
     // check for a global intensity in local storage
     const globalIntensity = localStorage.getItem("globalIntensity");
@@ -197,10 +215,10 @@ export class Store {
     if (usingLocalData && process.env.NEXT_PUBLIC_NODE_ENV !== "production")
       this._usingLocalData = usingLocalData === "true";
 
-    // check for an experience name in local storage
-    const experienceName = localStorage.getItem("experienceName");
-    if (experienceName) this.experienceStore.load(experienceName);
-    else this.experienceStore.loadEmptyExperience();
+    // load experience from path parameter if provided (e.g. /experience/my-experience)
+    if (initialExperienceName) this.experienceStore.load(initialExperienceName);
+    else if (this.context !== "playlistEditor")
+      this.experienceStore.loadEmptyExperience();
 
     this.uiStore.initialize();
   };
@@ -495,7 +513,7 @@ export class Store {
     }
   };
 
-  serialize = (): SerialExperience => ({
+  serialize = (): Experience => ({
     id: this.experienceId,
     name: this.experienceName,
     song: this.audioStore.selectedSong,
@@ -504,7 +522,7 @@ export class Store {
     data: { layers: this.layers.map((l) => l.serialize()) },
   });
 
-  deserialize = (experience: SerialExperience) => {
+  deserialize = (experience: Experience) => {
     this.experienceId = experience.id;
     this.experienceName = experience.name;
     this.audioStore.selectedSong = experience.song || NO_SONG;

@@ -20,9 +20,9 @@ import { action } from "mobx";
 import { observer } from "mobx-react-lite";
 import { trpc } from "@/src/utils/trpc";
 
-export const LoginModal = observer(function LoginModal() {
+export const LoginButton = observer(function LoginButton() {
   const store = useStore();
-  const { experienceStore, uiStore, user, usingLocalData } = store;
+  const { experienceStore, uiStore, usingLocalData } = store;
 
   const [newUser, setNewUser] = useState("");
 
@@ -52,7 +52,7 @@ export const LoginModal = observer(function LoginModal() {
         leftIcon={<FaUser />}
         size="xs"
       >
-        {user || "Log in"}
+        {store.username || "Log in"}
       </Button>
 
       <Modal
@@ -70,16 +70,18 @@ export const LoginModal = observer(function LoginModal() {
             <VStack alignItems="center">
               {!isPending &&
                 users
-                  .filter(({ username }) => username !== user)
+                  .filter((user) => user.username !== store.username)
                   .map((user) => (
                     <Button
                       key={user.id}
                       leftIcon={<FaUser />}
                       width="100%"
                       onClick={action(() => {
-                        store.user = user.username;
-                        experienceStore.loadEmptyExperience();
-                        store.uiStore.showingOpenExperienceModal = true;
+                        store.username = user.username;
+                        if (store.context === "experienceEditor") {
+                          experienceStore.loadEmptyExperience();
+                          uiStore.showingOpenExperienceModal = true;
+                        }
                         onClose();
                       })}
                     >
@@ -103,7 +105,7 @@ export const LoginModal = observer(function LoginModal() {
                     usingLocalData,
                     username: newUser,
                   });
-                  store.user = newUser;
+                  store.username = newUser;
                   experienceStore.loadEmptyExperience();
                   onClose();
                 })}

@@ -7,14 +7,9 @@ import {
 import { makeAutoObservable } from "mobx";
 import type WaveSurfer from "wavesurfer.js";
 import type TimelinePlugin from "wavesurfer.js/dist/plugins/timeline";
-import type RegionsPlugin from "wavesurfer.js/dist/plugins/regions";
 import type MinimapPlugin from "wavesurfer.js/dist/plugins/minimap";
-import type { RegionParams } from "wavesurfer.js/dist/plugins/regions";
 import { filterData } from "@/src/types/audioPeaks";
-import { AudioRegion } from "@/src/types/AudioRegion";
 import { NO_SONG, Song } from "@/src/types/Song";
-
-export const loopRegionColor = "rgba(237, 137, 54, 0.4)";
 
 export const PEAK_DATA_SAMPLE_RATE = 60;
 
@@ -30,17 +25,9 @@ export class AudioStore {
 
   wavesurfer: WaveSurfer | null = null;
   timelinePlugin: TimelinePlugin | null = null;
-  regionsPlugin: RegionsPlugin | null = null;
   minimapPlugin: MinimapPlugin | null = null;
 
-  initialRegions: AudioRegion[] = [];
-
   peaks: number[] = [];
-
-  markingAudio = false;
-
-  loopingAudio = false;
-  loopRegion: RegionParams | null = null;
 
   audioState: "paused" | "starting" | "playing" = "paused";
 
@@ -49,7 +36,6 @@ export class AudioStore {
   constructor(readonly rootStore: RootStore) {
     makeAutoObservable(this, {
       timelinePlugin: false,
-      regionsPlugin: false,
       minimapPlugin: false,
       peaks: false,
       getPeakAtTime: false,
@@ -81,33 +67,6 @@ export class AudioStore {
 
   toggleAudioMuted = () => {
     this.audioMuted = !this.audioMuted;
-  };
-
-  toggleMarkingAudio = () => {
-    this.markingAudio = !this.markingAudio;
-
-    this.regionsPlugin
-      ?.getRegions()
-      .forEach(
-        (region) =>
-          region.content &&
-          region.setOptions({ start: region.start, drag: this.markingAudio })
-      );
-  };
-
-  toggleLoopingAudio = () => {
-    this.loopingAudio = !this.loopingAudio;
-  };
-
-  loopAudio = (start: number, end: number) => {
-    this.loopingAudio = true;
-    this.loopRegion = {
-      id: "block",
-      start,
-      end,
-      color: loopRegionColor,
-    };
-    this.regionsPlugin?.addRegion(this.loopRegion);
   };
 
   getSelectedSongUrl = () =>
@@ -146,10 +105,6 @@ export class AudioStore {
   // called by wavesurfer, which defaults to 60fps
   onTick = (time: number) => {
     this.globalTime = time;
-
-    if (!this.loopingAudio || !this.loopRegion || !this.loopRegion.end) return;
-    if (time > this.loopRegion.end)
-      this.setTimeWithCursor(this.loopRegion.start);
   };
 
   private _lastCursor = { position: 0 };
@@ -170,18 +125,4 @@ export class AudioStore {
     // instantiate a new object here to trigger Mobx reactions
     this._lastCursor = { position: time < 0 ? 0 : time };
   }
-
-  // TODO: reimplement audio regions
-  // serialize = () => ({
-  //   selectedSong: this.selectedSong,
-  //   // audioRegions: this.regionsPlugin
-  //   //   ?.getRegions()
-  //   //   .map((region) => new AudioRegion(region).serialize()),
-  // });
-
-  // deserialize = (data: any) => {
-  //   this.selectedSong = data.selectedSong;
-  //   // this.initialRegions =
-  //   //   data.audioRegions?.map((region: any) => new AudioRegion(region)) ?? [];
-  // };
 }

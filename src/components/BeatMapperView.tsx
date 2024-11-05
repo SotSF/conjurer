@@ -19,8 +19,8 @@ import { useStore } from "@/src/types/StoreContext";
 import { Fragment, useEffect, useRef, useState } from "react";
 import { WavesurferWaveform } from "@/src/components/Wavesurfer/WavesurferWaveform";
 import { MAX_TIME } from "@/src/utils/time";
-import { TimerReadout } from "@/src/components/TimerReadout";
-import { TimerControls } from "@/src/components/TimerControls";
+import { TimerReadout } from "@/src/components/Timeline/TimerReadout";
+import { TimerControls } from "@/src/components/Timeline/TimerControls";
 import { useWheelZooming } from "@/src/hooks/wheelZooming";
 import {
   countIntervalsBetweenNearbyPeaks,

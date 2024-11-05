@@ -1,17 +1,16 @@
 import { makeAutoObservable, runInAction } from "mobx";
 import { trpcClient } from "@/src/utils/trpc";
-import { SerialExperience, EXPERIENCE_VERSION } from "@/src/types/Experience";
+import { Experience, EXPERIENCE_VERSION } from "@/src/types/Experience";
 import { NO_SONG } from "@/src/types/Song";
 
 // Define a new RootStore interface here so that we avoid circular dependencies
 interface RootStore {
-  user: string;
   experienceName: string;
   hasSaved: boolean;
   experienceLastSavedAt: number;
   usingLocalData: boolean;
-  serialize: () => SerialExperience;
-  deserialize: (data: SerialExperience) => void;
+  serialize: () => Experience;
+  deserialize: (data: Experience) => void;
 }
 
 export class ExperienceStore {
@@ -19,21 +18,30 @@ export class ExperienceStore {
     makeAutoObservable(this);
   }
 
-  load = async (experienceName: string) => {
-    const experience = await trpcClient.experience.getExperience.query({
-      experienceName,
-      usingLocalData: this.rootStore.usingLocalData,
-    });
-    if (!experience) {
-      this.loadEmptyExperience();
-      return;
-    }
-
+  loadExperience = (experience: Experience) => {
     this.rootStore.deserialize(experience);
     runInAction(() => {
       this.rootStore.hasSaved = false;
       this.rootStore.experienceLastSavedAt = Date.now();
     });
+  };
+
+  load = async (experienceName: string) => {
+    const experience = await trpcClient.experience.getExperience.query({
+      experienceName,
+      usingLocalData: this.rootStore.usingLocalData,
+    });
+    if (!experience) this.loadEmptyExperience();
+    else this.loadExperience(experience);
+  };
+
+  loadById = async (experienceId: number) => {
+    const experience = await trpcClient.experience.getExperienceById.query({
+      experienceId,
+      usingLocalData: this.rootStore.usingLocalData,
+    });
+    if (!experience) this.loadEmptyExperience();
+    else this.loadExperience(experience);
   };
 
   loadEmptyExperience = () => {

@@ -8,14 +8,14 @@ import {
   OnDragEndResponder,
 } from "@hello-pangea/dnd";
 import { Fragment } from "react";
-import { reorder } from "@/src/utils/algorithm";
+import { reorder } from "@/src/utils/array";
 import { Block } from "@/src/types/Block";
 import { action } from "mobx";
-import { VariationBound } from "@/src/components/VariationBound";
-import { NewVariationButtons } from "@/src/components/NewVariationButtons";
+import { VariationBound } from "@/src/components/ParameterVariations/VariationBound";
+import { NewVariationButtons } from "@/src/components/ParameterVariations/NewVariationButtons";
 import { observer } from "mobx-react-lite";
 import { useStore } from "@/src/types/StoreContext";
-import { VariationHandle } from "@/src/components/VariationHandle";
+import { VariationHandle } from "@/src/components/ParameterVariations/VariationHandle";
 
 type ParameterVariationsProps = {
   uniformName: string;

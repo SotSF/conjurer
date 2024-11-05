@@ -58,7 +58,7 @@ export const LoadBeatMapModal = observer(function LoadBeatMapModal() {
             <>
               {beatMaps.length === 0 && (
                 <Text color="gray.400">
-                  {store.user} has no saved experiences yet!
+                  {store.username} has no saved experiences yet!
                 </Text>
               )}
               <VStack align="flex-start" spacing={0}>

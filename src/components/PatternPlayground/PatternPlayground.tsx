@@ -135,8 +135,10 @@ export const PatternPlayground = observer(function PatternPlayground() {
         <HStack my={2} pr={1} justify="center">
           <DisplayModeButtons />
           {/* <RecordCanvasControls /> */}
-          {["playground", "default"].includes(context) && <SendDataButton />}
-          {context === "default" && (
+          {["playground", "experienceEditor"].includes(context) && (
+            <SendDataButton />
+          )}
+          {context === "experienceEditor" && (
             <Button
               size="sm"
               colorScheme="teal"
