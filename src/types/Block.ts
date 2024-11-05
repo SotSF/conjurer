@@ -236,7 +236,7 @@ export class Block<T extends ExtraParams = {}> {
     if (index > -1) variations.splice(index, 0, variation.clone());
   };
 
-  // Note: not berry performant due to looping through variations
+  // Note: not very performant due to looping through variations
   getVariationGlobalEndTime = (uniformName: string, variation: Variation) => {
     const variations = this.parameterVariations[uniformName];
     if (!variations) return this.startTime;

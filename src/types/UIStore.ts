@@ -2,7 +2,6 @@ import { AudioStore } from "@/src/types/AudioStore";
 import { Context } from "@/src/types/context";
 import { INITIAL_PIXELS_PER_SECOND } from "@/src/utils/time";
 import { makeAutoObservable } from "mobx";
-import { RegionParams } from "wavesurfer.js/dist/plugins/regions";
 
 export const MAX_PIXELS_PER_SECOND = 160;
 export const MIN_PIXELS_PER_SECOND = 4;
@@ -49,8 +48,6 @@ export class UIStore {
     this._renderTargetSize = size;
     this.saveToLocalStorage();
   }
-
-  markerToEdit: Partial<RegionParams> = {};
 
   keepingPlayHeadCentered = false;
   keepingPlayHeadVisible = false;

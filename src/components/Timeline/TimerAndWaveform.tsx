@@ -1,10 +1,9 @@
 import { observer } from "mobx-react-lite";
-import { Box, HStack, VStack } from "@chakra-ui/react";
+import { HStack, VStack } from "@chakra-ui/react";
 import { useStore } from "@/src/types/StoreContext";
 import { WavesurferWaveform } from "@/src/components/Wavesurfer/WavesurferWaveform";
 import { MAX_TIME } from "@/src/utils/time";
 import { TimerReadout } from "@/src/components/Timeline/TimerReadout";
-import { MarkerEditorModal } from "@/src/components/Timeline/MarkerEditorModal";
 import { TimerControls } from "@/src/components/Timeline/TimerControls";
 
 export const TimerAndWaveform = observer(function TimerAndWaveform() {
@@ -42,7 +41,6 @@ export const TimerAndWaveform = observer(function TimerAndWaveform() {
       </VStack>
 
       <WavesurferWaveform />
-      <MarkerEditorModal key={uiStore.markerToEdit.id} />
     </HStack>
   );
 });
