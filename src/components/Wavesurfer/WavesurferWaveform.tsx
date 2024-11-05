@@ -43,14 +43,12 @@ const DEFAULT_WAVESURFER_OPTIONS: Partial<WaveSurferOptions> = {
 };
 
 const DEFAULT_TIMELINE_OPTIONS: TimelinePluginOptions = {
-  height: 60,
   insertPosition: "beforebegin",
   timeInterval: 0.25,
-  primaryLabelInterval: 5,
-  secondaryLabelInterval: 1,
   style: {
     fontSize: "14px",
     color: "#000000",
+    zIndex: "100",
   },
 };
 
@@ -103,18 +101,12 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
 
   const cloneCanvas = useCloneCanvas(clonedWaveformRef);
 
-  const timelinePluginOptions = useMemo(
-    () => ({
-      ...DEFAULT_TIMELINE_OPTIONS,
-      ...(store.context === "viewer"
-        ? {
-            primaryLabelInterval: 15,
-            secondaryLabelInterval: 0,
-          }
-        : {}),
-    }),
-    [store.context]
-  );
+  const timelinePluginOptions = {
+    ...DEFAULT_TIMELINE_OPTIONS,
+    height: uiStore.canTimelineZoom ? 60 : 80,
+    primaryLabelInterval: uiStore.canTimelineZoom ? 5 : 30,
+    secondaryLabelInterval: uiStore.canTimelineZoom ? 1 : 0,
+  };
 
   // initialize wavesurfer
   useEffect(() => {
