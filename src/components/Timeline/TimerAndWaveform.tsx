@@ -36,8 +36,8 @@ export const TimerAndWaveform = observer(function TimerAndWaveform() {
         zIndex={18}
         bgColor="gray.500"
       >
-        <TimerControls />
         {!embeddedViewer && <TimerReadout />}
+        <TimerControls />
       </VStack>
 
       <WavesurferWaveform />

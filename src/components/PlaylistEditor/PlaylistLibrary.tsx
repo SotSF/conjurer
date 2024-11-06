@@ -64,7 +64,7 @@ export const PlaylistLibrary = observer(function PlaylistLibrary() {
                 username,
                 usingLocalData,
                 name: "New Playlist",
-                description: "New Playlist",
+                description: "",
                 orderedExperienceIds: [],
               });
               runInAction(() => {

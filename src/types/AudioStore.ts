@@ -91,16 +91,21 @@ export class AudioStore {
 
   setTimeWithCursor = (time: number) => {
     if (!this.wavesurfer) return;
-    this.lastCursorPosition = time;
-    this.globalTime = time;
+
+    const validTime = Math.max(0, time);
+    this.lastCursorPosition = validTime;
+    this.globalTime = validTime;
 
     const duration = this.wavesurfer.getDuration();
-    if (this.wavesurfer.getCurrentTime() === time || duration === 0) return;
-    this.wavesurfer.seekTo(time / duration);
+    if (this.wavesurfer.getCurrentTime() === validTime || duration === 0)
+      return;
+    this.wavesurfer.seekTo(validTime / duration);
   };
 
   skipForward = () => this.setTimeWithCursor(this.globalTime + 0.01);
   skipBackward = () => this.setTimeWithCursor(this.globalTime - 0.01);
+
+  skip = (delta: number) => this.setTimeWithCursor(this.globalTime + delta);
 
   // called by wavesurfer, which defaults to 60fps
   onTick = (time: number) => {

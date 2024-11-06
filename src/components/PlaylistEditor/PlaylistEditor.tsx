@@ -16,7 +16,7 @@ import { useStore } from "@/src/types/StoreContext";
 import { observer } from "mobx-react-lite";
 import { PlaylistItem } from "@/src/components/PlaylistEditor/PlaylistItem";
 import { MdOutlinePlaylistAdd } from "react-icons/md";
-import { action } from "mobx";
+import { action, runInAction } from "mobx";
 import { AddExperienceModal } from "@/src/components/PlaylistEditor/AddExperienceModal";
 import { BiShuffle } from "react-icons/bi";
 import { ImLoop } from "react-icons/im";
@@ -45,6 +45,13 @@ export const PlaylistEditor = observer(function PlaylistEditor() {
       staleTime: 1000 * 60 * 10,
     }
   );
+
+  useEffect(() => {
+    runInAction(() => {
+      // this is very hacky and I hate it but it works
+      if (data?.playlist) playlistStore.selectedPlaylist = data.playlist;
+    });
+  }, [data?.playlist]);
 
   useEffect(() => {
     if (!data?.experiencesAndUsers.length || store.experienceName) return;

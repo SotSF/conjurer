@@ -18,12 +18,14 @@ import { Experience } from "@/src/types/Experience";
 export const ExperiencesTable = observer(function ExperiencesTable({
   experiencesAndUsers,
   onLoadExperience,
+  omitIds,
   selectable,
   selectedExperiences,
   setSelectedExperiences,
 }: {
   experiencesAndUsers: { user: { username: string }; experience: Experience }[];
   onLoadExperience: (experience: Experience) => void;
+  omitIds?: number[];
   // TODO: implement selectable experiences in the table
   selectable?: boolean;
   selectedExperiences?: string[];
@@ -44,51 +46,53 @@ export const ExperiencesTable = observer(function ExperiencesTable({
           </Tr>
         </Thead>
         <Tbody>
-          {experiencesAndUsers.map(({ user, experience }) => (
-            <Tr key={experience.id}>
-              <Td>
-                <Button
-                  ml={-3}
-                  size="md"
-                  height={8}
-                  variant="solid"
-                  onClick={() => onLoadExperience(experience)}
-                >
-                  {experience.name}
-                </Button>
-              </Td>
-              <Td>{user.username}</Td>
-              <Td>
-                {experience.song?.artist} - {experience.song?.name}
-              </Td>
-              <Td>
-                {user.username === username && (
-                  <IconButton
-                    variant="ghost"
-                    size="sm"
-                    aria-label="Delete experience"
-                    title="Delete experience"
-                    icon={<FaTrashAlt size={14} />}
-                    disabled={true}
-                    onClick={action(() => {
-                      if (
-                        !confirm(
-                          "Are you sure you want to delete this experience? This will permanently cast the experience into the fires of Mount Doom. (jk doesn't work yet)"
+          {experiencesAndUsers
+            .filter(({ experience }) => !omitIds?.includes(experience.id!))
+            .map(({ user, experience }) => (
+              <Tr key={experience.id}>
+                <Td>
+                  <Button
+                    ml={-3}
+                    size="md"
+                    height={8}
+                    variant="solid"
+                    onClick={() => onLoadExperience(experience)}
+                  >
+                    {experience.name}
+                  </Button>
+                </Td>
+                <Td>{user.username}</Td>
+                <Td>
+                  {experience.song?.artist} - {experience.song?.name}
+                </Td>
+                <Td>
+                  {user.username === username && (
+                    <IconButton
+                      variant="ghost"
+                      size="sm"
+                      aria-label="Delete experience"
+                      title="Delete experience"
+                      icon={<FaTrashAlt size={14} />}
+                      disabled={true}
+                      onClick={action(() => {
+                        if (
+                          !confirm(
+                            "Are you sure you want to delete this experience? This will permanently cast the experience into the fires of Mount Doom. (jk doesn't work yet)"
+                          )
                         )
-                      )
-                        return;
+                          return;
 
-                      // TODO:
-                      // trpc.experience.deleteExperience.mutate({
-                      //   name: experience.name,
-                      //   usingLocalData,
-                      // });
-                    })}
-                  />
-                )}
-              </Td>
-            </Tr>
-          ))}
+                        // TODO:
+                        // trpc.experience.deleteExperience.mutate({
+                        //   name: experience.name,
+                        //   usingLocalData,
+                        // });
+                      })}
+                    />
+                  )}
+                </Td>
+              </Tr>
+            ))}
         </Tbody>
       </Table>
     </TableContainer>

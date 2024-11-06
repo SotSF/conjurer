@@ -40,11 +40,11 @@ const DEFAULT_WAVESURFER_OPTIONS: Partial<WaveSurferOptions> = {
   autoScroll: false,
   autoCenter: false,
   interact: true,
+  dragToSeek: { debounceTime: 50 },
 };
 
 const DEFAULT_TIMELINE_OPTIONS: TimelinePluginOptions = {
   insertPosition: "beforebegin",
-  timeInterval: 0.25,
   style: {
     fontSize: "14px",
     color: "#000000",
@@ -106,6 +106,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
     height: uiStore.canTimelineZoom ? 60 : 80,
     primaryLabelInterval: uiStore.canTimelineZoom ? 5 : 30,
     secondaryLabelInterval: uiStore.canTimelineZoom ? 1 : 0,
+    timeInterval: uiStore.canTimelineZoom ? 0.25 : 5,
   };
 
   // initialize wavesurfer

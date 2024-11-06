@@ -8,3 +8,7 @@ export const reorder: <T>(
   result.splice(endIndex, 0, removed);
   return result;
 };
+
+export const areEqual: <T>(a: T[], b: T[]) => boolean = (a, b) => {
+  return JSON.stringify(a) === JSON.stringify(b);
+};
