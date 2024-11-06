@@ -48,7 +48,8 @@ export const PlaylistEditor = observer(function PlaylistEditor() {
 
   useEffect(() => {
     runInAction(() => {
-      playlistStore.selectedPlaylist = data?.playlist ?? null;
+      // this is very hacky and I hate it but it works
+      if (data?.playlist) playlistStore.selectedPlaylist = data.playlist;
     });
   }, [data?.playlist]);
 
