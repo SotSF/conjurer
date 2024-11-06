@@ -79,6 +79,7 @@ export const AddExperienceModal = observer(function AddExperienceModal({
                 });
                 onClose();
               })}
+              omitIds={playlist.orderedExperienceIds}
             />
           )}
         </ModalBody>
