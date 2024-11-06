@@ -4,6 +4,7 @@ import { AudioStore } from "@/src/types/AudioStore";
 import { Context } from "@/src/types/context";
 import { Playlist } from "@/src/types/Playlist";
 import { MAX_TIME } from "@/src/utils/time";
+import { areEqual } from "@/src/utils/array";
 
 // Define a new RootStore interface here so that we avoid circular dependencies
 interface RootStore {
@@ -16,14 +17,38 @@ interface RootStore {
 
 export class PlaylistStore {
   autoplay = ["playlistEditor", "viewer"].includes(this.rootStore.context);
-  // TODO: implement
   shufflingPlaylist = false;
   loopingPlaylist = false;
 
   selectedPlaylist: Playlist | null = null;
 
-  get playlistExperienceIds() {
-    return this.selectedPlaylist?.orderedExperienceIds;
+  _cachedPlaylistOrderedExperienceIds: number[] = [];
+  _cachedExperienceIdPlayOrder: number[] = [];
+  get experienceIdPlayOrder() {
+    if (!this.selectedPlaylist) return [];
+    if (!this.shufflingPlaylist)
+      return this.selectedPlaylist?.orderedExperienceIds;
+
+    // check if the current playlist order is the same as the cached order
+    if (
+      areEqual(
+        this.selectedPlaylist.orderedExperienceIds,
+        this._cachedPlaylistOrderedExperienceIds
+      )
+    ) {
+      return this._cachedExperienceIdPlayOrder;
+    }
+
+    // current playlist order and cached order are different, so update the cache
+    this._cachedPlaylistOrderedExperienceIds =
+      this.selectedPlaylist.orderedExperienceIds.slice();
+    this._cachedExperienceIdPlayOrder =
+      this.selectedPlaylist.orderedExperienceIds.slice();
+
+    console.log("shuffling");
+    // shuffle the play order
+    this._cachedExperienceIdPlayOrder.sort(() => Math.random() - 0.5);
+    return this._cachedExperienceIdPlayOrder;
   }
 
   constructor(
@@ -31,7 +56,10 @@ export class PlaylistStore {
     readonly audioStore: AudioStore,
     readonly experienceStore: ExperienceStore
   ) {
-    makeAutoObservable(this);
+    makeAutoObservable(this, {
+      _cachedPlaylistOrderedExperienceIds: false,
+      _cachedExperienceIdPlayOrder: false,
+    });
   }
 
   loadAndPlayExperience = async (experienceId: number) => {
@@ -84,22 +112,22 @@ export class PlaylistStore {
 
   // e.g. if delta is -1, get the experience ID of the previous experience
   getDeltaExperienceId = (delta: number) => {
-    if (!this.playlistExperienceIds?.length) return null;
+    if (!this.experienceIdPlayOrder?.length) return null;
 
     let desiredIndex;
     if (!this.rootStore.experienceId) desiredIndex = 0;
     else {
-      const currentIndex = this.playlistExperienceIds.indexOf(
+      const currentIndex = this.experienceIdPlayOrder.indexOf(
         this.rootStore.experienceId
       );
       desiredIndex = currentIndex + delta;
 
       if (desiredIndex < 0)
-        desiredIndex = this.playlistExperienceIds.length - 1;
-      if (desiredIndex > this.playlistExperienceIds.length - 1)
+        desiredIndex = this.experienceIdPlayOrder.length - 1;
+      if (desiredIndex > this.experienceIdPlayOrder.length - 1)
         desiredIndex = 0;
     }
 
-    return this.playlistExperienceIds[desiredIndex];
+    return this.experienceIdPlayOrder[desiredIndex];
   };
 }
