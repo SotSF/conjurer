@@ -3,6 +3,7 @@ import { ExperienceStore } from "@/src/types/ExperienceStore";
 import { AudioStore } from "@/src/types/AudioStore";
 import { Context } from "@/src/types/context";
 import { Playlist } from "@/src/types/Playlist";
+import { MAX_TIME } from "@/src/utils/time";
 
 // Define a new RootStore interface here so that we avoid circular dependencies
 interface RootStore {
@@ -20,6 +21,10 @@ export class PlaylistStore {
   loopingPlaylist = false;
 
   selectedPlaylist: Playlist | null = null;
+
+  get playlistExperienceIds() {
+    return this.selectedPlaylist?.orderedExperienceIds;
+  }
 
   constructor(
     readonly rootStore: RootStore,
@@ -51,29 +56,50 @@ export class PlaylistStore {
       });
     });
 
-  playNextExperience = async () => {
-    if (!this.selectedPlaylist?.orderedExperienceIds.length) return;
-
-    if (!this.rootStore.experienceId) {
-      await this.loadAndPlayExperience(
-        this.selectedPlaylist.orderedExperienceIds[0]
-      );
+  playPreviousExperience = async () => {
+    if (this.rootStore.context === "experienceEditor") {
+      this.audioStore.setTimeWithCursor(0);
       return;
     }
 
-    const currentIndex = this.selectedPlaylist?.orderedExperienceIds.indexOf(
-      this.rootStore.experienceId
-    );
-    let nextIndex = currentIndex + 1;
+    const previousExperienceId = this.getDeltaExperienceId(-1);
+    if (previousExperienceId === null) return;
 
-    if (currentIndex < 0) return;
-    if (nextIndex > this.selectedPlaylist.orderedExperienceIds.length - 1) {
-      if (this.loopingPlaylist) nextIndex = 0;
-      else return;
+    this.rootStore.pause();
+    await this.loadAndPlayExperience(previousExperienceId);
+  };
+
+  playNextExperience = async () => {
+    if (this.rootStore.context === "experienceEditor") {
+      this.audioStore.setTimeWithCursor(MAX_TIME);
+      return;
     }
 
-    await this.loadAndPlayExperience(
-      this.selectedPlaylist.orderedExperienceIds[nextIndex]
-    );
+    const nextExperienceId = this.getDeltaExperienceId(1);
+    if (nextExperienceId === null) return;
+
+    this.rootStore.pause();
+    await this.loadAndPlayExperience(nextExperienceId);
+  };
+
+  // e.g. if delta is -1, get the experience ID of the previous experience
+  getDeltaExperienceId = (delta: number) => {
+    if (!this.playlistExperienceIds?.length) return null;
+
+    let desiredIndex;
+    if (!this.rootStore.experienceId) desiredIndex = 0;
+    else {
+      const currentIndex = this.playlistExperienceIds.indexOf(
+        this.rootStore.experienceId
+      );
+      desiredIndex = currentIndex + delta;
+
+      if (desiredIndex < 0)
+        desiredIndex = this.playlistExperienceIds.length - 1;
+      if (desiredIndex > this.playlistExperienceIds.length - 1)
+        desiredIndex = 0;
+    }
+
+    return this.playlistExperienceIds[desiredIndex];
   };
 }
