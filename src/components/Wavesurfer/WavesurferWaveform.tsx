@@ -40,6 +40,7 @@ const DEFAULT_WAVESURFER_OPTIONS: Partial<WaveSurferOptions> = {
   autoScroll: false,
   autoCenter: false,
   interact: true,
+  dragToSeek: { debounceTime: 50 },
 };
 
 const DEFAULT_TIMELINE_OPTIONS: TimelinePluginOptions = {
