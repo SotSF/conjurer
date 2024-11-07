@@ -1,4 +1,4 @@
-import { Button, HStack, Text, VStack } from "@chakra-ui/react";
+import { Button, HStack, Spinner, Text, VStack } from "@chakra-ui/react";
 import { useStore } from "@/src/types/StoreContext";
 import { observer } from "mobx-react-lite";
 import { FaPlus } from "react-icons/fa";
@@ -36,7 +36,7 @@ export const PlaylistLibrary = observer(function PlaylistLibrary() {
     });
   }, [playlists]);
 
-  if (isPending || isError) return null;
+  if (isError) return null;
 
   return (
     <VStack
@@ -81,9 +81,13 @@ export const PlaylistLibrary = observer(function PlaylistLibrary() {
       <VStack width="100%" height={1}></VStack>
 
       <VStack width="100%" spacing={0}>
-        {playlists.map((playlist) => (
-          <SelectablePlaylist key={playlist.id} playlist={playlist} />
-        ))}
+        {isPending ? (
+          <Spinner />
+        ) : (
+          playlists.map((playlist) => (
+            <SelectablePlaylist key={playlist.id} playlist={playlist} />
+          ))
+        )}
       </VStack>
     </VStack>
   );

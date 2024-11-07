@@ -190,40 +190,35 @@ export const PlaylistItem = observer(function PlaylistItem({
 
       <Td px={0}>
         <HStack height={10} alignItems="center" spacing={0}>
-          {store.username === user.username && (
-            <>
-              <IconButton
-                variant="link"
-                aria-label="Edit experience"
-                title="Edit experience"
-                height={6}
-                _hover={{ color: "orange.500" }}
-                icon={<FaPencilAlt size={10} />}
-                onClick={action(() =>
-                  router.push(`/experience/${experience.name}`)
-                )}
-              />
-            </>
-          )}
+          <IconButton
+            variant="link"
+            aria-label="Edit experience"
+            title="Edit experience"
+            height={6}
+            _hover={{ color: "orange.500" }}
+            icon={<FaPencilAlt size={10} />}
+            onClick={action(() => {
+              store.role = "experience creator";
+              router.push(`/experience/${experience.name}`);
+            })}
+          />
           {editable && (
-            <>
-              <IconButton
-                variant="link"
-                aria-label="Remove experience from playlist"
-                title="Remove experience from playlist"
-                height={6}
-                _hover={{ color: "red.500" }}
-                icon={<ImCross size={10} />}
-                onClick={() => {
-                  savePlaylist({
-                    ...playlist,
-                    orderedExperienceIds: playlist.orderedExperienceIds.filter(
-                      (id) => id !== experience.id
-                    ),
-                  });
-                }}
-              />
-            </>
+            <IconButton
+              variant="link"
+              aria-label="Remove experience from playlist"
+              title="Remove experience from playlist"
+              height={6}
+              _hover={{ color: "red.500" }}
+              icon={<ImCross size={10} />}
+              onClick={() => {
+                savePlaylist({
+                  ...playlist,
+                  orderedExperienceIds: playlist.orderedExperienceIds.filter(
+                    (id) => id !== experience.id
+                  ),
+                });
+              }}
+            />
           )}
         </HStack>
       </Td>

@@ -157,6 +157,9 @@ export const PlaylistEditor = observer(function PlaylistEditor() {
                   <Td>
                     <Text>No experiences added yet!</Text>
                   </Td>
+                  <Td>-</Td>
+                  <Td>-</Td>
+                  <Td></Td>
                 </Tr>
               </>
             ) : (
