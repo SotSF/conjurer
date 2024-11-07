@@ -5,6 +5,7 @@ import { FaTrashAlt } from "react-icons/fa";
 import { action, runInAction } from "mobx";
 import { trpc } from "@/src/utils/trpc";
 import { Playlist } from "@/src/types/Playlist";
+import { HiSparkles } from "react-icons/hi";
 
 export const SelectablePlaylist = observer(function SelectablePlaylist({
   playlist,
@@ -43,9 +44,13 @@ export const SelectablePlaylist = observer(function SelectablePlaylist({
         alignItems="start"
         spacing={0}
       >
-        <Text fontSize="md" fontWeight="bold">
-          {playlist.name}
-        </Text>
+        <HStack spacing={1} justify="start">
+          {playlist.user.username === "conjurer" && <HiSparkles />}
+          <Text fontSize="md" fontWeight="bold">
+            {playlist.name}
+          </Text>
+        </HStack>
+
         <HStack spacing={4} justify="space-between">
           <Text fontSize="sm" color="gray.400">
             {playlist.user.username} • {playlist.orderedExperienceIds.length}{" "}

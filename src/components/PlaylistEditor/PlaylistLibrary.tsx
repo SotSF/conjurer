@@ -87,10 +87,10 @@ export const PlaylistLibrary = observer(function PlaylistLibrary() {
         )}
       </HStack>
 
-      <VStack width="100%" height={1}></VStack>
+      <VStack width="100%" height={2}></VStack>
 
       <Switch
-        mb={4}
+        my={2}
         mx={6}
         size="sm"
         isChecked={viewingAllPlaylists}
