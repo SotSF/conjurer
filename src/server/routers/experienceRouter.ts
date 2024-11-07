@@ -105,6 +105,21 @@ export const experienceRouter = router({
       const { id: songId } = song;
 
       if (id) {
+        // Check if the user has permission to save this experience
+        const userToExperience = await ctx.db.query.usersToExperiences
+          .findFirst({
+            where: eq(usersToExperiences.experienceId, id),
+          })
+          .execute();
+
+        if (userToExperience?.userId !== ctx.user.id) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message:
+              'You do not have permission to save this experience. Save a copy with "File > Save as" instead.',
+          });
+        }
+
         // If an id is provided then we are updating an existing experience
         await ctx.db
           .update(experiences)
@@ -158,7 +173,7 @@ export const experienceRouter = router({
         .execute();
     }),
 
-    getExperienceById: databaseProcedure
+  getExperienceById: databaseProcedure
     .input(
       z.object({
         experienceId: z.number(),
