@@ -1,9 +1,11 @@
 import { observer } from "mobx-react-lite";
 import {
+  Button,
   Modal,
   ModalBody,
   ModalCloseButton,
   ModalContent,
+  ModalFooter,
   ModalHeader,
   ModalOverlay,
   Spinner,
@@ -27,6 +29,9 @@ export const AddExperienceModal = observer(function AddExperienceModal({
   const { username, uiStore } = store;
 
   const [viewingAllExperiences, setViewingAllExperiences] = useState(false);
+  const [selectedExperienceIds, setSelectedExperienceIds] = useState<number[]>(
+    []
+  );
 
   const { isPending, isError, experiencesAndUsers } = useExperiencesAndUsers({
     username: viewingAllExperiences ? undefined : username,
@@ -37,9 +42,10 @@ export const AddExperienceModal = observer(function AddExperienceModal({
 
   if (isError) return null;
 
-  const onClose = action(
-    () => (uiStore.showingPlaylistAddExperienceModal = false)
-  );
+  const onClose = action(() => {
+    setSelectedExperienceIds([]);
+    uiStore.showingPlaylistAddExperienceModal = false;
+  });
 
   return (
     <Modal
@@ -69,20 +75,30 @@ export const AddExperienceModal = observer(function AddExperienceModal({
           {!isPending && (
             <ExperiencesTable
               experiencesAndUsers={experiencesAndUsers}
-              onLoadExperience={action((experience) => {
-                savePlaylist({
-                  ...playlist,
-                  orderedExperienceIds: [
-                    ...playlist.orderedExperienceIds,
-                    experience.id!,
-                  ],
-                });
-                onClose();
-              })}
               omitIds={playlist.orderedExperienceIds}
+              selectable
+              selectedExperienceIds={selectedExperienceIds}
+              setSelectedExperienceIds={setSelectedExperienceIds}
             />
           )}
         </ModalBody>
+        <ModalFooter>
+          <Button
+            isDisabled={!selectedExperienceIds.length || isPending}
+            onClick={action(() => {
+              savePlaylist({
+                ...playlist,
+                orderedExperienceIds: [
+                  ...playlist.orderedExperienceIds,
+                  ...selectedExperienceIds,
+                ],
+              });
+              onClose();
+            })}
+          >
+            {isPending ? <Spinner /> : "Add"}
+          </Button>
+        </ModalFooter>
         <ModalCloseButton />
       </ModalContent>
     </Modal>

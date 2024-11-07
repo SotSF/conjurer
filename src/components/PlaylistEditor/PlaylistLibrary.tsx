@@ -1,15 +1,24 @@
-import { Button, HStack, Text, VStack } from "@chakra-ui/react";
+import {
+  Button,
+  HStack,
+  Spinner,
+  Switch,
+  Text,
+  VStack,
+} from "@chakra-ui/react";
 import { useStore } from "@/src/types/StoreContext";
 import { observer } from "mobx-react-lite";
 import { FaPlus } from "react-icons/fa";
 import { runInAction } from "mobx";
 import { trpc } from "@/src/utils/trpc";
 import { SelectablePlaylist } from "@/src/components/PlaylistEditor/SelectablePlaylist";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export const PlaylistLibrary = observer(function PlaylistLibrary() {
   const store = useStore();
   const { username, usingLocalData, playlistStore } = store;
+
+  const [viewingAllPlaylists, setViewingAllPlaylists] = useState(false);
 
   const isEditable = !!store.username;
 
@@ -20,10 +29,11 @@ export const PlaylistLibrary = observer(function PlaylistLibrary() {
     isPending,
     isError,
     data: playlists,
-  } = trpc.playlist.listPlaylistsForUser.useQuery(
+  } = trpc.playlist.listPlaylists.useQuery(
     {
       usingLocalData,
       username,
+      allPlaylists: viewingAllPlaylists,
     },
     { staleTime: 1000 * 60 * 10 }
   );
@@ -36,7 +46,7 @@ export const PlaylistLibrary = observer(function PlaylistLibrary() {
     });
   }, [playlists]);
 
-  if (isPending || isError) return null;
+  if (isError) return null;
 
   return (
     <VStack
@@ -70,7 +80,7 @@ export const PlaylistLibrary = observer(function PlaylistLibrary() {
               runInAction(() => {
                 playlistStore.selectedPlaylist = newPlaylist;
               });
-              utils.playlist.listPlaylistsForUser.invalidate();
+              utils.playlist.listPlaylists.invalidate();
             }}
           >
             Playlist
@@ -78,12 +88,25 @@ export const PlaylistLibrary = observer(function PlaylistLibrary() {
         )}
       </HStack>
 
-      <VStack width="100%" height={1}></VStack>
+      <VStack width="100%" height={2}></VStack>
 
+      <Switch
+        my={2}
+        mx={6}
+        size="sm"
+        isChecked={viewingAllPlaylists}
+        onChange={(e) => setViewingAllPlaylists(e.target.checked)}
+      >
+        All playlists
+      </Switch>
       <VStack width="100%" spacing={0}>
-        {playlists.map((playlist) => (
-          <SelectablePlaylist key={playlist.id} playlist={playlist} />
-        ))}
+        {isPending ? (
+          <Spinner />
+        ) : (
+          playlists.map((playlist) => (
+            <SelectablePlaylist key={playlist.id} playlist={playlist} />
+          ))
+        )}
       </VStack>
     </VStack>
   );

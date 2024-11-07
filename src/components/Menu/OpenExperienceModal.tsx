@@ -67,7 +67,7 @@ export const OpenExperienceModal = observer(function OpenExperienceModal() {
           {!isPending && (
             <ExperiencesTable
               experiencesAndUsers={experiencesAndUsers}
-              onLoadExperience={action(async (experience) => {
+              onClickExperience={action(async (experience) => {
                 setIsLoadingNewExperience(true);
                 await experienceStore.load(experience.name);
                 setIsLoadingNewExperience(false);

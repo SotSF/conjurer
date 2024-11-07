@@ -44,7 +44,7 @@ export const useSaveExperience = () => {
         duration: 15_000,
         isClosable: true,
       });
-      throw e;
+      return;
     }
 
     runInAction(() => {
