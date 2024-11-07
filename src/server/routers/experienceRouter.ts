@@ -116,7 +116,7 @@ export const experienceRouter = router({
           throw new TRPCError({
             code: "FORBIDDEN",
             message:
-              'You do not have permission to save this experience. Save a copy with "File > Save as" instead.',
+              'You do not have permission to edit this experience. Save a copy with "File > Save as" instead.',
           });
         }
 
