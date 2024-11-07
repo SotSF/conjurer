@@ -39,7 +39,7 @@ export const useSavePlaylist = () => {
     }
 
     await Promise.all([
-      utils.playlist.listPlaylistsForUser.invalidate(),
+      utils.playlist.listPlaylists.invalidate(),
       utils.playlist.getPlaylist.invalidate({
         usingLocalData,
         id: savedPlaylist.id,

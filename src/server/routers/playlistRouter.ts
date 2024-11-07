@@ -150,21 +150,35 @@ export const playlistRouter = router({
         .execute();
     }),
 
-  listPlaylistsForUser: userProcedure.query(async ({ ctx }) => {
-    const databasePlaylists = await ctx.db.query.playlists
-      .findMany({
-        where: eq(playlists.userId, ctx.user.id),
-        columns: {
-          id: true,
-          name: true,
-          description: true,
-          orderedExperienceIds: true,
-          isLocked: true,
-        },
-        with: { user: true },
+  listPlaylists: userProcedure
+    .input(
+      z.object({
+        allPlaylists: z.boolean().optional(),
       })
-      .execute();
+    )
+    .query(async ({ ctx, input }) => {
+      const databasePlaylists = await ctx.db.query.playlists
+        .findMany({
+          where: input.allPlaylists
+            ? undefined
+            : eq(playlists.userId, ctx.user.id),
+          columns: {
+            id: true,
+            name: true,
+            description: true,
+            orderedExperienceIds: true,
+            isLocked: true,
+          },
+          with: { user: true },
+        })
+        .execute();
 
-    return [await getMyExperiencesSmartPlaylist(ctx), ...databasePlaylists];
-  }),
+      const sortedPlaylists = databasePlaylists.sort((a, b) =>
+        `${a.user.username}-${a.name}`.localeCompare(
+          `${b.user.username}-${b.name}`
+        )
+      );
+
+      return [await getMyExperiencesSmartPlaylist(ctx), ...sortedPlaylists];
+    }),
 });

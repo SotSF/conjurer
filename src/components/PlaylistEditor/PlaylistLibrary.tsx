@@ -29,10 +29,11 @@ export const PlaylistLibrary = observer(function PlaylistLibrary() {
     isPending,
     isError,
     data: playlists,
-  } = trpc.playlist.listPlaylistsForUser.useQuery(
+  } = trpc.playlist.listPlaylists.useQuery(
     {
       usingLocalData,
       username,
+      allPlaylists: viewingAllPlaylists,
     },
     { staleTime: 1000 * 60 * 10 }
   );
@@ -79,7 +80,7 @@ export const PlaylistLibrary = observer(function PlaylistLibrary() {
               runInAction(() => {
                 playlistStore.selectedPlaylist = newPlaylist;
               });
-              utils.playlist.listPlaylistsForUser.invalidate();
+              utils.playlist.listPlaylists.invalidate();
             }}
           >
             Playlist

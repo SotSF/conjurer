@@ -78,7 +78,7 @@ export const SelectablePlaylist = observer(function SelectablePlaylist({
               usingLocalData,
               id: playlist.id,
             });
-            utils.playlist.listPlaylistsForUser.invalidate();
+            utils.playlist.listPlaylists.invalidate();
 
             if (playlistStore.selectedPlaylist?.id === playlist.id) {
               runInAction(() => {
