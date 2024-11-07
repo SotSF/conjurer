@@ -1,15 +1,24 @@
-import { Button, HStack, Spinner, Text, VStack } from "@chakra-ui/react";
+import {
+  Button,
+  HStack,
+  Spinner,
+  Switch,
+  Text,
+  VStack,
+} from "@chakra-ui/react";
 import { useStore } from "@/src/types/StoreContext";
 import { observer } from "mobx-react-lite";
 import { FaPlus } from "react-icons/fa";
 import { runInAction } from "mobx";
 import { trpc } from "@/src/utils/trpc";
 import { SelectablePlaylist } from "@/src/components/PlaylistEditor/SelectablePlaylist";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export const PlaylistLibrary = observer(function PlaylistLibrary() {
   const store = useStore();
   const { username, usingLocalData, playlistStore } = store;
+
+  const [viewingAllPlaylists, setViewingAllPlaylists] = useState(false);
 
   const isEditable = !!store.username;
 
@@ -80,6 +89,15 @@ export const PlaylistLibrary = observer(function PlaylistLibrary() {
 
       <VStack width="100%" height={1}></VStack>
 
+      <Switch
+        mb={4}
+        mx={6}
+        size="sm"
+        isChecked={viewingAllPlaylists}
+        onChange={(e) => setViewingAllPlaylists(e.target.checked)}
+      >
+        All playlists
+      </Switch>
       <VStack width="100%" spacing={0}>
         {isPending ? (
           <Spinner />

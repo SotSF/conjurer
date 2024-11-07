@@ -98,7 +98,9 @@ export const LoginButton = observer(function LoginButton() {
               />
               <Button
                 isDisabled={
-                  !newUser || users?.some((u) => u.username === newUser)
+                  !newUser ||
+                  users?.some((u) => u.username === newUser) ||
+                  newUser === "conjurer" // reserved username
                 }
                 onClick={action(async () => {
                   await createUser.mutateAsync({

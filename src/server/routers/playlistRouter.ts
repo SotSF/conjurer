@@ -1,11 +1,6 @@
 import { router, userProcedure } from "@/src/server/trpc";
 import { z } from "zod";
-import {
-  experiences,
-  playlists,
-  SelectUser,
-  usersToExperiences,
-} from "@/src/db/schema";
+import { playlists, SelectUser, usersToExperiences } from "@/src/db/schema";
 import { asc, eq, inArray } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { MY_EXPERIENCES_SMART_PLAYLIST, Playlist } from "@/src/types/Playlist";

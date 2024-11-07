@@ -36,7 +36,13 @@ export const SelectablePlaylist = observer(function SelectablePlaylist({
         transition: "background-color 0.2s",
       }}
     >
-      <VStack width="100%" height="100%" justify="start" alignItems="start">
+      <VStack
+        width="100%"
+        height="100%"
+        justify="start"
+        alignItems="start"
+        spacing={0}
+      >
         <Text fontSize="md" fontWeight="bold">
           {playlist.name}
         </Text>
