@@ -87,7 +87,8 @@ const WavesurferWaveform = observer(function WavesurferWaveform() {
       },
       { once: true }
     );
-  }, [audioStore, isReady]);
+    cloneCanvas();
+  }, [audioStore, isReady, cloneCanvas]);
 
   // on audio state change
   useEffect(() => {
