@@ -1,4 +1,4 @@
-import { makeAutoObservable } from "mobx";
+import { makeAutoObservable, runInAction } from "mobx";
 import { ExperienceStore } from "@/src/types/ExperienceStore";
 import { AudioStore } from "@/src/types/AudioStore";
 import { Context } from "@/src/types/context";
@@ -72,17 +72,10 @@ export class PlaylistStore {
     }
 
     await this.experienceStore.loadById(experienceId);
-    await this.playExperienceWhenReady();
-  };
-
-  playExperienceWhenReady = () =>
-    new Promise<void>((resolve) => {
-      this.audioStore.wavesurfer?.once("ready", () => {
-        this.audioStore.setTimeWithCursor(0);
-        this.rootStore.play();
-        resolve();
-      });
+    runInAction(() => {
+      this.audioStore.audioState = "playing";
     });
+  };
 
   playPreviousExperience = async () => {
     if (this.rootStore.context === "experienceEditor") {
