@@ -359,7 +359,8 @@ export function PeriodicVariationControls({
       <ScalarInput
         name="Period"
         onChange={(valueString, valueNumber) => {
-          variation.period = valueNumber;
+          // do not allow setting period to 0
+          if (valueNumber) variation.period = valueNumber;
           setPeriod(valueString);
           if (matchPeriodAndDuration) variation.duration = valueNumber;
           block.triggerVariationReactions(uniformName);
