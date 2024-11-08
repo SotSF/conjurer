@@ -6,7 +6,7 @@ import { clamp } from "three/src/math/MathUtils";
 import WaveSurferPlayer from "@wavesurfer/react";
 import TimelinePlugin from "wavesurfer.js/dist/plugins/timeline";
 import MinimapPlugin from "wavesurfer.js/dist/plugins/minimap";
-import { action } from "mobx";
+import { action, runInAction } from "mobx";
 import { useCloneCanvas } from "@/src/components/Wavesurfer/hooks/cloneCanvas";
 import { debounce } from "lodash";
 
@@ -30,6 +30,7 @@ const WavesurferWaveform = observer(function WavesurferWaveform() {
   const [isReady, setIsReady] = useState(false);
   const clonedWaveformRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
+  const didInitialize = useRef(false);
 
   const cloneCanvas = useCloneCanvas(clonedWaveformRef);
 
@@ -64,26 +65,29 @@ const WavesurferWaveform = observer(function WavesurferWaveform() {
       }),
       minimapPlugin,
     ];
-  }, [uiStore.canTimelineZoom]);
+  }, [audioStore, uiStore.canTimelineZoom]);
 
-  // TODO: reimplement this
-  //   const create = async () => {
-  //     audioRef.current!.addEventListener(
-  //       "canplay",
-  //       () => {
-  //         // delay audio in order to sync with video
-  //         const audioContext = new AudioContext();
-  //         runInAction(() => (audioStore.audioContext = audioContext));
-  //         const mediaSource = audioContext.createMediaElementSource(
-  //           audioRef.current!
-  //         );
-  //         const delayNode = audioContext.createDelay(1);
-  //         delayNode.delayTime.value = audioStore.audioLatency;
-  //         mediaSource.connect(delayNode);
-  //         delayNode.connect(audioContext.destination);
-  //       },
-  //       { once: true }
-  //     );
+  useEffect(() => {
+    if (didInitialize.current || !isReady) return;
+    didInitialize.current = true;
+
+    audioRef.current!.addEventListener(
+      "canplay",
+      () => {
+        // delay audio in order to sync with video
+        const audioContext = new AudioContext();
+        runInAction(() => (audioStore.audioContext = audioContext));
+        const mediaSource = audioContext.createMediaElementSource(
+          audioRef.current!
+        );
+        const delayNode = audioContext.createDelay(5);
+        delayNode.delayTime.value = audioStore.audioLatency;
+        mediaSource.connect(delayNode);
+        delayNode.connect(audioContext.destination);
+      },
+      { once: true }
+    );
+  }, [audioStore, isReady]);
 
   // on audio state change
   useEffect(() => {
@@ -93,20 +97,20 @@ const WavesurferWaveform = observer(function WavesurferWaveform() {
     } else if (audioStore.audioState === "paused") {
       audioStore.wavesurfer.pause();
     }
-  }, [audioStore.audioState, audioStore.wavesurfer]);
+  }, [audioStore.audioState, audioStore.wavesurfer, isReady]);
 
   // on mute toggle
   useEffect(() => {
     if (!audioStore.wavesurfer || !isReady) return;
     audioStore.wavesurfer.setMuted(audioStore.audioMuted);
-  }, [audioStore.audioMuted, audioStore.wavesurfer]);
+  }, [audioStore.audioMuted, audioStore.wavesurfer, isReady]);
 
   // on zoom change
   useEffect(() => {
     if (!audioStore.wavesurfer || !isReady || !uiStore.canTimelineZoom) return;
     audioStore.wavesurfer.zoom(uiStore.pixelsPerSecond);
     cloneCanvas();
-  }, [cloneCanvas, uiStore.pixelsPerSecond, audioStore.wavesurfer]);
+  }, [cloneCanvas, uiStore.pixelsPerSecond, uiStore.canTimelineZoom, audioStore.wavesurfer, isReady]);
 
   // on cursor change
   useEffect(() => {
@@ -115,7 +119,7 @@ const WavesurferWaveform = observer(function WavesurferWaveform() {
     const progress =
       duration > 0 ? audioStore.lastCursor.position / duration : 0;
     audioStore.wavesurfer.seekTo(clamp(progress, 0, 1));
-  }, [audioStore.lastCursor, audioStore.wavesurfer]);
+  }, [audioStore.lastCursor, audioStore.wavesurfer, isReady]);
 
   const dragToSeek = useMemo(() => ({ debounceTime: 50 }), []);
 
