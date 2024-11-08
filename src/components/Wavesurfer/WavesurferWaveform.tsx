@@ -75,6 +75,7 @@ const scrollIntoView = debounce(
   { leading: false, trailing: true }
 );
 
+// TODO: switch to https://github.com/katspaugh/wavesurfer-react for better react integration
 // TODO: factor some of this logic out into hooks
 export const WavesurferWaveform = observer(function WavesurferWaveform() {
   const didInitialize = useRef(false);
@@ -265,9 +266,7 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
 
         minimapPlugin.on("interaction", () => {
           if (!audioStore.wavesurfer) return;
-          audioStore.setTimeWithCursor(
-            Math.max(0, audioStore.wavesurfer.getCurrentTime())
-          );
+          audioStore.setTimeWithCursor(audioStore.wavesurfer.getCurrentTime());
           scrollIntoView();
         });
 
@@ -301,9 +300,9 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
 
   // on zoom change
   useEffect(() => {
-    if (!audioStore.wavesurfer || !ready.current) return;
-    uiStore.canTimelineZoom &&
-      audioStore.wavesurfer.zoom(uiStore.pixelsPerSecond);
+    if (!audioStore.wavesurfer || !ready.current || !uiStore.canTimelineZoom)
+      return;
+    audioStore.wavesurfer.zoom(uiStore.pixelsPerSecond);
     cloneCanvas();
   }, [cloneCanvas, uiStore.pixelsPerSecond, audioStore.wavesurfer]);
 
