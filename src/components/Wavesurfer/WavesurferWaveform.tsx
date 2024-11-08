@@ -3,33 +3,17 @@ import { Box, Skeleton } from "@chakra-ui/react";
 import { observer } from "mobx-react-lite";
 import { useRef, useEffect, useState, useMemo } from "react";
 import { clamp } from "three/src/math/MathUtils";
-import type WaveSurfer from "wavesurfer.js";
+import { useWavesurfer } from "@wavesurfer/react";
+
+import WaveSurfer from "wavesurfer.js";
 import type { WaveSurferOptions } from "wavesurfer.js";
-import type TimelinePlugin from "wavesurfer.js/dist/plugins/timeline";
+import TimelinePlugin from "wavesurfer.js/dist/plugins/timeline";
 import type { TimelinePluginOptions } from "wavesurfer.js/dist/plugins/timeline";
-import type MinimapPlugin from "wavesurfer.js/dist/plugins/minimap";
+import MinimapPlugin from "wavesurfer.js/dist/plugins/minimap";
 import type { MinimapPluginOptions } from "wavesurfer.js/dist/plugins/minimap";
 import { action, runInAction } from "mobx";
 import { useCloneCanvas } from "@/src/components/Wavesurfer/hooks/cloneCanvas";
 import { debounce } from "lodash";
-
-const importWavesurferConstructors = async () => {
-  // Can't be run on the server, so we need to use dynamic imports
-  const [
-    { default: WaveSurfer },
-    { default: TimelinePlugin },
-    { default: MinimapPlugin },
-  ] = await Promise.all([
-    import("wavesurfer.js"),
-    import("wavesurfer.js/dist/plugins/timeline"),
-    import("wavesurfer.js/dist/plugins/minimap"),
-  ]);
-  return {
-    WaveSurfer,
-    TimelinePlugin,
-    MinimapPlugin,
-  };
-};
 
 // https://wavesurfer-js.org/docs/options.html
 const DEFAULT_WAVESURFER_OPTIONS: Partial<WaveSurferOptions> = {
@@ -75,23 +59,12 @@ const scrollIntoView = debounce(
   { leading: false, trailing: true }
 );
 
-// TODO: switch to https://github.com/katspaugh/wavesurfer-react for better react integration
 // TODO: factor some of this logic out into hooks
-export const WavesurferWaveform = observer(function WavesurferWaveform() {
+const WavesurferWaveform = observer(function WavesurferWaveform() {
   const didInitialize = useRef(false);
   const ready = useRef(false);
   const lastAudioLoaded = useRef("");
   const [loading, setLoading] = useState(true);
-
-  const wavesurferConstructors = useRef<{
-    WaveSurfer: typeof WaveSurfer | null;
-    TimelinePlugin: typeof TimelinePlugin | null;
-    MinimapPlugin: typeof MinimapPlugin | null;
-  }>({
-    WaveSurfer: null,
-    TimelinePlugin: null,
-    MinimapPlugin: null,
-  });
 
   const waveformRef = useRef<HTMLDivElement>(null);
   const clonedWaveformRef = useRef<HTMLDivElement>(null);
@@ -110,6 +83,24 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
     timeInterval: uiStore.canTimelineZoom ? 0.25 : 5,
   };
 
+  const plugins = useMemo(() => {
+    return [TimelinePlugin.create()];
+  }, []);
+
+  const {
+    wavesurfer: ws,
+    isPlaying,
+    currentTime,
+  } = useWavesurfer({
+    ...DEFAULT_WAVESURFER_OPTIONS,
+    container: waveformRef,
+    height: uiStore.canTimelineZoom ? 60 : 80,
+    fillParent: !uiStore.canTimelineZoom,
+    minPxPerSec: uiStore.canTimelineZoom ? uiStore.pixelsPerSecond : undefined,
+    plugins,
+    media: audioRef.current ?? undefined,
+  });
+
   // initialize wavesurfer
   useEffect(() => {
     if (didInitialize.current) return;
@@ -117,10 +108,6 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
 
     const create = async () => {
       setLoading(true);
-
-      // Lazy load all wave surfer dependencies
-      const { WaveSurfer, TimelinePlugin, MinimapPlugin } =
-        (wavesurferConstructors.current = await importWavesurferConstructors());
 
       // Instantiate timeline plugin
       const timelinePlugin = (audioStore.timelinePlugin = TimelinePlugin.create(
@@ -230,8 +217,6 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
       if (
         didInitialize.current &&
         audioStore.wavesurfer &&
-        wavesurferConstructors.current.TimelinePlugin &&
-        wavesurferConstructors.current.MinimapPlugin &&
         lastAudioLoaded.current !== audioStore.selectedSong.filename
       ) {
         ready.current = false;
@@ -246,7 +231,6 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
         // memory leak here, and it generally feels like there is a better way to do this
 
         // Create a new timeline plugin
-        const { TimelinePlugin } = wavesurferConstructors.current;
         const timelinePlugin = (audioStore.timelinePlugin =
           TimelinePlugin.create(timelinePluginOptions));
         audioStore.wavesurfer.registerPlugin(timelinePlugin);
@@ -255,7 +239,6 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
         audioStore.minimapPlugin?.destroy();
 
         // Create a new minimap plugin
-        const { MinimapPlugin } = wavesurferConstructors.current;
         const minimapPlugin = (audioStore.minimapPlugin = MinimapPlugin.create({
           ...DEFAULT_MINIMAP_OPTIONS,
           height: embeddedViewer
@@ -314,6 +297,30 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
       duration > 0 ? audioStore.lastCursor.position / duration : 0;
     audioStore.wavesurfer.seekTo(clamp(progress, 0, 1));
   }, [audioStore.lastCursor, audioStore.wavesurfer]);
+
+  return (
+    <Box position="relative" flexGrow={1} height={20} bgColor="gray.500">
+      <audio ref={audioRef} />
+      <Skeleton
+        position="absolute"
+        top={0}
+        width="100%"
+        height="100%"
+        startColor="gray.500"
+        endColor="gray.700"
+        speed={0.4}
+        isLoaded={!loading || !audioStore.selectedSong.filename}
+      />
+      <Box
+        position="absolute"
+        top="0"
+        width="100%"
+        id="waveform"
+        display="block"
+        ref={waveformRef}
+      />
+    </Box>
+  );
 
   return uiStore.canTimelineZoom ? (
     <Box
@@ -388,3 +395,4 @@ export const WavesurferWaveform = observer(function WavesurferWaveform() {
     </Box>
   );
 });
+export default WavesurferWaveform;

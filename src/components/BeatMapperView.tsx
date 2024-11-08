@@ -17,7 +17,7 @@ import {
 } from "@chakra-ui/react";
 import { useStore } from "@/src/types/StoreContext";
 import { Fragment, useEffect, useRef, useState } from "react";
-import { WavesurferWaveform } from "@/src/components/Wavesurfer/WavesurferWaveform";
+import { LazyWavesurferWaveform } from "@/src/components/Wavesurfer/LazyWavesurferWaveform";
 import { MAX_TIME } from "@/src/utils/time";
 import { TimerReadout } from "@/src/components/Timeline/TimerReadout";
 import { TimerControls } from "@/src/components/Timeline/TimerControls";
@@ -185,7 +185,7 @@ export const BeatMapperView = observer(function BeatMapperView() {
             <TimerControls />
             <TimerReadout />
           </VStack>
-          <WavesurferWaveform />
+          {/* <LazyWavesurferWaveform /> */}
         </HStack>
 
         <HStack
