@@ -33,8 +33,23 @@ const WavesurferWaveform = observer(function WavesurferWaveform() {
 
   const cloneCanvas = useCloneCanvas(clonedWaveformRef);
 
-  const plugins = useMemo(
-    () => [
+  const plugins = useMemo(() => {
+    const minimapPlugin = MinimapPlugin.create({
+      waveColor: "#bbb",
+      progressColor: "#0178FF",
+      cursorColor: "#FF0000FF",
+      container: "#minimap",
+      height: DEFAULT_MINIMAP_HEIGHT,
+      insertPosition: "beforebegin",
+    });
+    minimapPlugin.on("interaction", () => {
+      audioStore.setTimeWithCursor(
+        Math.max(0, audioStore.wavesurfer!.getCurrentTime())
+      );
+      scrollIntoView();
+    });
+
+    return [
       TimelinePlugin.create({
         insertPosition: "beforebegin",
         style: {
@@ -47,17 +62,9 @@ const WavesurferWaveform = observer(function WavesurferWaveform() {
         secondaryLabelInterval: uiStore.canTimelineZoom ? 1 : 0,
         timeInterval: uiStore.canTimelineZoom ? 0.25 : 5,
       }),
-      MinimapPlugin.create({
-        waveColor: "#bbb",
-        progressColor: "#0178FF",
-        cursorColor: "#FF0000FF",
-        container: "#minimap",
-        height: DEFAULT_MINIMAP_HEIGHT,
-        insertPosition: "beforebegin",
-      }),
-    ],
-    [uiStore.canTimelineZoom]
-  );
+      minimapPlugin,
+    ];
+  }, [uiStore.canTimelineZoom]);
 
   // TODO: reimplement this
   //   const create = async () => {
@@ -169,7 +176,6 @@ const WavesurferWaveform = observer(function WavesurferWaveform() {
           onRedraw={() => setIsReady(true)}
           onInteraction={(wavesurfer, newTime: number) => {
             audioStore.setTimeWithCursor(Math.max(0, newTime));
-            scrollIntoView();
           }}
           onAudioprocess={(wavesurfer, currentTime: number) =>
             audioStore.onTick(currentTime)
