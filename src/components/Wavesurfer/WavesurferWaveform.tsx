@@ -3,29 +3,14 @@ import { Box, Skeleton } from "@chakra-ui/react";
 import { observer } from "mobx-react-lite";
 import { useRef, useEffect, useState, useMemo } from "react";
 import { clamp } from "three/src/math/MathUtils";
-import { useWavesurfer } from "@wavesurfer/react";
 import WaveSurferPlayer from "@wavesurfer/react";
-
-import WaveSurfer from "wavesurfer.js";
-import type { WaveSurferOptions } from "wavesurfer.js";
 import TimelinePlugin from "wavesurfer.js/dist/plugins/timeline";
-import type { TimelinePluginOptions } from "wavesurfer.js/dist/plugins/timeline";
 import MinimapPlugin from "wavesurfer.js/dist/plugins/minimap";
-import type { MinimapPluginOptions } from "wavesurfer.js/dist/plugins/minimap";
-import { action, runInAction } from "mobx";
+import { action } from "mobx";
 import { useCloneCanvas } from "@/src/components/Wavesurfer/hooks/cloneCanvas";
 import { debounce } from "lodash";
 
 const DEFAULT_MINIMAP_HEIGHT = 20;
-
-const DEFAULT_MINIMAP_OPTIONS: MinimapPluginOptions = {
-  waveColor: "#bbb",
-  progressColor: "#0178FF",
-  cursorColor: "#FF0000FF",
-  container: "#minimap",
-  height: DEFAULT_MINIMAP_HEIGHT,
-  insertPosition: "beforebegin",
-};
 
 const scrollIntoView = debounce(
   () =>
@@ -39,17 +24,17 @@ const scrollIntoView = debounce(
 );
 
 const WavesurferWaveform = observer(function WavesurferWaveform() {
+  const store = useStore();
+  const { audioStore, uiStore, playlistStore } = store;
+
   const [isReady, setIsReady] = useState(false);
   const clonedWaveformRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
 
-  const store = useStore();
-  const { audioStore, uiStore, playlistStore } = store;
-
   const cloneCanvas = useCloneCanvas(clonedWaveformRef);
 
-  const plugins = useMemo(() => {
-    return [
+  const plugins = useMemo(
+    () => [
       TimelinePlugin.create({
         insertPosition: "beforebegin",
         style: {
@@ -62,20 +47,20 @@ const WavesurferWaveform = observer(function WavesurferWaveform() {
         secondaryLabelInterval: uiStore.canTimelineZoom ? 1 : 0,
         timeInterval: uiStore.canTimelineZoom ? 0.25 : 5,
       }),
-    ];
-  }, [uiStore.canTimelineZoom]);
+      MinimapPlugin.create({
+        waveColor: "#bbb",
+        progressColor: "#0178FF",
+        cursorColor: "#FF0000FF",
+        container: "#minimap",
+        height: DEFAULT_MINIMAP_HEIGHT,
+        insertPosition: "beforebegin",
+      }),
+    ],
+    [uiStore.canTimelineZoom]
+  );
 
-  // initialize wavesurfer
+  // TODO: reimplement this
   //   const create = async () => {
-
-  //     // Instantiate minimap plugin
-  //     // const minimapPlugin = (audioStore.minimapPlugin = MinimapPlugin.create({
-  //     //   ...DEFAULT_MINIMAP_OPTIONS,
-  //     //   height: embeddedViewer
-  //     //     ? EMBEDDED_MINIMAP_HEIGHT
-  //     //     : DEFAULT_MINIMAP_HEIGHT,
-  //     // }));
-
   //     audioRef.current!.addEventListener(
   //       "canplay",
   //       () => {
@@ -92,21 +77,6 @@ const WavesurferWaveform = observer(function WavesurferWaveform() {
   //       },
   //       { once: true }
   //     );
-
-  //     cloneCanvas();
-  //   };
-
-  // on selected audio file change
-  //   const changeAudioFile = async () => {
-  //       minimapPlugin.on("interaction", () => {
-  //         if (!audioStore.wavesurfer) return;
-  //         audioStore.setTimeWithCursor(audioStore.wavesurfer.getCurrentTime());
-  //         scrollIntoView();
-  //       });
-  //     }
-  //   };
-  //   changeAudioFile();
-  //   cloneCanvas();
 
   // on audio state change
   useEffect(() => {
@@ -141,8 +111,9 @@ const WavesurferWaveform = observer(function WavesurferWaveform() {
   }, [audioStore.lastCursor, audioStore.wavesurfer]);
 
   const dragToSeek = useMemo(() => ({ debounceTime: 50 }), []);
-  return (
-    <Box position="relative" flexGrow={1} height={20} bgColor="gray.500">
+
+  const commonWavesurferUI = (
+    <>
       <audio ref={audioRef} />
       <Skeleton
         position="absolute"
@@ -156,8 +127,8 @@ const WavesurferWaveform = observer(function WavesurferWaveform() {
       />
       <Box
         position="absolute"
-        top="0"
-        width="100%"
+        top={uiStore.canTimelineZoom ? "20px" : "0"}
+        width={uiStore.canTimelineZoom ? undefined : "100%"}
         id="waveform"
         display="block"
       >
@@ -216,80 +187,40 @@ const WavesurferWaveform = observer(function WavesurferWaveform() {
           }}
         />
       </Box>
-    </Box>
+    </>
   );
 
-  // return uiStore.canTimelineZoom ? (
-  //   <Box
-  //     width="100%"
-  //     height={embeddedViewer ? `${EMBEDDED_MINIMAP_HEIGHT}px` : 20}
-  //     bgColor="gray.500"
-  //   >
-  //     <Box
-  //       id="minimap"
-  //       position="sticky"
-  //       top={0}
-  //       left="150px"
-  //       boxSizing="border-box"
-  //       borderBottom={embeddedViewer ? 0 : 1}
-  //       borderColor="black"
-  //       borderBottomStyle="solid"
-  //       bgColor="gray.600"
-  //       width={`calc(${uiStore.horizontalLayout ? "100vw" : "60vw"} - 150px)`}
-  //       height={`${
-  //         embeddedViewer ? EMBEDDED_MINIMAP_HEIGHT : DEFAULT_MINIMAP_HEIGHT
-  //       }px`}
-  //       zIndex={100}
-  //     />
-  //     <audio ref={audioRef} />
-  //     <Skeleton
-  //       position="absolute"
-  //       top={0}
-  //       width="100%"
-  //       height="100%"
-  //       startColor="gray.500"
-  //       endColor="gray.700"
-  //       speed={0.4}
-  //       // isLoaded={!loading || !audioStore.selectedSong.filename}
-  //     />
-  //     <Box
-  //       position="absolute"
-  //       top="20px"
-  //       id="waveform"
-  //       display={embeddedViewer ? "none" : "block"}
-  //       ref={waveformRef}
-  //     />
-  //     {uiStore.showingWaveformOverlay && (
-  //       <Box
-  //         ref={clonedWaveformRef}
-  //         position="absolute"
-  //         top="80px"
-  //         pointerEvents="none"
-  //       />
-  //     )}
-  //   </Box>
-  // ) : (
-  //   <Box position="relative" flexGrow={1} height={20} bgColor="gray.500">
-  //     <audio ref={audioRef} />
-  //     <Skeleton
-  //       position="absolute"
-  //       top={0}
-  //       width="100%"
-  //       height="100%"
-  //       startColor="gray.500"
-  //       endColor="gray.700"
-  //       speed={0.4}
-  //       // isLoaded={!loading || !audioStore.selectedSong.filename}
-  //     />
-  //     <Box
-  //       position="absolute"
-  //       top="0"
-  //       width="100%"
-  //       id="waveform"
-  //       display="block"
-  //       ref={waveformRef}
-  //     />
-  //   </Box>
-  // );
+  return uiStore.canTimelineZoom ? (
+    <Box width="100%" height={20} bgColor="gray.500">
+      <Box
+        id="minimap"
+        position="sticky"
+        top={0}
+        left="150px"
+        boxSizing="border-box"
+        borderBottom={1}
+        borderColor="black"
+        borderBottomStyle="solid"
+        bgColor="gray.600"
+        width={`calc(${uiStore.horizontalLayout ? "100vw" : "60vw"} - 150px)`}
+        height={`${DEFAULT_MINIMAP_HEIGHT}px`}
+        zIndex={100}
+      />
+      {commonWavesurferUI}
+      {uiStore.showingWaveformOverlay && (
+        <Box
+          ref={clonedWaveformRef}
+          position="absolute"
+          top="80px"
+          pointerEvents="none"
+        />
+      )}
+    </Box>
+  ) : (
+    <Box position="relative" flexGrow={1} height={20} bgColor="gray.500">
+      {commonWavesurferUI}
+    </Box>
+  );
 });
+
 export default WavesurferWaveform;
