@@ -126,7 +126,7 @@ const WavesurferWaveform = observer(function WavesurferWaveform() {
 
   const commonWavesurferUI = (
     <>
-      <audio ref={audioRef} />
+      <audio ref={audioRef} crossOrigin="anonymous" />
       <Skeleton
         position="absolute"
         top={0}
