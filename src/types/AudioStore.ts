@@ -69,10 +69,12 @@ export class AudioStore {
     this.audioMuted = !this.audioMuted;
   };
 
-  getSelectedSongUrl = () =>
-    this.rootStore.usingLocalData
+  getSelectedSongUrl = () => {
+    if (!this.selectedSong.filename) return undefined;
+    return this.rootStore.usingLocalData
       ? `${location.origin}/${LOCAL_ASSET_DIRECTORY}${AUDIO_ASSET_PREFIX}${this.selectedSong.filename}`
       : `https://${ASSET_BUCKET_NAME}.s3.${ASSET_BUCKET_REGION}.amazonaws.com/${AUDIO_ASSET_PREFIX}${this.selectedSong.filename}`;
+  };
 
   // Timer relevant code - perhaps extract this to a separate file
 
