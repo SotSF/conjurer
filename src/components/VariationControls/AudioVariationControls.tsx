@@ -16,6 +16,7 @@ export function AudioVariationControls({
 }: AudioVariationControlsProps) {
   const [factor, setFactor] = useState(variation.factor.toString());
   const [offset, setOffset] = useState(variation.offset.toString());
+  const [smoothing, setSmoothing] = useState(variation.smoothing.toString());
 
   return (
     <>
@@ -36,6 +37,15 @@ export function AudioVariationControls({
           block.triggerVariationReactions(uniformName);
         }}
         value={offset}
+      />
+      <ScalarInput
+        name="Smoothing"
+        onChange={(valueString, valueNumber) => {
+          variation.smoothing = valueNumber;
+          setSmoothing(valueString);
+          block.triggerVariationReactions(uniformName);
+        }}
+        value={smoothing}
       />
     </>
   );

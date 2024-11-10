@@ -65,6 +65,20 @@ export class AudioStore {
     return this.peaks[index];
   };
 
+  getSmoothedPeakAtTime = (time: number, smoothing: number) => {
+    if (!this.peaks.length) return 0;
+    if (smoothing === 0) return this.getPeakAtTime(time);
+
+    const index = Math.floor(time * PEAK_DATA_SAMPLE_RATE);
+    const start = Math.max(0, index - smoothing);
+    const end = Math.min(this.peaks.length - 1, index + smoothing);
+
+    let total = 0;
+    for (let i = start; i <= end; i++) total += this.peaks[i];
+
+    return total / (end - start + 1);
+  };
+
   toggleAudioMuted = () => {
     this.audioMuted = !this.audioMuted;
   };
