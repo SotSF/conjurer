@@ -1,3 +1,4 @@
+import { LatencyTest } from "@/src/components/LatencyTest";
 import { Store } from "@/src/types/Store";
 import { StoreContext } from "@/src/types/StoreContext";
 import { Box, ChakraProvider, theme } from "@chakra-ui/react";
@@ -25,7 +26,8 @@ export default function Test() {
         <StoreContext.Provider value={store}>
           <Box height="100vh" width="100vw" bgColor="gray.700" p={2}>
             <p>Embedded conjurer test:</p>
-            {initialized && <EmbedTest />}
+            {/* {initialized && <EmbedTest />} */}
+            <LatencyTest />
           </Box>
         </StoreContext.Provider>
       </ChakraProvider>
