@@ -37,6 +37,7 @@ export class UIStore {
   showingViewerInstructionsModal = false;
   showingSaveBeatMapModal = false;
   showingLoadBeatMapModal = false;
+  showingLatencyModal = false;
 
   pendingAction: "open" | "save" | "" = "";
 
