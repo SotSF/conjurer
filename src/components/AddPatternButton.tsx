@@ -9,19 +9,21 @@ export const AddPatternButton = observer(function AddPatternButton() {
   const { uiStore } = store;
 
   return (
-    <Box position="absolute" bottom={0} right={0} m={4}>
+    <Box position="absolute" bottom={0} right={0} m={6}>
       <Button
         variant="solid"
-        bgColor="gray.600"
-        fontWeight="bold"
-        borderRadius="50%"
+        bgColor="orange.500"
+        _hover={{ backgroundColor: "orange.400" }}
+        size="md"
+        borderRadius={"full"}
         onClick={action(() => {
           store.pause();
           uiStore.patternDrawerOpen = true;
         })}
         zIndex={100}
+        leftIcon={<AiOutlinePlus size={18} />}
       >
-        <AiOutlinePlus />
+        Pattern
       </Button>
     </Box>
   );
