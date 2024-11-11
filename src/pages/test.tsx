@@ -38,7 +38,7 @@ const EmbedTest = memo(function EmbedTest() {
     <iframe
       width="800"
       height="675"
-      src={`${window.location.origin}/experience/night-jar&embedded=true`}
+      src={`${window.location.origin}/experience/night-jar&viewerMode=true`}
       title="Conjurer"
       allow="autoplay; fullscreen"
       allowFullScreen

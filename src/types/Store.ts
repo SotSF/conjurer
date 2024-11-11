@@ -1,5 +1,5 @@
 import { Block } from "@/src/types/Block";
-import { MIN_PIXELS_PER_SECOND, UIStore } from "@/src/types/UIStore";
+import { UIStore } from "@/src/types/UIStore";
 import { makeAutoObservable, configure } from "mobx";
 import { AudioStore } from "@/src/types/AudioStore";
 import { Variation } from "@/src/types/Variations/Variation";
@@ -184,11 +184,13 @@ export class Store {
     this.viewerMode =
       new URLSearchParams(window.location.search).get("viewerMode") === "true";
 
+    // TODO:
     if (this.viewerMode) {
-      // TODO:
-      this.experienceStore.loadFromParams() ||
-        this.experienceStore.loadEmptyExperience();
+      if (initialExperienceName)
+        this.experienceStore.load(initialExperienceName);
+      else this.experienceStore.loadEmptyExperience();
       this.uiStore.initialize(this.viewerMode);
+      this.audioStore.initialize();
       if (this.viewerMode) this.play();
       return;
     }
