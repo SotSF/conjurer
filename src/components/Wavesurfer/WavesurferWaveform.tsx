@@ -67,28 +67,22 @@ const WavesurferWaveform = observer(function WavesurferWaveform() {
     ];
   }, [audioStore, uiStore.canTimelineZoom]);
 
+  // on audio latency change
   useEffect(() => {
-    if (didInitialize.current || !isReady) return;
-    didInitialize.current = true;
-
-    audioRef.current!.addEventListener(
-      "canplay",
-      () => {
-        // delay audio in order to sync with video
-        const audioContext = new AudioContext();
-        runInAction(() => (audioStore.audioContext = audioContext));
-        const mediaSource = audioContext.createMediaElementSource(
-          audioRef.current!
-        );
-        const delayNode = audioContext.createDelay(5);
-        delayNode.delayTime.value = audioStore.audioLatency;
-        mediaSource.connect(delayNode);
-        delayNode.connect(audioContext.destination);
-      },
-      { once: true }
-    );
-    cloneCanvas();
-  }, [audioStore, isReady, cloneCanvas]);
+    if (!isReady || !audioRef.current) return;
+    const audioElement = audioRef.current;
+    const audioContext = new AudioContext();
+    runInAction(() => (audioStore.audioContext = audioContext));
+    const mediaSource = audioContext.createMediaElementSource(audioElement);
+    const delayNode = audioContext.createDelay(5);
+    delayNode.delayTime.value = audioStore.audioLatency;
+    mediaSource.connect(delayNode);
+    delayNode.connect(audioContext.destination);
+    return () => {
+      audioContext.close();
+      runInAction(() => (audioStore.audioContext = null));
+    };
+  }, [audioStore, audioStore.audioLatency, isReady]);
 
   // on audio state change
   useEffect(() => {

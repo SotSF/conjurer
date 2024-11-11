@@ -148,7 +148,7 @@ export function LatencyTest({
           Stop
         </Button>
         <Button
-          onClick={() => setLatency(userLatency)}
+          onClick={() => setLatency(userLatency / 1000)}
           isDisabled={isRunning || userLatency === 0}
         >
           Use latency
