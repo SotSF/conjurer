@@ -1,4 +1,4 @@
-import { Button, Text } from "@chakra-ui/react";
+import { Button, HStack, Text, VStack } from "@chakra-ui/react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 // NOTE:
@@ -24,10 +24,32 @@ function playSound(audioContext: AudioContext, audioBuffer: AudioBuffer) {
   player.start();
 }
 
-export function LatencyTest() {
+// Source: https://gist.github.com/AlexJWayne/1d99b3cd81d610ac7351
+const accurateInterval = (time: number, fn: () => void) => {
+  let cancel: any, nextAt: any, timeout: any, wrapper: any, _ref: any;
+  nextAt = new Date().getTime() + time;
+  timeout = null;
+  if (typeof time === "function")
+    (_ref = [time, fn]), (fn = _ref[0]), (time = _ref[1]);
+  wrapper = () => {
+    nextAt += time;
+    timeout = setTimeout(wrapper, nextAt - new Date().getTime());
+    return fn();
+  };
+  cancel = () => clearTimeout(timeout);
+  timeout = setTimeout(wrapper, nextAt - new Date().getTime());
+  return { cancel };
+};
+
+export function LatencyTest({
+  setLatency,
+}: {
+  setLatency: (latency: number) => void;
+}) {
   const initialized = useRef(false);
   const audioContext = useRef<AudioContext | null>(null);
   const audioBuffer = useRef<AudioBuffer | null>(null);
+  const lastLatency = useRef(0);
 
   const [isRunning, setIsRunning] = useState(false);
   const [beatTimes, setBeatTimes] = useState<Date[]>([]);
@@ -45,57 +67,93 @@ export function LatencyTest() {
     initialize();
   }, [initialized]);
 
-  const userTempo = useMemo(() => {
+  // const userTempo = useMemo(() => {
+  //   if (userTimes.length < 2) return 0;
+
+  //   const userTimesMs = userTimes
+  //     .map((time, index) => {
+  //       if (index === 0) return null;
+  //       return time.getTime() - userTimes[index - 1].getTime();
+  //     })
+  //     .filter((time) => time !== null);
+
+  //   const average =
+  //     userTimesMs.reduce((acc, curr) => acc + curr, 0) / userTimesMs.length;
+  //   return MS_IN_M / average;
+  // }, [userTimes]);
+
+  const userLatency = useMemo(() => {
     if (userTimes.length < 2) return 0;
+    if (beatTimes.length > userTimes.length) return lastLatency.current;
 
-    const userTimesMs = userTimes.map((time, index) => {
-      if (index === 0) return 0;
-      return time.getTime() - userTimes[index - 1].getTime();
-    });
+    const userLatencies = beatTimes
+      .map((beatTime, index) => {
+        if (index >= userTimes.length) return null;
+        return userTimes[index].getTime() - beatTime.getTime();
+      })
+      .filter((time) => time !== null);
 
-    const average =
-      userTimesMs.reduce((acc, curr) => acc + curr, 0) / userTimesMs.length;
-    return MS_IN_M / average;
-  }, [userTimes]);
+    lastLatency.current =
+      userLatencies.reduce((acc, curr) => acc + curr, 0) / userLatencies.length;
+
+    return lastLatency.current;
+  }, [beatTimes, userTimes]);
 
   useEffect(() => {
     if (!isRunning) return;
 
     let currentBpmInMs = MS_IN_M / tempo;
-    const interval = setInterval(() => {
+    const { cancel } = accurateInterval(currentBpmInMs, () => {
       if (!audioContext.current || !audioBuffer.current) return;
       playSound(audioContext.current, audioBuffer.current);
       setBeatTimes((beatTimes) => [...beatTimes, new Date()]);
-    }, currentBpmInMs);
+    });
 
-    return () => clearInterval(interval);
+    return () => cancel();
   }, [isRunning]);
 
   return (
-    <>
-      <Text>Latency Test</Text>
-      <Button
-        onClick={async () => {
-          if (!audioContext.current || !audioBuffer.current) return;
+    <VStack>
+      <Text>
+        Keep clicking Tap until latency stabilizes, then click Stop. When
+        satisfied, click Use latency.
+      </Text>
+      <Text h={8}>
+        {userLatency ? `Latency: ${userLatency.toFixed(2)}ms` : ""}
+      </Text>
+      <HStack>
+        <Button
+          onClick={async () => {
+            if (!audioContext.current || !audioBuffer.current) return;
 
-          if (isRunning) {
-            setUserTimes((userTimes) => [...userTimes, new Date()]);
-            if (userTimes.length > MIN_BEATS) {
-              setUserTimes((userTimes) => userTimes.slice(1));
-              setBeatTimes((beatTimes) => beatTimes.slice(1));
+            if (isRunning) {
+              if (userTimes.length > MIN_BEATS) {
+                setUserTimes((userTimes) => [
+                  ...userTimes.slice(1),
+                  new Date(),
+                ]);
+                setBeatTimes((beatTimes) => beatTimes.slice(1));
+              } else setUserTimes((userTimes) => [...userTimes, new Date()]);
+              return;
             }
-            return;
-          }
 
-          setIsRunning(true);
-          setBeatTimes([]);
-          setUserTimes([]);
-        }}
-      >
-        Tap
-      </Button>
-      <Text>Tempo: {tempo.toFixed(2)}</Text>
-      <Text>User tempo: {userTempo}</Text>
-    </>
+            setIsRunning(true);
+            setBeatTimes([]);
+            setUserTimes([]);
+          }}
+        >
+          Tap
+        </Button>
+        <Button onClick={() => setIsRunning(false)} isDisabled={!isRunning}>
+          Stop
+        </Button>
+        <Button
+          onClick={() => setLatency(userLatency)}
+          isDisabled={isRunning || userLatency === 0}
+        >
+          Use latency
+        </Button>
+      </HStack>
+    </VStack>
   );
 }
