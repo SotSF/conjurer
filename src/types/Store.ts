@@ -57,7 +57,7 @@ export class Store {
   layers: Layer[] = [];
 
   sendingData = false;
-  embeddedViewer = false;
+  viewerMode = false;
 
   _globalIntensity = 1;
   get globalIntensity(): number {
@@ -188,13 +188,15 @@ export class Store {
       return;
     }
 
-    if (this.context === "viewer") {
-      this.embeddedViewer =
-        new URLSearchParams(window.location.search).get("embedded") === "true";
+    this.viewerMode =
+      new URLSearchParams(window.location.search).get("viewerMode") === "true";
+
+    if (this.viewerMode) {
+      // TODO:
       this.experienceStore.loadFromParams() ||
         this.experienceStore.loadEmptyExperience();
-      this.uiStore.initialize(this.embeddedViewer);
-      if (this.embeddedViewer) this.play();
+      this.uiStore.initialize(this.viewerMode);
+      if (this.viewerMode) this.play();
       return;
     }
 

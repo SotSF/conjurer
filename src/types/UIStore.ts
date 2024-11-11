@@ -80,8 +80,8 @@ export class UIStore {
     makeAutoObservable(this);
   }
 
-  initialize = (embeddedViewer = false) => {
-    if (embeddedViewer) this.setEmbeddedDefaults();
+  initialize = (viewerMode = false) => {
+    if (viewerMode) this.setViewerModeDefaults();
     else this.loadFromLocalStorage();
 
     if (!this.rootStore.username) this.showingUserPickerModal = true;
@@ -172,7 +172,7 @@ export class UIStore {
     this.saveToLocalStorage();
   };
 
-  setEmbeddedDefaults = () => {
+  setViewerModeDefaults = () => {
     this.horizontalLayout = true;
     this.showingPerformance = false;
     this.displayMode = "canopy";

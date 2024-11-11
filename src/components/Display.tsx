@@ -11,7 +11,7 @@ import { RoleSelector } from "@/src/components/RoleSelector";
 
 export const Display = observer(function Display() {
   const store = useStore();
-  const { uiStore, embeddedViewer } = store;
+  const { uiStore, viewerMode } = store;
 
   const boxRef = useRef<HTMLDivElement>(null);
 
@@ -23,7 +23,7 @@ export const Display = observer(function Display() {
       position="relative"
       height="100%"
     >
-      {!embeddedViewer && (
+      {!viewerMode && (
         <Box transition="all 100ms">
           <MenuBar />
           <VStack position="absolute" width="100%" marginY="2" zIndex={1}>
