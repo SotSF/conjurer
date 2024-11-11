@@ -115,7 +115,14 @@ export class Store {
     localStorage.setItem("role", value);
   }
   get roleText(): string {
-    return this._role === "emcee" ? "Emcee" : "Experience Creator";
+    switch (this._role) {
+      case "emcee":
+        return "Emcee";
+      case "experience creator":
+        return "Experience Creator";
+      case "vj":
+        return "VJ";
+    }
   }
 
   private _username = "";
