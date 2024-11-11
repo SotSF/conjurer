@@ -1,6 +1,6 @@
 import { Block } from "@/src/types/Block";
 import { UIStore } from "@/src/types/UIStore";
-import { makeAutoObservable, configure } from "mobx";
+import { makeAutoObservable } from "mobx";
 import { AudioStore } from "@/src/types/AudioStore";
 import { Variation } from "@/src/types/Variations/Variation";
 import { ExperienceStore } from "@/src/types/ExperienceStore";
@@ -19,15 +19,7 @@ import {
 } from "@/src/types/Experience";
 import { NO_SONG } from "@/src/types/Song";
 import { Context, Role } from "@/src/types/context";
-
-// Enforce MobX strict mode, which can make many noisy console warnings, but can help use learn MobX better.
-// Feel free to comment out the following if you want to silence the console messages.
-configure({
-  enforceActions: "always",
-  computedRequiresReaction: true,
-  reactionRequiresObservable: true,
-  observableRequiresReaction: false, // This will trigger false positives sometimes, so turning off
-});
+import "@/src/utils/mobx";
 
 export type BlockSelection = { type: "block"; block: Block };
 
