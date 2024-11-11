@@ -183,6 +183,7 @@ export class Store {
     if (this.context === "playground") {
       this.playgroundStore.initialize();
       this.uiStore.initialize();
+      this.audioStore.initialize();
       setupControllerWebsocket(this.context, this.playgroundStore.onUpdate);
       return;
     }
@@ -221,6 +222,7 @@ export class Store {
       this.experienceStore.loadEmptyExperience();
 
     this.uiStore.initialize();
+    this.audioStore.initialize();
   };
 
   toggleSendingData = () => {
