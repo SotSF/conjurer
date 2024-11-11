@@ -71,7 +71,7 @@ export class UIStore {
     this.saveToLocalStorage();
   }
 
-  patternDrawerOpen = false;
+  patternDrawerOpen = this.rootStore.context === "playground";
 
   canTimelineZoom = this.rootStore.context === "experienceEditor";
   pixelsPerSecond = INITIAL_PIXELS_PER_SECOND; // the zoom of the timeline

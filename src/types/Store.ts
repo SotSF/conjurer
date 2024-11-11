@@ -158,21 +158,7 @@ export class Store {
 
   constructor(readonly context: Context) {
     makeAutoObservable(this);
-
-    this.initializeServerSide();
   }
-
-  initializeServerSide = () => {
-    // TODO: can move all of these into the field initialization code in their respective stores
-    if (this.context === "playground") {
-      this.uiStore.patternDrawerOpen = true;
-    } else if (this.context === "controller") {
-      this.uiStore.displayMode = "none";
-    } else if (this.context === "viewer") {
-      this.uiStore.showingViewerInstructionsModal = true;
-      this.uiStore.pixelsPerSecond = MIN_PIXELS_PER_SECOND;
-    }
-  };
 
   initializeClientSide = (initialExperienceName?: string) => {
     if (this.initializedClientSide) return;
@@ -208,9 +194,14 @@ export class Store {
     }
 
     // check for a role in local storage
-    const role = localStorage.getItem("role");
-    if (role) this._role = role as Role;
+    // const role = localStorage.getItem("role");
+    // if (role) this._role = role as Role;
+
+    // For now, we'll just set the role based on the context (page)
     if (this.context === "playlistEditor") this._role = "emcee";
+    else if (this.context === "experienceEditor")
+      this._role = "experience creator";
+    else if (this.context === "viewer") this._role = "vj";
 
     // check for a username in local storage
     const username = localStorage.getItem("username");
