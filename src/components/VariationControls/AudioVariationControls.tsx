@@ -46,6 +46,7 @@ export function AudioVariationControls({
           block.triggerVariationReactions(uniformName);
         }}
         value={smoothing}
+        step={1}
       />
     </>
   );
