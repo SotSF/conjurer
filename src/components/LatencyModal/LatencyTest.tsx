@@ -10,7 +10,7 @@ const tempo = 120; // 120 BPM
 const MIN_BEATS = 10;
 
 async function loadSound(audioContext: AudioContext) {
-  let response = await fetch("./kick.mp3", { mode: "no-cors" });
+  let response = await fetch("/kick.mp3", { mode: "no-cors" });
   let arrayBuffer = await response.arrayBuffer();
   let audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
   return audioBuffer;
