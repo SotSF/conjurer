@@ -30,6 +30,7 @@ import { KeyboardShortcuts } from "@/src/components/KeyboardShortcuts";
 import { useSaveExperience } from "@/src/hooks/experience";
 import { DisplayMode } from "@/src/types/UIStore";
 import { action } from "mobx";
+import { LatencyModal } from "@/src/components/LatencyModal/LatencyModal";
 
 export const MenuBar = observer(function MenuBar() {
   const store = useStore();
@@ -81,6 +82,7 @@ export const MenuBar = observer(function MenuBar() {
           </ModalFooter>
         </ModalContent>
       </Modal>
+      <LatencyModal />
       <HStack>
         <Heading
           size="md"
@@ -308,6 +310,11 @@ export const MenuBar = observer(function MenuBar() {
                   >
                     Transmit data to canopy
                   </MenuItemOption>
+                  <MenuItem
+                    onClick={action(() => (uiStore.showingLatencyModal = true))}
+                  >
+                    Set audio latency
+                  </MenuItem>
                 </MenuList>
               </Menu>
             )}

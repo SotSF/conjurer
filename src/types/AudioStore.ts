@@ -12,6 +12,7 @@ import { filterData } from "@/src/types/audioPeaks";
 import { NO_SONG, Song } from "@/src/types/Song";
 
 export const PEAK_DATA_SAMPLE_RATE = 60;
+const INITIAL_AUDIO_LATENCY = 0.15;
 
 // Define a new RootStore interface here so that we avoid circular dependencies
 interface RootStore {
@@ -33,6 +34,15 @@ export class AudioStore {
 
   audioContext: AudioContext | null = null;
 
+  _audioLatency = INITIAL_AUDIO_LATENCY; // seconds
+  get audioLatency() {
+    return this._audioLatency;
+  }
+  set audioLatency(latency: number) {
+    this._audioLatency = latency;
+    this.saveToLocalStorage();
+  }
+
   constructor(readonly rootStore: RootStore) {
     makeAutoObservable(this, {
       timelinePlugin: false,
@@ -41,6 +51,30 @@ export class AudioStore {
       getPeakAtTime: false,
     });
   }
+
+  initialize = () => {
+    this.loadFromLocalStorage();
+  };
+
+  loadFromLocalStorage = () => {
+    if (typeof window === "undefined") return;
+    const data = localStorage.getItem("audioStore");
+    if (data) {
+      const localStorageAudioSettings = JSON.parse(data);
+      this.audioLatency =
+        localStorageAudioSettings.audioLatency || INITIAL_AUDIO_LATENCY;
+    }
+  };
+
+  saveToLocalStorage = () => {
+    if (typeof window === "undefined") return;
+    localStorage.setItem(
+      "audioStore",
+      JSON.stringify({
+        audioLatency: this.audioLatency,
+      })
+    );
+  };
 
   computePeaks = (audioBuffer: AudioBuffer) => {
     const totalDesiredSamples = Math.floor(
@@ -63,6 +97,20 @@ export class AudioStore {
     if (!this.peaks.length) return 0;
     const index = Math.floor(time * PEAK_DATA_SAMPLE_RATE);
     return this.peaks[index];
+  };
+
+  getSmoothedPeakAtTime = (time: number, smoothing: number) => {
+    if (!this.peaks.length) return 0;
+    if (smoothing === 0) return this.getPeakAtTime(time);
+
+    const index = Math.floor(time * PEAK_DATA_SAMPLE_RATE);
+    const start = Math.max(0, index - smoothing);
+    const end = Math.min(this.peaks.length - 1, index + smoothing);
+
+    let total = 0;
+    for (let i = start; i <= end; i++) total += this.peaks[i];
+
+    return total / (end - start + 1);
   };
 
   toggleAudioMuted = () => {
@@ -88,8 +136,6 @@ export class AudioStore {
   get globalTimeRounded() {
     return Math.round(this.globalTime * 10) / 10;
   }
-
-  audioLatency = 0.15; // seconds
 
   setTimeWithCursor = (time: number) => {
     if (!this.wavesurfer) return;

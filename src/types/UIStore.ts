@@ -37,6 +37,7 @@ export class UIStore {
   showingViewerInstructionsModal = false;
   showingSaveBeatMapModal = false;
   showingLoadBeatMapModal = false;
+  showingLatencyModal = false;
 
   pendingAction: "open" | "save" | "" = "";
 
@@ -70,7 +71,7 @@ export class UIStore {
     this.saveToLocalStorage();
   }
 
-  patternDrawerOpen = false;
+  patternDrawerOpen = this.rootStore.context === "playground";
 
   canTimelineZoom = this.rootStore.context === "experienceEditor";
   pixelsPerSecond = INITIAL_PIXELS_PER_SECOND; // the zoom of the timeline
@@ -79,8 +80,8 @@ export class UIStore {
     makeAutoObservable(this);
   }
 
-  initialize = (embeddedViewer = false) => {
-    if (embeddedViewer) this.setEmbeddedDefaults();
+  initialize = (viewerMode = false) => {
+    if (viewerMode) this.setViewerModeDefaults();
     else this.loadFromLocalStorage();
 
     if (!this.rootStore.username) this.showingUserPickerModal = true;
@@ -171,7 +172,7 @@ export class UIStore {
     this.saveToLocalStorage();
   };
 
-  setEmbeddedDefaults = () => {
+  setViewerModeDefaults = () => {
     this.horizontalLayout = true;
     this.showingPerformance = false;
     this.displayMode = "canopy";

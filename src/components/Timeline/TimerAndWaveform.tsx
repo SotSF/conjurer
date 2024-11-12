@@ -8,7 +8,7 @@ import { TimerControls } from "@/src/components/Timeline/TimerControls";
 
 export const TimerAndWaveform = observer(function TimerAndWaveform() {
   const store = useStore();
-  const { uiStore, embeddedViewer } = store;
+  const { uiStore } = store;
 
   const width = uiStore.canTimelineZoom
     ? uiStore.timeToXPixels(MAX_TIME)
@@ -33,10 +33,11 @@ export const TimerAndWaveform = observer(function TimerAndWaveform() {
         borderColor="black"
         spacing={0}
         width="150px"
+        height="80px"
         zIndex={18}
         bgColor="gray.500"
       >
-        {!embeddedViewer && <TimerReadout />}
+        <TimerReadout />
         <TimerControls />
       </VStack>
 

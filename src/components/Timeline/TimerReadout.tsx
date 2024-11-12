@@ -15,7 +15,16 @@ export const TimerReadout = observer(function TimerReadout() {
   const { audioStore } = useStore();
 
   return (
-    <VStack justify="center">
+    <VStack
+      justify="center"
+      borderWidth={1}
+      bgColor="gray.400"
+      borderRadius={2}
+      lineHeight="1"
+      px={1}
+      py={0.25}
+      m={1}
+    >
       <Text
         color="black"
         fontSize={18}

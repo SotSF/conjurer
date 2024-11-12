@@ -2,7 +2,7 @@ import { ParamType } from "@/src/types/PatternParams";
 import { generateId } from "@/src/utils/id";
 
 export type RootStore = {
-  audioStore: { getPeakAtTime: (time: number) => number };
+  audioStore: { getSmoothedPeakAtTime: (time: number,smoothing: number) => number };
 };
 
 type VariationType =

@@ -51,13 +51,13 @@ export const PlaylistEditor = observer(function PlaylistEditor() {
       // this is very hacky and I hate it but it works
       if (data?.playlist) playlistStore.selectedPlaylist = data.playlist;
     });
-  }, [data?.playlist]);
+  }, [playlistStore, data?.playlist]);
 
   useEffect(() => {
     if (!data?.experiencesAndUsers.length || store.experienceName) return;
     // once experiences are fetched, load the first experience in the playlist
     store.experienceStore.load(data.experiencesAndUsers[0].experience.name);
-  }, [data?.experiencesAndUsers]);
+  }, [store.experienceName, store.experienceStore, data?.experiencesAndUsers]);
 
   const router = useRouter();
 

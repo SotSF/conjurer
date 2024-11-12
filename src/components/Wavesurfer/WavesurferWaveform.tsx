@@ -30,11 +30,18 @@ const WavesurferWaveform = observer(function WavesurferWaveform() {
   const [isReady, setIsReady] = useState(false);
   const clonedWaveformRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
-  const didInitialize = useRef(false);
 
   const cloneCanvas = useCloneCanvas(clonedWaveformRef);
 
   const plugins = useMemo(() => {
+    const timelinePlugin = TimelinePlugin.create({
+      insertPosition: "beforebegin",
+      style: { fontSize: "14px", color: "#000000", zIndex: "100" },
+      height: uiStore.canTimelineZoom ? 60 : 80,
+      primaryLabelInterval: uiStore.canTimelineZoom ? 5 : 30,
+      secondaryLabelInterval: uiStore.canTimelineZoom ? 1 : 0,
+      timeInterval: uiStore.canTimelineZoom ? 0.25 : 5,
+    });
     const minimapPlugin = MinimapPlugin.create({
       waveColor: "#bbb",
       progressColor: "#0178FF",
@@ -49,46 +56,25 @@ const WavesurferWaveform = observer(function WavesurferWaveform() {
       );
       scrollIntoView();
     });
-
-    return [
-      TimelinePlugin.create({
-        insertPosition: "beforebegin",
-        style: {
-          fontSize: "14px",
-          color: "#000000",
-          zIndex: "100",
-        },
-        height: uiStore.canTimelineZoom ? 60 : 80,
-        primaryLabelInterval: uiStore.canTimelineZoom ? 5 : 30,
-        secondaryLabelInterval: uiStore.canTimelineZoom ? 1 : 0,
-        timeInterval: uiStore.canTimelineZoom ? 0.25 : 5,
-      }),
-      minimapPlugin,
-    ];
+    return [timelinePlugin, minimapPlugin];
   }, [audioStore, uiStore.canTimelineZoom]);
 
+  // on audio latency change
   useEffect(() => {
-    if (didInitialize.current || !isReady) return;
-    didInitialize.current = true;
-
-    audioRef.current!.addEventListener(
-      "canplay",
-      () => {
-        // delay audio in order to sync with video
-        const audioContext = new AudioContext();
-        runInAction(() => (audioStore.audioContext = audioContext));
-        const mediaSource = audioContext.createMediaElementSource(
-          audioRef.current!
-        );
-        const delayNode = audioContext.createDelay(5);
-        delayNode.delayTime.value = audioStore.audioLatency;
-        mediaSource.connect(delayNode);
-        delayNode.connect(audioContext.destination);
-      },
-      { once: true }
-    );
-    cloneCanvas();
-  }, [audioStore, isReady, cloneCanvas]);
+    if (!isReady || !audioRef.current) return;
+    const audioElement = audioRef.current;
+    const audioContext = new AudioContext();
+    runInAction(() => (audioStore.audioContext = audioContext));
+    const mediaSource = audioContext.createMediaElementSource(audioElement);
+    const delayNode = audioContext.createDelay(5);
+    delayNode.delayTime.value = audioStore.audioLatency;
+    mediaSource.connect(delayNode);
+    delayNode.connect(audioContext.destination);
+    return () => {
+      audioContext.close();
+      runInAction(() => (audioStore.audioContext = null));
+    };
+  }, [audioStore, audioStore.audioLatency, isReady]);
 
   // on audio state change
   useEffect(() => {
@@ -150,6 +136,9 @@ const WavesurferWaveform = observer(function WavesurferWaveform() {
           waveColor="#DDDDDD"
           progressColor="#0178FF"
           cursorColor="#FF0000FF"
+          barWidth={uiStore.canTimelineZoom ? undefined : 3}
+          barRadius={uiStore.canTimelineZoom ? undefined : 10}
+          barGap={uiStore.canTimelineZoom ? undefined : 1}
           height={uiStore.canTimelineZoom ? 60 : 80}
           fillParent={!uiStore.canTimelineZoom}
           minPxPerSec={

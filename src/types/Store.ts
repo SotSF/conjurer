@@ -1,6 +1,6 @@
 import { Block } from "@/src/types/Block";
-import { MIN_PIXELS_PER_SECOND, UIStore } from "@/src/types/UIStore";
-import { makeAutoObservable, configure } from "mobx";
+import { UIStore } from "@/src/types/UIStore";
+import { makeAutoObservable } from "mobx";
 import { AudioStore } from "@/src/types/AudioStore";
 import { Variation } from "@/src/types/Variations/Variation";
 import { ExperienceStore } from "@/src/types/ExperienceStore";
@@ -19,15 +19,7 @@ import {
 } from "@/src/types/Experience";
 import { NO_SONG } from "@/src/types/Song";
 import { Context, Role } from "@/src/types/context";
-
-// Enforce MobX strict mode, which can make many noisy console warnings, but can help use learn MobX better.
-// Feel free to comment out the following if you want to silence the console messages.
-configure({
-  enforceActions: "always",
-  computedRequiresReaction: true,
-  reactionRequiresObservable: true,
-  observableRequiresReaction: false, // This will trigger false positives sometimes, so turning off
-});
+import "@/src/utils/mobx";
 
 export type BlockSelection = { type: "block"; block: Block };
 
@@ -57,7 +49,7 @@ export class Store {
   layers: Layer[] = [];
 
   sendingData = false;
-  embeddedViewer = false;
+  viewerMode = false;
 
   _globalIntensity = 1;
   get globalIntensity(): number {
@@ -115,7 +107,14 @@ export class Store {
     localStorage.setItem("role", value);
   }
   get roleText(): string {
-    return this._role === "emcee" ? "Emcee" : "Experience Creator";
+    switch (this._role) {
+      case "emcee":
+        return "Emcee";
+      case "experience creator":
+        return "Experience Creator";
+      case "vj":
+        return "VJ";
+    }
   }
 
   private _username = "";
@@ -151,21 +150,7 @@ export class Store {
 
   constructor(readonly context: Context) {
     makeAutoObservable(this);
-
-    this.initializeServerSide();
   }
-
-  initializeServerSide = () => {
-    // TODO: can move all of these into the field initialization code in their respective stores
-    if (this.context === "playground") {
-      this.uiStore.patternDrawerOpen = true;
-    } else if (this.context === "controller") {
-      this.uiStore.displayMode = "none";
-    } else if (this.context === "viewer") {
-      this.uiStore.showingViewerInstructionsModal = true;
-      this.uiStore.pixelsPerSecond = MIN_PIXELS_PER_SECOND;
-    }
-  };
 
   initializeClientSide = (initialExperienceName?: string) => {
     if (this.initializedClientSide) return;
@@ -183,24 +168,34 @@ export class Store {
     if (this.context === "playground") {
       this.playgroundStore.initialize();
       this.uiStore.initialize();
+      this.audioStore.initialize();
       setupControllerWebsocket(this.context, this.playgroundStore.onUpdate);
       return;
     }
 
-    if (this.context === "viewer") {
-      this.embeddedViewer =
-        new URLSearchParams(window.location.search).get("embedded") === "true";
-      this.experienceStore.loadFromParams() ||
-        this.experienceStore.loadEmptyExperience();
-      this.uiStore.initialize(this.embeddedViewer);
-      if (this.embeddedViewer) this.play();
+    this.viewerMode =
+      new URLSearchParams(window.location.search).get("viewerMode") === "true";
+
+    // TODO:
+    if (this.viewerMode) {
+      if (initialExperienceName)
+        this.experienceStore.load(initialExperienceName);
+      else this.experienceStore.loadEmptyExperience();
+      this.uiStore.initialize(this.viewerMode);
+      this.audioStore.initialize();
+      if (this.viewerMode) this.play();
       return;
     }
 
     // check for a role in local storage
-    const role = localStorage.getItem("role");
-    if (role) this._role = role as Role;
+    // const role = localStorage.getItem("role");
+    // if (role) this._role = role as Role;
+
+    // For now, we'll just set the role based on the context (page)
     if (this.context === "playlistEditor") this._role = "emcee";
+    else if (this.context === "experienceEditor")
+      this._role = "experience creator";
+    else if (this.context === "viewer") this._role = "vj";
 
     // check for a username in local storage
     const username = localStorage.getItem("username");
@@ -221,6 +216,7 @@ export class Store {
       this.experienceStore.loadEmptyExperience();
 
     this.uiStore.initialize();
+    this.audioStore.initialize();
   };
 
   toggleSendingData = () => {

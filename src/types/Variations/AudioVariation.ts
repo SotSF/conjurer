@@ -4,21 +4,24 @@ export class AudioVariation extends Variation<number> {
   displayName = "Audio";
   factor: number;
   offset: number;
+  smoothing: number;
 
   constructor(
     duration: number,
     factor: number,
     offset: number,
+    smoothing: number,
     readonly store: RootStore
   ) {
     super("audio", duration);
 
     this.factor = factor;
     this.offset = offset;
+    this.smoothing = smoothing ?? 0;
   }
 
   valueAtTime = (time: number, globalTime: number) =>
-    this.factor * this.store.audioStore.getPeakAtTime(globalTime) + this.offset;
+    this.factor * this.store.audioStore.getSmoothedPeakAtTime(globalTime,this.smoothing) + this.offset;
 
   // TODO:
   computeDomain = () => [0, 1] as [number, number];
@@ -39,7 +42,13 @@ export class AudioVariation extends Variation<number> {
   };
 
   clone = () =>
-    new AudioVariation(this.duration, this.factor, this.offset, this.store);
+    new AudioVariation(
+      this.duration,
+      this.factor,
+      this.offset,
+      this.smoothing,
+      this.store
+    );
 
   serialize = () => ({
     type: this.type,
@@ -49,5 +58,11 @@ export class AudioVariation extends Variation<number> {
   });
 
   static deserialize = (store: RootStore, data: any) =>
-    new AudioVariation(data.duration, data.factor, data.offset, store);
+    new AudioVariation(
+      data.duration,
+      data.factor,
+      data.offset,
+      data.smoothing,
+      store
+    );
 }

@@ -30,7 +30,7 @@ export type SerializedBlock = {
 export type RootStore = {
   context: Context;
   audioStore: {
-    getPeakAtTime: (time: number) => number;
+    getSmoothedPeakAtTime: (time: number, smoothing: number) => number;
   };
 };
 

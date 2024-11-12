@@ -5,4 +5,4 @@ export type Context =
   | "experienceEditor"
   | "playlistEditor";
 
-export type Role = "emcee" | "experience creator";
+export type Role = "emcee" | "experience creator" | "vj";
