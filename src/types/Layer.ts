@@ -4,13 +4,11 @@ import { DEFAULT_BLOCK_DURATION } from "@/src/utils/time";
 import { makeAutoObservable } from "mobx";
 import { generateId } from "@/src/utils/id";
 import { Context } from "@/src/types/context";
+import type { AudioStore } from "@/src/types/AudioStore";
 
 type RootStore = {
   context: Context;
-  audioStore: {
-    getPeakAtTime: (time: number) => number;
-    globalTime: number;
-  };
+  audioStore: AudioStore;
 };
 
 export class Layer {
