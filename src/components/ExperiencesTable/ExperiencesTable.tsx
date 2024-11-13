@@ -17,7 +17,7 @@ import { FaTrashAlt } from "react-icons/fa";
 import { Experience } from "@/src/types/Experience";
 
 type ExperiencesTableProps = {
-  experiencesAndUsers: { user: { username: string }; experience: Experience }[];
+  experiences: Experience[];
   omitIds?: number[];
   onClickExperience?: (experience: Experience) => void;
   selectable?: boolean;
@@ -26,7 +26,7 @@ type ExperiencesTableProps = {
 };
 
 export const ExperiencesTable = observer(function ExperiencesTable({
-  experiencesAndUsers,
+  experiences,
   onClickExperience,
   omitIds,
   selectable,
@@ -40,7 +40,7 @@ export const ExperiencesTable = observer(function ExperiencesTable({
     setSelectedExperienceIds?.(
       selectedExperienceIds?.includes(id)
         ? selectedExperienceIds.filter((selectedId) => selectedId !== id)
-        : [...(selectedExperienceIds ?? []), id]
+        : [...(selectedExperienceIds ?? []), id],
     );
   };
 
@@ -57,15 +57,15 @@ export const ExperiencesTable = observer(function ExperiencesTable({
           </Tr>
         </Thead>
         <Tbody>
-          {experiencesAndUsers
-            .filter(({ experience }) => !omitIds?.includes(experience.id!))
-            .map(({ user, experience }) => (
+          {experiences
+            .filter((experience) => !omitIds?.includes(experience.id!))
+            .map((experience) => (
               <Tr key={experience.id}>
                 {selectable && (
                   <Td>
                     <Checkbox
                       isChecked={selectedExperienceIds?.includes(
-                        experience.id!
+                        experience.id!,
                       )}
                       onChange={() =>
                         toggleExperienceIdSelection(experience.id!)
@@ -87,12 +87,12 @@ export const ExperiencesTable = observer(function ExperiencesTable({
                     {experience.name}
                   </Button>
                 </Td>
-                <Td>{user.username}</Td>
+                <Td>{experience.user.username}</Td>
                 <Td>
                   {experience.song?.artist} - {experience.song?.name}
                 </Td>
                 <Td>
-                  {user.username === username && (
+                  {experience.user.username === username && (
                     <IconButton
                       variant="ghost"
                       size="sm"
@@ -103,7 +103,7 @@ export const ExperiencesTable = observer(function ExperiencesTable({
                       onClick={action(() => {
                         if (
                           !confirm(
-                            "Are you sure you want to delete this experience? This will permanently cast the experience into the fires of Mount Doom. (jk doesn't work yet)"
+                            "Are you sure you want to delete this experience? This will permanently cast the experience into the fires of Mount Doom. (jk doesn't work yet)",
                           )
                         )
                           return;

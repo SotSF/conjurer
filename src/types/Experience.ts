@@ -8,6 +8,8 @@ export type ExperienceStatus = (typeof EXPERIENCE_STATUSES)[number];
 export type Experience = {
   id: number | undefined;
   name: string;
+  // TODO(ben+jeff): we can clean this up later
+  user: { id: number; username: string };
   song: Song;
   status: ExperienceStatus;
   version: number;

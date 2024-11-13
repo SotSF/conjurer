@@ -62,7 +62,7 @@ export const useSaveExperience = () => {
     });
 
     utils.experience.listExperiencesForUser.invalidate();
-    utils.experience.listExperiencesAndUsers.invalidate();
+    utils.experience.listExperiences.invalidate();
   };
 
   return { saveExperience };

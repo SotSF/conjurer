@@ -6,10 +6,12 @@ import { NO_SONG } from "@/src/types/Song";
 // Define a new RootStore interface here so that we avoid circular dependencies
 interface RootStore {
   experienceName: string;
+  // TODO(ben+jeff): maybe this can change
+  username: string;
   hasSaved: boolean;
   experienceLastSavedAt: number;
   usingLocalData: boolean;
-  serialize: () => Experience;
+  serialize: () => Omit<Experience, "user">;
   deserialize: (data: Experience) => void;
 }
 
@@ -47,6 +49,8 @@ export class ExperienceStore {
   loadEmptyExperience = () => {
     this.rootStore.deserialize({
       id: undefined,
+      // TODO(ben+jeff): magic number placeholder to appease the typing gods
+      user: { id: -8, username: this.rootStore.username },
       name: "untitled",
       song: NO_SONG,
       status: "inprogress",
@@ -71,7 +75,7 @@ export class ExperienceStore {
       (_, val) =>
         // round numbers to 6 decimal places, which saves space and is probably enough precision
         val?.toFixed ? Number(val.toFixed(6)) : val,
-      pretty ? 2 : 0
+      pretty ? 2 : 0,
     );
 
   copyToClipboard = () => {

@@ -1,7 +1,7 @@
 import { useStore } from "@/src/types/StoreContext";
 import { trpc } from "@/src/utils/trpc";
 
-export const useExperiencesAndUsers = ({
+export const useExperiences = ({
   username,
   enabled,
 }: {
@@ -15,25 +15,23 @@ export const useExperiencesAndUsers = ({
     isPending,
     isError,
     isRefetching,
-    data: experiencesAndUsers,
-  } = trpc.experience.listExperiencesAndUsers.useQuery(
+    data: experiences,
+  } = trpc.experience.listExperiences.useQuery(
     {
       username,
       usingLocalData,
     },
-    { enabled }
+    { enabled },
   );
 
-  const sortedExperiencesAndUsers = (experiencesAndUsers ?? []).sort((a, b) =>
-    `${a.user.username}${a.experience.name}`.localeCompare(
-      `${b.user.username}${b.experience.name}`
-    )
+  const sortedExperiences = (experiences ?? []).sort((a, b) =>
+    `${a.user.username}${a.name}`.localeCompare(`${b.user.username}${b.name}`),
   );
 
   return {
     isPending,
     isError,
     isRefetching,
-    experiencesAndUsers: sortedExperiencesAndUsers,
+    experiences: sortedExperiences,
   };
 };

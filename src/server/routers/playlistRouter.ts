@@ -1,7 +1,7 @@
 import { router, userProcedure } from "@/src/server/trpc";
 import { z } from "zod";
-import { playlists, SelectUser, usersToExperiences } from "@/src/db/schema";
-import { asc, eq, inArray } from "drizzle-orm";
+import { experiences, playlists, SelectUser } from "@/src/db/schema";
+import { eq, inArray } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { MY_EXPERIENCES_SMART_PLAYLIST, Playlist } from "@/src/types/Playlist";
 import { ConjurerDatabase } from "@/src/db/type";
@@ -9,30 +9,24 @@ import { ConjurerDatabase } from "@/src/db/type";
 const getMyExperiencesSmartPlaylist = async (ctx: {
   db: ConjurerDatabase;
   user: SelectUser;
-}) => {
-  const myExperienceIds = (
-    await ctx.db.query.usersToExperiences
-      .findMany({
-        where: eq(usersToExperiences.userId, ctx.user.id),
-        columns: { experienceId: true },
-        orderBy: [asc(usersToExperiences.id)],
-      })
-      .execute()
-  ).map(({ experienceId }) => experienceId);
-
-  return {
-    ...MY_EXPERIENCES_SMART_PLAYLIST,
-    name: `Experiences by ${ctx.user.username}`,
-    orderedExperienceIds: myExperienceIds,
-  };
-};
+}) => ({
+  ...MY_EXPERIENCES_SMART_PLAYLIST,
+  name: `Experiences by ${ctx.user.username}`,
+  orderedExperienceIds: (
+    await ctx.db
+      .select({ id: experiences.id })
+      .from(experiences)
+      .where(eq(experiences.userId, ctx.user.id))
+      .all()
+  ).map(({ id }) => id),
+});
 
 export const playlistRouter = router({
   getPlaylist: userProcedure
     .input(
       z.object({
         id: z.number(),
-      })
+      }),
     )
     .query(async ({ ctx, input }) => {
       let playlist: Playlist | undefined;
@@ -59,31 +53,25 @@ export const playlistRouter = router({
           message: "Playlist not found",
         });
 
-      const experiencesAndUsers = await ctx.db.query.usersToExperiences
+      const playlistExperiences = await ctx.db.query.experiences
         .findMany({
-          where: inArray(
-            usersToExperiences.experienceId,
-            playlist.orderedExperienceIds
-          ),
-          columns: {},
+          where: inArray(experiences.id, playlist.orderedExperienceIds),
+          columns: { id: true, name: true, status: true, version: true },
           with: {
             user: { columns: { id: true, username: true } },
-            experience: {
-              columns: { id: true, name: true, status: true, version: true },
-              with: { song: true },
-            },
+            song: true,
           },
         })
         .execute();
 
       // Sort the experiences in the order they are in the playlist
-      experiencesAndUsers.sort(
+      playlistExperiences.sort(
         (a, b) =>
-          playlist.orderedExperienceIds.indexOf(a.experience.id) -
-          playlist.orderedExperienceIds.indexOf(b.experience.id)
+          playlist.orderedExperienceIds.indexOf(a.id) -
+          playlist.orderedExperienceIds.indexOf(b.id),
       );
 
-      return { playlist, experiencesAndUsers };
+      return { playlist, playlistExperiences };
     }),
 
   savePlaylist: userProcedure
@@ -93,7 +81,7 @@ export const playlistRouter = router({
         name: z.string(),
         description: z.string(),
         orderedExperienceIds: z.array(z.number()),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       const { id, name, description, orderedExperienceIds } = input;
@@ -141,7 +129,7 @@ export const playlistRouter = router({
     .input(
       z.object({
         id: z.number(),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       await ctx.db
@@ -154,7 +142,7 @@ export const playlistRouter = router({
     .input(
       z.object({
         allPlaylists: z.boolean().optional(),
-      })
+      }),
     )
     .query(async ({ ctx, input }) => {
       const databasePlaylists = await ctx.db.query.playlists
@@ -175,8 +163,8 @@ export const playlistRouter = router({
 
       const sortedPlaylists = databasePlaylists.sort((a, b) =>
         `${a.user.username}-${a.name}`.localeCompare(
-          `${b.user.username}-${b.name}`
-        )
+          `${b.user.username}-${b.name}`,
+        ),
       );
 
       return [await getMyExperiencesSmartPlaylist(ctx), ...sortedPlaylists];

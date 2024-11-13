@@ -18,7 +18,7 @@ import { ExperiencesTable } from "@/src/components/ExperiencesTable/ExperiencesT
 import { useState } from "react";
 import { Playlist } from "@/src/types/Playlist";
 import { useSavePlaylist } from "@/src/hooks/playlist";
-import { useExperiencesAndUsers } from "@/src/hooks/experiencesAndUsers";
+import { useExperiences } from "@/src/hooks/experiencesAndUsers";
 
 export const AddExperienceModal = observer(function AddExperienceModal({
   playlist,
@@ -30,10 +30,10 @@ export const AddExperienceModal = observer(function AddExperienceModal({
 
   const [viewingAllExperiences, setViewingAllExperiences] = useState(false);
   const [selectedExperienceIds, setSelectedExperienceIds] = useState<number[]>(
-    []
+    [],
   );
 
-  const { isPending, isError, experiencesAndUsers } = useExperiencesAndUsers({
+  const { isPending, isError, experiences } = useExperiences({
     username: viewingAllExperiences ? undefined : username,
     enabled: uiStore.showingPlaylistAddExperienceModal,
   });
@@ -60,7 +60,7 @@ export const AddExperienceModal = observer(function AddExperienceModal({
           Add experience to playlist {isPending && <Spinner />}
         </ModalHeader>
         <ModalBody>
-          {!isPending && experiencesAndUsers.length === 0 && (
+          {!isPending && experiences.length === 0 && (
             <Text color="gray.400">
               {username} has no saved experiences yet!
             </Text>
@@ -74,7 +74,7 @@ export const AddExperienceModal = observer(function AddExperienceModal({
           </Switch>
           {!isPending && (
             <ExperiencesTable
-              experiencesAndUsers={experiencesAndUsers}
+              experiences={experiences}
               omitIds={playlist.orderedExperienceIds}
               selectable
               selectedExperienceIds={selectedExperienceIds}

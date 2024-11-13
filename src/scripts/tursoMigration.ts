@@ -86,7 +86,7 @@ const songMap: Record<
 
 // Experience filename format: <user>-<experienceName>.json
 const extractPartsFromExperienceFilename = (
-  filename: string
+  filename: string,
 ): { user: string; experienceName: string } => {
   const parts = filename.split("-");
   return {
@@ -127,12 +127,12 @@ const migration = async () => {
   const experiences = await getExperiences();
 
   const users: string[] = Array.from(
-    new Set(experiences.map((experience) => experience.user))
+    new Set(experiences.map((experience) => experience.user)),
   );
   const songs: string[] = Array.from(
     new Set(
-      experiences.map((experience) => experience.audioStore.selectedAudioFile)
-    )
+      experiences.map((experience) => experience.audioStore.selectedAudioFile),
+    ),
   );
   for (const song of songs) {
     if (!songMap[song]) {
@@ -173,29 +173,19 @@ const migration = async () => {
     const data = { layers: experience.layers };
     const { experienceName: truncatedName } =
       extractPartsFromExperienceFilename(experience.name);
-    const [dbExperience] = await localDB
+    await localDB
       .insert(schema.experiences)
       .values([
         {
           name: truncatedName === "untitled" ? experience.name : truncatedName,
           songId: song.id,
           version: 1,
+          userId: user.id,
           data,
         },
       ])
-      .returning()
       .execute();
     console.log("created experience", experience.name);
-    await localDB
-      .insert(schema.usersToExperiences)
-      .values([
-        {
-          userId: user.id,
-          experienceId: dbExperience.id,
-        },
-      ])
-      .execute();
-    console.log("linked user to experience");
   }
 };
 

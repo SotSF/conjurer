@@ -26,7 +26,7 @@ export const users = sqliteTable("users", {
 });
 
 export const usersRelations = relations(users, ({ many }) => ({
-  usersToExperiences: many(usersToExperiences),
+  experiences: many(experiences),
 }));
 
 export type InsertUser = typeof users.$inferInsert;
@@ -68,6 +68,7 @@ export const experiences = sqliteTable(
       .default("inprogress"),
     data: text({ mode: "json" }).notNull(),
     version: integer("version").notNull().default(0),
+    userId: integer("user_id").notNull(),
 
     ...timestamps,
   },
@@ -76,9 +77,9 @@ export const experiences = sqliteTable(
   }),
 );
 
-export const experiencesRelations = relations(experiences, ({ one, many }) => ({
+export const experiencesRelations = relations(experiences, ({ one }) => ({
   song: one(songs, { fields: [experiences.songId], references: [songs.id] }),
-  usersToExperiences: many(usersToExperiences),
+  user: one(users, { fields: [experiences.userId], references: [users.id] }),
 }));
 
 export type InsertExperience = typeof experiences.$inferInsert;
@@ -104,23 +105,6 @@ export const usersToExperiences = sqliteTable(
     ),
   }),
 );
-
-export const usersToExperiencesRelations = relations(
-  usersToExperiences,
-  ({ one }) => ({
-    user: one(users, {
-      fields: [usersToExperiences.userId],
-      references: [users.id],
-    }),
-    experience: one(experiences, {
-      fields: [usersToExperiences.experienceId],
-      references: [experiences.id],
-    }),
-  }),
-);
-
-export type InsertAuthorship = typeof usersToExperiences.$inferInsert;
-export type SelectAuthorship = typeof usersToExperiences.$inferSelect;
 
 export const playlists = sqliteTable(
   "playlists",

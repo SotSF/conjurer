@@ -43,7 +43,7 @@ export const PlaylistEditor = observer(function PlaylistEditor() {
     {
       enabled: selectedPlaylist !== null,
       staleTime: 1000 * 60 * 10,
-    }
+    },
   );
 
   useEffect(() => {
@@ -54,16 +54,16 @@ export const PlaylistEditor = observer(function PlaylistEditor() {
   }, [playlistStore, data?.playlist]);
 
   useEffect(() => {
-    if (!data?.experiencesAndUsers.length || store.experienceName) return;
+    if (!data?.playlistExperiences.length || store.experienceName) return;
     // once experiences are fetched, load the first experience in the playlist
-    store.experienceStore.load(data.experiencesAndUsers[0].experience.name);
-  }, [store.experienceName, store.experienceStore, data?.experiencesAndUsers]);
+    store.experienceStore.load(data.playlistExperiences[0].name);
+  }, [store.experienceName, store.experienceStore, data?.playlistExperiences]);
 
   const router = useRouter();
 
   if (isPending || isError) return null;
 
-  const { playlist, experiencesAndUsers } = data;
+  const { playlist, playlistExperiences } = data;
 
   return (
     <VStack m={6} justify="start" alignItems="start">
@@ -78,7 +78,7 @@ export const PlaylistEditor = observer(function PlaylistEditor() {
             onClick={action(
               () =>
                 (playlistStore.shufflingPlaylist =
-                  !playlistStore.shufflingPlaylist)
+                  !playlistStore.shufflingPlaylist),
             )}
             leftIcon={<BiShuffle size={14} />}
             bgColor={playlistStore.shufflingPlaylist ? "orange.600" : undefined}
@@ -95,7 +95,8 @@ export const PlaylistEditor = observer(function PlaylistEditor() {
           <Button
             onClick={action(
               () =>
-                (playlistStore.loopingPlaylist = !playlistStore.loopingPlaylist)
+                (playlistStore.loopingPlaylist =
+                  !playlistStore.loopingPlaylist),
             )}
             leftIcon={<ImLoop size={14} />}
             bgColor={playlistStore.loopingPlaylist ? "orange.600" : undefined}
@@ -134,7 +135,7 @@ export const PlaylistEditor = observer(function PlaylistEditor() {
       )}
       <HStack justify="start" align="center" spacing={4}>
         <Text fontSize="md" color="gray.400">
-          {playlist.user.username} • {experiencesAndUsers.length} experiences
+          {playlist.user.username} • {playlistExperiences.length} experiences
         </Text>
       </HStack>
 
@@ -150,7 +151,7 @@ export const PlaylistEditor = observer(function PlaylistEditor() {
             </Tr>
           </Thead>
           <Tbody>
-            {experiencesAndUsers.length === 0 ? (
+            {playlistExperiences.length === 0 ? (
               <>
                 <Tr>
                   <Td>-</Td>
@@ -163,14 +164,14 @@ export const PlaylistEditor = observer(function PlaylistEditor() {
                 </Tr>
               </>
             ) : (
-              experiencesAndUsers.map(({ experience, user }, index) => (
+              playlistExperiences.map((experience, index) => (
                 <Tr key={experience.id}>
                   <PlaylistItem
                     playlist={playlist}
                     experience={experience}
-                    user={user}
+                    user={experience.user}
                     index={index}
-                    playlistLength={experiencesAndUsers.length}
+                    playlistLength={playlistExperiences.length}
                     editable={isEditable}
                   />
                 </Tr>
@@ -188,7 +189,7 @@ export const PlaylistEditor = observer(function PlaylistEditor() {
               size="sm"
               leftIcon={<MdOutlinePlaylistAdd size={20} />}
               onClick={action(
-                () => (uiStore.showingPlaylistAddExperienceModal = true)
+                () => (uiStore.showingPlaylistAddExperienceModal = true),
               )}
             >
               Add experience
