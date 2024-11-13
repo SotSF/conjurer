@@ -5,7 +5,6 @@ import { AudioStore } from "@/src/types/AudioStore";
 import { Variation } from "@/src/types/Variations/Variation";
 import { ExperienceStore } from "@/src/types/ExperienceStore";
 import { Layer } from "@/src/types/Layer";
-import { setupUnityAppWebsocket } from "@/src/websocket/unityWebsocket";
 import { deserializeVariation } from "@/src/types/Variations/variations";
 import { PlaylistStore } from "@/src/types/PlaylistStore";
 import { BeatMapStore } from "@/src/types/BeatMapStore";
@@ -221,7 +220,6 @@ export class Store {
 
   toggleSendingData = () => {
     this.sendingData = !this.sendingData;
-    if (this.sendingData) setupUnityAppWebsocket();
   };
 
   toggleUsingLocalData = () => {
