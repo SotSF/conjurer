@@ -44,9 +44,9 @@ export const songs = sqliteTable(
   (table) => ({
     songNameArtistIndex: uniqueIndex("song_name_artist_index").on(
       table.artist,
-      table.name
+      table.name,
     ),
-  })
+  }),
 );
 
 export const songsRelations = relations(songs, ({ many }) => ({
@@ -73,7 +73,7 @@ export const experiences = sqliteTable(
   },
   (table) => ({
     status_index: index("status_index").on(table.status),
-  })
+  }),
 );
 
 export const experiencesRelations = relations(experiences, ({ one, many }) => ({
@@ -100,9 +100,9 @@ export const usersToExperiences = sqliteTable(
   (table) => ({
     userExperienceIndex: uniqueIndex("user_experience_index").on(
       table.userId,
-      table.experienceId
+      table.experienceId,
     ),
-  })
+  }),
 );
 
 export const usersToExperiencesRelations = relations(
@@ -116,7 +116,7 @@ export const usersToExperiencesRelations = relations(
       fields: [usersToExperiences.experienceId],
       references: [experiences.id],
     }),
-  })
+  }),
 );
 
 export type InsertAuthorship = typeof usersToExperiences.$inferInsert;
@@ -143,7 +143,7 @@ export const playlists = sqliteTable(
   },
   (table) => ({
     userIdIndex: index("user_id_index").on(table.userId),
-  })
+  }),
 );
 
 export const playlistsRelations = relations(playlists, ({ one }) => ({
