@@ -12,17 +12,16 @@ export const experienceRouter = router({
         username: z.string(),
       }),
     )
-    .query(
-      async ({ ctx, input }) =>
-        await ctx.db
-          .select({
-            id: experiences.id,
-            name: experiences.name,
-          })
-          .from(experiences)
-          .leftJoin(users, eq(experiences.userId, users.id))
-          .where(eq(users.username, input.username))
-          .all(),
+    .query(({ ctx, input }) =>
+      ctx.db
+        .select({
+          id: experiences.id,
+          name: experiences.name,
+        })
+        .from(experiences)
+        .leftJoin(users, eq(experiences.userId, users.id))
+        .where(eq(users.username, input.username))
+        .all(),
     ),
 
   listExperiences: databaseProcedure
@@ -119,14 +118,14 @@ export const experienceRouter = router({
         usingLocalData: z.boolean(),
       }),
     )
-    .query(async ({ ctx, input }) => {
-      return await ctx.db.query.experiences
+    .query(({ ctx, input }) =>
+      ctx.db.query.experiences
         .findFirst({
           with: { user: true, song: true },
           where: eq(experiences.name, input.experienceName),
         })
-        .execute();
-    }),
+        .execute(),
+    ),
 
   getExperienceById: databaseProcedure
     .input(
@@ -135,12 +134,12 @@ export const experienceRouter = router({
         usingLocalData: z.boolean(),
       }),
     )
-    .query(async ({ ctx, input }) => {
-      return await ctx.db.query.experiences
+    .query(({ ctx, input }) =>
+      ctx.db.query.experiences
         .findFirst({
           with: { user: true, song: true },
           where: eq(experiences.id, input.experienceId),
         })
-        .execute();
-    }),
+        .execute(),
+    ),
 });
