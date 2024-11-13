@@ -147,7 +147,7 @@ git remote add prod ssh://git@github.com/brollin/conjurer.git
 And then to deploy would just look like:
 
 ```
-git remote add prod ssh://git@github.com/brollin/conjurer.git
+git push prod
 ```
 
 ## Todos
