@@ -8,11 +8,7 @@ import {
   uniqueIndex,
 } from "drizzle-orm/sqlite-core";
 
-export const users = sqliteTable("users", {
-  id: integer("id").primaryKey(),
-  username: text("username").unique().notNull(),
-  isAdmin: integer("is_admin", { mode: "boolean" }).notNull().default(false),
-
+const timestamps = {
   createdAt: text("created_at")
     .default(sql`(CURRENT_TIMESTAMP)`)
     .notNull(),
@@ -20,10 +16,17 @@ export const users = sqliteTable("users", {
     .default(sql`(CURRENT_TIMESTAMP)`)
     .notNull()
     .$onUpdate(() => sql`(CURRENT_TIMESTAMP)`),
+};
+
+export const users = sqliteTable("users", {
+  id: integer("id").primaryKey(),
+  username: text("username").unique().notNull(),
+  isAdmin: integer("is_admin", { mode: "boolean" }).notNull().default(false),
+  ...timestamps,
 });
 
 export const usersRelations = relations(users, ({ many }) => ({
-  usersToExperiences: many(usersToExperiences),
+  experiences: many(experiences),
 }));
 
 export type InsertUser = typeof users.$inferInsert;
@@ -36,21 +39,14 @@ export const songs = sqliteTable(
     name: text("name").notNull(),
     artist: text("artist").notNull().default(""),
     filename: text("filename").notNull(),
-
-    createdAt: text("created_at")
-      .default(sql`(CURRENT_TIMESTAMP)`)
-      .notNull(),
-    updatedAt: text("updated_at")
-      .default(sql`(CURRENT_TIMESTAMP)`)
-      .notNull()
-      .$onUpdate(() => sql`(CURRENT_TIMESTAMP)`),
+    ...timestamps,
   },
   (table) => ({
     songNameArtistIndex: uniqueIndex("song_name_artist_index").on(
       table.artist,
-      table.name
+      table.name,
     ),
-  })
+  }),
 );
 
 export const songsRelations = relations(songs, ({ many }) => ({
@@ -72,23 +68,18 @@ export const experiences = sqliteTable(
       .default("inprogress"),
     data: text({ mode: "json" }).notNull(),
     version: integer("version").notNull().default(0),
+    userId: integer("user_id").notNull(),
 
-    createdAt: text("created_at")
-      .default(sql`(CURRENT_TIMESTAMP)`)
-      .notNull(),
-    updatedAt: text("updated_at")
-      .default(sql`(CURRENT_TIMESTAMP)`)
-      .notNull()
-      .$onUpdate(() => sql`(CURRENT_TIMESTAMP)`),
+    ...timestamps,
   },
   (table) => ({
     status_index: index("status_index").on(table.status),
-  })
+  }),
 );
 
-export const experiencesRelations = relations(experiences, ({ one, many }) => ({
+export const experiencesRelations = relations(experiences, ({ one }) => ({
   song: one(songs, { fields: [experiences.songId], references: [songs.id] }),
-  usersToExperiences: many(usersToExperiences),
+  user: one(users, { fields: [experiences.userId], references: [users.id] }),
 }));
 
 export type InsertExperience = typeof experiences.$inferInsert;
@@ -105,38 +96,15 @@ export const usersToExperiences = sqliteTable(
       .notNull()
       .references(() => experiences.id, { onDelete: "cascade" }),
 
-    createdAt: text("created_at")
-      .default(sql`(CURRENT_TIMESTAMP)`)
-      .notNull(),
-    updatedAt: text("updated_at")
-      .default(sql`(CURRENT_TIMESTAMP)`)
-      .notNull()
-      .$onUpdate(() => sql`(CURRENT_TIMESTAMP)`),
+    ...timestamps,
   },
   (table) => ({
     userExperienceIndex: uniqueIndex("user_experience_index").on(
       table.userId,
-      table.experienceId
+      table.experienceId,
     ),
-  })
+  }),
 );
-
-export const usersToExperiencesRelations = relations(
-  usersToExperiences,
-  ({ one }) => ({
-    user: one(users, {
-      fields: [usersToExperiences.userId],
-      references: [users.id],
-    }),
-    experience: one(experiences, {
-      fields: [usersToExperiences.experienceId],
-      references: [experiences.id],
-    }),
-  })
-);
-
-export type InsertAuthorship = typeof usersToExperiences.$inferInsert;
-export type SelectAuthorship = typeof usersToExperiences.$inferSelect;
 
 export const playlists = sqliteTable(
   "playlists",
@@ -155,17 +123,11 @@ export const playlists = sqliteTable(
       .notNull()
       .default([]),
 
-    createdAt: text("created_at")
-      .default(sql`(CURRENT_TIMESTAMP)`)
-      .notNull(),
-    updatedAt: text("updated_at")
-      .default(sql`(CURRENT_TIMESTAMP)`)
-      .notNull()
-      .$onUpdate(() => sql`(CURRENT_TIMESTAMP)`),
+    ...timestamps,
   },
   (table) => ({
     userIdIndex: index("user_id_index").on(table.userId),
-  })
+  }),
 );
 
 export const playlistsRelations = relations(playlists, ({ one }) => ({

@@ -16,7 +16,7 @@ import { useStore } from "@/src/types/StoreContext";
 import { action } from "mobx";
 import { useState } from "react";
 import { ExperiencesTable } from "@/src/components/ExperiencesTable/ExperiencesTable";
-import { useExperiencesAndUsers } from "@/src/hooks/experiencesAndUsers";
+import { useExperiences } from "@/src/hooks/experiencesAndUsers";
 
 export const OpenExperienceModal = observer(function OpenExperienceModal() {
   const store = useStore();
@@ -25,11 +25,10 @@ export const OpenExperienceModal = observer(function OpenExperienceModal() {
   const [viewingAllExperiences, setViewingAllExperiences] = useState(false);
   const [isLoadingNewExperience, setIsLoadingNewExperience] = useState(false);
 
-  const { isPending, isError, isRefetching, experiencesAndUsers } =
-    useExperiencesAndUsers({
-      username: viewingAllExperiences ? undefined : username,
-      enabled: uiStore.showingOpenExperienceModal,
-    });
+  const { isPending, isError, isRefetching, experiences } = useExperiences({
+    username: viewingAllExperiences ? undefined : username,
+    enabled: uiStore.showingOpenExperienceModal,
+  });
 
   const onClose = action(() => (uiStore.showingOpenExperienceModal = false));
 
@@ -52,7 +51,7 @@ export const OpenExperienceModal = observer(function OpenExperienceModal() {
         </ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          {!isPending && experiencesAndUsers.length === 0 && (
+          {!isPending && experiences.length === 0 && (
             <Text color="gray.400">
               {username} has no saved experiences yet!
             </Text>
@@ -66,7 +65,7 @@ export const OpenExperienceModal = observer(function OpenExperienceModal() {
           </Switch>
           {!isPending && (
             <ExperiencesTable
-              experiencesAndUsers={experiencesAndUsers}
+              experiences={experiences}
               onClickExperience={action(async (experience) => {
                 setIsLoadingNewExperience(true);
                 await experienceStore.load(experience.name);

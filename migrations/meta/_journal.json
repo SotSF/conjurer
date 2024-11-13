@@ -22,6 +22,13 @@
       "when": 1730598821462,
       "tag": "0002_sweet_maria_hill",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1731487566800,
+      "tag": "0003_empty_valeria_richards",
+      "breakpoints": true
     }
   ]
 }

@@ -41,7 +41,7 @@ export class Store {
   playlistStore = new PlaylistStore(
     this,
     this.audioStore,
-    this.experienceStore
+    this.experienceStore,
   );
   playgroundStore = new PlaygroundStore(this);
 
@@ -81,7 +81,7 @@ export class Store {
 
   get singleBlockSelection(): Block | null {
     const blockSelections = Array.from(this.selectedBlocksOrVariations).filter(
-      (blockOrVariation) => blockOrVariation.type === "block"
+      (blockOrVariation) => blockOrVariation.type === "block",
     ) as BlockSelection[];
 
     return blockSelections.length === 1 ? blockSelections[0].block : null;
@@ -89,9 +89,9 @@ export class Store {
 
   get singleVariationSelection(): VariationSelection | null {
     const variationSelections = Array.from(
-      this.selectedBlocksOrVariations
+      this.selectedBlocksOrVariations,
     ).filter(
-      (blockOrVariation) => blockOrVariation.type === "variation"
+      (blockOrVariation) => blockOrVariation.type === "variation",
     ) as VariationSelection[];
 
     return variationSelections.length === 1 ? variationSelections[0] : null;
@@ -237,7 +237,7 @@ export class Store {
   selectVariation = (
     block: Block,
     uniformName: string,
-    variation: Variation
+    variation: Variation,
   ) => {
     this.selectedBlocksOrVariations = new Set([
       {
@@ -253,7 +253,7 @@ export class Store {
   addVariationToSelection = (
     block: Block,
     uniformName: string,
-    variation: Variation
+    variation: Variation,
   ) => {
     this.selectedBlocksOrVariations.add({
       type: "variation",
@@ -277,7 +277,7 @@ export class Store {
   deselectVariation = (
     block: Block,
     uniformName: string,
-    variation: Variation
+    variation: Variation,
   ) => {
     this.selectedBlocksOrVariations.forEach((selectedBlockOrVariation) => {
       if (
@@ -310,7 +310,7 @@ export class Store {
 
     let blockRemoved = false;
     for (const blockOrVariation of Array.from(
-      this.selectedBlocksOrVariations
+      this.selectedBlocksOrVariations,
     )) {
       if (blockOrVariation.type === "block") {
         // TODO: better generalize for multiple layers
@@ -320,7 +320,7 @@ export class Store {
         this.deleteVariation(
           blockOrVariation.block,
           blockOrVariation.uniformName,
-          blockOrVariation.variation
+          blockOrVariation.variation,
         );
     }
 
@@ -340,7 +340,7 @@ export class Store {
     block: Block,
     uniformName: string,
     variation: Variation,
-    insertAtEnd = false
+    insertAtEnd = false,
   ) => {
     block.duplicateVariation(uniformName, variation, insertAtEnd);
     if (block.layer) this._selectedLayer = block.layer;
@@ -350,7 +350,7 @@ export class Store {
   deleteVariation = (
     block: Block,
     uniformName: string,
-    variation: Variation
+    variation: Variation,
   ) => {
     const removeIndex = block.removeVariation(uniformName, variation);
     const nextVariation = block.findVariationAtIndex(uniformName, removeIndex);
@@ -374,16 +374,16 @@ export class Store {
         Array.from(this.selectedBlocksOrVariations).map((blockOrVariation) =>
           blockOrVariation.type === "block"
             ? blockOrVariation.block.serialize()
-            : blockOrVariation.variation.serialize()
-        )
-      )
+            : blockOrVariation.variation.serialize(),
+        ),
+      ),
     );
   };
 
   // TODO: better generalize for multiple layers
   pasteFromClipboard = (clipboardData: DataTransfer) => {
     const blocksOrVariationsData = JSON.parse(
-      clipboardData.getData("text/plain")
+      clipboardData.getData("text/plain"),
     ) as any[];
     if (!blocksOrVariationsData || !blocksOrVariationsData.length) return;
 
@@ -394,14 +394,14 @@ export class Store {
       if (!layerToPasteInto) return;
 
       const blocksToPaste = blocksOrVariationsData.map((b: any) =>
-        Block.deserialize(this, b)
+        Block.deserialize(this, b),
       );
       blocksToPaste.forEach((block) => block.regenerateId());
       this.selectedBlocksOrVariations = new Set();
       for (const blockToPaste of blocksToPaste) {
         const nextGap = layerToPasteInto.nextFiniteGap(
           this.audioStore.globalTime,
-          blockToPaste.duration
+          blockToPaste.duration,
         );
         blockToPaste.setTiming(nextGap);
         layerToPasteInto.addBlock(blockToPaste);
@@ -414,9 +414,9 @@ export class Store {
 
     // at least one variation must already be selected to know where to paste
     const selectedVariations = Array.from(
-      this.selectedBlocksOrVariations
+      this.selectedBlocksOrVariations,
     ).filter(
-      (blockOrVariation) => blockOrVariation.type === "variation"
+      (blockOrVariation) => blockOrVariation.type === "variation",
     ) as VariationSelection[];
     if (!selectedVariations.length) return;
 
@@ -424,7 +424,7 @@ export class Store {
     const uniformNameToPasteTo = selectedVariations[0].uniformName;
 
     const variationsToPaste = blocksOrVariationsData.map((v) =>
-      deserializeVariation(this, v)
+      deserializeVariation(this, v),
     );
 
     this.selectedBlocksOrVariations = new Set();
@@ -449,7 +449,7 @@ export class Store {
         const newBlock = selectedBlock.clone();
         const nextGap = layerToPasteInto.nextFiniteGap(
           selectedBlock.endTime,
-          selectedBlock.duration
+          selectedBlock.duration,
         );
         newBlock.setTiming(nextGap);
         layerToPasteInto.addBlock(newBlock);
@@ -459,9 +459,9 @@ export class Store {
     }
 
     const selectedVariations = Array.from(
-      this.selectedBlocksOrVariations
+      this.selectedBlocksOrVariations,
     ).filter(
-      (blockOrVariation) => blockOrVariation.type === "variation"
+      (blockOrVariation) => blockOrVariation.type === "variation",
       // TODO: do better type discrimination
     ) as VariationSelection[];
     if (selectedVariations.length > 0) {
@@ -470,7 +470,7 @@ export class Store {
           selectedVariation.block,
           selectedVariation.uniformName,
           selectedVariation.variation,
-          selectedVariations.length > 1
+          selectedVariations.length > 1,
         );
       }
     }
@@ -507,7 +507,8 @@ export class Store {
     }
   };
 
-  serialize = (): Experience => ({
+  // TODO(ben+jeff): using Omit here just to appease the type checker
+  serialize = (): Omit<Experience, "user"> => ({
     id: this.experienceId,
     name: this.experienceName,
     song: this.audioStore.selectedSong,
@@ -523,7 +524,7 @@ export class Store {
     this.experienceStatus = experience.status;
     this.experienceVersion = experience.version;
     this.layers = experience.data.layers.map((l: any) =>
-      Layer.deserialize(this, l)
+      Layer.deserialize(this, l),
     );
 
     // Select first layer

@@ -82,6 +82,7 @@
     "eslint": "^8.56.0",
     "eslint-config-next": "^14.2.16",
     "eslint-plugin-mobx": "^0.0.9",
+    "prettier": "^3.3.3",
     "r3f-perf": "^7.1.2",
     "typescript": "^5.2.2"
   }
