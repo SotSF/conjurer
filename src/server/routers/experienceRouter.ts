@@ -25,47 +25,6 @@ export const experienceRouter = router({
           .all(),
     ),
 
-  // listExperiencesForUser: userProcedure.query(async ({ ctx }) => {
-  //   // Approach 1: uses db.select and only requires one query, but the types are nullable in the end for some reason
-  //   // return await ctx.db
-  //   //   .select({ id: experiences.id, name: experiences.name })
-  //   //   .from(usersToExperiences)
-  //   //   .leftJoin(users, eq(usersToExperiences.userId , users.id))
-  //   //   .leftJoin(
-  //   //     experiences,
-  //   //     eq(usersToExperiences.experienceId, experiences.id)
-  //   //   )
-  //   //   .where(eq(users.username, input.username))
-  //   //   .all();
-
-  //   // Approach 2: uses db.query and one query, but currently nested select filters are not supported. They will be supported in the future.
-  //   // return await ctx.db.query.usersToExperiences
-  //   //   .findMany({
-  //   //     columns: {},
-  //   //     with: {
-  //   //       user: {
-  //   //         columns: { username: true },
-  //   //         where: (users, { eq }) => eq(users.username, input.username),
-  //   //       },
-  //   //       experience: { columns: { id: true, name: true } },
-  //   //     },
-  //   //   })
-  //   //   .execute();
-
-  //   // Approach 3: uses db.query which is nice but requires 2 queries (the below one and the one in userProcedure)
-  //   return (
-  //     await ctx.db.query.usersToExperiences
-  //       .findMany({
-  //         where: eq(usersToExperiences.userId, ctx.user.id),
-  //         columns: {},
-  //         with: {
-  //           experience: { columns: { id: true, name: true } },
-  //         },
-  //       })
-  //       .execute()
-  //   ).map(({ experience }) => experience);
-  // }),
-
   listExperiences: databaseProcedure
     .input(
       z.object({
