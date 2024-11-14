@@ -119,21 +119,23 @@ This is a big React app, hastily designed, that's doing a lot of expensive CPU/G
 
 ### Deploying
 
-We host Conjurer on Vercel. Vercel does not allow you to deploy an organization repo like `sotsf/conjurer` on their free hobby tier. So instead, we deploy `brollin/conjurer`. It is an exact copy of the `sotsf/conjurer` repo,
+We host Conjurer on Vercel. Vercel does not allow you to deploy an organization repo like `sotsf/conjurer` on their free hobby tier. So instead, we deploy `secret-fire-dev/conjurer`. `secret-fire-dev` is a shared GitHub account that exists for this sole reason. `secret-fire-dev/conjurer` is an exact copy of the `sotsf/conjurer` repo.
 
-To deploy, all you have to do is to push a new commit to the `main` branch of the `brollin/conjurer` repo. First you will need to be a collaborator on the `brollin/conjurer` repo, so just ask Ben for that.
+To deploy, all you have to do is to push a new commit to the `main` branch of the `secret-fire-dev/conjurer` repo. First you will need to be a collaborator on the `secret-fire-dev/conjurer` repo, so just ask around for that.
 
-For ease, you can clone `sotsf/conjurer`. Then you can set up a new remote called `prod` to point at `brollin/conjurer`:
+For ease of development, you should clone `sotsf/conjurer`. Then you can set up a new remote called `prod` to point at `secret-fire-dev/conjurer`:
 
 ```
-git remote add prod ssh://git@github.com/brollin/conjurer.git
+git remote add prod ssh://git@github.com/secret-fire-dev/conjurer.git
 ```
 
 And then to deploy would just look like:
 
 ```
-git remote add prod ssh://git@github.com/brollin/conjurer.git
+git push prod
 ```
+
+When you push a new commit to the main branch, there will be a Vercel action that actually performs the deploy. You can click it for more details if desired, but you should see your changes go live 3-4 minutes after running `git push prod`.
 
 ## Todos
 
