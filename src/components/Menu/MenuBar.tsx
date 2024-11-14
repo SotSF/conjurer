@@ -118,7 +118,7 @@ export const MenuBar = observer(function MenuBar() {
             onClick={() => {
               if (
                 confirm(
-                  "Switching data sources requires reloading the page - are you sure?"
+                  "Switching data sources requires reloading the page - are you sure?",
                 )
               ) {
                 store.toggleUsingLocalData();
@@ -254,7 +254,7 @@ export const MenuBar = observer(function MenuBar() {
                   value={uiStore.renderTargetSize.toString()}
                   onChange={action(
                     (value) =>
-                      (uiStore.renderTargetSize = parseInt(value as string))
+                      (uiStore.renderTargetSize = parseInt(value as string)),
                   )}
                 >
                   <MenuItemOption value="256">256 x 256</MenuItemOption>
@@ -268,7 +268,7 @@ export const MenuBar = observer(function MenuBar() {
                   type="radio"
                   value={uiStore.displayMode}
                   onChange={action(
-                    (value) => (uiStore.displayMode = value as DisplayMode)
+                    (value) => (uiStore.displayMode = value as DisplayMode),
                   )}
                 >
                   <MenuItemOption value="canopy">Canopy</MenuItemOption>

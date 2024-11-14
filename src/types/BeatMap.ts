@@ -25,10 +25,10 @@ export class BeatMap {
     Math.max(
       0,
       Math.floor(
-        (time - this.tempoOffset + this.beatDuration / 2) / this.beatDuration
+        (time - this.tempoOffset + this.beatDuration / 2) / this.beatDuration,
       ) *
         this.beatDuration +
-        this.tempoOffset
+        this.tempoOffset,
     );
 
   serialize = () => ({

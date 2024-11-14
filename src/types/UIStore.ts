@@ -76,7 +76,10 @@ export class UIStore {
   canTimelineZoom = this.rootStore.context === "experienceEditor";
   pixelsPerSecond = INITIAL_PIXELS_PER_SECOND; // the zoom of the timeline
 
-  constructor(readonly rootStore: RootStore, readonly audioStore: AudioStore) {
+  constructor(
+    readonly rootStore: RootStore,
+    readonly audioStore: AudioStore,
+  ) {
     makeAutoObservable(this);
   }
 
@@ -209,7 +212,7 @@ export class UIStore {
         playgroundDisplayMode: this.playgroundDisplayMode,
         renderTargetSize: this.renderTargetSize,
         pixelsPerSecond: this.pixelsPerSecond,
-      })
+      }),
     );
   };
 }

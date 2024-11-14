@@ -18,7 +18,7 @@ export const catenary = (
   { x: x2, y: y2 }: Point,
   rLength: number,
   N: number,
-  sagInit: number = 1
+  sagInit: number = 1,
 ) => {
   const maxIter = 100; // maximum number of iterations
   const minGrad = 1e-10; // minimum norm of gradient

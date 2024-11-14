@@ -33,7 +33,7 @@ const PortalNarrativeModal = observer(function PortalNarrativeModal() {
   const [currentStep, setCurrentStep] = useState(0);
 
   const onClose = action(
-    () => (uiStore.showingViewerInstructionsModal = false)
+    () => (uiStore.showingViewerInstructionsModal = false),
   );
   useEffect(() => {
     const handleKeyDown = action((e: KeyboardEvent) => {

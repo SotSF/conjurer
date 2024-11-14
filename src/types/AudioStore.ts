@@ -72,13 +72,13 @@ export class AudioStore {
       "audioStore",
       JSON.stringify({
         audioLatency: this.audioLatency,
-      })
+      }),
     );
   };
 
   computePeaks = (audioBuffer: AudioBuffer) => {
     const totalDesiredSamples = Math.floor(
-      PEAK_DATA_SAMPLE_RATE * audioBuffer.duration
+      PEAK_DATA_SAMPLE_RATE * audioBuffer.duration,
     );
     const channelData = filterData(audioBuffer, totalDesiredSamples, true);
     const numberOfChannels = channelData.length;

@@ -37,7 +37,7 @@ export const SplineVariationGraph = memo(function SplineVariationGraph({
       const spliner = new CanvasSpliner(
         id,
         width - VARIATION_BOUND_WIDTH,
-        HEIGHT
+        HEIGHT,
       );
       for (let i = 0; i < variation.points.length; i++) {
         const { x, y } = variation.points[i];
@@ -62,7 +62,7 @@ export const SplineVariationGraph = memo(function SplineVariationGraph({
           (p: { x: number; y: number }) => ({
             x: p.x / width,
             y: p.y / HEIGHT,
-          })
+          }),
         );
       };
       spliner.on("movePoint", handler);

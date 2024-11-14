@@ -17,8 +17,8 @@ const saveJson = (filename: string, data: CanopyGeometry) =>
   fs.writeFileSync(
     filename,
     JSON.stringify(data, (key, val) =>
-      val.toFixed ? Number(val.toFixed(JSON_DECIMAL_PLACES)) : val
-    )
+      val.toFixed ? Number(val.toFixed(JSON_DECIMAL_PLACES)) : val,
+    ),
   );
 
 const saveBinary = (filename: string, data: CanopyGeometry) => {
@@ -38,7 +38,7 @@ const main = async () => {
     { x: APEX_RADIUS, y: APEX_HEIGHT },
     { x: BASE_RADIUS, y: 0 },
     STRIP_LENGTH,
-    LED_COUNTS.y
+    LED_COUNTS.y,
   );
   const catenaryNormal = [];
   for (let i = 0; i < catenaryCoordinates.length; i++) {
@@ -73,12 +73,12 @@ const main = async () => {
       position.push(
         catenaryCoordinates[y][0] * Math.cos(theta),
         catenaryCoordinates[y][0] * Math.sin(theta),
-        -catenaryCoordinates[y][1]
+        -catenaryCoordinates[y][1],
       );
       normal.push(
         catenaryNormal[y][0] * Math.cos(theta),
         catenaryNormal[y][0] * Math.sin(theta),
-        -catenaryNormal[y][1]
+        -catenaryNormal[y][1],
       );
     }
   }

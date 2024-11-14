@@ -33,5 +33,5 @@ export const SingleBlockRenderPipeline = observer(
         renderTargetOut={renderTargetB}
       />
     );
-  }
+  },
 );

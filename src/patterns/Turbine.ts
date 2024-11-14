@@ -13,7 +13,7 @@ export const Turbine = () =>
         new Vector3(0.4, 0.18151, 0.82081),
         new Vector3(0.30995, 0.43477, 0.2783),
         new Vector3(1, 1, 1),
-        new Vector3(0.33107, 0.79852, 0.1234)
+        new Vector3(0.33107, 0.79852, 0.1234),
       ),
     },
     u_time_offset: {

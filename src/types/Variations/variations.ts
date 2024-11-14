@@ -10,7 +10,7 @@ import { RootStore, Variation } from "@/src/types/Variations/Variation";
 
 export const deserializeVariation = (
   store: RootStore,
-  data: any
+  data: any,
 ): Variation => {
   switch (data.type) {
     case "flat":
@@ -31,7 +31,7 @@ export const deserializeVariation = (
       return PaletteVariation.deserialize(store, data);
     default:
       throw new Error(
-        `Need to implement deserialization for variation type: ${data.type}`
+        `Need to implement deserialization for variation type: ${data.type}`,
       );
   }
 };

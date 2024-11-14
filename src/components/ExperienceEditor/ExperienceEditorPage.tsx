@@ -18,7 +18,12 @@ export const ExperienceEditorPage = observer(function ExperienceEditorPage() {
   useEffect(() => {
     if (store.initializedClientSide || !router.query.experienceName) return;
     store.initializeClientSide(router.query.experienceName as string);
-  }, [store, experienceStore, store.experienceName, router.query.experienceName]);
+  }, [
+    store,
+    experienceStore,
+    store.experienceName,
+    router.query.experienceName,
+  ]);
 
   return (
     <Box position="relative" w="100vw" h="100vh">

@@ -35,7 +35,7 @@ export class PeriodicVariation extends Variation<number> {
     amplitude: number,
     period: number,
     phase: number,
-    offset: number
+    offset: number,
   ) {
     super("periodic", duration);
 
@@ -56,7 +56,7 @@ export class PeriodicVariation extends Variation<number> {
         );
       case "square":
         const magnitude = Math.sin(
-          (time / this.period) * 2 * Math.PI + this.phase
+          (time / this.period) * 2 * Math.PI + this.phase,
         );
         const sign = magnitude > 0 ? 1 : -1;
         return sign * this.amplitude + this.offset;
@@ -68,7 +68,7 @@ export class PeriodicVariation extends Variation<number> {
               ((((time - 0.25 * this.period + this.phase) % this.period) +
                 this.period) %
                 this.period) -
-                0.5 * this.period
+                0.5 * this.period,
             ) -
           this.amplitude +
           this.offset
@@ -81,7 +81,7 @@ export class PeriodicVariation extends Variation<number> {
   computeDomain = () =>
     [-this.amplitude + this.offset, this.amplitude + this.offset] as [
       number,
-      number
+      number,
     ];
 
   computeSampledData = (duration: number) => {
@@ -104,7 +104,7 @@ export class PeriodicVariation extends Variation<number> {
       this.amplitude,
       this.period,
       this.phase,
-      this.offset
+      this.offset,
     );
 
   serialize = () => ({
@@ -124,6 +124,6 @@ export class PeriodicVariation extends Variation<number> {
       data.amplitude,
       data.period,
       data.phase,
-      data.offset
+      data.offset,
     );
 }

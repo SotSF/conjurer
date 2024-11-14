@@ -68,7 +68,7 @@ export const SelectablePlaylist = observer(function SelectablePlaylist({
           onClick={action(async () => {
             if (
               !confirm(
-                "Are you sure you want to delete this playlist? This will permanently cast the playlist into the fires of Mount Doom."
+                "Are you sure you want to delete this playlist? This will permanently cast the playlist into the fires of Mount Doom.",
               )
             )
               return;

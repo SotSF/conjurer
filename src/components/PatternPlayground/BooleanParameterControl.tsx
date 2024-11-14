@@ -53,7 +53,7 @@ export const BooleanParameterControl = memo(function BooleanParameterControl({
 
       block.parameterVariations[uniformName]![0] = new FlatVariation(
         DEFAULT_VARIATION_DURATION,
-        inputNumber
+        inputNumber,
       );
     });
   };

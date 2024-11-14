@@ -32,7 +32,7 @@ export const SaveBeatMapModal = observer(function SaveBeatMapModal() {
     {
       usingLocalData,
     },
-    { enabled: uiStore.showingLoadBeatMapModal }
+    { enabled: uiStore.showingLoadBeatMapModal },
   );
 
   const inputRef = useRef<HTMLInputElement>(null);
@@ -63,7 +63,7 @@ export const SaveBeatMapModal = observer(function SaveBeatMapModal() {
   if (isError) return;
 
   const willOverwriteExistingBeatMap = beatMaps?.includes(
-    `${beatMapName}.json`
+    `${beatMapName}.json`,
   );
 
   return (

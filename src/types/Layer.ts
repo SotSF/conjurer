@@ -36,7 +36,7 @@ export class Layer {
 
     const currentBlockIndex = binarySearchForBlockAtTime(
       this.patternBlocks,
-      this.store.audioStore.globalTime
+      this.store.audioStore.globalTime,
     );
     this._lastComputedCurrentBlock =
       this.patternBlocks[currentBlockIndex] ?? null;
@@ -69,7 +69,7 @@ export class Layer {
 
     // insert block in sorted order
     const index = this.patternBlocks.findIndex(
-      (b) => b.startTime > block.startTime
+      (b) => b.startTime > block.startTime,
     );
     if (index === -1) {
       this.patternBlocks.push(block);
@@ -111,7 +111,7 @@ export class Layer {
    */
   nextGap = (
     fromTime: number,
-    blocks: Block[] = this.patternBlocks
+    blocks: Block[] = this.patternBlocks,
   ): { startTime: number; duration?: number } => {
     // no blocks
     if (blocks.length === 0) return { startTime: fromTime };
@@ -177,7 +177,7 @@ export class Layer {
   nextFiniteGap = (
     fromTime: number,
     maxDuration: number = DEFAULT_BLOCK_DURATION,
-    blocks: Block[] = this.patternBlocks
+    blocks: Block[] = this.patternBlocks,
   ): { startTime: number; duration: number } => {
     const gap = this.nextGap(fromTime, blocks);
     return {
@@ -218,7 +218,7 @@ export class Layer {
       const { startTime, duration } = this.nextFiniteGap(
         desiredStartTime,
         block.duration,
-        this.patternBlocks.filter((b) => b !== block)
+        this.patternBlocks.filter((b) => b !== block),
       );
       return startTime === desiredStartTime && duration >= block.duration
         ? desiredDeltaTime
@@ -236,7 +236,7 @@ export class Layer {
     const { startTime, duration } = this.nextFiniteGap(
       potentialStartTime,
       block.duration,
-      this.patternBlocks.filter((b) => b !== block)
+      this.patternBlocks.filter((b) => b !== block),
     );
     return potentialStartTime === startTime && duration >= block.duration
       ? potentialStartTime - block.startTime
@@ -249,7 +249,7 @@ export class Layer {
     // prevent block overlaps for now by snapping to nearest valid start time
     const validTimeDelta = this.nearestValidStartTimeDelta(
       block,
-      relative ? desiredTime : desiredTime - block.startTime
+      relative ? desiredTime : desiredTime - block.startTime,
     );
     this.changeBlockStartTime(block, block.startTime + validTimeDelta);
   };
@@ -322,7 +322,7 @@ export class Layer {
     if (data.id) layer.id = data.id;
     layer.name = data.name ?? "";
     layer.patternBlocks = data.patternBlocks.map((b: any) =>
-      Block.deserialize(store, b)
+      Block.deserialize(store, b),
     );
     layer.patternBlocks.forEach((b) => (b.layer = layer));
     return layer;

@@ -24,7 +24,7 @@ export const PreviewCanvas = observer(function PreviewCanvas({
   const { uiStore } = store;
   const { playgroundDisplayMode } = uiStore;
   const [renderTarget, setRenderTarget] = useState<WebGLRenderTarget | null>(
-    null
+    null,
   );
 
   return (

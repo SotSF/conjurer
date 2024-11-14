@@ -95,7 +95,7 @@ export const PlaylistItem = observer(function PlaylistItem({
                         orderedExperienceIds: reorder(
                           playlist.orderedExperienceIds,
                           index,
-                          index - 1
+                          index - 1,
                         ),
                       })
                     }
@@ -115,7 +115,7 @@ export const PlaylistItem = observer(function PlaylistItem({
                         orderedExperienceIds: reorder(
                           playlist.orderedExperienceIds,
                           index,
-                          index + 1
+                          index + 1,
                         ),
                       })
                     }
@@ -214,7 +214,7 @@ export const PlaylistItem = observer(function PlaylistItem({
                 savePlaylist({
                   ...playlist,
                   orderedExperienceIds: playlist.orderedExperienceIds.filter(
-                    (id) => id !== experience.id
+                    (id) => id !== experience.id,
                   ),
                 });
               }}

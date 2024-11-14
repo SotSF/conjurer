@@ -32,7 +32,7 @@ export const LoginButton = observer(function LoginButton() {
     data: users,
   } = trpc.user.listUsers.useQuery(
     { usingLocalData },
-    { enabled: uiStore.showingUserPickerModal }
+    { enabled: uiStore.showingUserPickerModal },
   );
 
   const createUser = trpc.user.createUser.useMutation();

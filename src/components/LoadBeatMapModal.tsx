@@ -28,7 +28,7 @@ export const LoadBeatMapModal = observer(function LoadBeatMapModal() {
     {
       usingLocalData,
     },
-    { enabled: uiStore.showingLoadBeatMapModal }
+    { enabled: uiStore.showingLoadBeatMapModal },
   );
 
   const onClose = action(() => (uiStore.showingLoadBeatMapModal = false));

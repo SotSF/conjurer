@@ -16,10 +16,10 @@ export const DisplayModeButtons = observer(function DisplayModeButtons() {
   const { uiStore } = store;
 
   const selectedDisplayModeIndex = displayModeTabs.indexOf(
-    uiStore.playgroundDisplayMode
+    uiStore.playgroundDisplayMode,
   );
   const setSelectedDisplayModeIndex = action(
-    (index: number) => (uiStore.playgroundDisplayMode = displayModeTabs[index])
+    (index: number) => (uiStore.playgroundDisplayMode = displayModeTabs[index]),
   );
 
   return (

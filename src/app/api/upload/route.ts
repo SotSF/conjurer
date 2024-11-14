@@ -7,7 +7,7 @@ export const POST = async (req: Request, res: Response) => {
   if (process.env.NODE_ENV === "production") {
     return NextResponse.json(
       { error: "This endpoint is only available in development mode." },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -24,9 +24,9 @@ export const POST = async (req: Request, res: Response) => {
     await writeFile(
       path.join(
         process.cwd(),
-        `public/${LOCAL_ASSET_DIRECTORY}${AUDIO_ASSET_PREFIX}${filename}`
+        `public/${LOCAL_ASSET_DIRECTORY}${AUDIO_ASSET_PREFIX}${filename}`,
       ),
-      new Uint8Array(buffer)
+      new Uint8Array(buffer),
     );
     return NextResponse.json({ Message: "Success", status: 201 });
   } catch (error) {

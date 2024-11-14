@@ -29,7 +29,7 @@ export class SplineVariation extends Variation<number> {
     duration: number,
     points?: { x: number; y: number }[],
     domainMin?: number,
-    domainMax?: number
+    domainMax?: number,
   ) {
     super("spline", duration);
 
@@ -51,7 +51,7 @@ export class SplineVariation extends Variation<number> {
   valueAtTime = (time: number) => {
     let value = this.spline.interpolate(
       // if you pass a value of 1 to interpolate, you get NaN, so we clamp it to 0.99999
-      Math.min(time / this.duration, 0.99999)
+      Math.min(time / this.duration, 0.99999),
     );
 
     // if the interpolation yields NaN, we just use the last value
@@ -79,7 +79,7 @@ export class SplineVariation extends Variation<number> {
       this.duration,
       this.points,
       this.domainMin,
-      this.domainMax
+      this.domainMax,
     );
 
   serialize = () => ({
@@ -95,6 +95,6 @@ export class SplineVariation extends Variation<number> {
       data.duration,
       data.points,
       data.domainMin,
-      data.domainMax
+      data.domainMax,
     );
 }

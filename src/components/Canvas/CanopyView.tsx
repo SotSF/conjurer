@@ -23,7 +23,7 @@ export const Canopy = function Canopy({ renderTarget }: CanopyProps) {
   useEffect(() => {
     // Lazy load the canopy geometry
     import("@/src/data/canopyGeometry.json").then((data) =>
-      setCanopyGeometry(data)
+      setCanopyGeometry(data),
     );
   }, []);
   if (!canopyGeometry) return null;
@@ -58,15 +58,15 @@ const CanopyView = function CanopyView({
     const geometry = new BufferGeometry();
     geometry.setAttribute(
       "position",
-      new BufferAttribute(new Float32Array(canopyGeometry.position), 3)
+      new BufferAttribute(new Float32Array(canopyGeometry.position), 3),
     );
     geometry.setAttribute(
       "uv",
-      new BufferAttribute(new Float32Array(canopyGeometry.uv), 2)
+      new BufferAttribute(new Float32Array(canopyGeometry.uv), 2),
     );
     geometry.setAttribute(
       "normal",
-      new BufferAttribute(new Float32Array(canopyGeometry.normal), 3)
+      new BufferAttribute(new Float32Array(canopyGeometry.normal), 3),
     );
     return geometry;
   }, [canopyGeometry]);
@@ -77,7 +77,7 @@ const CanopyView = function CanopyView({
     const effectComposer = new EffectComposer(gl);
     effectComposer.setSize(
       gl.domElement.clientWidth,
-      gl.domElement.clientHeight
+      gl.domElement.clientHeight,
     );
 
     return effectComposer;
@@ -93,8 +93,8 @@ const CanopyView = function CanopyView({
         new BloomEffect({
           luminanceThreshold: 0.001,
           intensity: 0.7,
-        })
-      )
+        }),
+      ),
     );
   }, [effectComposer, camera]);
 

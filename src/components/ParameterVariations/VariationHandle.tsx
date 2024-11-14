@@ -29,8 +29,8 @@ export const VariationHandle = observer(function VariationHandle({
       !!Array.from(store.selectedBlocksOrVariations).find(
         (blockOrVariation) =>
           blockOrVariation.type === "variation" &&
-          blockOrVariation.variation === variation
-      )
+          blockOrVariation.variation === variation,
+      ),
   ).get();
 
   const onVariationClick = useVariationClick(block, uniformName);

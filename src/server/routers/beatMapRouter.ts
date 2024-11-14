@@ -18,7 +18,7 @@ export const beatMapRouter = router({
     .input(
       z.object({
         usingLocalData: z.boolean(),
-      })
+      }),
     )
     .query(async ({ input }) => {
       let beatMaps: string[] = [];
@@ -44,14 +44,14 @@ export const beatMapRouter = router({
       z.object({
         beatMapName: z.string(),
         usingLocalData: z.boolean(),
-      })
+      }),
     )
     .query(async ({ input }) => {
       if (input.usingLocalData) {
         // TODO: implement this
         const beatMap = fs
           .readFileSync(
-            `${LOCAL_ASSET_PATH}${BEAT_MAP_ASSET_PREFIX}${input.beatMapName}.json`
+            `${LOCAL_ASSET_PATH}${BEAT_MAP_ASSET_PREFIX}${input.beatMapName}.json`,
           )
           .toString();
         return { beatMap };
@@ -79,14 +79,14 @@ export const beatMapRouter = router({
         beatMap: z.string(),
         beatMapName: z.string(),
         usingLocalData: z.boolean(),
-      })
+      }),
     )
     .mutation(async ({ input }) => {
       if (input.usingLocalData) {
         // TODO: implement this
         fs.writeFileSync(
           `${LOCAL_ASSET_PATH}${BEAT_MAP_ASSET_PREFIX}${input.beatMapName}.json`,
-          input.beatMapName
+          input.beatMapName,
         );
         return;
       }

@@ -2,7 +2,9 @@ import { ParamType } from "@/src/types/PatternParams";
 import { generateId } from "@/src/utils/id";
 
 export type RootStore = {
-  audioStore: { getSmoothedPeakAtTime: (time: number,smoothing: number) => number };
+  audioStore: {
+    getSmoothedPeakAtTime: (time: number, smoothing: number) => number;
+  };
 };
 
 type VariationType =
@@ -31,7 +33,7 @@ export abstract class Variation<T extends ParamType = ParamType> {
   abstract computeDomain: () => [number, number];
   abstract computeSampledData: (
     duration: number,
-    globalStartTime?: number
+    globalStartTime?: number,
   ) => { value: number }[];
   abstract clone: () => Variation<T>;
   abstract serialize: () => any;

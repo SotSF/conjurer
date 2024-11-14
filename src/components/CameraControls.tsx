@@ -28,5 +28,5 @@ export const CameraControls = observer(
         <OrbitControls camera={cameraRef.current ?? undefined} />
       </>
     );
-  }
+  },
 );

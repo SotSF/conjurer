@@ -49,7 +49,7 @@ export const PaletteVariationGraph = function PaletteVariationGraph({
               <stop
                 offset="100%"
                 stopColor={vector3ToRgbaString(
-                  palette.colorAt((i + 1) / colorCells)
+                  palette.colorAt((i + 1) / colorCells),
                 )}
               ></stop>
             </linearGradient>

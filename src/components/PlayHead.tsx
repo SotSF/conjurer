@@ -20,7 +20,7 @@ export const PlayHead = observer(function PlayHead() {
         block: scrollPosition,
         inline: scrollPosition,
       }),
-    20
+    20,
   );
 
   useEffect(() => {
@@ -28,7 +28,7 @@ export const PlayHead = observer(function PlayHead() {
       return;
 
     const observer = new IntersectionObserver(
-      ([entry]) => !entry.isIntersecting && scrollIntoView("start")
+      ([entry]) => !entry.isIntersecting && scrollIntoView("start"),
     );
     observer.observe(playHead.current);
     return () => observer.disconnect();
@@ -39,7 +39,7 @@ export const PlayHead = observer(function PlayHead() {
 
     const interval = setInterval(
       () => requestAnimationFrame(() => scrollIntoView("center")),
-      30
+      30,
     );
     return () => clearInterval(interval);
   }, [scrollIntoView, uiStore.keepingPlayHeadCentered, store.playing]);

@@ -39,9 +39,9 @@ export const TimelineBlockStack = observer(function TimelineBlockStack({
 
         // recompute the number of header repetitions
         patternBlock.recomputeHeaderRepetitions(
-          dragNodeRef.current?.clientWidth ?? 0
+          dragNodeRef.current?.clientWidth ?? 0,
         );
-      })
+      }),
     ).observe(dragNodeRef.current);
   }, [dragNodeRef, patternBlock.layer, patternBlock]);
 
@@ -64,7 +64,7 @@ export const TimelineBlockStack = observer(function TimelineBlockStack({
       const deltaPosition = uiStore.timeToX(deltaTime);
       setPosition({ x: deltaPosition, y: 0 });
     },
-    [uiStore, beatMapStore, patternBlock]
+    [uiStore, beatMapStore, patternBlock],
   );
   // handle moving a block to a new start time
   const handleDragStop = action((e: DraggableEvent, data: DraggableData) => {
@@ -74,7 +74,7 @@ export const TimelineBlockStack = observer(function TimelineBlockStack({
     patternBlock.layer.attemptMoveBlock(
       patternBlock,
       uiStore.xToTime(position.x),
-      true
+      true,
     );
     setPosition({ x: 0, y: 0 });
   });
@@ -91,7 +91,7 @@ export const TimelineBlockStack = observer(function TimelineBlockStack({
         Array.from(selectedBlocksOrVariations).find(
           (blockOrVariation) =>
             blockOrVariation.type === "block" &&
-            blockOrVariation.block === patternBlock
+            blockOrVariation.block === patternBlock,
         )
       ) {
         store.deselectBlock(patternBlock);
@@ -104,7 +104,7 @@ export const TimelineBlockStack = observer(function TimelineBlockStack({
       if (patternBlock.layer) store.selectedLayer = patternBlock.layer;
       e.stopPropagation();
     },
-    [store, patternBlock, selectedBlocksOrVariations]
+    [store, patternBlock, selectedBlocksOrVariations],
   );
 
   // cache this value, see https://mobx.js.org/computeds-with-args.html
@@ -113,8 +113,8 @@ export const TimelineBlockStack = observer(function TimelineBlockStack({
       !!Array.from(store.selectedBlocksOrVariations).find(
         (blockOrVariation) =>
           blockOrVariation.type === "block" &&
-          blockOrVariation.block === patternBlock
-      )
+          blockOrVariation.block === patternBlock,
+      ),
   ).get();
 
   return (

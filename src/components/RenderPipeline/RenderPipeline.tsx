@@ -21,7 +21,7 @@ export const RenderPipeline = observer(function RenderPipeline({
   const renderTargetD = useRenderTarget();
 
   const activeLayers = store.layers.filter(
-    (layer) => layer.visible && !!layer.currentBlock
+    (layer) => layer.visible && !!layer.currentBlock,
   );
 
   /*

@@ -28,17 +28,17 @@ export class Palette {
     const r = clamp(
       this.a.x + this.b.x * Math.cos(2 * Math.PI * (this.c.x * t + this.d.x)),
       0,
-      1
+      1,
     );
     const g = clamp(
       this.a.y + this.b.y * Math.cos(2 * Math.PI * (this.c.y * t + this.d.y)),
       0,
-      1
+      1,
     );
     const b = clamp(
       this.a.z + this.b.z * Math.cos(2 * Math.PI * (this.c.z * t + this.d.z)),
       0,
-      1
+      1,
     );
     this.colorOut.set(r, g, b);
     return this.colorOut;
@@ -66,7 +66,7 @@ export class Palette {
       new Vector3(serialized.a[0], serialized.a[1], serialized.a[2]),
       new Vector3(serialized.b[0], serialized.b[1], serialized.b[2]),
       new Vector3(serialized.c[0], serialized.c[1], serialized.c[2]),
-      new Vector3(serialized.d[0], serialized.d[1], serialized.d[2])
+      new Vector3(serialized.d[0], serialized.d[1], serialized.d[2]),
     );
 
   setFromSerialized = (serialized: SerializedPalette) => {
@@ -84,7 +84,7 @@ export class Palette {
       new Vector3(0.387, 0.8, 0.435),
       new Vector3(0.8, 0.392, 0.071),
       new Vector3(1.497, 1.219, 1.176),
-      new Vector3(3.613, 5.485, 0.773)
+      new Vector3(3.613, 5.485, 0.773),
     );
 }
 

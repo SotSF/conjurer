@@ -43,7 +43,7 @@ export class EasingVariation extends Variation<number> {
     duration: number,
     easingType: EasingVariationType,
     from: number,
-    to: number
+    to: number,
   ) {
     super("easing", duration);
 
@@ -59,7 +59,7 @@ export class EasingVariation extends Variation<number> {
   computeDomain = () =>
     [Math.min(this.from, this.to), Math.max(this.from, this.to)] as [
       number,
-      number
+      number,
     ];
 
   computeSampledData = (duration: number) => {

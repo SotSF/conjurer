@@ -14,7 +14,7 @@ export type PatternParam<T = ParamType> = {
 };
 
 export const isBooleanParam = (
-  param: PatternParam
+  param: PatternParam,
 ): param is PatternParam<number> =>
   typeof param.value === "number" &&
   param.min === 0 &&
@@ -22,19 +22,19 @@ export const isBooleanParam = (
   param.step === 1;
 
 export const isNumberParam = (
-  param: PatternParam
+  param: PatternParam,
 ): param is PatternParam<number> => typeof param.value === "number";
 
 export const isVector4Param = (
-  param: PatternParam
+  param: PatternParam,
 ): param is PatternParam<Vector4> => isVector4(param.value);
 
 export const isPaletteParam = (
-  param: PatternParam
+  param: PatternParam,
 ): param is PatternParam<Palette> => isPalette(param.value);
 
 export const isTextureParam = (
-  param: PatternParam
+  param: PatternParam,
 ): param is PatternParam<Texture> => param.value instanceof Texture;
 
 export type StandardParams = {
