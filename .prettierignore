@@ -1,0 +1,4 @@
+migrations
+src/data
+*.frag
+*.vert
