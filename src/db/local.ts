@@ -11,7 +11,7 @@ export const getLocalDatabase = () => {
 
   if (!fs.existsSync("./local.db")) {
     throw new Error(
-      "Local database file not found. Run `yarn db:local:setup` to create it."
+      "Local database file not found. Run `yarn db:local:setup` to create it.",
     );
   }
 

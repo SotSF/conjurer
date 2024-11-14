@@ -13,7 +13,7 @@ export const GentleRings = () =>
         new Vector3(0.5, 0.5, 0.5),
         new Vector3(0.5, 0.5, 0.5),
         new Vector3(1, 1, 1),
-        new Vector3(0, 0.33, 0.67)
+        new Vector3(0, 0.33, 0.67),
       ),
     },
   });

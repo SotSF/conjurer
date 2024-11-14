@@ -13,7 +13,7 @@ export class PaletteVariation extends Variation<Palette> {
       palette.a.clone(),
       palette.b.clone(),
       palette.c.clone(),
-      palette.d.clone()
+      palette.d.clone(),
     );
   }
 
@@ -38,7 +38,7 @@ export class PaletteVariation extends Variation<Palette> {
         new Vector3(...data.palette.a),
         new Vector3(...data.palette.b),
         new Vector3(...data.palette.c),
-        new Vector3(...data.palette.d)
-      )
+        new Vector3(...data.palette.d),
+      ),
     );
 }

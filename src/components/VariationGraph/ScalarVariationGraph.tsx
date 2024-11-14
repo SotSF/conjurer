@@ -40,7 +40,7 @@ export const ScalarVariationGraph = function ScalarVariationGraph({
 
   const data = variation.computeSampledData(
     variation.duration,
-    block.startTime
+    block.startTime,
   );
 
   return (

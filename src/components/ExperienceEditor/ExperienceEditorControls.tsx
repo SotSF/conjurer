@@ -72,7 +72,7 @@ export const ExperienceEditorControls = observer(
           onClick={action(
             () =>
               (uiStore.keepingPlayHeadCentered =
-                !uiStore.keepingPlayHeadCentered)
+                !uiStore.keepingPlayHeadCentered),
           )}
         />
         <IconButton
@@ -90,7 +90,8 @@ export const ExperienceEditorControls = observer(
           icon={<TbArrowBigRightLines size={17} />}
           onClick={action(
             () =>
-              (uiStore.keepingPlayHeadVisible = !uiStore.keepingPlayHeadVisible)
+              (uiStore.keepingPlayHeadVisible =
+                !uiStore.keepingPlayHeadVisible),
           )}
         />
         <IntensitySlider />
@@ -101,8 +102,7 @@ export const ExperienceEditorControls = observer(
           icon={<FaShareAlt size={17} />}
           onClick={store.copyLinkToExperience}
         />
-
       </HStack>
     );
-  }
+  },
 );

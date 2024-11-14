@@ -44,6 +44,6 @@ export class LinearVariation4 extends Variation<Vector4> {
     new LinearVariation4(
       data.duration,
       new Vector4(...data.from),
-      new Vector4(...data.to)
+      new Vector4(...data.to),
     );
 }

@@ -11,7 +11,7 @@ export class AudioVariation extends Variation<number> {
     factor: number,
     offset: number,
     smoothing: number,
-    readonly store: RootStore
+    readonly store: RootStore,
   ) {
     super("audio", duration);
 
@@ -21,7 +21,9 @@ export class AudioVariation extends Variation<number> {
   }
 
   valueAtTime = (time: number, globalTime: number) =>
-    this.factor * this.store.audioStore.getSmoothedPeakAtTime(globalTime,this.smoothing) + this.offset;
+    this.factor *
+      this.store.audioStore.getSmoothedPeakAtTime(globalTime, this.smoothing) +
+    this.offset;
 
   // TODO:
   computeDomain = () => [0, 1] as [number, number];
@@ -34,7 +36,7 @@ export class AudioVariation extends Variation<number> {
       data.push({
         value: this.valueAtTime(
           0,
-          globalStartTime + duration * (i / (totalSamples - 1))
+          globalStartTime + duration * (i / (totalSamples - 1)),
         ),
       });
     }
@@ -47,7 +49,7 @@ export class AudioVariation extends Variation<number> {
       this.factor,
       this.offset,
       this.smoothing,
-      this.store
+      this.store,
     );
 
   serialize = () => ({
@@ -63,6 +65,6 @@ export class AudioVariation extends Variation<number> {
       data.factor,
       data.offset,
       data.smoothing,
-      store
+      store,
     );
 }

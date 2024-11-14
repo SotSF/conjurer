@@ -38,7 +38,7 @@ export const NewVariationButtons = memo(function NewVariationButtons({
 }: NewVariationButtonsProps) {
   const store = useStore();
   const newVariationButtons = isVector4Param(
-    block.pattern.params[uniformName]
+    block.pattern.params[uniformName],
   ) ? (
     <>
       <IconButton
@@ -57,8 +57,8 @@ export const NewVariationButtons = memo(function NewVariationButtons({
               new LinearVariation4(
                 DEFAULT_VARIATION_DURATION,
                 lastValue.clone(),
-                lastValue.clone()
-              )
+                lastValue.clone(),
+              ),
             );
             return;
           }
@@ -69,8 +69,8 @@ export const NewVariationButtons = memo(function NewVariationButtons({
             new LinearVariation4(
               DEFAULT_VARIATION_DURATION,
               new Vector4(0, 0, 0, 1),
-              new Vector4(0.32, 0.1, 0.6, 1)
-            )
+              new Vector4(0.32, 0.1, 0.6, 1),
+            ),
           );
         })}
       />
@@ -92,8 +92,8 @@ export const NewVariationButtons = memo(function NewVariationButtons({
               uniformName,
               new PaletteVariation(
                 DEFAULT_VARIATION_DURATION,
-                new Palette(lastValue.a, lastValue.b, lastValue.c, lastValue.d)
-              )
+                new Palette(lastValue.a, lastValue.b, lastValue.c, lastValue.d),
+              ),
             );
             return;
           }
@@ -101,7 +101,7 @@ export const NewVariationButtons = memo(function NewVariationButtons({
           store.addVariation(
             block,
             uniformName,
-            new PaletteVariation(DEFAULT_VARIATION_DURATION, Palette.default())
+            new PaletteVariation(DEFAULT_VARIATION_DURATION, Palette.default()),
           );
         })}
       />
@@ -121,7 +121,7 @@ export const NewVariationButtons = memo(function NewVariationButtons({
             store.addVariation(
               block,
               uniformName,
-              new FlatVariation(DEFAULT_VARIATION_DURATION, lastValue)
+              new FlatVariation(DEFAULT_VARIATION_DURATION, lastValue),
             );
             return;
           }
@@ -129,7 +129,7 @@ export const NewVariationButtons = memo(function NewVariationButtons({
           store.addVariation(
             block,
             uniformName,
-            new FlatVariation(DEFAULT_VARIATION_DURATION, 1)
+            new FlatVariation(DEFAULT_VARIATION_DURATION, 1),
           );
         })}
       />
@@ -146,7 +146,7 @@ export const NewVariationButtons = memo(function NewVariationButtons({
             store.addVariation(
               block,
               uniformName,
-              new LinearVariation(DEFAULT_VARIATION_DURATION, lastValue, 1)
+              new LinearVariation(DEFAULT_VARIATION_DURATION, lastValue, 1),
             );
             return;
           }
@@ -154,7 +154,7 @@ export const NewVariationButtons = memo(function NewVariationButtons({
           store.addVariation(
             block,
             uniformName,
-            new LinearVariation(DEFAULT_VARIATION_DURATION, 1, 2)
+            new LinearVariation(DEFAULT_VARIATION_DURATION, 1, 2),
           );
         })}
       />
@@ -174,9 +174,9 @@ export const NewVariationButtons = memo(function NewVariationButtons({
               0.5,
               2,
               0,
-              0.5
-            )
-          )
+              0.5,
+            ),
+          ),
         )}
       />
       <IconButton
@@ -194,7 +194,7 @@ export const NewVariationButtons = memo(function NewVariationButtons({
             store.addVariation(
               block,
               uniformName,
-              new SplineVariation(DEFAULT_VARIATION_DURATION, points)
+              new SplineVariation(DEFAULT_VARIATION_DURATION, points),
             );
             return;
           }
@@ -202,7 +202,7 @@ export const NewVariationButtons = memo(function NewVariationButtons({
           store.addVariation(
             block,
             uniformName,
-            new SplineVariation(DEFAULT_VARIATION_DURATION)
+            new SplineVariation(DEFAULT_VARIATION_DURATION),
           );
         })}
       />
@@ -223,8 +223,8 @@ export const NewVariationButtons = memo(function NewVariationButtons({
                 DEFAULT_VARIATION_DURATION,
                 "easeInSine",
                 lastValue,
-                lastValue + 1
-              )
+                lastValue + 1,
+              ),
             );
             return;
           }
@@ -232,7 +232,7 @@ export const NewVariationButtons = memo(function NewVariationButtons({
           store.addVariation(
             block,
             uniformName,
-            new EasingVariation(DEFAULT_VARIATION_DURATION, "easeInSine", 0, 1)
+            new EasingVariation(DEFAULT_VARIATION_DURATION, "easeInSine", 0, 1),
           );
         })}
       />
@@ -246,7 +246,7 @@ export const NewVariationButtons = memo(function NewVariationButtons({
           store.addVariation(
             block,
             uniformName,
-            new AudioVariation(DEFAULT_VARIATION_DURATION, 1, 0, 0, store)
+            new AudioVariation(DEFAULT_VARIATION_DURATION, 1, 0, 0, store),
           );
         })}
       />

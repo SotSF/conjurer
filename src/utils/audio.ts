@@ -4,7 +4,7 @@
 export function getPeaksAtThreshold(
   data: Float32Array,
   threshold: number,
-  sampleRate: number
+  sampleRate: number,
 ) {
   const peaksArray = [];
   const length = data.length;
@@ -22,7 +22,7 @@ export function getPeaksAtThreshold(
 // Function used to return a histogram of peak intervals
 export function countIntervalsBetweenNearbyPeaks(
   peaks: number[],
-  roundFactor: number
+  roundFactor: number,
 ) {
   const intervalCounts: { interval: number; count: number }[] = [];
   peaks.forEach((peak, index) => {
@@ -47,7 +47,7 @@ export function countIntervalsBetweenNearbyPeaks(
 // Function used to return a histogram of tempo candidates.
 export function groupNeighborsByTempo(
   intervalCounts: { interval: number; count: number }[],
-  sampleRate: number
+  sampleRate: number,
 ) {
   const tempoCounts: { tempo: number; count: number }[] = [];
   intervalCounts.forEach(
@@ -69,7 +69,7 @@ export function groupNeighborsByTempo(
           count: intervalCount.count,
         });
       }
-    }
+    },
   );
   return tempoCounts;
 }

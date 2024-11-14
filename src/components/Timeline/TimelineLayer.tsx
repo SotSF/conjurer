@@ -51,9 +51,9 @@ export const TimelineLayer = observer(function TimelineLayer({
             Math.max(
               0,
               uiStore.xToTime(
-                e.clientX - boxRef.current!.getBoundingClientRect().x
-              )
-            )
+                e.clientX - boxRef.current!.getBoundingClientRect().x,
+              ),
+            ),
           );
           store.deselectAll();
         })}

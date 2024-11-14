@@ -24,7 +24,7 @@ export const handleVoiceCommandActionMessage = action(
       const time = clamp(
         convertSpokenTimeToSeconds(message.value),
         0,
-        MAX_TIME
+        MAX_TIME,
       );
       store.audioStore.setTimeWithCursor(time);
     } else if (
@@ -69,5 +69,5 @@ export const handleVoiceCommandActionMessage = action(
     } else if (action === "copyExperience") {
       store.experienceStore.copyToClipboard();
     }
-  }
+  },
 );

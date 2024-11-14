@@ -33,7 +33,7 @@ export class PlaylistStore {
     if (
       areEqual(
         this.selectedPlaylist.orderedExperienceIds,
-        this._cachedPlaylistOrderedExperienceIds
+        this._cachedPlaylistOrderedExperienceIds,
       )
     ) {
       return this._cachedExperienceIdPlayOrder;
@@ -54,7 +54,7 @@ export class PlaylistStore {
   constructor(
     readonly rootStore: RootStore,
     readonly audioStore: AudioStore,
-    readonly experienceStore: ExperienceStore
+    readonly experienceStore: ExperienceStore,
   ) {
     makeAutoObservable(this, {
       _cachedPlaylistOrderedExperienceIds: false,
@@ -111,7 +111,7 @@ export class PlaylistStore {
     if (!this.rootStore.experienceId) desiredIndex = 0;
     else {
       const currentIndex = this.experienceIdPlayOrder.indexOf(
-        this.rootStore.experienceId
+        this.rootStore.experienceId,
       );
       desiredIndex = currentIndex + delta;
 

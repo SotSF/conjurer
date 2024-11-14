@@ -13,7 +13,7 @@ export const AudioSelector = observer(function AudioSelector() {
 
   const { isPending, data: songs } = trpc.song.listSongs.useQuery(
     { usingLocalData },
-    { refetchOnWindowFocus: false }
+    { refetchOnWindowFocus: false },
   );
 
   if (isPending || !songs) {
@@ -29,7 +29,7 @@ export const AudioSelector = observer(function AudioSelector() {
         value={audioStore.selectedSong.filename}
         onChange={action((e) => {
           audioStore.selectedSong = songsWithNoSongOption.find(
-            (song) => song.filename === e.target.value
+            (song) => song.filename === e.target.value,
           )!;
         })}
       >

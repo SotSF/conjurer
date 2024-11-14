@@ -45,7 +45,7 @@ export const ParameterVariations = observer(function ParameterVariations({
     block.parameterVariations[uniformName] = reorder(
       variations,
       result.source.index,
-      result.destination.index
+      result.destination.index,
     );
   });
 

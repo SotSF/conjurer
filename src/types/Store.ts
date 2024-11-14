@@ -9,7 +9,6 @@ import { deserializeVariation } from "@/src/types/Variations/variations";
 import { PlaylistStore } from "@/src/types/PlaylistStore";
 import { BeatMapStore } from "@/src/types/BeatMapStore";
 import { PlaygroundStore } from "@/src/types/PlaygroundStore";
-import { setupControllerWebsocket } from "@/src/websocket/controllerWebsocket";
 import { setupVoiceCommandWebsocket } from "@/src/websocket/voiceCommandWebsocket";
 import {
   EXPERIENCE_VERSION,
@@ -158,17 +157,10 @@ export class Store {
     if (process.env.NEXT_PUBLIC_ENABLE_VOICE === "true")
       setupVoiceCommandWebsocket(this);
 
-    if (this.context === "controller") {
-      this.playgroundStore.initialize();
-      setupControllerWebsocket(this.context);
-      return;
-    }
-
     if (this.context === "playground") {
       this.playgroundStore.initialize();
       this.uiStore.initialize();
       this.audioStore.initialize();
-      setupControllerWebsocket(this.context, this.playgroundStore.onUpdate);
       return;
     }
 

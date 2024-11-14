@@ -12,7 +12,7 @@ export const songRouter = router({
         name: z.string(),
         artist: z.string(),
         filename: z.string(),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       const { name, artist, filename } = input;

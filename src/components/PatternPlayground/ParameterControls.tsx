@@ -46,7 +46,7 @@ export const ParameterControls = memo(function ParameterControls({
               parameters={parameters}
               setParameters={setParameters}
             />
-          )
+          ),
         )}
     </VStack>
   );

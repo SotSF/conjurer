@@ -6,7 +6,7 @@ import { useStore } from "@/src/types/StoreContext";
 import { KeyboardControls } from "@/src/components/KeyboardControls";
 
 const PortalNarrativeModal = lazy(
-  () => import("@/src/components/PortalNarrativeModal")
+  () => import("@/src/components/PortalNarrativeModal"),
 );
 
 type Props = {

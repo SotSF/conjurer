@@ -10,7 +10,7 @@ export const userRouter = router({
     .input(
       z.object({
         username: z.string(),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       const { username } = input;

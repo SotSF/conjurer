@@ -10,8 +10,8 @@ export const useRenderTarget = (width = 0, height = 0) => {
     () =>
       new WebGLRenderTarget(
         width || renderTargetSize,
-        height || renderTargetSize
+        height || renderTargetSize,
       ),
-    [width, height, renderTargetSize]
+    [width, height, renderTargetSize],
   );
 };

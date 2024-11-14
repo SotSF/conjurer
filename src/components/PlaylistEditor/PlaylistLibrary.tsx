@@ -35,7 +35,7 @@ export const PlaylistLibrary = observer(function PlaylistLibrary() {
       username,
       allPlaylists: viewingAllPlaylists,
     },
-    { staleTime: 1000 * 60 * 10 }
+    { staleTime: 1000 * 60 * 10 },
   );
 
   useEffect(() => {

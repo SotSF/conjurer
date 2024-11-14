@@ -8,6 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "format": "prettier --write .",
     "db:generate": "drizzle-kit generate --config=drizzle-local.config.ts",
     "db:local:migrate": "drizzle-kit migrate --config=drizzle-local.config.ts",
     "db:local:studio": "drizzle-kit studio --config=drizzle-local.config.ts",
@@ -20,7 +21,6 @@
     "tursoMigration": "src/scripts/tursoMigration.sh",
     "downloadCloudAudio": "ts-node --project tsconfig.script.json src/scripts/downloadCloudAudio.ts",
     "unityTestServer": "ts-node --project tsconfig.script.json src/scripts/unityTestServer.ts",
-    "controllerServer": "ts-node --project tsconfig.script.json src/scripts/controllerServer.ts",
     "generatePattern": "ts-node --project tsconfig.script.json src/scripts/generatePattern.ts"
   },
   "dependencies": {

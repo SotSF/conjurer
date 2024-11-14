@@ -24,7 +24,7 @@ export const useDataTransmission = (mesh: Mesh | null, enabled: boolean) => {
     if (!canTransmitData) return;
 
     const ws = new WebSocket(
-      `ws://${UNITY_APP_WEBSOCKET_HOST}:${UNITY_APP_WEBSOCKET_PORT}`
+      `ws://${UNITY_APP_WEBSOCKET_HOST}:${UNITY_APP_WEBSOCKET_PORT}`,
     );
     ws.binaryType = "arraybuffer";
 
@@ -87,7 +87,7 @@ export const useDataTransmission = (mesh: Mesh | null, enabled: boolean) => {
       0,
       LED_COUNTS.x,
       LED_COUNTS.y,
-      arrayBuffer.current
+      arrayBuffer.current,
     );
 
     transmitData(arrayBuffer.current);

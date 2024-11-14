@@ -63,7 +63,7 @@ export const BeatMapperView = observer(function BeatMapperView() {
   });
 
   const [tempoOffsetString, setTempoOffsetString] = useState(
-    beatMap.tempoOffset.toFixed(6)
+    beatMap.tempoOffset.toFixed(6),
   );
   const setTempoOffset = action((valueString: string) => {
     setTempoOffsetString(valueString);
@@ -71,7 +71,7 @@ export const BeatMapperView = observer(function BeatMapperView() {
   });
 
   const [selectedBeatIndex, setSelectedBeatIndex] = useState<number | null>(
-    null
+    null,
   );
 
   useEffect(() => {
@@ -95,7 +95,7 @@ export const BeatMapperView = observer(function BeatMapperView() {
     var offlineContext = new OfflineAudioContext(
       1,
       audioBuffer.length,
-      audioBuffer.sampleRate
+      audioBuffer.sampleRate,
     );
 
     // Create buffer source
@@ -124,23 +124,23 @@ export const BeatMapperView = observer(function BeatMapperView() {
       const filteredPeaks = getPeaksAtThreshold(
         filteredBuffer.getChannelData(0),
         Number(threshold),
-        filteredBuffer.sampleRate
+        filteredBuffer.sampleRate,
       );
 
       const newBeats = filteredPeaks.map(
-        (peakIndex) => peakIndex / filteredBuffer.sampleRate
+        (peakIndex) => peakIndex / filteredBuffer.sampleRate,
       );
       setBeats(newBeats);
 
       const histogram = countIntervalsBetweenNearbyPeaks(filteredPeaks, 200);
       const newTempoCounts = groupNeighborsByTempo(
         histogram,
-        filteredBuffer.sampleRate
+        filteredBuffer.sampleRate,
       );
 
       // sort data by highest count
       const sortedTempoCounts = newTempoCounts.sort(
-        (a, b) => b.count - a.count
+        (a, b) => b.count - a.count,
       );
       setTempoCounts(sortedTempoCounts);
     };

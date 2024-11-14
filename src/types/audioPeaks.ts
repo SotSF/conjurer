@@ -13,7 +13,7 @@
 export const filterData = (
   audioBuffer: AudioBuffer,
   samples: number,
-  allchannels = false
+  allchannels = false,
 ) => {
   const channels = allchannels ? audioBuffer.numberOfChannels : 1;
   let filteredDataChannels = [];

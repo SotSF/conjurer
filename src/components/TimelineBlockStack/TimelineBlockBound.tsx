@@ -24,7 +24,7 @@ export const TimelineBlockBound = observer(function TimelineBlockBound({
   const handleDrag = useCallback(
     (e: DraggableEvent, data: DraggableData) =>
       setPosition({ x: data.x, y: 0 }),
-    []
+    [],
   );
 
   const changeBound = (delta: number) => {

@@ -25,7 +25,7 @@ export const PatternOrEffectBlock = observer(function PatternOrEffectBlock({
   effectIndex = -1,
 }: Props) {
   const [expandMode, setExpandMode] = useState<"expanded" | "collapsed">(
-    "collapsed"
+    "collapsed",
   );
 
   const parentBlock = block.parentBlock;
@@ -77,7 +77,7 @@ export const PatternOrEffectBlock = observer(function PatternOrEffectBlock({
             }
             onClick={(e) => {
               setExpandMode(
-                expandMode === "expanded" ? "collapsed" : "expanded"
+                expandMode === "expanded" ? "collapsed" : "expanded",
               );
               e.stopPropagation();
             }}
@@ -94,7 +94,7 @@ export const PatternOrEffectBlock = observer(function PatternOrEffectBlock({
                   _hover={{ color: "blue.500" }}
                   icon={<RxCaretDown size={28} />}
                   onClick={action(() =>
-                    parentBlock.reorderEffectBlock(block, 1)
+                    parentBlock.reorderEffectBlock(block, 1),
                   )}
                 />
               )}
@@ -107,7 +107,7 @@ export const PatternOrEffectBlock = observer(function PatternOrEffectBlock({
                   _hover={{ color: "blue.500" }}
                   icon={<RxCaretUp size={28} />}
                   onClick={action(() =>
-                    parentBlock.reorderEffectBlock(block, -1)
+                    parentBlock.reorderEffectBlock(block, -1),
                   )}
                 />
               )}

@@ -16,7 +16,7 @@ export const databaseProcedure = publicProcedure
   .input(
     z.object({
       usingLocalData: z.boolean(),
-    })
+    }),
   )
   .use(async ({ input, next }) => {
     const { usingLocalData } = input;
@@ -42,7 +42,7 @@ export const userProcedure = databaseProcedure
   .input(
     z.object({
       username: z.string(),
-    })
+    }),
   )
   .use(async ({ ctx, input, next }) => {
     const { username } = input;

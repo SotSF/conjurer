@@ -12,7 +12,7 @@ export const Lissajous = () =>
         new Vector3(0.5, 0.5, 0.5),
         new Vector3(0.5, 0.5, 0.194),
         new Vector3(1.0, 0.608, 1.0),
-        new Vector3(0.468, 0.198, 0.557)
+        new Vector3(0.468, 0.198, 0.557),
       ),
     },
     u_count: {

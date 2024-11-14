@@ -29,7 +29,7 @@ export const SaveExperienceModal = observer(function SaveExperienceModal() {
     data: experiences,
   } = trpc.experience.listExperiencesForUser.useQuery(
     { username, usingLocalData },
-    { enabled: uiStore.showingSaveExperienceModal }
+    { enabled: uiStore.showingSaveExperienceModal },
   );
 
   const { saveExperience } = useSaveExperience();
@@ -67,11 +67,11 @@ export const SaveExperienceModal = observer(function SaveExperienceModal() {
   };
 
   const willOverwriteExistingExperience = (experiences ?? []).some(
-    ({ name }) => name === newExperienceName
+    ({ name }) => name === newExperienceName,
   );
 
   const sortedExperiences = (experiences ?? []).sort((a, b) =>
-    a.name.localeCompare(b.name)
+    a.name.localeCompare(b.name),
   );
 
   return (

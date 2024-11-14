@@ -17,17 +17,18 @@ export const ParametersList = memo(function ParametersList({
 }: ParametersListProps) {
   return (
     <VStack spacing={0} width="100%">
-      {Object.entries(block.pattern.params).map(([uniformName, patternParam]) =>
-        uniformNamesToExclude.includes(uniformName) ? null : (
-          <ParameterView
-            // if the expandMode changes, we want to re-render all the ParameterViews
-            key={uniformName + expandMode}
-            expandMode={expandMode}
-            uniformName={uniformName}
-            patternParam={patternParam}
-            block={block}
-          />
-        )
+      {Object.entries(block.pattern.params).map(
+        ([uniformName, patternParam]) =>
+          uniformNamesToExclude.includes(uniformName) ? null : (
+            <ParameterView
+              // if the expandMode changes, we want to re-render all the ParameterViews
+              key={uniformName + expandMode}
+              expandMode={expandMode}
+              uniformName={uniformName}
+              patternParam={patternParam}
+              block={block}
+            />
+          ),
       )}
     </VStack>
   );

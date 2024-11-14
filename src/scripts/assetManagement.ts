@@ -17,8 +17,8 @@ export const createDirectory = (path: string) => {
 export const copyDirectory = (src: string, dest: string): Promise<void> =>
   new Promise<void>((resolve, reject) =>
     fs.cp(src, dest, { recursive: true }, (err) =>
-      err ? reject(err) : resolve()
-    )
+      err ? reject(err) : resolve(),
+    ),
   );
 
 export const saveJson = (filename: string, data: any) =>
@@ -47,7 +47,7 @@ export const downloadAudio = async (s3: S3Client) => {
     if (audioData?.length)
       fs.writeFileSync(
         `${LOCAL_ASSET_PATH}${AUDIO_ASSET_PREFIX}${filename}`,
-        new Uint8Array(Buffer.from(audioData))
+        new Uint8Array(Buffer.from(audioData)),
       );
   }
 };

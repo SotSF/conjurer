@@ -27,14 +27,14 @@ export const VariationBound = memo(function VariationBound({
   const handleDrag = useCallback(
     (e: DraggableEvent, data: DraggableData) =>
       setPosition({ x: data.x, y: 0 }),
-    []
+    [],
   );
   const handleStop = action(() => {
     let deltaTime = uiStore.xToTime(position.x);
     if (uiStore.snappingToBeatGrid) {
       const variationEndTime = block.getVariationGlobalEndTime(
         uniformName,
-        variation
+        variation,
       );
       const hoveredTime = uiStore.xToTime(position.x) + variationEndTime;
       const nearestBeatTime = beatMapStore.beatMap.nearestBeatTime(hoveredTime);

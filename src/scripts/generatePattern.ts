@@ -32,7 +32,7 @@ const printer = ts.createPrinter();
 const prependChild = (
   node: ts.Node,
   newChild: ts.Node,
-  context: ts.TransformationContext
+  context: ts.TransformationContext,
 ) => {
   let childCount = 0;
 
@@ -44,7 +44,7 @@ const prependChild = (
       }
       return n;
     },
-    context
+    context,
   );
 };
 
@@ -63,9 +63,9 @@ const transformer: ts.TransformerFactory<ts.Node> = (context) => {
         undefined,
         f.createNamedImports([
           f.createImportSpecifier(false, undefined, newIdentifier),
-        ])
+        ]),
       ),
-      f.createStringLiteral(`@/src/patterns/${patternName}`)
+      f.createStringLiteral(`@/src/patterns/${patternName}`),
     );
 
     const importIdentifiers = new Set([patternName]);
@@ -76,7 +76,7 @@ const transformer: ts.TransformerFactory<ts.Node> = (context) => {
           if (ts.isIdentifier(importChild)) {
             if (importIdentifiers.has(importChild.text)) {
               console.error(
-                `ERROR: hey choose a different name ya dunce (${importChild.text}), exiting!`
+                `ERROR: hey choose a different name ya dunce (${importChild.text}), exiting!`,
               );
               process.exit(1);
             }
@@ -144,5 +144,5 @@ fs.copyFileSync(shaderPath, newShaderPath);
 console.log("writing", patternsTSFile);
 fs.writeFileSync(
   patternsTSFile,
-  printer.printNode(ts.EmitHint.Unspecified, updatedSource, source!)
+  printer.printNode(ts.EmitHint.Unspecified, updatedSource, source!),
 );

@@ -20,7 +20,7 @@ const scrollIntoView = debounce(
       inline: "center",
     }),
   20,
-  { leading: false, trailing: true }
+  { leading: false, trailing: true },
 );
 
 const WavesurferWaveform = observer(function WavesurferWaveform() {
@@ -52,7 +52,7 @@ const WavesurferWaveform = observer(function WavesurferWaveform() {
     });
     minimapPlugin.on("interaction", () => {
       audioStore.setTimeWithCursor(
-        Math.max(0, audioStore.wavesurfer!.getCurrentTime())
+        Math.max(0, audioStore.wavesurfer!.getCurrentTime()),
       );
       scrollIntoView();
     });
@@ -97,7 +97,13 @@ const WavesurferWaveform = observer(function WavesurferWaveform() {
     if (!audioStore.wavesurfer || !isReady || !uiStore.canTimelineZoom) return;
     audioStore.wavesurfer.zoom(uiStore.pixelsPerSecond);
     cloneCanvas();
-  }, [cloneCanvas, uiStore.pixelsPerSecond, uiStore.canTimelineZoom, audioStore.wavesurfer, isReady]);
+  }, [
+    cloneCanvas,
+    uiStore.pixelsPerSecond,
+    uiStore.canTimelineZoom,
+    audioStore.wavesurfer,
+    isReady,
+  ]);
 
   // on cursor change
   useEffect(() => {

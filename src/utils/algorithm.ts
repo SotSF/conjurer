@@ -5,7 +5,7 @@ export function binarySearchForBlockAtTime(
   blocks: Block[],
   time: number,
   start = 0,
-  end = blocks.length - 1
+  end = blocks.length - 1,
 ): number {
   if (start > end) return -1;
   const mid = Math.floor((start + end) / 2);

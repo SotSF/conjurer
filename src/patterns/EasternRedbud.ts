@@ -12,7 +12,7 @@ export const EasternRedbud = () =>
         new Vector3(0.387, 0.8, 0.435),
         new Vector3(0.8, 0.392, 0.071),
         new Vector3(1.497, 1.219, 1.176),
-        new Vector3(3.613, 5.485, 0.773)
+        new Vector3(3.613, 5.485, 0.773),
       ),
     },
     u_time_factor: {

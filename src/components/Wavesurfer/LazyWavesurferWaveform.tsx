@@ -5,5 +5,5 @@ export const LazyWavesurferWaveform = dynamic(
   () => import("@/src/components/Wavesurfer/WavesurferWaveform"),
   {
     ssr: false,
-  }
+  },
 );

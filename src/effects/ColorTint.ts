@@ -17,5 +17,5 @@ export const ColorTint = () =>
         value: 0.3,
       },
     },
-    ["v_normalized_uv"]
+    ["v_normalized_uv"],
   );
