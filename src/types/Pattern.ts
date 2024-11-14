@@ -25,7 +25,7 @@ export class Pattern<T extends ExtraParams = ExtraParams> {
     name: string,
     src: string,
     parameters: T = {} as T,
-    vertexShaderVaryings: Varying[] = ["v_uv"]
+    vertexShaderVaryings: Varying[] = ["v_uv"],
   ) {
     this.name = name;
     this.fragmentShader = src;
@@ -60,12 +60,13 @@ export class Pattern<T extends ExtraParams = ExtraParams> {
     const pattern = new Pattern<T>(
       this.name,
       this.fragmentShader,
-      clonedParams
+      clonedParams,
     );
     pattern.vertexShader = this.vertexShader;
     return pattern;
   };
 
+  // Note: not using includeParams anymore but probably will in the future
   serialize = (includeParams = false): SerializedPattern => {
     if (!includeParams) return { name: this.name };
 

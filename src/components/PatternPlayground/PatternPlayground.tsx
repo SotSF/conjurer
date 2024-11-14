@@ -1,13 +1,5 @@
 import styles from "@/styles/PatternPlayground.module.css";
-import {
-  Box,
-  Button,
-  Grid,
-  GridItem,
-  HStack,
-  Switch,
-  VStack,
-} from "@chakra-ui/react";
+import { Box, Button, Grid, GridItem, HStack, VStack } from "@chakra-ui/react";
 import { PatternList } from "@/src/components/PatternPlayground/PatternList";
 import { PreviewCanvas } from "@/src/components/Canvas/PreviewCanvas";
 import { useCallback, useEffect, useRef } from "react";
@@ -47,7 +39,7 @@ export const PatternPlayground = observer(function PatternPlayground() {
         });
       });
     },
-    [effectBlocks, patternBlocks]
+    [effectBlocks, patternBlocks],
   );
 
   const onSelectPatternBlock = action((index: number) => {
@@ -76,10 +68,16 @@ export const PatternPlayground = observer(function PatternPlayground() {
   useEffect(() => {
     applyPatternEffects(
       playgroundStore.selectedPatternIndex,
-      playgroundStore.selectedEffectIndices
+      playgroundStore.selectedEffectIndices,
     );
-    playgroundStore.sendControllerUpdateMessage();
-  }, [context, selectedPatternBlock, applyPatternEffects, playgroundStore, playgroundStore.selectedEffectIndices, playgroundStore.selectedPatternIndex]);
+  }, [
+    context,
+    selectedPatternBlock,
+    applyPatternEffects,
+    playgroundStore,
+    playgroundStore.selectedEffectIndices,
+    playgroundStore.selectedPatternIndex,
+  ]);
 
   const didInitialize = useRef(false);
   useEffect(() => {
@@ -87,7 +85,14 @@ export const PatternPlayground = observer(function PatternPlayground() {
     didInitialize.current = true;
     store.initializeClientSide();
     applyPatternEffects(lastPatternIndexSelected, lastEffectIndices);
-  }, [store, lastPatternIndexSelected, lastEffectIndices, playgroundStore.lastEffectIndices, onSelectPatternBlock, applyPatternEffects]);
+  }, [
+    store,
+    lastPatternIndexSelected,
+    lastEffectIndices,
+    playgroundStore.lastEffectIndices,
+    onSelectPatternBlock,
+    applyPatternEffects,
+  ]);
 
   return (
     <Grid className={styles.grid} height="100%">
@@ -115,23 +120,6 @@ export const PatternPlayground = observer(function PatternPlayground() {
         </VStack>
       </GridItem>
       <GridItem area="preview" position="relative">
-        {context === "controller" && (
-          <VStack width="100%" justify="center">
-            <Button
-              size="sm"
-              onClick={() => playgroundStore.sendControllerUpdateMessage(true)}
-            >
-              Update
-            </Button>
-            <Switch
-              size="md"
-              isChecked={playgroundStore.autoUpdate}
-              onChange={(e) => (playgroundStore.autoUpdate = e.target.checked)}
-            >
-              Auto-update
-            </Switch>
-          </VStack>
-        )}
         <HStack my={2} pr={1} justify="center">
           <DisplayModeButtons />
           {/* <RecordCanvasControls /> */}

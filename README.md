@@ -87,7 +87,6 @@ graph
 - [/viewer](https://canopyconjurer.vercel.app/viewer) - view-only page
 - [/portal](https://canopyconjurer.vercel.app/portal) - view-only page that tells a story
 - [/playground](https://canopyconjurer.vercel.app/playground) - page for tinkering with patterns+effects, can be used to VJ
-- [/controller](https://canopyconjurer.vercel.app/controller) - controller page can control playground page (requires running controllerServer)
 - [/beatMapper](https://canopyconjurer.vercel.app/beatMapper) - page for constructing a beat map for a song (work in progress)
 - [/test](https://canopyconjurer.vercel.app/test) - test page for the embedded Conjurer viewer
 
@@ -96,10 +95,6 @@ graph
 #### `yarn generatePattern PatternName`
 
 Generates boilerplate for a new pattern called PatternName. Choose your own unique PatternName. It prints out the filepaths it writes, including the fragment shader and typescript pattern definition.
-
-#### `yarn controllerServer`
-
-Starts the server that passes messages between conjurer and conjurer controllers.
 
 #### `yarn generateCanopy`
 
@@ -112,16 +107,6 @@ Starts a websocket server at port 8080 on localhost. For development use only, t
 #### `ANALYZE=true yarn build`
 
 Use webpack analyzer to analyze the bundle. Will launch three tabs in your browser with bundle size details.
-
-### Setting up Conjurer Playground to run via Controller
-
-1. Find your local IP address, and set `CONTROLLER_SERVER_WEBSOCKET_HOST` (`websocketHost.ts`) to that address.
-1. Run `yarn dev`, or `yarn build && yarn start`.
-1. Run `yarn controllerServer`.
-1. Open http://localhost:3000/playground.
-1. On any device on the network, visit http://<IP_ADDRESS>:3000/controller.
-
-You are good to go - when you change things with the controller, you should see the playground page update.
 
 ### Performance issues / memory leaks
 

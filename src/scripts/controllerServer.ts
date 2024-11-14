@@ -1,13 +1,11 @@
 import { WebSocketServer } from "ws";
-import { CONTROLLER_SERVER_WEBSOCKET_PORT } from "../websocket/websocketHost";
 import { inspect } from "util";
 
-// TODO: do better
 interface MyWebSocket {
   destinationPlayground: boolean;
 }
 
-const wss = new WebSocketServer({ port: CONTROLLER_SERVER_WEBSOCKET_PORT });
+const wss = new WebSocketServer({ port: 8081 });
 wss.on("connection", (ws) => {
   ws.on("error", console.error);
 
@@ -20,7 +18,7 @@ wss.on("connection", (ws) => {
       // Mark this client as a playground client. Always the last playground to connect.
       wss.clients.forEach(
         (client) =>
-          ((client as unknown as MyWebSocket).destinationPlayground = false)
+          ((client as unknown as MyWebSocket).destinationPlayground = false),
       );
       (ws as unknown as MyWebSocket).destinationPlayground = true;
     } else if (data.type === "updateBlock") {

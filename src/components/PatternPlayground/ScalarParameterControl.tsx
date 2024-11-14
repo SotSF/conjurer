@@ -54,7 +54,7 @@ export const ScalarParameterControl = observer(function ScalarParameterControl({
 }: ScalarParameterControlProps) {
   const { playgroundStore } = useStore();
   const [variationMode, setVariationMode] = useState<"flat" | "periodic">(
-    "flat"
+    "flat",
   );
   const [showTooltip, setShowTooltip] = useState(false);
   const min = typeof patternParam.min === "number" ? patternParam.min : 0;
@@ -77,11 +77,9 @@ export const ScalarParameterControl = observer(function ScalarParameterControl({
 
       block.parameterVariations[uniformName]![0] = new FlatVariation(
         DEFAULT_VARIATION_DURATION,
-        inputNumber
+        inputNumber,
       );
     });
-
-    playgroundStore.sendControllerUpdateMessage();
   };
 
   const onVariationModeToggle = () => {
@@ -96,7 +94,7 @@ export const ScalarParameterControl = observer(function ScalarParameterControl({
       if (newVariationMode === "flat")
         block.parameterVariations[uniformName]![0] = new FlatVariation(
           DEFAULT_VARIATION_DURATION,
-          patternParam.value
+          patternParam.value,
         );
       else if (newVariationMode === "periodic")
         block.parameterVariations[uniformName]![0] = new PeriodicVariation(
@@ -105,11 +103,9 @@ export const ScalarParameterControl = observer(function ScalarParameterControl({
           0,
           DEFAULT_VARIATION_DURATION,
           0,
-          patternParam.value
+          patternParam.value,
         );
     });
-
-    playgroundStore.sendControllerUpdateMessage();
   };
 
   const firstVariation = block.parameterVariations[uniformName]?.[0];
@@ -181,7 +177,6 @@ export const ScalarParameterControl = observer(function ScalarParameterControl({
                 block={block}
                 variation={firstVariation}
                 matchPeriodAndDuration
-                onChange={playgroundStore.sendControllerUpdateMessage}
               />
             </VStack>
           )}
