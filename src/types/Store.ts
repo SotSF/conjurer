@@ -107,7 +107,7 @@ export class Store {
       case "emcee":
         return "Emcee";
       case "experienceCreator":
-        return "experienceCreator";
+        return "Experience Creator";
       case "vj":
         return "VJ";
     }

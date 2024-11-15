@@ -28,7 +28,8 @@ import { useRouter } from "next/router";
 
 export const PlaylistEditor = observer(function PlaylistEditor() {
   const store = useStore();
-  const { userStore, usingLocalData, playlistStore, uiStore } = store;
+  const { userStore, usingLocalData, experienceStore, playlistStore, uiStore } =
+    store;
   const { username } = userStore;
   const { selectedPlaylist } = playlistStore;
 
@@ -54,10 +55,11 @@ export const PlaylistEditor = observer(function PlaylistEditor() {
   }, [playlistStore, data?.playlist]);
 
   useEffect(() => {
-    if (!data?.playlistExperiences.length || store.experienceName) return;
+    if (!data?.playlistExperiences.length) return;
+    if (store.experienceName && store.experienceName !== "untitled") return;
     // once experiences are fetched, load the first experience in the playlist
-    store.experienceStore.load(data.playlistExperiences[0].name);
-  }, [store.experienceName, store.experienceStore, data?.playlistExperiences]);
+    experienceStore.load(data.playlistExperiences[0].name);
+  }, [store.experienceName, experienceStore, data?.playlistExperiences]);
 
   const router = useRouter();
 

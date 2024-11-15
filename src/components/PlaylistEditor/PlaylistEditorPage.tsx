@@ -11,6 +11,7 @@ import { LoadingOverlay } from "@/src/components/LoadingOverlay";
 
 export const PlaylistEditorPage = function PlaylistEditorPage() {
   const store = useStore();
+  const { userStore } = store;
 
   useEffect(() => {
     if (store.initializedClientSide) return;
@@ -19,7 +20,11 @@ export const PlaylistEditorPage = function PlaylistEditorPage() {
 
   return (
     <Box position="relative" w="100vw" h="100vh">
-      <PanelGroup autoSaveId="playlistEditor-1" direction="horizontal">
+      <PanelGroup
+        key={userStore.username}
+        autoSaveId="playlistEditor-1"
+        direction="horizontal"
+      >
         <Panel defaultSize={25} minSize={20}>
           <PlaylistLibrary />
         </Panel>
