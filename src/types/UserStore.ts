@@ -1,13 +1,7 @@
-import type { UIStore } from "@/src/types/UIStore";
+import type { Store } from "@/src/types/Store";
 import { FullUser } from "@/src/types/User";
 import { trpcClient } from "@/src/utils/trpc";
 import { makeAutoObservable } from "mobx";
-
-type RootStore = {
-  context: string;
-  uiStore: UIStore;
-  usingLocalData: boolean;
-};
 
 export class UserStore {
   private _lastAuthenticatedUsername = "";
@@ -36,7 +30,7 @@ export class UserStore {
     return this.me?.username ?? "";
   }
 
-  constructor(readonly rootStore: RootStore) {
+  constructor(readonly store: Store) {
     makeAutoObservable(this);
   }
 
@@ -49,14 +43,14 @@ export class UserStore {
 
     if (!this.me) {
       this.lastAuthenticatedUsername = "";
-      this.rootStore.uiStore.showingUserPickerModal = true;
+      this.store.uiStore.showingUserPickerModal = true;
     }
   };
 
   fetchUser = async (username: string) => {
     return await trpcClient.user.getUser.query({
       username,
-      usingLocalData: this.rootStore.usingLocalData,
+      usingLocalData: this.store.usingLocalData,
     });
   };
 }

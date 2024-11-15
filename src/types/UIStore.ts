@@ -1,8 +1,6 @@
-import { Context } from "@/src/types/context";
-import type { AudioStore } from "@/src/types/AudioStore";
-import type { UserStore } from "@/src/types/UserStore";
 import { INITIAL_PIXELS_PER_SECOND } from "@/src/utils/time";
 import { makeAutoObservable } from "mobx";
+import type { Store } from "@/src/types/Store";
 
 export const MAX_PIXELS_PER_SECOND = 160;
 export const MIN_PIXELS_PER_SECOND = 4;
@@ -10,12 +8,6 @@ export const MIN_PIXELS_PER_SECOND = 4;
 const INITIAL_RENDER_TARGET_SIZE = 512;
 
 export type DisplayMode = "canopy" | "canopySpace" | "cartesianSpace" | "none";
-
-type RootStore = {
-  context: Context;
-  audioStore: AudioStore;
-  userStore: UserStore;
-};
 
 export class UIStore {
   horizontalLayout = true;
@@ -67,12 +59,12 @@ export class UIStore {
     this.saveToLocalStorage();
   }
 
-  patternDrawerOpen = this.rootStore.context === "playground";
+  patternDrawerOpen = this.store.context === "playground";
 
-  canTimelineZoom = this.rootStore.context === "experienceEditor";
+  canTimelineZoom = this.store.context === "experienceEditor";
   pixelsPerSecond = INITIAL_PIXELS_PER_SECOND; // the zoom of the timeline
 
-  constructor(readonly rootStore: RootStore) {
+  constructor(readonly store: Store) {
     makeAutoObservable(this);
   }
 
@@ -92,9 +84,7 @@ export class UIStore {
     }
 
     // resetting the time will restart the playhead animation
-    this.rootStore.audioStore.setTimeWithCursor(
-      this.rootStore.audioStore.globalTime,
-    );
+    this.store.audioStore.setTimeWithCursor(this.store.audioStore.globalTime);
   };
 
   zoomIn = (amount?: number) => {
@@ -104,9 +94,7 @@ export class UIStore {
     }
 
     // resetting the time will restart the playhead animation
-    this.rootStore.audioStore.setTimeWithCursor(
-      this.rootStore.audioStore.globalTime,
-    );
+    this.store.audioStore.setTimeWithCursor(this.store.audioStore.globalTime);
   };
 
   toggleLayout = () => {
@@ -133,7 +121,7 @@ export class UIStore {
 
   // TODO: can be removed when authentication is implemented
   attemptShowOpenExperienceModal = () => {
-    if (!this.rootStore.userStore.isAuthenticated) {
+    if (!this.store.userStore.isAuthenticated) {
       this.showingUserPickerModal = true;
       this.pendingAction = "open";
       return;
@@ -143,7 +131,7 @@ export class UIStore {
   };
 
   attemptShowSaveExperienceModal = () => {
-    if (!this.rootStore.userStore.isAuthenticated) {
+    if (!this.store.userStore.isAuthenticated) {
       this.showingUserPickerModal = true;
       this.pendingAction = "save";
       return;
@@ -190,7 +178,7 @@ export class UIStore {
         localStorageUiSettings.playgroundDisplayMode || "canopy";
       this.renderTargetSize =
         localStorageUiSettings.renderTargetSize || INITIAL_RENDER_TARGET_SIZE;
-      if (this.rootStore.context === "experienceEditor")
+      if (this.store.context === "experienceEditor")
         this.pixelsPerSecond =
           localStorageUiSettings.pixelsPerSecond || INITIAL_PIXELS_PER_SECOND;
     }
