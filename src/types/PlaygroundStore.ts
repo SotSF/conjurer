@@ -1,12 +1,13 @@
 import { playgroundEffects } from "@/src/effects/effects";
 import { playgroundPatterns } from "@/src/patterns/patterns";
-import { Block, RootStore, SerializedBlock } from "@/src/types/Block";
+import { Block, SerializedBlock } from "@/src/types/Block";
 import { Palette, SerializedPalette } from "@/src/types/Palette";
 import {
   ExtraParams,
   ParamType,
   isPaletteParam,
 } from "@/src/types/PatternParams";
+import type { Store } from "@/src/types/Store";
 import { deserializeVariation } from "@/src/types/Variations/variations";
 import { makeAutoObservable } from "mobx";
 
@@ -32,7 +33,7 @@ export class PlaygroundStore {
     this._selectedEffectIndices = indices;
   }
 
-  constructor(readonly store: RootStore) {
+  constructor(readonly store: Store) {
     this.patternBlocks = playgroundPatterns.map(
       (pattern) => new Block(this.store, pattern),
       [],

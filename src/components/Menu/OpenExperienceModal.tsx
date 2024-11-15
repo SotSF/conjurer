@@ -20,7 +20,8 @@ import { useExperiences } from "@/src/hooks/experiencesAndUsers";
 
 export const OpenExperienceModal = observer(function OpenExperienceModal() {
   const store = useStore();
-  const { experienceStore, uiStore, username } = store;
+  const { experienceStore, uiStore, userStore } = store;
+  const { username } = userStore;
 
   const [viewingAllExperiences, setViewingAllExperiences] = useState(false);
   const [isLoadingNewExperience, setIsLoadingNewExperience] = useState(false);

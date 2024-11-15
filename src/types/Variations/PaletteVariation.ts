@@ -1,5 +1,6 @@
 import { Palette } from "@/src/types/Palette";
-import { RootStore, Variation } from "@/src/types/Variations/Variation";
+import { Variation } from "@/src/types/Variations/Variation";
+import type { Store } from "@/src/types/Store";
 import { Vector3 } from "three";
 
 export class PaletteVariation extends Variation<Palette> {
@@ -31,7 +32,7 @@ export class PaletteVariation extends Variation<Palette> {
     palette: this.palette.serialize(),
   });
 
-  static deserialize = (store: RootStore, data: any) =>
+  static deserialize = (store: Store, data: any) =>
     new PaletteVariation(
       data.duration,
       new Palette(

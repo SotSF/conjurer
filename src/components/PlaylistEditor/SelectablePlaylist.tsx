@@ -13,9 +13,10 @@ export const SelectablePlaylist = observer(function SelectablePlaylist({
   playlist: Playlist;
 }) {
   const store = useStore();
-  const { username, usingLocalData, playlistStore } = store;
+  const { userStore, usingLocalData, playlistStore } = store;
+  const { username } = userStore;
 
-  const isEditable = store.username === playlist.user.username;
+  const isEditable = username === playlist.user.username;
 
   const isSelected = playlistStore.selectedPlaylist?.id === playlist.id;
 

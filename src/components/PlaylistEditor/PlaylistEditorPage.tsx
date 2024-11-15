@@ -7,9 +7,11 @@ import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { TimerAndWaveform } from "@/src/components/Timeline/TimerAndWaveform";
 import { PlaylistEditor } from "@/src/components/PlaylistEditor/PlaylistEditor";
 import { PlaylistLibrary } from "@/src/components/PlaylistEditor/PlaylistLibrary";
+import { LoadingOverlay } from "@/src/components/LoadingOverlay";
 
 export const PlaylistEditorPage = function PlaylistEditorPage() {
   const store = useStore();
+  const { userStore } = store;
 
   useEffect(() => {
     if (store.initializedClientSide) return;
@@ -18,7 +20,11 @@ export const PlaylistEditorPage = function PlaylistEditorPage() {
 
   return (
     <Box position="relative" w="100vw" h="100vh">
-      <PanelGroup autoSaveId="playlistEditor-1" direction="horizontal">
+      <PanelGroup
+        key={userStore.username}
+        autoSaveId="playlistEditor-1"
+        direction="horizontal"
+      >
         <Panel defaultSize={25} minSize={20}>
           <PlaylistLibrary />
         </Panel>
@@ -39,6 +45,7 @@ export const PlaylistEditorPage = function PlaylistEditorPage() {
         </Panel>
       </PanelGroup>
 
+      <LoadingOverlay />
       <KeyboardControls editMode={false} />
     </Box>
   );

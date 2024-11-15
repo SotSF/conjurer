@@ -1,16 +1,10 @@
 import { makeAutoObservable } from "mobx";
 import { BeatMap } from "./BeatMap";
 import { trpcClient } from "@/src/utils/trpc";
+import type { Store } from "@/src/types/Store";
 
 const removeExtension = (filename: string) =>
   filename.substring(0, filename.lastIndexOf("."));
-
-// Define a new RootStore interface here so that we avoid circular dependencies
-interface RootStore {
-  usingLocalData: boolean;
-  serialize: () => any;
-  deserialize: (data: any) => void;
-}
 
 // For reference:
 // beatMapFilename = `${beatMapName}.json`
@@ -18,7 +12,7 @@ export class BeatMapStore {
   beatMap: BeatMap = new BeatMap(120, 0);
   selectedBeatMapName: string | null = null;
 
-  constructor(readonly rootStore: RootStore) {
+  constructor(readonly store: Store) {
     makeAutoObservable(this);
   }
 
@@ -26,7 +20,7 @@ export class BeatMapStore {
     const beatMapName = removeExtension(beatMapFilename);
     const { beatMap } = await trpcClient.beatMap.getBeatMap.query({
       beatMapName,
-      usingLocalData: this.rootStore.usingLocalData,
+      usingLocalData: this.store.usingLocalData,
     });
     this.loadFromString(beatMap);
     this.selectedBeatMapName = beatMapName;
@@ -36,7 +30,7 @@ export class BeatMapStore {
     trpcClient.beatMap.saveBeatMap.mutate({
       beatMap,
       beatMapName,
-      usingLocalData: this.rootStore.usingLocalData,
+      usingLocalData: this.store.usingLocalData,
     });
 
   stringifyBeatMap = () => JSON.stringify(this.beatMap.serialize());

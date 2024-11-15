@@ -1,11 +1,11 @@
-import { Playlist } from "@/src/types/Playlist";
 import { useStore } from "@/src/types/StoreContext";
 import { trpc } from "@/src/utils/trpc";
 import { useToast } from "@chakra-ui/react";
 
 export const useSavePlaylist = () => {
   const store = useStore();
-  const { username, usingLocalData } = store;
+  const { userStore, usingLocalData } = store;
+  const { username } = userStore;
   const savePlaylistMutation = trpc.playlist.savePlaylist.useMutation();
 
   const utils = trpc.useUtils();

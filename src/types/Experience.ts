@@ -1,4 +1,5 @@
 import { Song } from "@/src/types/Song";
+import { User } from "@/src/types/User";
 
 export const EXPERIENCE_VERSION = 1;
 
@@ -8,8 +9,7 @@ export type ExperienceStatus = (typeof EXPERIENCE_STATUSES)[number];
 export type Experience = {
   id: number | undefined;
   name: string;
-  // TODO(ben+jeff): we can clean this up later
-  user: { id: number; username: string };
+  user: User;
   song: Song;
   status: ExperienceStatus;
   version: number;

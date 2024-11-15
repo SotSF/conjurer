@@ -19,12 +19,14 @@ import { useStore } from "@/src/types/StoreContext";
 import { action } from "mobx";
 import { observer } from "mobx-react-lite";
 import { trpc } from "@/src/utils/trpc";
+import { sanitize } from "@/src/utils/sanitize";
+import { CONJURER_USER } from "@/src/types/User";
 
 export const LoginButton = observer(function LoginButton() {
   const store = useStore();
-  const { experienceStore, uiStore, usingLocalData } = store;
+  const { experienceStore, uiStore, userStore, usingLocalData } = store;
 
-  const [newUser, setNewUser] = useState("");
+  const [newUsername, setNewUsername] = useState("");
 
   const {
     isPending,
@@ -39,7 +41,7 @@ export const LoginButton = observer(function LoginButton() {
 
   const onClose = action(() => {
     uiStore.showingUserPickerModal = false;
-    setNewUser("");
+    setNewUsername("");
   });
 
   if (isError) return null;
@@ -52,7 +54,7 @@ export const LoginButton = observer(function LoginButton() {
         leftIcon={<FaUser />}
         size="xs"
       >
-        {store.username || "Log in"}
+        {userStore.username || "Log in"}
       </Button>
 
       <Modal
@@ -70,16 +72,16 @@ export const LoginButton = observer(function LoginButton() {
             <VStack alignItems="center">
               {!isPending &&
                 users
-                  .filter((user) => user.username !== store.username)
+                  .filter((user) => user.username !== userStore.username)
                   .map((user) => (
                     <Button
                       key={user.id}
                       leftIcon={<FaUser />}
                       width="100%"
                       onClick={action(() => {
-                        store.username = user.username;
+                        userStore.me = user;
+                        experienceStore.loadEmptyExperience();
                         if (store.context === "experienceEditor") {
-                          experienceStore.loadEmptyExperience();
                           uiStore.showingOpenExperienceModal = true;
                         }
                         onClose();
@@ -93,21 +95,21 @@ export const LoginButton = observer(function LoginButton() {
             <Text my={4}>Click a name above or type a new name:</Text>
             <HStack>
               <Input
-                value={newUser}
-                onChange={(e) => setNewUser(e.target.value)}
+                value={newUsername}
+                onChange={(e) => setNewUsername(sanitize(e.target.value))}
               />
               <Button
                 isDisabled={
-                  !newUser ||
-                  users?.some((u) => u.username === newUser) ||
-                  newUser === "conjurer" // reserved username
+                  !newUsername ||
+                  users?.some((u) => u.username === newUsername) ||
+                  newUsername === CONJURER_USER.username
                 }
                 onClick={action(async () => {
-                  await createUser.mutateAsync({
+                  const newUser = await createUser.mutateAsync({
                     usingLocalData,
-                    username: newUser,
+                    username: newUsername,
                   });
-                  store.username = newUser;
+                  userStore.me = newUser;
                   experienceStore.loadEmptyExperience();
                   onClose();
                 })}

@@ -21,7 +21,8 @@ import { useSaveExperience } from "@/src/hooks/experience";
 
 export const SaveExperienceModal = observer(function SaveExperienceModal() {
   const store = useStore();
-  const { uiStore, username, usingLocalData } = store;
+  const { uiStore, userStore, usingLocalData } = store;
+  const { username } = userStore;
 
   const {
     isPending,

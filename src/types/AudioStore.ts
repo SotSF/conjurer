@@ -10,14 +10,10 @@ import type TimelinePlugin from "wavesurfer.js/dist/plugins/timeline";
 import type MinimapPlugin from "wavesurfer.js/dist/plugins/minimap";
 import { filterData } from "@/src/types/audioPeaks";
 import { NO_SONG, Song } from "@/src/types/Song";
+import type { Store } from "@/src/types/Store";
 
 export const PEAK_DATA_SAMPLE_RATE = 60;
 const INITIAL_AUDIO_LATENCY = 0.15;
-
-// Define a new RootStore interface here so that we avoid circular dependencies
-interface RootStore {
-  usingLocalData: boolean;
-}
 
 export class AudioStore {
   audioInitialized = false;
@@ -43,7 +39,7 @@ export class AudioStore {
     this.saveToLocalStorage();
   }
 
-  constructor(readonly rootStore: RootStore) {
+  constructor(readonly store: Store) {
     makeAutoObservable(this, {
       timelinePlugin: false,
       minimapPlugin: false,
@@ -119,7 +115,7 @@ export class AudioStore {
 
   getSelectedSongUrl = () => {
     if (!this.selectedSong.filename) return undefined;
-    return this.rootStore.usingLocalData
+    return this.store.usingLocalData
       ? `${location.origin}/${LOCAL_ASSET_DIRECTORY}${AUDIO_ASSET_PREFIX}${this.selectedSong.filename}`
       : `https://${ASSET_BUCKET_NAME}.s3.${ASSET_BUCKET_REGION}.amazonaws.com/${AUDIO_ASSET_PREFIX}${this.selectedSong.filename}`;
   };

@@ -1,22 +1,11 @@
 import { makeAutoObservable, runInAction } from "mobx";
-import { ExperienceStore } from "@/src/types/ExperienceStore";
-import { AudioStore } from "@/src/types/AudioStore";
-import { Context } from "@/src/types/context";
 import { Playlist } from "@/src/types/Playlist";
 import { MAX_TIME } from "@/src/utils/time";
 import { areEqual } from "@/src/utils/array";
-
-// Define a new RootStore interface here so that we avoid circular dependencies
-interface RootStore {
-  context: Context;
-  experienceName: string;
-  experienceId: number | undefined;
-  play: () => void;
-  pause: () => void;
-}
+import type { Store } from "@/src/types/Store";
 
 export class PlaylistStore {
-  autoplay = ["playlistEditor", "viewer"].includes(this.rootStore.context);
+  autoplay = ["playlistEditor", "viewer"].includes(this.store.context);
   shufflingPlaylist = false;
   loopingPlaylist = false;
 
@@ -45,17 +34,12 @@ export class PlaylistStore {
     this._cachedExperienceIdPlayOrder =
       this.selectedPlaylist.orderedExperienceIds.slice();
 
-    console.log("shuffling");
     // shuffle the play order
     this._cachedExperienceIdPlayOrder.sort(() => Math.random() - 0.5);
     return this._cachedExperienceIdPlayOrder;
   }
 
-  constructor(
-    readonly rootStore: RootStore,
-    readonly audioStore: AudioStore,
-    readonly experienceStore: ExperienceStore,
-  ) {
+  constructor(readonly store: Store) {
     makeAutoObservable(this, {
       _cachedPlaylistOrderedExperienceIds: false,
       _cachedExperienceIdPlayOrder: false,
@@ -63,43 +47,43 @@ export class PlaylistStore {
   }
 
   loadAndPlayExperience = async (experienceId: number) => {
-    this.rootStore.pause();
+    this.store.pause();
 
-    if (this.rootStore.experienceId === experienceId) {
-      this.audioStore.setTimeWithCursor(0);
-      this.rootStore.play();
+    if (this.store.experienceId === experienceId) {
+      this.store.audioStore.setTimeWithCursor(0);
+      this.store.play();
       return;
     }
 
-    await this.experienceStore.loadById(experienceId);
+    await this.store.experienceStore.loadById(experienceId);
     runInAction(() => {
-      this.audioStore.audioState = "playing";
+      this.store.audioStore.audioState = "playing";
     });
   };
 
   playPreviousExperience = async () => {
-    if (this.rootStore.context === "experienceEditor") {
-      this.audioStore.setTimeWithCursor(0);
+    if (this.store.context === "experienceEditor") {
+      this.store.audioStore.setTimeWithCursor(0);
       return;
     }
 
     const previousExperienceId = this.getDeltaExperienceId(-1);
     if (previousExperienceId === null) return;
 
-    this.rootStore.pause();
+    this.store.pause();
     await this.loadAndPlayExperience(previousExperienceId);
   };
 
   playNextExperience = async () => {
-    if (this.rootStore.context === "experienceEditor") {
-      this.audioStore.setTimeWithCursor(MAX_TIME);
+    if (this.store.context === "experienceEditor") {
+      this.store.audioStore.setTimeWithCursor(MAX_TIME);
       return;
     }
 
     const nextExperienceId = this.getDeltaExperienceId(1);
     if (nextExperienceId === null) return;
 
-    this.rootStore.pause();
+    this.store.pause();
     await this.loadAndPlayExperience(nextExperienceId);
   };
 
@@ -108,10 +92,10 @@ export class PlaylistStore {
     if (!this.experienceIdPlayOrder?.length) return null;
 
     let desiredIndex;
-    if (!this.rootStore.experienceId) desiredIndex = 0;
+    if (!this.store.experienceId) desiredIndex = 0;
     else {
       const currentIndex = this.experienceIdPlayOrder.indexOf(
-        this.rootStore.experienceId,
+        this.store.experienceId,
       );
       desiredIndex = currentIndex + delta;
 

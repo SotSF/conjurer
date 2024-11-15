@@ -9,6 +9,7 @@
     "start": "next start",
     "lint": "next lint",
     "format": "prettier --write .",
+    "typecheck": "tsc --noEmit",
     "db:generate": "drizzle-kit generate --config=drizzle-local.config.ts",
     "db:local:migrate": "drizzle-kit migrate --config=drizzle-local.config.ts",
     "db:local:studio": "drizzle-kit studio --config=drizzle-local.config.ts",

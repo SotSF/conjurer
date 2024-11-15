@@ -16,17 +16,18 @@ import { useEffect, useState } from "react";
 
 export const PlaylistLibrary = observer(function PlaylistLibrary() {
   const store = useStore();
-  const { username, usingLocalData, playlistStore } = store;
+  const { userStore, usingLocalData, playlistStore } = store;
+  const { username } = userStore;
 
   const [viewingAllPlaylists, setViewingAllPlaylists] = useState(false);
 
-  const isEditable = !!store.username;
+  const isEditable = userStore.isAuthenticated;
 
   const utils = trpc.useUtils();
   const createPlaylist = trpc.playlist.savePlaylist.useMutation();
 
   const {
-    isPending,
+    isFetching,
     isError,
     data: playlists,
   } = trpc.playlist.listPlaylists.useQuery(
@@ -35,7 +36,10 @@ export const PlaylistLibrary = observer(function PlaylistLibrary() {
       username,
       allPlaylists: viewingAllPlaylists,
     },
-    { staleTime: 1000 * 60 * 10 },
+    {
+      enabled: userStore.isAuthenticated,
+      staleTime: 1000 * 60 * 10,
+    },
   );
 
   useEffect(() => {
@@ -44,7 +48,7 @@ export const PlaylistLibrary = observer(function PlaylistLibrary() {
     runInAction(() => {
       playlistStore.selectedPlaylist = playlists[0];
     });
-  }, [playlists]);
+  }, [playlists, playlistStore]);
 
   if (isError) return null;
 
@@ -100,10 +104,10 @@ export const PlaylistLibrary = observer(function PlaylistLibrary() {
         All playlists
       </Switch>
       <VStack width="100%" spacing={0}>
-        {isPending ? (
+        {isFetching ? (
           <Spinner />
         ) : (
-          playlists.map((playlist) => (
+          playlists?.map((playlist) => (
             <SelectablePlaylist key={playlist.id} playlist={playlist} />
           ))
         )}

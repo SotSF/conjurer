@@ -18,6 +18,7 @@ import {
 import { NO_SONG } from "@/src/types/Song";
 import { Context, Role } from "@/src/types/context";
 import "@/src/utils/mobx";
+import { UserStore } from "@/src/types/UserStore";
 
 export type BlockSelection = { type: "block"; block: Block };
 
@@ -35,14 +36,11 @@ export class Store {
 
   audioStore = new AudioStore(this);
   beatMapStore = new BeatMapStore(this);
-  uiStore = new UIStore(this, this.audioStore);
+  uiStore = new UIStore(this);
   experienceStore = new ExperienceStore(this);
-  playlistStore = new PlaylistStore(
-    this,
-    this.audioStore,
-    this.experienceStore,
-  );
+  playlistStore = new PlaylistStore(this);
   playgroundStore = new PlaygroundStore(this);
+  userStore = new UserStore(this);
 
   layers: Layer[] = [];
 
@@ -97,7 +95,7 @@ export class Store {
   }
 
   private _role: Role = "emcee";
-  get role(): string {
+  get role(): Role {
     return this._role;
   }
   set role(value: Role) {
@@ -108,20 +106,11 @@ export class Store {
     switch (this._role) {
       case "emcee":
         return "Emcee";
-      case "experience creator":
+      case "experienceCreator":
         return "Experience Creator";
       case "vj":
         return "VJ";
     }
-  }
-
-  private _username = "";
-  get username(): string {
-    return this._username;
-  }
-  set username(value: string) {
-    this._username = value;
-    localStorage.setItem("username", value);
   }
 
   private _experienceName = "";
@@ -136,6 +125,7 @@ export class Store {
     }
   }
 
+  // TODO: move this stuff inside of the experience store
   hasSaved = false;
   experienceLastSavedAt = 0;
   experienceVersion = EXPERIENCE_VERSION;
@@ -157,40 +147,26 @@ export class Store {
     if (process.env.NEXT_PUBLIC_ENABLE_VOICE === "true")
       setupVoiceCommandWebsocket(this);
 
-    if (this.context === "playground") {
-      this.playgroundStore.initialize();
-      this.uiStore.initialize();
-      this.audioStore.initialize();
-      return;
-    }
-
-    this.viewerMode =
-      new URLSearchParams(window.location.search).get("viewerMode") === "true";
-
     // TODO:
-    if (this.viewerMode) {
-      if (initialExperienceName)
-        this.experienceStore.load(initialExperienceName);
-      else this.experienceStore.loadEmptyExperience();
-      this.uiStore.initialize(this.viewerMode);
-      this.audioStore.initialize();
-      if (this.viewerMode) this.play();
-      return;
-    }
+    // this.viewerMode =
+    //   new URLSearchParams(window.location.search).get("viewerMode") === "true";
+    // if (this.viewerMode) {
+    //   if (initialExperienceName)
+    //     this.experienceStore.load(initialExperienceName);
+    //   else this.experienceStore.loadEmptyExperience();
+    //   this.uiStore.initialize(this.viewerMode);
+    //   this.audioStore.initialize();
+    //   if (this.viewerMode) this.play();
+    //   return;
+    // }
 
-    // check for a role in local storage
-    // const role = localStorage.getItem("role");
-    // if (role) this._role = role as Role;
+    this.userStore.initialize();
 
     // For now, we'll just set the role based on the context (page)
     if (this.context === "playlistEditor") this._role = "emcee";
     else if (this.context === "experienceEditor")
-      this._role = "experience creator";
-    else if (this.context === "viewer") this._role = "vj";
-
-    // check for a username in local storage
-    const username = localStorage.getItem("username");
-    if (username) this._username = username;
+      this._role = "experienceCreator";
+    else this._role = "vj";
 
     // check for a global intensity in local storage
     const globalIntensity = localStorage.getItem("globalIntensity");
@@ -206,6 +182,7 @@ export class Store {
     else if (this.context !== "playlistEditor")
       this.experienceStore.loadEmptyExperience();
 
+    if (this.context === "playground") this.playgroundStore.initialize();
     this.uiStore.initialize();
     this.audioStore.initialize();
   };
@@ -499,10 +476,10 @@ export class Store {
     }
   };
 
-  // TODO(ben+jeff): using Omit here just to appease the type checker
-  serialize = (): Omit<Experience, "user"> => ({
+  serialize = (): Experience => ({
     id: this.experienceId,
     name: this.experienceName,
+    user: this.userStore.me!,
     song: this.audioStore.selectedSong,
     status: this.experienceStatus,
     version: this.experienceVersion,

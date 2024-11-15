@@ -9,6 +9,7 @@ import { AddPatternButton } from "@/src/components/AddPatternButton";
 import { PatternDrawer } from "@/src/components/PatternDrawer";
 import { useRouter } from "next/router";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
+import { LoadingOverlay } from "@/src/components/LoadingOverlay";
 
 export const ExperienceEditorPage = observer(function ExperienceEditorPage() {
   const store = useStore();
@@ -39,6 +40,7 @@ export const ExperienceEditorPage = observer(function ExperienceEditorPage() {
           <Arrangement />
         </Panel>
       </PanelGroup>
+      <LoadingOverlay />
       <KeyboardControls editMode />
       <PatternDrawer />
       <AddPatternButton />

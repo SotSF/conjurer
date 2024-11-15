@@ -26,7 +26,8 @@ export const AddExperienceModal = observer(function AddExperienceModal({
   playlist: Playlist;
 }) {
   const store = useStore();
-  const { username, uiStore } = store;
+  const { userStore, uiStore } = store;
+  const { username } = userStore;
 
   const [viewingAllExperiences, setViewingAllExperiences] = useState(false);
   const [selectedExperienceIds, setSelectedExperienceIds] = useState<number[]>(

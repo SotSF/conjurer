@@ -1,13 +1,11 @@
-export const CONJURER_USER_ID = -1;
+import { CONJURER_USER } from "@/src/types/User";
+
 export const MY_EXPERIENCES_SMART_PLAYLIST = {
   id: -10,
   name: "My Experiences",
   description:
     "This is an auto-generated playlist of all the experiences you've created.",
-  user: {
-    id: CONJURER_USER_ID,
-    username: "conjurer",
-  },
+  user: CONJURER_USER,
 } as const;
 
 export type Playlist = {
