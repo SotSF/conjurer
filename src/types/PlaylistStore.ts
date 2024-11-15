@@ -1,6 +1,6 @@
 import { makeAutoObservable, runInAction } from "mobx";
-import { ExperienceStore } from "@/src/types/ExperienceStore";
-import { AudioStore } from "@/src/types/AudioStore";
+import type { ExperienceStore } from "@/src/types/ExperienceStore";
+import type { AudioStore } from "@/src/types/AudioStore";
 import { Context } from "@/src/types/context";
 import { Playlist } from "@/src/types/Playlist";
 import { MAX_TIME } from "@/src/utils/time";
@@ -9,6 +9,8 @@ import { areEqual } from "@/src/utils/array";
 // Define a new RootStore interface here so that we avoid circular dependencies
 interface RootStore {
   context: Context;
+  audioStore: AudioStore;
+  experienceStore: ExperienceStore;
   experienceName: string;
   experienceId: number | undefined;
   play: () => void;
@@ -45,17 +47,12 @@ export class PlaylistStore {
     this._cachedExperienceIdPlayOrder =
       this.selectedPlaylist.orderedExperienceIds.slice();
 
-    console.log("shuffling");
     // shuffle the play order
     this._cachedExperienceIdPlayOrder.sort(() => Math.random() - 0.5);
     return this._cachedExperienceIdPlayOrder;
   }
 
-  constructor(
-    readonly rootStore: RootStore,
-    readonly audioStore: AudioStore,
-    readonly experienceStore: ExperienceStore,
-  ) {
+  constructor(readonly rootStore: RootStore) {
     makeAutoObservable(this, {
       _cachedPlaylistOrderedExperienceIds: false,
       _cachedExperienceIdPlayOrder: false,
@@ -66,20 +63,20 @@ export class PlaylistStore {
     this.rootStore.pause();
 
     if (this.rootStore.experienceId === experienceId) {
-      this.audioStore.setTimeWithCursor(0);
+      this.rootStore.audioStore.setTimeWithCursor(0);
       this.rootStore.play();
       return;
     }
 
-    await this.experienceStore.loadById(experienceId);
+    await this.rootStore.experienceStore.loadById(experienceId);
     runInAction(() => {
-      this.audioStore.audioState = "playing";
+      this.rootStore.audioStore.audioState = "playing";
     });
   };
 
   playPreviousExperience = async () => {
     if (this.rootStore.context === "experienceEditor") {
-      this.audioStore.setTimeWithCursor(0);
+      this.rootStore.audioStore.setTimeWithCursor(0);
       return;
     }
 
@@ -92,7 +89,7 @@ export class PlaylistStore {
 
   playNextExperience = async () => {
     if (this.rootStore.context === "experienceEditor") {
-      this.audioStore.setTimeWithCursor(MAX_TIME);
+      this.rootStore.audioStore.setTimeWithCursor(MAX_TIME);
       return;
     }
 

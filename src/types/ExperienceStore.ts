@@ -2,7 +2,7 @@ import { makeAutoObservable, runInAction } from "mobx";
 import { trpcClient } from "@/src/utils/trpc";
 import { Experience, EXPERIENCE_VERSION } from "@/src/types/Experience";
 import { NO_SONG } from "@/src/types/Song";
-import { UserStore } from "@/src/types/UserStore";
+import type { UserStore } from "@/src/types/UserStore";
 
 // Define a new RootStore interface here so that we avoid circular dependencies
 interface RootStore {

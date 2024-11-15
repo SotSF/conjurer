@@ -34,16 +34,12 @@ export type BlockOrVariation = BlockSelection | VariationSelection;
 export class Store {
   initializedClientSide = false;
 
-  audioStore = new AudioStore(this);
-  beatMapStore = new BeatMapStore(this);
+  audioStore: AudioStore = new AudioStore(this);
+  beatMapStore: BeatMapStore = new BeatMapStore(this);
   uiStore: UIStore = new UIStore(this);
-  experienceStore = new ExperienceStore(this);
-  playlistStore = new PlaylistStore(
-    this,
-    this.audioStore,
-    this.experienceStore,
-  );
-  playgroundStore = new PlaygroundStore(this);
+  experienceStore: ExperienceStore = new ExperienceStore(this);
+  playlistStore: PlaylistStore = new PlaylistStore(this);
+  playgroundStore: PlaygroundStore = new PlaygroundStore(this);
   userStore: UserStore = new UserStore(this);
 
   layers: Layer[] = [];
