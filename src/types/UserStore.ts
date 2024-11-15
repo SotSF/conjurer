@@ -1,8 +1,10 @@
 import { User } from "@/src/types/User";
+import { trpcClient } from "@/src/utils/trpc";
 import { makeAutoObservable } from "mobx";
 
 type RootStore = {
   context: string;
+  usingLocalData: boolean;
 };
 
 export class UserStore {
@@ -25,8 +27,18 @@ export class UserStore {
     makeAutoObservable(this);
   }
 
-  initialize() {
+  initialize = async () => {
     this._lastAuthenticatedUsername =
       localStorage.getItem("lastAuthenticatedUsername") || "";
-  }
+
+    if (!this._lastAuthenticatedUsername) return;
+    this.me = (await this.fetchUser(this._lastAuthenticatedUsername)) ?? null;
+  };
+
+  fetchUser = async (username: string) => {
+    return await trpcClient.user.getUser.query({
+      username,
+      usingLocalData: this.rootStore.usingLocalData,
+    });
+  };
 }
