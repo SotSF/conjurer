@@ -36,7 +36,7 @@ export class Store {
 
   audioStore = new AudioStore(this);
   beatMapStore = new BeatMapStore(this);
-  uiStore = new UIStore(this, this.audioStore);
+  uiStore: UIStore = new UIStore(this);
   experienceStore = new ExperienceStore(this);
   playlistStore = new PlaylistStore(
     this,
@@ -44,7 +44,7 @@ export class Store {
     this.experienceStore,
   );
   playgroundStore = new PlaygroundStore(this);
-  userStore = new UserStore(this);
+  userStore: UserStore = new UserStore(this);
 
   layers: Layer[] = [];
 

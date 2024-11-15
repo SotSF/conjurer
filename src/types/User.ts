@@ -6,4 +6,4 @@ export type User = Pick<FullUser, "id" | "username">;
 export const CONJURER_USER = {
   id: -1,
   username: "conjurer",
-} satisfies User;
+} as const satisfies User;

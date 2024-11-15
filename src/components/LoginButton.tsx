@@ -19,6 +19,8 @@ import { useStore } from "@/src/types/StoreContext";
 import { action } from "mobx";
 import { observer } from "mobx-react-lite";
 import { trpc } from "@/src/utils/trpc";
+import { sanitize } from "@/src/utils/sanitize";
+import { CONJURER_USER } from "@/src/types/User";
 
 export const LoginButton = observer(function LoginButton() {
   const store = useStore();
@@ -94,13 +96,13 @@ export const LoginButton = observer(function LoginButton() {
             <HStack>
               <Input
                 value={newUsername}
-                onChange={(e) => setNewUsername(e.target.value)}
+                onChange={(e) => setNewUsername(sanitize(e.target.value))}
               />
               <Button
                 isDisabled={
                   !newUsername ||
                   users?.some((u) => u.username === newUsername) ||
-                  newUsername === "conjurer" // reserved username
+                  newUsername === CONJURER_USER.username
                 }
                 onClick={action(async () => {
                   const newUser = await createUser.mutateAsync({

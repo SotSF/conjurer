@@ -27,7 +27,7 @@ export const PlaylistLibrary = observer(function PlaylistLibrary() {
   const createPlaylist = trpc.playlist.savePlaylist.useMutation();
 
   const {
-    isPending,
+    isFetching,
     isError,
     data: playlists,
   } = trpc.playlist.listPlaylists.useQuery(
@@ -36,7 +36,10 @@ export const PlaylistLibrary = observer(function PlaylistLibrary() {
       username,
       allPlaylists: viewingAllPlaylists,
     },
-    { staleTime: 1000 * 60 * 10 },
+    {
+      enabled: userStore.isAuthenticated,
+      staleTime: 1000 * 60 * 10,
+    },
   );
 
   useEffect(() => {
@@ -101,10 +104,10 @@ export const PlaylistLibrary = observer(function PlaylistLibrary() {
         All playlists
       </Switch>
       <VStack width="100%" spacing={0}>
-        {isPending ? (
+        {isFetching ? (
           <Spinner />
         ) : (
-          playlists.map((playlist) => (
+          playlists?.map((playlist) => (
             <SelectablePlaylist key={playlist.id} playlist={playlist} />
           ))
         )}

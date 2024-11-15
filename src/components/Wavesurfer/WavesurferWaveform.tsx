@@ -9,6 +9,7 @@ import MinimapPlugin from "wavesurfer.js/dist/plugins/minimap";
 import { action, runInAction } from "mobx";
 import { useCloneCanvas } from "@/src/components/Wavesurfer/hooks/cloneCanvas";
 import { debounce } from "lodash";
+import { NO_SONG } from "@/src/types/Song";
 
 const DEFAULT_MINIMAP_HEIGHT = 20;
 
@@ -116,6 +117,8 @@ const WavesurferWaveform = observer(function WavesurferWaveform() {
 
   const dragToSeek = useMemo(() => ({ debounceTime: 50 }), []);
 
+  const noSongSelected = audioStore.selectedSong.id === NO_SONG.id;
+
   const commonWavesurferUI = (
     <>
       <audio ref={audioRef} crossOrigin="anonymous" />
@@ -127,7 +130,7 @@ const WavesurferWaveform = observer(function WavesurferWaveform() {
         startColor="gray.500"
         endColor="gray.700"
         speed={0.4}
-        isLoaded={isReady}
+        isLoaded={isReady || noSongSelected}
       />
       <Box
         position="absolute"

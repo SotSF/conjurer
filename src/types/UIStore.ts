@@ -1,6 +1,6 @@
-import { AudioStore } from "@/src/types/AudioStore";
 import { Context } from "@/src/types/context";
-import { UserStore } from "@/src/types/UserStore";
+import type { AudioStore } from "@/src/types/AudioStore";
+import type { UserStore } from "@/src/types/UserStore";
 import { INITIAL_PIXELS_PER_SECOND } from "@/src/utils/time";
 import { makeAutoObservable } from "mobx";
 
@@ -13,6 +13,7 @@ export type DisplayMode = "canopy" | "canopySpace" | "cartesianSpace" | "none";
 
 type RootStore = {
   context: Context;
+  audioStore: AudioStore;
   userStore: UserStore;
 };
 
@@ -71,10 +72,7 @@ export class UIStore {
   canTimelineZoom = this.rootStore.context === "experienceEditor";
   pixelsPerSecond = INITIAL_PIXELS_PER_SECOND; // the zoom of the timeline
 
-  constructor(
-    readonly rootStore: RootStore,
-    readonly audioStore: AudioStore,
-  ) {
+  constructor(readonly rootStore: RootStore) {
     makeAutoObservable(this);
   }
 
@@ -94,7 +92,9 @@ export class UIStore {
     }
 
     // resetting the time will restart the playhead animation
-    this.audioStore.setTimeWithCursor(this.audioStore.globalTime);
+    this.rootStore.audioStore.setTimeWithCursor(
+      this.rootStore.audioStore.globalTime,
+    );
   };
 
   zoomIn = (amount?: number) => {
@@ -104,7 +104,9 @@ export class UIStore {
     }
 
     // resetting the time will restart the playhead animation
-    this.audioStore.setTimeWithCursor(this.audioStore.globalTime);
+    this.rootStore.audioStore.setTimeWithCursor(
+      this.rootStore.audioStore.globalTime,
+    );
   };
 
   toggleLayout = () => {
