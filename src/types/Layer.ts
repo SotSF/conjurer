@@ -3,13 +3,7 @@ import { binarySearchForBlockAtTime } from "@/src/utils/algorithm";
 import { DEFAULT_BLOCK_DURATION } from "@/src/utils/time";
 import { makeAutoObservable } from "mobx";
 import { generateId } from "@/src/utils/id";
-import { Context } from "@/src/types/context";
-import type { AudioStore } from "@/src/types/AudioStore";
-
-type RootStore = {
-  context: Context;
-  audioStore: AudioStore;
-};
+import type { Store } from "@/src/types/Store";
 
 export class Layer {
   id: string = generateId();
@@ -50,7 +44,7 @@ export class Layer {
     return lastBlock.endTime;
   }
 
-  constructor(readonly store: RootStore) {
+  constructor(readonly store: Store) {
     makeAutoObservable(this, {
       store: false,
       _lastComputedCurrentBlock: false, // don't make this observable, since it's just a cache
@@ -317,7 +311,7 @@ export class Layer {
     patternBlocks: this.patternBlocks.map((b) => b.serialize()),
   });
 
-  static deserialize = (store: RootStore, data: any) => {
+  static deserialize = (store: Store, data: any) => {
     const layer = new Layer(store);
     if (data.id) layer.id = data.id;
     layer.name = data.name ?? "";

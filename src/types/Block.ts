@@ -15,7 +15,7 @@ import { LinearVariation4 } from "@/src/types/Variations/LinearVariation4";
 import { isPalette } from "@/src/types/Palette";
 import { PaletteVariation } from "@/src/types/Variations/PaletteVariation";
 import { generateId } from "@/src/utils/id";
-import { Context } from "@/src/types/context";
+import type { Store } from "@/src/types/Store";
 
 export type SerializedBlock = {
   id: string;
@@ -25,13 +25,6 @@ export type SerializedBlock = {
   startTime: number;
   duration: number;
   effectBlocks: SerializedBlock[];
-};
-
-export type RootStore = {
-  context: Context;
-  audioStore: {
-    getSmoothedPeakAtTime: (time: number, smoothing: number) => number;
-  };
 };
 
 export class Block<T extends ExtraParams = {}> {
@@ -63,7 +56,7 @@ export class Block<T extends ExtraParams = {}> {
   }
 
   constructor(
-    readonly store: RootStore,
+    readonly store: Store,
     pattern: Pattern<T>,
     parentBlock: Block | null = null,
   ) {
@@ -414,7 +407,7 @@ export class Block<T extends ExtraParams = {}> {
     ),
   });
 
-  static deserialize = (store: RootStore, data: any, parentBlock?: Block) => {
+  static deserialize = (store: Store, data: any, parentBlock?: Block) => {
     const patternName =
       typeof data.pattern === "string" ? data.pattern : data.pattern.name;
 

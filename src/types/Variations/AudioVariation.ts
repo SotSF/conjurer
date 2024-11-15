@@ -1,4 +1,5 @@
-import { Variation, RootStore } from "@/src/types/Variations/Variation";
+import { Variation } from "@/src/types/Variations/Variation";
+import type { Store } from "@/src/types/Store";
 
 export class AudioVariation extends Variation<number> {
   displayName = "Audio";
@@ -11,7 +12,7 @@ export class AudioVariation extends Variation<number> {
     factor: number,
     offset: number,
     smoothing: number,
-    readonly store: RootStore,
+    readonly store: Store,
   ) {
     super("audio", duration);
 
@@ -59,7 +60,7 @@ export class AudioVariation extends Variation<number> {
     offset: this.offset,
   });
 
-  static deserialize = (store: RootStore, data: any) =>
+  static deserialize = (store: Store, data: any) =>
     new AudioVariation(
       data.duration,
       data.factor,

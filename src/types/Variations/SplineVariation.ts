@@ -1,4 +1,5 @@
-import { RootStore, Variation } from "@/src/types/Variations/Variation";
+import { Variation } from "@/src/types/Variations/Variation";
+import type { Store } from "@/src/types/Store";
 import { CubicSpline } from "splines";
 
 export const DEFAULT_SPLINE_POINTS = [
@@ -90,7 +91,7 @@ export class SplineVariation extends Variation<number> {
     domainMax: this.domainMax,
   });
 
-  static deserialize = (store: RootStore, data: any) =>
+  static deserialize = (store: Store, data: any) =>
     new SplineVariation(
       data.duration,
       data.points,

@@ -1,4 +1,5 @@
-import { RootStore, Variation } from "@/src/types/Variations/Variation";
+import { Variation } from "@/src/types/Variations/Variation";
+import type { Store } from "@/src/types/Store";
 
 export class FlatVariation extends Variation<number> {
   displayName = "Flat";
@@ -33,6 +34,6 @@ export class FlatVariation extends Variation<number> {
     value: this.value,
   });
 
-  static deserialize = (store: RootStore, data: any) =>
+  static deserialize = (store: Store, data: any) =>
     new FlatVariation(data.duration, data.value);
 }
