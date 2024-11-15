@@ -16,10 +16,12 @@ export const useSaveExperience = () => {
     id?: number;
     name: string;
   }) => {
+    if (!userStore.isAuthenticated) {
+      runInAction(() => (store.uiStore.showingUserPickerModal = true));
+      return;
+    }
     if ((saveMetadata?.name ?? store.experienceName) === "untitled") {
-      runInAction(() => {
-        store.uiStore.showingSaveExperienceModal = true;
-      });
+      runInAction(() => (store.uiStore.showingSaveExperienceModal = true));
       return;
     }
 

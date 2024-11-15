@@ -476,10 +476,10 @@ export class Store {
     }
   };
 
-  // TODO(ben+jeff): using Omit here just to appease the type checker
-  serialize = (): Omit<Experience, "user"> => ({
+  serialize = (): Experience => ({
     id: this.experienceId,
     name: this.experienceName,
+    user: this.userStore.me!,
     song: this.audioStore.selectedSong,
     status: this.experienceStatus,
     version: this.experienceVersion,
