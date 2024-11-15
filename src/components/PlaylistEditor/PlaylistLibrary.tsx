@@ -16,11 +16,12 @@ import { useEffect, useState } from "react";
 
 export const PlaylistLibrary = observer(function PlaylistLibrary() {
   const store = useStore();
-  const { username, usingLocalData, playlistStore } = store;
+  const { userStore, usingLocalData, playlistStore } = store;
+  const { username } = userStore;
 
   const [viewingAllPlaylists, setViewingAllPlaylists] = useState(false);
 
-  const isEditable = !!store.username;
+  const isEditable = userStore.isAuthenticated;
 
   const utils = trpc.useUtils();
   const createPlaylist = trpc.playlist.savePlaylist.useMutation();
@@ -44,7 +45,7 @@ export const PlaylistLibrary = observer(function PlaylistLibrary() {
     runInAction(() => {
       playlistStore.selectedPlaylist = playlists[0];
     });
-  }, [playlists]);
+  }, [playlists, playlistStore]);
 
   if (isError) return null;
 

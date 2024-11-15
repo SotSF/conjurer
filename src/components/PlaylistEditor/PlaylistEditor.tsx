@@ -28,11 +28,11 @@ import { useRouter } from "next/router";
 
 export const PlaylistEditor = observer(function PlaylistEditor() {
   const store = useStore();
-  const { username, usingLocalData, playlistStore, uiStore } = store;
+  const { userStore, usingLocalData, playlistStore, uiStore } = store;
+  const { username } = userStore;
   const { selectedPlaylist } = playlistStore;
 
-  const isEditable =
-    !!store.username && store.username === selectedPlaylist?.user.username;
+  const isEditable = username === selectedPlaylist?.user.username;
 
   const { isPending, isError, data } = trpc.playlist.getPlaylist.useQuery(
     {

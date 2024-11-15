@@ -1,5 +1,6 @@
 import { AudioStore } from "@/src/types/AudioStore";
 import { Context } from "@/src/types/context";
+import { UserStore } from "@/src/types/UserStore";
 import { INITIAL_PIXELS_PER_SECOND } from "@/src/utils/time";
 import { makeAutoObservable } from "mobx";
 
@@ -12,15 +13,9 @@ export type DisplayMode = "canopy" | "canopySpace" | "cartesianSpace" | "none";
 
 type RootStore = {
   context: Context;
-  username: string;
+  userStore: UserStore;
 };
 
-/**
- * MobX store for UI state.
- *
- * @export
- * @class UIStore
- */
 export class UIStore {
   horizontalLayout = true;
   showingPerformance = false;
@@ -86,8 +81,6 @@ export class UIStore {
   initialize = (viewerMode = false) => {
     if (viewerMode) this.setViewerModeDefaults();
     else this.loadFromLocalStorage();
-
-    if (!this.rootStore.username) this.showingUserPickerModal = true;
   };
 
   timeToXPixels = (time: number) => `${time * this.pixelsPerSecond}px`;
@@ -138,7 +131,7 @@ export class UIStore {
 
   // TODO: can be removed when authentication is implemented
   attemptShowOpenExperienceModal = () => {
-    if (!this.rootStore.username) {
+    if (!this.rootStore.userStore.isAuthenticated) {
       this.showingUserPickerModal = true;
       this.pendingAction = "open";
       return;
@@ -148,7 +141,7 @@ export class UIStore {
   };
 
   attemptShowSaveExperienceModal = () => {
-    if (!this.rootStore.username) {
+    if (!this.rootStore.userStore.isAuthenticated) {
       this.showingUserPickerModal = true;
       this.pendingAction = "save";
       return;

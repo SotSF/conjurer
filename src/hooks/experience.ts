@@ -5,7 +5,8 @@ import { runInAction } from "mobx";
 
 export const useSaveExperience = () => {
   const store = useStore();
-  const { username, usingLocalData } = store;
+  const { userStore, usingLocalData } = store;
+  const { username } = userStore;
   const saveExperienceMutation = trpc.experience.saveExperience.useMutation();
 
   const utils = trpc.useUtils();

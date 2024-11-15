@@ -34,7 +34,8 @@ export const ExperiencesTable = observer(function ExperiencesTable({
   setSelectedExperienceIds,
 }: ExperiencesTableProps) {
   const store = useStore();
-  const { username } = store;
+  const { userStore } = store;
+  const { username } = userStore;
 
   const toggleExperienceIdSelection = (id: number) => {
     setSelectedExperienceIds?.(

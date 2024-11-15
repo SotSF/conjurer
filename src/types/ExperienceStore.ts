@@ -2,12 +2,12 @@ import { makeAutoObservable, runInAction } from "mobx";
 import { trpcClient } from "@/src/utils/trpc";
 import { Experience, EXPERIENCE_VERSION } from "@/src/types/Experience";
 import { NO_SONG } from "@/src/types/Song";
+import { UserStore } from "@/src/types/UserStore";
 
 // Define a new RootStore interface here so that we avoid circular dependencies
 interface RootStore {
   experienceName: string;
-  // TODO(ben+jeff): maybe this can change
-  username: string;
+  userStore: UserStore;
   hasSaved: boolean;
   experienceLastSavedAt: number;
   usingLocalData: boolean;
@@ -49,8 +49,7 @@ export class ExperienceStore {
   loadEmptyExperience = () => {
     this.rootStore.deserialize({
       id: undefined,
-      // TODO(ben+jeff): magic number placeholder to appease the typing gods
-      user: { id: -8, username: this.rootStore.username },
+      user: this.rootStore.userStore.me ?? { id: 0, username: "" },
       name: "untitled",
       song: NO_SONG,
       status: "inprogress",
