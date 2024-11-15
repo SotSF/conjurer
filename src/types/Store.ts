@@ -95,7 +95,7 @@ export class Store {
   }
 
   private _role: Role = "emcee";
-  get role(): string {
+  get role(): Role {
     return this._role;
   }
   set role(value: Role) {
@@ -106,8 +106,8 @@ export class Store {
     switch (this._role) {
       case "emcee":
         return "Emcee";
-      case "experience creator":
-        return "Experience Creator";
+      case "experienceCreator":
+        return "experienceCreator";
       case "vj":
         return "VJ";
     }
@@ -165,8 +165,8 @@ export class Store {
     // For now, we'll just set the role based on the context (page)
     if (this.context === "playlistEditor") this._role = "emcee";
     else if (this.context === "experienceEditor")
-      this._role = "experience creator";
-    else if (this.context === "viewer") this._role = "vj";
+      this._role = "experienceCreator";
+    else this._role = "vj";
 
     // check for a global intensity in local storage
     const globalIntensity = localStorage.getItem("globalIntensity");

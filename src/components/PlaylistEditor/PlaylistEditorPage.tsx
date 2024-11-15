@@ -7,7 +7,7 @@ import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { TimerAndWaveform } from "@/src/components/Timeline/TimerAndWaveform";
 import { PlaylistEditor } from "@/src/components/PlaylistEditor/PlaylistEditor";
 import { PlaylistLibrary } from "@/src/components/PlaylistEditor/PlaylistLibrary";
-import { trpc } from "@/src/utils/trpc";
+import { LoadingOverlay } from "@/src/components/LoadingOverlay";
 
 export const PlaylistEditorPage = function PlaylistEditorPage() {
   const store = useStore();
@@ -40,6 +40,7 @@ export const PlaylistEditorPage = function PlaylistEditorPage() {
         </Panel>
       </PanelGroup>
 
+      <LoadingOverlay />
       <KeyboardControls editMode={false} />
     </Box>
   );

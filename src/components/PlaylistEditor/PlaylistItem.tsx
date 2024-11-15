@@ -198,7 +198,7 @@ export const PlaylistItem = observer(function PlaylistItem({
             _hover={{ color: "orange.500" }}
             icon={<FaPencilAlt size={10} />}
             onClick={action(() => {
-              store.role = "experience creator";
+              store.role = "experienceCreator";
               router.push(`/experience/${experience.name}`);
             })}
           />

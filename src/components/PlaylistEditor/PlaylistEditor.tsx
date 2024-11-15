@@ -118,7 +118,7 @@ export const PlaylistEditor = observer(function PlaylistEditor() {
           size="sm"
           leftIcon={<FaPlus size={14} />}
           onClick={() => {
-            store.role = "experience creator";
+            store.role = "experienceCreator";
             router.push("/experience/untitled");
           }}
         >

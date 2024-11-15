@@ -35,11 +35,11 @@ export const RoleSelector = observer(function RoleSelector() {
         </MenuItem>
         <MenuItem
           onClick={action(() => {
-            store.role = "experience creator";
+            store.role = "experienceCreator";
             router.push(`/experience/${store.experienceName || "untitled"}`);
           })}
         >
-          Experience creator
+          experienceCreator
         </MenuItem>
         <MenuItem
           onClick={action(() => {
