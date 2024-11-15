@@ -1,7 +1,7 @@
 import { router, userProcedure } from "@/src/server/trpc";
 import { z } from "zod";
 import { experiences, playlists, SelectUser } from "@/src/db/schema";
-import { eq, inArray } from "drizzle-orm";
+import { eq, inArray, desc } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { MY_EXPERIENCES_SMART_PLAYLIST, Playlist } from "@/src/types/Playlist";
 import { ConjurerDatabase } from "@/src/db/type";
@@ -17,6 +17,7 @@ const getMyExperiencesSmartPlaylist = async (ctx: {
       .select({ id: experiences.id })
       .from(experiences)
       .where(eq(experiences.userId, ctx.user.id))
+      .orderBy(desc(experiences.updatedAt))
       .all()
   ).map(({ id }) => id),
 });
