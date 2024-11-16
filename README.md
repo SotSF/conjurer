@@ -12,13 +12,24 @@ You can think of Conjurer as an in-browser Digital Audio Visual Workstation, sim
 
 **Note:** see [Onsite Setup](ONSITE_SETUP.md) for more detailed instructions if preparing for an event.
 
+First, follow these one-time steps to install system-level dependencies:
+
 ```bash
-# use the correct version of node
+# install nvm, which manages node version installs
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
+# use nvm to install the correct version of node
+nvm install
+# install yarn, our package manager of choice
+brew install yarn
+```
+
+Then whenever you want to run Conjurer, just run the following:
+
+```bash
+# use the correct version of node (only needed if you changed node versions)
 nvm use
-
-# install dependencies
+# install dependencies (only needed if you recently git pulled)
 yarn
-
 # run the app with hot reloading on save
 yarn dev
 ```
