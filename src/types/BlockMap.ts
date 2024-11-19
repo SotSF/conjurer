@@ -1,4 +1,5 @@
-import { Block, RootStore } from "./Block";
+import type { Store } from "@/src/types/Store";
+import { Block } from "./Block";
 import { LayerV2 } from "./Layer/LayerV2";
 
 export type ActivePatternsWindow = {
@@ -21,7 +22,7 @@ export class BlockMap {
     return serialized;
   };
 
-  deserialize = (store: RootStore, layer: LayerV2, blockMap: any) => {
+  deserialize = (store: Store, layer: LayerV2, blockMap: any) => {
     Object.entries(blockMap).forEach(([id, blockData]: [string, any]) => {
       const block = Block.deserialize(store, blockData);
       block.layer = layer;
@@ -44,7 +45,7 @@ export class BlockMap {
   getActivePatternsWindow(
     time: number,
     start = 0,
-    end = this.activePatternsIndex.length - 1
+    end = this.activePatternsIndex.length - 1,
   ): ActivePatternsWindow | undefined {
     if (start > end) return;
     const mid = Math.floor((start + end) / 2);

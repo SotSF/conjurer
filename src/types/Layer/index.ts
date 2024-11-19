@@ -1,16 +1,9 @@
+import type { Store } from "@/src/types/Store";
 import { Block } from "@/src/types/Block";
 import { binarySearchForBlockAtTime } from "@/src/utils/algorithm";
 import { DEFAULT_BLOCK_DURATION } from "@/src/utils/time";
 import { makeAutoObservable } from "mobx";
 import { generateId } from "@/src/utils/id";
-
-type RootStore = {
-  context: string;
-  audioStore: {
-    getPeakAtTime: (time: number) => number;
-    globalTime: number;
-  };
-};
 
 export type ActivePatternsWindow = {
   startTime: number;
@@ -24,7 +17,10 @@ export abstract class Layer {
   visible = true;
   height = 350;
 
-  constructor(readonly store: RootStore, overrides?: object) {
+  constructor(
+    readonly store: Store,
+    overrides?: object,
+  ) {
     this.store = store;
     // makeAutoObservable(this, { store: false, ...overrides });
   }
@@ -59,14 +55,14 @@ export abstract class Layer {
   abstract attemptMoveBlock: (
     block: Block,
     desiredTime: number,
-    relative?: boolean
+    relative?: boolean,
   ) => void;
 
   abstract getAllBlocks(): Block[];
 
   abstract getNextValidStartAndDuration(
     fromTime: number,
-    maxDuration: number
+    maxDuration: number,
   ): { startTime: number; duration: number };
 
   abstract resizeBlockLeftBound: (block: Block, delta: number) => void;

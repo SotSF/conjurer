@@ -1,4 +1,5 @@
-import { Block, RootStore } from "@/src/types/Block";
+import type { Store } from "@/src/types/Store";
+import { Block } from "@/src/types/Block";
 import { DEFAULT_BLOCK_DURATION } from "@/src/utils/time";
 import { makeAutoObservable } from "mobx";
 import { generateId } from "@/src/utils/id";
@@ -19,7 +20,7 @@ export class LayerV2 extends Layer {
 
   get activeBlocks(): Block[] {
     const currentWindow = this.patternBlocks.getActivePatternsWindow(
-      this.store.audioStore.globalTime
+      this.store.audioStore.globalTime,
     );
 
     if (!currentWindow) return [];
@@ -33,7 +34,7 @@ export class LayerV2 extends Layer {
     if (this._maxConcurrentBlocks === null) {
       this._maxConcurrentBlocks = this.patternBlocks.activePatternsIndex.reduce(
         (max, window) => Math.max(max, window.patterns.length),
-        0
+        0,
       );
     }
 
@@ -136,7 +137,7 @@ export class LayerV2 extends Layer {
     patternBlocks: this.patternBlocks.serialize(),
   });
 
-  static deserialize = (store: RootStore, data: any) => {
+  static deserialize = (store: Store, data: any) => {
     const layer = new LayerV2(store);
     if (data.id) layer.id = data.id;
     layer.name = data.name ?? "";
