@@ -1,8 +1,10 @@
 import { GetObjectCommand, ListObjectsCommand } from "@aws-sdk/client-s3";
-import { ASSET_BUCKET_NAME, EXPERIENCE_ASSET_PREFIX } from "../utils/assets";
 import { getS3 } from "../utils/s3";
 import { getLocalDatabase } from "../db/local";
 import * as schema from "../db/schema";
+
+const ASSET_BUCKET_NAME = "brollin-assets";
+const EXPERIENCE_ASSET_PREFIX = "conjurer-experiences/";
 
 const songMap: Record<
   string,
