@@ -8,8 +8,8 @@ export const getS3 = () => {
 
   return (_s3 = new S3Client({
     credentials: fromCognitoIdentityPool({
-      clientConfig: { region: "us-east-2" },
-      identityPoolId: "us-east-2:343f9a70-6bf5-40f3-b21d-1376f65bb4be",
+      clientConfig: { region: "us-west-1" },
+      identityPoolId: "us-west-1:a7b986e6-596e-4498-9637-eccd8864e5fa",
     }),
     region: ASSET_BUCKET_REGION,
   }));

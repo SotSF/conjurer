@@ -62,9 +62,10 @@ export const SaveBeatMapModal = observer(function SaveBeatMapModal() {
 
   if (isError) return;
 
-  const willOverwriteExistingBeatMap = beatMaps?.includes(
-    `${beatMapName}.json`,
-  );
+  // const willOverwriteExistingBeatMap = beatMaps?.includes(
+  //   `${beatMapName}.json`,
+  // );
+  const willOverwriteExistingBeatMap = false;
 
   return (
     <Modal
