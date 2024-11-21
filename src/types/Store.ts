@@ -8,8 +8,8 @@ import { Layer } from "@/src/types/Layer";
 import { deserializeVariation } from "@/src/types/Variations/variations";
 import { PlaylistStore } from "@/src/types/PlaylistStore";
 import { BeatMapStore } from "@/src/types/BeatMapStore";
-import { PlaygroundStore } from "@/src/types/PlaygroundStore";
 import { setupVoiceCommandWebsocket } from "@/src/websocket/voiceCommandWebsocket";
+import { PlaygroundStore } from "@/src/types/PlaygroundStore";
 import {
   EXPERIENCE_VERSION,
   ExperienceStatus,
