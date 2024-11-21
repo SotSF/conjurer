@@ -310,6 +310,7 @@ export const MenuBar = observer(function MenuBar() {
                   >
                     Transmit data to canopy
                   </MenuItemOption>
+                  <MenuDivider />
                   <MenuItem
                     onClick={action(() => (uiStore.showingLatencyModal = true))}
                   >

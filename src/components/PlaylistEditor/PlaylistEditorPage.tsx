@@ -8,8 +8,9 @@ import { TimerAndWaveform } from "@/src/components/Timeline/TimerAndWaveform";
 import { PlaylistEditor } from "@/src/components/PlaylistEditor/PlaylistEditor";
 import { PlaylistLibrary } from "@/src/components/PlaylistEditor/PlaylistLibrary";
 import { LoadingOverlay } from "@/src/components/LoadingOverlay";
+import { observer } from "mobx-react-lite";
 
-export const PlaylistEditorPage = function PlaylistEditorPage() {
+export const PlaylistEditorPage = observer(function PlaylistEditorPage() {
   const store = useStore();
   const { userStore } = store;
 
@@ -49,4 +50,4 @@ export const PlaylistEditorPage = function PlaylistEditorPage() {
       <KeyboardControls editMode={false} />
     </Box>
   );
-};
+});
