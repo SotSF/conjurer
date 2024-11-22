@@ -7,7 +7,7 @@
     "canopy": "src/scripts/try-start-unity-bridge.sh; yarn db:local:setup && next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "next lint --dir src",
     "format": "prettier --write .",
     "typecheck": "tsc --noEmit",
     "db:generate": "drizzle-kit generate --config=drizzle-local.config.ts",
@@ -82,9 +82,11 @@
     "drizzle-kit": "^0.25.0",
     "eslint": "^8.56.0",
     "eslint-config-next": "^14.2.16",
+    "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-mobx": "^0.0.9",
     "prettier": "^3.3.3",
     "r3f-perf": "^7.1.2",
     "typescript": "^5.2.2"
-  }
+  },
+  "packageManager": "yarn@4.5.1"
 }

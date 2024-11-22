@@ -1,4 +1,4 @@
-import { Store } from "@/src/types/Store";
+import type { Store } from "@/src/types/Store";
 import { VoiceCommandMessage } from "@/src/types/VoiceCommandMessage";
 import { handleVoiceCommandActionMessage } from "@/src/websocket/voiceCommandHandler";
 import {

@@ -19,8 +19,8 @@ First, follow these one-time steps to install system-level dependencies:
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
 # use nvm to install the correct version of node
 nvm install
-# install yarn, our package manager of choice
-brew install yarn
+# install yarn, our package manager of choice, via corepack
+corepack enable
 ```
 
 Then whenever you want to run Conjurer, just run the following:

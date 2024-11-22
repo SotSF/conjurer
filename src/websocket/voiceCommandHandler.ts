@@ -1,4 +1,4 @@
-import { Store } from "@/src/types/Store";
+import type { Store } from "@/src/types/Store";
 import { VoiceCommandActionMessage } from "@/src/types/VoiceCommandMessage";
 import { convertSpokenTimeToSeconds } from "@/src/utils/spoken";
 import { MAX_TIME } from "@/src/utils/time";

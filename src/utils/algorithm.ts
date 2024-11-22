@@ -1,4 +1,4 @@
-import { Block } from "@/src/types/Block";
+import type { Block } from "@/src/types/Block";
 
 // binary search over an ordered list of blocks
 export function binarySearchForBlockAtTime(

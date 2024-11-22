@@ -7,7 +7,7 @@ import {
   MINIMUM_VARIATION_DURATION,
 } from "@/src/utils/time";
 import { deserializeVariation } from "@/src/types/Variations/variations";
-import { Layer } from "@/src/types/Layer";
+import type { Layer } from "@/src/types/Layer";
 import { FlatVariation } from "@/src/types/Variations/FlatVariation";
 import { defaultPatternEffectMap } from "@/src/utils/patternsEffects";
 import { isVector4 } from "@/src/utils/object";
