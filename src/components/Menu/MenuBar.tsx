@@ -34,7 +34,7 @@ import { LatencyModal } from "@/src/components/LatencyModal/LatencyModal";
 
 export const MenuBar = observer(function MenuBar() {
   const store = useStore();
-  const { experienceStore, uiStore } = store;
+  const { audioStore, experienceStore, uiStore } = store;
 
   const { saveExperience } = useSaveExperience();
 
@@ -87,7 +87,7 @@ export const MenuBar = observer(function MenuBar() {
         <Heading
           size="md"
           onClick={() =>
-            store.context !== "viewer" &&
+            store.context === "experienceEditor" &&
             uiStore.attemptShowSaveExperienceModal()
           }
           cursor="pointer"
@@ -133,7 +133,9 @@ export const MenuBar = observer(function MenuBar() {
       <HStack>
         <OpenExperienceModal />
         <SaveExperienceModal />
-        {store.context !== "viewer" && (
+
+        {/* Only the experience editor gets the File and Edit menus */}
+        {store.context === "experienceEditor" && (
           <>
             <Menu>
               <MenuButton
@@ -213,150 +215,147 @@ export const MenuBar = observer(function MenuBar() {
                 </MenuItem>
               </MenuList>
             </Menu>
-            <Menu>
-              <MenuButton
-                as={Button}
-                px={1}
-                py={0}
-                variant="ghost"
-                size="sm"
-                transition="all 0.2s"
-                borderRadius="md"
-                _hover={{ bg: "gray.500" }}
-                _focus={{ boxShadow: "outline" }}
-              >
-                View
-              </MenuButton>
-              <MenuList zIndex={12}>
-                {store.context === "experienceEditor" && (
-                  <>
-                    <MenuOptionGroup
-                      defaultValue={uiStore.renderTargetSize.toString()}
-                      title="App orientation"
-                      type="radio"
-                      value={
-                        uiStore.horizontalLayout ? "horizontal" : "vertical"
-                      }
-                      onChange={uiStore.toggleLayout}
-                    >
-                      <MenuItemOption value="horizontal">
-                        Horizontal
-                      </MenuItemOption>
-                      <MenuItemOption value="vertical">Vertical</MenuItemOption>
-                    </MenuOptionGroup>
-                    <MenuDivider />
-                  </>
-                )}
-                <MenuOptionGroup
-                  defaultValue={uiStore.renderTargetSize.toString()}
-                  title="Render size (resolution)"
-                  type="radio"
-                  value={uiStore.renderTargetSize.toString()}
-                  onChange={action(
-                    (value) =>
-                      (uiStore.renderTargetSize = parseInt(value as string)),
-                  )}
-                >
-                  <MenuItemOption value="256">256 x 256</MenuItemOption>
-                  <MenuItemOption value="512">512 x 512</MenuItemOption>
-                  <MenuItemOption value="1024">1024 x 1024</MenuItemOption>
-                </MenuOptionGroup>
-                <MenuDivider />
-                <MenuOptionGroup
-                  defaultValue={uiStore.displayMode}
-                  title="Display mode"
-                  type="radio"
-                  value={uiStore.displayMode}
-                  onChange={action(
-                    (value) => (uiStore.displayMode = value as DisplayMode),
-                  )}
-                >
-                  <MenuItemOption value="canopy">Canopy</MenuItemOption>
-                  <MenuItemOption value="cartesianSpace">
-                    Cartesian space
-                  </MenuItemOption>
-                  <MenuItemOption value="canopySpace">
-                    Canopy space
-                  </MenuItemOption>
-                </MenuOptionGroup>
-                <MenuDivider />
-                <MenuItemOption
-                  isChecked={uiStore.showingPerformance}
-                  onClick={uiStore.togglePerformance}
-                >
-                  Show performance overlay
-                </MenuItemOption>
-              </MenuList>
-            </Menu>
-            {process.env.NEXT_PUBLIC_NODE_ENV !== "production" && (
-              <Menu closeOnSelect={false}>
-                <MenuButton
-                  as={Button}
-                  px={1}
-                  py={0}
-                  variant="ghost"
-                  size="sm"
-                  transition="all 0.2s"
-                  borderRadius="md"
-                  _hover={{ bg: "gray.500" }}
-                  _focus={{ boxShadow: "outline" }}
-                >
-                  Tools
-                </MenuButton>
-                <MenuList zIndex={12}>
-                  <MenuItemOption
-                    isChecked={store.sendingData}
-                    onClick={store.toggleSendingData}
-                  >
-                    Transmit data to canopy
-                  </MenuItemOption>
-                  <MenuDivider />
-                  <MenuItem
-                    onClick={action(() => (uiStore.showingLatencyModal = true))}
-                  >
-                    Set audio latency
-                  </MenuItem>
-                </MenuList>
-              </Menu>
-            )}
-            <Menu>
-              <MenuButton
-                as={Button}
-                px={1}
-                py={0}
-                variant="ghost"
-                size="sm"
-                transition="all 0.2s"
-                borderRadius="md"
-                _hover={{ bg: "gray.500" }}
-                _focus={{ boxShadow: "outline" }}
-              >
-                Help
-              </MenuButton>
-              <MenuList zIndex={12}>
-                <MenuItem
-                  as="a"
-                  href="https://github.com/SotSF/conjurer#conjurer"
-                  target="_blank"
-                >
-                  About Conjurer
-                </MenuItem>
-                {store.context === "experienceEditor" && (
-                  <MenuItem onClick={onOpenKeyboardShortcuts}>
-                    Keyboard shortcuts
-                  </MenuItem>
-                )}
-                <MenuItem
-                  as="a"
-                  href="https://github.com/SotSF/conjurer/issues/new/choose"
-                  target="_blank"
-                >
-                  Report an issue
-                </MenuItem>
-              </MenuList>
-            </Menu>
           </>
         )}
+
+        {/* Experience editor and playlist editor both get View, Tools, and Help menus */}
+        <Menu>
+          <MenuButton
+            as={Button}
+            px={1}
+            py={0}
+            variant="ghost"
+            size="sm"
+            transition="all 0.2s"
+            borderRadius="md"
+            _hover={{ bg: "gray.500" }}
+            _focus={{ boxShadow: "outline" }}
+          >
+            View
+          </MenuButton>
+          <MenuList zIndex={12}>
+            {store.context === "experienceEditor" && (
+              <>
+                <MenuOptionGroup
+                  defaultValue={uiStore.renderTargetSize.toString()}
+                  title="App orientation"
+                  type="radio"
+                  value={uiStore.horizontalLayout ? "horizontal" : "vertical"}
+                  onChange={uiStore.toggleLayout}
+                >
+                  <MenuItemOption value="horizontal">Horizontal</MenuItemOption>
+                  <MenuItemOption value="vertical">Vertical</MenuItemOption>
+                </MenuOptionGroup>
+                <MenuDivider />
+              </>
+            )}
+            <MenuOptionGroup
+              defaultValue={uiStore.renderTargetSize.toString()}
+              title="Render size (resolution)"
+              type="radio"
+              value={uiStore.renderTargetSize.toString()}
+              onChange={action(
+                (value) =>
+                  (uiStore.renderTargetSize = parseInt(value as string)),
+              )}
+            >
+              <MenuItemOption value="256">256 x 256</MenuItemOption>
+              <MenuItemOption value="512">512 x 512</MenuItemOption>
+              <MenuItemOption value="1024">1024 x 1024</MenuItemOption>
+            </MenuOptionGroup>
+            <MenuDivider />
+            <MenuOptionGroup
+              defaultValue={uiStore.displayMode}
+              title="Display mode"
+              type="radio"
+              value={uiStore.displayMode}
+              onChange={action(
+                (value) => (uiStore.displayMode = value as DisplayMode),
+              )}
+            >
+              <MenuItemOption value="canopy">Canopy</MenuItemOption>
+              <MenuItemOption value="cartesianSpace">
+                Cartesian space
+              </MenuItemOption>
+              <MenuItemOption value="canopySpace">Canopy space</MenuItemOption>
+            </MenuOptionGroup>
+            <MenuDivider />
+            <MenuItemOption
+              isChecked={uiStore.showingPerformance}
+              onClick={uiStore.togglePerformance}
+            >
+              Show performance overlay
+            </MenuItemOption>
+          </MenuList>
+        </Menu>
+        {process.env.NEXT_PUBLIC_NODE_ENV !== "production" && (
+          <Menu closeOnSelect={false}>
+            <MenuButton
+              as={Button}
+              px={1}
+              py={0}
+              variant="ghost"
+              size="sm"
+              transition="all 0.2s"
+              borderRadius="md"
+              _hover={{ bg: "gray.500" }}
+              _focus={{ boxShadow: "outline" }}
+            >
+              Tools
+            </MenuButton>
+            <MenuList zIndex={12}>
+              <MenuItemOption
+                isChecked={store.sendingData}
+                onClick={store.toggleSendingData}
+              >
+                Transmit data to canopy
+              </MenuItemOption>
+              <MenuDivider />
+              <MenuItem
+                onClick={action(() => (uiStore.showingLatencyModal = true))}
+              >
+                Set audio latency ({(audioStore.audioLatency * 1000).toFixed()}
+                ms)
+              </MenuItem>
+            </MenuList>
+          </Menu>
+        )}
+        <Menu>
+          <MenuButton
+            as={Button}
+            px={1}
+            py={0}
+            variant="ghost"
+            size="sm"
+            transition="all 0.2s"
+            borderRadius="md"
+            _hover={{ bg: "gray.500" }}
+            _focus={{ boxShadow: "outline" }}
+          >
+            Help
+          </MenuButton>
+          <MenuList zIndex={12}>
+            <MenuItem
+              as="a"
+              href="https://github.com/SotSF/conjurer#conjurer"
+              target="_blank"
+            >
+              About Conjurer
+            </MenuItem>
+            {store.context === "experienceEditor" && (
+              <MenuItem onClick={onOpenKeyboardShortcuts}>
+                Keyboard shortcuts
+              </MenuItem>
+            )}
+            <MenuItem
+              as="a"
+              href="https://github.com/SotSF/conjurer/issues/new/choose"
+              target="_blank"
+            >
+              Report an issue
+            </MenuItem>
+          </MenuList>
+        </Menu>
       </HStack>
     </VStack>
   );
