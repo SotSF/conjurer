@@ -44,6 +44,7 @@ export class ExperienceStore {
       status: "inprogress",
       version: EXPERIENCE_VERSION,
       data: { layers: [{ patternBlocks: [] }, { patternBlocks: [] }] },
+      thumbnailURL: "",
     });
 
     this.store.hasSaved = false;

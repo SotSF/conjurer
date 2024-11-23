@@ -80,7 +80,13 @@ export const playlistRouter = router({
       const playlistExperiences = await ctx.db.query.experiences
         .findMany({
           where: inArray(experiences.id, playlist.orderedExperienceIds),
-          columns: { id: true, name: true, status: true, version: true },
+          columns: {
+            id: true,
+            name: true,
+            status: true,
+            version: true,
+            thumbnailURL: true,
+          },
           with: {
             user: { columns: { id: true, username: true } },
             song: true,
