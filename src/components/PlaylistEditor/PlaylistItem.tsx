@@ -176,7 +176,7 @@ export const PlaylistItem = observer(function PlaylistItem({
       <Td>
         <HStack>
           <ExperienceThumbnail
-            thumbnailURL={store.experienceThumbnailURL}
+            thumbnailURL={experience.thumbnailURL}
             onClick={onSelect}
           />
           <VStack {...textProps} alignItems="start">

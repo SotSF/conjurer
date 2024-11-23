@@ -33,12 +33,10 @@ export const DisplayCanvas = observer(function DisplayCanvas() {
       {renderTarget && (
         <>
           {displayMode === "canopy" && <Canopy renderTarget={renderTarget} />}
-          {displayMode === "cartesianSpace" && (
-            <CartesianSpaceView
-              renderTarget={renderTarget}
-              visible={displayMode === "cartesianSpace"}
-            />
-          )}
+          <CartesianSpaceView
+            renderTarget={renderTarget}
+            visible={displayMode === "cartesianSpace"}
+          />
           <CanopySpaceView
             renderTarget={renderTarget}
             transmitData={!uiStore.patternDrawerOpen}

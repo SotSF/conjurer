@@ -16,12 +16,12 @@ export const ExperienceThumbnail = memo(function ExperienceThumbnail({
   return (
     <Box
       position="relative"
-      cursor="pointer"
       width="32px"
       height="32px"
       borderRadius="50%"
       overflow="hidden"
-      _hover={{ opacity: 0.8 }}
+      cursor={onClick ? "pointer" : undefined}
+      _hover={onClick ? { opacity: 0.8 } : undefined}
       onClick={onClick}
     >
       {!thumbnailURL && captureButton && (
