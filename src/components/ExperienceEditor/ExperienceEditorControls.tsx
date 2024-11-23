@@ -4,13 +4,12 @@ import { RiZoomInLine, RiZoomOutLine } from "react-icons/ri";
 import { HiZoomIn, HiZoomOut } from "react-icons/hi";
 import { RxAlignCenterHorizontally } from "react-icons/rx";
 import { TbArrowBigRightLines } from "react-icons/tb";
-import { RiPlayList2Fill } from "react-icons/ri";
 import { useStore } from "@/src/types/StoreContext";
 import { action } from "mobx";
 import { AudioControls } from "@/src/components/AudioControls";
 import { IntensitySlider } from "@/src/components/IntensitySlider";
 import { SendDataButton } from "@/src/components/SendDataButton";
-import { FaCamera, FaShareAlt } from "react-icons/fa";
+import { FaShareAlt } from "react-icons/fa";
 
 export const ExperienceEditorControls = observer(
   function ExperienceEditorControls() {
@@ -101,13 +100,6 @@ export const ExperienceEditorControls = observer(
           height={6}
           icon={<FaShareAlt size={17} />}
           onClick={store.copyLinkToExperience}
-        />
-        <IconButton
-          aria-label="Capture thumbnail"
-          title="Capture thumbnail"
-          height={6}
-          icon={<FaCamera size={17} />}
-          onClick={action(() => (uiStore.capturingThumbnail = true))}
         />
       </HStack>
     );

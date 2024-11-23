@@ -54,6 +54,7 @@ export const CartesianSpaceView = observer(function CartesianSpaceView({
 
     gl.readRenderTargetPixels(thumbnailRenderTarget, 0, 0, 64, 64, buffer);
 
+    // TODO: toast message reporting successful and reminding to save
     // Generate image via data url
     const canvas = document.createElement("canvas");
     canvas.width = 64;
@@ -64,9 +65,12 @@ export const CartesianSpaceView = observer(function CartesianSpaceView({
     console.log(buffer);
     imageData.data.set(buffer);
     context.putImageData(imageData, 0, 0);
-    console.log(canvas.toDataURL());
+    const dataURL = canvas.toDataURL();
 
-    runInAction(() => (uiStore.capturingThumbnail = false));
+    runInAction(() => {
+      uiStore.capturingThumbnail = false;
+      store.experienceThumbnailURL = dataURL;
+    });
   }, 10000);
 
   return (

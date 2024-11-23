@@ -85,7 +85,11 @@ export const MenuBar = observer(function MenuBar() {
       </Modal>
       <LatencyModal />
       <HStack>
-        <ExperienceThumbnail thumbnailURL={store.experienceThumbnailURL} />
+        <ExperienceThumbnail
+          thumbnailURL={store.experienceThumbnailURL}
+          onClick={action(() => (uiStore.capturingThumbnail = true))}
+          captureButton
+        />
         <Heading
           size="md"
           onClick={() =>
