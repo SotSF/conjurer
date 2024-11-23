@@ -31,6 +31,7 @@ import { useSaveExperience } from "@/src/hooks/experience";
 import { DisplayMode } from "@/src/types/UIStore";
 import { action } from "mobx";
 import { LatencyModal } from "@/src/components/LatencyModal/LatencyModal";
+import { ExperienceThumbnail } from "@/src/components/ExperienceThumbnail";
 
 export const MenuBar = observer(function MenuBar() {
   const store = useStore();
@@ -84,6 +85,7 @@ export const MenuBar = observer(function MenuBar() {
       </Modal>
       <LatencyModal />
       <HStack>
+        <ExperienceThumbnail thumbnailURL={store.experienceThumbnailURL} />
         <Heading
           size="md"
           onClick={() =>

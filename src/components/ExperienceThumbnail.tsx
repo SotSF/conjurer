@@ -4,13 +4,13 @@ import Image from "next/image";
 import { memo } from "react";
 
 export const ExperienceThumbnail = memo(function ExperienceThumbnail({
-  experience,
+  thumbnailURL,
   onClick,
 }: {
-  experience: Experience;
+  thumbnailURL: string;
   onClick?: () => void;
 }) {
-  if (!experience.thumbnailURL) return null;
+  if (!thumbnailURL) return null;
   return (
     <Box
       position="relative"
@@ -34,12 +34,7 @@ export const ExperienceThumbnail = memo(function ExperienceThumbnail({
         bgColor="#000000"
         zIndex={10}
       />
-      <Image
-        src={experience.thumbnailURL}
-        alt="thumbnail"
-        width="32"
-        height="32"
-      />
+      <Image src={thumbnailURL} alt="thumbnail" width="32" height="32" />
     </Box>
   );
 });

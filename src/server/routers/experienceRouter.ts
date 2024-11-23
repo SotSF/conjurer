@@ -42,7 +42,13 @@ export const experienceRouter = router({
 
       return await ctx.db.query.experiences
         .findMany({
-          columns: { id: true, name: true, status: true, version: true },
+          columns: {
+            id: true,
+            name: true,
+            status: true,
+            version: true,
+            thumbnailURL: true,
+          },
           with: {
             user: { columns: { id: true, username: true } },
             song: true,
