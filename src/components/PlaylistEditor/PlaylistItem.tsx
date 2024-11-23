@@ -20,6 +20,7 @@ import { Experience } from "@/src/types/Experience";
 import { useSavePlaylist } from "@/src/hooks/playlist";
 import { Playlist } from "@/src/types/Playlist";
 import { reorder } from "@/src/utils/array";
+import { ExperienceThumbnail } from "@/src/components/ExperienceThumbnail";
 
 type PlaylistItemControlsProps = {
   playlist: Playlist;
@@ -173,19 +174,21 @@ export const PlaylistItem = observer(function PlaylistItem({
       </Td>
 
       <Td>
-        <Text {...textProps} fontWeight="bold">
-          {experience.name}
-        </Text>
+        <HStack>
+          <ExperienceThumbnail experience={experience} onClick={onSelect} />
+          <VStack {...textProps} alignItems="start">
+            <Text fontWeight="bold">{experience.name}</Text>
+            <Text>{user.username}</Text>
+          </VStack>
+        </HStack>
       </Td>
 
       <Td>
-        <Text {...textProps}>{user.username}</Text>
+        <Text {...textProps}>{experience.song.artist}</Text>
       </Td>
 
       <Td>
-        <Text {...textProps}>
-          {experience.song.artist} - {experience.song.name}
-        </Text>
+        <Text {...textProps}>{experience.song.name}</Text>
       </Td>
 
       <Td px={0}>

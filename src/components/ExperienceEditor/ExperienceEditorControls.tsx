@@ -10,7 +10,7 @@ import { action } from "mobx";
 import { AudioControls } from "@/src/components/AudioControls";
 import { IntensitySlider } from "@/src/components/IntensitySlider";
 import { SendDataButton } from "@/src/components/SendDataButton";
-import { FaShareAlt } from "react-icons/fa";
+import { FaCamera, FaShareAlt } from "react-icons/fa";
 
 export const ExperienceEditorControls = observer(
   function ExperienceEditorControls() {
@@ -101,6 +101,13 @@ export const ExperienceEditorControls = observer(
           height={6}
           icon={<FaShareAlt size={17} />}
           onClick={store.copyLinkToExperience}
+        />
+        <IconButton
+          aria-label="Capture thumbnail"
+          title="Capture thumbnail"
+          height={6}
+          icon={<FaCamera size={17} />}
+          onClick={action(() => (uiStore.capturingThumbnail = true))}
         />
       </HStack>
     );

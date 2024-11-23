@@ -145,9 +145,10 @@ export const PlaylistEditor = observer(function PlaylistEditor() {
         <Table size="sm" variant="simple">
           <Thead>
             <Tr>
-              <Th isNumeric>#</Th>
+              <Th isNumeric></Th>
               <Th>Experience</Th>
-              <Th>Author</Th>
+              {/* <Th>Author</Th> */}
+              <Th>Artist</Th>
               <Th>Song</Th>
               <Th></Th>
             </Tr>
@@ -156,7 +157,7 @@ export const PlaylistEditor = observer(function PlaylistEditor() {
             {playlistExperiences.length === 0 ? (
               <>
                 <Tr>
-                  <Td>-</Td>
+                  <Td></Td>
                   <Td>
                     <Text>No experiences added yet!</Text>
                   </Td>
