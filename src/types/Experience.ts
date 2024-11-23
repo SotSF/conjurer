@@ -14,4 +14,5 @@ export type Experience = {
   status: ExperienceStatus;
   version: number;
   data?: any;
+  thumbnailURL: string;
 };

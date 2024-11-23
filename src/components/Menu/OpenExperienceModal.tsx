@@ -52,11 +52,6 @@ export const OpenExperienceModal = observer(function OpenExperienceModal() {
         </ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          {!isPending && experiences.length === 0 && (
-            <Text color="gray.400">
-              {username} has no saved experiences yet!
-            </Text>
-          )}
           <Switch
             mb={4}
             isChecked={viewingAllExperiences}
@@ -74,6 +69,11 @@ export const OpenExperienceModal = observer(function OpenExperienceModal() {
                 onClose();
               })}
             />
+          )}
+          {!isPending && experiences.length === 0 && (
+            <Text m={4} color="gray.400">
+              {username} has no saved experiences yet!
+            </Text>
           )}
         </ModalBody>
         <ModalFooter>

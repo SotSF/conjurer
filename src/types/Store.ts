@@ -131,6 +131,7 @@ export class Store {
   experienceVersion = EXPERIENCE_VERSION;
   experienceStatus: ExperienceStatus = "inprogress";
   experienceId: number | undefined = undefined;
+  experienceThumbnailURL = "";
 
   get playing() {
     return this.audioStore.audioState !== "paused";
@@ -484,6 +485,7 @@ export class Store {
     status: this.experienceStatus,
     version: this.experienceVersion,
     data: { layers: this.layers.map((l) => l.serialize()) },
+    thumbnailURL: this.experienceThumbnailURL,
   });
 
   deserialize = (experience: Experience) => {
@@ -492,6 +494,7 @@ export class Store {
     this.audioStore.selectedSong = experience.song || NO_SONG;
     this.experienceStatus = experience.status;
     this.experienceVersion = experience.version;
+    this.experienceThumbnailURL = experience.thumbnailURL;
     this.layers = experience.data.layers.map((l: any) =>
       Layer.deserialize(this, l),
     );

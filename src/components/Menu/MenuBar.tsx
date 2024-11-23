@@ -31,6 +31,7 @@ import { useSaveExperience } from "@/src/hooks/experience";
 import { DisplayMode } from "@/src/types/UIStore";
 import { action } from "mobx";
 import { LatencyModal } from "@/src/components/LatencyModal/LatencyModal";
+import { ExperienceThumbnail } from "@/src/components/ExperienceThumbnail";
 
 export const MenuBar = observer(function MenuBar() {
   const store = useStore();
@@ -84,6 +85,16 @@ export const MenuBar = observer(function MenuBar() {
       </Modal>
       <LatencyModal />
       <HStack>
+        {/* TODO: disallow editing if you don't own this experience */}
+        {store.context === "experienceEditor" ? (
+          <ExperienceThumbnail
+            thumbnailURL={store.experienceThumbnailURL}
+            onClick={action(() => (uiStore.capturingThumbnail = true))}
+            captureButton
+          />
+        ) : (
+          <ExperienceThumbnail thumbnailURL={store.experienceThumbnailURL} />
+        )}
         <Heading
           size="md"
           onClick={() =>
