@@ -2,9 +2,17 @@ import { CONJURER_USER } from "@/src/types/User";
 
 export const MY_EXPERIENCES_SMART_PLAYLIST = {
   id: -10,
-  name: "My Experiences",
+  name: "Experiences by X",
   description:
     "This is an auto-generated playlist of all the experiences you've created.",
+  user: CONJURER_USER,
+} as const;
+
+export const ALL_FINISHED_SMART_PLAYLIST = {
+  id: -11,
+  name: "Welcome to Conjurer",
+  description:
+    "This is an auto-generated playlist of everyone's finished experiences. Enjoy!",
   user: CONJURER_USER,
 } as const;
 
