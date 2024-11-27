@@ -147,6 +147,7 @@ export const PlaylistEditor = observer(function PlaylistEditor() {
             <Tr>
               <Th isNumeric></Th>
               <Th>Experience</Th>
+              <Th>Status</Th>
               <Th>Artist</Th>
               <Th>Song</Th>
               <Th></Th>

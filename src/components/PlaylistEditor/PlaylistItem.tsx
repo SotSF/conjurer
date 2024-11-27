@@ -16,11 +16,12 @@ import { useStore } from "@/src/types/StoreContext";
 import { observer } from "mobx-react-lite";
 import { useRouter } from "next/router";
 import { ImCross } from "react-icons/im";
-import { Experience } from "@/src/types/Experience";
+import { Experience, ExperienceStatus } from "@/src/types/Experience";
 import { useSavePlaylist } from "@/src/hooks/playlist";
 import { Playlist } from "@/src/types/Playlist";
 import { reorder } from "@/src/utils/array";
 import { ExperienceThumbnail } from "@/src/components/ExperienceThumbnail";
+import { ExperienceStatusIndicator } from "../ExperienceStatusIndicator";
 
 type PlaylistItemControlsProps = {
   playlist: Playlist;
@@ -183,6 +184,12 @@ export const PlaylistItem = observer(function PlaylistItem({
             <Text fontWeight="bold">{experience.name}</Text>
             <Text>{user.username}</Text>
           </VStack>
+        </HStack>
+      </Td>
+
+      <Td>
+        <HStack {...textProps} justify="center">
+          <ExperienceStatusIndicator experienceStatus={experience.status} />
         </HStack>
       </Td>
 
