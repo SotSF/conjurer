@@ -32,6 +32,7 @@ import { DisplayMode } from "@/src/types/UIStore";
 import { action } from "mobx";
 import { LatencyModal } from "@/src/components/LatencyModal/LatencyModal";
 import { ExperienceThumbnail } from "@/src/components/ExperienceThumbnail";
+import { ExperienceStatusIndicator } from "../ExperienceStatusIndicator";
 
 export const MenuBar = observer(function MenuBar() {
   const store = useStore();
@@ -366,6 +367,24 @@ export const MenuBar = observer(function MenuBar() {
               Report an issue
             </MenuItem>
           </MenuList>
+          <Button
+            as={Button}
+            px={1}
+            py={0}
+            variant="ghost"
+            size="xs"
+            transition="all 0.2s"
+            borderRadius="md"
+            _hover={{ bg: "gray.500" }}
+            _focus={{ boxShadow: "outline" }}
+          >
+            <Text fontSize="xs">
+              <ExperienceStatusIndicator
+                experienceStatus={store.experienceStatus}
+                withLabel
+              />
+            </Text>
+          </Button>
         </Menu>
       </HStack>
     </VStack>
