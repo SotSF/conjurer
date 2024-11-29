@@ -28,7 +28,10 @@ const WavesurferWaveform = observer(function WavesurferWaveform() {
   const store = useStore();
   const { audioStore, uiStore, playlistStore } = store;
 
-  const [isReady, setIsReady] = useState(false);
+  const setAudioReady = action(
+    (ready: boolean) => (audioStore.audioReady = ready),
+  );
+
   const clonedWaveformRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
 
@@ -62,7 +65,7 @@ const WavesurferWaveform = observer(function WavesurferWaveform() {
 
   // on audio latency change
   useEffect(() => {
-    if (!isReady || !audioRef.current) return;
+    if (!audioStore.audioReady || !audioRef.current) return;
     const audioElement = audioRef.current;
     const audioContext = new AudioContext();
     runInAction(() => (audioStore.audioContext = audioContext));
@@ -75,27 +78,32 @@ const WavesurferWaveform = observer(function WavesurferWaveform() {
       audioContext.close();
       runInAction(() => (audioStore.audioContext = null));
     };
-  }, [audioStore, audioStore.audioLatency, isReady]);
+  }, [audioStore, audioStore.audioLatency, audioStore.audioReady]);
 
   // on audio state change
   useEffect(() => {
-    if (!audioStore.wavesurfer || !isReady) return;
+    if (!audioStore.wavesurfer || !audioStore.audioReady) return;
     if (audioStore.audioState === "starting") {
       audioStore.wavesurfer.play();
     } else if (audioStore.audioState === "paused") {
       audioStore.wavesurfer.pause();
     }
-  }, [audioStore.audioState, audioStore.wavesurfer, isReady]);
+  }, [audioStore.audioState, audioStore.wavesurfer, audioStore.audioReady]);
 
   // on mute toggle
   useEffect(() => {
-    if (!audioStore.wavesurfer || !isReady) return;
+    if (!audioStore.wavesurfer || !audioStore.audioReady) return;
     audioStore.wavesurfer.setMuted(audioStore.audioMuted);
-  }, [audioStore.audioMuted, audioStore.wavesurfer, isReady]);
+  }, [audioStore.audioMuted, audioStore.wavesurfer, audioStore.audioReady]);
 
   // on zoom change
   useEffect(() => {
-    if (!audioStore.wavesurfer || !isReady || !uiStore.canTimelineZoom) return;
+    if (
+      !audioStore.wavesurfer ||
+      !audioStore.audioReady ||
+      !uiStore.canTimelineZoom
+    )
+      return;
     audioStore.wavesurfer.zoom(uiStore.pixelsPerSecond);
     cloneCanvas();
   }, [
@@ -103,17 +111,17 @@ const WavesurferWaveform = observer(function WavesurferWaveform() {
     uiStore.pixelsPerSecond,
     uiStore.canTimelineZoom,
     audioStore.wavesurfer,
-    isReady,
+    audioStore.audioReady,
   ]);
 
   // on cursor change
   useEffect(() => {
-    if (!audioStore.wavesurfer || !isReady) return;
+    if (!audioStore.wavesurfer || !audioStore.audioReady) return;
     const duration = audioStore.wavesurfer.getDuration();
     const progress =
       duration > 0 ? audioStore.lastCursor.position / duration : 0;
     audioStore.wavesurfer.seekTo(clamp(progress, 0, 1));
-  }, [audioStore.lastCursor, audioStore.wavesurfer, isReady]);
+  }, [audioStore.lastCursor, audioStore.wavesurfer, audioStore.audioReady]);
 
   const dragToSeek = useMemo(() => ({ debounceTime: 50 }), []);
 
@@ -130,7 +138,7 @@ const WavesurferWaveform = observer(function WavesurferWaveform() {
         startColor="gray.500"
         endColor="gray.700"
         speed={0.4}
-        isLoaded={isReady || noSongSelected}
+        isLoaded={audioStore.audioReady || noSongSelected}
       />
       <Box
         position="absolute"
@@ -176,7 +184,7 @@ const WavesurferWaveform = observer(function WavesurferWaveform() {
               wavesurfer.play().catch((e) => console.error(e));
             cloneCanvas();
           })}
-          onRedraw={() => setIsReady(true)}
+          onRedraw={() => setAudioReady(true)}
           onInteraction={(wavesurfer, newTime: number) => {
             audioStore.setTimeWithCursor(Math.max(0, newTime));
           }}
@@ -190,7 +198,7 @@ const WavesurferWaveform = observer(function WavesurferWaveform() {
               playlistStore.playNextExperience();
           })}
           onLoading={(wavesurfer) => {
-            setIsReady(false);
+            setAudioReady(false);
             wavesurfer.stop();
             audioStore.setTimeWithCursor(0);
           }}
