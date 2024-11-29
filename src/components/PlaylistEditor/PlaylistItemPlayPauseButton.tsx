@@ -20,29 +20,32 @@ export const PlaylistItemPlayPauseButton = observer(
     onPauseClick,
   }: PlaylistItemPlayPauseButtonProps) {
     const store = useStore();
+    const { audioStore } = store;
 
     let playPauseButton = null;
-    // If loading experience, show spinner
-    if (loadingExperience) playPauseButton = <Spinner />;
-    // If experience is selected, show play/pause button
-    else if (isSelected) {
-      playPauseButton = (
-        <IconButton
-          variant="unstyled"
-          aria-label="Play"
-          title="Play"
-          color={store.playing ? "orange" : "green"}
-          height={6}
-          icon={
-            <HStack justify="center">
-              {store.playing ? <FaPause size={10} /> : <FaPlay size={10} />}
-            </HStack>
-          }
-          onClick={store.playing ? onPauseClick : onPlayClick}
-        />
-      );
-      // If experience is not selected, show play button
+    if (isSelected) {
+      // If experience is selected and loading, show spinner
+      if (loadingExperience || !audioStore.audioReady)
+        playPauseButton = <Spinner size="sm" />;
+      // If experience is selected and not loading, show play/pause button
+      else
+        playPauseButton = (
+          <IconButton
+            variant="unstyled"
+            aria-label="Play"
+            title="Play"
+            color={store.playing ? "orange" : "green"}
+            height={6}
+            icon={
+              <HStack justify="center">
+                {store.playing ? <FaPause size={10} /> : <FaPlay size={10} />}
+              </HStack>
+            }
+            onClick={store.playing ? onPauseClick : onPlayClick}
+          />
+        );
     } else {
+      // If experience is not selected, show play button
       playPauseButton = (
         <IconButton
           variant="unstyled"
@@ -62,7 +65,7 @@ export const PlaylistItemPlayPauseButton = observer(
 
     return (
       <>
-        <Box position="relative" height={6}>
+        <HStack position="relative" height={6} width="100%" justify="center">
           {/* If not selected, overlay playlist number on top of play/pause button */}
           {!isSelected && (
             <Box
@@ -81,7 +84,7 @@ export const PlaylistItemPlayPauseButton = observer(
             </Box>
           )}
           {playPauseButton}
-        </Box>
+        </HStack>
       </>
     );
   },
