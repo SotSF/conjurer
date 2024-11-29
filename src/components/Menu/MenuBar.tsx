@@ -91,7 +91,7 @@ export const MenuBar = observer(function MenuBar() {
           <ExperienceThumbnail
             thumbnailURL={store.experienceThumbnailURL}
             onClick={action(() => (uiStore.capturingThumbnail = true))}
-            captureButton
+            showCaptureButton
           />
         ) : (
           <ExperienceThumbnail thumbnailURL={store.experienceThumbnailURL} />

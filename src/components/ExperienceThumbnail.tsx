@@ -6,13 +6,13 @@ import { FaCamera } from "react-icons/fa";
 export const ExperienceThumbnail = memo(function ExperienceThumbnail({
   thumbnailURL,
   onClick,
-  captureButton = false,
+  showCaptureButton = false,
 }: {
   thumbnailURL: string;
   onClick?: () => void;
-  captureButton?: boolean;
+  showCaptureButton?: boolean;
 }) {
-  if (!thumbnailURL && !captureButton) return null;
+  if (!thumbnailURL && !showCaptureButton) return null;
   return (
     <Box
       position="relative"
@@ -24,7 +24,7 @@ export const ExperienceThumbnail = memo(function ExperienceThumbnail({
       _hover={onClick ? { opacity: 0.8 } : undefined}
       onClick={onClick}
     >
-      {!thumbnailURL && captureButton && (
+      {!thumbnailURL && showCaptureButton && (
         <HStack justify="center" width="100%" height="100%">
           <FaCamera size={13} />
         </HStack>
