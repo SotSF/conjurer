@@ -1,27 +1,19 @@
-import {
-  Box,
-  Button,
-  HStack,
-  IconButton,
-  Spinner,
-  Td,
-  Text,
-  VStack,
-} from "@chakra-ui/react";
+import { HStack, IconButton, Td, Text, VStack } from "@chakra-ui/react";
 import { RxCaretDown, RxCaretUp } from "react-icons/rx";
 import { action } from "mobx";
-import { FaPause, FaPencilAlt, FaPlay } from "react-icons/fa";
+import { FaPencilAlt } from "react-icons/fa";
 import { useState } from "react";
 import { useStore } from "@/src/types/StoreContext";
 import { observer } from "mobx-react-lite";
 import { useRouter } from "next/router";
 import { ImCross } from "react-icons/im";
-import { Experience, ExperienceStatus } from "@/src/types/Experience";
+import { Experience } from "@/src/types/Experience";
 import { useSavePlaylist } from "@/src/hooks/playlist";
 import { Playlist } from "@/src/types/Playlist";
 import { reorder } from "@/src/utils/array";
 import { ExperienceThumbnail } from "@/src/components/ExperienceThumbnail";
 import { ExperienceStatusIndicator } from "../ExperienceStatusIndicator";
+import { PlaylistItemPlayPauseButton } from "@/src/components/PlaylistEditor/PlaylistItemPlayPauseButton";
 
 type PlaylistItemControlsProps = {
   playlist: Playlist;
@@ -47,8 +39,8 @@ export const PlaylistItem = observer(function PlaylistItem({
 
   const { savePlaylist } = useSavePlaylist();
 
-  const [mousingOver, setMousingOver] = useState(false);
   const [loadingExperience, setLoadingExperience] = useState(false);
+
   const onPlayClick = async () => {
     if (loadingExperience || !experience.id) return;
     setLoadingExperience(true);
@@ -126,51 +118,13 @@ export const PlaylistItem = observer(function PlaylistItem({
               </VStack>
             </>
           )}
-          <Box
-            m={0}
-            onPointerEnter={() => setMousingOver(true)}
-            onPointerLeave={() => setMousingOver(false)}
-          >
-            {isSelectedExperience && loadingExperience ? (
-              <Spinner />
-            ) : isSelectedExperience ? (
-              <IconButton
-                variant="unstyled"
-                aria-label="Play"
-                title="Play"
-                color={store.playing ? "orange" : "green"}
-                height={6}
-                icon={
-                  <HStack justify="center">
-                    {store.playing ? (
-                      <FaPause size={10} />
-                    ) : (
-                      <FaPlay size={10} />
-                    )}
-                  </HStack>
-                }
-                onClick={store.playing ? onPauseClick : onPlayClick}
-              />
-            ) : mousingOver ? (
-              <IconButton
-                variant="unstyled"
-                aria-label="Play"
-                title="Play"
-                color="green"
-                height={6}
-                icon={
-                  <HStack justify="center">
-                    <FaPlay size={10} />
-                  </HStack>
-                }
-                onClick={onPlayClick}
-              />
-            ) : (
-              <Button variant="unstyled" onClick={onPlayClick} fontSize={14}>
-                {index + 1}
-              </Button>
-            )}
-          </Box>
+          <PlaylistItemPlayPauseButton
+            index={index}
+            isSelected={isSelectedExperience}
+            loadingExperience={loadingExperience}
+            onPlayClick={onPlayClick}
+            onPauseClick={onPauseClick}
+          />
         </HStack>
       </Td>
 
