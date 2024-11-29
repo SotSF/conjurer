@@ -94,6 +94,7 @@ export const ExperienceEditorControls = observer(
           )}
         />
         <IntensitySlider />
+        {/* TODO: re implement given viewerMode */}
         <IconButton
           aria-label="Copy link to experience"
           title="Copy link to experience"
