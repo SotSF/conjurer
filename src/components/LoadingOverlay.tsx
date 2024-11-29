@@ -21,7 +21,9 @@ export const LoadingOverlay = observer(function LoadingOverlay() {
   const { context, role } = store;
   return (
     <Modal
-      isOpen={!contextMatchesRole(context, role)}
+      isOpen={
+        !store.initializedClientSide || !contextMatchesRole(context, role)
+      }
       onClose={() => {}}
       closeOnEsc={false}
       closeOnOverlayClick={false}
