@@ -373,17 +373,16 @@ export const MenuBar = observer(function MenuBar() {
             py={0}
             variant="ghost"
             size="xs"
+            fontSize="xs"
             transition="all 0.2s"
             borderRadius="md"
             _hover={{ bg: "gray.500" }}
             _focus={{ boxShadow: "outline" }}
           >
-            <Text fontSize="xs">
-              <ExperienceStatusIndicator
-                experienceStatus={store.experienceStatus}
-                withLabel
-              />
-            </Text>
+            <ExperienceStatusIndicator
+              experienceStatus={store.experienceStatus}
+              withLabel
+            />
           </Button>
         </Menu>
       </HStack>
