@@ -38,7 +38,7 @@ export class ExperienceStore {
   loadEmptyExperience = () => {
     this.store.deserialize({
       id: undefined,
-      user: this.store.userStore.me ?? { id: 0, username: "" },
+      user: this.store.userStore.me ?? { id: -1, username: "" },
       name: "untitled",
       song: NO_SONG,
       status: "inprogress",

@@ -19,6 +19,7 @@ import { NO_SONG } from "@/src/types/Song";
 import { Context, Role } from "@/src/types/context";
 import "@/src/utils/mobx";
 import { UserStore } from "@/src/types/UserStore";
+import { User } from "@/src/types/User";
 
 export type BlockSelection = { type: "block"; block: Block };
 
@@ -132,6 +133,13 @@ export class Store {
   experienceStatus: ExperienceStatus = "inprogress";
   experienceId: number | undefined = undefined;
   experienceThumbnailURL = "";
+  experienceUser: User | undefined = undefined;
+  get canEditExperience() {
+    return (
+      this.userStore.isAuthenticated &&
+      this.experienceUser?.id === this.userStore.me?.id
+    );
+  }
 
   get playing() {
     return this.audioStore.audioState !== "paused";
@@ -477,16 +485,19 @@ export class Store {
     }
   };
 
-  serialize = (): Experience => ({
-    id: this.experienceId,
-    name: this.experienceName,
-    user: this.userStore.me!,
-    song: this.audioStore.selectedSong,
-    status: this.experienceStatus,
-    version: this.experienceVersion,
-    data: { layers: this.layers.map((l) => l.serialize()) },
-    thumbnailURL: this.experienceThumbnailURL,
-  });
+  serialize = (): Experience => {
+    if (!this.userStore.me) throw new Error("User not authenticated");
+    return {
+      id: this.experienceId,
+      name: this.experienceName,
+      user: this.userStore.me,
+      song: this.audioStore.selectedSong,
+      status: this.experienceStatus,
+      version: this.experienceVersion,
+      data: { layers: this.layers.map((l) => l.serialize()) },
+      thumbnailURL: this.experienceThumbnailURL,
+    };
+  };
 
   deserialize = (experience: Experience) => {
     this.experienceId = experience.id;
@@ -495,6 +506,7 @@ export class Store {
     this.experienceStatus = experience.status;
     this.experienceVersion = experience.version;
     this.experienceThumbnailURL = experience.thumbnailURL;
+    this.experienceUser = experience.user;
     this.layers = experience.data.layers.map((l: any) =>
       Layer.deserialize(this, l),
     );

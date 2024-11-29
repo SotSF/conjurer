@@ -86,8 +86,7 @@ export const MenuBar = observer(function MenuBar() {
       </Modal>
       <LatencyModal />
       <HStack>
-        {/* TODO: disallow editing if you don't own this experience */}
-        {store.context === "experienceEditor" ? (
+        {store.context === "experienceEditor" && store.canEditExperience ? (
           <ExperienceThumbnail
             thumbnailURL={store.experienceThumbnailURL}
             onClick={action(() => (uiStore.capturingThumbnail = true))}
