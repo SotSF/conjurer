@@ -17,19 +17,21 @@ export const ExperienceEditorPage = observer(function ExperienceEditorPage() {
   const { loadingExperienceName } = experienceStore;
 
   const router = useRouter();
+
+  // Initialize the store with the experience name from the URL
   useEffect(() => {
     if (initializationState !== "uninitialized" || !router.isReady) return;
-
-    console.log("initial load", router.query.experienceName);
     store.initializeClientSide(router.query.experienceName as string);
   }, [
     store,
     initializationState,
     experienceStore,
     store.experienceName,
+    router.isReady,
     router.query.experienceName,
   ]);
 
+  // Listen for url changes and load any new experience by name
   useEffect(() => {
     if (
       initializationState !== "initialized" ||
@@ -38,8 +40,6 @@ export const ExperienceEditorPage = observer(function ExperienceEditorPage() {
       loadingExperienceName === router.query.experienceName
     )
       return;
-
-    console.log("subsequent load", router.query.experienceName);
     experienceStore.load(router.query.experienceName as string);
   }, [
     store,

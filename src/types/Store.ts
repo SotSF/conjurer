@@ -1,6 +1,6 @@
 import { Block } from "@/src/types/Block";
 import { UIStore } from "@/src/types/UIStore";
-import { makeAutoObservable, runInAction } from "mobx";
+import { makeAutoObservable } from "mobx";
 import { AudioStore } from "@/src/types/AudioStore";
 import { Variation } from "@/src/types/Variations/Variation";
 import { ExperienceStore } from "@/src/types/ExperienceStore";
@@ -35,9 +35,6 @@ export type BlockOrVariation = BlockSelection | VariationSelection;
 type InitializationState = "uninitialized" | "initializing" | "initialized";
 
 export class Store {
-  initializedClientSide = false;
-  initializationState: InitializationState = "uninitialized";
-
   audioStore = new AudioStore(this);
   beatMapStore = new BeatMapStore(this);
   uiStore = new UIStore(this);
@@ -50,6 +47,14 @@ export class Store {
 
   sendingData = false;
   viewerMode = false;
+
+  private _initializationState: InitializationState = "uninitialized";
+  get initializationState() {
+    return this._initializationState;
+  }
+  set initializationState(value: InitializationState) {
+    this._initializationState = value;
+  }
 
   _globalIntensity = 1;
   get globalIntensity(): number {
@@ -153,9 +158,7 @@ export class Store {
 
   initializeClientSide = async (initialExperienceName?: string) => {
     if (this.initializationState !== "uninitialized") return;
-    runInAction(() => {
-      this.initializationState = "initializing";
-    });
+    this.initializationState = "initializing";
 
     if (process.env.NEXT_PUBLIC_ENABLE_VOICE === "true")
       setupVoiceCommandWebsocket(this);
@@ -200,7 +203,7 @@ export class Store {
     else if (this.context !== "playlistEditor")
       this.experienceStore.loadEmptyExperience();
 
-    runInAction(() => (this.initializationState = "initialized"));
+    this.initializationState = "initialized";
   };
 
   toggleSendingData = () => {
