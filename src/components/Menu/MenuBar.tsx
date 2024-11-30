@@ -33,11 +33,13 @@ import { action } from "mobx";
 import { LatencyModal } from "@/src/components/LatencyModal/LatencyModal";
 import { ExperienceThumbnail } from "@/src/components/ExperienceThumbnail";
 import { ExperienceStatusIndicator } from "../ExperienceStatusIndicator";
+import { useRouter } from "next/router";
 
 export const MenuBar = observer(function MenuBar() {
   const store = useStore();
   const { audioStore, experienceStore, uiStore } = store;
 
+  const router = useRouter();
   const { saveExperience } = useSaveExperience();
 
   const {
@@ -168,7 +170,9 @@ export const MenuBar = observer(function MenuBar() {
                     <MenuItem
                       icon={<FaFile size={17} />}
                       command="⌘N"
-                      onClick={experienceStore.loadEmptyExperience}
+                      onClick={() =>
+                        experienceStore.openEmptyExperience(router)
+                      }
                     >
                       New experience
                     </MenuItem>

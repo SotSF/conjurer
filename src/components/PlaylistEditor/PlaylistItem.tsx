@@ -166,7 +166,7 @@ export const PlaylistItem = observer(function PlaylistItem({
             icon={<FaPencilAlt size={10} />}
             onClick={action(() => {
               store.role = "experienceCreator";
-              router.push(`/experience/${experience.name}`);
+              experienceStore.openExperience(router, experience.name);
             })}
           />
           {editable && (

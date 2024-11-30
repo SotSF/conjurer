@@ -1,7 +1,7 @@
 import { Arrangement } from "@/src/components/Arrangement";
 import { Box } from "@chakra-ui/react";
 import { Display } from "@/src/components/Display";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { useStore } from "@/src/types/StoreContext";
 import { observer } from "mobx-react-lite";
 import { KeyboardControls } from "@/src/components/KeyboardControls";

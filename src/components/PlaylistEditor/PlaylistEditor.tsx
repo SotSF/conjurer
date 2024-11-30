@@ -121,7 +121,7 @@ export const PlaylistEditor = observer(function PlaylistEditor() {
           leftIcon={<FaPlus size={14} />}
           onClick={() => {
             store.role = "experienceCreator";
-            router.push("/experience/untitled");
+            experienceStore.openEmptyExperience(router);
           }}
         >
           New experience

@@ -3,6 +3,7 @@ import { trpcClient } from "@/src/utils/trpc";
 import { Experience, EXPERIENCE_VERSION } from "@/src/types/Experience";
 import { NO_SONG } from "@/src/types/Song";
 import type { Store } from "@/src/types/Store";
+import { NextRouter } from "next/router";
 
 export class ExperienceStore {
   private _loadingExperienceName: string | null = null;
@@ -17,12 +18,40 @@ export class ExperienceStore {
     makeAutoObservable(this);
   }
 
+  // Open an experience by experience name
+  openExperience = (router: NextRouter, experienceName: string) => {
+    router.push(`/experience/${experienceName}`);
+  };
+
+  // Open an empty experience
+  openEmptyExperience = (router: NextRouter) => {
+    router.push("/experience/untitled");
+  };
+
+  // This "load" method and subsequent load* methods are used internally to change experiences, and
+  // are not meant to be called directly. Instead use openExperience/openEmptyExperience.
   loadExperience = (experience: Experience) => {
     this.store.deserialize(experience);
     runInAction(() => {
       this.store.hasSaved = false;
       this.store.experienceLastSavedAt = Date.now();
     });
+  };
+
+  loadEmptyExperience = () => {
+    this.store.deserialize({
+      id: undefined,
+      user: this.store.userStore.me ?? { id: -1, username: "" },
+      name: "untitled",
+      song: NO_SONG,
+      status: "inprogress",
+      version: EXPERIENCE_VERSION,
+      data: { layers: [{ patternBlocks: [] }, { patternBlocks: [] }] },
+      thumbnailURL: "",
+    });
+
+    this.store.hasSaved = false;
+    this.store.experienceLastSavedAt = 0;
   };
 
   load = async (experienceName: string) => {
@@ -43,29 +72,6 @@ export class ExperienceStore {
     });
     if (!experience) this.loadEmptyExperience();
     else this.loadExperience(experience);
-  };
-
-  loadEmptyExperience = () => {
-    this.store.deserialize({
-      id: undefined,
-      user: this.store.userStore.me ?? { id: -1, username: "" },
-      name: "untitled",
-      song: NO_SONG,
-      status: "inprogress",
-      version: EXPERIENCE_VERSION,
-      data: { layers: [{ patternBlocks: [] }, { patternBlocks: [] }] },
-      thumbnailURL: "",
-    });
-
-    this.store.hasSaved = false;
-    this.store.experienceLastSavedAt = 0;
-  };
-
-  loadFromParams = () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const experience = urlParams.get("experience");
-    if (experience) void this.load(experience);
-    return !!experience;
   };
 
   stringifyExperience = (pretty: boolean = false): string =>

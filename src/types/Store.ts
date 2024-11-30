@@ -125,11 +125,6 @@ export class Store {
     this._experienceName = value;
     if (this.context === "experienceEditor") {
       localStorage.setItem("experienceName", value);
-      window.history.replaceState(
-        window.history.state,
-        "",
-        `/experience/${value}`,
-      );
     }
   }
 

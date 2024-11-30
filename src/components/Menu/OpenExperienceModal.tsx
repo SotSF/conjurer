@@ -21,7 +21,7 @@ import { useRouter } from "next/router";
 
 export const OpenExperienceModal = observer(function OpenExperienceModal() {
   const store = useStore();
-  const { uiStore, userStore } = store;
+  const { uiStore, userStore, experienceStore } = store;
   const { username } = userStore;
 
   const [viewingAllExperiences, setViewingAllExperiences] = useState(false);
@@ -62,9 +62,7 @@ export const OpenExperienceModal = observer(function OpenExperienceModal() {
             <ExperiencesTable
               experiences={experiences}
               onClickExperience={action(async (experience) => {
-                router.push(`/experience/${experience.name}`, undefined, {
-                  shallow: true,
-                });
+                experienceStore.openExperience(router, experience.name);
                 onClose();
               })}
             />

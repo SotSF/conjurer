@@ -2,6 +2,7 @@ import { useSaveExperience } from "@/src/hooks/experience";
 import { useStore } from "@/src/types/StoreContext";
 import { action } from "mobx";
 import { observer } from "mobx-react-lite";
+import { useRouter } from "next/router";
 import { useEffect } from "react";
 
 type Props = {
@@ -14,6 +15,7 @@ export const KeyboardControls = observer(function KeyboardControls({
   const store = useStore();
   const { uiStore, experienceStore, audioStore } = store;
 
+  const router = useRouter();
   const { saveExperience } = useSaveExperience();
 
   useEffect(() => {
@@ -25,7 +27,7 @@ export const KeyboardControls = observer(function KeyboardControls({
         saveExperience();
         e.preventDefault();
       } else if (editMode && e.key === "n" && (e.ctrlKey || e.metaKey)) {
-        experienceStore.loadEmptyExperience();
+        experienceStore.openEmptyExperience(router);
         e.preventDefault();
       }
 
