@@ -82,9 +82,9 @@ export const LoginButton = observer(function LoginButton() {
                       width="100%"
                       onClick={action(() => {
                         userStore.me = user;
-                        experienceStore.openEmptyExperience(router);
                         if (store.context === "experienceEditor") {
                           uiStore.showingOpenExperienceModal = true;
+                          experienceStore.openEmptyExperience(router);
                         }
                         onClose();
                       })}
@@ -112,7 +112,9 @@ export const LoginButton = observer(function LoginButton() {
                     username: newUsername,
                   });
                   userStore.me = newUser;
-                  experienceStore.openEmptyExperience(router);
+                  if (store.context === "experienceEditor") {
+                    experienceStore.openEmptyExperience(router);
+                  }
                   onClose();
                 })}
               >

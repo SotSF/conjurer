@@ -18,12 +18,12 @@ export class ExperienceStore {
     makeAutoObservable(this);
   }
 
-  // Open an experience by experience name
+  // Open an experience in the experience editor by experience name
   openExperience = (router: NextRouter, experienceName: string) => {
     router.push(`/experience/${experienceName}`);
   };
 
-  // Open an empty experience
+  // Open an empty experience in the experience editor
   openEmptyExperience = (router: NextRouter) => {
     router.push("/experience/untitled");
   };

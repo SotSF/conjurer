@@ -5,6 +5,7 @@ import { LazyWavesurferWaveform } from "@/src/components/Wavesurfer/LazyWavesurf
 import { MAX_TIME } from "@/src/utils/time";
 import { TimerReadout } from "@/src/components/Timeline/TimerReadout";
 import { TimerControls } from "@/src/components/Timeline/TimerControls";
+import { SongMarquee } from "@/src/components/Timeline/SongMarquee";
 
 export const TimerAndWaveform = observer(function TimerAndWaveform() {
   const store = useStore();
@@ -36,7 +37,9 @@ export const TimerAndWaveform = observer(function TimerAndWaveform() {
         height="80px"
         zIndex={18}
         bgColor="gray.500"
+        overflow="hidden"
       >
+        {store.context === "playlistEditor" && <SongMarquee />}
         <TimerReadout />
         <TimerControls />
       </VStack>

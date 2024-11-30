@@ -107,6 +107,11 @@ export const MenuBar = observer(function MenuBar() {
         >
           {store.experienceName}
         </Heading>
+        {store.experienceUser && (
+          <Text ml={2} fontSize="sm" userSelect="none">
+            by {store.experienceUser.username}
+          </Text>
+        )}
         {store.context === "experienceEditor" &&
           !store.hasSaved &&
           !store.experienceId && (
@@ -193,6 +198,7 @@ export const MenuBar = observer(function MenuBar() {
                       icon={<FiSave size={17} />}
                       command="⌘S"
                       onClick={() => saveExperience()}
+                      isDisabled={!store.canEditExperience}
                     >
                       Save
                     </MenuItem>

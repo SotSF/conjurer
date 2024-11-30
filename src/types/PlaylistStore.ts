@@ -56,9 +56,9 @@ export class PlaylistStore {
     }
 
     await this.store.experienceStore.loadById(experienceId);
-    runInAction(() => {
-      this.store.audioStore.audioState = "playing";
-    });
+
+    this.store.audioStore.setTimeWithCursor(0);
+    this.store.play();
   };
 
   playPreviousExperience = async () => {
