@@ -27,7 +27,7 @@ export const PlaylistLibrary = observer(function PlaylistLibrary() {
   const createPlaylist = trpc.playlist.savePlaylist.useMutation();
 
   const {
-    isFetching,
+    isPending,
     isError,
     data: playlists,
   } = trpc.playlist.listPlaylists.useQuery(
@@ -104,7 +104,7 @@ export const PlaylistLibrary = observer(function PlaylistLibrary() {
         All playlists
       </Switch>
       <VStack width="100%" spacing={0}>
-        {isFetching ? (
+        {isPending ? (
           <Spinner />
         ) : (
           playlists?.map((playlist) => (
