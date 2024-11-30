@@ -33,11 +33,13 @@ import { action } from "mobx";
 import { LatencyModal } from "@/src/components/LatencyModal/LatencyModal";
 import { ExperienceThumbnail } from "@/src/components/ExperienceThumbnail";
 import { ExperienceStatusIndicator } from "../ExperienceStatusIndicator";
+import { useRouter } from "next/router";
 
 export const MenuBar = observer(function MenuBar() {
   const store = useStore();
   const { audioStore, experienceStore, uiStore } = store;
 
+  const router = useRouter();
   const { saveExperience } = useSaveExperience();
 
   const {
@@ -86,12 +88,11 @@ export const MenuBar = observer(function MenuBar() {
       </Modal>
       <LatencyModal />
       <HStack>
-        {/* TODO: disallow editing if you don't own this experience */}
-        {store.context === "experienceEditor" ? (
+        {store.context === "experienceEditor" && store.canEditExperience ? (
           <ExperienceThumbnail
             thumbnailURL={store.experienceThumbnailURL}
             onClick={action(() => (uiStore.capturingThumbnail = true))}
-            captureButton
+            showCaptureButton
           />
         ) : (
           <ExperienceThumbnail thumbnailURL={store.experienceThumbnailURL} />
@@ -169,7 +170,9 @@ export const MenuBar = observer(function MenuBar() {
                     <MenuItem
                       icon={<FaFile size={17} />}
                       command="⌘N"
-                      onClick={experienceStore.loadEmptyExperience}
+                      onClick={() =>
+                        experienceStore.openEmptyExperience(router)
+                      }
                     >
                       New experience
                     </MenuItem>
@@ -373,17 +376,16 @@ export const MenuBar = observer(function MenuBar() {
             py={0}
             variant="ghost"
             size="xs"
+            fontSize="xs"
             transition="all 0.2s"
             borderRadius="md"
             _hover={{ bg: "gray.500" }}
             _focus={{ boxShadow: "outline" }}
           >
-            <Text fontSize="xs">
-              <ExperienceStatusIndicator
-                experienceStatus={store.experienceStatus}
-                withLabel
-              />
-            </Text>
+            <ExperienceStatusIndicator
+              experienceStatus={store.experienceStatus}
+              withLabel
+            />
           </Button>
         </Menu>
       </HStack>

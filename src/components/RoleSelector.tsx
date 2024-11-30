@@ -7,6 +7,7 @@ import { useRouter } from "next/router";
 
 export const RoleSelector = observer(function RoleSelector() {
   const store = useStore();
+  const { experienceStore } = store;
   const router = useRouter();
   return (
     <Menu computePositionOnMount size="xs">
@@ -36,7 +37,7 @@ export const RoleSelector = observer(function RoleSelector() {
         <MenuItem
           onClick={action(() => {
             store.role = "experienceCreator";
-            router.push(`/experience/${store.experienceName || "untitled"}`);
+            experienceStore.openExperience(router, store.experienceName);
           })}
         >
           Experience Creator

@@ -15,9 +15,9 @@ export const PlaylistEditorPage = observer(function PlaylistEditorPage() {
   const { userStore } = store;
 
   useEffect(() => {
-    if (store.initializedClientSide) return;
+    if (store.initializationState !== "uninitialized") return;
     store.initializeClientSide();
-  }, [store]);
+  }, [store, store.initializationState]);
 
   return (
     <Box position="relative" w="100vw" h="100vh">
