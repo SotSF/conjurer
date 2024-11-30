@@ -1,0 +1,12 @@
+.marquee {
+  animation: advance 8s linear infinite;
+}
+
+@keyframes advance {
+  from {
+    transform: translateX(0px);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
