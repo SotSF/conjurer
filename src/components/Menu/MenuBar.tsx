@@ -107,6 +107,11 @@ export const MenuBar = observer(function MenuBar() {
         >
           {store.experienceName}
         </Heading>
+        {store.experienceUser && (
+          <Text ml={2} fontSize="sm" userSelect="none">
+            by {store.experienceUser.username}
+          </Text>
+        )}
         {store.context === "experienceEditor" &&
           !store.hasSaved &&
           !store.experienceId && (
