@@ -112,7 +112,9 @@ export const LoginButton = observer(function LoginButton() {
                     username: newUsername,
                   });
                   userStore.me = newUser;
-                  experienceStore.openEmptyExperience(router);
+                  if (store.context === "experienceEditor") {
+                    experienceStore.openEmptyExperience(router);
+                  }
                   onClose();
                 })}
               >

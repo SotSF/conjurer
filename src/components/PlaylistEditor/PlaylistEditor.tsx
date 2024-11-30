@@ -16,13 +16,13 @@ import { useStore } from "@/src/types/StoreContext";
 import { observer } from "mobx-react-lite";
 import { PlaylistItem } from "@/src/components/PlaylistEditor/PlaylistItem";
 import { MdOutlinePlaylistAdd } from "react-icons/md";
-import { action, runInAction } from "mobx";
+import { action } from "mobx";
 import { AddExperienceModal } from "@/src/components/PlaylistEditor/AddExperienceModal";
 import { BiShuffle } from "react-icons/bi";
 import { ImLoop } from "react-icons/im";
 import { trpc } from "@/src/utils/trpc";
 import { PlaylistNameEditable } from "@/src/components/PlaylistEditor/PlaylistNameEditable";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { FaPlus } from "react-icons/fa";
 import { useRouter } from "next/router";
 
@@ -47,17 +47,12 @@ export const PlaylistEditor = observer(function PlaylistEditor() {
     },
   );
 
+  const selectedInitialExperience = useRef(false);
   useEffect(() => {
-    runInAction(() => {
-      // this is very hacky and I hate it but it works
-      if (data?.playlist) playlistStore.selectedPlaylist = data.playlist;
-    });
-  }, [playlistStore, data?.playlist]);
-
-  useEffect(() => {
-    if (!data?.playlistExperiences.length) return;
-    if (store.experienceName && store.experienceName !== "untitled") return;
-    // once experiences are fetched, load the first experience in the playlist
+    if (!data?.playlistExperiences.length || selectedInitialExperience.current)
+      return;
+    selectedInitialExperience.current = true;
+    // Once the experiences are fetched and if we have not done so already, select the first experience
     experienceStore.load(data.playlistExperiences[0].name);
   }, [store.experienceName, experienceStore, data?.playlistExperiences]);
 

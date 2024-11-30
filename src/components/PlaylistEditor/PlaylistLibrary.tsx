@@ -12,7 +12,7 @@ import { FaPlus } from "react-icons/fa";
 import { runInAction } from "mobx";
 import { trpc } from "@/src/utils/trpc";
 import { SelectablePlaylist } from "@/src/components/PlaylistEditor/SelectablePlaylist";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export const PlaylistLibrary = observer(function PlaylistLibrary() {
   const store = useStore();
@@ -42,12 +42,12 @@ export const PlaylistLibrary = observer(function PlaylistLibrary() {
     },
   );
 
+  const selectedInitialPlaylist = useRef(false);
   useEffect(() => {
-    if (!playlists || playlists.length === 0 || playlistStore.selectedPlaylist)
-      return;
-    runInAction(() => {
-      playlistStore.selectedPlaylist = playlists[0];
-    });
+    if (!playlists?.length || selectedInitialPlaylist.current) return;
+    selectedInitialPlaylist.current = true;
+    // Once the playlists are fetched and if we have not done so already, select the first playlist
+    runInAction(() => (playlistStore.selectedPlaylist = playlists[0]));
   }, [playlists, playlistStore]);
 
   if (isError) return null;

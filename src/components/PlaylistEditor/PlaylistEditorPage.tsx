@@ -20,7 +20,7 @@ export const PlaylistEditorPage = observer(function PlaylistEditorPage() {
   }, [store, store.initializationState]);
 
   return (
-    <Box position="relative" w="100vw" h="100vh">
+    <Box key={userStore.username} position="relative" w="100vw" h="100vh">
       <PanelGroup
         key={userStore.username}
         autoSaveId="playlistEditor-1"
