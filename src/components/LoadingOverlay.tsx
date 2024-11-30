@@ -18,11 +18,13 @@ const contextMatchesRole = (context: Context, role: Role) => {
 
 export const LoadingOverlay = observer(function LoadingOverlay() {
   const store = useStore();
-  const { context, role } = store;
+  const { context, role, experienceStore } = store;
   return (
     <Modal
       isOpen={
-        !store.initializedClientSide || !contextMatchesRole(context, role)
+        store.initializationState !== "initialized" ||
+        experienceStore.loadingExperienceName !== null ||
+        !contextMatchesRole(context, role)
       }
       onClose={() => {}}
       closeOnEsc={false}

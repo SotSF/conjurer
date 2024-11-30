@@ -5,6 +5,14 @@ import { NO_SONG } from "@/src/types/Song";
 import type { Store } from "@/src/types/Store";
 
 export class ExperienceStore {
+  private _loadingExperienceName: string | null = null;
+  get loadingExperienceName() {
+    return this._loadingExperienceName;
+  }
+  set loadingExperienceName(value: string | null) {
+    this._loadingExperienceName = value;
+  }
+
   constructor(readonly store: Store) {
     makeAutoObservable(this);
   }
@@ -18,12 +26,14 @@ export class ExperienceStore {
   };
 
   load = async (experienceName: string) => {
+    this.loadingExperienceName = experienceName;
     const experience = await trpcClient.experience.getExperience.query({
       experienceName,
       usingLocalData: this.store.usingLocalData,
     });
     if (!experience) this.loadEmptyExperience();
     else this.loadExperience(experience);
+    this.loadingExperienceName = null;
   };
 
   loadById = async (experienceId: number) => {

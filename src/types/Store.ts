@@ -1,6 +1,6 @@
 import { Block } from "@/src/types/Block";
 import { UIStore } from "@/src/types/UIStore";
-import { makeAutoObservable } from "mobx";
+import { makeAutoObservable, runInAction } from "mobx";
 import { AudioStore } from "@/src/types/AudioStore";
 import { Variation } from "@/src/types/Variations/Variation";
 import { ExperienceStore } from "@/src/types/ExperienceStore";
@@ -32,8 +32,11 @@ export type VariationSelection = {
 
 export type BlockOrVariation = BlockSelection | VariationSelection;
 
+type InitializationState = "uninitialized" | "initializing" | "initialized";
+
 export class Store {
   initializedClientSide = false;
+  initializationState: InitializationState = "uninitialized";
 
   audioStore = new AudioStore(this);
   beatMapStore = new BeatMapStore(this);
@@ -122,7 +125,11 @@ export class Store {
     this._experienceName = value;
     if (this.context === "experienceEditor") {
       localStorage.setItem("experienceName", value);
-      window.history.pushState({}, "", `/experience/${value}`);
+      window.history.replaceState(
+        window.history.state,
+        "",
+        `/experience/${value}`,
+      );
     }
   }
 
@@ -149,9 +156,11 @@ export class Store {
     makeAutoObservable(this);
   }
 
-  initializeClientSide = (initialExperienceName?: string) => {
-    if (this.initializedClientSide) return;
-    this.initializedClientSide = true;
+  initializeClientSide = async (initialExperienceName?: string) => {
+    if (this.initializationState !== "uninitialized") return;
+    runInAction(() => {
+      this.initializationState = "initializing";
+    });
 
     if (process.env.NEXT_PUBLIC_ENABLE_VOICE === "true")
       setupVoiceCommandWebsocket(this);
@@ -186,14 +195,17 @@ export class Store {
     if (usingLocalData && process.env.NEXT_PUBLIC_NODE_ENV !== "production")
       this._usingLocalData = usingLocalData === "true";
 
-    // load experience from path parameter if provided (e.g. /experience/my-experience)
-    if (initialExperienceName) this.experienceStore.load(initialExperienceName);
-    else if (this.context !== "playlistEditor")
-      this.experienceStore.loadEmptyExperience();
-
     if (this.context === "playground") this.playgroundStore.initialize();
     this.uiStore.initialize();
     this.audioStore.initialize();
+
+    // load experience from path parameter if provided (e.g. /experience/my-experience)
+    if (initialExperienceName)
+      await this.experienceStore.load(initialExperienceName);
+    else if (this.context !== "playlistEditor")
+      this.experienceStore.loadEmptyExperience();
+
+    runInAction(() => (this.initializationState = "initialized"));
   };
 
   toggleSendingData = () => {
