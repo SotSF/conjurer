@@ -5,7 +5,7 @@ import { DisplayControls } from "@/src/components/DisplayControls";
 import { observer } from "mobx-react-lite";
 import { useStore } from "@/src/types/StoreContext";
 import { MenuBar } from "@/src/components/Menu/MenuBar";
-import { useRef } from "react";
+import { useState } from "react";
 import { LoginButton } from "@/src/components/LoginButton";
 import { RoleSelector } from "@/src/components/RoleSelector";
 
@@ -13,7 +13,8 @@ export const Display = observer(function Display() {
   const store = useStore();
   const { uiStore, viewerMode } = store;
 
-  const boxRef = useRef<HTMLDivElement>(null);
+  const [containerElement, setContainerElement] =
+    useState<HTMLDivElement | null>(null);
 
   return (
     <Box
@@ -42,11 +43,15 @@ export const Display = observer(function Display() {
             <RoleSelector />
             <LoginButton />
           </HStack>
-          <DisplayControls canvasContainer={boxRef.current} />
+          <DisplayControls canvasContainer={containerElement} />
         </Box>
       )}
 
-      <Box ref={boxRef} height="100%" bgColor="gray.900">
+      <Box
+        ref={(element) => setContainerElement(element)}
+        height="100%"
+        bgColor="gray.900"
+      >
         <DisplayCanvas />
       </Box>
     </Box>
