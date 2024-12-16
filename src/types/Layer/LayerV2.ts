@@ -105,7 +105,7 @@ export class LayerV2 implements Layer {
 
   attemptMoveBlock = (block: Block, desiredTime: number, relative = false) => {
     if (block.layer != this) return;
-    block.startTime = desiredTime;
+    block.startTime = relative ? desiredTime + block.startTime : desiredTime;
   };
 
   resizeBlockLeftBound = (block: Block, delta: number) => {
