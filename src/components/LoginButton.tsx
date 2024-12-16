@@ -21,11 +21,13 @@ import { observer } from "mobx-react-lite";
 import { trpc } from "@/src/utils/trpc";
 import { sanitize } from "@/src/utils/sanitize";
 import { CONJURER_USER } from "@/src/types/User";
+import { useRouter } from "next/router";
 
 export const LoginButton = observer(function LoginButton() {
   const store = useStore();
   const { experienceStore, uiStore, userStore, usingLocalData } = store;
 
+  const router = useRouter();
   const [newUsername, setNewUsername] = useState("");
 
   const {
@@ -80,9 +82,9 @@ export const LoginButton = observer(function LoginButton() {
                       width="100%"
                       onClick={action(() => {
                         userStore.me = user;
-                        experienceStore.loadEmptyExperience();
                         if (store.context === "experienceEditor") {
                           uiStore.showingOpenExperienceModal = true;
+                          experienceStore.openEmptyExperience(router);
                         }
                         onClose();
                       })}
@@ -110,7 +112,9 @@ export const LoginButton = observer(function LoginButton() {
                     username: newUsername,
                   });
                   userStore.me = newUser;
-                  experienceStore.loadEmptyExperience();
+                  if (store.context === "experienceEditor") {
+                    experienceStore.openEmptyExperience(router);
+                  }
                   onClose();
                 })}
               >

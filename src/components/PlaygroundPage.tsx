@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { PatternPlayground } from "@/src/components/PatternPlayground/PatternPlayground";
 import { useStore } from "@/src/types/StoreContext";
 import { observer } from "mobx-react-lite";
@@ -10,15 +10,13 @@ import { LoginButton } from "@/src/components/LoginButton";
 export const PlaygroundPage = observer(function PlaygroundPage() {
   const store = useStore();
 
-  const initialized = useRef(false);
   useEffect(() => {
-    if (initialized.current) return;
-    initialized.current = true;
+    if (store.initializationState !== "uninitialized") return;
     store.initializeClientSide();
-  }, [store]);
+  }, [store, store.initializationState]);
 
   return (
-    store.initializedClientSide && (
+    store.initializationState === "initialized" && (
       <>
         <HStack
           p={2}

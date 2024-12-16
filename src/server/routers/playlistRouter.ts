@@ -3,7 +3,11 @@ import { z } from "zod";
 import { experiences, playlists, SelectUser } from "@/src/db/schema";
 import { eq, inArray, desc } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
-import { MY_EXPERIENCES_SMART_PLAYLIST, Playlist } from "@/src/types/Playlist";
+import {
+  ALL_FINISHED_SMART_PLAYLIST,
+  MY_EXPERIENCES_SMART_PLAYLIST,
+  Playlist,
+} from "@/src/types/Playlist";
 import { ConjurerDatabase } from "@/src/db/type";
 
 const getMyExperiencesSmartPlaylist = async (ctx: {
@@ -22,6 +26,23 @@ const getMyExperiencesSmartPlaylist = async (ctx: {
   ).map(({ id }) => id),
 });
 
+const getAllFinishedSmartPlaylist = async (ctx: {
+  db: ConjurerDatabase;
+  user: SelectUser;
+}) => ({
+  ...ALL_FINISHED_SMART_PLAYLIST,
+  orderedExperienceIds: (
+    await ctx.db
+      .select({ id: experiences.id })
+      .from(experiences)
+      .where(eq(experiences.status, "complete"))
+      .all()
+  )
+    .map(({ id }) => id)
+    // Shuffle the experiences
+    .sort(() => Math.random() - 0.5),
+});
+
 export const playlistRouter = router({
   getPlaylist: userProcedure
     .input(
@@ -33,6 +54,8 @@ export const playlistRouter = router({
       let playlist: Playlist | undefined;
       if (input.id === MY_EXPERIENCES_SMART_PLAYLIST.id) {
         playlist = await getMyExperiencesSmartPlaylist(ctx);
+      } else if (input.id === ALL_FINISHED_SMART_PLAYLIST.id) {
+        playlist = await getAllFinishedSmartPlaylist(ctx);
       } else {
         playlist = await ctx.db.query.playlists
           .findFirst({
@@ -57,7 +80,13 @@ export const playlistRouter = router({
       const playlistExperiences = await ctx.db.query.experiences
         .findMany({
           where: inArray(experiences.id, playlist.orderedExperienceIds),
-          columns: { id: true, name: true, status: true, version: true },
+          columns: {
+            id: true,
+            name: true,
+            status: true,
+            version: true,
+            thumbnailURL: true,
+          },
           with: {
             user: { columns: { id: true, username: true } },
             song: true,
@@ -168,6 +197,10 @@ export const playlistRouter = router({
         ),
       );
 
-      return [await getMyExperiencesSmartPlaylist(ctx), ...sortedPlaylists];
+      return [
+        await getAllFinishedSmartPlaylist(ctx),
+        await getMyExperiencesSmartPlaylist(ctx),
+        ...sortedPlaylists,
+      ];
     }),
 });

@@ -1,10 +1,10 @@
-import { Block } from "@/src/types/Block";
+import type { Store } from "@/src/types/Store";
 import { binarySearchForBlockAtTime } from "@/src/utils/algorithm";
 import { DEFAULT_BLOCK_DURATION } from "@/src/utils/time";
 import { makeAutoObservable } from "mobx";
 import { generateId } from "@/src/utils/id";
-import type { Store } from "@/src/types/Store";
 import { Layer } from ".";
+import { Block } from "@/src/types/Block";
 
 export type ActivePatternsWindow = {
   startTime: number;

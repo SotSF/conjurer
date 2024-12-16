@@ -17,19 +17,21 @@ import { action } from "mobx";
 import { useState } from "react";
 import { ExperiencesTable } from "@/src/components/ExperiencesTable/ExperiencesTable";
 import { useExperiences } from "@/src/hooks/experiencesAndUsers";
+import { useRouter } from "next/router";
 
 export const OpenExperienceModal = observer(function OpenExperienceModal() {
   const store = useStore();
-  const { experienceStore, uiStore, userStore } = store;
+  const { uiStore, userStore, experienceStore } = store;
   const { username } = userStore;
 
   const [viewingAllExperiences, setViewingAllExperiences] = useState(false);
-  const [isLoadingNewExperience, setIsLoadingNewExperience] = useState(false);
 
   const { isPending, isError, isRefetching, experiences } = useExperiences({
     username: viewingAllExperiences ? undefined : username,
     enabled: uiStore.showingOpenExperienceModal,
   });
+
+  const router = useRouter();
 
   const onClose = action(() => (uiStore.showingOpenExperienceModal = false));
 
@@ -45,18 +47,10 @@ export const OpenExperienceModal = observer(function OpenExperienceModal() {
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>
-          Open experience{" "}
-          {(isPending || isRefetching || isLoadingNewExperience) && (
-            <Spinner ml={2} />
-          )}
+          Open experience {(isPending || isRefetching) && <Spinner ml={2} />}
         </ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          {!isPending && experiences.length === 0 && (
-            <Text color="gray.400">
-              {username} has no saved experiences yet!
-            </Text>
-          )}
           <Switch
             mb={4}
             isChecked={viewingAllExperiences}
@@ -68,12 +62,15 @@ export const OpenExperienceModal = observer(function OpenExperienceModal() {
             <ExperiencesTable
               experiences={experiences}
               onClickExperience={action(async (experience) => {
-                setIsLoadingNewExperience(true);
-                await experienceStore.load(experience.name);
-                setIsLoadingNewExperience(false);
+                experienceStore.openExperience(router, experience.name);
                 onClose();
               })}
             />
+          )}
+          {!isPending && experiences.length === 0 && (
+            <Text m={4} color="gray.400">
+              {username} has no saved experiences yet!
+            </Text>
           )}
         </ModalBody>
         <ModalFooter>

@@ -42,7 +42,13 @@ export const experienceRouter = router({
 
       return await ctx.db.query.experiences
         .findMany({
-          columns: { id: true, name: true, status: true, version: true },
+          columns: {
+            id: true,
+            name: true,
+            status: true,
+            version: true,
+            thumbnailURL: true,
+          },
           with: {
             user: { columns: { id: true, username: true } },
             song: true,
@@ -61,10 +67,11 @@ export const experienceRouter = router({
         data: z.any(),
         status: z.enum(EXPERIENCE_STATUSES),
         version: z.number(),
+        thumbnailURL: z.string(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const { id, name, song, data, status, version } = input;
+      const { id, name, song, data, status, version, thumbnailURL } = input;
       const { id: songId } = song;
 
       if (id) {
@@ -86,7 +93,7 @@ export const experienceRouter = router({
         // If an id is provided then we are updating an existing experience
         await ctx.db
           .update(experiences)
-          .set({ name, songId, data, status, version })
+          .set({ name, songId, data, status, version, thumbnailURL })
           .where(eq(experiences.id, id))
           .execute();
         return id;

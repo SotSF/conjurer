@@ -66,6 +66,7 @@ export const useSaveExperience = () => {
 
     utils.experience.listExperiencesForUser.invalidate();
     utils.experience.listExperiences.invalidate();
+    utils.playlist.getPlaylist.invalidate();
   };
 
   return { saveExperience };

@@ -1,7 +1,7 @@
 import { Song } from "@/src/types/Song";
 import { User } from "@/src/types/User";
 
-export const EXPERIENCE_VERSION = 1;
+export const EXPERIENCE_VERSION = 2;
 
 export const EXPERIENCE_STATUSES = ["inprogress", "complete"] as const;
 export type ExperienceStatus = (typeof EXPERIENCE_STATUSES)[number];
@@ -14,4 +14,5 @@ export type Experience = {
   status: ExperienceStatus;
   version: number;
   data?: any;
+  thumbnailURL: string;
 };

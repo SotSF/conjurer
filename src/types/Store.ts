@@ -8,8 +8,8 @@ import { Layer } from "@/src/types/Layer";
 import { deserializeVariation } from "@/src/types/Variations/variations";
 import { PlaylistStore } from "@/src/types/PlaylistStore";
 import { BeatMapStore } from "@/src/types/BeatMapStore";
-import { PlaygroundStore } from "@/src/types/PlaygroundStore";
 import { setupVoiceCommandWebsocket } from "@/src/websocket/voiceCommandWebsocket";
+import { PlaygroundStore } from "@/src/types/PlaygroundStore";
 import {
   EXPERIENCE_VERSION,
   ExperienceStatus,
@@ -21,6 +21,7 @@ import "@/src/utils/mobx";
 import { UserStore } from "@/src/types/UserStore";
 import { LayerV1 } from "./Layer/LayerV1";
 import { LayerV2 } from "./Layer/LayerV2";
+import { User } from "@/src/types/User";
 
 export type BlockSelection = { type: "block"; block: Block };
 
@@ -33,10 +34,9 @@ export type VariationSelection = {
 
 export type BlockOrVariation = BlockSelection | VariationSelection;
 
-export class Store {
-  initializedClientSide = false;
-  version = 2;
+type InitializationState = "uninitialized" | "initializing" | "initialized";
 
+export class Store {
   audioStore = new AudioStore(this);
   beatMapStore = new BeatMapStore(this);
   uiStore = new UIStore(this);
@@ -49,6 +49,14 @@ export class Store {
 
   sendingData = false;
   viewerMode = false;
+
+  private _initializationState: InitializationState = "uninitialized";
+  get initializationState() {
+    return this._initializationState;
+  }
+  set initializationState(value: InitializationState) {
+    this._initializationState = value;
+  }
 
   _globalIntensity = 1;
   get globalIntensity(): number {
@@ -124,7 +132,6 @@ export class Store {
     this._experienceName = value;
     if (this.context === "experienceEditor") {
       localStorage.setItem("experienceName", value);
-      window.history.pushState({}, "", `/experience/${value}`);
     }
   }
 
@@ -134,6 +141,14 @@ export class Store {
   experienceVersion = EXPERIENCE_VERSION;
   experienceStatus: ExperienceStatus = "inprogress";
   experienceId: number | undefined = undefined;
+  experienceThumbnailURL = "";
+  experienceUser: User | undefined = undefined;
+  get canEditExperience() {
+    return (
+      this.userStore.isAuthenticated &&
+      this.experienceUser?.id === this.userStore.me?.id
+    );
+  }
 
   get playing() {
     return this.audioStore.audioState !== "paused";
@@ -143,9 +158,9 @@ export class Store {
     makeAutoObservable(this);
   }
 
-  initializeClientSide = (initialExperienceName?: string) => {
-    if (this.initializedClientSide) return;
-    this.initializedClientSide = true;
+  initializeClientSide = async (initialExperienceName?: string) => {
+    if (this.initializationState !== "uninitialized") return;
+    this.initializationState = "initializing";
 
     if (process.env.NEXT_PUBLIC_ENABLE_VOICE === "true")
       setupVoiceCommandWebsocket(this);
@@ -180,14 +195,17 @@ export class Store {
     if (usingLocalData && process.env.NEXT_PUBLIC_NODE_ENV !== "production")
       this._usingLocalData = usingLocalData === "true";
 
-    // load experience from path parameter if provided (e.g. /experience/my-experience)
-    if (initialExperienceName) this.experienceStore.load(initialExperienceName);
-    else if (this.context !== "playlistEditor")
-      this.experienceStore.loadEmptyExperience();
-
     if (this.context === "playground") this.playgroundStore.initialize();
     this.uiStore.initialize();
     this.audioStore.initialize();
+
+    // load experience from path parameter if provided (e.g. /experience/my-experience)
+    if (initialExperienceName)
+      await this.experienceStore.load(initialExperienceName);
+    else if (this.context !== "playlistEditor")
+      this.experienceStore.loadEmptyExperience();
+
+    this.initializationState = "initialized";
   };
 
   toggleSendingData = () => {
@@ -479,15 +497,19 @@ export class Store {
     }
   };
 
-  serialize = (): Experience => ({
-    id: this.experienceId,
-    name: this.experienceName,
-    user: this.userStore.me!,
-    song: this.audioStore.selectedSong,
-    status: this.experienceStatus,
-    version: this.experienceVersion,
-    data: { layers: this.layers.map((l) => l.serialize()) },
-  });
+  serialize = (): Experience => {
+    if (!this.userStore.me) throw new Error("User not authenticated");
+    return {
+      id: this.experienceId,
+      name: this.experienceName,
+      user: this.userStore.me,
+      song: this.audioStore.selectedSong,
+      status: this.experienceStatus,
+      version: this.experienceVersion,
+      data: { layers: this.layers.map((l) => l.serialize()) },
+      thumbnailURL: this.experienceThumbnailURL,
+    };
+  };
 
   deserialize = (experience: Experience) => {
     this.experienceId = experience.id;
@@ -495,6 +517,7 @@ export class Store {
     this.audioStore.selectedSong = experience.song || NO_SONG;
     this.experienceStatus = experience.status;
     this.experienceVersion = experience.version;
+<<<<<<< HEAD
 
     if (this.experienceVersion === 1) {
       this.layers = experience.data.layers.map((l: any) =>
@@ -505,6 +528,13 @@ export class Store {
         LayerV2.deserialize(this, l),
       );
     }
+=======
+    this.experienceThumbnailURL = experience.thumbnailURL;
+    this.experienceUser = experience.user;
+    this.layers = experience.data.layers.map((l: any) =>
+      Layer.deserialize(this, l),
+    );
+>>>>>>> main
 
     // Select first layer
     this.selectedLayer = this.layers[0];

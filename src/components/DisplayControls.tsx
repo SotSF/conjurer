@@ -6,6 +6,7 @@ type DisplayControlsProps = { canvasContainer: HTMLDivElement | null };
 export const DisplayControls = function DisplayControls({
   canvasContainer,
 }: DisplayControlsProps) {
+  if (!canvasContainer) return null;
   return (
     <VStack
       p={1}
@@ -16,12 +17,12 @@ export const DisplayControls = function DisplayControls({
       zIndex={1}
     >
       <IconButton
-        variant={"ghost"}
+        variant="ghost"
         aria-label="Go fullscreen"
         title="Go fullscreen"
         height={6}
         icon={<BsArrowsFullscreen size={15} />}
-        onClick={() => canvasContainer?.requestFullscreen()}
+        onClick={() => canvasContainer.requestFullscreen()}
       />
     </VStack>
   );

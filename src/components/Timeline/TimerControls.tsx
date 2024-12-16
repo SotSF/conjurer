@@ -9,6 +9,7 @@ export const TimerControls = observer(function TimerControls() {
   const store = useStore();
   const { audioStore, playlistStore } = store;
   const playing = audioStore.audioState === "playing";
+  const showSkipButtons = store.context === "experienceEditor";
 
   return (
     <VStack pb={1} spacing={0}>
@@ -59,30 +60,32 @@ export const TimerControls = observer(function TimerControls() {
           />
         </ButtonGroup>
       </HStack>
-      <HStack width="100%" justify="center" overflowX="clip">
-        <ButtonGroup isAttached>
-          <IconButton
-            borderStyle="solid"
-            borderWidth={1}
-            aria-label="Go back 10 seconds "
-            title="Go back 10 seconds "
-            height={6}
-            bgColor="gray.600"
-            icon={<MdReplay10 size={17} />}
-            onClick={action(() => audioStore.skip(-10))}
-          />
-          <IconButton
-            borderStyle="solid"
-            borderWidth={1}
-            aria-label="Go forward 10 seconds"
-            title="Go forward 10 seconds"
-            height={6}
-            bgColor="gray.600"
-            icon={<MdForward10 size={17} />}
-            onClick={action(() => audioStore.skip(10))}
-          />
-        </ButtonGroup>
-      </HStack>
+      {showSkipButtons && (
+        <HStack width="100%" justify="center" overflowX="clip">
+          <ButtonGroup isAttached>
+            <IconButton
+              borderStyle="solid"
+              borderWidth={1}
+              aria-label="Go back 10 seconds "
+              title="Go back 10 seconds "
+              height={6}
+              bgColor="gray.600"
+              icon={<MdReplay10 size={17} />}
+              onClick={action(() => audioStore.skip(-10))}
+            />
+            <IconButton
+              borderStyle="solid"
+              borderWidth={1}
+              aria-label="Go forward 10 seconds"
+              title="Go forward 10 seconds"
+              height={6}
+              bgColor="gray.600"
+              icon={<MdForward10 size={17} />}
+              onClick={action(() => audioStore.skip(10))}
+            />
+          </ButtonGroup>
+        </HStack>
+      )}
     </VStack>
   );
 });

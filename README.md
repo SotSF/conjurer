@@ -19,8 +19,8 @@ First, follow these one-time steps to install system-level dependencies:
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
 # use nvm to install the correct version of node
 nvm install
-# install yarn, our package manager of choice
-brew install yarn
+# install yarn, our package manager of choice, via corepack
+corepack enable
 ```
 
 Then whenever you want to run Conjurer, just run the following:
@@ -47,7 +47,7 @@ TURSO_DATABASE_URL=libsql://conjurer-db-secretfire.turso.io
 TURSO_AUTH_TOKEN=******************************
 ```
 
-Ask for credentials to the Turso dashboard to generate your own token.
+Ask for credentials to the Turso dashboard to generate your own token. To download the database, run `yarn db:prod:download`. You will need to have the `turso` CLI installed. To install it, run `brew install tursodatabase/tap/turso`.
 
 ### General info / tips
 

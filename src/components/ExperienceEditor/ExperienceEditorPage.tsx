@@ -13,15 +13,39 @@ import { LoadingOverlay } from "@/src/components/LoadingOverlay";
 
 export const ExperienceEditorPage = observer(function ExperienceEditorPage() {
   const store = useStore();
-  const { uiStore, experienceStore } = store;
+  const { uiStore, experienceStore, initializationState } = store;
+  const { loadingExperienceName } = experienceStore;
 
   const router = useRouter();
+
+  // Initialize the store with the experience name from the URL
   useEffect(() => {
-    if (store.initializedClientSide || !router.query.experienceName) return;
+    if (initializationState !== "uninitialized" || !router.isReady) return;
     store.initializeClientSide(router.query.experienceName as string);
   }, [
     store,
+    initializationState,
     experienceStore,
+    store.experienceName,
+    router.isReady,
+    router.query.experienceName,
+  ]);
+
+  // Listen for url changes and load any new experience by name
+  useEffect(() => {
+    if (
+      initializationState !== "initialized" ||
+      !router.query.experienceName ||
+      store.experienceName === router.query.experienceName ||
+      loadingExperienceName === router.query.experienceName
+    )
+      return;
+    experienceStore.load(router.query.experienceName as string);
+  }, [
+    store,
+    experienceStore,
+    initializationState,
+    loadingExperienceName,
     store.experienceName,
     router.query.experienceName,
   ]);

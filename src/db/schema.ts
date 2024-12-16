@@ -69,6 +69,7 @@ export const experiences = sqliteTable(
     data: text({ mode: "json" }).notNull(),
     version: integer("version").notNull().default(0),
     userId: integer("user_id").notNull(),
+    thumbnailURL: text("thumbnail_url").notNull().default(""),
 
     ...timestamps,
   },

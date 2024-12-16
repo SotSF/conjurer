@@ -5,6 +5,7 @@ import fromTexture from "@/src/shaders/fromTexture.frag";
 import { observer } from "mobx-react-lite";
 import { useStore } from "@/src/types/StoreContext";
 import { makeVertexShader } from "@/src/shaders/vertexShader";
+import { useCaptureThumbnail } from "@/src/hooks/captureThumbnail";
 
 type Props = {
   renderTarget: WebGLRenderTarget;
@@ -39,6 +40,8 @@ export const CartesianSpaceView = observer(function CartesianSpaceView({
     gl.setRenderTarget(null);
     gl.render(outputMesh.current, camera);
   }, 1000);
+
+  useCaptureThumbnail(outputMesh);
 
   return (
     <mesh ref={outputMesh}>

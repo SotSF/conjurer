@@ -26,6 +26,7 @@ export class UIStore {
   showingSaveBeatMapModal = false;
   showingLoadBeatMapModal = false;
   showingLatencyModal = false;
+  capturingThumbnail = false;
 
   pendingAction: "open" | "save" | "" = "";
 

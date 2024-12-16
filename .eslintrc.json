@@ -7,7 +7,8 @@
     "mobx/exhaustive-make-observable": "warn",
     "mobx/unconditional-make-observable": "error",
     "mobx/missing-make-observable": "error",
-    "mobx/missing-observer": "off"
+    "mobx/missing-observer": "off",
+    "import/no-cycle": "error"
   },
   "settings": {
     "componentWrapperFunctions": ["observer"]

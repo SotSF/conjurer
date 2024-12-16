@@ -29,6 +29,20 @@
       "when": 1731487566800,
       "tag": "0003_empty_valeria_richards",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1732337100735,
+      "tag": "0004_recreate-experiences-table-constraints",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1732343150274,
+      "tag": "0005_outgoing_hedge_knight",
+      "breakpoints": true
     }
   ]
 }

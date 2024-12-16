@@ -4,7 +4,6 @@ import { RiZoomInLine, RiZoomOutLine } from "react-icons/ri";
 import { HiZoomIn, HiZoomOut } from "react-icons/hi";
 import { RxAlignCenterHorizontally } from "react-icons/rx";
 import { TbArrowBigRightLines } from "react-icons/tb";
-import { RiPlayList2Fill } from "react-icons/ri";
 import { useStore } from "@/src/types/StoreContext";
 import { action } from "mobx";
 import { AudioControls } from "@/src/components/AudioControls";
@@ -95,6 +94,7 @@ export const ExperienceEditorControls = observer(
           )}
         />
         <IntensitySlider />
+        {/* TODO: re implement given viewerMode */}
         <IconButton
           aria-label="Copy link to experience"
           title="Copy link to experience"

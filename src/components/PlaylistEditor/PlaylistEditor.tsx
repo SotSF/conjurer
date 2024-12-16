@@ -22,7 +22,7 @@ import { BiShuffle } from "react-icons/bi";
 import { ImLoop } from "react-icons/im";
 import { trpc } from "@/src/utils/trpc";
 import { PlaylistNameEditable } from "@/src/components/PlaylistEditor/PlaylistNameEditable";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { FaPlus } from "react-icons/fa";
 import { useRouter } from "next/router";
 
@@ -48,16 +48,17 @@ export const PlaylistEditor = observer(function PlaylistEditor() {
   );
 
   useEffect(() => {
-    runInAction(() => {
-      // this is very hacky and I hate it but it works
-      if (data?.playlist) playlistStore.selectedPlaylist = data.playlist;
-    });
+    // Once the playlist is fetched, set it as the selected playlist
+    if (data?.playlist)
+      runInAction(() => (playlistStore.selectedPlaylist = data.playlist));
   }, [playlistStore, data?.playlist]);
 
+  const selectedInitialExperience = useRef(false);
   useEffect(() => {
-    if (!data?.playlistExperiences.length) return;
-    if (store.experienceName && store.experienceName !== "untitled") return;
-    // once experiences are fetched, load the first experience in the playlist
+    if (!data?.playlistExperiences.length || selectedInitialExperience.current)
+      return;
+    selectedInitialExperience.current = true;
+    // Once the experiences are fetched and if we have not done so already, select the first experience
     experienceStore.load(data.playlistExperiences[0].name);
   }, [store.experienceName, experienceStore, data?.playlistExperiences]);
 
@@ -121,7 +122,7 @@ export const PlaylistEditor = observer(function PlaylistEditor() {
           leftIcon={<FaPlus size={14} />}
           onClick={() => {
             store.role = "experienceCreator";
-            router.push("/experience/untitled");
+            experienceStore.openEmptyExperience(router);
           }}
         >
           New experience
@@ -145,9 +146,10 @@ export const PlaylistEditor = observer(function PlaylistEditor() {
         <Table size="sm" variant="simple">
           <Thead>
             <Tr>
-              <Th isNumeric>#</Th>
+              <Th isNumeric></Th>
               <Th>Experience</Th>
-              <Th>Author</Th>
+              <Th>Status</Th>
+              <Th>Artist</Th>
               <Th>Song</Th>
               <Th></Th>
             </Tr>
@@ -156,7 +158,7 @@ export const PlaylistEditor = observer(function PlaylistEditor() {
             {playlistExperiences.length === 0 ? (
               <>
                 <Tr>
-                  <Td>-</Td>
+                  <Td></Td>
                   <Td>
                     <Text>No experiences added yet!</Text>
                   </Td>

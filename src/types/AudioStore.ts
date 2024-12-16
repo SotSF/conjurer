@@ -16,7 +16,7 @@ export const PEAK_DATA_SAMPLE_RATE = 60;
 const INITIAL_AUDIO_LATENCY = 0.15;
 
 export class AudioStore {
-  audioInitialized = false;
+  audioReady = false;
   selectedSong: Song = NO_SONG;
   audioMuted = false;
 
