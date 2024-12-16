@@ -20,9 +20,9 @@ export class BlockMap {
   serialize = () => {
     const serialized: Record<string, any> = {};
 
-    Object.entries(this.map).forEach(([id, block]) => {
+    for (let [id, block] of this.map.entries()) {
       serialized[id] = block.serialize();
-    });
+    }
 
     return serialized;
   };

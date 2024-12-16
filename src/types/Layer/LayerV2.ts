@@ -55,14 +55,10 @@ export class LayerV2 implements Layer {
   }
 
   get maxConcurrentBlocks() {
-    if (this._maxConcurrentBlocks === null) {
-      this._maxConcurrentBlocks = this.patternBlocks.activePatternsIndex.reduce(
-        (max, window) => Math.max(max, window.patterns.length),
-        0,
-      );
-    }
-
-    return this._maxConcurrentBlocks;
+    return this.patternBlocks.activePatternsIndex.reduce(
+      (max, window) => Math.max(max, window.patterns.length),
+      0,
+    );
   }
 
   insertCloneOfBlock = (block: Block) => {
@@ -106,6 +102,7 @@ export class LayerV2 implements Layer {
   attemptMoveBlock = (block: Block, desiredTime: number, relative = false) => {
     if (block.layer != this) return;
     block.startTime = relative ? desiredTime + block.startTime : desiredTime;
+    this.patternBlocks.computeActivePatternsIndex();
   };
 
   resizeBlockLeftBound = (block: Block, delta: number) => {

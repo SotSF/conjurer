@@ -37,6 +37,8 @@ export const MergeNode = memo(function MergeNode({
     <mesh ref={mesh}>
       <planeGeometry args={[2, 2]} />
       <shaderMaterial
+        // TODO: the fuck?
+        key={Math.random().toString()}
         uniforms={uniforms}
         vertexShader={makeVertexShader(["v_normalized_uv"])}
         fragmentShader={merge}
