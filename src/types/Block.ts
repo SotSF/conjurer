@@ -318,6 +318,11 @@ export class Block<T extends ExtraParams = {}> {
     }
   };
 
+  isActive = () => {
+    const { globalTime } = this.store.audioStore;
+    return this.startTime <= globalTime && globalTime < this.endTime;
+  };
+
   /**
    * Adds a clone of the effect to the block
    *
