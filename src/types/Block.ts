@@ -103,6 +103,11 @@ export class Block<T extends ExtraParams = {}> {
     const variations = this.parameterVariations[parameter];
     if (!variations) return;
 
+    if (!(parameter in this.pattern.params)) {
+      console.error(`Parameter ${String(parameter)} not found in pattern`);
+      return;
+    }
+
     let variationTime = 0;
     for (const variation of variations) {
       if (time < variationTime + variation.duration) {
