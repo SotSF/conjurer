@@ -1,6 +1,7 @@
 import type { Store } from "@/src/types/Store";
 import { Block } from "./Block";
 import { LayerV2 } from "./Layer/LayerV2";
+import { makeAutoObservable } from "mobx";
 
 export type ActivePatternsWindow = {
   startTime: number;
@@ -11,6 +12,10 @@ export type ActivePatternsWindow = {
 export class BlockMap {
   map: Map<string, Block> = new Map();
   activePatternsIndex: ActivePatternsWindow[] = [];
+
+  constructor() {
+    makeAutoObservable(this);
+  }
 
   serialize = () => {
     const serialized: Record<string, any> = {};
@@ -62,12 +67,13 @@ export class BlockMap {
     const blocks = this.getAllBlocks();
     const patternStartTimes = blocks.map((b) => b.startTime);
     const patternEndTimes = blocks.map((b) => b.endTime);
-    const allTimes = [...patternStartTimes, ...patternEndTimes].sort();
+    const allTimes = new Set([...patternStartTimes, ...patternEndTimes]);
+    const sortedTimes = new Float64Array([...allTimes]).toSorted();
     const windows: ActivePatternsWindow[] = [];
 
-    for (let i = 0; i < allTimes.length - 1; i++) {
-      const startTime = allTimes[i];
-      const endTime = allTimes[i + 1];
+    for (let i = 0; i < sortedTimes.length - 1; i++) {
+      const startTime = sortedTimes[i];
+      const endTime = sortedTimes[i + 1];
       const patterns = blocks
         .filter((b) => b.startTime <= startTime && b.endTime > startTime)
         .map((b) => b.id);
