@@ -517,7 +517,8 @@ export class Store {
     this.audioStore.selectedSong = experience.song || NO_SONG;
     this.experienceStatus = experience.status;
     this.experienceVersion = experience.version;
-<<<<<<< HEAD
+    this.experienceThumbnailURL = experience.thumbnailURL;
+    this.experienceUser = experience.user;
 
     if (this.experienceVersion === 1) {
       this.layers = experience.data.layers.map((l: any) =>
@@ -528,13 +529,6 @@ export class Store {
         LayerV2.deserialize(this, l),
       );
     }
-=======
-    this.experienceThumbnailURL = experience.thumbnailURL;
-    this.experienceUser = experience.user;
-    this.layers = experience.data.layers.map((l: any) =>
-      Layer.deserialize(this, l),
-    );
->>>>>>> main
 
     // Select first layer
     this.selectedLayer = this.layers[0];
