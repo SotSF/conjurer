@@ -12,7 +12,7 @@ export function useVariationClick(block: Block, uniformName: string) {
         Array.from(store.selectedBlocksOrVariations).find(
           (blockOrVariation) =>
             blockOrVariation.type === "variation" &&
-            blockOrVariation.variation === variation
+            blockOrVariation.variation === variation,
         )
       ) {
         store.deselectVariation(block, uniformName, variation);
@@ -24,6 +24,6 @@ export function useVariationClick(block: Block, uniformName: string) {
 
       e.stopPropagation();
     },
-    [store, block, uniformName]
+    [store, block, uniformName],
   );
 }

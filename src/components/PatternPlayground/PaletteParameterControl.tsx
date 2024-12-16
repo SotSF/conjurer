@@ -35,7 +35,7 @@ export const PaletteParameterControl = memo(function PaletteParameterControl({
 
       block.parameterVariations[uniformName]![0] = new PaletteVariation(
         DEFAULT_VARIATION_DURATION,
-        patternParam.value
+        patternParam.value,
       );
     });
   }, [block.parameterVariations, patternParam.value, uniformName]);

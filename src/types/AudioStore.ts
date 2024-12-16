@@ -7,59 +7,74 @@ import {
 import { makeAutoObservable } from "mobx";
 import type WaveSurfer from "wavesurfer.js";
 import type TimelinePlugin from "wavesurfer.js/dist/plugins/timeline";
-import type RegionsPlugin from "wavesurfer.js/dist/plugins/regions";
 import type MinimapPlugin from "wavesurfer.js/dist/plugins/minimap";
-import type { RegionParams } from "wavesurfer.js/dist/plugins/regions";
 import { filterData } from "@/src/types/audioPeaks";
-import { AudioRegion } from "@/src/types/AudioRegion";
-import { trpcClient } from "@/src/utils/trpc";
-
-export const loopRegionColor = "rgba(237, 137, 54, 0.4)";
+import { NO_SONG, Song } from "@/src/types/Song";
+import type { Store } from "@/src/types/Store";
 
 export const PEAK_DATA_SAMPLE_RATE = 60;
-
-// Define a new RootStore interface here so that we avoid circular dependencies
-interface RootStore {
-  usingLocalAssets: boolean;
-}
+const INITIAL_AUDIO_LATENCY = 0.15;
 
 export class AudioStore {
   audioInitialized = false;
-  availableAudioFiles: string[] = [];
-  selectedAudioFile: string = "";
+  selectedSong: Song = NO_SONG;
   audioMuted = false;
 
   wavesurfer: WaveSurfer | null = null;
   timelinePlugin: TimelinePlugin | null = null;
-  regionsPlugin: RegionsPlugin | null = null;
   minimapPlugin: MinimapPlugin | null = null;
 
-  initialRegions: AudioRegion[] = [];
-
   peaks: number[] = [];
-
-  markingAudio = false;
-
-  loopingAudio = false;
-  loopRegion: RegionParams | null = null;
 
   audioState: "paused" | "starting" | "playing" = "paused";
 
   audioContext: AudioContext | null = null;
 
-  constructor(readonly rootStore: RootStore) {
+  _audioLatency = INITIAL_AUDIO_LATENCY; // seconds
+  get audioLatency() {
+    return this._audioLatency;
+  }
+  set audioLatency(latency: number) {
+    this._audioLatency = latency;
+    this.saveToLocalStorage();
+  }
+
+  constructor(readonly store: Store) {
     makeAutoObservable(this, {
       timelinePlugin: false,
-      regionsPlugin: false,
       minimapPlugin: false,
       peaks: false,
       getPeakAtTime: false,
     });
   }
 
+  initialize = () => {
+    this.loadFromLocalStorage();
+  };
+
+  loadFromLocalStorage = () => {
+    if (typeof window === "undefined") return;
+    const data = localStorage.getItem("audioStore");
+    if (data) {
+      const localStorageAudioSettings = JSON.parse(data);
+      this.audioLatency =
+        localStorageAudioSettings.audioLatency || INITIAL_AUDIO_LATENCY;
+    }
+  };
+
+  saveToLocalStorage = () => {
+    if (typeof window === "undefined") return;
+    localStorage.setItem(
+      "audioStore",
+      JSON.stringify({
+        audioLatency: this.audioLatency,
+      }),
+    );
+  };
+
   computePeaks = (audioBuffer: AudioBuffer) => {
     const totalDesiredSamples = Math.floor(
-      PEAK_DATA_SAMPLE_RATE * audioBuffer.duration
+      PEAK_DATA_SAMPLE_RATE * audioBuffer.duration,
     );
     const channelData = filterData(audioBuffer, totalDesiredSamples, true);
     const numberOfChannels = channelData.length;
@@ -80,49 +95,29 @@ export class AudioStore {
     return this.peaks[index];
   };
 
+  getSmoothedPeakAtTime = (time: number, smoothing: number) => {
+    if (!this.peaks.length) return 0;
+    if (smoothing === 0) return this.getPeakAtTime(time);
+
+    const index = Math.floor(time * PEAK_DATA_SAMPLE_RATE);
+    const start = Math.max(0, index - smoothing);
+    const end = Math.min(this.peaks.length - 1, index + smoothing);
+
+    let total = 0;
+    for (let i = start; i <= end; i++) total += this.peaks[i];
+
+    return total / (end - start + 1);
+  };
+
   toggleAudioMuted = () => {
     this.audioMuted = !this.audioMuted;
   };
 
-  toggleMarkingAudio = () => {
-    this.markingAudio = !this.markingAudio;
-
-    this.regionsPlugin
-      ?.getRegions()
-      .forEach(
-        (region) =>
-          region.content &&
-          region.setOptions({ start: region.start, drag: this.markingAudio })
-      );
-  };
-
-  toggleLoopingAudio = () => {
-    this.loopingAudio = !this.loopingAudio;
-  };
-
-  loopAudio = (start: number, end: number) => {
-    this.loopingAudio = true;
-    this.loopRegion = {
-      id: "block",
-      start,
-      end,
-      color: loopRegionColor,
-    };
-    this.regionsPlugin?.addRegion(this.loopRegion);
-  };
-
-  getSelectedAudioFileUrl = () =>
-    this.rootStore.usingLocalAssets
-      ? `${location.href}/${LOCAL_ASSET_DIRECTORY}${AUDIO_ASSET_PREFIX}${this.selectedAudioFile}`
-      : `https://${ASSET_BUCKET_NAME}.s3.${ASSET_BUCKET_REGION}.amazonaws.com/${AUDIO_ASSET_PREFIX}${this.selectedAudioFile}`;
-
-  fetchAvailableAudioFiles = async (forceReload = false) => {
-    if (this.audioInitialized && !forceReload) return;
-    this.audioInitialized = true;
-
-    this.availableAudioFiles = await trpcClient.audio.listAudioFiles.query({
-      usingLocalAssets: this.rootStore.usingLocalAssets,
-    });
+  getSelectedSongUrl = () => {
+    if (!this.selectedSong.filename) return undefined;
+    return this.store.usingLocalData
+      ? `${location.origin}/${LOCAL_ASSET_DIRECTORY}${AUDIO_ASSET_PREFIX}${this.selectedSong.filename}`
+      : `https://${ASSET_BUCKET_NAME}.s3.${ASSET_BUCKET_REGION}.amazonaws.com/${AUDIO_ASSET_PREFIX}${this.selectedSong.filename}`;
   };
 
   // Timer relevant code - perhaps extract this to a separate file
@@ -138,27 +133,27 @@ export class AudioStore {
     return Math.round(this.globalTime * 10) / 10;
   }
 
-  audioLatency = 0.15; // seconds
-
   setTimeWithCursor = (time: number) => {
     if (!this.wavesurfer) return;
-    this.lastCursorPosition = time;
-    this.globalTime = time;
 
-    if (this.wavesurfer.getCurrentTime() === time) return;
-    this.wavesurfer.seekTo(time / this.wavesurfer.getDuration());
+    const validTime = Math.max(0, time);
+    this.lastCursorPosition = validTime;
+    this.globalTime = validTime;
+
+    const duration = this.wavesurfer.getDuration();
+    if (this.wavesurfer.getCurrentTime() === validTime || duration === 0)
+      return;
+    this.wavesurfer.seekTo(validTime / duration);
   };
 
   skipForward = () => this.setTimeWithCursor(this.globalTime + 0.01);
   skipBackward = () => this.setTimeWithCursor(this.globalTime - 0.01);
 
+  skip = (delta: number) => this.setTimeWithCursor(this.globalTime + delta);
+
   // called by wavesurfer, which defaults to 60fps
   onTick = (time: number) => {
     this.globalTime = time;
-
-    if (!this.loopingAudio || !this.loopRegion || !this.loopRegion.end) return;
-    if (time > this.loopRegion.end)
-      this.setTimeWithCursor(this.loopRegion.start);
   };
 
   private _lastCursor = { position: 0 };
@@ -179,19 +174,4 @@ export class AudioStore {
     // instantiate a new object here to trigger Mobx reactions
     this._lastCursor = { position: time < 0 ? 0 : time };
   }
-
-  // Serialization
-
-  serialize = () => ({
-    selectedAudioFile: this.selectedAudioFile,
-    audioRegions: this.regionsPlugin
-      ?.getRegions()
-      .map((region) => new AudioRegion(region).serialize()),
-  });
-
-  deserialize = (data: any) => {
-    this.selectedAudioFile = data.selectedAudioFile;
-    this.initialRegions =
-      data.audioRegions?.map((region: any) => new AudioRegion(region)) ?? [];
-  };
 }

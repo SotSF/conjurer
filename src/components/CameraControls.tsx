@@ -9,12 +9,12 @@ type CameraControlsProps = {};
 
 export const CameraControls = observer(
   function CameraControls({}: CameraControlsProps) {
-    const { embeddedViewer } = useStore();
+    const { viewerMode } = useStore();
 
     const cameraRef = useRef<PerspectiveCameraThree>(null);
     const initialPositionRef = useRef(new Vector3(0, 0, 20));
 
-    useTravelingCamera(cameraRef, embeddedViewer);
+    useTravelingCamera(cameraRef, viewerMode);
 
     return (
       <>
@@ -28,5 +28,5 @@ export const CameraControls = observer(
         <OrbitControls camera={cameraRef.current ?? undefined} />
       </>
     );
-  }
+  },
 );

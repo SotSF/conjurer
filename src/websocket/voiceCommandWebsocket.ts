@@ -12,14 +12,14 @@ export const setupVoiceCommandWebsocket = (store: Store) => {
   console.log(
     "Reconnecting to voice command websocket server at",
     VOICE_COMMAND_APP_WEBSOCKET_HOST,
-    VOICE_COMMAND_APP_WEBSOCKET_PORT
+    VOICE_COMMAND_APP_WEBSOCKET_PORT,
   );
   _websocket = new WebSocket(
-    `ws://${VOICE_COMMAND_APP_WEBSOCKET_HOST}:${VOICE_COMMAND_APP_WEBSOCKET_PORT}`
+    `ws://${VOICE_COMMAND_APP_WEBSOCKET_HOST}:${VOICE_COMMAND_APP_WEBSOCKET_PORT}`,
   );
   _websocket.onerror = () =>
     console.log(
-      "Failed to connect to voice command websocket server (which is likely not a real problem for you)"
+      "Failed to connect to voice command websocket server (which is likely not a real problem for you)",
     );
   _websocket.binaryType = "blob";
 

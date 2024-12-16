@@ -11,7 +11,7 @@ import { CartesianSpaceView } from "@/src/components/Canvas/CartesianSpaceView";
 import { useRenderTarget } from "@/src/hooks/renderTarget";
 
 const Perf = lazy(() =>
-  import("r3f-perf").then((module) => ({ default: module.Perf }))
+  import("r3f-perf").then((module) => ({ default: module.Perf })),
 );
 
 // when DEBUG is true, the canvas will only render when the global time changes. This is useful when

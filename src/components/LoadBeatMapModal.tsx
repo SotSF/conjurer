@@ -18,7 +18,7 @@ import { trpc } from "@/src/utils/trpc";
 
 export const LoadBeatMapModal = observer(function LoadBeatMapModal() {
   const store = useStore();
-  const { beatMapStore, uiStore } = store;
+  const { beatMapStore, uiStore, userStore, usingLocalData } = store;
 
   const {
     isPending,
@@ -26,9 +26,9 @@ export const LoadBeatMapModal = observer(function LoadBeatMapModal() {
     data: beatMaps,
   } = trpc.beatMap.listBeatMaps.useQuery(
     {
-      usingLocalAssets: store.usingLocalAssets,
+      usingLocalData,
     },
-    { enabled: uiStore.showingLoadBeatMapModal }
+    { enabled: uiStore.showingLoadBeatMapModal },
   );
 
   const onClose = action(() => (uiStore.showingLoadBeatMapModal = false));
@@ -58,7 +58,7 @@ export const LoadBeatMapModal = observer(function LoadBeatMapModal() {
             <>
               {beatMaps.length === 0 && (
                 <Text color="gray.400">
-                  {store.user} has no saved experiences yet!
+                  {userStore.username} has no saved experiences yet!
                 </Text>
               )}
               <VStack align="flex-start" spacing={0}>

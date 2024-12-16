@@ -11,9 +11,9 @@ export const useCloneCanvas = (clonedWaveformRef: {
   const cloneCanvas = useCallback(() => {
     if (!clonedWaveformRef.current || !uiStore.showingWaveformOverlay) return;
 
-    const shadowRoot = document.querySelector("#waveform div")?.shadowRoot;
+    const shadowRoot = document.querySelector("#waveform div div")?.shadowRoot;
     const sourceCanvases = shadowRoot?.querySelectorAll(
-      ".canvases canvas"
+      ".canvases canvas",
     ) as NodeListOf<HTMLCanvasElement>;
 
     if (!sourceCanvases || sourceCanvases.length === 0) return;

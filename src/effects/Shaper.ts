@@ -47,5 +47,5 @@ export const Shaper = () =>
         max: 3,
       },
     },
-    ["v_uv", "v_normalized_uv"]
+    ["v_uv", "v_normalized_uv"],
   );

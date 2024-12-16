@@ -17,12 +17,12 @@ export const beatMapRouter = router({
   listBeatMaps: publicProcedure
     .input(
       z.object({
-        usingLocalAssets: z.boolean(),
-      })
+        usingLocalData: z.boolean(),
+      }),
     )
     .query(async ({ input }) => {
       let beatMaps: string[] = [];
-      if (input.usingLocalAssets) {
+      if (input.usingLocalData) {
         // TODO: implement this
         beatMaps = fs
           .readdirSync(`${LOCAL_ASSET_PATH}${BEAT_MAP_ASSET_PREFIX}`)
@@ -43,15 +43,15 @@ export const beatMapRouter = router({
     .input(
       z.object({
         beatMapName: z.string(),
-        usingLocalAssets: z.boolean(),
-      })
+        usingLocalData: z.boolean(),
+      }),
     )
     .query(async ({ input }) => {
-      if (input.usingLocalAssets) {
+      if (input.usingLocalData) {
         // TODO: implement this
         const beatMap = fs
           .readFileSync(
-            `${LOCAL_ASSET_PATH}${BEAT_MAP_ASSET_PREFIX}${input.beatMapName}.json`
+            `${LOCAL_ASSET_PATH}${BEAT_MAP_ASSET_PREFIX}${input.beatMapName}.json`,
           )
           .toString();
         return { beatMap };
@@ -78,15 +78,15 @@ export const beatMapRouter = router({
       z.object({
         beatMap: z.string(),
         beatMapName: z.string(),
-        usingLocalAssets: z.boolean(),
-      })
+        usingLocalData: z.boolean(),
+      }),
     )
     .mutation(async ({ input }) => {
-      if (input.usingLocalAssets) {
+      if (input.usingLocalData) {
         // TODO: implement this
         fs.writeFileSync(
           `${LOCAL_ASSET_PATH}${BEAT_MAP_ASSET_PREFIX}${input.beatMapName}.json`,
-          input.beatMapName
+          input.beatMapName,
         );
         return;
       }

@@ -1,12 +1,5 @@
+import type { Store } from "@/src/types/Store";
 import { Block } from "@/src/types/Block";
-
-type RootStore = {
-  context: string;
-  audioStore: {
-    getPeakAtTime: (time: number) => number;
-    globalTime: number;
-  };
-};
 
 export type ActivePatternsWindow = {
   startTime: number;
@@ -19,7 +12,7 @@ export type Layer = {
   name: string;
   visible: boolean;
   height: number;
-  store: RootStore;
+  store: Store;
 
   insertCloneOfBlock(block: Block): void;
   addBlock(block: Block): void;
@@ -29,7 +22,7 @@ export type Layer = {
 
   getNextValidStartAndDuration(
     fromTime: number,
-    maxDuration: number
+    maxDuration: number,
   ): { startTime: number; duration: number };
 
   resizeBlockLeftBound(block: Block, delta: number): void;

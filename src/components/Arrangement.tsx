@@ -1,8 +1,8 @@
 import { Grid, GridItem } from "@chakra-ui/react";
-import { MainControls } from "@/src/components/MainControls";
-import { Timeline } from "@/src/components/Timeline";
+import { Timeline } from "@/src/components/Timeline/Timeline";
 import { useStore } from "@/src/types/StoreContext";
 import { observer } from "mobx-react-lite";
+import { ExperienceEditorControls } from "@/src/components/ExperienceEditor/ExperienceEditorControls";
 
 export const Arrangement = observer(function Arrangement() {
   const store = useStore();
@@ -17,7 +17,7 @@ export const Arrangement = observer(function Arrangement() {
       gridTemplateRows="auto minmax(0,1fr)"
     >
       <GridItem area="controls">
-        {store.context !== "viewer" && <MainControls />}
+        {store.context !== "viewer" && <ExperienceEditorControls />}
       </GridItem>
       <GridItem area="timeline" bgColor="gray.400">
         <Timeline />

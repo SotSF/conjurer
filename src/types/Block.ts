@@ -15,6 +15,7 @@ import { LinearVariation4 } from "@/src/types/Variations/LinearVariation4";
 import { isPalette } from "@/src/types/Palette";
 import { PaletteVariation } from "@/src/types/Variations/PaletteVariation";
 import { generateId } from "@/src/utils/id";
+import type { Store } from "@/src/types/Store";
 
 export type SerializedBlock = {
   id: string;
@@ -24,14 +25,6 @@ export type SerializedBlock = {
   startTime: number;
   duration: number;
   effectBlocks: SerializedBlock[];
-};
-
-export type RootStore = {
-  context: string;
-  audioStore: {
-    getPeakAtTime: (time: number) => number;
-    globalTime: number;
-  };
 };
 
 export class Block<T extends ExtraParams = {}> {
@@ -63,9 +56,9 @@ export class Block<T extends ExtraParams = {}> {
   }
 
   constructor(
-    readonly store: RootStore,
+    readonly store: Store,
     pattern: Pattern<T>,
-    parentBlock: Block | null = null
+    parentBlock: Block | null = null,
   ) {
     this.pattern = pattern;
     this.parentBlock = parentBlock;
@@ -116,7 +109,7 @@ export class Block<T extends ExtraParams = {}> {
         // this is the variation that is active at this time
         this.pattern.params[parameter].value = variation.valueAtTime(
           time - variationTime,
-          this.startTime + time
+          this.startTime + time,
         );
         return;
       }
@@ -133,7 +126,7 @@ export class Block<T extends ExtraParams = {}> {
       const loopedTime = time % lastVariation.duration;
       this.pattern.params[parameter].value = lastVariation.valueAtTime(
         loopedTime,
-        this.startTime + loopedTime
+        this.startTime + loopedTime,
       );
       return;
     }
@@ -141,7 +134,7 @@ export class Block<T extends ExtraParams = {}> {
     // if the current time is beyond the end of the last variation, use the last variation's last value
     this.pattern.params[parameter].value = lastVariation.valueAtTime(
       lastVariation.duration,
-      this.startTime + variationTime
+      this.startTime + variationTime,
     );
   };
 
@@ -157,11 +150,11 @@ export class Block<T extends ExtraParams = {}> {
     const lastVariation = variations[variations.length - 1];
     const totalVariationTime = variations.reduce(
       (total, variation) => total + variation.duration,
-      0
+      0,
     );
     return lastVariation.valueAtTime(
       lastVariation.duration,
-      this.startTime + totalVariationTime
+      this.startTime + totalVariationTime,
     );
   };
 
@@ -177,13 +170,13 @@ export class Block<T extends ExtraParams = {}> {
     } else {
       const totalVariationDuration = variations.reduce(
         (total, variation) => total + variation.duration,
-        0
+        0,
       );
 
       if (time < totalVariationDuration || time > this.duration) return;
 
       variations.push(
-        new FlatVariation(time - totalVariationDuration, parameter.value)
+        new FlatVariation(time - totalVariationDuration, parameter.value),
       );
       this.triggerVariationReactions(uniformName);
     }
@@ -222,7 +215,7 @@ export class Block<T extends ExtraParams = {}> {
   duplicateVariation = (
     uniformName: string,
     variation: Variation,
-    insertAtEnd = false
+    insertAtEnd = false,
   ) => {
     const variations = this.parameterVariations[uniformName];
     if (!variations) return;
@@ -236,7 +229,7 @@ export class Block<T extends ExtraParams = {}> {
     if (index > -1) variations.splice(index, 0, variation.clone());
   };
 
-  // Note: not berry performant due to looping through variations
+  // Note: not very performant due to looping through variations
   getVariationGlobalEndTime = (uniformName: string, variation: Variation) => {
     const variations = this.parameterVariations[uniformName];
     if (!variations) return this.startTime;
@@ -252,7 +245,7 @@ export class Block<T extends ExtraParams = {}> {
   applyVariationDurationDelta = (
     uniformName: string,
     variation: Variation,
-    delta: number
+    delta: number,
   ) => {
     const variations = this.parameterVariations[uniformName];
     if (!variations) return;
@@ -268,7 +261,7 @@ export class Block<T extends ExtraParams = {}> {
 
   applyMaxVariationDurationDelta = (
     uniformName: string,
-    variation: Variation
+    variation: Variation,
   ) => {
     const variations = this.parameterVariations[uniformName];
     if (!variations) return;
@@ -278,7 +271,7 @@ export class Block<T extends ExtraParams = {}> {
 
     const totalVariationDuration = variations.reduce(
       (total, variation) => total + variation.duration,
-      0
+      0,
     );
 
     // use the parent block's duration if this is an effect block
@@ -303,7 +296,7 @@ export class Block<T extends ExtraParams = {}> {
     this.headerRepetitions = Math.floor(width / 1280) + 1;
 
     this.effectBlocks.forEach((effect) =>
-      effect.recomputeHeaderRepetitions(width)
+      effect.recomputeHeaderRepetitions(width),
     );
   };
 
@@ -357,7 +350,7 @@ export class Block<T extends ExtraParams = {}> {
 
     newBlock.parentBlock = this.parentBlock;
     newBlock.effectBlocks = this.effectBlocks.map((effectBlock) =>
-      effectBlock.clone()
+      effectBlock.clone(),
     );
     return newBlock;
   };
@@ -372,11 +365,11 @@ export class Block<T extends ExtraParams = {}> {
 
     // check for any parameters without variations and insert a flat variation
     const parameterNames = Object.keys(
-      defaultPatternEffectMap[this.pattern.name]?.params ?? {}
+      defaultPatternEffectMap[this.pattern.name]?.params ?? {},
     );
     const variationDuration = Math.min(
       this.duration,
-      DEFAULT_VARIATION_DURATION
+      DEFAULT_VARIATION_DURATION,
     );
     for (const parameter of parameterNames) {
       // skip this parameter if it is a base uniform or if it already has variations
@@ -396,7 +389,7 @@ export class Block<T extends ExtraParams = {}> {
           new LinearVariation4(
             variationDuration,
             parameterValue,
-            parameterValue
+            parameterValue,
           ).serialize(),
         ];
       } else if (isPalette(parameterValue)) {
@@ -415,17 +408,17 @@ export class Block<T extends ExtraParams = {}> {
     duration: this.duration,
     parameterVariations: this.serializeParameterVariations(),
     effectBlocks: this.effectBlocks.map((effectBlock) =>
-      effectBlock.serialize()
+      effectBlock.serialize(),
     ),
   });
 
-  static deserialize = (store: RootStore, data: any, parentBlock?: Block) => {
+  static deserialize = (store: Store, data: any, parentBlock?: Block) => {
     const patternName =
       typeof data.pattern === "string" ? data.pattern : data.pattern.name;
 
     const block = new Block<ExtraParams>(
       store,
-      defaultPatternEffectMap[patternName].clone()
+      defaultPatternEffectMap[patternName].clone(),
     );
 
     if (data.id) block.id = data.id;
@@ -439,12 +432,12 @@ export class Block<T extends ExtraParams = {}> {
       block.parameterVariations[parameter] = data.parameterVariations[
         parameter
       ]?.map((variationData: any) =>
-        deserializeVariation(store, variationData)
+        deserializeVariation(store, variationData),
       );
     }
 
     block.effectBlocks = data.effectBlocks.map((effectBlockData: any) =>
-      Block.deserialize(store, effectBlockData, block)
+      Block.deserialize(store, effectBlockData, block),
     );
 
     return block;

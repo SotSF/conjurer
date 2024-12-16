@@ -11,16 +11,16 @@ export const useRenderTarget = (width?: number, height?: number) => {
     () =>
       new WebGLRenderTarget(
         width || renderTargetSize,
-        height || renderTargetSize
+        height || renderTargetSize,
       ),
-    [width, height, renderTargetSize]
+    [width, height, renderTargetSize],
   );
 };
 
 export const useRenderTargets = (
   layer: LayerV2,
   width?: number,
-  height?: number
+  height?: number,
 ) => {
   const { renderTargetSize } = useStore().uiStore;
   return useMemo(() => {
@@ -30,8 +30,8 @@ export const useRenderTargets = (
       (_) =>
         new WebGLRenderTarget(
           width || renderTargetSize,
-          height || renderTargetSize
-        )
+          height || renderTargetSize,
+        ),
     );
   }, [layer.maxConcurrentBlocks, width, height, renderTargetSize]);
 };

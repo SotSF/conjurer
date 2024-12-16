@@ -1,104 +1,110 @@
 import { makeAutoObservable, runInAction } from "mobx";
-import initialPlaylist from "@/src/data/initialPlaylist.json";
-import { ExperienceStore } from "@/src/types/ExperienceStore";
-import { AudioStore } from "@/src/types/AudioStore";
-
-// Define a new RootStore interface here so that we avoid circular dependencies
-interface RootStore {
-  experienceFilename: string;
-  play: () => void;
-  pause: () => void;
-}
+import { Playlist } from "@/src/types/Playlist";
+import { MAX_TIME } from "@/src/utils/time";
+import { areEqual } from "@/src/utils/array";
+import type { Store } from "@/src/types/Store";
 
 export class PlaylistStore {
-  name: string = "";
-  experienceFilenames: string[] = [];
+  autoplay = ["playlistEditor", "viewer"].includes(this.store.context);
+  shufflingPlaylist = false;
+  loopingPlaylist = false;
 
-  autoplay = false;
+  selectedPlaylist: Playlist | null = null;
 
-  constructor(
-    readonly rootStore: RootStore,
-    readonly audioStore: AudioStore,
-    readonly experienceStore: ExperienceStore
-  ) {
-    makeAutoObservable(this);
+  _cachedPlaylistOrderedExperienceIds: number[] = [];
+  _cachedExperienceIdPlayOrder: number[] = [];
+  get experienceIdPlayOrder() {
+    if (!this.selectedPlaylist) return [];
+    if (!this.shufflingPlaylist)
+      return this.selectedPlaylist?.orderedExperienceIds;
 
-    runInAction(() => this.initialize());
+    // check if the current playlist order is the same as the cached order
+    if (
+      areEqual(
+        this.selectedPlaylist.orderedExperienceIds,
+        this._cachedPlaylistOrderedExperienceIds,
+      )
+    ) {
+      return this._cachedExperienceIdPlayOrder;
+    }
+
+    // current playlist order and cached order are different, so update the cache
+    this._cachedPlaylistOrderedExperienceIds =
+      this.selectedPlaylist.orderedExperienceIds.slice();
+    this._cachedExperienceIdPlayOrder =
+      this.selectedPlaylist.orderedExperienceIds.slice();
+
+    // shuffle the play order
+    this._cachedExperienceIdPlayOrder.sort(() => Math.random() - 0.5);
+    return this._cachedExperienceIdPlayOrder;
   }
 
-  initialize = () => {
-    this.name = initialPlaylist.name;
-    this.experienceFilenames = initialPlaylist.experienceFilenames;
-  };
+  constructor(readonly store: Store) {
+    makeAutoObservable(this, {
+      _cachedPlaylistOrderedExperienceIds: false,
+      _cachedExperienceIdPlayOrder: false,
+    });
+  }
 
-  addExperience = (experienceFilename: string) => {
-    const experienceFilenames = [...this.experienceFilenames];
-    experienceFilenames.push(experienceFilename);
-    this.experienceFilenames = experienceFilenames;
-  };
+  loadAndPlayExperience = async (experienceId: number) => {
+    this.store.pause();
 
-  reorderExperience = (currentIndex: number, delta: number) => {
-    const newIndex = currentIndex + delta;
-    if (newIndex < 0 || newIndex > this.experienceFilenames.length - 1) return;
-
-    const experienceFilenames = [...this.experienceFilenames];
-    const [removed] = experienceFilenames.splice(currentIndex, 1);
-    experienceFilenames.splice(newIndex, 0, removed);
-
-    this.experienceFilenames = experienceFilenames;
-  };
-
-  removeExperience = (index: number) => {
-    const experienceFilenames = [...this.experienceFilenames];
-    experienceFilenames.splice(index, 1);
-    this.experienceFilenames = experienceFilenames;
-  };
-
-  loadAndPlayExperience = async (experienceFilename: string) => {
-    this.rootStore.pause();
-
-    if (this.rootStore.experienceFilename === experienceFilename) {
-      this.audioStore.setTimeWithCursor(0);
-      this.rootStore.play();
+    if (this.store.experienceId === experienceId) {
+      this.store.audioStore.setTimeWithCursor(0);
+      this.store.play();
       return;
     }
 
-    await this.experienceStore.load(experienceFilename);
-    await this.playExperienceWhenReady();
+    await this.store.experienceStore.loadById(experienceId);
+    runInAction(() => {
+      this.store.audioStore.audioState = "playing";
+    });
   };
 
-  playExperienceWhenReady = () =>
-    new Promise<void>((resolve) => {
-      this.audioStore.wavesurfer?.once("ready", () => {
-        this.audioStore.setTimeWithCursor(0);
-        this.rootStore.play();
-        resolve();
-      });
-    });
+  playPreviousExperience = async () => {
+    if (this.store.context === "experienceEditor") {
+      this.store.audioStore.setTimeWithCursor(0);
+      return;
+    }
+
+    const previousExperienceId = this.getDeltaExperienceId(-1);
+    if (previousExperienceId === null) return;
+
+    this.store.pause();
+    await this.loadAndPlayExperience(previousExperienceId);
+  };
 
   playNextExperience = async () => {
-    this.experienceStore.saveToLocalStorage("autosave");
+    if (this.store.context === "experienceEditor") {
+      this.store.audioStore.setTimeWithCursor(MAX_TIME);
+      return;
+    }
 
-    const currentIndex = this.experienceFilenames.indexOf(
-      this.rootStore.experienceFilename
-    );
-    if (currentIndex < 0) return;
+    const nextExperienceId = this.getDeltaExperienceId(1);
+    if (nextExperienceId === null) return;
 
-    const nextIndex = currentIndex + 1;
-    if (nextIndex > this.experienceFilenames.length - 1) return;
-
-    await this.loadAndPlayExperience(this.experienceFilenames[nextIndex]);
+    this.store.pause();
+    await this.loadAndPlayExperience(nextExperienceId);
   };
 
-  copyToClipboard = () => {
-    if (typeof window === "undefined") return;
-    navigator.clipboard.writeText(this.stringifyPlaylist());
+  // e.g. if delta is -1, get the experience ID of the previous experience
+  getDeltaExperienceId = (delta: number) => {
+    if (!this.experienceIdPlayOrder?.length) return null;
+
+    let desiredIndex;
+    if (!this.store.experienceId) desiredIndex = 0;
+    else {
+      const currentIndex = this.experienceIdPlayOrder.indexOf(
+        this.store.experienceId,
+      );
+      desiredIndex = currentIndex + delta;
+
+      if (desiredIndex < 0)
+        desiredIndex = this.experienceIdPlayOrder.length - 1;
+      if (desiredIndex > this.experienceIdPlayOrder.length - 1)
+        desiredIndex = 0;
+    }
+
+    return this.experienceIdPlayOrder[desiredIndex];
   };
-
-  stringifyPlaylist = () => JSON.stringify(this.serialize());
-
-  serialize = () => ({
-    name: this.name,
-    experienceFilenames: this.experienceFilenames,
-  });
 }

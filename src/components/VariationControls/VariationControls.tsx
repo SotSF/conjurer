@@ -107,7 +107,7 @@ export const VariationControls = function VariationControls({
           color="gray.400"
           leftIcon={<BiDuplicate size={14} />}
           onClick={action(() =>
-            store.duplicateVariation(block, uniformName, variation)
+            store.duplicateVariation(block, uniformName, variation),
           )}
         >
           Duplicate
@@ -120,7 +120,7 @@ export const VariationControls = function VariationControls({
           color="gray.400"
           leftIcon={<FaTrashAlt size={12} />}
           onClick={action(() =>
-            store.deleteVariation(block, uniformName, variation)
+            store.deleteVariation(block, uniformName, variation),
           )}
         >
           Delete
@@ -359,7 +359,8 @@ export function PeriodicVariationControls({
       <ScalarInput
         name="Period"
         onChange={(valueString, valueNumber) => {
-          variation.period = valueNumber;
+          // do not allow setting period to 0
+          if (valueNumber) variation.period = valueNumber;
           setPeriod(valueString);
           if (matchPeriodAndDuration) variation.duration = valueNumber;
           block.triggerVariationReactions(uniformName);
@@ -429,7 +430,7 @@ function EasingVariationControls({
   block,
 }: EasingVariationControlsProps) {
   const [easingType, setEasingType] = useState<EasingVariationType>(
-    variation.easingType
+    variation.easingType,
   );
   const [from, setFrom] = useState(variation.from.toString());
   const [to, setTo] = useState(variation.to.toString());

@@ -23,7 +23,7 @@ export const BeatGrid = observer(function BeatGrid({
   const secondsPerBeat = 60 / songTempo;
   const numberOfBeats = Math.min(
     MAX_BEATS,
-    Math.ceil(songDuration / secondsPerBeat)
+    Math.ceil(songDuration / secondsPerBeat),
   );
 
   return (
@@ -36,7 +36,7 @@ export const BeatGrid = observer(function BeatGrid({
             position="absolute"
             top={0}
             left={uiStore.timeToXPixels(
-              songTempoOffset + (index * 60) / songTempo
+              songTempoOffset + (index * 60) / songTempo,
             )}
             width="0px"
             height="100%"

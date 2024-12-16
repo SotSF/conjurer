@@ -51,7 +51,7 @@ export const ComputedBeatsPanel = observer(function ComputedBeatsPanel({
       >
         Open computed beat data
       </Button>
-      <SaveBeatMapModal key={audioStore.selectedAudioFile} />
+      <SaveBeatMapModal key={audioStore.selectedSong.id} />
       <LoadBeatMapModal />
     </VStack>
   );

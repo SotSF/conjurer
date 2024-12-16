@@ -1,50 +1,53 @@
-import { makeAutoObservable } from "mobx";
-import initialExperience from "@/src/data/initialExperience.json";
-import emptyExperience from "@/src/data/emptyExperience.json";
+import { makeAutoObservable, runInAction } from "mobx";
 import { trpcClient } from "@/src/utils/trpc";
-import { extractPartsFromExperienceFilename } from "@/src/utils/experience";
-
-// Define a new RootStore interface here so that we avoid circular dependencies
-interface RootStore {
-  user: string;
-  experienceName: string;
-  experienceLastSavedAt: number;
-  usingLocalAssets: boolean;
-  serialize: () => any;
-  deserialize: (data: any) => void;
-}
+import { Experience, EXPERIENCE_VERSION } from "@/src/types/Experience";
+import { NO_SONG } from "@/src/types/Song";
+import type { Store } from "@/src/types/Store";
 
 export class ExperienceStore {
-  constructor(readonly rootStore: RootStore) {
+  constructor(readonly store: Store) {
     makeAutoObservable(this);
   }
 
-  load = async (experienceFilename: string) => {
-    const { experience } = await trpcClient.experience.getExperience.query({
-      experienceFilename,
-      usingLocalAssets: this.rootStore.usingLocalAssets,
+  loadExperience = (experience: Experience) => {
+    this.store.deserialize(experience);
+    runInAction(() => {
+      this.store.hasSaved = false;
+      this.store.experienceLastSavedAt = Date.now();
     });
-
-    const { user, experienceName } =
-      extractPartsFromExperienceFilename(experienceFilename);
-    this.rootStore.user = user;
-    this.rootStore.experienceName = experienceName;
-    this.rootStore.experienceLastSavedAt = Date.now();
-    this.loadFromString(experience);
   };
 
-  loadFromString = (experienceString: string) => {
-    this.rootStore.deserialize(JSON.parse(experienceString));
+  load = async (experienceName: string) => {
+    const experience = await trpcClient.experience.getExperience.query({
+      experienceName,
+      usingLocalData: this.store.usingLocalData,
+    });
+    if (!experience) this.loadEmptyExperience();
+    else this.loadExperience(experience);
+  };
+
+  loadById = async (experienceId: number) => {
+    const experience = await trpcClient.experience.getExperienceById.query({
+      experienceId,
+      usingLocalData: this.store.usingLocalData,
+    });
+    if (!experience) this.loadEmptyExperience();
+    else this.loadExperience(experience);
   };
 
   loadEmptyExperience = () => {
-    this.rootStore.deserialize(emptyExperience);
-  };
+    this.store.deserialize({
+      id: undefined,
+      user: this.store.userStore.me ?? { id: 0, username: "" },
+      name: "untitled",
+      song: NO_SONG,
+      status: "inprogress",
+      version: EXPERIENCE_VERSION,
+      data: { layers: [{ patternBlocks: [] }, { patternBlocks: [] }] },
+    });
 
-  loadInitialExperience = () => {
-    // load initial experience from file. if you would like to change this, click the clipboard
-    // button in the UI and paste the contents into the data/initialExperience.json file.
-    this.rootStore.deserialize(initialExperience);
+    this.store.hasSaved = false;
+    this.store.experienceLastSavedAt = 0;
   };
 
   loadFromParams = () => {
@@ -56,26 +59,15 @@ export class ExperienceStore {
 
   stringifyExperience = (pretty: boolean = false): string =>
     JSON.stringify(
-      this.rootStore.serialize(),
+      this.store.serialize(),
       (_, val) =>
         // round numbers to 6 decimal places, which saves space and is probably enough precision
         val?.toFixed ? Number(val.toFixed(6)) : val,
-      pretty ? 2 : 0
+      pretty ? 2 : 0,
     );
 
   copyToClipboard = () => {
     if (typeof window === "undefined") return;
     navigator.clipboard.writeText(this.stringifyExperience(true));
-  };
-
-  saveToLocalStorage = (key: string) => {
-    if (typeof window === "undefined") return;
-    window.localStorage.setItem(key, this.stringifyExperience());
-  };
-
-  loadFromLocalStorage = (key: string) => {
-    if (typeof window === "undefined") return;
-    const experience = window.localStorage.getItem(key);
-    if (experience) this.loadFromString(experience);
   };
 }

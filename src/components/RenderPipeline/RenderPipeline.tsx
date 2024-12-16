@@ -11,7 +11,7 @@ type Props = {
 export const RenderPipeline = observer(function RenderPipeline(props: Props) {
   const store = useStore();
 
-  if (store.version === 1) {
+  if (store.experienceVersion === 1) {
     return <RenderPipelineV1 {...props} />;
   } else {
     return <RenderPipelineV2 {...props} />;

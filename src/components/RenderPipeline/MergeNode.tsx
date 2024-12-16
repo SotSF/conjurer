@@ -23,7 +23,7 @@ export const MergeNode = memo(function MergeNode({
       u_texture1: { value: renderTargetIn1.texture },
       u_texture2: { value: renderTargetIn2.texture },
     }),
-    [renderTargetIn1, renderTargetIn2]
+    [renderTargetIn1, renderTargetIn2],
   );
 
   useFrame(({ gl, camera }) => {

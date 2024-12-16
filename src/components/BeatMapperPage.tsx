@@ -15,7 +15,8 @@ export const BeatMapperPage = observer(function BeatMapperPage() {
       initialized.current = true;
 
       runInAction(() => {
-        playlistStore.experienceFilenames = ["joe-night-jar"];
+        // TODO: un-break
+        // playlistStore.experienceNames = ["joe-night-jar"];
       });
       store.initializeClientSide();
     }

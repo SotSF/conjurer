@@ -1,21 +1,19 @@
 import styles from "@/styles/Display.module.css";
-import { Box, Heading, Text, VStack } from "@chakra-ui/react";
+import { Box, Heading, HStack, VStack } from "@chakra-ui/react";
 import { DisplayCanvas } from "@/src/components/Canvas/DisplayCanvas";
 import { DisplayControls } from "@/src/components/DisplayControls";
 import { observer } from "mobx-react-lite";
 import { useStore } from "@/src/types/StoreContext";
-import { UserPicker } from "@/src/components/UserPicker";
 import { MenuBar } from "@/src/components/Menu/MenuBar";
-import { useRef, useState } from "react";
+import { useRef } from "react";
+import { LoginButton } from "@/src/components/LoginButton";
+import { RoleSelector } from "@/src/components/RoleSelector";
 
 export const Display = observer(function Display() {
   const store = useStore();
-  const { uiStore, embeddedViewer } = store;
+  const { uiStore, viewerMode } = store;
 
   const boxRef = useRef<HTMLDivElement>(null);
-
-  // TODO: hide controls some other way than double click
-  const [showAllControls, setShowAllControls] = useState(true);
 
   return (
     <Box
@@ -24,26 +22,26 @@ export const Display = observer(function Display() {
       overflow="auto"
       position="relative"
       height="100%"
-      onDoubleClick={() => {
-        // setShowAllControls(!showAllControls);
-        boxRef.current?.requestFullscreen();
-      }}
     >
-      {!embeddedViewer && (
-        <Box opacity={showAllControls ? 1 : 0} transition="all 100ms">
+      {!viewerMode && (
+        <Box transition="all 100ms">
           <MenuBar />
           <VStack position="absolute" width="100%" marginY="2" zIndex={1}>
             <Heading className={styles.fadeOut} userSelect="none">
               Conjurer
             </Heading>
           </VStack>
-          <VStack p={2} position="absolute" top={0} right={0} zIndex={1}>
-            {store.context === "viewer" ? (
-              <Text fontWeight={"bold"}>by {store.user}</Text>
-            ) : (
-              <UserPicker />
-            )}
-          </VStack>
+          <HStack
+            p={2}
+            position="absolute"
+            top={0}
+            right={0}
+            zIndex={1}
+            alignItems="end"
+          >
+            <RoleSelector />
+            <LoginButton />
+          </HStack>
           <DisplayControls canvasContainer={boxRef.current} />
         </Box>
       )}

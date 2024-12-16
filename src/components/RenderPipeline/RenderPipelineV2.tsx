@@ -70,5 +70,5 @@ const MergeNodes = observer(
         />
       );
     });
-  }
+  },
 );

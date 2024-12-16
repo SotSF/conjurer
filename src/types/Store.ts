@@ -1,28 +1,26 @@
 import { Block } from "@/src/types/Block";
-import { MIN_PIXELS_PER_SECOND, UIStore } from "@/src/types/UIStore";
-import { makeAutoObservable, configure } from "mobx";
+import { UIStore } from "@/src/types/UIStore";
+import { makeAutoObservable } from "mobx";
 import { AudioStore } from "@/src/types/AudioStore";
 import { Variation } from "@/src/types/Variations/Variation";
 import { ExperienceStore } from "@/src/types/ExperienceStore";
 import { Layer } from "@/src/types/Layer";
-import { setupUnityAppWebsocket } from "@/src/websocket/unityWebsocket";
 import { deserializeVariation } from "@/src/types/Variations/variations";
 import { PlaylistStore } from "@/src/types/PlaylistStore";
 import { BeatMapStore } from "@/src/types/BeatMapStore";
 import { PlaygroundStore } from "@/src/types/PlaygroundStore";
-import { setupControllerWebsocket } from "@/src/websocket/controllerWebsocket";
 import { setupVoiceCommandWebsocket } from "@/src/websocket/voiceCommandWebsocket";
+import {
+  EXPERIENCE_VERSION,
+  ExperienceStatus,
+  Experience,
+} from "@/src/types/Experience";
+import { NO_SONG } from "@/src/types/Song";
+import { Context, Role } from "@/src/types/context";
+import "@/src/utils/mobx";
+import { UserStore } from "@/src/types/UserStore";
 import { LayerV1 } from "./Layer/LayerV1";
 import { LayerV2 } from "./Layer/LayerV2";
-
-// Enforce MobX strict mode, which can make many noisy console warnings, but can help use learn MobX better.
-// Feel free to comment out the following if you want to silence the console messages.
-configure({
-  enforceActions: "always",
-  computedRequiresReaction: true,
-  reactionRequiresObservable: true,
-  observableRequiresReaction: false, // This will trigger false positives sometimes, so turning off
-});
 
 export type BlockSelection = { type: "block"; block: Block };
 
@@ -41,19 +39,16 @@ export class Store {
 
   audioStore = new AudioStore(this);
   beatMapStore = new BeatMapStore(this);
-  uiStore = new UIStore(this, this.audioStore);
+  uiStore = new UIStore(this);
   experienceStore = new ExperienceStore(this);
-  playlistStore = new PlaylistStore(
-    this,
-    this.audioStore,
-    this.experienceStore
-  );
+  playlistStore = new PlaylistStore(this);
   playgroundStore = new PlaygroundStore(this);
+  userStore = new UserStore(this);
 
   layers: Layer[] = [];
 
   sendingData = false;
-  embeddedViewer = false;
+  viewerMode = false;
 
   _globalIntensity = 1;
   get globalIntensity(): number {
@@ -64,13 +59,13 @@ export class Store {
     localStorage.setItem("globalIntensity", String(value));
   }
 
-  private _usingLocalAssets = false;
-  get usingLocalAssets(): boolean {
-    return this._usingLocalAssets;
+  private _usingLocalData = process.env.NEXT_PUBLIC_NODE_ENV !== "production";
+  get usingLocalData(): boolean {
+    return this._usingLocalData;
   }
-  set usingLocalAssets(value: boolean) {
-    this._usingLocalAssets = value;
-    localStorage.setItem("usingLocalAssets", String(value));
+  set usingLocalData(value: boolean) {
+    this._usingLocalData = value;
+    localStorage.setItem("usingLocalData", String(value));
   }
 
   private _selectedLayer: Layer = this.layers[0]; // a layer is always selected
@@ -86,7 +81,7 @@ export class Store {
 
   get singleBlockSelection(): Block | null {
     const blockSelections = Array.from(this.selectedBlocksOrVariations).filter(
-      (blockOrVariation) => blockOrVariation.type === "block"
+      (blockOrVariation) => blockOrVariation.type === "block",
     ) as BlockSelection[];
 
     return blockSelections.length === 1 ? blockSelections[0].block : null;
@@ -94,137 +89,113 @@ export class Store {
 
   get singleVariationSelection(): VariationSelection | null {
     const variationSelections = Array.from(
-      this.selectedBlocksOrVariations
+      this.selectedBlocksOrVariations,
     ).filter(
-      (blockOrVariation) => blockOrVariation.type === "variation"
+      (blockOrVariation) => blockOrVariation.type === "variation",
     ) as VariationSelection[];
 
     return variationSelections.length === 1 ? variationSelections[0] : null;
   }
 
-  private _user = "";
-  get user(): string {
-    return this._user;
+  private _role: Role = "emcee";
+  get role(): Role {
+    return this._role;
   }
-  set user(value: string) {
-    this._user = value;
-    if (this.context === "default") localStorage.setItem("user", value);
+  set role(value: Role) {
+    this._role = value;
+    localStorage.setItem("role", value);
+  }
+  get roleText(): string {
+    switch (this._role) {
+      case "emcee":
+        return "Emcee";
+      case "experienceCreator":
+        return "Experience Creator";
+      case "vj":
+        return "VJ";
+    }
   }
 
-  private _experienceName = "untitled";
+  private _experienceName = "";
   get experienceName(): string {
     return this._experienceName;
   }
   set experienceName(value: string) {
     this._experienceName = value;
-    if (this.context === "default")
+    if (this.context === "experienceEditor") {
       localStorage.setItem("experienceName", value);
+      window.history.pushState({}, "", `/experience/${value}`);
+    }
   }
 
-  get experienceFilename(): string {
-    return `${this.user}-${this.experienceName}`;
-  }
-
+  // TODO: move this stuff inside of the experience store
+  hasSaved = false;
   experienceLastSavedAt = 0;
+  experienceVersion = EXPERIENCE_VERSION;
+  experienceStatus: ExperienceStatus = "inprogress";
+  experienceId: number | undefined = undefined;
 
   get playing() {
     return this.audioStore.audioState !== "paused";
   }
 
-  constructor(
-    readonly context:
-      | "playground"
-      | "controller"
-      | "viewer"
-      | "pipes"
-      | "default"
-  ) {
+  constructor(readonly context: Context) {
     makeAutoObservable(this);
-
-    this.initializeServerSide();
   }
 
-  initializeServerSide = () => {
-    if (this.context === "playground" || this.context === "pipes") {
-      this.uiStore.patternDrawerOpen = true;
-    } else if (this.context === "controller") {
-      this.uiStore.displayMode = "none";
-    } else if (this.context === "viewer") {
-      this.playlistStore.autoplay = true;
-      this.uiStore.showingViewerInstructionsModal = true;
-      this.uiStore.pixelsPerSecond = MIN_PIXELS_PER_SECOND;
-    }
-  };
-
-  initializeClientSide = () => {
+  initializeClientSide = (initialExperienceName?: string) => {
     if (this.initializedClientSide) return;
     this.initializedClientSide = true;
 
-    setupVoiceCommandWebsocket(this);
+    if (process.env.NEXT_PUBLIC_ENABLE_VOICE === "true")
+      setupVoiceCommandWebsocket(this);
 
-    if (this.context === "controller") {
-      this.playgroundStore.initialize();
-      setupControllerWebsocket(this.context);
-      return;
-    }
+    // TODO:
+    // this.viewerMode =
+    //   new URLSearchParams(window.location.search).get("viewerMode") === "true";
+    // if (this.viewerMode) {
+    //   if (initialExperienceName)
+    //     this.experienceStore.load(initialExperienceName);
+    //   else this.experienceStore.loadEmptyExperience();
+    //   this.uiStore.initialize(this.viewerMode);
+    //   this.audioStore.initialize();
+    //   if (this.viewerMode) this.play();
+    //   return;
+    // }
 
-    if (this.context === "playground" || this.context === "pipes") {
-      this.playgroundStore.initialize();
-      this.uiStore.initialize();
-      if (this.context === "pipes") {
-        this.uiStore.renderTargetSize = 1024;
-        this.uiStore.playgroundDisplayMode = "cartesianSpace";
-      }
-      setupControllerWebsocket(this.context, this.playgroundStore.onUpdate);
-      return;
-    }
+    this.userStore.initialize();
 
-    if (this.context === "viewer") {
-      this.embeddedViewer =
-        new URLSearchParams(window.location.search).get("embedded") === "true";
-      this.experienceStore.loadFromParams() ||
-        this.experienceStore.load(this.playlistStore.experienceFilenames[0]);
-      this.uiStore.initialize(this.embeddedViewer);
-      if (this.embeddedViewer) this.play();
-      return;
-    }
-
-    // check for a username in local storage
-    const username = localStorage.getItem("user");
-    if (username) this._user = username;
+    // For now, we'll just set the role based on the context (page)
+    if (this.context === "playlistEditor") this._role = "emcee";
+    else if (this.context === "experienceEditor")
+      this._role = "experienceCreator";
+    else this._role = "vj";
 
     // check for a global intensity in local storage
     const globalIntensity = localStorage.getItem("globalIntensity");
     if (globalIntensity) this._globalIntensity = Number(globalIntensity);
 
-    // check for a usingLocalAssets in local storage
-    const usingLocalAssets = localStorage.getItem("usingLocalAssets");
-    if (usingLocalAssets) this._usingLocalAssets = usingLocalAssets === "true";
+    // check for a usingLocalData in local storage (not honored in production)
+    const usingLocalData = localStorage.getItem("usingLocalData");
+    if (usingLocalData && process.env.NEXT_PUBLIC_NODE_ENV !== "production")
+      this._usingLocalData = usingLocalData === "true";
 
-    // check for an experience name in local storage
-    const experienceName = localStorage.getItem("experienceName");
-    if (experienceName) {
-      this._experienceName = experienceName;
-      this.experienceStore.load(`${this.user}-${experienceName}`);
-    } else this.experienceStore.loadInitialExperience();
+    // load experience from path parameter if provided (e.g. /experience/my-experience)
+    if (initialExperienceName) this.experienceStore.load(initialExperienceName);
+    else if (this.context !== "playlistEditor")
+      this.experienceStore.loadEmptyExperience();
 
+    if (this.context === "playground") this.playgroundStore.initialize();
     this.uiStore.initialize();
+    this.audioStore.initialize();
   };
 
   toggleSendingData = () => {
     this.sendingData = !this.sendingData;
-    if (this.sendingData) setupUnityAppWebsocket();
   };
 
-  toggleUsingLocalAssets = () => {
-    this.usingLocalAssets = !this.usingLocalAssets;
-  };
-
-  newExperience = () => {
-    this.experienceStore.saveToLocalStorage("autosave");
-    this.experienceName = "untitled";
-    this.experienceLastSavedAt = 0;
-    this.experienceStore.loadEmptyExperience();
+  toggleUsingLocalData = () => {
+    this.usingLocalData = !this.usingLocalData;
   };
 
   selectBlock = (block: Block) => {
@@ -238,7 +209,7 @@ export class Store {
   selectVariation = (
     block: Block,
     uniformName: string,
-    variation: Variation
+    variation: Variation,
   ) => {
     this.selectedBlocksOrVariations = new Set([
       {
@@ -254,7 +225,7 @@ export class Store {
   addVariationToSelection = (
     block: Block,
     uniformName: string,
-    variation: Variation
+    variation: Variation,
   ) => {
     this.selectedBlocksOrVariations.add({
       type: "variation",
@@ -278,7 +249,7 @@ export class Store {
   deselectVariation = (
     block: Block,
     uniformName: string,
-    variation: Variation
+    variation: Variation,
   ) => {
     this.selectedBlocksOrVariations.forEach((selectedBlockOrVariation) => {
       if (
@@ -311,7 +282,7 @@ export class Store {
 
     let blockRemoved = false;
     for (const blockOrVariation of Array.from(
-      this.selectedBlocksOrVariations
+      this.selectedBlocksOrVariations,
     )) {
       if (blockOrVariation.type === "block") {
         // TODO: better generalize for multiple layers
@@ -321,7 +292,7 @@ export class Store {
         this.deleteVariation(
           blockOrVariation.block,
           blockOrVariation.uniformName,
-          blockOrVariation.variation
+          blockOrVariation.variation,
         );
     }
 
@@ -341,7 +312,7 @@ export class Store {
     block: Block,
     uniformName: string,
     variation: Variation,
-    insertAtEnd = false
+    insertAtEnd = false,
   ) => {
     block.duplicateVariation(uniformName, variation, insertAtEnd);
     if (block.layer) this._selectedLayer = block.layer;
@@ -351,7 +322,7 @@ export class Store {
   deleteVariation = (
     block: Block,
     uniformName: string,
-    variation: Variation
+    variation: Variation,
   ) => {
     const removeIndex = block.removeVariation(uniformName, variation);
     const nextVariation = block.findVariationAtIndex(uniformName, removeIndex);
@@ -362,7 +333,7 @@ export class Store {
 
   copyLinkToExperience = () => {
     const url = new URL(`${window.location.origin}/viewer`);
-    url.searchParams.set("experience", this.experienceFilename);
+    url.searchParams.set("experience", this.experienceName);
     navigator.clipboard.writeText(url.toString());
   };
 
@@ -375,16 +346,16 @@ export class Store {
         Array.from(this.selectedBlocksOrVariations).map((blockOrVariation) =>
           blockOrVariation.type === "block"
             ? blockOrVariation.block.serialize()
-            : blockOrVariation.variation.serialize()
-        )
-      )
+            : blockOrVariation.variation.serialize(),
+        ),
+      ),
     );
   };
 
   // TODO: better generalize for multiple layers
   pasteFromClipboard = (clipboardData: DataTransfer) => {
     const blocksOrVariationsData = JSON.parse(
-      clipboardData.getData("text/plain")
+      clipboardData.getData("text/plain"),
     ) as any[];
     if (!blocksOrVariationsData || !blocksOrVariationsData.length) return;
 
@@ -395,14 +366,14 @@ export class Store {
       if (!layerToPasteInto) return;
 
       const blocksToPaste = blocksOrVariationsData.map((b: any) =>
-        Block.deserialize(this, b)
+        Block.deserialize(this, b),
       );
       blocksToPaste.forEach((block) => block.regenerateId());
       this.selectedBlocksOrVariations = new Set();
       for (const blockToPaste of blocksToPaste) {
         const nextGap = layerToPasteInto.getNextValidStartAndDuration(
           this.audioStore.globalTime,
-          blockToPaste.duration
+          blockToPaste.duration,
         );
         blockToPaste.setTiming(nextGap);
         layerToPasteInto.addBlock(blockToPaste);
@@ -415,9 +386,9 @@ export class Store {
 
     // at least one variation must already be selected to know where to paste
     const selectedVariations = Array.from(
-      this.selectedBlocksOrVariations
+      this.selectedBlocksOrVariations,
     ).filter(
-      (blockOrVariation) => blockOrVariation.type === "variation"
+      (blockOrVariation) => blockOrVariation.type === "variation",
     ) as VariationSelection[];
     if (!selectedVariations.length) return;
 
@@ -425,7 +396,7 @@ export class Store {
     const uniformNameToPasteTo = selectedVariations[0].uniformName;
 
     const variationsToPaste = blocksOrVariationsData.map((v) =>
-      deserializeVariation(this, v)
+      deserializeVariation(this, v),
     );
 
     this.selectedBlocksOrVariations = new Set();
@@ -450,7 +421,7 @@ export class Store {
         const newBlock = selectedBlock.clone();
         const nextGap = layerToPasteInto.getNextValidStartAndDuration(
           selectedBlock.endTime,
-          selectedBlock.duration
+          selectedBlock.duration,
         );
         newBlock.setTiming(nextGap);
         layerToPasteInto.addBlock(newBlock);
@@ -460,9 +431,9 @@ export class Store {
     }
 
     const selectedVariations = Array.from(
-      this.selectedBlocksOrVariations
+      this.selectedBlocksOrVariations,
     ).filter(
-      (blockOrVariation) => blockOrVariation.type === "variation"
+      (blockOrVariation) => blockOrVariation.type === "variation",
       // TODO: do better type discrimination
     ) as VariationSelection[];
     if (selectedVariations.length > 0) {
@@ -471,7 +442,7 @@ export class Store {
           selectedVariation.block,
           selectedVariation.uniformName,
           selectedVariation.variation,
-          selectedVariations.length > 1
+          selectedVariations.length > 1,
         );
       }
     }
@@ -508,28 +479,34 @@ export class Store {
     }
   };
 
-  serialize = () => ({
-    version: this.version,
-    audioStore: this.audioStore.serialize(),
-    beatMapStore: this.beatMapStore.serialize(),
-    uiStore: this.uiStore.serialize(),
-    layers: this.layers.map((l) => l.serialize()),
-    user: this.user,
-    savedAt: Date.now(),
+  serialize = (): Experience => ({
+    id: this.experienceId,
+    name: this.experienceName,
+    user: this.userStore.me!,
+    song: this.audioStore.selectedSong,
+    status: this.experienceStatus,
+    version: this.experienceVersion,
+    data: { layers: this.layers.map((l) => l.serialize()) },
   });
 
-  deserialize = (data: any) => {
-    this.version = data.version ?? 1;
-    this.audioStore.deserialize(data.audioStore);
-    this.beatMapStore.deserialize(data.beatMapStore);
-    this.uiStore.deserialize(this, data.uiStore);
+  deserialize = (experience: Experience) => {
+    this.experienceId = experience.id;
+    this.experienceName = experience.name;
+    this.audioStore.selectedSong = experience.song || NO_SONG;
+    this.experienceStatus = experience.status;
+    this.experienceVersion = experience.version;
 
-    if (this.version === 1) {
-      this.layers = data.layers.map((l: any) => LayerV1.deserialize(this, l));
+    if (this.experienceVersion === 1) {
+      this.layers = experience.data.layers.map((l: any) =>
+        LayerV1.deserialize(this, l),
+      );
     } else {
-      this.layers = data.layers.map((l: any) => LayerV2.deserialize(this, l));
+      this.layers = experience.data.layers.map((l: any) =>
+        LayerV2.deserialize(this, l),
+      );
     }
 
+    // Select first layer
     this.selectedLayer = this.layers[0];
   };
 }

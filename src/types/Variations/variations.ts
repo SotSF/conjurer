@@ -6,12 +6,10 @@ import { PaletteVariation } from "@/src/types/Variations/PaletteVariation";
 import { PeriodicVariation } from "@/src/types/Variations/PeriodicVariation";
 import { SplineVariation } from "@/src/types/Variations/SplineVariation";
 import { AudioVariation } from "@/src/types/Variations/AudioVariation";
-import { RootStore, Variation } from "@/src/types/Variations/Variation";
+import { Variation } from "@/src/types/Variations/Variation";
+import type { Store } from "@/src/types/Store";
 
-export const deserializeVariation = (
-  store: RootStore,
-  data: any
-): Variation => {
+export const deserializeVariation = (store: Store, data: any): Variation => {
   switch (data.type) {
     case "flat":
       return FlatVariation.deserialize(store, data);
@@ -31,7 +29,7 @@ export const deserializeVariation = (
       return PaletteVariation.deserialize(store, data);
     default:
       throw new Error(
-        `Need to implement deserialization for variation type: ${data.type}`
+        `Need to implement deserialization for variation type: ${data.type}`,
       );
   }
 };

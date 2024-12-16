@@ -6,7 +6,7 @@ import { lazy, Suspense } from "react";
 
 // lazy load to keep the S3 client out of the initial bundle
 const UploadAudioModalContent = lazy(
-  () => import("@/src/components/UploadAudioModalContent")
+  () => import("@/src/components/UploadAudioModalContent"),
 );
 
 export const UploadAudioModal = observer(function UploadAudioModal() {

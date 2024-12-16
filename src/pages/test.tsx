@@ -5,7 +5,7 @@ import Head from "next/head";
 import { memo, useEffect, useMemo, useState } from "react";
 
 export default function Test() {
-  // Note: currently the store is not used on this page, only in the iframe
+  // Note: currently the store is not used on this page
   const store = useMemo(() => new Store("viewer"), []);
   const [initialized, setInitialized] = useState(false);
   useEffect(() => {
@@ -38,7 +38,7 @@ const EmbedTest = memo(function EmbedTest() {
     <iframe
       width="800"
       height="675"
-      src={`${window.location.origin}/viewer?experience=joe-night-jar&embedded=true`}
+      src={`${window.location.origin}/experience/night-jar&viewerMode=true`}
       title="Conjurer"
       allow="autoplay; fullscreen"
       allowFullScreen

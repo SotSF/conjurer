@@ -1,7 +1,6 @@
-import { AudioStore } from "@/src/types/AudioStore";
 import { INITIAL_PIXELS_PER_SECOND } from "@/src/utils/time";
 import { makeAutoObservable } from "mobx";
-import { RegionParams } from "wavesurfer.js/dist/plugins/regions";
+import type { Store } from "@/src/types/Store";
 
 export const MAX_PIXELS_PER_SECOND = 160;
 export const MIN_PIXELS_PER_SECOND = 4;
@@ -10,17 +9,6 @@ const INITIAL_RENDER_TARGET_SIZE = 512;
 
 export type DisplayMode = "canopy" | "canopySpace" | "cartesianSpace" | "none";
 
-type RootStore = {
-  context: string;
-  user: string;
-};
-
-/**
- * MobX store for UI state.
- *
- * @export
- * @class UIStore
- */
 export class UIStore {
   horizontalLayout = true;
   showingPerformance = false;
@@ -37,6 +25,7 @@ export class UIStore {
   showingViewerInstructionsModal = false;
   showingSaveBeatMapModal = false;
   showingLoadBeatMapModal = false;
+  showingLatencyModal = false;
 
   pendingAction: "open" | "save" | "" = "";
 
@@ -48,8 +37,6 @@ export class UIStore {
     this._renderTargetSize = size;
     this.saveToLocalStorage();
   }
-
-  markerToEdit: Partial<RegionParams> = {};
 
   keepingPlayHeadCentered = false;
   keepingPlayHeadVisible = false;
@@ -72,18 +59,17 @@ export class UIStore {
     this.saveToLocalStorage();
   }
 
-  patternDrawerOpen = false;
+  patternDrawerOpen = this.store.context === "playground";
 
-  playlistDrawerOpen = false;
-
+  canTimelineZoom = this.store.context === "experienceEditor";
   pixelsPerSecond = INITIAL_PIXELS_PER_SECOND; // the zoom of the timeline
 
-  constructor(readonly rootStore: RootStore, readonly audioStore: AudioStore) {
+  constructor(readonly store: Store) {
     makeAutoObservable(this);
   }
 
-  initialize = (embeddedViewer = false) => {
-    if (embeddedViewer) this.setEmbeddedDefaults();
+  initialize = (viewerMode = false) => {
+    if (viewerMode) this.setViewerModeDefaults();
     else this.loadFromLocalStorage();
   };
 
@@ -98,7 +84,7 @@ export class UIStore {
     }
 
     // resetting the time will restart the playhead animation
-    this.audioStore.setTimeWithCursor(this.audioStore.globalTime);
+    this.store.audioStore.setTimeWithCursor(this.store.audioStore.globalTime);
   };
 
   zoomIn = (amount?: number) => {
@@ -108,7 +94,7 @@ export class UIStore {
     }
 
     // resetting the time will restart the playhead animation
-    this.audioStore.setTimeWithCursor(this.audioStore.globalTime);
+    this.store.audioStore.setTimeWithCursor(this.store.audioStore.globalTime);
   };
 
   toggleLayout = () => {
@@ -133,8 +119,9 @@ export class UIStore {
     this.snappingToBeatGrid = !this.snappingToBeatGrid;
   };
 
+  // TODO: can be removed when authentication is implemented
   attemptShowOpenExperienceModal = () => {
-    if (!this.rootStore.user) {
+    if (!this.store.userStore.isAuthenticated) {
       this.showingUserPickerModal = true;
       this.pendingAction = "open";
       return;
@@ -144,7 +131,7 @@ export class UIStore {
   };
 
   attemptShowSaveExperienceModal = () => {
-    if (!this.rootStore.user) {
+    if (!this.store.userStore.isAuthenticated) {
       this.showingUserPickerModal = true;
       this.pendingAction = "save";
       return;
@@ -171,7 +158,7 @@ export class UIStore {
     this.saveToLocalStorage();
   };
 
-  setEmbeddedDefaults = () => {
+  setViewerModeDefaults = () => {
     this.horizontalLayout = true;
     this.showingPerformance = false;
     this.displayMode = "canopy";
@@ -191,6 +178,9 @@ export class UIStore {
         localStorageUiSettings.playgroundDisplayMode || "canopy";
       this.renderTargetSize =
         localStorageUiSettings.renderTargetSize || INITIAL_RENDER_TARGET_SIZE;
+      if (this.store.context === "experienceEditor")
+        this.pixelsPerSecond =
+          localStorageUiSettings.pixelsPerSecond || INITIAL_PIXELS_PER_SECOND;
     }
   };
 
@@ -204,16 +194,8 @@ export class UIStore {
         displayMode: this.displayMode,
         playgroundDisplayMode: this.playgroundDisplayMode,
         renderTargetSize: this.renderTargetSize,
-      })
+        pixelsPerSecond: this.pixelsPerSecond,
+      }),
     );
-  };
-
-  serialize = () => ({
-    pixelsPerSecond: this.pixelsPerSecond,
-  });
-
-  deserialize = (rootStore: RootStore, data: any) => {
-    if (rootStore.context !== "viewer")
-      this.pixelsPerSecond = data?.pixelsPerSecond ?? this.pixelsPerSecond;
   };
 }

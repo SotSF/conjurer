@@ -1,27 +1,18 @@
 import { playgroundEffects } from "@/src/effects/effects";
 import { playgroundPatterns } from "@/src/patterns/patterns";
-import { Block, RootStore, SerializedBlock } from "@/src/types/Block";
+import { Block, SerializedBlock } from "@/src/types/Block";
 import { Palette, SerializedPalette } from "@/src/types/Palette";
 import {
   ExtraParams,
   ParamType,
   isPaletteParam,
 } from "@/src/types/PatternParams";
+import type { Store } from "@/src/types/Store";
 import { deserializeVariation } from "@/src/types/Variations/variations";
-import { sendControllerMessage } from "@/src/websocket/controllerWebsocket";
 import { makeAutoObservable } from "mobx";
 
 export class PlaygroundStore {
   presets: SerializedBlock[] = [];
-
-  _autoUpdate = true;
-  get autoUpdate() {
-    return this._autoUpdate;
-  }
-  set autoUpdate(autoUpdate: boolean) {
-    this._autoUpdate = autoUpdate;
-    this.sendControllerUpdateMessage();
-  }
 
   patternBlocks: Block[];
   effectBlocks: Block[];
@@ -32,7 +23,6 @@ export class PlaygroundStore {
   }
   set selectedPatternIndex(index: number) {
     this._selectedPatternIndex = index;
-    this.sendControllerUpdateMessage();
   }
 
   _selectedEffectIndices: number[] = [];
@@ -43,13 +33,13 @@ export class PlaygroundStore {
     this._selectedEffectIndices = indices;
   }
 
-  constructor(readonly store: RootStore) {
+  constructor(readonly store: Store) {
     this.patternBlocks = playgroundPatterns.map(
       (pattern) => new Block(this.store, pattern),
-      []
+      [],
     );
     this.effectBlocks = playgroundEffects.map(
-      (effect) => new Block(this.store, effect)
+      (effect) => new Block(this.store, effect),
     );
 
     makeAutoObservable(this);
@@ -122,17 +112,9 @@ export class PlaygroundStore {
         lastPatternIndexSelected: this.lastPatternIndexSelected,
         lastEffectIndices: this.lastEffectIndices,
         presets: this.presets,
-      })
+      }),
     );
   };
-
-  sendControllerUpdateMessage = (force = false) =>
-    this.store.context === "controller" &&
-    (this.autoUpdate || force) &&
-    sendControllerMessage({
-      type: "updateBlock",
-      serializedBlock: this.selectedPatternBlock.serialize(),
-    });
 
   // TODO: refactor, make performant
   onUpdate = (serializedBlock: SerializedBlock) => {
@@ -145,6 +127,7 @@ export class PlaygroundStore {
       (patternBlock: Block<ExtraParams>, patternIndex: number) => {
         if (typeof transferPattern === "string") return;
         if (patternBlock.pattern.name !== transferPattern.name) return;
+        if (!transferPattern.params) return;
 
         // TODO: fix duplicated code here
         const { params } = transferPattern;
@@ -162,7 +145,7 @@ export class PlaygroundStore {
         for (const parameter of Object.keys(transferParameterVariations)) {
           patternBlock.parameterVariations[parameter] =
             transferParameterVariations[parameter]?.map((variationData: any) =>
-              deserializeVariation(this.store, variationData)
+              deserializeVariation(this.store, variationData),
             );
         }
 
@@ -176,6 +159,7 @@ export class PlaygroundStore {
               if (typeof transferEffectBlock.pattern === "string") return;
               if (effectBlock.pattern.name !== transferEffectBlock.pattern.name)
                 return;
+              if (!transferEffectBlock.pattern.params) return;
 
               const { params } = transferEffectBlock.pattern;
               for (const [uniformName, param] of Object.entries(params)) {
@@ -193,22 +177,22 @@ export class PlaygroundStore {
               }
 
               for (const parameter of Object.keys(
-                transferEffectBlock.parameterVariations
+                transferEffectBlock.parameterVariations,
               )) {
                 effectBlock.parameterVariations[parameter] =
                   transferEffectBlock.parameterVariations[parameter]?.map(
                     (variationData: any) =>
-                      deserializeVariation(this.store, variationData)
+                      deserializeVariation(this.store, variationData),
                   );
               }
 
               // set this effect as selected
               effectIndices.push(effectIndex);
-            }
+            },
           );
         }
         this.selectedEffectIndices = effectIndices;
-      }
+      },
     );
   };
 }

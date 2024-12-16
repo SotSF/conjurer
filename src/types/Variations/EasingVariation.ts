@@ -1,4 +1,5 @@
-import { RootStore, Variation } from "@/src/types/Variations/Variation";
+import { Variation } from "@/src/types/Variations/Variation";
+import type { Store } from "@/src/types/Store";
 import { easings } from "@/src/utils/easings";
 
 export type EasingVariationType =
@@ -43,7 +44,7 @@ export class EasingVariation extends Variation<number> {
     duration: number,
     easingType: EasingVariationType,
     from: number,
-    to: number
+    to: number,
   ) {
     super("easing", duration);
 
@@ -59,7 +60,7 @@ export class EasingVariation extends Variation<number> {
   computeDomain = () =>
     [Math.min(this.from, this.to), Math.max(this.from, this.to)] as [
       number,
-      number
+      number,
     ];
 
   computeSampledData = (duration: number) => {
@@ -85,6 +86,6 @@ export class EasingVariation extends Variation<number> {
     to: this.to,
   });
 
-  static deserialize = (store: RootStore, data: any) =>
+  static deserialize = (store: Store, data: any) =>
     new EasingVariation(data.duration, data.easingType, data.from, data.to);
 }

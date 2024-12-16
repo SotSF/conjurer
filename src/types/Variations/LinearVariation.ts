@@ -1,4 +1,5 @@
-import { RootStore, Variation } from "@/src/types/Variations/Variation";
+import { Variation } from "@/src/types/Variations/Variation";
+import type { Store } from "@/src/types/Store";
 import { lerp } from "three/src/math/MathUtils";
 
 export class LinearVariation extends Variation<number> {
@@ -36,6 +37,6 @@ export class LinearVariation extends Variation<number> {
     to: this.to,
   });
 
-  static deserialize = (store: RootStore, data: any) =>
+  static deserialize = (store: Store, data: any) =>
     new LinearVariation(data.duration, data.from, data.to);
 }

@@ -10,7 +10,7 @@ import { makeVertexShader, Varying } from "@/src/shaders/vertexShader";
 
 export type SerializedPattern = {
   name: string;
-  params: SerializedParams;
+  params?: SerializedParams;
 };
 
 export const BASE_UNIFORMS = ["u_time", "u_texture"];
@@ -25,7 +25,7 @@ export class Pattern<T extends ExtraParams = ExtraParams> {
     name: string,
     src: string,
     parameters: T = {} as T,
-    vertexShaderVaryings: Varying[] = ["v_uv"]
+    vertexShaderVaryings: Varying[] = ["v_uv"],
   ) {
     this.name = name;
     this.fragmentShader = src;
@@ -60,13 +60,16 @@ export class Pattern<T extends ExtraParams = ExtraParams> {
     const pattern = new Pattern<T>(
       this.name,
       this.fragmentShader,
-      clonedParams
+      clonedParams,
     );
     pattern.vertexShader = this.vertexShader;
     return pattern;
   };
 
-  serialize = (): SerializedPattern => {
+  // Note: not using includeParams anymore but probably will in the future
+  serialize = (includeParams = false): SerializedPattern => {
+    if (!includeParams) return { name: this.name };
+
     const transferParams: SerializedParams = {};
     for (const [key, param] of Object.entries(this.params)) {
       if (BASE_UNIFORMS.includes(key)) continue;
@@ -74,7 +77,6 @@ export class Pattern<T extends ExtraParams = ExtraParams> {
         transferParams[key] = { value: param.value.serialize() };
       else transferParams[key] = { value: param.value };
     }
-
     return {
       name: this.name,
       params: transferParams,

@@ -129,7 +129,7 @@ export function Rain({ mouseObject, auto }: RainProps) {
           particulesactives.X,
           particulesactives.Y,
           particulesactives.vitesseY / 4,
-          particulesactives.vitesseY
+          particulesactives.vitesseY,
         );
       }
 
@@ -147,7 +147,7 @@ export function Rain({ mouseObject, auto }: RainProps) {
           gouttesactives.Y,
           gouttesactives.radius,
           0,
-          tau
+          tau,
         );
         ctx.fill();
       }
@@ -201,7 +201,7 @@ export function Rain({ mouseObject, auto }: RainProps) {
           explosion(
             particulesactives.X,
             particulesactives.Y,
-            particulesactives.color
+            particulesactives.color,
           );
         }
         var umbrella =
@@ -216,7 +216,7 @@ export function Rain({ mouseObject, auto }: RainProps) {
             explosion(
               particulesactives.X,
               particulesactives.Y,
-              particulesactives.color
+              particulesactives.color,
             );
             particuleslocales.splice(i--, 1);
           }
@@ -232,7 +232,7 @@ export function Rain({ mouseObject, auto }: RainProps) {
             explosion(
               particulesactives.X,
               particulesactives.Y,
-              particulesactives.color
+              particulesactives.color,
             );
             particuleslocales.splice(i--, 1);
           }
@@ -242,7 +242,7 @@ export function Rain({ mouseObject, auto }: RainProps) {
             explosion(
               particulesactives.X,
               particulesactives.Y,
-              particulesactives.color
+              particulesactives.color,
             );
             particuleslocales.splice(i--, 1);
           }

@@ -41,7 +41,7 @@ export const ColorParameterControl = memo(function ColorParameterControl({
       block.parameterVariations[uniformName]![0] = new LinearVariation4(
         DEFAULT_VARIATION_DURATION,
         value,
-        value
+        value,
       );
     });
   };

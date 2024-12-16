@@ -9,28 +9,29 @@ It is assumed that there is no internet at the event.
 ### Update Conjurer
 
 1. Run `git pull` to fetch the latest code (or `git clone` this repository)
-1. Run `node -v` to ensure you are using node 18
+1. Run `node -v` to ensure you are using node 20
    - For easy node version management, [install `nvm`](https://github.com/nvm-sh/nvm?tab=readme-ov-file#installing-and-updating)
-   - Once it is installed, run `nvm install 18`
-   - If nvm and node 18 are already installed, simply run `nvm use 18`
-   - Run `node -v` again to verify you are using node 18
+   - Once it is installed, run `nvm install 20`
+   - If nvm and node 20 are already installed, simply run `nvm use 20`
+   - Run `node -v` again to verify you are using node 20
 1. Run `yarn` to install dependencies
 1. Run `yarn dev` to run conjurer locally
 1. Visit http://localhost:3000 to test it out
-   - Log in as someone (top right button), open up an experience (File->Open...)
-   - Click play and verify visuals and audio are working
+   - Note that the first load will be slow
 
-### Setup Conjurer to use local assets
+### Setup Conjurer to use local data
+
+> This section needs a rewrite
 
 These steps can be skipped if you will have internet at the event.
 
 1. Run `yarn downloadCloudAssets` to download all cloud assets into the folder `public/cloud-assets`
    - This could take a little bit because there's a bunch of audio to download
    - Note that you are getting a snapshot of all of the experiences and audio files. If anyone makes more changes to these cloud saved files, you will have to rerun this script to download the latest changed assets
-1. Run `yarn build` (to be confirmed if this is really necessary)
-1. Run `yarn dev` to run conjurer locally if it is not already running
-1. Visit the app at http://localhost:3000
-1. Toggle the `Use local assets` button (desert icon) on such that it becomes orange:
+2. Run `yarn build` (to be confirmed if this is really necessary)
+3. Run `yarn dev` to run conjurer locally if it is not already running
+4. Visit the app at http://localhost:3000
+5. Toggle the `Use local assets` button (desert icon) on such that it becomes orange:
 
 ![Use local assets button](public/use-local-assets-button.png)
 
@@ -44,6 +45,8 @@ You can toggle the same `Use local assets` button again to return to opening/sav
 ## At the event
 
 ### Start up and configure Conjurer
+
+> This section needs a rewrite
 
 1. Run `yarn dev` to run Conjurer locally
 1. Visit http://localhost:3000 to tested out
@@ -66,6 +69,7 @@ You can toggle the same `Use local assets` button again to return to opening/sav
 # Optimizations
 
 - Make sure that the conjurer texture size is set to 1024. To the bottom right of the canopy is a button that will say either 256, 512, or 1024. Click it until it says 1024.
+- Make sure the "global intensity" slider (middle right) in conjurer is set to maximum. Use pixlite software for global dimming needs.
 
 # Troubleshooting
 

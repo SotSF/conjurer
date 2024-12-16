@@ -1,107 +1,145 @@
-import * as fs from "fs";
-import { publicProcedure, router } from "@/src/server/trpc";
-import {
-  GetObjectCommand,
-  ListObjectsCommand,
-  PutObjectCommand,
-} from "@aws-sdk/client-s3";
-import {
-  ASSET_BUCKET_NAME,
-  EXPERIENCE_ASSET_PREFIX,
-  LOCAL_ASSET_PATH,
-} from "@/src/utils/assets";
+import { router, databaseProcedure, userProcedure } from "@/src/server/trpc";
 import { z } from "zod";
-import { getS3 } from "@/src/utils/s3";
+import { experiences, users } from "@/src/db/schema";
+import { eq } from "drizzle-orm";
+import { EXPERIENCE_STATUSES } from "@/src/types/Experience";
+import { TRPCError } from "@trpc/server";
 
 export const experienceRouter = router({
-  listExperiences: publicProcedure
+  listExperiencesForUser: databaseProcedure
     .input(
       z.object({
-        usingLocalAssets: z.boolean(),
-        user: z.string(),
-      })
+        username: z.string(),
+      }),
     )
-    .query(async ({ input }) => {
-      let experienceFilenames: string[] = [];
-      if (input.usingLocalAssets) {
-        experienceFilenames = fs
-          .readdirSync(`${LOCAL_ASSET_PATH}${EXPERIENCE_ASSET_PREFIX}`)
-          .map((file) => file.toString());
-      } else {
-        const listObjectsCommand = new ListObjectsCommand({
-          Bucket: ASSET_BUCKET_NAME,
-          Prefix: EXPERIENCE_ASSET_PREFIX,
+    .query(({ ctx, input }) =>
+      ctx.db
+        .select({
+          id: experiences.id,
+          name: experiences.name,
+        })
+        .from(experiences)
+        .leftJoin(users, eq(experiences.userId, users.id))
+        .where(eq(users.username, input.username))
+        .all(),
+    ),
+
+  listExperiences: databaseProcedure
+    .input(
+      z.object({
+        username: z.string().optional(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      let whereClause = {};
+      if (input.username) {
+        const user = await ctx.db.query.users
+          .findFirst({ where: eq(users.username, input.username) })
+          .execute();
+        if (!user) return [];
+        whereClause = { where: eq(experiences.userId, user.id) };
+      }
+
+      return await ctx.db.query.experiences
+        .findMany({
+          columns: { id: true, name: true, status: true, version: true },
+          with: {
+            user: { columns: { id: true, username: true } },
+            song: true,
+          },
+          ...whereClause,
+        })
+        .execute();
+    }),
+
+  saveExperience: userProcedure
+    .input(
+      z.object({
+        id: z.number().optional(),
+        name: z.string(),
+        song: z.object({ id: z.number() }),
+        data: z.any(),
+        status: z.enum(EXPERIENCE_STATUSES),
+        version: z.number(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { id, name, song, data, status, version } = input;
+      const { id: songId } = song;
+
+      if (id) {
+        // Check if the user has permission to save this experience
+        const userToExperience = await ctx.db.query.experiences
+          .findFirst({
+            where: eq(experiences.userId, ctx.user.id),
+          })
+          .execute();
+
+        if (userToExperience?.userId !== ctx.user.id) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message:
+              'You do not have permission to edit this experience. Save a copy with "File > Save as" instead.',
+          });
+        }
+
+        // If an id is provided then we are updating an existing experience
+        await ctx.db
+          .update(experiences)
+          .set({ name, songId, data, status, version })
+          .where(eq(experiences.id, id))
+          .execute();
+        return id;
+      }
+
+      // If no id is provided then we are inserting a new experience
+      const [updatedExperience] = await ctx.db
+        .insert(experiences)
+        .values({ name, songId, data, status, version, userId: ctx.user.id })
+        .onConflictDoNothing({ target: [experiences.name] })
+        .returning({ id: experiences.id })
+        .execute();
+
+      if (!updatedExperience) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message:
+            "Could not save experience because someone has already taken that name. Experience names must be globally unique. Please try a different name.",
         });
-        const data = await getS3().send(listObjectsCommand);
-        experienceFilenames =
-          data.Contents?.map((object) => object.Key?.split("/")[1] ?? "") ?? [];
       }
 
-      return (
-        experienceFilenames
-          // filter down to only the desired user's experiences
-          .filter((e) => e.startsWith(input.user))
-          // remove .json extension
-          .map((e) => e.replaceAll(".json", "")) ?? []
-      );
+      return updatedExperience.id;
     }),
 
-  saveExperience: publicProcedure
+  getExperience: databaseProcedure
     .input(
       z.object({
-        experience: z.string(),
-        filename: z.string(),
-        usingLocalAssets: z.boolean(),
-      })
+        experienceName: z.string(),
+        usingLocalData: z.boolean(),
+      }),
     )
-    .mutation(async ({ input }) => {
-      if (input.usingLocalAssets) {
-        fs.writeFileSync(
-          `${LOCAL_ASSET_PATH}${EXPERIENCE_ASSET_PREFIX}${input.filename}.json`,
-          input.experience
-        );
-        return;
-      }
+    .query(({ ctx, input }) =>
+      ctx.db.query.experiences
+        .findFirst({
+          with: { user: true, song: true },
+          where: eq(experiences.name, input.experienceName),
+        })
+        .execute(),
+    ),
 
-      const putObjectCommand = new PutObjectCommand({
-        Bucket: ASSET_BUCKET_NAME,
-        Key: `${EXPERIENCE_ASSET_PREFIX}${input.filename}.json`,
-        Body: input.experience,
-      });
-
-      return getS3().send(putObjectCommand);
-    }),
-
-  getExperience: publicProcedure
+  getExperienceById: databaseProcedure
     .input(
       z.object({
-        experienceFilename: z.string(),
-        usingLocalAssets: z.boolean(),
-      })
+        experienceId: z.number(),
+        usingLocalData: z.boolean(),
+      }),
     )
-    .query(async ({ input }) => {
-      if (input.usingLocalAssets) {
-        const experience = fs
-          .readFileSync(
-            `${LOCAL_ASSET_PATH}${EXPERIENCE_ASSET_PREFIX}${input.experienceFilename}.json`
-          )
-          .toString();
-        return { experience };
-      }
-
-      const getObjectCommand = new GetObjectCommand({
-        Bucket: ASSET_BUCKET_NAME,
-        Key: `${EXPERIENCE_ASSET_PREFIX}${input.experienceFilename}.json`,
-        ResponseCacheControl: "no-store",
-      });
-
-      try {
-        const experienceData = await getS3().send(getObjectCommand);
-        const experienceString = await experienceData.Body?.transformToString();
-        return { experience: experienceString ?? "" };
-      } catch (err) {
-        console.log(err);
-        return { experience: "" };
-      }
-    }),
+    .query(({ ctx, input }) =>
+      ctx.db.query.experiences
+        .findFirst({
+          with: { user: true, song: true },
+          where: eq(experiences.id, input.experienceId),
+        })
+        .execute(),
+    ),
 });

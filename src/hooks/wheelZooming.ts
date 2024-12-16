@@ -20,7 +20,7 @@ export function useWheelZooming(element: HTMLElement | null) {
         e.preventDefault();
       }
     },
-    [uiStore]
+    [uiStore],
   );
 
   useEffect(() => {

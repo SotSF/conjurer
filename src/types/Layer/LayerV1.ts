@@ -1,17 +1,10 @@
 import { Block } from "@/src/types/Block";
 import { binarySearchForBlockAtTime } from "@/src/utils/algorithm";
 import { DEFAULT_BLOCK_DURATION } from "@/src/utils/time";
-import { makeAutoObservable, observable } from "mobx";
+import { makeAutoObservable } from "mobx";
 import { generateId } from "@/src/utils/id";
+import type { Store } from "@/src/types/Store";
 import { Layer } from ".";
-
-type RootStore = {
-  context: string;
-  audioStore: {
-    getPeakAtTime: (time: number) => number;
-    globalTime: number;
-  };
-};
 
 export type ActivePatternsWindow = {
   startTime: number;
@@ -28,7 +21,7 @@ export class LayerV1 implements Layer {
   patternBlocks: Block[] = [];
   _lastComputedCurrentBlock: Block | null = null;
 
-  constructor(readonly store: RootStore) {
+  constructor(readonly store: Store) {
     makeAutoObservable(this, {
       store: false,
 
@@ -51,7 +44,7 @@ export class LayerV1 implements Layer {
 
     const currentBlockIndex = binarySearchForBlockAtTime(
       this.patternBlocks,
-      this.store.audioStore.globalTime
+      this.store.audioStore.globalTime,
     );
     this._lastComputedCurrentBlock =
       this.patternBlocks[currentBlockIndex] ?? null;
@@ -70,7 +63,7 @@ export class LayerV1 implements Layer {
 
     // insert block in sorted order
     const index = this.patternBlocks.findIndex(
-      (b) => b.startTime > block.startTime
+      (b) => b.startTime > block.startTime,
     );
     if (index === -1) {
       this.patternBlocks.push(block);
@@ -116,7 +109,7 @@ export class LayerV1 implements Layer {
    */
   nextGap = (
     fromTime: number,
-    blocks: Block[] = this.patternBlocks
+    blocks: Block[] = this.patternBlocks,
   ): { startTime: number; duration?: number } => {
     // no blocks
     if (blocks.length === 0) return { startTime: fromTime };
@@ -182,7 +175,7 @@ export class LayerV1 implements Layer {
   nextFiniteGap = (
     fromTime: number,
     maxDuration: number = DEFAULT_BLOCK_DURATION,
-    blocks: Block[] = this.patternBlocks
+    blocks: Block[] = this.patternBlocks,
   ): { startTime: number; duration: number } => {
     const gap = this.nextGap(fromTime, blocks);
     return {
@@ -227,7 +220,7 @@ export class LayerV1 implements Layer {
       const { startTime, duration } = this.nextFiniteGap(
         desiredStartTime,
         block.duration,
-        this.patternBlocks.filter((b) => b !== block)
+        this.patternBlocks.filter((b) => b !== block),
       );
       return startTime === desiredStartTime && duration >= block.duration
         ? desiredDeltaTime
@@ -245,7 +238,7 @@ export class LayerV1 implements Layer {
     const { startTime, duration } = this.nextFiniteGap(
       potentialStartTime,
       block.duration,
-      this.patternBlocks.filter((b) => b !== block)
+      this.patternBlocks.filter((b) => b !== block),
     );
     return potentialStartTime === startTime && duration >= block.duration
       ? potentialStartTime - block.startTime
@@ -258,7 +251,7 @@ export class LayerV1 implements Layer {
     // prevent block overlaps for now by snapping to nearest valid start time
     const validTimeDelta = this.nearestValidStartTimeDelta(
       block,
-      relative ? desiredTime : desiredTime - block.startTime
+      relative ? desiredTime : desiredTime - block.startTime,
     );
     this.changeBlockStartTime(block, block.startTime + validTimeDelta);
   };
@@ -326,12 +319,12 @@ export class LayerV1 implements Layer {
     patternBlocks: this.patternBlocks.map((b) => b.serialize()),
   });
 
-  static deserialize = (store: RootStore, data: any) => {
+  static deserialize = (store: Store, data: any) => {
     const layer = new LayerV1(store);
     if (data.id) layer.id = data.id;
     layer.name = data.name ?? "";
     layer.patternBlocks = data.patternBlocks.map((b: any) =>
-      Block.deserialize(store, b)
+      Block.deserialize(store, b),
     );
     layer.patternBlocks.forEach((b) => (b.layer = layer));
     return layer;

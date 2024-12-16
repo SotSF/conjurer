@@ -5,39 +5,55 @@ import {
   ModalBody,
   ModalCloseButton,
   ModalContent,
+  ModalFooter,
   ModalHeader,
   ModalOverlay,
   Spinner,
-  VStack,
+  Switch,
+  Text,
 } from "@chakra-ui/react";
 import { useStore } from "@/src/types/StoreContext";
 import { action } from "mobx";
-import { trpc } from "@/src/utils/trpc";
+import { ExperiencesTable } from "@/src/components/ExperiencesTable/ExperiencesTable";
+import { useState } from "react";
+import { Playlist } from "@/src/types/Playlist";
+import { useSavePlaylist } from "@/src/hooks/playlist";
+import { useExperiences } from "@/src/hooks/experiencesAndUsers";
 
-export const AddExperienceModal = observer(function AddExperienceModal() {
+export const AddExperienceModal = observer(function AddExperienceModal({
+  playlist,
+}: {
+  playlist: Playlist;
+}) {
   const store = useStore();
-  const { uiStore, playlistStore, usingLocalAssets } = store;
+  const { userStore, uiStore } = store;
+  const { username } = userStore;
 
-  const {
-    isPending,
-    isError,
-    data: experiences,
-  } = trpc.experience.listExperiences.useQuery(
-    { user: "", usingLocalAssets },
-    { enabled: uiStore.showingPlaylistAddExperienceModal }
+  const [viewingAllExperiences, setViewingAllExperiences] = useState(false);
+  const [selectedExperienceIds, setSelectedExperienceIds] = useState<number[]>(
+    [],
   );
+
+  const { isPending, isError, experiences } = useExperiences({
+    username: viewingAllExperiences ? undefined : username,
+    enabled: uiStore.showingPlaylistAddExperienceModal,
+  });
+
+  const { savePlaylist } = useSavePlaylist();
 
   if (isError) return null;
 
-  const onClose = action(
-    () => (uiStore.showingPlaylistAddExperienceModal = false)
-  );
+  const onClose = action(() => {
+    setSelectedExperienceIds([]);
+    uiStore.showingPlaylistAddExperienceModal = false;
+  });
 
   return (
     <Modal
       onClose={onClose}
       isOpen={uiStore.showingPlaylistAddExperienceModal}
       isCentered
+      size="4xl"
     >
       <ModalOverlay />
       <ModalContent>
@@ -45,19 +61,45 @@ export const AddExperienceModal = observer(function AddExperienceModal() {
           Add experience to playlist {isPending && <Spinner />}
         </ModalHeader>
         <ModalBody>
-          <VStack height="60vh" overflowY="scroll">
-            {!isPending &&
-              experiences.map((experience) => (
-                <Button
-                  key={experience}
-                  variant="link"
-                  onClick={() => playlistStore.addExperience(experience)}
-                >
-                  {experience}
-                </Button>
-              ))}
-          </VStack>
+          {!isPending && experiences.length === 0 && (
+            <Text color="gray.400">
+              {username} has no saved experiences yet!
+            </Text>
+          )}
+          <Switch
+            mb={4}
+            isChecked={viewingAllExperiences}
+            onChange={(e) => setViewingAllExperiences(e.target.checked)}
+          >
+            View all experiences
+          </Switch>
+          {!isPending && (
+            <ExperiencesTable
+              experiences={experiences}
+              omitIds={playlist.orderedExperienceIds}
+              selectable
+              selectedExperienceIds={selectedExperienceIds}
+              setSelectedExperienceIds={setSelectedExperienceIds}
+            />
+          )}
         </ModalBody>
+        <ModalFooter>
+          <Button
+            isDisabled={!selectedExperienceIds.length || isPending}
+            onClick={action(() => {
+              savePlaylist({
+                ...playlist,
+                orderedExperienceIds: [
+                  ...playlist.orderedExperienceIds,
+                  ...selectedExperienceIds,
+                ],
+              });
+              onClose();
+            })}
+          >
+            {isPending ? <Spinner /> : "Add"}
+          </Button>
+        </ModalFooter>
         <ModalCloseButton />
       </ModalContent>
     </Modal>

@@ -42,19 +42,35 @@ export const ParameterControl = memo(function ParameterControl({
   let parameterControl = null;
   if (isBooleanParam(patternParam))
     parameterControl = (
-      <BooleanParameterControl {...props} patternParam={patternParam} />
+      <BooleanParameterControl
+        {...props}
+        key={props.key}
+        patternParam={patternParam}
+      />
     );
   else if (isNumberParam(patternParam))
     parameterControl = (
-      <ScalarParameterControl {...props} patternParam={patternParam} />
+      <ScalarParameterControl
+        {...props}
+        key={props.key}
+        patternParam={patternParam}
+      />
     );
   else if (isVector4Param(patternParam))
     parameterControl = (
-      <ColorParameterControl {...props} patternParam={patternParam} />
+      <ColorParameterControl
+        {...props}
+        key={props.key}
+        patternParam={patternParam}
+      />
     );
   else if (isPaletteParam(patternParam))
     parameterControl = (
-      <PaletteParameterControl {...props} patternParam={patternParam} />
+      <PaletteParameterControl
+        {...props}
+        key={props.key}
+        patternParam={patternParam}
+      />
     );
 
   return (

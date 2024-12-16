@@ -8,8 +8,7 @@ import {
   Tooltip,
 } from "@chakra-ui/react";
 import { BsSoundwave } from "react-icons/bs";
-import { FaVolumeMute, FaPencilAlt } from "react-icons/fa";
-import { ImLoop } from "react-icons/im";
+import { FaVolumeMute } from "react-icons/fa";
 import { useStore } from "@/src/types/StoreContext";
 import { action } from "mobx";
 import { useState } from "react";
@@ -18,7 +17,7 @@ import { BeatMapControls } from "@/src/components/BeatMapControls";
 
 export const AudioControls = observer(function AudioControls() {
   const store = useStore();
-  const { uiStore, audioStore, initializedClientSide } = store;
+  const { uiStore, audioStore } = store;
   const { wavesurfer } = audioStore;
   const [showTooltip, setShowTooltip] = useState(false);
   const [audioVol, setAudioVol] = useState(1);
@@ -76,21 +75,6 @@ export const AudioControls = observer(function AudioControls() {
         onClick={action(() => audioStore.toggleAudioMuted())}
       />
       <IconButton
-        aria-label="Loop time range"
-        title="Loop time range"
-        height={6}
-        icon={<ImLoop size={17} />}
-        bgColor={audioStore.loopingAudio ? "orange.700" : undefined}
-        _hover={
-          audioStore.loopingAudio
-            ? {
-                bgColor: "orange.600",
-              }
-            : undefined
-        }
-        onClick={action(() => audioStore.toggleLoopingAudio())}
-      />
-      <IconButton
         aria-label="Show waveform overlay"
         title="Show waveform overlay"
         height={6}
@@ -106,21 +90,6 @@ export const AudioControls = observer(function AudioControls() {
         onClick={action(() => uiStore.toggleWaveformOverlay())}
       />
       <BeatMapControls />
-      <IconButton
-        aria-label="Mark audio"
-        title="Mark audio"
-        height={6}
-        icon={<FaPencilAlt size={17} />}
-        bgColor={audioStore.markingAudio ? "orange.700" : undefined}
-        _hover={
-          audioStore.markingAudio
-            ? {
-                bgColor: "orange.600",
-              }
-            : undefined
-        }
-        onClick={action(() => audioStore.toggleMarkingAudio())}
-      />
     </>
   );
 });

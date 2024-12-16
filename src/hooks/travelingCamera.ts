@@ -3,7 +3,7 @@ import { useFrame } from "@react-three/fiber";
 
 export const useTravelingCamera = (
   cameraRef: { current: PerspectiveCameraThree | null },
-  enabled: boolean
+  enabled: boolean,
 ) => {
   useFrame((state) => {
     const camera = cameraRef.current;
