@@ -47,7 +47,7 @@ TURSO_DATABASE_URL=libsql://conjurer-db-secretfire.turso.io
 TURSO_AUTH_TOKEN=******************************
 ```
 
-Ask for credentials to the Turso dashboard to generate your own token.
+Ask for credentials to the Turso dashboard to generate your own token. To download the database, run `yarn db:prod:download`. You will need to have the `turso` CLI installed. To install it, run `brew install tursodatabase/tap/turso`.
 
 ### General info / tips
 
