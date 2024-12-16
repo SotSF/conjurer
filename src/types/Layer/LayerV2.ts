@@ -12,7 +12,7 @@ export class LayerV2 implements Layer {
   height = 350;
   visible = true;
 
-  patternBlocks = new BlockMap();
+  blockMap = new BlockMap();
 
   _lastComputedWindowStartTime: number = -1;
   _maxConcurrentBlocks: number | null = null;
@@ -28,7 +28,7 @@ export class LayerV2 implements Layer {
   }
 
   get activeBlocks(): Block[] {
-    const currentWindow = this.patternBlocks.getActivePatternsWindow(
+    const currentWindow = this.blockMap.getActivePatternsWindow(
       this.store.audioStore.globalTime,
     );
 
@@ -48,14 +48,14 @@ export class LayerV2 implements Layer {
     this._lastComputedWindowStartTime = currentWindow.startTime;
     const { patterns } = currentWindow;
     this._activeBlocks = patterns
-      .map((patternId) => this.patternBlocks.map.get(patternId))
+      .map((patternId) => this.blockMap.map.get(patternId))
       .filter((b) => b !== undefined);
 
     return this._activeBlocks;
   }
 
   get maxConcurrentBlocks() {
-    return this.patternBlocks.activePatternsIndex.reduce(
+    return this.blockMap.activePatternsIndex.reduce(
       (max, window) => Math.max(max, window.patterns.length),
       0,
     );
@@ -72,16 +72,16 @@ export class LayerV2 implements Layer {
 
   addBlock = (block: Block) => {
     block.layer = this;
-    this.patternBlocks.addBlock(block);
+    this.blockMap.addBlock(block);
   };
 
   removeBlock = (block: Block) => {
-    this.patternBlocks.removeBlock(block);
+    this.blockMap.removeBlock(block);
     block.layer = null;
   };
 
   getAllBlocks() {
-    return this.patternBlocks.getAllBlocks();
+    return this.blockMap.getAllBlocks();
   }
 
   getNextValidStartAndDuration(fromTime: number, maxDuration: number) {
@@ -102,7 +102,7 @@ export class LayerV2 implements Layer {
   attemptMoveBlock = (block: Block, desiredTime: number, relative = false) => {
     if (block.layer != this) return;
     block.startTime = relative ? desiredTime + block.startTime : desiredTime;
-    this.patternBlocks.computeActivePatternsIndex();
+    this.blockMap.computeActivePatternsIndex();
   };
 
   resizeBlockLeftBound = (block: Block, delta: number) => {
@@ -149,7 +149,7 @@ export class LayerV2 implements Layer {
   serialize = () => ({
     id: this.id,
     name: this.name,
-    patternBlocks: this.patternBlocks.serialize(),
+    blockMap: this.blockMap.serialize(),
   });
 
   static deserialize = (store: Store, data: any) => {
@@ -157,7 +157,7 @@ export class LayerV2 implements Layer {
     if (data.id) layer.id = data.id;
     layer.name = data.name ?? "";
 
-    layer.patternBlocks.deserialize(store, layer, data.patternBlocks);
+    layer.blockMap = BlockMap.deserialize(store, layer, data.blockMap);
     return layer;
   };
 }

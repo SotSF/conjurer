@@ -27,14 +27,16 @@ export class BlockMap {
     return serialized;
   };
 
-  deserialize = (store: Store, layer: LayerV2, blockMap: any) => {
-    Object.entries(blockMap).forEach(([id, blockData]: [string, any]) => {
+  static deserialize = (store: Store, layer: LayerV2, data: any) => {
+    const blockMap = new BlockMap();
+    Object.entries(data).forEach(([id, blockData]: [string, any]) => {
       const block = Block.deserialize(store, blockData);
       block.layer = layer;
-      layer.patternBlocks.map.set(id, block);
+      blockMap.map.set(id, block);
     });
 
-    this.computeActivePatternsIndex();
+    blockMap.computeActivePatternsIndex();
+    return blockMap;
   };
 
   addBlock = (block: Block) => {
