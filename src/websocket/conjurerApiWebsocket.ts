@@ -1,9 +1,13 @@
 import type { Store } from "@/src/types/Store";
-import { ConjurerAPIMessage } from "@/src/types/ConjurerAPIMessage";
+import {
+  ConjurerAPIMessage,
+  ConjurerAPIStateMessage,
+} from "@/src/types/ConjurerAPIMessage";
 import {
   CONJURER_API_WEBSOCKET_HOST,
   CONJURER_API_WEBSOCKET_PORT,
 } from "@/src/websocket/websocketHost";
+import { handleConjurerAPIMessage } from "@/src/websocket/conjurerApiHandler";
 
 let _websocket: WebSocket;
 
@@ -21,23 +25,18 @@ export const setupConjurerApiWebsocket = (store: Store) => {
     console.log("Failed to connect to Conjurer API websocket server.");
   _websocket.binaryType = "blob";
 
-  _websocket.onopen = () =>
-    sendMessage({
-      event: "conjurer_state_update",
-      browser_tab_state: "connected",
-    });
+  _websocket.onopen = () => sendConjurerStateUpdate(store);
 
   _websocket.onmessage = ({ data }) => {
     const dataString = data.toString();
     const message: ConjurerAPIMessage = JSON.parse(dataString);
 
-    // if (message.type === "action")
-    //   handleVoiceCommandActionMessage(store, message);
+    handleConjurerAPIMessage(store, message);
   };
 };
 
 let lastWarned = 0;
-export const sendMessage = (message: ConjurerAPIMessage) => {
+export const sendConjurerStateUpdate = (store: Store) => {
   if (!_websocket || _websocket.readyState !== _websocket.OPEN) {
     if (Date.now() - lastWarned > 5000) {
       console.warn("Websocket not open, not sending message");
@@ -46,5 +45,15 @@ export const sendMessage = (message: ConjurerAPIMessage) => {
     return;
   }
 
-  _websocket.send(JSON.stringify(message));
+  const stateUpdate: ConjurerAPIStateMessage = {
+    event: "conjurer_state_update",
+    data: {
+      browser_tab_state: "connected",
+      modes_available: ["emcee", "experienceCreator", "vj"],
+      // TODO:
+      current_mode: { name: store.role, commands: [] },
+    },
+  };
+
+  _websocket.send(JSON.stringify(stateUpdate));
 };
