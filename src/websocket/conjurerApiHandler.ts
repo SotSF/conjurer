@@ -12,6 +12,16 @@ export const handleConjurerAPIMessage = (
     console.log("Received command", message.data.command);
     if (message.data.command === "next_track") {
       store.playlistStore.playNextExperience();
+    } else if (message.data.command === "previous_track") {
+      store.playlistStore.playPreviousExperience();
+    } else if (message.data.command === "toggle_playing") {
+      store.togglePlaying();
+    } else if (message.data.command === "shuffle") {
+      store.playlistStore.shufflingPlaylist =
+        !store.playlistStore.shufflingPlaylist;
+    } else if (message.data.command === "loop_all") {
+      store.playlistStore.loopingPlaylist =
+        !store.playlistStore.loopingPlaylist;
     }
   }
 };
