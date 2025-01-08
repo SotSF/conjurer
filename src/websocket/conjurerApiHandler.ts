@@ -10,6 +10,8 @@ export const handleConjurerAPIMessage = (
     store.role = message.data.mode;
   } else if (message.event === "command") {
     console.log("Received command", message.data.command);
-    // TODO:
+    if (message.data.command === "next_track") {
+      store.playlistStore.playNextExperience();
+    }
   }
 };
