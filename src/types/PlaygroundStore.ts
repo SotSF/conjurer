@@ -58,6 +58,15 @@ export class PlaygroundStore {
     );
   }
 
+  setParameterValues = (newParams: { name: string; value: number }[]) => {
+    const params = this.selectedPatternBlock.pattern.params as ExtraParams;
+    for (const { name, value } of newParams) {
+      if (params[name]) params[name].value = value;
+      // TODO: handle non-numeric params
+      // TODO: handle effect params
+    }
+  };
+
   private _lastPatternIndexSelected = 0;
   get lastPatternIndexSelected() {
     return this._lastPatternIndexSelected;

@@ -13,6 +13,10 @@ export type ConjurerAPIStateMessage = {
   };
 };
 
+export type ConjurerAPIRequestStateMessage = {
+  event: "request_state";
+};
+
 export type ConjurerAPISelectModeMessage = {
   event: "select_mode";
   data: {
@@ -22,13 +26,24 @@ export type ConjurerAPISelectModeMessage = {
 
 export type ConjurerAPICommandMessage = {
   event: "command";
-  data: {
-    // TODO:
-    command: string;
-  };
+  data:
+    | {
+        command:
+          | "next_track"
+          | "previous_track"
+          | "toggle_playing"
+          | "shuffle"
+          | "loop_all"
+          | "restart";
+      }
+    | {
+        command: "update_parameter";
+        params: { name: string; value: number }[];
+      };
 };
 
 export type ConjurerAPIMessage =
   | ConjurerAPIStateMessage
+  | ConjurerAPIRequestStateMessage
   | ConjurerAPISelectModeMessage
   | ConjurerAPICommandMessage;

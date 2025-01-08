@@ -1,7 +1,8 @@
-import { WebSocketServer } from "ws";
+import { WebSocket, WebSocketServer } from "ws";
 import { inspect } from "util";
 import {
   ConjurerAPIMessage,
+  ConjurerAPIRequestStateMessage,
   ConjurerAPIStateMessage,
 } from "../../src/types/ConjurerAPIMessage";
 
@@ -12,26 +13,33 @@ interface MyWebSocket {
 const wss = new WebSocketServer({ port: 8081 });
 wss.on("connection", (ws) => {
   // Whenever a new client connects, check if there is already a primary Conjurer browser tab connected
-  let isConjurerConnected = false;
-  wss.clients.forEach((client) => {
+  let conjurer: WebSocket | null = null;
+  for (const client of wss.clients) {
     if ((client as unknown as MyWebSocket).primaryConjurerBrowserTab)
-      isConjurerConnected = true;
-  });
-
-  if (!isConjurerConnected) {
-    ws.send(
-      JSON.stringify({
-        event: "conjurer_state_update",
-        data: {
-          browser_tab_state: "disconnected",
-          modes_available: [],
-          current_mode: null,
-        },
-      } satisfies ConjurerAPIStateMessage),
-    );
+      conjurer = client;
   }
 
-  // TODO: otherwise trigger a Conjurer state update so that the client knows the current state
+  // If there is a primary Conjurer browser tab, request the current state
+  if (conjurer) {
+    conjurer.send(
+      JSON.stringify({
+        event: "request_state",
+      } satisfies ConjurerAPIRequestStateMessage),
+    );
+    return;
+  }
+
+  // Otherwise, communicate that conjurer is disconnected
+  ws.send(
+    JSON.stringify({
+      event: "conjurer_state_update",
+      data: {
+        browser_tab_state: "disconnected",
+        modes_available: [],
+        current_mode: null,
+      },
+    } satisfies ConjurerAPIStateMessage),
+  );
 
   ws.on("error", console.error);
 
