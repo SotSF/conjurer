@@ -29,17 +29,21 @@ export type ConjurerAPICommandMessage = {
   data:
     | {
         command:
+          | "toggle_send_data"
           | "next_track"
           | "previous_track"
           | "toggle_playing"
           | "shuffle"
           | "loop_all"
-          | "restart";
+          | "restart"
+          | "next_pattern"
+          | "previous_pattern";
       }
     | {
         command: "update_parameter";
         params: { name: string; value: number }[];
-      };
+      }
+    | { command: "add_effect" | "remove_effect"; params: { name: string }[] };
 };
 
 export type ConjurerAPIMessage =
