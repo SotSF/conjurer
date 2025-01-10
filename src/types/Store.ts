@@ -20,6 +20,7 @@ import { Context, Role } from "@/src/types/context";
 import "@/src/utils/mobx";
 import { UserStore } from "@/src/types/UserStore";
 import { User } from "@/src/types/User";
+import { setupConjurerApiWebsocket } from "@/src/websocket/conjurerApiWebsocket";
 
 export type BlockSelection = { type: "block"; block: Block };
 
@@ -159,6 +160,10 @@ export class Store {
   initializeClientSide = async (initialExperienceName?: string) => {
     if (this.initializationState !== "uninitialized") return;
     this.initializationState = "initializing";
+
+    // Attempt to connect to the conjurer api if not in production
+    if (process.env.NEXT_PUBLIC_NODE_ENV !== "production")
+      setupConjurerApiWebsocket(this);
 
     if (process.env.NEXT_PUBLIC_ENABLE_VOICE === "true")
       setupVoiceCommandWebsocket(this);

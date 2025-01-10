@@ -58,6 +58,45 @@ export class PlaygroundStore {
     );
   }
 
+  nextPattern = () => {
+    this.selectedPatternIndex =
+      (this.selectedPatternIndex + 1) % this.patternBlocks.length;
+  };
+
+  previousPattern = () => {
+    this.selectedPatternIndex =
+      (this.selectedPatternIndex - 1 + this.patternBlocks.length) %
+      this.patternBlocks.length;
+  };
+
+  addEffects = (effectNames: string[]) => {
+    effectNames.forEach((effectName) => {
+      const newIndex = this.effectBlocks.findIndex(
+        (effectBlock) => effectBlock.pattern.name === effectName,
+      );
+      if (!this.selectedEffectIndices.includes(newIndex))
+        this.selectedEffectIndices = [...this.selectedEffectIndices, newIndex];
+    });
+  };
+
+  removeEffects = (effectNames: string[]) => {
+    this.selectedEffectIndices = this.selectedEffectIndices.filter(
+      (selectedEffectIndex) =>
+        !effectNames.includes(
+          this.effectBlocks[selectedEffectIndex].pattern.name,
+        ),
+    );
+  };
+
+  setParameterValues = (newParams: { name: string; value: number }[]) => {
+    const params = this.selectedPatternBlock.pattern.params as ExtraParams;
+    for (const { name, value } of newParams) {
+      if (params[name]) params[name].value = value;
+      // TODO: handle non-numeric params
+      // TODO: handle effect params
+    }
+  };
+
   private _lastPatternIndexSelected = 0;
   get lastPatternIndexSelected() {
     return this._lastPatternIndexSelected;
