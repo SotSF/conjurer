@@ -7,7 +7,10 @@ import {
   CONJURER_API_WEBSOCKET_HOST,
   CONJURER_API_WEBSOCKET_PORT,
 } from "@/src/websocket/websocketHost";
-import { handleConjurerAPIMessage } from "@/src/websocket/conjurerApiHandler";
+import {
+  generateConjurerAPIStateMessage,
+  handleConjurerAPIMessage,
+} from "@/src/websocket/conjurerApiHandler";
 
 let _websocket: WebSocket;
 
@@ -31,7 +34,7 @@ export const setupConjurerApiWebsocket = (store: Store) => {
     const dataString = data.toString();
     const message: ConjurerAPIMessage = JSON.parse(dataString);
 
-    handleConjurerAPIMessage(store, message);
+    handleConjurerAPIMessage(store, message, sendConjurerStateUpdate);
   };
 };
 
@@ -45,15 +48,5 @@ export const sendConjurerStateUpdate = (store: Store) => {
     return;
   }
 
-  const stateUpdate: ConjurerAPIStateMessage = {
-    event: "conjurer_state_update",
-    data: {
-      browser_tab_state: "connected",
-      modes_available: ["emcee", "experienceCreator", "vj"],
-      // TODO:
-      current_mode: { name: store.role, commands: [] },
-    },
-  };
-
-  _websocket.send(JSON.stringify(stateUpdate));
+  _websocket.send(JSON.stringify(generateConjurerAPIStateMessage(store)));
 };
