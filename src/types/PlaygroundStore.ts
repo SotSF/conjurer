@@ -9,6 +9,7 @@ import {
 } from "@/src/types/PatternParams";
 import type { Store } from "@/src/types/Store";
 import { deserializeVariation } from "@/src/types/Variations/variations";
+import { sendConjurerStateUpdate } from "@/src/websocket/conjurerApiWebsocket";
 import { makeAutoObservable } from "mobx";
 
 export class PlaygroundStore {
@@ -23,6 +24,9 @@ export class PlaygroundStore {
   }
   set selectedPatternIndex(index: number) {
     this._selectedPatternIndex = index;
+
+    if (process.env.NEXT_PUBLIC_NODE_ENV !== "production")
+      sendConjurerStateUpdate(this.store);
   }
 
   _selectedEffectIndices: number[] = [];
