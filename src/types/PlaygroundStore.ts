@@ -11,6 +11,8 @@ import type { Store } from "@/src/types/Store";
 import { deserializeVariation } from "@/src/types/Variations/variations";
 import { sendConjurerStateUpdate } from "@/src/websocket/conjurerApiWebsocket";
 import { makeAutoObservable } from "mobx";
+import { FlatVariation } from "./Variations/FlatVariation";
+import { DEFAULT_BLOCK_DURATION } from "../utils/time";
 
 export class PlaygroundStore {
   presets: SerializedBlock[] = [];
@@ -56,7 +58,7 @@ export class PlaygroundStore {
     this.selectedEffectIndices = this.lastEffectIndices;
   };
 
-  get selectedPatternBlock() {
+  get selectedPatternBlock(): Block<ExtraParams> {
     return (
       this.patternBlocks[this.selectedPatternIndex] ?? this.patternBlocks[0]
     );
@@ -95,7 +97,15 @@ export class PlaygroundStore {
   setParameterValues = (newParams: { name: string; value: number }[]) => {
     const params = this.selectedPatternBlock.pattern.params as ExtraParams;
     for (const { name, value } of newParams) {
+      const variations = this.selectedPatternBlock.parameterVariations;
       if (params[name]) params[name].value = value;
+      if (!variations[name] || variations[name].length == 0) {
+        variations[name] = [new FlatVariation(DEFAULT_BLOCK_DURATION, value)];
+        return;
+      }
+      if (variations[name][0] instanceof FlatVariation) {
+        variations[name][0].value = value;
+      }
       // TODO: handle non-numeric params
       // TODO: handle effect params
     }
