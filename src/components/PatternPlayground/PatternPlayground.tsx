@@ -106,7 +106,7 @@ export const PatternPlayground = observer(function PatternPlayground() {
         />
       </GridItem>
       <GridItem className={styles.controls} area="controls">
-        <VStack p={2} height="100%" overflowY="scroll">
+        <VStack key={playgroundStore.id} p={2} height="100%" overflowY="scroll">
           <ParameterControls
             key={selectedPatternBlock.id}
             block={selectedPatternBlock}
