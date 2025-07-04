@@ -135,7 +135,9 @@ export class PlaygroundStore {
   };
 
   saveCurrentPreset = () => {
-    const serializedBlock = this.selectedPatternBlock.serialize();
+    const serializedBlock = this.selectedPatternBlock.serialize({
+      includeParams: true,
+    });
     this.presets.push(serializedBlock);
     this.saveToLocalStorage();
   };
