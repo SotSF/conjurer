@@ -23,7 +23,7 @@ export const PlaygroundPage = observer(function PlaygroundPage() {
           position="absolute"
           top={0}
           right={0}
-          zIndex={1}
+          zIndex={10}
           alignItems="end"
         >
           <RoleSelector />
