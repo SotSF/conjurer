@@ -396,14 +396,14 @@ export class Block<T extends ExtraParams = {}> {
     return serialized;
   };
 
-  serialize = (): SerializedBlock => ({
+  serialize = (options: { includeParams?: boolean } = {}): SerializedBlock => ({
     id: this.id,
-    pattern: this.pattern.serialize(),
+    pattern: this.pattern.serialize(options?.includeParams),
     startTime: this.startTime,
     duration: this.duration,
     parameterVariations: this.serializeParameterVariations(),
     effectBlocks: this.effectBlocks.map((effectBlock) =>
-      effectBlock.serialize(),
+      effectBlock.serialize(options),
     ),
   });
 

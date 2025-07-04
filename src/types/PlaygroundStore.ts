@@ -13,8 +13,11 @@ import { sendConjurerStateUpdate } from "@/src/websocket/conjurerApiWebsocket";
 import { makeAutoObservable } from "mobx";
 import { FlatVariation } from "./Variations/FlatVariation";
 import { DEFAULT_BLOCK_DURATION } from "../utils/time";
+import { generateId } from "@/src/utils/id";
 
 export class PlaygroundStore {
+  id = generateId();
+
   presets: SerializedBlock[] = [];
 
   patternBlocks: Block[];
@@ -132,10 +135,13 @@ export class PlaygroundStore {
   loadPreset = (index: number) => {
     const serializedBlock = this.presets[index];
     this.onUpdate(serializedBlock);
+    this.id = generateId(); // reset id to trigger re-render
   };
 
   saveCurrentPreset = () => {
-    const serializedBlock = this.selectedPatternBlock.serialize();
+    const serializedBlock = this.selectedPatternBlock.serialize({
+      includeParams: true,
+    });
     this.presets.push(serializedBlock);
     this.saveToLocalStorage();
   };
