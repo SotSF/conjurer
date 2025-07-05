@@ -1,5 +1,5 @@
 import styles from "@/styles/PatternPlayground.module.css";
-import { Box, Button, Grid, GridItem, HStack, VStack } from "@chakra-ui/react";
+import { Box, Button, HStack, VStack } from "@chakra-ui/react";
 import { PatternList } from "@/src/components/PatternPlayground/PatternList";
 import { PreviewCanvas } from "@/src/components/Canvas/PreviewCanvas";
 import { useCallback, useEffect, useRef } from "react";
@@ -10,13 +10,14 @@ import { action, runInAction } from "mobx";
 import { DisplayModeButtons } from "@/src/components/PatternPlayground/DisplayModeButtons";
 import { SendDataButton } from "@/src/components/SendDataButton";
 import { PresetsList } from "@/src/components/PatternPlayground/PresetsList";
+import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 // import { RecordCanvasControls } from "@/src/components/PatternPlayground/RecordCanvasControls";
 
 const PATTERN_PREVIEW_DISPLAY_SIZE = 600;
 
 export const PatternPlayground = observer(function PatternPlayground() {
   const store = useStore();
-  const { uiStore, playgroundStore, context } = store;
+  const { uiStore, playgroundStore, userStore, context } = store;
   const {
     patternBlocks,
     effectBlocks,
@@ -95,70 +96,94 @@ export const PatternPlayground = observer(function PatternPlayground() {
   ]);
 
   return (
-    <Grid className={styles.grid} height="100%">
-      <GridItem area="patterns" mb={3}>
-        <PresetsList />
-        <PatternList
-          selectedPatternBlock={selectedPatternBlock}
-          onSelectPatternBlock={onSelectPatternBlock}
-          selectedEffectIndices={selectedEffectIndices}
-          onSelectEffectBlock={onSelectEffectBlock}
-        />
-      </GridItem>
-      <GridItem className={styles.controls} area="controls">
-        <VStack key={playgroundStore.id} p={2} height="100%" overflowY="scroll">
-          <ParameterControls
-            key={selectedPatternBlock.id}
-            block={selectedPatternBlock}
-          />
-          {selectedEffectIndices.map((effectIndex, i) => (
-            <ParameterControls
-              key={`${effectBlocks[effectIndex].id}-${i}`}
-              block={effectBlocks[effectIndex]}
-            />
-          ))}
-        </VStack>
-      </GridItem>
-      <GridItem area="preview" position="relative">
-        <HStack my={2} pr={1} justify="center">
-          <DisplayModeButtons />
-          {/* <RecordCanvasControls /> */}
-          {["playground", "experienceEditor"].includes(context) && (
-            <SendDataButton />
-          )}
-          {context === "experienceEditor" && (
-            <Button
-              size="sm"
-              colorScheme="teal"
-              onClick={action(() => {
-                store.selectedLayer.insertCloneOfBlock(selectedPatternBlock);
-                uiStore.patternDrawerOpen = false;
-              })}
-            >
-              Insert
-            </Button>
-          )}
-        </HStack>
+    <>
+      <Box key={userStore.username} position="relative" w="100vw" h="100vh">
+        <PanelGroup
+          key={userStore.username}
+          autoSaveId="patternPlayground-1"
+          direction="horizontal"
+        >
+          <Panel defaultSize={25}>
+            <PanelGroup autoSaveId="patternPlayground-2" direction="vertical">
+              <Panel defaultSize={50}>
+                <HStack my={2} pr={1} justify="center">
+                  <DisplayModeButtons />
+                  {/* <RecordCanvasControls /> */}
+                  {["playground", "experienceEditor"].includes(context) && (
+                    <SendDataButton />
+                  )}
+                  {context === "experienceEditor" && (
+                    <Button
+                      size="sm"
+                      colorScheme="teal"
+                      onClick={action(() => {
+                        store.selectedLayer.insertCloneOfBlock(
+                          selectedPatternBlock,
+                        );
+                        uiStore.patternDrawerOpen = false;
+                      })}
+                    >
+                      Insert
+                    </Button>
+                  )}
+                </HStack>
 
-        {uiStore.playgroundDisplayMode !== "none" && (
-          <VStack
-            my={2}
-            position="sticky"
-            top={0}
-            justify="center"
-            alignItems="center"
-            overflowX="hidden"
-          >
-            <Box
-              className={styles.previewCanvas}
-              width={`${PATTERN_PREVIEW_DISPLAY_SIZE}px`}
-              height={`${PATTERN_PREVIEW_DISPLAY_SIZE}px`}
+                {uiStore.playgroundDisplayMode !== "none" && (
+                  <VStack
+                    my={2}
+                    position="sticky"
+                    top={0}
+                    justify="center"
+                    alignItems="center"
+                    overflowX="hidden"
+                  >
+                    <Box
+                      className={styles.previewCanvas}
+                      width={`${PATTERN_PREVIEW_DISPLAY_SIZE}px`}
+                      height={`${PATTERN_PREVIEW_DISPLAY_SIZE}px`}
+                    >
+                      <PreviewCanvas block={selectedPatternBlock} />
+                    </Box>
+                  </VStack>
+                )}
+              </Panel>
+              <PanelResizeHandle />
+              <Panel defaultSize={50}>
+                <Box overflowX="hidden" overflowY="hidden">
+                  <PresetsList />
+                  <PatternList
+                    selectedPatternBlock={selectedPatternBlock}
+                    onSelectPatternBlock={onSelectPatternBlock}
+                    selectedEffectIndices={selectedEffectIndices}
+                    onSelectEffectBlock={onSelectEffectBlock}
+                  />
+                </Box>
+              </Panel>
+            </PanelGroup>
+          </Panel>
+          <PanelResizeHandle />
+          <Panel defaultSize={50}>
+            <VStack
+              key={playgroundStore.id}
+              mt={10}
+              p={2}
+              height="100%"
+              overflowY="scroll"
             >
-              <PreviewCanvas block={selectedPatternBlock} />
-            </Box>
-          </VStack>
-        )}
-      </GridItem>
-    </Grid>
+              <ParameterControls
+                key={selectedPatternBlock.id}
+                block={selectedPatternBlock}
+              />
+              {selectedEffectIndices.map((effectIndex, i) => (
+                <ParameterControls
+                  key={`${effectBlocks[effectIndex].id}-${i}`}
+                  block={effectBlocks[effectIndex]}
+                />
+              ))}
+            </VStack>
+          </Panel>
+        </PanelGroup>
+      </Box>
+    </>
   );
 });
