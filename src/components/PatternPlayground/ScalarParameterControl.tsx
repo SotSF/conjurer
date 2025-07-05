@@ -52,10 +52,14 @@ export const ScalarParameterControl = observer(function ScalarParameterControl({
   parameters,
   setParameters,
 }: ScalarParameterControlProps) {
-  const { playgroundStore } = useStore();
+  const variations = block.parameterVariations[uniformName] ?? [];
+  // Initialize the variation mode based on the first variation type found
   const [variationMode, setVariationMode] = useState<"flat" | "periodic">(
-    "flat",
+    variations.length > 0 && variations[0].type === "periodic"
+      ? "periodic"
+      : "flat",
   );
+
   const [showTooltip, setShowTooltip] = useState(false);
   const min = typeof patternParam.min === "number" ? patternParam.min : 0;
   const max = typeof patternParam.max === "number" ? patternParam.max : 1;
