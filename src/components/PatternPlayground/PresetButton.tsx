@@ -17,6 +17,7 @@ import { useState } from "react";
 import { TbTrashFilled, TbTrashXFilled } from "react-icons/tb";
 import { Preset } from "@/src/types/Preset";
 import { action } from "mobx";
+import { FaPencilAlt } from "react-icons/fa";
 
 type Props = { index: number; preset: Preset };
 
@@ -47,6 +48,16 @@ export const PresetButton = observer(function PresetButton({
       <IconButton
         as={Button}
         size="xs"
+        aria-label="Editing preset name"
+        title="Editing preset name"
+        borderRadius={0}
+        onClick={() => setShowingEditModal(true)}
+        icon={<FaPencilAlt size={10} />}
+        color="orange.200"
+      />
+      <IconButton
+        as={Button}
+        size="xs"
         aria-label={confirmingDelete ? "Confirming delete" : "Delete preset"}
         title={confirmingDelete ? "Confirming delete" : "Delete preset"}
         borderTopLeftRadius={0}
@@ -66,7 +77,7 @@ export const PresetButton = observer(function PresetButton({
             <TbTrashFilled size={13} />
           )
         }
-        color={confirmingDelete ? "red.500" : undefined}
+        color={confirmingDelete ? "red.500" : "red.200"}
       />
       {showingEditModal && (
         <Modal
@@ -76,20 +87,29 @@ export const PresetButton = observer(function PresetButton({
         >
           <ModalOverlay />
           <ModalContent>
-            <ModalHeader>Edit preset</ModalHeader>
+            <ModalHeader>Edit preset name</ModalHeader>
             <ModalBody>
-              <VStack>
-                <Text>Name</Text>
-                <input
-                  type="text"
-                  value={preset.name || ""}
-                  onChange={action((e) => {
-                    preset.name = e.target.value;
-                    playgroundStore.saveToLocalStorage();
-                  })}
-                />
-                <Button onClick={() => setShowingEditModal(false)}>Done</Button>
-              </VStack>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  playgroundStore.saveToLocalStorage();
+                  setShowingEditModal(false);
+                }}
+              >
+                <VStack>
+                  <input
+                    type="text"
+                    value={preset.name || ""}
+                    onChange={action((e) => {
+                      preset.name = e.target.value;
+                      playgroundStore.saveToLocalStorage();
+                    })}
+                  />
+                  <Button alignSelf="end" type="submit">
+                    Done
+                  </Button>
+                </VStack>
+              </form>
             </ModalBody>
             <ModalCloseButton />
           </ModalContent>

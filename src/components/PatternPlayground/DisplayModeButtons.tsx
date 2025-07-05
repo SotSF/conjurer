@@ -6,8 +6,8 @@ import { action } from "mobx";
 
 const displayModeTabs: DisplayMode[] = [
   "canopy",
-  "canopySpace",
   "cartesianSpace",
+  "canopySpace",
   "none",
 ];
 
@@ -33,8 +33,8 @@ export const DisplayModeButtons = observer(function DisplayModeButtons() {
     >
       <TabList>
         <Tab>Canopy</Tab>
-        <Tab>Canopy space</Tab>
         <Tab>Cartesian space</Tab>
+        <Tab>Canopy space</Tab>
         <Tab>X</Tab>
       </TabList>
     </Tabs>
