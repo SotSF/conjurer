@@ -163,23 +163,20 @@ export const PatternPlayground = observer(function PatternPlayground() {
           </Panel>
           <PanelResizeHandle />
           <Panel defaultSize={50}>
-            <VStack
-              key={playgroundStore.id}
-              mt={10}
-              p={2}
-              height="100%"
-              overflowY="scroll"
-            >
-              <ParameterControls
-                key={selectedPatternBlock.id}
-                block={selectedPatternBlock}
-              />
-              {selectedEffectIndices.map((effectIndex, i) => (
+            <VStack key={playgroundStore.id} height="100%" width="100%">
+              <VStack mt={10}></VStack>
+              <VStack width="100%" overflowY="auto">
                 <ParameterControls
-                  key={`${effectBlocks[effectIndex].id}-${i}`}
-                  block={effectBlocks[effectIndex]}
+                  key={selectedPatternBlock.id}
+                  block={selectedPatternBlock}
                 />
-              ))}
+                {selectedEffectIndices.map((effectIndex, i) => (
+                  <ParameterControls
+                    key={`${effectBlocks[effectIndex].id}-${i}`}
+                    block={effectBlocks[effectIndex]}
+                  />
+                ))}
+              </VStack>
             </VStack>
           </Panel>
         </PanelGroup>
