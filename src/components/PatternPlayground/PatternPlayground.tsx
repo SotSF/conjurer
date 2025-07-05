@@ -1,4 +1,3 @@
-import styles from "@/styles/PatternPlayground.module.css";
 import { Box, Button, HStack, VStack } from "@chakra-ui/react";
 import { PatternList } from "@/src/components/PatternPlayground/PatternList";
 import { PreviewCanvas } from "@/src/components/Canvas/PreviewCanvas";
@@ -12,8 +11,6 @@ import { SendDataButton } from "@/src/components/SendDataButton";
 import { PresetsList } from "@/src/components/PatternPlayground/PresetsList";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 // import { RecordCanvasControls } from "@/src/components/PatternPlayground/RecordCanvasControls";
-
-const PATTERN_PREVIEW_DISPLAY_SIZE = 600;
 
 export const PatternPlayground = observer(function PatternPlayground() {
   const store = useStore();
@@ -106,50 +103,38 @@ export const PatternPlayground = observer(function PatternPlayground() {
           <Panel defaultSize={25}>
             <PanelGroup autoSaveId="patternPlayground-2" direction="vertical">
               <Panel defaultSize={50}>
-                <HStack my={2} pr={1} justify="center">
-                  <DisplayModeButtons />
-                  {/* <RecordCanvasControls /> */}
-                  {["playground", "experienceEditor"].includes(context) && (
-                    <SendDataButton />
-                  )}
-                  {context === "experienceEditor" && (
-                    <Button
-                      size="sm"
-                      colorScheme="teal"
-                      onClick={action(() => {
-                        store.selectedLayer.insertCloneOfBlock(
-                          selectedPatternBlock,
-                        );
-                        uiStore.patternDrawerOpen = false;
-                      })}
-                    >
-                      Insert
-                    </Button>
-                  )}
-                </HStack>
-
-                {uiStore.playgroundDisplayMode !== "none" && (
-                  <VStack
-                    my={2}
-                    position="sticky"
-                    top={0}
-                    justify="center"
-                    alignItems="center"
-                    overflowX="hidden"
-                  >
-                    <Box
-                      className={styles.previewCanvas}
-                      width={`${PATTERN_PREVIEW_DISPLAY_SIZE}px`}
-                      height={`${PATTERN_PREVIEW_DISPLAY_SIZE}px`}
-                    >
+                <VStack height="100%">
+                  <HStack my={1} justify="center">
+                    <DisplayModeButtons />
+                    {/* <RecordCanvasControls /> */}
+                    {["playground", "experienceEditor"].includes(context) && (
+                      <SendDataButton />
+                    )}
+                    {context === "experienceEditor" && (
+                      <Button
+                        size="sm"
+                        colorScheme="teal"
+                        onClick={action(() => {
+                          store.selectedLayer.insertCloneOfBlock(
+                            selectedPatternBlock,
+                          );
+                          uiStore.patternDrawerOpen = false;
+                        })}
+                      >
+                        Insert
+                      </Button>
+                    )}
+                  </HStack>
+                  <VStack flexGrow={1} width="100%">
+                    {uiStore.playgroundDisplayMode !== "none" && (
                       <PreviewCanvas block={selectedPatternBlock} />
-                    </Box>
+                    )}
                   </VStack>
-                )}
+                </VStack>
               </Panel>
               <PanelResizeHandle />
               <Panel defaultSize={50}>
-                <Box overflowX="hidden" overflowY="hidden">
+                <VStack p={2} overflowY="auto">
                   <PresetsList />
                   <PatternList
                     selectedPatternBlock={selectedPatternBlock}
@@ -157,7 +142,7 @@ export const PatternPlayground = observer(function PatternPlayground() {
                     selectedEffectIndices={selectedEffectIndices}
                     onSelectEffectBlock={onSelectEffectBlock}
                   />
-                </Box>
+                </VStack>
               </Panel>
             </PanelGroup>
           </Panel>

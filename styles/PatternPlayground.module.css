@@ -1,8 +1,0 @@
-/* mobile resolution */
-/* TODO: may be now unnecessary? */
-@media (max-width: 1600px) {
-  .previewCanvas {
-    width: 100vw;
-    height: 100vw;
-  }
-}
