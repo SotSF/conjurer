@@ -21,60 +21,52 @@ It is assumed that there is no internet at the event.
 
 ### Setup Conjurer to use local data
 
-> This section needs a rewrite
-
 These steps can be skipped if you will have internet at the event.
 
-1. Run `yarn downloadCloudAssets` to download all cloud assets into the folder `public/cloud-assets`
-   - This could take a little bit because there's a bunch of audio to download
-   - Note that you are getting a snapshot of all of the experiences and audio files. If anyone makes more changes to these cloud saved files, you will have to rerun this script to download the latest changed assets
-2. Run `yarn build` (to be confirmed if this is really necessary)
+1. Run `yarn downloadCloudAudio` to download all cloud audio into the folder `public/cloud-assets`
+   - This could take a little while depending on internet speed
+2. Run `yarn db:prod:download` to replace the local database with all prod data. Refer to the Database access section of the README if you encounter errors.
 3. Run `yarn dev` to run conjurer locally if it is not already running
 4. Visit the app at http://localhost:3000
-5. Toggle the `Use local assets` button (desert icon) on such that it becomes orange:
-
-![Use local assets button](public/use-local-assets-button.png)
-
+5. Ensure that at the top of the app it says `using local data` in orange. If it says `using prod data` in green, click it to toggle to local data.
 6. Reload the page.
-7. Optionally, verify your setup by turning off your internet and make sure you can load and play experiences still.
+7. Verify your setup by turning off your internet and make sure you can load and play experiences still.
+8. Terminate `yarn dev` and run `yarn canopy` to test the unity bridge app. Click Tools->"Transmit data to canopy". Verify that the unity bridge app shows data from Conjurer.
 
-You are good to go! From now on, you should not need internet access for any functionality. Whenever you open an experience or audio file, it will be loaded from the local `public/cloud-assets` directory, and whenever you save an experience file, it will be saved locally into that same directory.
-
-You can toggle the same `Use local assets` button again to return to opening/saving files to the cloud. Just be careful of potentially overwriting the wrong thing.
+You are good to go! From now on, you should not need internet access for any functionality. Whenever you open an experience or audio file, it will be loaded from the local database and `public/cloud-audio` directory respectively, and whenever you save an experience file, it will be saved locally.
 
 ## At the event
 
 ### Start up and configure Conjurer
 
-> This section needs a rewrite
-
-1. Run `yarn dev` to run Conjurer locally
-1. Visit http://localhost:3000 to tested out
-   - Log in as someone, open up an experience
-   - Click play and verify visuals and audio are working
-1. If you don't have internet, make sure the `Use local assets` button (desert icon) is orange:
-
-![Use local assets button](public/use-local-assets-button.png)
-
+1. Run `yarn canopy` to run Conjurer locally
+2. Visit http://localhost:3000 to test it out
+   - Log in as someone, play any experience on the default Emcee page.
+   - Verify visuals and audio are working
+3. If you don't have internet, make sure you see `using local assets` in orange
 4. Set the texture size to 1024 on the bottom right of the canvas (optimizations section for details)
 
-### Transmit data
+### Transmit data via Unity Bridge app
 
-1. Transmit data from Conjurer to the unity app by clicking the transmit button. It will be orange when it is in transmitting mode:
-
-![Transmit data button](public/transmit-data-button.png)
-
-2. TODO: Unity configuration steps
+1. Transmit data from Conjurer to the unity bridge app by clicking Tools->"Transmit data to canopy".
+2. Open the unity bridge app and:
+   Set HSV value (V) to 0.5
+   Set IP to 192.168.1.71 (this may be change)
+   Click Set IP
+   Click Reconnect?
+   Set Mirror port to 4
+   Set Mirror offset to 27
+   Click Use double density
+3. The canopy should be displaying Conjurer data at this point!
 
 # Optimizations
 
 - Make sure that the conjurer texture size is set to 1024. To the bottom right of the canopy is a button that will say either 256, 512, or 1024. Click it until it says 1024.
-- Make sure the "global intensity" slider (middle right) in conjurer is set to maximum. Use pixlite software for global dimming needs.
+- Tools->Set audio latency. (Does this even work??)
 
 # Troubleshooting
 
 Here are some issues we have run into in the past. Add to this list as problems occur!
 
-- **Conjurer opens but there is an error modal.** try logging in or opening a different experience. Because of the janky login situation, you may be in a funky state.
-- **The canopy is showing something different from Conjurer.** Make sure that in the unity app, the Conjurer node is in "polarized" mode (to be confirmed)
-- ...
+- (No longer relevant) **Conjurer opens but there is an error modal.** try logging in or opening a different experience. Because of the janky login situation, you may be in a funky state.
+- (No longer relevant) **The canopy is showing something different from Conjurer.** Make sure that in the unity app, the Conjurer node is in "polarized" mode.

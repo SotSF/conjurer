@@ -40,14 +40,20 @@ Conjurer should be running locally at http://localhost:3000.
 
 Note that you will be using a local database by default. The SQLite database will be generated automatically if it does not exist (`setupDatabase.sh`) at `./local.db`.
 
-In production we use [Turso](https://docs.turso.tech/introduction), which cloud hosts SQLite/LibSQL databases. If you would like production database access, you will need to define `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN` in `.env.local`:
+In production we use [Turso](https://docs.turso.tech/introduction), which cloud hosts SQLite/LibSQL databases. If you would like production database access, you will need to:
+
+1. Ask for credentials to the Turso dashboard (SSO with dev@se.cretfi.re Github account) to generate your own token
+2. Install the Turso CLI with `brew install tursodatabase/tap/turso`
+3. Run `turso auth login`
+4. Define `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN` in `.env.local`:
 
 ```
 TURSO_DATABASE_URL=libsql://conjurer-db-secretfire.turso.io
 TURSO_AUTH_TOKEN=******************************
 ```
 
-Ask for credentials to the Turso dashboard to generate your own token. To download the database, run `yarn db:prod:download`. You will need to have the `turso` CLI installed. To install it, run `brew install tursodatabase/tap/turso`.
+5. Run the app normally (`yarn dev`) and now you can click "using local data" to toggle to prod data.
+6. (Optionally) replace the local database with a copy of the prod database by running `yarn db:prod:download`.
 
 ### General info / tips
 
@@ -102,6 +108,10 @@ graph
 - [/test](https://canopyconjurer.vercel.app/test) - test page for the embedded Conjurer viewer
 
 ### Scripts
+
+#### `yarn db:prod:download`
+
+Replaces the local database (`local.db`) with all the data from the production Turso database.
 
 #### `yarn generatePattern PatternName`
 
