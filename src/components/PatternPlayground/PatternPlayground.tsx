@@ -103,8 +103,13 @@ export const PatternPlayground = observer(function PatternPlayground() {
           <Panel defaultSize={25}>
             <PanelGroup autoSaveId="patternPlayground-2" direction="vertical">
               <Panel defaultSize={50}>
-                <VStack height="100%">
-                  <HStack my={1} justify="center">
+                <Box position="relative" height="100%">
+                  <HStack
+                    position="absolute"
+                    justify="center"
+                    top={0}
+                    width="100%"
+                  >
                     <DisplayModeButtons />
                     {/* <RecordCanvasControls /> */}
                     {["playground", "experienceEditor"].includes(context) && (
@@ -125,12 +130,12 @@ export const PatternPlayground = observer(function PatternPlayground() {
                       </Button>
                     )}
                   </HStack>
-                  <VStack flexGrow={1} width="100%">
+                  <Box height="100%" pt={10}>
                     {uiStore.playgroundDisplayMode !== "none" && (
                       <PreviewCanvas block={selectedPatternBlock} />
                     )}
-                  </VStack>
-                </VStack>
+                  </Box>
+                </Box>
               </Panel>
               <PanelResizeHandle />
               <Panel defaultSize={50}>
