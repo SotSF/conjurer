@@ -66,18 +66,22 @@ const WavesurferWaveform = observer(function WavesurferWaveform() {
   // on audio latency change
   useEffect(() => {
     if (!audioStore.audioReady || !audioRef.current) return;
-    const audioElement = audioRef.current;
-    const audioContext = new AudioContext();
-    runInAction(() => (audioStore.audioContext = audioContext));
-    const mediaSource = audioContext.createMediaElementSource(audioElement);
-    const delayNode = audioContext.createDelay(5);
-    delayNode.delayTime.value = audioStore.audioLatency;
-    mediaSource.connect(delayNode);
-    delayNode.connect(audioContext.destination);
-    return () => {
-      audioContext.close();
-      runInAction(() => (audioStore.audioContext = null));
-    };
+
+    // initialize audio context if necessary
+    if (!audioStore.audioContext) {
+      const audioElement = audioRef.current;
+      const audioContext = new AudioContext();
+      runInAction(() => (audioStore.audioContext = audioContext));
+      const mediaSource = audioContext.createMediaElementSource(audioElement);
+      const delayNode = audioContext.createDelay(5);
+      runInAction(() => (audioStore.delayNode = delayNode));
+      delayNode.delayTime.value = audioStore.audioLatency;
+      mediaSource.connect(delayNode);
+      delayNode.connect(audioContext.destination);
+    }
+
+    if (audioStore.delayNode)
+      audioStore.delayNode.delayTime.value = audioStore.audioLatency;
   }, [audioStore, audioStore.audioLatency, audioStore.audioReady]);
 
   // on audio state change
