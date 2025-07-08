@@ -71,6 +71,12 @@ export class PlaygroundStore {
           this.store.sendingData = false;
         });
       }
+      if (
+        event.key === `playgroundStore-${this.store.context}` &&
+        event.newValue !== null
+      ) {
+        this.loadFromLocalStorage();
+      }
     });
   };
 
