@@ -213,6 +213,13 @@ export class Store {
 
   toggleSendingData = () => {
     this.sendingData = !this.sendingData;
+    if (this.sendingData) {
+      // If we are sending data, notify other tabs by setting a random value in localStorage
+      localStorage.setItem(
+        `${this.context}-sendingData`,
+        Math.random().toString(),
+      );
+    }
   };
 
   toggleUsingLocalData = () => {
