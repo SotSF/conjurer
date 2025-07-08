@@ -1,5 +1,5 @@
 import { observer } from "mobx-react-lite";
-import { IconButton } from "@chakra-ui/react";
+import { Button } from "@chakra-ui/react";
 import { CiStreamOn, CiStreamOff } from "react-icons/ci";
 import { useStore } from "@/src/types/StoreContext";
 
@@ -9,10 +9,8 @@ export const SendDataButton = observer(function SendDataButton() {
   if (process.env.NEXT_PUBLIC_NODE_ENV === "production") return null;
 
   return (
-    <IconButton
-      aria-label="Send data to canopy"
-      title="Send data to canopy"
-      height={6}
+    <Button
+      size="sm"
       bgColor={store.sendingData ? "orange.700" : undefined}
       _hover={
         store.sendingData
@@ -21,10 +19,12 @@ export const SendDataButton = observer(function SendDataButton() {
             }
           : undefined
       }
-      icon={
+      leftIcon={
         store.sendingData ? <CiStreamOn size={17} /> : <CiStreamOff size={17} />
       }
       onClick={store.toggleSendingData}
-    />
+    >
+      {store.sendingData ? "Sending" : "Send Data"}
+    </Button>
   );
 });

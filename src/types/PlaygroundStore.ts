@@ -10,7 +10,7 @@ import {
 import type { Store } from "@/src/types/Store";
 import { deserializeVariation } from "@/src/types/Variations/variations";
 import { sendConjurerStateUpdate } from "@/src/websocket/conjurerApiWebsocket";
-import { makeAutoObservable } from "mobx";
+import { makeAutoObservable, runInAction } from "mobx";
 import { FlatVariation } from "./Variations/FlatVariation";
 import { DEFAULT_BLOCK_DURATION } from "../utils/time";
 import { generateId } from "@/src/utils/id";
@@ -59,6 +59,25 @@ export class PlaygroundStore {
 
     this.selectedPatternIndex = this.lastPatternIndexSelected;
     this.selectedEffectIndices = this.lastEffectIndices;
+
+    // listen for local storage changes to sending data
+    window.addEventListener("storage", (event) => {
+      if (
+        event.key === `${this.store.context}-sendingData` &&
+        event.newValue !== null
+      ) {
+        runInAction(() => {
+          // don't send data if another tab is already
+          this.store.sendingData = false;
+        });
+      }
+      if (
+        event.key === `playgroundStore-${this.store.context}` &&
+        event.newValue !== null
+      ) {
+        this.loadFromLocalStorage();
+      }
+    });
   };
 
   get selectedPatternBlock(): Block<ExtraParams> {

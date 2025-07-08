@@ -8,7 +8,6 @@ import { useStore } from "@/src/types/StoreContext";
 import { action } from "mobx";
 import { AudioControls } from "@/src/components/AudioControls";
 import { IntensitySlider } from "@/src/components/IntensitySlider";
-import { SendDataButton } from "@/src/components/SendDataButton";
 import { FaShareAlt } from "react-icons/fa";
 
 export const ExperienceEditorControls = observer(
@@ -54,7 +53,6 @@ export const ExperienceEditorControls = observer(
           icon={<RiZoomOutLine size={17} />}
           onClick={action(() => uiStore.zoomOut(50))}
         />
-        <SendDataButton />
         <IconButton
           aria-label="Keep playhead centered"
           title="Keep playhead centered"
