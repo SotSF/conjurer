@@ -48,7 +48,7 @@ In production we use [Turso](https://docs.turso.tech/introduction), which cloud 
 4. Define `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN` in `.env.local`:
 
 ```
-TURSO_DATABASE_URL=libsql://conjurer-db-secretfire.turso.io
+TURSO_DATABASE_URL=libsql://conjurer-db-secretfire.aws-us-west-2.turso.io
 TURSO_AUTH_TOKEN=******************************
 ```
 
