@@ -159,6 +159,7 @@ const PortalNarrativeModal = observer(function PortalNarrativeModal() {
 
   const incrementStep = () => {
     if (currentStep >= steps.length - 1) {
+      // store.playlistStore.load
       store.togglePlaying();
       onClose();
       return;
