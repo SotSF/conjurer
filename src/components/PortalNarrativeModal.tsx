@@ -19,7 +19,7 @@ import {
 import { useStore } from "@/src/types/StoreContext";
 import { action } from "mobx";
 import { useEffect, useRef, useState } from "react";
-import { RiPlayList2Fill } from "react-icons/ri";
+import { RiSkipRightFill } from "react-icons/ri";
 import Image from "next/image";
 import { Rain } from "@/src/components/Rain";
 import { FiMonitor } from "react-icons/fi";
@@ -125,15 +125,15 @@ const PortalNarrativeModal = observer(function PortalNarrativeModal() {
           </Text>
         </GridItem>
         <GridItem pt={0.5}>
-          <RiPlayList2Fill size={17} />
+          <RiSkipRightFill size={17} />
         </GridItem>
         <GridItem>
-          Browse the <strong>playlist</strong> with this button:&nbsp;
+          Go to the <strong>next song</strong> by clicking&nbsp;
           <IconButton
-            aria-label="Show playlist"
-            title="Show playlist"
+            aria-label="Next song"
+            title="Next song"
             height={6}
-            icon={<RiPlayList2Fill size={17} />}
+            icon={<RiSkipRightFill size={17} />}
           />
         </GridItem>
       </Grid>
@@ -159,7 +159,6 @@ const PortalNarrativeModal = observer(function PortalNarrativeModal() {
 
   const incrementStep = () => {
     if (currentStep >= steps.length - 1) {
-      // store.playlistStore.load
       store.togglePlaying();
       onClose();
       return;
