@@ -32,9 +32,7 @@ const PortalNarrativeModal = observer(function PortalNarrativeModal() {
   const nextButtonRef = useRef(null);
   const [currentStep, setCurrentStep] = useState(0);
 
-  const onClose = action(
-    () => (uiStore.showingViewerInstructionsModal = false),
-  );
+  const onClose = action(() => (uiStore.showingPortalNarrativeModal = false));
   useEffect(() => {
     const handleKeyDown = action((e: KeyboardEvent) => {
       if (e.key === " ") onClose();
@@ -171,7 +169,7 @@ const PortalNarrativeModal = observer(function PortalNarrativeModal() {
   return (
     <Modal
       onClose={onClose}
-      isOpen={uiStore.showingViewerInstructionsModal}
+      isOpen={uiStore.showingPortalNarrativeModal}
       size="full"
       initialFocusRef={nextButtonRef}
       motionPreset="none"
