@@ -6,13 +6,11 @@ import {
   GridItem,
   IconButton,
   Kbd,
-  ListItem,
   Modal,
   ModalBody,
   ModalCloseButton,
   ModalContent,
   ModalOverlay,
-  OrderedList,
   Text,
   VStack,
 } from "@chakra-ui/react";
@@ -48,6 +46,8 @@ const PortalNarrativeModal = observer(function PortalNarrativeModal() {
       <strong>The Servants of the Secret Fire</strong>,
       <br />
       who attended Burning Man in 2023.
+      <br />
+      (click the icon below to continue)
     </Text>,
     <Text key={1} lineHeight={2}>
       This legend suggests that these wizards performed a singularly powerful
