@@ -22,7 +22,7 @@ export class UIStore {
   showingPaletteEditorModal = false;
   showingMarkerEditorModal = false;
   showingPlaylistAddExperienceModal = false;
-  showingViewerInstructionsModal = false;
+  showingPortalNarrativeModal = true;
   showingSaveBeatMapModal = false;
   showingLoadBeatMapModal = false;
   showingLatencyModal = false;

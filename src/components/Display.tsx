@@ -8,6 +8,7 @@ import { MenuBar } from "@/src/components/Menu/MenuBar";
 import { useState } from "react";
 import { LoginButton } from "@/src/components/LoginButton";
 import { RoleSelector } from "@/src/components/RoleSelector";
+import { ExperienceHeading } from "@/src/components/Menu/ExperienceHeading";
 
 export const Display = observer(function Display() {
   const store = useStore();
@@ -24,28 +25,31 @@ export const Display = observer(function Display() {
       position="relative"
       height="100%"
     >
-      {!viewerMode && (
-        <Box transition="all 100ms">
-          <MenuBar />
-          <VStack position="absolute" width="100%" marginY="2" zIndex={1}>
-            <Heading className={styles.fadeOut} userSelect="none">
-              Conjurer
-            </Heading>
-          </VStack>
-          <HStack
-            p={2}
-            position="absolute"
-            top={0}
-            right={0}
-            zIndex={1}
-            alignItems="end"
-          >
-            <RoleSelector />
-            <LoginButton />
-          </HStack>
-          <DisplayControls canvasContainer={containerElement} />
-        </Box>
-      )}
+      <Box transition="all 100ms">
+        {viewerMode && <ExperienceHeading />}
+        {!viewerMode && (
+          <>
+            <MenuBar />
+            <VStack position="absolute" width="100%" marginY="2" zIndex={1}>
+              <Heading className={styles.fadeOut} userSelect="none">
+                Conjurer
+              </Heading>
+            </VStack>
+            <HStack
+              p={2}
+              position="absolute"
+              top={0}
+              right={0}
+              zIndex={1}
+              alignItems="end"
+            >
+              <RoleSelector />
+              <LoginButton />
+            </HStack>
+          </>
+        )}
+        <DisplayControls canvasContainer={containerElement} />
+      </Box>
 
       <Box
         ref={(element) => setContainerElement(element)}

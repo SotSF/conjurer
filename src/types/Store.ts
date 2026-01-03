@@ -168,6 +168,19 @@ export class Store {
     if (process.env.NEXT_PUBLIC_ENABLE_VOICE === "true")
       setupVoiceCommandWebsocket(this);
 
+    // At the moment viewer = portal viewer
+    if (this.context === "viewer") {
+      this.viewerMode = true;
+      // hardcoded event playlist for now
+      this.playlistStore.selectedPlaylist = {
+        id: 0,
+        name: "Burning Man 2023 Event Playlist",
+        description: "",
+        orderedExperienceIds: [6, 5, 14, 9, 25, 21, 29, 8, 31, 32],
+        user: { id: 0, username: "viewer" },
+      };
+    }
+
     // TODO:
     // this.viewerMode =
     //   new URLSearchParams(window.location.search).get("viewerMode") === "true";
@@ -199,12 +212,16 @@ export class Store {
       this._usingLocalData = usingLocalData === "true";
 
     if (this.context === "playground") this.playgroundStore.initialize();
-    this.uiStore.initialize();
+    this.uiStore.initialize(this.viewerMode);
     this.audioStore.initialize();
 
     // load experience from path parameter if provided (e.g. /experience/my-experience)
     if (initialExperienceName)
       await this.experienceStore.load(initialExperienceName);
+    else if (this.context === "viewer")
+      this.experienceStore.loadById(
+        this.playlistStore.selectedPlaylist?.orderedExperienceIds[0] ?? 0,
+      );
     else if (this.context !== "playlistEditor")
       this.experienceStore.loadEmptyExperience();
 

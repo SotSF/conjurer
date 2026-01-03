@@ -198,8 +198,7 @@ const WavesurferWaveform = observer(function WavesurferWaveform() {
           onPlay={action(() => (audioStore.audioState = "playing"))}
           onFinish={action(() => {
             audioStore.audioState = "paused";
-            if (store.context === "playlistEditor")
-              playlistStore.playNextExperience();
+            if (playlistStore.autoplay) playlistStore.playNextExperience();
           })}
           onLoading={(wavesurfer) => {
             setAudioReady(false);
