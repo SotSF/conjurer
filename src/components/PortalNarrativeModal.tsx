@@ -43,15 +43,15 @@ const PortalNarrativeModal = observer(function PortalNarrativeModal() {
 
   const steps = [
     <Text key={0} lineHeight={2}>
-      Legend tells of a group of wizards called
+      Legend tells of a group of wizards,
       <br />
-      <strong>The Servants of the Secret Fire</strong>
+      <strong>The Servants of the Secret Fire</strong>,
       <br />
-      attending Burning Man in the year 2023.
+      who attended Burning Man in 2023.
     </Text>,
     <Text key={1} lineHeight={2}>
-      This legend suggests that this camp of wizards performed a singularly
-      powerful act - indeed, so powerful that the gods took notice and became{" "}
+      This legend suggests that these wizards performed a singularly powerful
+      act - indeed, so powerful that the gods took notice and became{" "}
       <Text
         as="span"
         position="absolute"
@@ -68,9 +68,9 @@ const PortalNarrativeModal = observer(function PortalNarrativeModal() {
     <>
       <Rain mouseObject="Umbrella" />
       <Text key={1} lineHeight={2}>
-        In their jealous rage, they unleashed{" "}
+        In their jealous rage, the gods unleashed{" "}
         <strong>vast quantities of water, wind, and mud</strong> upon the playa,
-        seeking to disrupt those wizards&apos; powerful acts of conjury.
+        seeking to disrupt the wizards&apos; powerful acts of conjury.
       </Text>
     </>,
     <Text key={2} lineHeight={2}>
@@ -80,8 +80,8 @@ const PortalNarrativeModal = observer(function PortalNarrativeModal() {
       <Rain auto />
       <Text key={3} lineHeight={2}>
         As the first raindrops fell, some lucky few inhabitants of Black Rock
-        City were actively being transformed by powerful magicks in the form of
-        ten audiovisual{" "}
+        City were already witnessing powerful magicks in the form of ten
+        audiovisual{" "}
         <Button
           as="a"
           variant="link"
@@ -95,8 +95,8 @@ const PortalNarrativeModal = observer(function PortalNarrativeModal() {
     </>,
     <Text key={4} lineHeight={2}>
       The Servants of the Secret Fire have provided this portal in time and
-      space so that you may experience yourself what so angered the gods that
-      day.
+      space so that you may experience yourself the audiovisual Canopy
+      experiences that so angered the gods that day.
     </Text>,
     <>
       <Text key={5} width="100%" textAlign="left">
@@ -106,7 +106,7 @@ const PortalNarrativeModal = observer(function PortalNarrativeModal() {
         gridTemplateColumns="auto 1fr"
         gap={2}
         textAlign="left"
-        fontSize="sm"
+        fontSize="lg"
       >
         <GridItem pt={0.5}>
           <FiMonitor size={17} />
@@ -128,7 +128,7 @@ const PortalNarrativeModal = observer(function PortalNarrativeModal() {
           <RiSkipRightFill size={17} />
         </GridItem>
         <GridItem>
-          Go to the <strong>next song</strong> by clicking&nbsp;
+          Go to the <strong>next song</strong> with&nbsp;
           <IconButton
             aria-label="Next song"
             title="Next song"
@@ -137,15 +137,6 @@ const PortalNarrativeModal = observer(function PortalNarrativeModal() {
           />
         </GridItem>
       </Grid>
-    </>,
-    <>
-      <Text key={8} width="100%" textAlign="left">
-        Afterwards, remember to:
-      </Text>
-      <OrderedList fontSize="sm" textAlign="left">
-        <ListItem>Channel your own creative energy into the world</ListItem>
-        <ListItem>Be excellent to each other</ListItem>
-      </OrderedList>
     </>,
     <>
       <Text key={9} lineHeight={2}>
@@ -185,8 +176,10 @@ const PortalNarrativeModal = observer(function PortalNarrativeModal() {
               mx={3}
               width={80}
               height={80}
+              fontSize="xl"
               textAlign="center"
               justify="center"
+              overflow="clip"
             >
               {steps[currentStep]}
             </VStack>
