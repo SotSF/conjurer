@@ -21,7 +21,7 @@ export type VJCanopySession = {
   renderNonce: number;
 
   // Copies the current selection + parameter values from `source` into this session.
-  // Used for "Push staging to live".
+  // Used for "Xfade preview to live".
   copySelectionFrom: (source: VJCanopySession) => void;
 };
 

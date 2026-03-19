@@ -1,10 +1,19 @@
-import { Box, Button, HStack, Text, VStack } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  HStack,
+  NumberInput,
+  NumberInputField,
+  Text,
+  VStack,
+} from "@chakra-ui/react";
 import { observer } from "mobx-react-lite";
 import { useEffect, useState } from "react";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { FaArrowDown, FaArrowUp } from "react-icons/fa";
 
 import { useStore } from "@/src/types/StoreContext";
+import { Block } from "@/src/types/Block";
 import {
   VJPreviewCanvas,
   VJDisplayMode,
@@ -14,31 +23,45 @@ import { VJSendDataButton } from "@/src/components/VJPage/VJSendDataButton";
 import { VJPatternEffectsPanel } from "@/src/components/VJPage/VJPatternEffectsPanel";
 import { useVJCanopySession } from "@/src/components/VJPage/useVJCanopySession";
 import { VJParameterControls } from "@/src/components/VJPage/VJParameterControls";
+import { VJLivePreviewCanvas } from "@/src/components/VJPage/VJLivePreviewCanvas";
 
 const liveBorderColor = "teal.300";
-const stagingBorderColor = "purple.300";
+const previewBorderColor = "purple.300";
 const inactiveBorderColor = "gray.600";
 const leftCanvasPadding = 2;
-const stagingTopPadding = 0;
+const previewTopPadding = 0;
 
 export const VJPageInner = observer(function VJPageInner() {
   const store = useStore();
 
   const liveSession = useVJCanopySession(store);
-  const stagingSession = useVJCanopySession(store);
+  const previewSession = useVJCanopySession(store);
 
-  const [editingSession, setEditingSession] = useState<"live" | "staging">(
+  const [editingSession, setEditingSession] = useState<"live" | "preview">(
     "live",
   );
 
-  const session = editingSession === "live" ? liveSession : stagingSession;
+  const session =
+    editingSession === "live" ? liveSession : previewSession;
   const liveEditing = editingSession === "live";
-  const stagingEditing = editingSession === "staging";
+  const previewEditing = editingSession === "preview";
 
   const [displayMode, setDisplayMode] = useState<VJDisplayMode>("canopy");
   const activeEditBorderColor = liveEditing
     ? liveBorderColor
-    : stagingBorderColor;
+    : previewBorderColor;
+
+  const [pushRequest, setPushRequest] = useState<{
+    id: number;
+    toBlock: Block;
+  } | null>(null);
+
+  const [crossfadeDurationSeconds, setCrossfadeDurationSeconds] = useState(
+    0.6,
+  );
+  const [crossfadeDurationInput, setCrossfadeDurationInput] = useState(
+    "0.6",
+  );
 
   return (
     <Box position="relative" w="100vw" h="100vh">
@@ -108,11 +131,19 @@ export const VJPageInner = observer(function VJPageInner() {
                     >
                       LIVE
                     </Text>
-                    <VJPreviewCanvas
+                    <VJLivePreviewCanvas
                       key={`live-${liveSession.renderNonce}`}
                       block={liveSession.selectedPatternBlock}
                       displayMode={displayMode}
                       transmitDataEnabled
+                      pushRequest={pushRequest}
+                      onCrossfadeComplete={() => {
+                        // Align the live editing state to match preview after the fade.
+                        liveSession.copySelectionFrom(previewSession);
+                        // Prevent remounting from restarting the same crossfade.
+                        setPushRequest(null);
+                      }}
+                      crossfadeDurationSeconds={crossfadeDurationSeconds}
                     />
                   </Box>
                 </Box>
@@ -128,40 +159,65 @@ export const VJPageInner = observer(function VJPageInner() {
               pr={0}
             >
               <HStack spacing={2}>
+                <HStack spacing={1}>
+                  <Text fontSize="xs" color="gray.300">
+                    Xfade (s)
+                  </Text>
+                  <NumberInput
+                    aria-label="Crossfade duration in seconds"
+                    size="xs"
+                    width="86px"
+                    min={0.05}
+                    max={100}
+                    step={0.05}
+                    value={crossfadeDurationInput}
+                    onChange={(vAsString, vAsNumber) => {
+                      setCrossfadeDurationInput(vAsString);
+                      if (Number.isNaN(vAsNumber)) return;
+                      setCrossfadeDurationSeconds(
+                        Math.min(100, Math.max(0.05, vAsNumber)),
+                      );
+                    }}
+                  >
+                    <NumberInputField textAlign="center" padding={0} />
+                  </NumberInput>
+                </HStack>
                 <Button
-                  aria-label="Push Staging to Live"
-                  title="Push Staging to Live"
+                  aria-label="Xfade preview to live"
+                  title="Xfade preview to live"
                   leftIcon={<FaArrowUp />}
                   size="sm"
                   colorScheme="orange"
                   variant="outline"
                   onClick={() => {
-                    liveSession.copySelectionFrom(stagingSession);
-                    setEditingSession("live");
+                    setPushRequest({
+                      id: Date.now(),
+                      toBlock: previewSession.selectedPatternBlock.clone(),
+                    });
                   }}
                 >
-                  Push to live
+                  Xfade preview to live
                 </Button>
                 <Button
-                  aria-label="Reset Staging"
-                  title="Reset Staging"
+                  aria-label="Reset preview"
+                  title="Reset preview"
                   leftIcon={<FaArrowDown />}
                   size="sm"
                   colorScheme="gray"
                   variant="outline"
                   onClick={() => {
-                    stagingSession.copySelectionFrom(liveSession);
-                    setEditingSession("staging");
+                    previewSession.copySelectionFrom(liveSession);
+                    setEditingSession("preview");
                   }}
                 >
-                  Reset staging
+                  Reset preview
                 </Button>
               </HStack>
             </Box>
             <Panel defaultSize={50} minSize={20}>
               <Box
                 height="100%"
-                pt={stagingTopPadding}
+                pt={previewTopPadding}
                 pl={leftCanvasPadding}
                 pr={0}
               >
@@ -177,7 +233,7 @@ export const VJPageInner = observer(function VJPageInner() {
                     borderWidth={2}
                     borderStyle="solid"
                     borderColor={
-                      stagingEditing ? stagingBorderColor : inactiveBorderColor
+                      previewEditing ? previewBorderColor : inactiveBorderColor
                     }
                     borderRightWidth={0}
                     borderTopLeftRadius="md"
@@ -186,16 +242,16 @@ export const VJPageInner = observer(function VJPageInner() {
                     borderBottomRightRadius={0}
                     cursor="pointer"
                     position="relative"
-                    onClick={() => setEditingSession("staging")}
+                    onClick={() => setEditingSession("preview")}
                   >
-                    {stagingEditing && (
+                    {previewEditing && (
                       <Box
                         position="absolute"
                         top={0}
                         left={0}
                         height="100%"
                         width="4px"
-                        bg={stagingBorderColor}
+                        bg={previewBorderColor}
                         borderTopLeftRadius="md"
                         borderBottomLeftRadius="md"
                         zIndex={15}
@@ -209,19 +265,19 @@ export const VJPageInner = observer(function VJPageInner() {
                       zIndex={20}
                       fontSize="xs"
                       fontWeight="bold"
-                      bg={stagingEditing ? stagingBorderColor : "black"}
-                      color={stagingEditing ? "black" : "white"}
+                      bg={previewEditing ? previewBorderColor : "black"}
+                      color={previewEditing ? "black" : "white"}
                       px={2}
                       py={0.5}
                       borderRadius="sm"
                       userSelect="none"
                       pointerEvents="none"
                     >
-                      STAGING
+                      PREVIEW
                     </Text>
                     <VJPreviewCanvas
-                      key={`staging-${stagingSession.renderNonce}`}
-                      block={stagingSession.selectedPatternBlock}
+                      key={`preview-${previewSession.renderNonce}`}
+                      block={previewSession.selectedPatternBlock}
                       displayMode={displayMode}
                       transmitDataEnabled={false}
                       enableCameraControls={false}
@@ -269,7 +325,7 @@ export const VJPageInner = observer(function VJPageInner() {
               borderTopRightRadius={0}
               userSelect="none"
             >
-              Editing {liveEditing ? "Live" : "Staging"}
+                Editing {liveEditing ? "Live" : "Preview"}
             </Box>
             <VJPatternEffectsPanel
               key={`patternEffects-${editingSession}-${session.renderNonce}`}
