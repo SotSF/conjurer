@@ -26,6 +26,7 @@ import { Lissajous } from "@/src/patterns//Lissajous";
 import { GradientCircles } from "@/src/patterns//GradientCircles";
 import { Perlin } from "@/src/patterns/Perlin";
 import { PulsePalette } from "@/src/patterns/PulsePalette";
+import { BloomKaleidoscope } from "@/src/patterns/BloomKaleidoscope";
 const patternFactories: Array<() => Pattern> = [
   PulsePalette,
   LogSpirals,
@@ -47,6 +48,7 @@ const patternFactories: Array<() => Pattern> = [
   SpaceOdyssey,
   SunCycle,
   Tunnel,
+  BloomKaleidoscope,
   Turbine,
   Construct,
   EasternRedbud,
