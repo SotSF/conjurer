@@ -17,6 +17,9 @@ export type VJCanopySession = {
   selectedPatternBlock: Block<ExtraParams>;
   effectBlocks: Block[];
 
+  // Used to force remounts when we replace non-observable `block.pattern`.
+  renderNonce: number;
+
   // Copies the current selection + parameter values from `source` into this session.
   // Used for "Push staging to live".
   copySelectionFrom: (source: VJCanopySession) => void;
@@ -38,6 +41,7 @@ export const useVJCanopySession = (store: Store): VJCanopySession => {
   const [selectedEffectIndices, setSelectedEffectIndices] = useState<number[]>(
     [],
   );
+  const [renderNonce, setRenderNonce] = useState(0);
 
   const applyPatternEffects = useCallback(
     (patternIndex: number, effectIndices: number[]) => {
@@ -111,6 +115,10 @@ export const useVJCanopySession = (store: Store): VJCanopySession => {
       // Update selection so the pattern block attaches the right effect blocks.
       setSelectedPatternIndex(source.selectedPatternIndex);
       setSelectedEffectIndices([...source.selectedEffectIndices]);
+
+      // If the selection didn't change, `block.pattern` replacement won't trigger a re-render
+      // because Block.pattern is non-observable. Bump a nonce so the canvas/controls can remount.
+      setRenderNonce((n) => n + 1);
     },
     [effectBlocks, patternBlocks],
   );
@@ -122,6 +130,7 @@ export const useVJCanopySession = (store: Store): VJCanopySession => {
     onToggleEffect,
     selectedPatternBlock,
     effectBlocks,
+    renderNonce,
     copySelectionFrom,
   };
 };

@@ -2,22 +2,24 @@ import { Box, Button, HStack, Text, VStack } from "@chakra-ui/react";
 import { observer } from "mobx-react-lite";
 import { useEffect, useState } from "react";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
+import { FaArrowDown, FaArrowUp } from "react-icons/fa";
 
 import { useStore } from "@/src/types/StoreContext";
-import { VJPreviewCanvas, VJDisplayMode } from "@/src/components/VJPage/VJPreviewCanvas";
+import {
+  VJPreviewCanvas,
+  VJDisplayMode,
+} from "@/src/components/VJPage/VJPreviewCanvas";
 import { VJDisplayModeButtons } from "@/src/components/VJPage/VJDisplayModeButtons";
 import { VJSendDataButton } from "@/src/components/VJPage/VJSendDataButton";
 import { VJPatternEffectsPanel } from "@/src/components/VJPage/VJPatternEffectsPanel";
 import { useVJCanopySession } from "@/src/components/VJPage/useVJCanopySession";
 import { VJParameterControls } from "@/src/components/VJPage/VJParameterControls";
 
-const stagingStyle = {
-  borderStyle: "solid",
-  borderWidth: 1,
-  borderColor: "black",
-  width: "100%",
-  height: "100%",
-} as const;
+const liveBorderColor = "teal.300";
+const stagingBorderColor = "purple.300";
+const inactiveBorderColor = "gray.600";
+const leftCanvasPadding = 2;
+const stagingTopPadding = 0;
 
 export const VJPageInner = observer(function VJPageInner() {
   const store = useStore();
@@ -30,15 +32,20 @@ export const VJPageInner = observer(function VJPageInner() {
   );
 
   const session = editingSession === "live" ? liveSession : stagingSession;
+  const liveEditing = editingSession === "live";
+  const stagingEditing = editingSession === "staging";
 
   const [displayMode, setDisplayMode] = useState<VJDisplayMode>("canopy");
+  const activeEditBorderColor = liveEditing
+    ? liveBorderColor
+    : stagingBorderColor;
 
   return (
     <Box position="relative" w="100vw" h="100vh">
-      <PanelGroup autoSaveId="vj-1" direction="horizontal">
+      <PanelGroup autoSaveId="vj-1-v3" direction="horizontal">
         <Panel defaultSize={25}>
-          <PanelGroup autoSaveId="vj-2" direction="vertical">
-            <Panel defaultSize={70}>
+          <PanelGroup autoSaveId="vj-2-v3" direction="vertical">
+            <Panel defaultSize={50} minSize={20}>
               <Box position="relative" height="100%">
                 <HStack
                   position="absolute"
@@ -53,22 +60,137 @@ export const VJPageInner = observer(function VJPageInner() {
                   />
                   <VJSendDataButton />
                 </HStack>
-                <Box height="100%" pt={10}>
-                  <VJPreviewCanvas
-                    block={liveSession.selectedPatternBlock}
-                    displayMode={displayMode}
-                    transmitDataEnabled
-                  />
+                <Box height="100%" pt={10} pl={leftCanvasPadding} pr={0}>
+                  <Box
+                    height="100%"
+                    borderWidth={2}
+                    borderStyle="solid"
+                    borderColor={
+                      liveEditing ? liveBorderColor : inactiveBorderColor
+                    }
+                    borderRightWidth={0}
+                    borderTopRightRadius={0}
+                    borderBottomRightRadius={0}
+                    borderRadius="md"
+                    cursor="pointer"
+                    position="relative"
+                    onClick={() => setEditingSession("live")}
+                  >
+                    <Text
+                      position="absolute"
+                      top={2}
+                      left={2}
+                      zIndex={20}
+                      fontSize="xs"
+                      fontWeight="bold"
+                      bg={liveEditing ? liveBorderColor : "black"}
+                      color={liveEditing ? "black" : "white"}
+                      px={2}
+                      py={0.5}
+                      borderRadius="sm"
+                      userSelect="none"
+                      pointerEvents="none"
+                    >
+                      LIVE
+                    </Text>
+                    <VJPreviewCanvas
+                      key={`live-${liveSession.renderNonce}`}
+                      block={liveSession.selectedPatternBlock}
+                      displayMode={displayMode}
+                      transmitDataEnabled
+                    />
+                  </Box>
                 </Box>
               </Box>
             </Panel>
             <PanelResizeHandle />
-            <Panel defaultSize={30}>
-              <Box p={4} {...stagingStyle}>
-                <VStack height="100%" width="100%" alignItems="flex-start" spacing={2}>
-                  <Text fontWeight="bold">Staging</Text>
-                  <Box flex={1} width="100%">
+            <Box
+              display="flex"
+              justifyContent="center"
+              alignItems="center"
+              py={2}
+              pl={leftCanvasPadding}
+              pr={0}
+            >
+              <HStack spacing={2}>
+                <Button
+                  aria-label="Push Staging to Live"
+                  title="Push Staging to Live"
+                  leftIcon={<FaArrowUp />}
+                  size="sm"
+                  colorScheme="orange"
+                  variant="outline"
+                  onClick={() => {
+                    liveSession.copySelectionFrom(stagingSession);
+                    setEditingSession("live");
+                  }}
+                >
+                  Push to live
+                </Button>
+                <Button
+                  aria-label="Reset Staging"
+                  title="Reset Staging"
+                  leftIcon={<FaArrowDown />}
+                  size="sm"
+                  colorScheme="orange"
+                  variant="outline"
+                  onClick={() => {
+                    stagingSession.copySelectionFrom(liveSession);
+                    setEditingSession("staging");
+                  }}
+                >
+                  Reset staging
+                </Button>
+              </HStack>
+            </Box>
+            <Panel defaultSize={50} minSize={20}>
+              <Box
+                height="100%"
+                pt={stagingTopPadding}
+                pl={leftCanvasPadding}
+                pr={0}
+              >
+                <VStack
+                  height="100%"
+                  width="100%"
+                  alignItems="flex-start"
+                  spacing={2}
+                >
+                  <Box
+                    flex={1}
+                    width="100%"
+                    borderWidth={2}
+                    borderStyle="solid"
+                    borderColor={
+                      stagingEditing ? stagingBorderColor : inactiveBorderColor
+                    }
+                    borderRightWidth={0}
+                    borderTopRightRadius={0}
+                    borderBottomRightRadius={0}
+                    borderRadius="md"
+                    cursor="pointer"
+                    position="relative"
+                    onClick={() => setEditingSession("staging")}
+                  >
+                    <Text
+                      position="absolute"
+                      top={2}
+                      left={2}
+                      zIndex={20}
+                      fontSize="xs"
+                      fontWeight="bold"
+                      bg={stagingEditing ? stagingBorderColor : "black"}
+                      color={stagingEditing ? "black" : "white"}
+                      px={2}
+                      py={0.5}
+                      borderRadius="sm"
+                      userSelect="none"
+                      pointerEvents="none"
+                    >
+                      STAGING
+                    </Text>
                     <VJPreviewCanvas
+                      key={`staging-${stagingSession.renderNonce}`}
                       block={stagingSession.selectedPatternBlock}
                       displayMode={displayMode}
                       transmitDataEnabled={false}
@@ -82,50 +204,39 @@ export const VJPageInner = observer(function VJPageInner() {
         </Panel>
         <PanelResizeHandle />
         <Panel defaultSize={75}>
-          <VStack p={2} overflowY="auto" height="100%">
-            <HStack width="100%" spacing={2} mb={2}>
-              <Button
-                size="sm"
-                variant={editingSession === "live" ? "solid" : "outline"}
-                colorScheme="teal"
-                onClick={() => setEditingSession("live")}
-              >
-                Edit Live
-              </Button>
-              <Button
-                size="sm"
-                variant={editingSession === "staging" ? "solid" : "outline"}
-                colorScheme="teal"
-                onClick={() => setEditingSession("staging")}
-              >
-                Edit Staging
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                colorScheme="orange"
-                onClick={() => {
-                  liveSession.copySelectionFrom(stagingSession);
-                  setEditingSession("live");
-                }}
-              >
-                Push Staging to Live
-              </Button>
+          <VStack
+            p={0}
+            overflowY="auto"
+            height="100%"
+            borderWidth={2}
+            borderStyle="solid"
+            borderColor={activeEditBorderColor}
+            borderRadius="md"
+            spacing={2}
+          >
+            <HStack width="100%" spacing={2} mb={0}>
+              <Text fontWeight="bold" color={activeEditBorderColor}>
+                Editing: {liveEditing ? "Live" : "Staging"}
+              </Text>
             </HStack>
             <VJPatternEffectsPanel
+              key={`patternEffects-${editingSession}-${session.renderNonce}`}
               selectedPatternName={session.selectedPatternBlock.pattern.name}
               onSelectPattern={session.onSelectPattern}
               selectedEffectIndices={session.selectedEffectIndices}
               onToggleEffect={session.onToggleEffect}
             />
             <VStack width="100%" spacing={2} mt={2}>
-              <VJParameterControls block={session.selectedPatternBlock as any} />
+              <VJParameterControls
+                key={`params-pattern-${editingSession}-${session.renderNonce}`}
+                block={session.selectedPatternBlock as any}
+              />
               {session.selectedEffectIndices.map((effectIndex) => {
                 const effectBlock = session.effectBlocks[effectIndex];
                 if (!effectBlock) return null;
                 return (
                   <VJParameterControls
-                    key={effectBlock.id}
+                    key={`${effectBlock.id}-${editingSession}-${session.renderNonce}`}
                     block={effectBlock as any}
                   />
                 );
@@ -146,8 +257,5 @@ export const VJPage = observer(function VJPage() {
     void store.initializeClientSide();
   }, [store]);
 
-  return (
-    store.initializationState === "initialized" && <VJPageInner />
-  );
+  return store.initializationState === "initialized" && <VJPageInner />;
 });
-
