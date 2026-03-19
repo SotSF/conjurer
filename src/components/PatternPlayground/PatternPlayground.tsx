@@ -112,7 +112,7 @@ export const PatternPlayground = observer(function PatternPlayground() {
                   >
                     <DisplayModeButtons />
                     {/* <RecordCanvasControls /> */}
-                    {context === "playground" && <SendDataButton />}
+                    {context === "vj" && <SendDataButton />}
                     {context === "experienceEditor" && (
                       <Button
                         size="sm"
