@@ -92,11 +92,18 @@ export const useVJCanopySession = (store: Store): VJCanopySession => {
     (source: VJCanopySession) => {
       const sourcePatternBlock = source.selectedPatternBlock;
 
+      let needsRemount = false;
+
       runInAction(() => {
         const targetPatternBlock =
           patternBlocks[source.selectedPatternIndex] ?? patternBlocks[0];
 
-        targetPatternBlock.pattern = sourcePatternBlock.pattern.clone();
+        // `Block.pattern` is non-observable, so if we replace the pattern object
+        // we need a remount for shaderMaterial uniforms to point at the new params.
+        if (targetPatternBlock.pattern.name !== sourcePatternBlock.pattern.name) {
+          targetPatternBlock.pattern = sourcePatternBlock.pattern.clone();
+          needsRemount = true;
+        }
         targetPatternBlock.parameterVariations =
           cloneParameterVariations(sourcePatternBlock.parameterVariations);
 
@@ -106,7 +113,12 @@ export const useVJCanopySession = (store: Store): VJCanopySession => {
           const targetEffectBlock = effectBlocks[effectIndex];
           if (!sourceEffectBlock || !targetEffectBlock) return;
 
-          targetEffectBlock.pattern = sourceEffectBlock.pattern.clone();
+          if (
+            targetEffectBlock.pattern.name !== sourceEffectBlock.pattern.name
+          ) {
+            targetEffectBlock.pattern = sourceEffectBlock.pattern.clone();
+            needsRemount = true;
+          }
           targetEffectBlock.parameterVariations =
             cloneParameterVariations(sourceEffectBlock.parameterVariations);
         });
@@ -117,8 +129,9 @@ export const useVJCanopySession = (store: Store): VJCanopySession => {
       setSelectedEffectIndices([...source.selectedEffectIndices]);
 
       // If the selection didn't change, `block.pattern` replacement won't trigger a re-render
-      // because Block.pattern is non-observable. Bump a nonce so the canvas/controls can remount.
-      setRenderNonce((n) => n + 1);
+      // because Block.pattern is non-observable. Bump a nonce only if we replaced the
+      // pattern objects (which changes shaderMaterial uniforms/fragmentShader inputs).
+      if (needsRemount) setRenderNonce((n) => n + 1);
     },
     [effectBlocks, patternBlocks],
   );
