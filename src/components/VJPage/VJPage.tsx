@@ -25,8 +25,8 @@ import { useVJCanopySession } from "@/src/components/VJPage/useVJCanopySession";
 import { VJParameterControls } from "@/src/components/VJPage/VJParameterControls";
 import { VJLivePreviewCanvas } from "@/src/components/VJPage/VJLivePreviewCanvas";
 
-const liveBorderColor = "teal.300";
-const previewBorderColor = "purple.300";
+const liveBorderColor = "red.300";
+const previewBorderColor = "green.300";
 const inactiveBorderColor = "gray.600";
 const leftCanvasPadding = 2;
 const previewTopPadding = 0;
@@ -187,8 +187,10 @@ export const VJPageInner = function VJPageInner() {
                   title="Xfade preview to live"
                   leftIcon={<FaArrowUp />}
                   size="sm"
-                  colorScheme="orange"
                   variant="outline"
+                  borderColor={liveBorderColor}
+                  color={liveBorderColor}
+                  _hover={{ borderColor: "red.200", color: "red.200" }}
                   onClick={() => {
                     setPushRequest({
                       id: Date.now(),
