@@ -31,7 +31,7 @@ const inactiveBorderColor = "gray.600";
 const leftCanvasPadding = 2;
 const previewTopPadding = 0;
 
-export const VJPageInner = observer(function VJPageInner() {
+export const VJPageInner = function VJPageInner() {
   const store = useStore();
 
   const liveSession = useVJCanopySession(store);
@@ -356,7 +356,7 @@ export const VJPageInner = observer(function VJPageInner() {
       </PanelGroup>
     </Box>
   );
-});
+};
 
 export const VJPage = observer(function VJPage() {
   const store = useStore();

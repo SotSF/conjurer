@@ -49,7 +49,7 @@ function attachBrightnessAdjust(base: Block, intensity: number): Block {
   return result!;
 }
 
-const CrossfadeDriver = observer(function CrossfadeDriver({
+const CrossfadeDriver = function CrossfadeDriver({
   active,
   startTimeRef,
   progressRef,
@@ -99,7 +99,7 @@ const CrossfadeDriver = observer(function CrossfadeDriver({
     if (p >= 1) onDone();
   }, -10);
   return null;
-});
+};
 
 export const VJLivePreviewCanvas = observer(function VJLivePreviewCanvas({
   block,
