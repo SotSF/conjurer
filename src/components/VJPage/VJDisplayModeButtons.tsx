@@ -1,8 +1,6 @@
 import { Box } from "@chakra-ui/react";
-import { observer } from "mobx-react-lite";
-import { useStore } from "@/src/types/StoreContext";
+import { memo } from "react";
 import { DisplayMode } from "@/src/types/UIStore";
-import { action } from "mobx";
 import { ConnectedButtonGroup } from "@/src/components/ConnectedButtonGroup";
 
 const displayModeOptions = [
@@ -12,18 +10,21 @@ const displayModeOptions = [
   { value: "none" as const, label: "X" },
 ] as const;
 
-export const DisplayModeButtons = observer(function DisplayModeButtons() {
-  const store = useStore();
-  const { uiStore } = store;
+type Props = {
+  displayMode: DisplayMode;
+  onChange: (mode: DisplayMode) => void;
+};
 
+export const VJDisplayModeButtons = memo(function VJDisplayModeButtons({
+  displayMode,
+  onChange,
+}: Props) {
   return (
-    <Box mt={2} mx={2}>
+    <Box mt={1} mx={2}>
       <ConnectedButtonGroup<DisplayMode>
         options={displayModeOptions}
-        value={uiStore.playgroundDisplayMode}
-        onChange={action((mode: DisplayMode) => {
-          uiStore.playgroundDisplayMode = mode;
-        })}
+        value={displayMode}
+        onChange={onChange}
         size="sm"
         aria-label="Display mode"
       />

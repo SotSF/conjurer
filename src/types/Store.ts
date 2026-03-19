@@ -211,7 +211,7 @@ export class Store {
     if (usingLocalData && process.env.NEXT_PUBLIC_NODE_ENV !== "production")
       this._usingLocalData = usingLocalData === "true";
 
-    if (this.context === "playground") this.playgroundStore.initialize();
+    if (this.context === "vj") this.playgroundStore.initialize();
     this.uiStore.initialize(this.viewerMode);
     this.audioStore.initialize();
 
