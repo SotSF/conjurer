@@ -24,6 +24,7 @@ import { VJPatternEffectsPanel } from "@/src/components/VJPage/VJPatternEffectsP
 import { useVJCanopySession } from "@/src/components/VJPage/useVJCanopySession";
 import { VJParameterControls } from "@/src/components/VJPage/VJParameterControls";
 import { VJLivePreviewCanvas } from "@/src/components/VJPage/VJLivePreviewCanvas";
+import { RoleSelector } from "@/src/components/RoleSelector";
 
 const liveBorderColor = "red.300";
 const previewBorderColor = "green.300";
@@ -41,8 +42,7 @@ export const VJPageInner = function VJPageInner() {
     "live",
   );
 
-  const session =
-    editingSession === "live" ? liveSession : previewSession;
+  const session = editingSession === "live" ? liveSession : previewSession;
   const liveEditing = editingSession === "live";
   const previewEditing = editingSession === "preview";
 
@@ -56,15 +56,21 @@ export const VJPageInner = function VJPageInner() {
     toBlock: Block;
   } | null>(null);
 
-  const [crossfadeDurationSeconds, setCrossfadeDurationSeconds] = useState(
-    0.6,
-  );
-  const [crossfadeDurationInput, setCrossfadeDurationInput] = useState(
-    "0.6",
-  );
+  const [crossfadeDurationSeconds, setCrossfadeDurationSeconds] = useState(0.6);
+  const [crossfadeDurationInput, setCrossfadeDurationInput] = useState("0.6");
 
   return (
     <Box position="relative" w="100vw" h="100vh">
+      <Box
+        position="absolute"
+        top={2}
+        right={2}
+        zIndex={20}
+        bg="gray.600"
+        borderRadius="md"
+      >
+        <RoleSelector />
+      </Box>
       <PanelGroup autoSaveId="vj-1-v3" direction="horizontal">
         <Panel defaultSize={25}>
           <PanelGroup autoSaveId="vj-2-v3" direction="vertical">
@@ -327,7 +333,7 @@ export const VJPageInner = function VJPageInner() {
               borderTopRightRadius={0}
               userSelect="none"
             >
-                Editing {liveEditing ? "Live" : "Preview"}
+              Editing {liveEditing ? "Live" : "Preview"}
             </Box>
             <VJPatternEffectsPanel
               key={`patternEffects-${editingSession}-${session.renderNonce}`}
