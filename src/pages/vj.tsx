@@ -1,41 +1,14 @@
-import { Box, ChakraProvider, theme, Text, VStack } from "@chakra-ui/react";
+import { Box, ChakraProvider, theme } from "@chakra-ui/react";
 import Head from "next/head";
-import { useEffect, useMemo } from "react";
-import { observer } from "mobx-react-lite";
+import { useMemo } from "react";
 
 import { Store } from "@/src/types/Store";
-import { StoreContext, useStore } from "@/src/types/StoreContext";
-
-const VJPlaceholder = observer(function VJPlaceholder() {
-  const store = useStore();
-
-  useEffect(() => {
-    if (store.initializationState !== "uninitialized") return;
-    void store.initializeClientSide();
-  }, [store]);
-
-  return (
-    <Box p={8}>
-      <VStack alignItems="flex-start" spacing={3}>
-        <Text fontSize="2xl" fontWeight="bold">
-          VJ view placeholder
-        </Text>
-        <Text color="gray.200">
-          The full VJ UI will be added here. For pattern editing and the
-          playground controls, use the editor drawer or the separate{" "}
-          <Text as="span" color="white" textDecoration="underline">
-            Pattern Playground
-          </Text>
-          .
-        </Text>
-      </VStack>
-    </Box>
-  );
-});
+import { StoreContext } from "@/src/types/StoreContext";
+import { VJPage } from "@/src/components/VJPage/VJPage";
 
 export default function VJ() {
   // Use the same underlying store setup as the VJ/playground experience,
-  // but render only a placeholder for now.
+  // but render the VJ view UI.
   const store = useMemo(() => new Store("vj"), []);
 
   return (
@@ -50,7 +23,7 @@ export default function VJ() {
       <ChakraProvider theme={theme}>
         <StoreContext.Provider value={store}>
           <Box height="100vh" width="100vw" bgColor="gray.700">
-            <VJPlaceholder />
+            <VJPage />
           </Box>
         </StoreContext.Provider>
       </ChakraProvider>
