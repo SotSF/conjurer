@@ -117,7 +117,7 @@ export const VJPageInner = function VJPageInner() {
                     <Text
                       position="absolute"
                       top={2}
-                      left={2}
+                      left={liveEditing ? 4 : 2}
                       zIndex={20}
                       fontSize="xs"
                       fontWeight="bold"
@@ -263,7 +263,7 @@ export const VJPageInner = function VJPageInner() {
                     <Text
                       position="absolute"
                       top={2}
-                      left={2}
+                      left={previewEditing ? 4 : 2}
                       zIndex={20}
                       fontSize="xs"
                       fontWeight="bold"

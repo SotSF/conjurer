@@ -11,7 +11,12 @@ export const VJSendDataButton = observer(function VJSendDataButton() {
 
   return (
     <Button
+      mt={1}
       size="sm"
+      variant="outline"
+      borderWidth="1px"
+      borderStyle="solid"
+      borderColor="gray.600"
       bgColor={store.sendingData ? "orange.700" : undefined}
       _hover={
         store.sendingData

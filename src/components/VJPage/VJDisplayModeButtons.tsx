@@ -1,14 +1,14 @@
-import { Tab, TabList, Tabs } from "@chakra-ui/react";
+import { Box } from "@chakra-ui/react";
 import { memo } from "react";
 import { DisplayMode } from "@/src/types/UIStore";
-import { action } from "mobx";
+import { ConnectedButtonGroup } from "@/src/components/ConnectedButtonGroup";
 
-const displayModeTabs: DisplayMode[] = [
-  "canopy",
-  "cartesianSpace",
-  "canopySpace",
-  "none",
-];
+const displayModeOptions = [
+  { value: "canopy" as const, label: "Canopy" },
+  { value: "cartesianSpace" as const, label: "Cartesian space" },
+  { value: "canopySpace" as const, label: "Canopy space" },
+  { value: "none" as const, label: "X" },
+] as const;
 
 type Props = {
   displayMode: DisplayMode;
@@ -19,27 +19,15 @@ export const VJDisplayModeButtons = memo(function VJDisplayModeButtons({
   displayMode,
   onChange,
 }: Props) {
-  const selectedDisplayModeIndex = displayModeTabs.indexOf(displayMode);
-  const setSelectedDisplayModeIndex = action((index: number) => {
-    onChange(displayModeTabs[index]);
-  });
-
   return (
-    <Tabs
-      size="sm"
-      mt={2}
-      mx={2}
-      variant="line"
-      index={selectedDisplayModeIndex}
-      onChange={setSelectedDisplayModeIndex}
-    >
-      <TabList>
-        <Tab>Canopy</Tab>
-        <Tab>Cartesian space</Tab>
-        <Tab>Canopy space</Tab>
-        <Tab>X</Tab>
-      </TabList>
-    </Tabs>
+    <Box mt={1} mx={2}>
+      <ConnectedButtonGroup<DisplayMode>
+        options={displayModeOptions}
+        value={displayMode}
+        onChange={onChange}
+        size="sm"
+        aria-label="Display mode"
+      />
+    </Box>
   );
 });
-
