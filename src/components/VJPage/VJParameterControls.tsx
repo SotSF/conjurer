@@ -1,15 +1,16 @@
 import { Button, Heading, VStack } from "@chakra-ui/react";
-import { memo, useState } from "react";
+import { useState } from "react";
 import { Block } from "@/src/types/Block";
 import { ExtraParams, PatternParam } from "@/src/types/PatternParams";
 import { BsArrowsCollapse, BsArrowsExpand } from "react-icons/bs";
 import { VJParameterControl } from "@/src/components/VJPage/VJParameterControl";
+import { observer } from "mobx-react-lite";
 
 type VJParameterControlsProps = {
   block: Block<ExtraParams>;
 };
 
-export const VJParameterControls = memo(function VJParameterControls({
+export const VJParameterControls = observer(function VJParameterControls({
   block,
 }: VJParameterControlsProps) {
   const [parameters, setParameters] = useState({});

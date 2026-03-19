@@ -69,13 +69,28 @@ export const VJPageInner = observer(function VJPageInner() {
                       liveEditing ? liveBorderColor : inactiveBorderColor
                     }
                     borderRightWidth={0}
+                    borderTopLeftRadius="md"
+                    borderBottomLeftRadius="md"
                     borderTopRightRadius={0}
                     borderBottomRightRadius={0}
-                    borderRadius="md"
                     cursor="pointer"
                     position="relative"
                     onClick={() => setEditingSession("live")}
                   >
+                    {liveEditing && (
+                      <Box
+                        position="absolute"
+                        top={0}
+                        left={0}
+                        height="100%"
+                        width="4px"
+                        bg={liveBorderColor}
+                        borderTopLeftRadius="md"
+                        borderBottomLeftRadius="md"
+                        zIndex={15}
+                        pointerEvents="none"
+                      />
+                    )}
                     <Text
                       position="absolute"
                       top={2}
@@ -132,7 +147,7 @@ export const VJPageInner = observer(function VJPageInner() {
                   title="Reset Staging"
                   leftIcon={<FaArrowDown />}
                   size="sm"
-                  colorScheme="orange"
+                  colorScheme="gray"
                   variant="outline"
                   onClick={() => {
                     stagingSession.copySelectionFrom(liveSession);
@@ -165,13 +180,28 @@ export const VJPageInner = observer(function VJPageInner() {
                       stagingEditing ? stagingBorderColor : inactiveBorderColor
                     }
                     borderRightWidth={0}
+                    borderTopLeftRadius="md"
+                    borderBottomLeftRadius="md"
                     borderTopRightRadius={0}
                     borderBottomRightRadius={0}
-                    borderRadius="md"
                     cursor="pointer"
                     position="relative"
                     onClick={() => setEditingSession("staging")}
                   >
+                    {stagingEditing && (
+                      <Box
+                        position="absolute"
+                        top={0}
+                        left={0}
+                        height="100%"
+                        width="4px"
+                        bg={stagingBorderColor}
+                        borderTopLeftRadius="md"
+                        borderBottomLeftRadius="md"
+                        zIndex={15}
+                        pointerEvents="none"
+                      />
+                    )}
                     <Text
                       position="absolute"
                       top={2}
@@ -208,25 +238,48 @@ export const VJPageInner = observer(function VJPageInner() {
             p={0}
             overflowY="auto"
             height="100%"
-            borderWidth={2}
+            borderWidth={1}
             borderStyle="solid"
-            borderColor={activeEditBorderColor}
-            borderRadius="md"
+            borderColor="gray.600"
+            borderRadius={0}
             spacing={2}
+            position="relative"
+            borderLeftWidth={0}
+            borderRightWidth={0}
+            borderBottomWidth={0}
           >
-            <HStack width="100%" spacing={2} mb={0}>
-              <Text fontWeight="bold" color={activeEditBorderColor}>
-                Editing: {liveEditing ? "Live" : "Staging"}
-              </Text>
-            </HStack>
+            <Box
+              position="absolute"
+              top={0}
+              left={0}
+              height="100%"
+              width="4px"
+              bg={activeEditBorderColor}
+              zIndex={5}
+              pointerEvents="none"
+            />
+            <Box
+              width="100%"
+              px={3}
+              py={2}
+              bg={activeEditBorderColor}
+              color="black"
+              fontWeight="bold"
+              borderTopLeftRadius={0}
+              borderTopRightRadius={0}
+              userSelect="none"
+            >
+              Editing {liveEditing ? "Live" : "Staging"}
+            </Box>
             <VJPatternEffectsPanel
               key={`patternEffects-${editingSession}-${session.renderNonce}`}
               selectedPatternName={session.selectedPatternBlock.pattern.name}
+              selectedPatternIndex={session.selectedPatternIndex}
               onSelectPattern={session.onSelectPattern}
               selectedEffectIndices={session.selectedEffectIndices}
               onToggleEffect={session.onToggleEffect}
             />
-            <VStack width="100%" spacing={2} mt={2}>
+            <VStack width="100%" spacing={2} mt={2} px={2} pb={2}>
               <VJParameterControls
                 key={`params-pattern-${editingSession}-${session.renderNonce}`}
                 block={session.selectedPatternBlock as any}
