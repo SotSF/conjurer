@@ -1,46 +1,60 @@
-import { Button, Heading, VStack } from "@chakra-ui/react";
+import { Heading, Text, VStack } from "@chakra-ui/react";
 import { useState } from "react";
 import { Block } from "@/src/types/Block";
 import { ExtraParams, PatternParam } from "@/src/types/PatternParams";
-import { BsArrowsCollapse, BsArrowsExpand } from "react-icons/bs";
 import { VJParameterControl } from "@/src/components/VJPage/VJParameterControl";
+import {
+  VJPatternRadioGroup,
+  type VJPatternRadioGroupProps,
+} from "@/src/components/VJPage/VJPatternRadioGroup";
 import { observer } from "mobx-react-lite";
 
 type VJParameterControlsProps = {
   block: Block<ExtraParams>;
+  /** When editing the root pattern block, pattern picker is shown under the "Pattern" heading. */
+  patternSelection?: Pick<
+    VJPatternRadioGroupProps,
+    "selectedPatternName" | "selectedPatternIndex" | "onSelectPattern"
+  >;
 };
 
 export const VJParameterControls = observer(function VJParameterControls({
   block,
+  patternSelection,
 }: VJParameterControlsProps) {
   const [parameters, setParameters] = useState({});
-  const [showControls, toggleControls] = useState(true);
 
   const isEffect = block.parentBlock !== null;
+  const showPatternPicker = !isEffect && patternSelection != null;
 
   return (
     <VStack
-      spacing={0}
+      spacing={2}
+      align="stretch"
       width="100%"
       minW={0}
       maxW="100%"
-      borderStyle="solid"
-      borderWidth={1}
-      borderColor="black"
+      px={2}
     >
-      <Heading size="sm">
-        {isEffect ? "Effect:" : "Pattern:"} {block.pattern.name}
-        <Button
-          ml={1}
-          variant="unstyled"
-          onClick={() => toggleControls(!showControls)}
-        >
-          {showControls ? <BsArrowsCollapse /> : <BsArrowsExpand />}
-        </Button>
-      </Heading>
+      {showPatternPicker ? (
+        <>
+          <Text fontSize="md" fontWeight="bold">
+            Pattern
+          </Text>
+          <VJPatternRadioGroup
+            selectedPatternName={patternSelection.selectedPatternName}
+            selectedPatternIndex={patternSelection.selectedPatternIndex}
+            onSelectPattern={patternSelection.onSelectPattern}
+          />
+        </>
+      ) : (
+        <Heading size="sm">
+          Effect: {block.pattern.name}
+        </Heading>
+      )}
 
-      {showControls &&
-        Object.entries<PatternParam>(block.pattern.params).map(
+      <VStack spacing={0} align="stretch" width="100%" pl={3}>
+        {Object.entries<PatternParam>(block.pattern.params).map(
           ([uniformName, patternParam]) => (
             <VJParameterControl
               key={uniformName}
@@ -52,7 +66,7 @@ export const VJParameterControls = observer(function VJParameterControls({
             />
           ),
         )}
+      </VStack>
     </VStack>
   );
 });
-

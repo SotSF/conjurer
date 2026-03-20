@@ -6,6 +6,7 @@ import {
   NumberInputField,
   Text,
   VStack,
+  useNumberInput,
 } from "@chakra-ui/react";
 import { observer } from "mobx-react-lite";
 import { useEffect, useState } from "react";
@@ -64,6 +65,25 @@ export const VJPageInner = observer(function VJPageInner() {
 
   const [crossfadeDurationSeconds, setCrossfadeDurationSeconds] = useState(0.6);
   const [crossfadeDurationInput, setCrossfadeDurationInput] = useState("2.0");
+
+  const onCrossfadeDurationChange = (
+    valueString: string,
+    valueNumber: number,
+  ) => {
+    setCrossfadeDurationInput(valueString);
+    if (Number.isNaN(valueNumber)) return;
+    setCrossfadeDurationSeconds(
+      Math.min(100, Math.max(0.05, valueNumber)),
+    );
+  };
+
+  const { getIncrementButtonProps, getDecrementButtonProps } = useNumberInput({
+    step: 0.05,
+    min: 0.05,
+    max: 100,
+    value: crossfadeDurationInput,
+    onChange: onCrossfadeDurationChange,
+  });
 
   return (
     <Box position="relative" w="100vw" h="100vh">
@@ -171,28 +191,45 @@ export const VJPageInner = observer(function VJPageInner() {
               pr={0}
             >
               <HStack spacing={2}>
-                <HStack spacing={1}>
+                <HStack spacing={1} alignItems="center">
                   <Text fontSize="xs" color="gray.300">
                     Xfade (s)
                   </Text>
-                  <NumberInput
-                    aria-label="Crossfade duration in seconds"
-                    size="xs"
-                    width="86px"
-                    min={0.05}
-                    max={100}
-                    step={0.05}
-                    value={crossfadeDurationInput}
-                    onChange={(vAsString, vAsNumber) => {
-                      setCrossfadeDurationInput(vAsString);
-                      if (Number.isNaN(vAsNumber)) return;
-                      setCrossfadeDurationSeconds(
-                        Math.min(100, Math.max(0.05, vAsNumber)),
-                      );
-                    }}
-                  >
-                    <NumberInputField textAlign="center" padding={0} />
-                  </NumberInput>
+                  <HStack spacing={0}>
+                    <Button
+                      size="xs"
+                      borderTopRightRadius={0}
+                      borderBottomRightRadius={0}
+                      aria-label="Decrease crossfade duration"
+                      {...getDecrementButtonProps()}
+                    >
+                      -
+                    </Button>
+                    <NumberInput
+                      aria-label="Crossfade duration in seconds"
+                      size="xs"
+                      min={0.05}
+                      max={100}
+                      step={0.05}
+                      value={crossfadeDurationInput}
+                      onChange={onCrossfadeDurationChange}
+                    >
+                      <NumberInputField
+                        w="72px"
+                        textAlign="center"
+                        padding={0}
+                      />
+                    </NumberInput>
+                    <Button
+                      size="xs"
+                      borderTopLeftRadius={0}
+                      borderBottomLeftRadius={0}
+                      aria-label="Increase crossfade duration"
+                      {...getIncrementButtonProps()}
+                    >
+                      +
+                    </Button>
+                  </HStack>
                 </HStack>
                 <Button
                   aria-label="Xfade preview to live"
@@ -345,18 +382,21 @@ export const VJPageInner = observer(function VJPageInner() {
             >
               Editing {liveEditing ? "Live" : "Preview"}
             </Box>
-            <VJPatternEffectsPanel
-              key={`patternEffects-${editingSession}-${session.renderNonce}`}
-              selectedPatternName={session.selectedPatternBlock.pattern.name}
-              selectedPatternIndex={session.selectedPatternIndex}
-              onSelectPattern={session.onSelectPattern}
-              selectedEffectIndices={session.selectedEffectIndices}
-              onToggleEffect={session.onToggleEffect}
-            />
             <VStack width="100%" minW={0} maxW="100%" spacing={2} mt={2} px={2} pb={2}>
               <VJParameterControls
                 key={`params-pattern-${editingSession}-${session.renderNonce}`}
                 block={session.selectedPatternBlock as any}
+                patternSelection={{
+                  selectedPatternName:
+                    session.selectedPatternBlock.pattern.name,
+                  selectedPatternIndex: session.selectedPatternIndex,
+                  onSelectPattern: session.onSelectPattern,
+                }}
+              />
+              <VJPatternEffectsPanel
+                key={`effects-${editingSession}-${session.renderNonce}`}
+                selectedEffectIndices={session.selectedEffectIndices}
+                onToggleEffect={session.onToggleEffect}
               />
               {session.selectedEffectIndices.map((effectIndex) => {
                 const effectBlock = session.effectBlocks[effectIndex];

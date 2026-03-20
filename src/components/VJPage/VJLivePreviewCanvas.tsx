@@ -122,7 +122,6 @@ export const VJLivePreviewCanvas = observer(function VJLivePreviewCanvas({
     null,
   );
   const transmitData = store.context === "vj" && transmitDataEnabled;
-  console.log("transmitData", transmitData);
 
   const [currentBase, setCurrentBase] = useState(() => block.clone());
   const [nextBase, setNextBase] = useState<Block | null>(null);
