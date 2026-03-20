@@ -25,14 +25,17 @@ import { useVJCanopySession } from "@/src/components/VJPage/useVJCanopySession";
 import { VJParameterControls } from "@/src/components/VJPage/VJParameterControls";
 import { VJLivePreviewCanvas } from "@/src/components/VJPage/VJLivePreviewCanvas";
 import { RoleSelector } from "@/src/components/RoleSelector";
+import {
+  vjLiveAccent,
+  vjLiveAccentHover,
+} from "@/src/components/VJPage/vjLiveTheme";
 
-const liveBorderColor = "red.300";
 const previewBorderColor = "green.300";
 const inactiveBorderColor = "gray.600";
 const leftCanvasPadding = 2;
 const previewTopPadding = 0;
 
-export const VJPageInner = function VJPageInner() {
+export const VJPageInner = observer(function VJPageInner() {
   const store = useStore();
 
   const liveSession = useVJCanopySession(store);
@@ -47,8 +50,11 @@ export const VJPageInner = function VJPageInner() {
   const previewEditing = editingSession === "preview";
 
   const [displayMode, setDisplayMode] = useState<VJDisplayMode>("canopy");
+  const sendingData = store.sendingData;
+  const liveAccent = vjLiveAccent(sendingData);
+  const liveHover = vjLiveAccentHover(sendingData);
   const activeEditBorderColor = liveEditing
-    ? liveBorderColor
+    ? liveAccent
     : previewBorderColor;
 
   const [pushRequest, setPushRequest] = useState<{
@@ -57,7 +63,7 @@ export const VJPageInner = function VJPageInner() {
   } | null>(null);
 
   const [crossfadeDurationSeconds, setCrossfadeDurationSeconds] = useState(0.6);
-  const [crossfadeDurationInput, setCrossfadeDurationInput] = useState("0.6");
+  const [crossfadeDurationInput, setCrossfadeDurationInput] = useState("2.0");
 
   return (
     <Box position="relative" w="100vw" h="100vh">
@@ -95,7 +101,7 @@ export const VJPageInner = function VJPageInner() {
                     borderWidth={2}
                     borderStyle="solid"
                     borderColor={
-                      liveEditing ? liveBorderColor : inactiveBorderColor
+                      liveEditing ? liveAccent : inactiveBorderColor
                     }
                     borderRightWidth={0}
                     borderTopLeftRadius="md"
@@ -113,7 +119,7 @@ export const VJPageInner = function VJPageInner() {
                         left={0}
                         height="100%"
                         width="4px"
-                        bg={liveBorderColor}
+                        bg={liveAccent}
                         borderTopLeftRadius="md"
                         borderBottomLeftRadius="md"
                         zIndex={15}
@@ -127,7 +133,7 @@ export const VJPageInner = function VJPageInner() {
                       zIndex={20}
                       fontSize="xs"
                       fontWeight="bold"
-                      bg={liveEditing ? liveBorderColor : "black"}
+                      bg={liveEditing ? liveAccent : "black"}
                       color={liveEditing ? "black" : "white"}
                       px={2}
                       py={0.5}
@@ -194,9 +200,9 @@ export const VJPageInner = function VJPageInner() {
                   leftIcon={<FaArrowUp />}
                   size="sm"
                   variant="outline"
-                  borderColor={liveBorderColor}
-                  color={liveBorderColor}
-                  _hover={{ borderColor: "red.200", color: "red.200" }}
+                  borderColor={liveAccent}
+                  color={liveAccent}
+                  _hover={{ borderColor: liveHover, color: liveHover }}
                   onClick={() => {
                     setPushRequest({
                       id: Date.now(),
@@ -300,6 +306,10 @@ export const VJPageInner = function VJPageInner() {
         <Panel defaultSize={75}>
           <VStack
             p={0}
+            w="100%"
+            minW={0}
+            maxW="100%"
+            overflowX="hidden"
             overflowY="auto"
             height="100%"
             borderWidth={1}
@@ -343,7 +353,7 @@ export const VJPageInner = function VJPageInner() {
               selectedEffectIndices={session.selectedEffectIndices}
               onToggleEffect={session.onToggleEffect}
             />
-            <VStack width="100%" spacing={2} mt={2} px={2} pb={2}>
+            <VStack width="100%" minW={0} maxW="100%" spacing={2} mt={2} px={2} pb={2}>
               <VJParameterControls
                 key={`params-pattern-${editingSession}-${session.renderNonce}`}
                 block={session.selectedPatternBlock as any}
@@ -364,7 +374,7 @@ export const VJPageInner = function VJPageInner() {
       </PanelGroup>
     </Box>
   );
-};
+});
 
 export const VJPage = observer(function VJPage() {
   const store = useStore();

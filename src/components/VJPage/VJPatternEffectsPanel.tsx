@@ -64,6 +64,8 @@ export const VJPatternEffectsPanel = memo(function VJPatternEffectsPanel({
   return (
     <VStack
       width="100%"
+      minW={0}
+      maxW="100%"
       px={2}
       py={2}
       flexWrap="wrap"

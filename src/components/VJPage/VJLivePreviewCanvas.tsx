@@ -15,7 +15,11 @@ import { VJCrossfadeRenderPipeline } from "@/src/components/VJPage/VJCrossfadeRe
 import { BrightnessAdjust } from "@/src/effects/BrightnessAdjust";
 import { runInAction } from "mobx";
 
-export type VJDisplayMode = "canopy" | "canopySpace" | "cartesianSpace" | "none";
+export type VJDisplayMode =
+  | "canopy"
+  | "canopySpace"
+  | "cartesianSpace"
+  | "none";
 
 type PushRequest = {
   id: number;
@@ -84,10 +88,13 @@ const CrossfadeDriver = function CrossfadeDriver({
         currentWithBrightness.effectBlocks.length - 1
       ];
     const nextBrightnessBlock =
-      nextWithBrightness.effectBlocks[nextWithBrightness.effectBlocks.length - 1];
+      nextWithBrightness.effectBlocks[
+        nextWithBrightness.effectBlocks.length - 1
+      ];
 
-    const currentIntensityParam = (currentBrightnessBlock?.pattern?.params as any)
-      ?.u_intensity;
+    const currentIntensityParam = (
+      currentBrightnessBlock?.pattern?.params as any
+    )?.u_intensity;
     const nextIntensityParam = (nextBrightnessBlock?.pattern?.params as any)
       ?.u_intensity;
 
@@ -115,6 +122,7 @@ export const VJLivePreviewCanvas = observer(function VJLivePreviewCanvas({
     null,
   );
   const transmitData = store.context === "vj" && transmitDataEnabled;
+  console.log("transmitData", transmitData);
 
   const [currentBase, setCurrentBase] = useState(() => block.clone());
   const [nextBase, setNextBase] = useState<Block | null>(null);
@@ -211,16 +219,13 @@ export const VJLivePreviewCanvas = observer(function VJLivePreviewCanvas({
               visible={displayMode === "cartesianSpace"}
             />
           )}
-          {displayMode === "canopySpace" && (
-            <CanopySpaceView
-              renderTarget={renderTarget}
-              transmitData={transmitData}
-              visible={displayMode === "canopySpace"}
-            />
-          )}
+          <CanopySpaceView
+            renderTarget={renderTarget}
+            transmitData={transmitData}
+            visible={displayMode === "canopySpace"}
+          />
         </>
       )}
     </Canvas>
   );
 });
-

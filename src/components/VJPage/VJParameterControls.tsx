@@ -22,6 +22,8 @@ export const VJParameterControls = observer(function VJParameterControls({
     <VStack
       spacing={0}
       width="100%"
+      minW={0}
+      maxW="100%"
       borderStyle="solid"
       borderWidth={1}
       borderColor="black"

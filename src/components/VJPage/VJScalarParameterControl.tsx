@@ -1,4 +1,5 @@
 import {
+  Box,
   Button,
   HStack,
   IconButton,
@@ -35,9 +36,12 @@ const labelStyles = {
   mt: -3,
   fontSize: "sm",
 };
-// Reserve enough horizontal space for 4-digit decimals (e.g. 0.001) on each side of the slider.
-const sliderSideSpace = 16; // Chakra spacing: 5rem each side
-const sliderLabelGap = 8; // Chakra spacing: 2rem gap between track and min/max labels
+// Reserve horizontal space for min/max labels; keep modest so the edit pane does not overflow.
+const sliderSideSpace = 0; // Chakra spacing token (each side of slider column)
+const sliderLabelGap = 6; // gap between track ends and numeric labels
+const sliderMarkMinW = "72px"; // min width for min/max labels (decimals)
+/** Horizontal inset so min/max marks (which sit outside the track) stay visible without overflow clipping. */
+const sliderMarkHorizontalGutter = 16; // Chakra space token (~4rem)
 
 type VJScalarParameterControlProps = {
   block: Block<ExtraParams>;
@@ -134,11 +138,22 @@ export const VJScalarParameterControl = observer(
     );
 
     return (
-      <HStack width="100%">
-        <VStack width="150px" spacing={1} alignItems="flex-start">
-          <HStack>
-            <VJParameterControlName patternParam={patternParam} />
+      <HStack width="100%" maxW="100%" minW={0} alignItems="center" spacing={4}>
+        <VStack
+          flex="0 1 200px"
+          minW="120px"
+          maxW="200px"
+          w="100%"
+          spacing={1}
+          alignItems="flex-start"
+          overflow="hidden"
+        >
+          <HStack w="100%" minW={0} spacing={1} alignItems="flex-start">
+            <Box flex="1" minW={0}>
+              <VJParameterControlName patternParam={patternParam} />
+            </Box>
             <IconButton
+              flexShrink={0}
               size="xs"
               aria-label={variationMode === "flat" ? "Periodic" : "Flat"}
               title={variationMode === "flat" ? "Periodic" : "Flat"}
@@ -200,61 +215,79 @@ export const VJScalarParameterControl = observer(
         </VStack>
 
         {variationMode === "flat" && (
-          <VStack mx={sliderSideSpace} flexGrow={1} overflow="visible">
-            <Slider
+          <VStack
+            flex="1"
+            minW={0}
+            maxW="100%"
+            alignSelf="stretch"
+            justifyContent="center"
+            py={1}
+            pl={2}
+            mx={sliderSideSpace}
+            overflow="visible"
+          >
+            <Box
+              w="100%"
+              minW={0}
+              px={sliderMarkHorizontalGutter}
               overflow="visible"
-              min={min}
-              max={max}
-              step={step}
-              value={patternParam.value}
-              onChange={(inputNumber) =>
-                updateParameterValue(inputNumber.toString(), inputNumber)
-              }
-              focusThumbOnChange={false}
-              onMouseEnter={() => setShowTooltip(true)}
-              onMouseLeave={() => setShowTooltip(false)}
             >
-              <SliderTrack>
-                <SliderFilledTrack />
-              </SliderTrack>
-              <Tooltip
-                hasArrow
-                bg="blue.300"
-                color="white"
-                placement="top"
-                isOpen={showTooltip}
-                label={patternParam.value}
+              <Slider
+                w="100%"
+                overflow="visible"
+                min={min}
+                max={max}
+                step={step}
+                value={patternParam.value}
+                onChange={(inputNumber) =>
+                  updateParameterValue(inputNumber.toString(), inputNumber)
+                }
+                focusThumbOnChange={false}
+                onMouseEnter={() => setShowTooltip(true)}
+                onMouseLeave={() => setShowTooltip(false)}
               >
-                <SliderThumb boxSize={5} />
-              </Tooltip>
-              <SliderMark
-                value={min}
-                {...labelStyles}
-                ml={0}
-                textAlign="right"
-                minW={`${sliderSideSpace * 4}px`}
-                whiteSpace="nowrap"
-                transform="translateX(calc(-100% - 2rem))"
-              >
-                {min}
-              </SliderMark>
-              <SliderMark
-                value={max}
-                {...labelStyles}
-                ml={sliderLabelGap}
-                textAlign="left"
-                minW={`${sliderSideSpace * 4}px`}
-                whiteSpace="nowrap"
-              >
-                {max}
-              </SliderMark>
-            </Slider>
+                <SliderTrack>
+                  <SliderFilledTrack />
+                </SliderTrack>
+                <Tooltip
+                  hasArrow
+                  bg="blue.300"
+                  color="white"
+                  placement="top"
+                  isOpen={showTooltip}
+                  label={patternParam.value}
+                >
+                  <SliderThumb boxSize={5} />
+                </Tooltip>
+                <SliderMark
+                  value={min}
+                  {...labelStyles}
+                  ml={0}
+                  textAlign="right"
+                  minW={sliderMarkMinW}
+                  whiteSpace="nowrap"
+                  transform="translateX(calc(-100% - 1.5rem))"
+                >
+                  {min}
+                </SliderMark>
+                <SliderMark
+                  value={max}
+                  {...labelStyles}
+                  ml={sliderLabelGap}
+                  textAlign="left"
+                  minW={sliderMarkMinW}
+                  whiteSpace="nowrap"
+                >
+                  {max}
+                </SliderMark>
+              </Slider>
+            </Box>
           </VStack>
         )}
 
         {variationMode === "periodic" &&
           firstVariation instanceof PeriodicVariation && (
-            <VStack fontSize="small" ml={4}>
+            <VStack fontSize="small" ml={4} alignSelf="center">
               <ScalarVariationGraph
                 uniformName={uniformName}
                 block={block}

@@ -78,6 +78,8 @@ export const VJParameterControl = memo(function VJParameterControl({
     <Box
       p={1}
       width="100%"
+      minW={0}
+      maxW="100%"
       _odd={{ bgColor: "whiteAlpha.200" }}
       _even={{ bgColor: "whiteAlpha.50" }}
     >

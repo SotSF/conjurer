@@ -58,7 +58,7 @@ export const VJPaletteParameterControl = memo(function VJPaletteParameterControl
   };
 
   return (
-    <HStack width="100%" gap={4}>
+    <HStack width="100%" maxW="100%" minW={0} flexWrap="wrap" gap={4}>
       <VJParameterControlName patternParam={patternParam} />
       {variation?.type === "palette" && (
         <PaletteEditor
