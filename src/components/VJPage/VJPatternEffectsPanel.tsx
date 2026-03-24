@@ -1,7 +1,6 @@
 import { Button, HStack, Text, VStack } from "@chakra-ui/react";
 import { memo } from "react";
 import { playgroundEffects } from "@/src/effects/effects";
-import { VJ_EDIT_PANE_CONTENT_ML } from "@/src/components/VJPage/vjEditPaneLayout";
 
 type Props = {
   selectedEffectIndices: number[];
@@ -18,7 +17,7 @@ export const VJPatternEffectsPanel = memo(function VJPatternEffectsPanel({
       width="100%"
       minW={0}
       maxW="100%"
-      ml={VJ_EDIT_PANE_CONTENT_ML}
+      ml={2}
       flexWrap="wrap"
       gap={1}
       spacing={0}

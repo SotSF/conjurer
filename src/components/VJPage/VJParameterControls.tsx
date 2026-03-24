@@ -1,10 +1,25 @@
 import { Box, Text, VStack } from "@chakra-ui/react";
-import { useState } from "react";
+import { keyframes } from "@emotion/react";
+import { useEffect, useRef, useState } from "react";
 import { Block } from "@/src/types/Block";
 import { ExtraParams, PatternParam } from "@/src/types/PatternParams";
 import { VJParameterControl } from "@/src/components/VJPage/VJParameterControl";
-import { VJ_EDIT_PANE_CONTENT_ML } from "@/src/components/VJPage/vjEditPaneLayout";
 import { observer } from "mobx-react-lite";
+
+const patternNameFlash = keyframes`
+  0% {
+    color: #93c5fd;
+    text-shadow: 0 0 10px rgba(147, 197, 253, 0.95);
+  }
+  35% {
+    color: #ffffff;
+    text-shadow: 0 0 12px rgba(255, 255, 255, 0.55);
+  }
+  100% {
+    color: #f7fafc;
+    text-shadow: none;
+  }
+`;
 
 type VJParameterControlsProps = {
   block: Block<ExtraParams>;
@@ -16,10 +31,23 @@ export const VJParameterControls = observer(function VJParameterControls({
   const [parameters, setParameters] = useState({});
 
   const isEffect = block.parentBlock !== null;
+  const patternName = block.pattern.name;
+
+  const [patternFlashKey, setPatternFlashKey] = useState(0);
+  const prevPatternNameRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (isEffect) return;
+    const prev = prevPatternNameRef.current;
+    if (prev !== null && prev !== patternName) {
+      setPatternFlashKey((k) => k + 1);
+    }
+    prevPatternNameRef.current = patternName;
+  }, [isEffect, patternName]);
 
   return (
     <Box
-      ml={VJ_EDIT_PANE_CONTENT_ML}
+      ml={2}
       width="100%"
       minW={0}
       maxW="100%"
@@ -31,7 +59,26 @@ export const VJParameterControls = observer(function VJParameterControls({
     >
       <Box px={3} pt={3} pb={2}>
         <Text fontSize="sm" fontWeight="bold" color="gray.100">
-          {isEffect ? "Effect" : "Pattern"}: {block.pattern.name}
+          {isEffect ? (
+            <>Effect: {patternName}</>
+          ) : (
+            <>
+              Pattern:{" "}
+              <Text
+                as="span"
+                key={patternFlashKey}
+                display="inline"
+                sx={{
+                  animation:
+                    patternFlashKey > 0
+                      ? `${patternNameFlash} 0.55s ease-out forwards`
+                      : undefined,
+                }}
+              >
+                {patternName}
+              </Text>
+            </>
+          )}
         </Text>
       </Box>
 

@@ -265,9 +265,7 @@ export const VJPresetsControls = observer(function VJPresetsControls({
                   maxW="240px"
                   rightIcon={deletePresetMode ? <FaTrashAlt /> : undefined}
                   title={
-                    deletePresetMode
-                      ? `Delete “${p.name}”`
-                      : `Load “${p.name}”`
+                    deletePresetMode ? `Delete “${p.name}”` : `Load “${p.name}”`
                   }
                   aria-label={
                     deletePresetMode
@@ -275,9 +273,7 @@ export const VJPresetsControls = observer(function VJPresetsControls({
                       : `Load preset ${p.name}`
                   }
                   onClick={() =>
-                    deletePresetMode
-                      ? deletePresetById(p.id)
-                      : loadPresetRow(p)
+                    deletePresetMode ? deletePresetById(p.id) : loadPresetRow(p)
                   }
                   isDisabled={listPending || deleteMutation.isPending}
                   _hover={{ bg: "whiteAlpha.100" }}
@@ -318,8 +314,8 @@ export const VJPresetsControls = observer(function VJPresetsControls({
               />
             </FormControl>
             <Text fontSize="xs" color="gray.400" mt={2}>
-              Saves the current pattern, parameters, variations, and effect chain
-              for your <strong>{editingLabel}</strong> session.
+              Saves the current pattern, parameters, variations, and effect
+              chain for your <strong>{editingLabel}</strong> session.
             </Text>
           </ModalBody>
           <ModalFooter gap={2}>
