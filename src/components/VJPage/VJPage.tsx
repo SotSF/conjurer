@@ -74,8 +74,8 @@ export const VJPageInner = observer(function VJPageInner() {
   };
 
   const { getIncrementButtonProps, getDecrementButtonProps } = useNumberInput({
-    step: 0.05,
-    min: 0.05,
+    step: 0.1,
+    min: 0,
     max: 100,
     value: crossfadeDurationInput,
     onChange: onCrossfadeDurationChange,
@@ -202,9 +202,9 @@ export const VJPageInner = observer(function VJPageInner() {
                     <NumberInput
                       aria-label="Crossfade duration in seconds"
                       size="xs"
-                      min={0.05}
+                      min={0}
                       max={100}
-                      step={0.05}
+                      step={0.1}
                       value={crossfadeDurationInput}
                       onChange={onCrossfadeDurationChange}
                     >
