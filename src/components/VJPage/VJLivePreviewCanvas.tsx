@@ -122,18 +122,12 @@ export const VJLivePreviewCanvas = observer(function VJLivePreviewCanvas({
     null,
   );
 
-  const [currentBase, setCurrentBase] = useState(() => block.clone());
+  // Snapshots only used during crossfade. When idle, we render `block` directly so
+  // live edits (params, variations) stay in sync — a clone would go stale because
+  // its source is the same MobX object and only id/pattern.name were previously
+  // used to refresh.
+  const [currentBase, setCurrentBase] = useState<Block | null>(null);
   const [nextBase, setNextBase] = useState<Block | null>(null);
-
-  // If the live session is edited directly (not via push), reflect it immediately
-  // when we're not mid-crossfade.
-  useEffect(() => {
-    if (nextBase) return;
-    runInAction(() => {
-      setCurrentBase(block.clone());
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [block.id, block.pattern.name, nextBase]);
 
   const startTimeRef = useRef<number | null>(null);
   const progressRef = useRef(0);
@@ -148,14 +142,16 @@ export const VJLivePreviewCanvas = observer(function VJLivePreviewCanvas({
     startTimeRef.current = null;
     progressRef.current = 0;
     runInAction(() => {
+      // Freeze live + preview at push time so the fade is between two stable snapshots.
+      setCurrentBase(block.clone());
       setNextBase(pushRequest.toBlock.clone());
     });
-  }, [pushRequest]);
+  }, [pushRequest, block]);
 
   const crossfading = !!nextBase;
 
   const currentWithBrightness = useMemo(() => {
-    if (!crossfading) return currentBase;
+    if (!crossfading || !currentBase) return null;
     return attachBrightnessAdjust(currentBase, 1);
   }, [crossfading, currentBase]);
 
@@ -166,8 +162,8 @@ export const VJLivePreviewCanvas = observer(function VJLivePreviewCanvas({
 
   const finishCrossfade = () => {
     if (!nextBase) return;
-    setCurrentBase(nextBase);
     setNextBase(null);
+    setCurrentBase(null);
     startTimeRef.current = null;
     progressRef.current = 0;
     onCrossfadeComplete?.();
@@ -180,7 +176,7 @@ export const VJLivePreviewCanvas = observer(function VJLivePreviewCanvas({
       )}
       <CameraControls />
 
-      {crossfading && (
+      {crossfading && currentWithBrightness && (
         <CrossfadeDriver
           active
           startTimeRef={startTimeRef}
@@ -195,12 +191,12 @@ export const VJLivePreviewCanvas = observer(function VJLivePreviewCanvas({
       {!crossfading && (
         <SingleBlockRenderPipeline
           autorun
-          block={currentBase}
+          block={block}
           setRenderTarget={setRenderTarget}
         />
       )}
 
-      {crossfading && nextWithBrightness && (
+      {crossfading && currentWithBrightness && nextWithBrightness && (
         <VJCrossfadeRenderPipeline
           currentBlock={currentWithBrightness}
           nextBlock={nextWithBrightness}
