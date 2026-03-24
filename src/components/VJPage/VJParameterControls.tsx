@@ -1,59 +1,41 @@
-import { Heading, Text, VStack } from "@chakra-ui/react";
+import { Box, Text, VStack } from "@chakra-ui/react";
 import { useState } from "react";
 import { Block } from "@/src/types/Block";
 import { ExtraParams, PatternParam } from "@/src/types/PatternParams";
 import { VJParameterControl } from "@/src/components/VJPage/VJParameterControl";
-import {
-  VJPatternRadioGroup,
-  type VJPatternRadioGroupProps,
-} from "@/src/components/VJPage/VJPatternRadioGroup";
+import { VJ_EDIT_PANE_CONTENT_ML } from "@/src/components/VJPage/vjEditPaneLayout";
 import { observer } from "mobx-react-lite";
 
 type VJParameterControlsProps = {
   block: Block<ExtraParams>;
-  /** When editing the root pattern block, pattern picker is shown under the "Pattern" heading. */
-  patternSelection?: Pick<
-    VJPatternRadioGroupProps,
-    "selectedPatternName" | "selectedPatternIndex" | "onSelectPattern"
-  >;
 };
 
 export const VJParameterControls = observer(function VJParameterControls({
   block,
-  patternSelection,
 }: VJParameterControlsProps) {
   const [parameters, setParameters] = useState({});
 
   const isEffect = block.parentBlock !== null;
-  const showPatternPicker = !isEffect && patternSelection != null;
 
   return (
-    <VStack
-      spacing={2}
-      align="stretch"
+    <Box
+      ml={VJ_EDIT_PANE_CONTENT_ML}
       width="100%"
       minW={0}
       maxW="100%"
-      px={2}
+      borderWidth="1px"
+      borderColor="gray.600"
+      borderRadius="md"
+      p={0}
+      overflow="hidden"
     >
-      {showPatternPicker ? (
-        <>
-          <Text fontSize="md" fontWeight="bold">
-            Pattern
-          </Text>
-          <VJPatternRadioGroup
-            selectedPatternName={patternSelection.selectedPatternName}
-            selectedPatternIndex={patternSelection.selectedPatternIndex}
-            onSelectPattern={patternSelection.onSelectPattern}
-          />
-        </>
-      ) : (
-        <Heading size="sm">
-          Effect: {block.pattern.name}
-        </Heading>
-      )}
+      <Box px={3} pt={3} pb={2}>
+        <Text fontSize="sm" fontWeight="bold" color="gray.100">
+          {isEffect ? "Effect" : "Pattern"}: {block.pattern.name}
+        </Text>
+      </Box>
 
-      <VStack spacing={0} align="stretch" width="100%" pl={3}>
+      <VStack spacing={0} align="stretch" width="100%" minW={0}>
         {Object.entries<PatternParam>(block.pattern.params).map(
           ([uniformName, patternParam]) => (
             <VJParameterControl
@@ -67,6 +49,6 @@ export const VJParameterControls = observer(function VJParameterControls({
           ),
         )}
       </VStack>
-    </VStack>
+    </Box>
   );
 });

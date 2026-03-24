@@ -168,6 +168,8 @@ export const VJPresetsControls = observer(function VJPresetsControls({
     });
   };
 
+  const suggestedSaveName = defaultPresetNameForSession(session, presets);
+
   if (!userStore.isAuthenticated) {
     return (
       <Box
@@ -236,7 +238,7 @@ export const VJPresetsControls = observer(function VJPresetsControls({
             </Text>
           )}
           <Wrap spacing={2} shouldWrapChildren align="center">
-            <WrapItem>
+            <WrapItem maxW="100%">
               <Button
                 size="sm"
                 variant="outline"
@@ -244,9 +246,13 @@ export const VJPresetsControls = observer(function VJPresetsControls({
                 color="gray.200"
                 _hover={{ bg: "whiteAlpha.100", borderColor: "gray.400" }}
                 px={2}
+                maxW="320px"
+                w="100%"
+                isTruncated
+                title={`+ Save ${suggestedSaveName}`}
                 onClick={openSaveModal}
               >
-                + Save preset
+                + Save {suggestedSaveName}
               </Button>
             </WrapItem>
             {presets?.map((p) => (

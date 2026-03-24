@@ -24,6 +24,7 @@ import { VJSendDataButton } from "@/src/components/VJPage/VJSendDataButton";
 import { VJPatternEffectsPanel } from "@/src/components/VJPage/VJPatternEffectsPanel";
 import { useVJCanopySession } from "@/src/components/VJPage/useVJCanopySession";
 import { VJParameterControls } from "@/src/components/VJPage/VJParameterControls";
+import { VJPatternRadioGroup } from "@/src/components/VJPage/VJPatternRadioGroup";
 import { VJLivePreviewCanvas } from "@/src/components/VJPage/VJLivePreviewCanvas";
 import { RoleSelector } from "@/src/components/RoleSelector";
 import {
@@ -31,6 +32,7 @@ import {
   vjLiveAccentHover,
 } from "@/src/components/VJPage/vjLiveTheme";
 import { VJPresetsControls } from "@/src/components/VJPage/VJPresetsControls";
+import { VJ_EDIT_PANE_CONTENT_ML } from "@/src/components/VJPage/vjEditPaneLayout";
 
 const previewBorderColor = "green.300";
 const inactiveBorderColor = "gray.600";
@@ -391,15 +393,27 @@ export const VJPageInner = observer(function VJPageInner() {
                 accentColor={activeEditBorderColor}
                 editingLabel={liveEditing ? "Live" : "Preview"}
               />
+              <VStack
+                align="stretch"
+                spacing={2}
+                width="100%"
+                minW={0}
+                ml={VJ_EDIT_PANE_CONTENT_ML}
+              >
+                <Text fontSize="md" fontWeight="bold" color="gray.200">
+                  Choose a pattern
+                </Text>
+                <VJPatternRadioGroup
+                  selectedPatternName={
+                    session.selectedPatternBlock.pattern.name
+                  }
+                  selectedPatternIndex={session.selectedPatternIndex}
+                  onSelectPattern={session.onSelectPattern}
+                />
+              </VStack>
               <VJParameterControls
                 key={`params-pattern-${editingSession}-${session.renderNonce}`}
                 block={session.selectedPatternBlock as any}
-                patternSelection={{
-                  selectedPatternName:
-                    session.selectedPatternBlock.pattern.name,
-                  selectedPatternIndex: session.selectedPatternIndex,
-                  onSelectPattern: session.onSelectPattern,
-                }}
               />
               <VJPatternEffectsPanel
                 key={`effects-${editingSession}-${session.renderNonce}`}

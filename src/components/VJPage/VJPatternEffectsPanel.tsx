@@ -1,13 +1,14 @@
 import { Button, HStack, Text, VStack } from "@chakra-ui/react";
 import { memo } from "react";
 import { playgroundEffects } from "@/src/effects/effects";
+import { VJ_EDIT_PANE_CONTENT_ML } from "@/src/components/VJPage/vjEditPaneLayout";
 
 type Props = {
   selectedEffectIndices: number[];
   onToggleEffect: (index: number) => void;
 };
 
-/** Effects only; pattern choice lives with pattern parameters (see VJParameterControls). */
+/** Effect toggles; pattern picker lives above pattern parameters on VJPage. */
 export const VJPatternEffectsPanel = memo(function VJPatternEffectsPanel({
   selectedEffectIndices,
   onToggleEffect,
@@ -17,15 +18,14 @@ export const VJPatternEffectsPanel = memo(function VJPatternEffectsPanel({
       width="100%"
       minW={0}
       maxW="100%"
-      px={2}
-      py={2}
+      ml={VJ_EDIT_PANE_CONTENT_ML}
       flexWrap="wrap"
       gap={1}
       spacing={0}
       alignItems="flex-start"
     >
-      <Text fontSize="md" fontWeight="bold">
-        Effects
+      <Text fontSize="md" fontWeight="bold" color="gray.200">
+        Choose any number of effects
       </Text>
       <HStack width="100%" flexWrap="wrap" gap={1} spacing={0}>
         {playgroundEffects.map((e, index) => {
