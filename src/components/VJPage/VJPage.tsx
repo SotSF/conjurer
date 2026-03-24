@@ -30,6 +30,7 @@ import {
   vjLiveAccent,
   vjLiveAccentHover,
 } from "@/src/components/VJPage/vjLiveTheme";
+import { VJPresetsControls } from "@/src/components/VJPage/VJPresetsControls";
 
 const previewBorderColor = "green.300";
 const inactiveBorderColor = "gray.600";
@@ -385,6 +386,11 @@ export const VJPageInner = observer(function VJPageInner() {
               px={2}
               pb={2}
             >
+              <VJPresetsControls
+                session={session}
+                accentColor={activeEditBorderColor}
+                editingLabel={liveEditing ? "Live" : "Preview"}
+              />
               <VJParameterControls
                 key={`params-pattern-${editingSession}-${session.renderNonce}`}
                 block={session.selectedPatternBlock as any}

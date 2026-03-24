@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { runInAction } from "mobx";
 
-import { Block } from "@/src/types/Block";
+import { Block, SerializedBlock } from "@/src/types/Block";
 import { playgroundEffects } from "@/src/effects/effects";
 import { playgroundPatterns } from "@/src/patterns/patterns";
 import type { Store } from "@/src/types/Store";
 import type { ExtraParams } from "@/src/types/PatternParams";
+import { applySerializedBlockToVjPool } from "@/src/utils/applySerializedBlockToVjPool";
 
 export type VJCanopySession = {
   selectedPatternIndex: number;
@@ -23,6 +24,9 @@ export type VJCanopySession = {
   // Copies the current selection + parameter values from `source` into this session.
   // Used for "Xfade preview to live".
   copySelectionFrom: (source: VJCanopySession) => void;
+
+  /** Applies a saved preset onto this session's pattern/effect pool. Returns false if no match. */
+  applySerializedPreset: (serialized: SerializedBlock) => boolean;
 };
 
 export const useVJCanopySession = (store: Store): VJCanopySession => {
@@ -136,6 +140,22 @@ export const useVJCanopySession = (store: Store): VJCanopySession => {
     [effectBlocks, patternBlocks],
   );
 
+  const applySerializedPreset = useCallback(
+    (serialized: SerializedBlock) => {
+      const applied = applySerializedBlockToVjPool(
+        store,
+        serialized,
+        patternBlocks,
+        effectBlocks,
+      );
+      if (!applied) return false;
+      setSelectedPatternIndex(applied.patternIndex);
+      setSelectedEffectIndices(applied.effectIndices);
+      return true;
+    },
+    [store, patternBlocks, effectBlocks],
+  );
+
   return {
     selectedPatternIndex,
     onSelectPattern,
@@ -145,6 +165,7 @@ export const useVJCanopySession = (store: Store): VJCanopySession => {
     effectBlocks,
     renderNonce,
     copySelectionFrom,
+    applySerializedPreset,
   };
 };
 
