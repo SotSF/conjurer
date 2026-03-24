@@ -13,7 +13,11 @@ import { Canopy } from "@/src/components/Canvas/CanopyView";
 import { CanopySpaceView } from "@/src/components/Canvas/CanopySpaceView";
 import { CartesianSpaceView } from "@/src/components/Canvas/CartesianSpaceView";
 
-export type VJDisplayMode = "canopy" | "canopySpace" | "cartesianSpace" | "none";
+export type VJDisplayMode =
+  | "canopy"
+  | "canopySpace"
+  | "cartesianSpace"
+  | "none";
 
 type Props = {
   block: Block;
@@ -69,4 +73,3 @@ export const VJPreviewCanvas = observer(function VJPreviewCanvas({
     </Canvas>
   );
 });
-

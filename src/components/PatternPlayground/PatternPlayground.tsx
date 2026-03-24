@@ -8,7 +8,6 @@ import { useStore } from "@/src/types/StoreContext";
 import { action, runInAction } from "mobx";
 import { DisplayModeButtons } from "@/src/components/PatternPlayground/DisplayModeButtons";
 import { SendDataButton } from "@/src/components/SendDataButton";
-import { PresetsList } from "@/src/components/PatternPlayground/PresetsList";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 // import { RecordCanvasControls } from "@/src/components/PatternPlayground/RecordCanvasControls";
 
@@ -138,7 +137,6 @@ export const PatternPlayground = observer(function PatternPlayground() {
               <PanelResizeHandle />
               <Panel defaultSize={50}>
                 <VStack p={2} overflowY="auto">
-                  <PresetsList />
                   <PatternList
                     selectedPatternBlock={selectedPatternBlock}
                     onSelectPatternBlock={onSelectPatternBlock}

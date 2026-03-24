@@ -1,4 +1,5 @@
 import {
+  Box,
   Button,
   HStack,
   NumberInput,
@@ -70,9 +71,25 @@ export const VJBooleanParameterControl = memo(function VJBooleanParameterControl
   });
 
   return (
-    <HStack width="100%">
-      <VStack width="150px" spacing={1} alignItems="flex-start">
-        <VJParameterControlName patternParam={patternParam} />
+    <HStack
+      width="100%"
+      maxW="100%"
+      minW={0}
+      alignItems="center"
+      spacing={4}
+    >
+      <VStack
+        flex="0 1 200px"
+        minW="120px"
+        maxW="200px"
+        w="100%"
+        spacing={1}
+        alignItems="flex-start"
+        overflow="hidden"
+      >
+        <Box w="100%" minW={0}>
+          <VJParameterControlName patternParam={patternParam} />
+        </Box>
         <HStack spacing={0}>
           <Button
             size="xs"
@@ -105,7 +122,7 @@ export const VJBooleanParameterControl = memo(function VJBooleanParameterControl
           </Button>
         </HStack>
       </VStack>
-      <HStack mx={12} flexGrow={1} justify="center">
+      <HStack flex="1" minW={0} justify="center">
         <Text>off</Text>
         <Switch
           size="lg"

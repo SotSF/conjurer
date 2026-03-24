@@ -6,9 +6,10 @@ import {
   NumberInputField,
   Text,
   VStack,
+  useNumberInput,
 } from "@chakra-ui/react";
 import { observer } from "mobx-react-lite";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { FaArrowDown, FaArrowUp } from "react-icons/fa";
 
@@ -23,16 +24,34 @@ import { VJSendDataButton } from "@/src/components/VJPage/VJSendDataButton";
 import { VJPatternEffectsPanel } from "@/src/components/VJPage/VJPatternEffectsPanel";
 import { useVJCanopySession } from "@/src/components/VJPage/useVJCanopySession";
 import { VJParameterControls } from "@/src/components/VJPage/VJParameterControls";
+import { VJPatternRadioGroup } from "@/src/components/VJPage/VJPatternRadioGroup";
 import { VJLivePreviewCanvas } from "@/src/components/VJPage/VJLivePreviewCanvas";
+import { LoginButton } from "@/src/components/LoginButton";
 import { RoleSelector } from "@/src/components/RoleSelector";
+import {
+  vjLiveAccent,
+  vjLiveAccentHover,
+} from "@/src/components/VJPage/vjLiveTheme";
+import { VJPresetsControls } from "@/src/components/VJPage/VJPresetsControls";
+import { VJKeyboardShortcutsHelp } from "@/src/components/VJPage/VJKeyboardShortcutsHelp";
+import { vjKeydownTargetIgnoresShortcuts } from "@/src/components/VJPage/vjKeyboardShortcuts";
+import { playgroundPatterns } from "@/src/patterns/patterns";
 
-const liveBorderColor = "red.300";
 const previewBorderColor = "green.300";
 const inactiveBorderColor = "gray.600";
 const leftCanvasPadding = 2;
 const previewTopPadding = 0;
 
-export const VJPageInner = function VJPageInner() {
+const PATTERN_NAV_KEYS = new Set([
+  "ArrowLeft",
+  "ArrowRight",
+  "ArrowUp",
+  "ArrowDown",
+  "Home",
+  "End",
+]);
+
+export const VJPageInner = observer(function VJPageInner() {
   const store = useStore();
 
   const liveSession = useVJCanopySession(store);
@@ -47,9 +66,10 @@ export const VJPageInner = function VJPageInner() {
   const previewEditing = editingSession === "preview";
 
   const [displayMode, setDisplayMode] = useState<VJDisplayMode>("canopy");
-  const activeEditBorderColor = liveEditing
-    ? liveBorderColor
-    : previewBorderColor;
+  const sendingData = store.sendingData;
+  const liveAccent = vjLiveAccent(sendingData);
+  const liveHover = vjLiveAccentHover(sendingData);
+  const activeEditBorderColor = liveEditing ? liveAccent : previewBorderColor;
 
   const [pushRequest, setPushRequest] = useState<{
     id: number;
@@ -57,19 +77,131 @@ export const VJPageInner = function VJPageInner() {
   } | null>(null);
 
   const [crossfadeDurationSeconds, setCrossfadeDurationSeconds] = useState(0.6);
-  const [crossfadeDurationInput, setCrossfadeDurationInput] = useState("0.6");
+  const [crossfadeDurationInput, setCrossfadeDurationInput] = useState("2.0");
+
+  const [deletePresetMode, setDeletePresetMode] = useState(false);
+
+  const hotkeysRef = useRef({
+    editingSession,
+    liveSession,
+    previewSession,
+    setDeletePresetMode,
+    setEditingSession,
+    setPushRequest,
+  });
+  hotkeysRef.current = {
+    editingSession,
+    liveSession,
+    previewSession,
+    setDeletePresetMode,
+    setEditingSession,
+    setPushRequest,
+  };
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (vjKeydownTargetIgnoresShortcuts(e.target)) return;
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+
+      const t = e.target;
+      if (
+        PATTERN_NAV_KEYS.has(e.key) &&
+        t instanceof HTMLElement &&
+        t.closest('[role="radiogroup"]')
+      ) {
+        return;
+      }
+
+      const h = hotkeysRef.current;
+      const session =
+        h.editingSession === "live" ? h.liveSession : h.previewSession;
+      const patternCount = playgroundPatterns.length;
+      if (patternCount === 0) return;
+
+      if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+        e.preventDefault();
+        session.onSelectPattern(
+          (session.selectedPatternIndex - 1 + patternCount) % patternCount,
+        );
+        return;
+      }
+      if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+        e.preventDefault();
+        session.onSelectPattern(
+          (session.selectedPatternIndex + 1) % patternCount,
+        );
+        return;
+      }
+      if (e.key === "Home") {
+        e.preventDefault();
+        session.onSelectPattern(0);
+        return;
+      }
+      if (e.key === "End") {
+        e.preventDefault();
+        session.onSelectPattern(patternCount - 1);
+        return;
+      }
+
+      if (e.key === "d") {
+        e.preventDefault();
+        h.setDeletePresetMode((v) => !v);
+        return;
+      }
+      if (e.key === "v") {
+        e.preventDefault();
+        h.setEditingSession((s) => (s === "live" ? "preview" : "live"));
+        return;
+      }
+      if (e.key === "X") {
+        e.preventDefault();
+        h.setPushRequest({
+          id: Date.now(),
+          toBlock: h.previewSession.selectedPatternBlock.clone(),
+        });
+        return;
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
+
+  const onCrossfadeDurationChange = (
+    valueString: string,
+    valueNumber: number,
+  ) => {
+    setCrossfadeDurationInput(valueString);
+    if (Number.isNaN(valueNumber)) return;
+    setCrossfadeDurationSeconds(Math.min(100, Math.max(0.05, valueNumber)));
+  };
+
+  const { getIncrementButtonProps, getDecrementButtonProps } = useNumberInput({
+    step: 0.1,
+    min: 0,
+    max: 100,
+    value: crossfadeDurationInput,
+    onChange: onCrossfadeDurationChange,
+  });
 
   return (
     <Box position="relative" w="100vw" h="100vh">
       <Box
         position="absolute"
-        top={2}
+        top={1}
         right={2}
         zIndex={20}
         bg="gray.600"
         borderRadius="md"
+        px={1}
+        py={1}
       >
-        <RoleSelector />
+        <HStack spacing={2} alignItems="center">
+          <RoleSelector />
+          <Box>
+            <LoginButton />
+          </Box>
+        </HStack>
       </Box>
       <PanelGroup autoSaveId="vj-1-v3" direction="horizontal">
         <Panel defaultSize={25}>
@@ -94,9 +226,7 @@ export const VJPageInner = function VJPageInner() {
                     height="100%"
                     borderWidth={2}
                     borderStyle="solid"
-                    borderColor={
-                      liveEditing ? liveBorderColor : inactiveBorderColor
-                    }
+                    borderColor={liveEditing ? liveAccent : inactiveBorderColor}
                     borderRightWidth={0}
                     borderTopLeftRadius="md"
                     borderBottomLeftRadius="md"
@@ -113,7 +243,7 @@ export const VJPageInner = function VJPageInner() {
                         left={0}
                         height="100%"
                         width="4px"
-                        bg={liveBorderColor}
+                        bg={liveAccent}
                         borderTopLeftRadius="md"
                         borderBottomLeftRadius="md"
                         zIndex={15}
@@ -127,7 +257,7 @@ export const VJPageInner = function VJPageInner() {
                       zIndex={20}
                       fontSize="xs"
                       fontWeight="bold"
-                      bg={liveEditing ? liveBorderColor : "black"}
+                      bg={liveEditing ? liveAccent : "black"}
                       color={liveEditing ? "black" : "white"}
                       px={2}
                       py={0.5}
@@ -165,28 +295,45 @@ export const VJPageInner = function VJPageInner() {
               pr={0}
             >
               <HStack spacing={2}>
-                <HStack spacing={1}>
+                <HStack spacing={1} alignItems="center">
                   <Text fontSize="xs" color="gray.300">
                     Xfade (s)
                   </Text>
-                  <NumberInput
-                    aria-label="Crossfade duration in seconds"
-                    size="xs"
-                    width="86px"
-                    min={0.05}
-                    max={100}
-                    step={0.05}
-                    value={crossfadeDurationInput}
-                    onChange={(vAsString, vAsNumber) => {
-                      setCrossfadeDurationInput(vAsString);
-                      if (Number.isNaN(vAsNumber)) return;
-                      setCrossfadeDurationSeconds(
-                        Math.min(100, Math.max(0.05, vAsNumber)),
-                      );
-                    }}
-                  >
-                    <NumberInputField textAlign="center" padding={0} />
-                  </NumberInput>
+                  <HStack spacing={0}>
+                    <Button
+                      size="xs"
+                      borderTopRightRadius={0}
+                      borderBottomRightRadius={0}
+                      aria-label="Decrease crossfade duration"
+                      {...getDecrementButtonProps()}
+                    >
+                      -
+                    </Button>
+                    <NumberInput
+                      aria-label="Crossfade duration in seconds"
+                      size="xs"
+                      min={0}
+                      max={100}
+                      step={0.1}
+                      value={crossfadeDurationInput}
+                      onChange={onCrossfadeDurationChange}
+                    >
+                      <NumberInputField
+                        w="72px"
+                        textAlign="center"
+                        padding={0}
+                      />
+                    </NumberInput>
+                    <Button
+                      size="xs"
+                      borderTopLeftRadius={0}
+                      borderBottomLeftRadius={0}
+                      aria-label="Increase crossfade duration"
+                      {...getIncrementButtonProps()}
+                    >
+                      +
+                    </Button>
+                  </HStack>
                 </HStack>
                 <Button
                   aria-label="Xfade preview to live"
@@ -194,9 +341,9 @@ export const VJPageInner = function VJPageInner() {
                   leftIcon={<FaArrowUp />}
                   size="sm"
                   variant="outline"
-                  borderColor={liveBorderColor}
-                  color={liveBorderColor}
-                  _hover={{ borderColor: "red.200", color: "red.200" }}
+                  borderColor={liveAccent}
+                  color={liveAccent}
+                  _hover={{ borderColor: liveHover, color: liveHover }}
                   onClick={() => {
                     setPushRequest({
                       id: Date.now(),
@@ -300,6 +447,10 @@ export const VJPageInner = function VJPageInner() {
         <Panel defaultSize={75}>
           <VStack
             p={0}
+            w="100%"
+            minW={0}
+            maxW="100%"
+            overflowX="hidden"
             overflowY="auto"
             height="100%"
             borderWidth={1}
@@ -335,18 +486,43 @@ export const VJPageInner = function VJPageInner() {
             >
               Editing {liveEditing ? "Live" : "Preview"}
             </Box>
-            <VJPatternEffectsPanel
-              key={`patternEffects-${editingSession}-${session.renderNonce}`}
-              selectedPatternName={session.selectedPatternBlock.pattern.name}
-              selectedPatternIndex={session.selectedPatternIndex}
-              onSelectPattern={session.onSelectPattern}
-              selectedEffectIndices={session.selectedEffectIndices}
-              onToggleEffect={session.onToggleEffect}
-            />
-            <VStack width="100%" spacing={2} mt={2} px={2} pb={2}>
+            <VStack
+              width="100%"
+              minW={0}
+              maxW="100%"
+              spacing={2}
+              pt={1}
+              pr={1}
+              pb={1}
+              pl={2}
+            >
+              <VJPresetsControls
+                session={session}
+                accentColor={activeEditBorderColor}
+                editingLabel={liveEditing ? "Live" : "Preview"}
+                deletePresetMode={deletePresetMode}
+                onDeletePresetModeChange={setDeletePresetMode}
+              />
+              <VStack align="stretch" spacing={2} width="100%" minW={0} ml={2}>
+                <Text fontSize="md" fontWeight="bold" color="gray.200">
+                  Choose a pattern
+                </Text>
+                <VJPatternRadioGroup
+                  selectedPatternName={
+                    session.selectedPatternBlock.pattern.name
+                  }
+                  selectedPatternIndex={session.selectedPatternIndex}
+                  onSelectPattern={session.onSelectPattern}
+                />
+              </VStack>
               <VJParameterControls
                 key={`params-pattern-${editingSession}-${session.renderNonce}`}
                 block={session.selectedPatternBlock as any}
+              />
+              <VJPatternEffectsPanel
+                key={`effects-${editingSession}-${session.renderNonce}`}
+                selectedEffectIndices={session.selectedEffectIndices}
+                onToggleEffect={session.onToggleEffect}
               />
               {session.selectedEffectIndices.map((effectIndex) => {
                 const effectBlock = session.effectBlocks[effectIndex];
@@ -358,13 +534,14 @@ export const VJPageInner = function VJPageInner() {
                   />
                 );
               })}
+              <VJKeyboardShortcutsHelp />
             </VStack>
           </VStack>
         </Panel>
       </PanelGroup>
     </Box>
   );
-};
+});
 
 export const VJPage = observer(function VJPage() {
   const store = useStore();

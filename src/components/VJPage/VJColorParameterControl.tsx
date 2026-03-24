@@ -61,7 +61,14 @@ export const VJColorParameterControl = memo(function VJColorParameterControl({
   };
 
   return (
-    <HStack pt={6} width="100%" gap={4}>
+    <HStack
+      pt={6}
+      width="100%"
+      maxW="100%"
+      minW={0}
+      flexWrap="wrap"
+      gap={4}
+    >
       <VJParameterControlName patternParam={patternParam} />
       <HexColorInput
         className="hexColorInput"

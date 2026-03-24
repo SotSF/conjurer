@@ -8,7 +8,14 @@ export const VJParameterControlName = memo(function VJParameterControlName({
   patternParam: PatternParam;
 }) {
   return (
-    <Text lineHeight={1} fontSize="sm" fontWeight="bold">
+    <Text
+      lineHeight={1.25}
+      fontSize="sm"
+      fontWeight="bold"
+      w="100%"
+      wordBreak="break-word"
+      whiteSpace="normal"
+    >
       {patternParam.name}
     </Text>
   );
