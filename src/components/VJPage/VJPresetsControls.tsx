@@ -1,15 +1,10 @@
 import {
-  AlertDialog,
-  AlertDialogBody,
-  AlertDialogContent,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogOverlay,
   Box,
   Button,
   FormControl,
   FormLabel,
   HStack,
+  IconButton,
   Input,
   Modal,
   ModalBody,
@@ -18,14 +13,16 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
-  Select,
   Text,
   VStack,
+  Wrap,
+  WrapItem,
   useDisclosure,
   useToast,
 } from "@chakra-ui/react";
 import { observer } from "mobx-react-lite";
-import { useRef, useState } from "react";
+import { useCallback, useState } from "react";
+import { FaTrashAlt } from "react-icons/fa";
 
 import type { VJCanopySession } from "@/src/components/VJPage/useVJCanopySession";
 import { SerializedBlock } from "@/src/types/Block";
@@ -39,6 +36,37 @@ type Props = {
   editingLabel: "Live" | "Preview";
 };
 
+function buildSuggestedPresetBaseName(session: VJCanopySession): string {
+  const patternName = session.selectedPatternBlock.pattern.name;
+  const effectNames = session.selectedEffectIndices
+    .map((index) => session.effectBlocks[index]?.pattern.name)
+    .filter((name): name is string => Boolean(name));
+  return effectNames.length > 0
+    ? [patternName, ...effectNames].join(" ")
+    : patternName;
+}
+
+/** If `base` matches an existing preset name, returns `base + " " + n` for the lowest n ≥ 2 that is unused. */
+function uniquifyPresetName(
+  base: string,
+  existingNames: Iterable<string>,
+): string {
+  const taken = new Set(existingNames);
+  if (!taken.has(base)) return base;
+  let n = 2;
+  while (taken.has(`${base} ${n}`)) n += 1;
+  return `${base} ${n}`;
+}
+
+function defaultPresetNameForSession(
+  session: VJCanopySession,
+  savedPresets: { name: string }[] | undefined,
+): string {
+  const base = buildSuggestedPresetBaseName(session);
+  const names = savedPresets?.map((p) => p.name) ?? [];
+  return uniquifyPresetName(base, names);
+}
+
 export const VJPresetsControls = observer(function VJPresetsControls({
   session,
   accentColor,
@@ -50,12 +78,9 @@ export const VJPresetsControls = observer(function VJPresetsControls({
   const toast = useToast();
   const utils = trpc.useUtils();
 
-  const saveModal = useDisclosure();
-  const deleteDialog = useDisclosure();
-  const cancelDeleteRef = useRef<HTMLButtonElement>(null);
-
   const [newPresetName, setNewPresetName] = useState("");
-  const [selectedPresetId, setSelectedPresetId] = useState<string>("");
+  /** When true, each preset shows a trash control; one click deletes. Toggle off via header control. */
+  const [deletePresetMode, setDeletePresetMode] = useState(false);
 
   const {
     data: presets,
@@ -69,10 +94,21 @@ export const VJPresetsControls = observer(function VJPresetsControls({
     },
   );
 
+  const {
+    isOpen: saveModalOpen,
+    onOpen: openSaveModalBase,
+    onClose: closeSaveModal,
+  } = useDisclosure();
+
+  const openSaveModal = useCallback(() => {
+    setNewPresetName(defaultPresetNameForSession(session, presets));
+    openSaveModalBase();
+  }, [session, presets, openSaveModalBase]);
+
   const createMutation = trpc.vjPreset.create.useMutation({
     onSuccess: () => {
       void utils.vjPreset.list.invalidate();
-      saveModal.onClose();
+      closeSaveModal();
       setNewPresetName("");
       toast({ title: "Preset saved", status: "success", duration: 2500 });
     },
@@ -89,8 +125,7 @@ export const VJPresetsControls = observer(function VJPresetsControls({
   const deleteMutation = trpc.vjPreset.delete.useMutation({
     onSuccess: () => {
       void utils.vjPreset.list.invalidate();
-      setSelectedPresetId("");
-      deleteDialog.onClose();
+      setDeletePresetMode(false);
       toast({ title: "Preset deleted", status: "success", duration: 2500 });
     },
     onError: (err) => {
@@ -120,44 +155,17 @@ export const VJPresetsControls = observer(function VJPresetsControls({
     });
   };
 
-  const onLoadPreset = () => {
-    const id = Number(selectedPresetId);
-    if (!Number.isFinite(id) || id <= 0) {
-      toast({ title: "Select a preset", status: "warning", duration: 2000 });
-      return;
-    }
-    const row = presets?.find((p) => p.id === id);
-    if (!row) {
-      toast({ title: "Preset not found", status: "error", duration: 3000 });
-      return;
-    }
-    const ok = session.applySerializedPreset(
-      row.serializedBlock as SerializedBlock,
-    );
-    if (!ok) {
-      toast({
-        title: "Could not load preset",
-        description:
-          "This preset’s pattern is not available in the current pattern list.",
-        status: "warning",
-        duration: 5000,
-      });
-      return;
-    }
-    toast({ title: "Preset loaded", status: "success", duration: 2500 });
+  const loadPresetRow = (row: { serializedBlock?: unknown }) => {
+    if (row.serializedBlock === undefined) return;
+    session.applySerializedPreset(row.serializedBlock as SerializedBlock);
   };
 
-  const selectedRow = presets?.find(
-    (p) => p.id === Number(selectedPresetId),
-  );
-
-  const onConfirmDelete = () => {
-    const id = Number(selectedPresetId);
-    if (!Number.isFinite(id) || id <= 0) {
-      deleteDialog.onClose();
-      return;
-    }
-    deleteMutation.mutate({ usingLocalData, username, id });
+  const deletePresetById = (id: number) => {
+    deleteMutation.mutate({
+      usingLocalData,
+      username,
+      id,
+    });
   };
 
   if (!userStore.isAuthenticated) {
@@ -189,67 +197,103 @@ export const VJPresetsControls = observer(function VJPresetsControls({
         borderColor="gray.600"
         bg="gray.800"
       >
-        <Text fontSize="xs" fontWeight="bold" color="gray.300" mb={2}>
-          Presets
-        </Text>
+        <HStack justify="space-between" align="center" mb={2}>
+          <Text fontSize="xs" fontWeight="bold" color="gray.300">
+            Presets
+          </Text>
+          <IconButton
+            size="xs"
+            variant={deletePresetMode ? "solid" : "ghost"}
+            colorScheme="red"
+            aria-label={
+              deletePresetMode
+                ? "Exit delete preset mode"
+                : "Enter delete preset mode"
+            }
+            title={
+              deletePresetMode
+                ? "Done deleting presets"
+                : "Delete presets (preset buttons show trash; click to delete)"
+            }
+            icon={<FaTrashAlt />}
+            onClick={() => setDeletePresetMode((v) => !v)}
+          />
+        </HStack>
         {listError && (
           <Text fontSize="xs" color="red.300" mb={2}>
             Could not load presets.
           </Text>
         )}
         <VStack align="stretch" spacing={2}>
-          <HStack spacing={2} flexWrap="wrap">
-            <FormControl maxW="200px" flex="1" minW="120px">
-              <FormLabel fontSize="xs" mb={1} srOnly>
-                Saved preset
-              </FormLabel>
-              <Select
+          {listPending && (
+            <Text fontSize="xs" color="gray.500">
+              Loading presets…
+            </Text>
+          )}
+          {!listPending && !presets?.length && !listError && (
+            <Text fontSize="xs" color="gray.500">
+              No saved presets yet.
+            </Text>
+          )}
+          <Wrap spacing={2} shouldWrapChildren align="center">
+            <WrapItem>
+              <Button
                 size="sm"
-                placeholder={listPending ? "Loading…" : "Choose preset"}
-                value={selectedPresetId}
-                onChange={(e) => setSelectedPresetId(e.target.value)}
-                isDisabled={listPending || !presets?.length}
+                variant="outline"
+                borderColor="gray.500"
+                color="gray.200"
+                _hover={{ bg: "whiteAlpha.100", borderColor: "gray.400" }}
+                px={2}
+                onClick={openSaveModal}
               >
-                {presets?.map((p) => (
-                  <option key={p.id} value={String(p.id)}>
+                + Save preset
+              </Button>
+            </WrapItem>
+            {presets?.map((p) => (
+              <WrapItem key={p.id}>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  borderColor={accentColor}
+                  color={accentColor}
+                  maxW="240px"
+                  rightIcon={deletePresetMode ? <FaTrashAlt /> : undefined}
+                  title={
+                    deletePresetMode
+                      ? `Delete “${p.name}”`
+                      : `Load “${p.name}”`
+                  }
+                  aria-label={
+                    deletePresetMode
+                      ? `Delete preset ${p.name}`
+                      : `Load preset ${p.name}`
+                  }
+                  onClick={() =>
+                    deletePresetMode
+                      ? deletePresetById(p.id)
+                      : loadPresetRow(p)
+                  }
+                  isDisabled={listPending || deleteMutation.isPending}
+                  _hover={{ bg: "whiteAlpha.100" }}
+                >
+                  <Text
+                    as="span"
+                    display="block"
+                    overflow="hidden"
+                    textOverflow="ellipsis"
+                    whiteSpace="nowrap"
+                    textAlign="left"
+                  >
                     {p.name}
-                  </option>
-                ))}
-              </Select>
-            </FormControl>
-            <Button
-              size="sm"
-              colorScheme="blue"
-              variant="outline"
-              onClick={onLoadPreset}
-              isDisabled={!selectedPresetId || listPending}
-            >
-              Load
-            </Button>
-            <Button
-              size="sm"
-              colorScheme="red"
-              variant="outline"
-              onClick={deleteDialog.onOpen}
-              isDisabled={!selectedPresetId || listPending}
-            >
-              Delete
-            </Button>
-          </HStack>
-          <Button
-            size="sm"
-            borderColor={accentColor}
-            color={accentColor}
-            variant="outline"
-            _hover={{ bg: "whiteAlpha.100" }}
-            onClick={saveModal.onOpen}
-          >
-            Save current as preset…
-          </Button>
+                  </Text>
+                </Button>
+              </WrapItem>
+            ))}
+          </Wrap>
         </VStack>
       </Box>
 
-      <Modal isOpen={saveModal.isOpen} onClose={saveModal.onClose} isCentered>
+      <Modal isOpen={saveModalOpen} onClose={closeSaveModal} isCentered>
         <ModalOverlay />
         <ModalContent bg="gray.800" borderColor="gray.600">
           <ModalHeader>Save VJ preset</ModalHeader>
@@ -273,7 +317,7 @@ export const VJPresetsControls = observer(function VJPresetsControls({
             </Text>
           </ModalBody>
           <ModalFooter gap={2}>
-            <Button variant="ghost" mr={3} onClick={saveModal.onClose}>
+            <Button variant="ghost" mr={3} onClick={closeSaveModal}>
               Cancel
             </Button>
             <Button
@@ -288,37 +332,6 @@ export const VJPresetsControls = observer(function VJPresetsControls({
           </ModalFooter>
         </ModalContent>
       </Modal>
-
-      <AlertDialog
-        isOpen={deleteDialog.isOpen}
-        leastDestructiveRef={cancelDeleteRef}
-        onClose={deleteDialog.onClose}
-      >
-        <AlertDialogOverlay />
-        <AlertDialogContent bg="gray.800">
-          <AlertDialogHeader fontSize="lg" fontWeight="bold">
-            Delete preset?
-          </AlertDialogHeader>
-          <AlertDialogBody>
-            {selectedRow
-              ? `Remove “${selectedRow.name}”? This cannot be undone.`
-              : "Remove this preset? This cannot be undone."}
-          </AlertDialogBody>
-          <AlertDialogFooter>
-            <Button ref={cancelDeleteRef} onClick={deleteDialog.onClose}>
-              Cancel
-            </Button>
-            <Button
-              colorScheme="red"
-              onClick={onConfirmDelete}
-              ml={3}
-              isLoading={deleteMutation.isPending}
-            >
-              Delete
-            </Button>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </>
   );
 });
