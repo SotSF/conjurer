@@ -9,7 +9,7 @@ import {
   useNumberInput,
 } from "@chakra-ui/react";
 import { observer } from "mobx-react-lite";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { FaArrowDown, FaArrowUp } from "react-icons/fa";
 
@@ -33,11 +33,23 @@ import {
   vjLiveAccentHover,
 } from "@/src/components/VJPage/vjLiveTheme";
 import { VJPresetsControls } from "@/src/components/VJPage/VJPresetsControls";
+import { VJKeyboardShortcutsHelp } from "@/src/components/VJPage/VJKeyboardShortcutsHelp";
+import { vjKeydownTargetIgnoresShortcuts } from "@/src/components/VJPage/vjKeyboardShortcuts";
+import { playgroundPatterns } from "@/src/patterns/patterns";
 
 const previewBorderColor = "green.300";
 const inactiveBorderColor = "gray.600";
 const leftCanvasPadding = 2;
 const previewTopPadding = 0;
+
+const PATTERN_NAV_KEYS = new Set([
+  "ArrowLeft",
+  "ArrowRight",
+  "ArrowUp",
+  "ArrowDown",
+  "Home",
+  "End",
+]);
 
 export const VJPageInner = observer(function VJPageInner() {
   const store = useStore();
@@ -66,6 +78,94 @@ export const VJPageInner = observer(function VJPageInner() {
 
   const [crossfadeDurationSeconds, setCrossfadeDurationSeconds] = useState(0.6);
   const [crossfadeDurationInput, setCrossfadeDurationInput] = useState("2.0");
+
+  const [deletePresetMode, setDeletePresetMode] = useState(false);
+
+  const hotkeysRef = useRef({
+    editingSession,
+    liveSession,
+    previewSession,
+    setDeletePresetMode,
+    setEditingSession,
+    setPushRequest,
+  });
+  hotkeysRef.current = {
+    editingSession,
+    liveSession,
+    previewSession,
+    setDeletePresetMode,
+    setEditingSession,
+    setPushRequest,
+  };
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (vjKeydownTargetIgnoresShortcuts(e.target)) return;
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+
+      const t = e.target;
+      if (
+        PATTERN_NAV_KEYS.has(e.key) &&
+        t instanceof HTMLElement &&
+        t.closest('[role="radiogroup"]')
+      ) {
+        return;
+      }
+
+      const h = hotkeysRef.current;
+      const session =
+        h.editingSession === "live" ? h.liveSession : h.previewSession;
+      const patternCount = playgroundPatterns.length;
+      if (patternCount === 0) return;
+
+      if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+        e.preventDefault();
+        session.onSelectPattern(
+          (session.selectedPatternIndex - 1 + patternCount) % patternCount,
+        );
+        return;
+      }
+      if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+        e.preventDefault();
+        session.onSelectPattern(
+          (session.selectedPatternIndex + 1) % patternCount,
+        );
+        return;
+      }
+      if (e.key === "Home") {
+        e.preventDefault();
+        session.onSelectPattern(0);
+        return;
+      }
+      if (e.key === "End") {
+        e.preventDefault();
+        session.onSelectPattern(patternCount - 1);
+        return;
+      }
+
+      if (e.key === "d") {
+        e.preventDefault();
+        h.setDeletePresetMode((v) => !v);
+        return;
+      }
+      if (e.key === "v") {
+        e.preventDefault();
+        h.setEditingSession((s) => (s === "live" ? "preview" : "live"));
+        return;
+      }
+      if (e.key === "X") {
+        e.preventDefault();
+        h.setPushRequest({
+          id: Date.now(),
+          toBlock: h.previewSession.selectedPatternBlock.clone(),
+        });
+        return;
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
 
   const onCrossfadeDurationChange = (
     valueString: string,
@@ -400,6 +500,8 @@ export const VJPageInner = observer(function VJPageInner() {
                 session={session}
                 accentColor={activeEditBorderColor}
                 editingLabel={liveEditing ? "Live" : "Preview"}
+                deletePresetMode={deletePresetMode}
+                onDeletePresetModeChange={setDeletePresetMode}
               />
               <VStack align="stretch" spacing={2} width="100%" minW={0} ml={2}>
                 <Text fontSize="md" fontWeight="bold" color="gray.200">
@@ -432,6 +534,7 @@ export const VJPageInner = observer(function VJPageInner() {
                   />
                 );
               })}
+              <VJKeyboardShortcutsHelp />
             </VStack>
           </VStack>
         </Panel>

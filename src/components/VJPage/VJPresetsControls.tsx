@@ -34,6 +34,8 @@ type Props = {
   accentColor: string;
   /** Which VJ session is being edited (for copy in the save dialog). */
   editingLabel: "Live" | "Preview";
+  deletePresetMode: boolean;
+  onDeletePresetModeChange: (value: boolean) => void;
 };
 
 function buildSuggestedPresetBaseName(session: VJCanopySession): string {
@@ -71,6 +73,8 @@ export const VJPresetsControls = observer(function VJPresetsControls({
   session,
   accentColor,
   editingLabel,
+  deletePresetMode,
+  onDeletePresetModeChange,
 }: Props) {
   const store = useStore();
   const { userStore, usingLocalData } = store;
@@ -79,9 +83,6 @@ export const VJPresetsControls = observer(function VJPresetsControls({
   const utils = trpc.useUtils();
 
   const [newPresetName, setNewPresetName] = useState("");
-  /** When true, each preset shows a trash control; one click deletes. Toggle off via header control. */
-  const [deletePresetMode, setDeletePresetMode] = useState(false);
-
   const {
     data: presets,
     isPending: listPending,
@@ -125,7 +126,7 @@ export const VJPresetsControls = observer(function VJPresetsControls({
   const deleteMutation = trpc.vjPreset.delete.useMutation({
     onSuccess: () => {
       void utils.vjPreset.list.invalidate();
-      setDeletePresetMode(false);
+      onDeletePresetModeChange(false);
       toast({ title: "Preset deleted", status: "success", duration: 2500 });
     },
     onError: (err) => {
@@ -218,7 +219,7 @@ export const VJPresetsControls = observer(function VJPresetsControls({
                 : "Delete presets (preset buttons show trash; click to delete)"
             }
             icon={<FaTrashAlt />}
-            onClick={() => setDeletePresetMode((v) => !v)}
+            onClick={() => onDeletePresetModeChange(!deletePresetMode)}
           />
         </HStack>
         {listError && (
