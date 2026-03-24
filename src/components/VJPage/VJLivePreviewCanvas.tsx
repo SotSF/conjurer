@@ -121,7 +121,6 @@ export const VJLivePreviewCanvas = observer(function VJLivePreviewCanvas({
   const [renderTarget, setRenderTarget] = useState<WebGLRenderTarget | null>(
     null,
   );
-  const transmitData = store.context === "vj" && transmitDataEnabled;
 
   const [currentBase, setCurrentBase] = useState(() => block.clone());
   const [nextBase, setNextBase] = useState<Block | null>(null);
@@ -220,7 +219,7 @@ export const VJLivePreviewCanvas = observer(function VJLivePreviewCanvas({
           )}
           <CanopySpaceView
             renderTarget={renderTarget}
-            transmitData={transmitData}
+            transmitData={transmitDataEnabled}
             visible={displayMode === "canopySpace"}
           />
         </>

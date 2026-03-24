@@ -54,9 +54,7 @@ export const VJPageInner = observer(function VJPageInner() {
   const sendingData = store.sendingData;
   const liveAccent = vjLiveAccent(sendingData);
   const liveHover = vjLiveAccentHover(sendingData);
-  const activeEditBorderColor = liveEditing
-    ? liveAccent
-    : previewBorderColor;
+  const activeEditBorderColor = liveEditing ? liveAccent : previewBorderColor;
 
   const [pushRequest, setPushRequest] = useState<{
     id: number;
@@ -72,9 +70,7 @@ export const VJPageInner = observer(function VJPageInner() {
   ) => {
     setCrossfadeDurationInput(valueString);
     if (Number.isNaN(valueNumber)) return;
-    setCrossfadeDurationSeconds(
-      Math.min(100, Math.max(0.05, valueNumber)),
-    );
+    setCrossfadeDurationSeconds(Math.min(100, Math.max(0.05, valueNumber)));
   };
 
   const { getIncrementButtonProps, getDecrementButtonProps } = useNumberInput({
@@ -120,9 +116,7 @@ export const VJPageInner = observer(function VJPageInner() {
                     height="100%"
                     borderWidth={2}
                     borderStyle="solid"
-                    borderColor={
-                      liveEditing ? liveAccent : inactiveBorderColor
-                    }
+                    borderColor={liveEditing ? liveAccent : inactiveBorderColor}
                     borderRightWidth={0}
                     borderTopLeftRadius="md"
                     borderBottomLeftRadius="md"
@@ -382,7 +376,15 @@ export const VJPageInner = observer(function VJPageInner() {
             >
               Editing {liveEditing ? "Live" : "Preview"}
             </Box>
-            <VStack width="100%" minW={0} maxW="100%" spacing={2} mt={2} px={2} pb={2}>
+            <VStack
+              width="100%"
+              minW={0}
+              maxW="100%"
+              spacing={2}
+              mt={2}
+              px={2}
+              pb={2}
+            >
               <VJParameterControls
                 key={`params-pattern-${editingSession}-${session.renderNonce}`}
                 block={session.selectedPatternBlock as any}
