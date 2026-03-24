@@ -26,6 +26,7 @@ import { useVJCanopySession } from "@/src/components/VJPage/useVJCanopySession";
 import { VJParameterControls } from "@/src/components/VJPage/VJParameterControls";
 import { VJPatternRadioGroup } from "@/src/components/VJPage/VJPatternRadioGroup";
 import { VJLivePreviewCanvas } from "@/src/components/VJPage/VJLivePreviewCanvas";
+import { LoginButton } from "@/src/components/LoginButton";
 import { RoleSelector } from "@/src/components/RoleSelector";
 import {
   vjLiveAccent,
@@ -87,13 +88,20 @@ export const VJPageInner = observer(function VJPageInner() {
     <Box position="relative" w="100vw" h="100vh">
       <Box
         position="absolute"
-        top={2}
+        top={1}
         right={2}
         zIndex={20}
         bg="gray.600"
         borderRadius="md"
+        px={1}
+        py={1}
       >
-        <RoleSelector />
+        <HStack spacing={2} alignItems="center">
+          <RoleSelector />
+          <Box>
+            <LoginButton />
+          </Box>
+        </HStack>
       </Box>
       <PanelGroup autoSaveId="vj-1-v3" direction="horizontal">
         <Panel defaultSize={25}>
