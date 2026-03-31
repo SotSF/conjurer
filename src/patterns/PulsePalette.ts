@@ -81,6 +81,6 @@ export const PulsePalette = () =>
       value: 0,
       min: 0,
       max: 96,
-      step: 1,
+      step: 2,
     },
   });
