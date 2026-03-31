@@ -7,6 +7,7 @@ import { playgroundPatterns } from "@/src/patterns/patterns";
 import type { Store } from "@/src/types/Store";
 import type { ExtraParams } from "@/src/types/PatternParams";
 import { applySerializedBlockToVjPool } from "@/src/utils/applySerializedBlockToVjPool";
+import { copyPatternParamValuesBetweenBlocks } from "@/src/utils/copyPatternParamValuesBetweenBlocks";
 
 export type VJCanopySession = {
   selectedPatternIndex: number;
@@ -107,6 +108,11 @@ export const useVJCanopySession = (store: Store): VJCanopySession => {
         if (targetPatternBlock.pattern.name !== sourcePatternBlock.pattern.name) {
           targetPatternBlock.pattern = sourcePatternBlock.pattern.clone();
           needsRemount = true;
+        } else {
+          copyPatternParamValuesBetweenBlocks(
+            sourcePatternBlock,
+            targetPatternBlock,
+          );
         }
         targetPatternBlock.parameterVariations =
           cloneParameterVariations(sourcePatternBlock.parameterVariations);
@@ -122,6 +128,11 @@ export const useVJCanopySession = (store: Store): VJCanopySession => {
           ) {
             targetEffectBlock.pattern = sourceEffectBlock.pattern.clone();
             needsRemount = true;
+          } else {
+            copyPatternParamValuesBetweenBlocks(
+              sourceEffectBlock,
+              targetEffectBlock,
+            );
           }
           targetEffectBlock.parameterVariations =
             cloneParameterVariations(sourceEffectBlock.parameterVariations);
