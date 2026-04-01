@@ -8,7 +8,6 @@ import { useStore } from "@/src/types/StoreContext";
 import { RenderingGate } from "@/src/components/RenderingGate";
 import { CameraControls } from "@/src/components/CameraControls";
 import { SingleBlockRenderPipeline } from "@/src/components/RenderPipeline/SingleBlockRenderPipeline";
-import { VJStaticCamera } from "@/src/components/VJPage/VJStaticCamera";
 import { Canopy } from "@/src/components/Canvas/CanopyView";
 import { CanopySpaceView } from "@/src/components/Canvas/CanopySpaceView";
 import { CartesianSpaceView } from "@/src/components/Canvas/CartesianSpaceView";
@@ -23,7 +22,6 @@ type Props = {
   block: Block;
   displayMode: VJDisplayMode;
   transmitDataEnabled?: boolean;
-  enableCameraControls?: boolean;
   frameloop?: "always" | "demand";
 };
 
@@ -31,7 +29,6 @@ export const VJPreviewCanvas = observer(function VJPreviewCanvas({
   block,
   displayMode,
   transmitDataEnabled = false,
-  enableCameraControls = true,
   frameloop = "demand",
 }: Props) {
   const store = useStore();
@@ -46,7 +43,7 @@ export const VJPreviewCanvas = observer(function VJPreviewCanvas({
       {frameloop === "demand" && (
         <RenderingGate shouldRender={!store.playing} />
       )}
-      {enableCameraControls ? <CameraControls /> : <VJStaticCamera />}
+      <CameraControls />
       <SingleBlockRenderPipeline
         autorun
         block={block}

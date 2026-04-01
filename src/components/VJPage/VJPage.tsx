@@ -435,7 +435,6 @@ export const VJPageInner = observer(function VJPageInner() {
                       block={previewSession.selectedPatternBlock}
                       displayMode={displayMode}
                       transmitDataEnabled={false}
-                      enableCameraControls={false}
                     />
                   </Box>
                 </VStack>
