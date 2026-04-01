@@ -20,6 +20,7 @@ export const PulsePalette = () =>
       value: 1,
       min: -5,
       max: 5,
+      jumpy: true,
     },
     u_time_offset: {
       name: "Time Offset",
@@ -31,6 +32,7 @@ export const PulsePalette = () =>
       name: "Period",
       value: 4,
       max: 10,
+      jumpy: true,
     },
     u_duty_cycle: {
       name: "Duty Cycle",
@@ -41,6 +43,7 @@ export const PulsePalette = () =>
       value: 5,
       max: 10,
       step: 0.1,
+      jumpy: true,
     },
     u_fade_factor: {
       name: "Fade Factor",
@@ -52,6 +55,7 @@ export const PulsePalette = () =>
       min: 1,
       max: 20,
       step: 1,
+      jumpy: true,
     },
     u_wave_amplitude: {
       name: "Wave Amplitude",
@@ -71,6 +75,7 @@ export const PulsePalette = () =>
       min: 1,
       max: 100,
       step: 1,
+      jumpy: true,
     },
     u_white_leading_edge: {
       name: "White Leading Edge",
@@ -82,5 +87,6 @@ export const PulsePalette = () =>
       min: 0,
       max: 96,
       step: 2,
+      jumpy: true,
     },
   });
