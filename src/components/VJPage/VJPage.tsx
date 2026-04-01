@@ -25,7 +25,7 @@ import { VJPatternEffectsPanel } from "@/src/components/VJPage/VJPatternEffectsP
 import { useVJCanopySession } from "@/src/components/VJPage/useVJCanopySession";
 import { VJParameterControls } from "@/src/components/VJPage/VJParameterControls";
 import { VJPatternRadioGroup } from "@/src/components/VJPage/VJPatternRadioGroup";
-import { VJLivePreviewCanvas } from "@/src/components/VJPage/VJLiveCanvas";
+import { VJLiveCanvas } from "@/src/components/VJPage/VJLiveCanvas";
 import { LoginButton } from "@/src/components/LoginButton";
 import { RoleSelector } from "@/src/components/RoleSelector";
 import {
@@ -75,11 +75,20 @@ export const VJPageInner = observer(function VJPageInner() {
     id: number;
     toBlock: Block;
   } | null>(null);
+  const [xfadeInProgress, setXfadeInProgress] = useState(false);
 
-  const [crossfadeDurationSeconds, setCrossfadeDurationSeconds] = useState(0.6);
+  const [crossfadeDurationSeconds, setCrossfadeDurationSeconds] = useState(2);
   const [crossfadeDurationInput, setCrossfadeDurationInput] = useState("2.0");
 
   const [deletePresetMode, setDeletePresetMode] = useState(false);
+
+  const requestXfadePreviewToLive = () => {
+    setXfadeInProgress(true);
+    setPushRequest({
+      id: Date.now(),
+      toBlock: previewSession.selectedPatternBlock.clone(),
+    });
+  };
 
   const hotkeysRef = useRef({
     editingSession,
@@ -87,7 +96,8 @@ export const VJPageInner = observer(function VJPageInner() {
     previewSession,
     setDeletePresetMode,
     setEditingSession,
-    setPushRequest,
+    requestXfadePreviewToLive,
+    xfadeInProgress,
   });
   hotkeysRef.current = {
     editingSession,
@@ -95,7 +105,8 @@ export const VJPageInner = observer(function VJPageInner() {
     previewSession,
     setDeletePresetMode,
     setEditingSession,
-    setPushRequest,
+    requestXfadePreviewToLive,
+    xfadeInProgress,
   };
 
   useEffect(() => {
@@ -155,10 +166,8 @@ export const VJPageInner = observer(function VJPageInner() {
       }
       if (e.key === "X") {
         e.preventDefault();
-        h.setPushRequest({
-          id: Date.now(),
-          toBlock: h.previewSession.selectedPatternBlock.clone(),
-        });
+        if (h.xfadeInProgress) return;
+        h.requestXfadePreviewToLive();
         return;
       }
     };
@@ -267,13 +276,14 @@ export const VJPageInner = observer(function VJPageInner() {
                     >
                       LIVE
                     </Text>
-                    <VJLivePreviewCanvas
+                    <VJLiveCanvas
                       key={`live-${liveSession.renderNonce}`}
                       block={liveSession.selectedPatternBlock}
                       displayMode={displayMode}
                       transmitDataEnabled
                       pushRequest={pushRequest}
                       onCrossfadeComplete={() => {
+                        setXfadeInProgress(false);
                         // Align the live editing state to match preview after the fade.
                         liveSession.copySelectionFrom(previewSession);
                         // Prevent remounting from restarting the same crossfade.
@@ -344,12 +354,8 @@ export const VJPageInner = observer(function VJPageInner() {
                   borderColor={liveAccent}
                   color={liveAccent}
                   _hover={{ borderColor: liveHover, color: liveHover }}
-                  onClick={() => {
-                    setPushRequest({
-                      id: Date.now(),
-                      toBlock: previewSession.selectedPatternBlock.clone(),
-                    });
-                  }}
+                  isDisabled={xfadeInProgress}
+                  onClick={requestXfadePreviewToLive}
                 >
                   Xfade preview to live
                 </Button>

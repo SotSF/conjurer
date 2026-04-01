@@ -108,7 +108,7 @@ const CrossfadeDriver = function CrossfadeDriver({
   return null;
 };
 
-export const VJLivePreviewCanvas = observer(function VJLivePreviewCanvas({
+export const VJLiveCanvas = observer(function VJLiveCanvas({
   block,
   displayMode,
   transmitDataEnabled = false,
