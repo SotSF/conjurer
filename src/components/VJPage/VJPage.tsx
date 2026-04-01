@@ -25,7 +25,7 @@ import { VJPatternEffectsPanel } from "@/src/components/VJPage/VJPatternEffectsP
 import { useVJCanopySession } from "@/src/components/VJPage/useVJCanopySession";
 import { VJParameterControls } from "@/src/components/VJPage/VJParameterControls";
 import { VJPatternRadioGroup } from "@/src/components/VJPage/VJPatternRadioGroup";
-import { VJLivePreviewCanvas } from "@/src/components/VJPage/VJLivePreviewCanvas";
+import { VJLivePreviewCanvas } from "@/src/components/VJPage/VJLiveCanvas";
 import { LoginButton } from "@/src/components/LoginButton";
 import { RoleSelector } from "@/src/components/RoleSelector";
 import {
