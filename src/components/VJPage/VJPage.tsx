@@ -371,9 +371,7 @@ export const VJPageInner = observer(function VJPageInner() {
                   _hover={{ borderColor: liveHover, color: liveHover }}
                   onClick={handleXfadePress}
                 >
-                  {xfadeInProgress
-                    ? "Cancel xfade"
-                    : "Xfade preview to live"}
+                  {xfadeInProgress ? "Cancel xfade" : "Xfade preview to live"}
                 </Button>
                 <Button
                   aria-label="Reset preview"
@@ -466,20 +464,20 @@ export const VJPageInner = observer(function VJPageInner() {
         </Panel>
         <PanelResizeHandle />
         <Panel defaultSize={75}>
-          <VStack
-            p={0}
+          <Box
+            position="relative"
+            display="flex"
+            flexDirection="column"
             w="100%"
             minW={0}
             maxW="100%"
-            overflowX="hidden"
-            overflowY="auto"
-            height="100%"
+            h="100%"
+            minH={0}
+            overflow="hidden"
             borderWidth={1}
             borderStyle="solid"
             borderColor="gray.600"
             borderRadius={0}
-            spacing={2}
-            position="relative"
             borderLeftWidth={0}
             borderRightWidth={0}
             borderBottomWidth={0}
@@ -495,6 +493,7 @@ export const VJPageInner = observer(function VJPageInner() {
               pointerEvents="none"
             />
             <Box
+              flexShrink={0}
               width="100%"
               px={3}
               py={2}
@@ -507,57 +506,65 @@ export const VJPageInner = observer(function VJPageInner() {
             >
               Editing {liveEditing ? "Live" : "Preview"}
             </Box>
-            <VStack
-              width="100%"
+            <Box
+              flex="1"
+              minH={0}
               minW={0}
-              maxW="100%"
-              spacing={2}
-              pt={1}
-              pr={1}
-              pb={1}
-              pl={2}
+              overflowX="hidden"
+              overflowY="auto"
             >
-              <VJPresetsControls
-                session={session}
-                accentColor={activeEditBorderColor}
-                editingLabel={liveEditing ? "Live" : "Preview"}
-                deletePresetMode={deletePresetMode}
-                onDeletePresetModeChange={setDeletePresetMode}
-              />
-              <VStack align="stretch" spacing={2} width="100%" minW={0} ml={2}>
-                <Text fontSize="md" fontWeight="bold" color="gray.200">
-                  Choose a pattern
-                </Text>
-                <VJPatternRadioGroup
-                  selectedPatternName={
-                    session.selectedPatternBlock.pattern.name
-                  }
-                  selectedPatternIndex={session.selectedPatternIndex}
-                  onSelectPattern={session.onSelectPattern}
+              <VStack
+                width="100%"
+                minW={0}
+                maxW="100%"
+                spacing={2}
+                pt={1}
+                pr={1}
+                pb={1}
+                pl={2}
+              >
+                <VJPresetsControls
+                  session={session}
+                  accentColor={activeEditBorderColor}
+                  editingLabel={liveEditing ? "Live" : "Preview"}
+                  deletePresetMode={deletePresetMode}
+                  onDeletePresetModeChange={setDeletePresetMode}
                 />
-              </VStack>
-              <VJParameterControls
-                key={`params-pattern-${editingSession}-${session.renderNonce}`}
-                block={session.selectedPatternBlock as any}
-              />
-              <VJPatternEffectsPanel
-                key={`effects-${editingSession}-${session.renderNonce}`}
-                selectedEffectIndices={session.selectedEffectIndices}
-                onToggleEffect={session.onToggleEffect}
-              />
-              {session.selectedEffectIndices.map((effectIndex) => {
-                const effectBlock = session.effectBlocks[effectIndex];
-                if (!effectBlock) return null;
-                return (
-                  <VJParameterControls
-                    key={`${effectBlock.id}-${editingSession}-${session.renderNonce}`}
-                    block={effectBlock as any}
+                <VStack align="stretch" spacing={2} width="100%" minW={0} ml={2}>
+                  <Text fontSize="md" fontWeight="bold" color="gray.200">
+                    Choose a pattern
+                  </Text>
+                  <VJPatternRadioGroup
+                    selectedPatternName={
+                      session.selectedPatternBlock.pattern.name
+                    }
+                    selectedPatternIndex={session.selectedPatternIndex}
+                    onSelectPattern={session.onSelectPattern}
                   />
-                );
-              })}
-              <VJKeyboardShortcutsHelp />
-            </VStack>
-          </VStack>
+                </VStack>
+                <VJParameterControls
+                  key={`params-pattern-${editingSession}-${session.renderNonce}`}
+                  block={session.selectedPatternBlock as any}
+                />
+                <VJPatternEffectsPanel
+                  key={`effects-${editingSession}-${session.renderNonce}`}
+                  selectedEffectIndices={session.selectedEffectIndices}
+                  onToggleEffect={session.onToggleEffect}
+                />
+                {session.selectedEffectIndices.map((effectIndex) => {
+                  const effectBlock = session.effectBlocks[effectIndex];
+                  if (!effectBlock) return null;
+                  return (
+                    <VJParameterControls
+                      key={`${effectBlock.id}-${editingSession}-${session.renderNonce}`}
+                      block={effectBlock as any}
+                    />
+                  );
+                })}
+                <VJKeyboardShortcutsHelp />
+              </VStack>
+            </Box>
+          </Box>
         </Panel>
       </PanelGroup>
     </Box>
