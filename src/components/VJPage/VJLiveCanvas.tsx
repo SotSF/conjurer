@@ -36,6 +36,8 @@ type Props = {
   onCrossfadeComplete?: () => void;
 
   crossfadeDurationSeconds: number;
+  /** Increment to finish the current crossfade immediately (same outcome as completing the fade). */
+  cancelCrossfadeSignal: number;
 };
 
 function attachBrightnessAdjust(base: Block, intensity: number): Block {
@@ -116,11 +118,15 @@ export const VJLiveCanvas = observer(function VJLiveCanvas({
   pushRequest,
   onCrossfadeComplete,
   crossfadeDurationSeconds,
+  cancelCrossfadeSignal,
 }: Props) {
   const store = useStore();
   const [renderTarget, setRenderTarget] = useState<WebGLRenderTarget | null>(
     null,
   );
+
+  const lastProcessedCancelSignalRef = useRef(0);
+  const nextBlockRef = useRef<Block | null>(null);
 
   // Snapshots only used during crossfade. When idle, we render `block` directly so
   // live edits (params, variations) stay in sync — a clone would go stale because
@@ -128,6 +134,7 @@ export const VJLiveCanvas = observer(function VJLiveCanvas({
   // used to refresh.
   const [currentBlock, setCurrentBlock] = useState<Block | null>(null);
   const [nextBlock, setNextBlock] = useState<Block | null>(null);
+  nextBlockRef.current = nextBlock;
 
   const startTimeRef = useRef<number | null>(null);
   const progressRef = useRef(0);
@@ -161,13 +168,22 @@ export const VJLiveCanvas = observer(function VJLiveCanvas({
   }, [nextBlock]);
 
   const finishCrossfade = () => {
-    if (!nextBlock) return;
+    if (!nextBlockRef.current) return;
     setNextBlock(null);
     setCurrentBlock(null);
     startTimeRef.current = null;
     progressRef.current = 0;
     onCrossfadeComplete?.();
   };
+
+  const finishCrossfadeRef = useRef(finishCrossfade);
+  finishCrossfadeRef.current = finishCrossfade;
+
+  useEffect(() => {
+    if (cancelCrossfadeSignal <= lastProcessedCancelSignalRef.current) return;
+    lastProcessedCancelSignalRef.current = cancelCrossfadeSignal;
+    finishCrossfadeRef.current();
+  }, [cancelCrossfadeSignal]);
 
   return (
     <Canvas frameloop={frameloop}>

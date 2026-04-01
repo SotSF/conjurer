@@ -76,6 +76,7 @@ export const VJPageInner = observer(function VJPageInner() {
     toBlock: Block;
   } | null>(null);
   const [xfadeInProgress, setXfadeInProgress] = useState(false);
+  const [cancelCrossfadeSignal, setCancelCrossfadeSignal] = useState(0);
 
   const [crossfadeDurationSeconds, setCrossfadeDurationSeconds] = useState(2);
   const [crossfadeDurationInput, setCrossfadeDurationInput] = useState("2.0");
@@ -90,14 +91,21 @@ export const VJPageInner = observer(function VJPageInner() {
     });
   };
 
+  const handleXfadePress = () => {
+    if (xfadeInProgress) {
+      setCancelCrossfadeSignal((n) => n + 1);
+    } else {
+      requestXfadePreviewToLive();
+    }
+  };
+
   const hotkeysRef = useRef({
     editingSession,
     liveSession,
     previewSession,
     setDeletePresetMode,
     setEditingSession,
-    requestXfadePreviewToLive,
-    xfadeInProgress,
+    handleXfadePress,
   });
   hotkeysRef.current = {
     editingSession,
@@ -105,8 +113,7 @@ export const VJPageInner = observer(function VJPageInner() {
     previewSession,
     setDeletePresetMode,
     setEditingSession,
-    requestXfadePreviewToLive,
-    xfadeInProgress,
+    handleXfadePress,
   };
 
   useEffect(() => {
@@ -166,8 +173,7 @@ export const VJPageInner = observer(function VJPageInner() {
       }
       if (e.key === "X") {
         e.preventDefault();
-        if (h.xfadeInProgress) return;
-        h.requestXfadePreviewToLive();
+        h.handleXfadePress();
         return;
       }
     };
@@ -290,6 +296,7 @@ export const VJPageInner = observer(function VJPageInner() {
                         setPushRequest(null);
                       }}
                       crossfadeDurationSeconds={crossfadeDurationSeconds}
+                      cancelCrossfadeSignal={cancelCrossfadeSignal}
                     />
                   </Box>
                 </Box>
@@ -346,18 +353,27 @@ export const VJPageInner = observer(function VJPageInner() {
                   </HStack>
                 </HStack>
                 <Button
-                  aria-label="Xfade preview to live"
-                  title="Xfade preview to live"
+                  aria-label={
+                    xfadeInProgress
+                      ? "Cancel crossfade and go to preview now"
+                      : "Xfade preview to live"
+                  }
+                  title={
+                    xfadeInProgress
+                      ? "Cancel crossfade and go to preview now"
+                      : "Xfade preview to live"
+                  }
                   leftIcon={<FaArrowUp />}
                   size="sm"
                   variant="outline"
                   borderColor={liveAccent}
                   color={liveAccent}
                   _hover={{ borderColor: liveHover, color: liveHover }}
-                  isDisabled={xfadeInProgress}
-                  onClick={requestXfadePreviewToLive}
+                  onClick={handleXfadePress}
                 >
-                  Xfade preview to live
+                  {xfadeInProgress
+                    ? "Cancel xfade"
+                    : "Xfade preview to live"}
                 </Button>
                 <Button
                   aria-label="Reset preview"

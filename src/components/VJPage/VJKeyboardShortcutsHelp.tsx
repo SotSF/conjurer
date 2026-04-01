@@ -13,7 +13,7 @@ const ROWS: Row[] = [
   {
     keyParts: ["Shift", "X"],
     joiner: "+",
-    description: "Crossfade preview to live",
+    description: "Crossfade preview to live (same key cancels during crossfade)",
   },
   { keyParts: ["v"], description: "Switch between editing live and preview" },
   {
