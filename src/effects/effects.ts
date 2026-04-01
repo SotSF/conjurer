@@ -36,4 +36,4 @@ for (const effect of defaultEffects) defaultEffectMap[effect.name] = effect;
 // Effects that will have their uniforms updated by the pattern playground.
 const playgroundEffects: Pattern[] = effectFactories.map((f) => f());
 
-export { playgroundEffects, defaultEffectMap };
+export { defaultEffectMap, effectFactories, playgroundEffects };

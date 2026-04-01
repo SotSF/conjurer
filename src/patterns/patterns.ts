@@ -67,4 +67,4 @@ for (const pattern of defaultPatterns)
   defaultPatternMap[pattern.name] = pattern;
 // Patterns that will have their uniforms updated by the pattern playground.
 const playgroundPatterns: Pattern[] = patternFactories.map((f) => f());
-export { defaultPatternMap, playgroundPatterns };
+export { defaultPatternMap, patternFactories, playgroundPatterns };

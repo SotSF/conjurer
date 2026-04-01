@@ -1,6 +1,6 @@
 import { Button, HStack } from "@chakra-ui/react";
 import { memo, useRef } from "react";
-import { playgroundPatterns } from "@/src/patterns/patterns";
+import { vjPatterns } from "@/src/components/VJPage/vjPageCatalog";
 
 export type VJPatternRadioGroupProps = {
   selectedPatternName: string;
@@ -18,7 +18,7 @@ export const VJPatternRadioGroup = memo(function VJPatternRadioGroup({
   onSelectPattern,
 }: VJPatternRadioGroupProps) {
   const patternRefs = useRef<Array<HTMLButtonElement | null>>([]);
-  const patternCount = playgroundPatterns.length;
+  const patternCount = vjPatterns.length;
 
   const focusPattern = (index: number) => {
     const el = patternRefs.current[index];
@@ -69,7 +69,7 @@ export const VJPatternRadioGroup = memo(function VJPatternRadioGroup({
       role="radiogroup"
       aria-label="Patterns"
     >
-      {playgroundPatterns.map((p, index) => {
+      {vjPatterns.map((p, index) => {
         const selected = p.name === selectedPatternName;
         return (
           <Button
