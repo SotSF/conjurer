@@ -158,7 +158,7 @@ export const VJScalarParameterControl = observer(
                 flexShrink={0}
                 size="xs"
                 aria-label="Periodic variation"
-                title="Periodic variation"
+                title="Vary this parameter periodically"
                 height={6}
                 icon={<TbWaveSine size={17} />}
                 onClick={onVariationModeToggle}
@@ -168,7 +168,7 @@ export const VJScalarParameterControl = observer(
                 flexShrink={0}
                 size="xs"
                 aria-label="Constant value"
-                title="Constant value"
+                title="Set this parameter to a constant value"
                 height={6}
                 icon={<FaTimes size={14} />}
                 onClick={onVariationModeToggle}
