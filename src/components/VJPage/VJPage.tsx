@@ -41,6 +41,7 @@ import {
   useVjMidiCcScalar,
   type VjMidiCcLearnState,
 } from "@/src/components/VJPage/useVjMidiCcScalar";
+import { getVjMidiScalarUniformsFlatForEditableStack } from "@/src/utils/vjFirstNonJumpyScalarUniform";
 import type { ExtraParams } from "@/src/types/PatternParams";
 import type { VjMidiDeviceConfigsFile } from "@/src/utils/vjMidiDeviceStorage";
 import {
@@ -152,11 +153,29 @@ export const VJPageInner = observer(function VJPageInner() {
   };
 
   const session = editingSession === "live" ? liveSession : previewSession;
+
+  const midiTargetsFlat = useMemo(
+    () =>
+      getVjMidiScalarUniformsFlatForEditableStack(
+        session.selectedPatternBlock as Block<ExtraParams>,
+        session.effectBlocks as Block<ExtraParams>[],
+        session.selectedEffectIndices,
+      ),
+    [
+      session.selectedPatternBlock,
+      session.effectBlocks,
+      session.selectedEffectIndices,
+    ],
+  );
+
+  const midiTargetsFlatRef = useRef(midiTargetsFlat);
+  midiTargetsFlatRef.current = midiTargetsFlat;
+
   useVjMidiCcScalar(
-    session.selectedPatternBlock as Block<ExtraParams>,
     midiLoggingEnabled,
     midiMapping,
     midiCcLearnRef,
+    midiTargetsFlatRef,
   );
   const liveEditing = editingSession === "live";
   const previewEditing = editingSession === "preview";

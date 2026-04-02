@@ -27,6 +27,34 @@ export type VjMidiScalarTarget = {
  * Same ordering and filters as {@link VJParameterControls} / {@link VJParameterControl}:
  * non-jumpy scalar params (sliders) in panel order, excluding base uniforms and non-number controls.
  */
+/** Scalar target plus the block it belongs to (pattern or effect). */
+export type VjMidiScalarTargetWithBlock = VjMidiScalarTarget & {
+  block: Block<ExtraParams>;
+};
+
+/**
+ * Flat list matching the VJ sidebar: pattern scalars first (panel order), then each
+ * enabled effect’s scalars in selection order — same order as stacked {@link VJParameterControls}.
+ */
+export function getVjMidiScalarUniformsFlatForEditableStack(
+  patternBlock: Block<ExtraParams>,
+  effectBlocks: Block<ExtraParams>[],
+  selectedEffectIndices: number[],
+): VjMidiScalarTargetWithBlock[] {
+  const out: VjMidiScalarTargetWithBlock[] = [];
+  for (const t of getVjMidiScalarUniformsInOrder(patternBlock)) {
+    out.push({ block: patternBlock, ...t });
+  }
+  for (const ei of selectedEffectIndices) {
+    const eb = effectBlocks[ei];
+    if (!eb) continue;
+    for (const t of getVjMidiScalarUniformsInOrder(eb)) {
+      out.push({ block: eb, ...t });
+    }
+  }
+  return out;
+}
+
 export function getVjMidiScalarUniformsInOrder(
   block: Block<ExtraParams>,
 ): VjMidiScalarTarget[] {

@@ -236,10 +236,11 @@ export function VJMidiModal({
                   </FormControl>
 
                   <Text fontSize="sm" color="gray.400">
-                    The ordered list maps to scalar sliders in the pattern panel (first
-                    CC → first slider, and so on). Only this device is used when the list
-                    is non-empty. Leave the list empty for legacy mode: any CC / pitch
-                    bend controls the first scalar only.
+                    The ordered list maps to scalar sliders in the sidebar: pattern
+                    first, then each enabled effect in order (first CC → first slider
+                    along that full list). Only this device is used when the list is
+                    non-empty. Leave the list empty for legacy mode: any CC / pitch bend
+                    controls the first scalar in that list only.
                   </Text>
 
                   {portName ? (
@@ -258,9 +259,10 @@ export function VJMidiModal({
                         {midiCcLearnActive ? (
                           <>
                             <Text fontSize="sm" color="blue.200" mb={3}>
-                              Listening — move each knob or slider once, in the order
-                              you want. Repeating the same control does not add it
-                              again. Click done when finished.
+                              Listening — move each knob or slider once, in order (pattern
+                              scalars, then each active effect’s scalars). Repeating the
+                              same control does not add it again. Click done when
+                              finished.
                             </Text>
                             <HStack spacing={2} flexWrap="wrap">
                               <Button
