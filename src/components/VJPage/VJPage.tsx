@@ -36,6 +36,8 @@ import { VJPresetsControls } from "@/src/components/VJPage/VJPresetsControls";
 import { VJKeyboardShortcutsHelp } from "@/src/components/VJPage/VJKeyboardShortcutsHelp";
 import { vjKeydownTargetIgnoresShortcuts } from "@/src/components/VJPage/vjKeyboardShortcuts";
 import { vjPatterns } from "@/src/components/VJPage/vjPageCatalog";
+import { useVjMidiCcScalar } from "@/src/components/VJPage/useVjMidiCcScalar";
+import type { ExtraParams } from "@/src/types/PatternParams";
 
 const previewBorderColor = "green.300";
 const inactiveBorderColor = "gray.600";
@@ -65,6 +67,7 @@ export const VJPageInner = observer(function VJPageInner() {
   );
 
   const session = editingSession === "live" ? liveSession : previewSession;
+  useVjMidiCcScalar(session.selectedPatternBlock as Block<ExtraParams>);
   const liveEditing = editingSession === "live";
   const previewEditing = editingSession === "preview";
 
