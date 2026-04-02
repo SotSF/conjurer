@@ -50,6 +50,13 @@
       "when": 1742304000000,
       "tag": "0006_vj_presets",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1742400000000,
+      "tag": "0007_vj_presets_preview_image",
+      "breakpoints": true
     }
   ]
 }

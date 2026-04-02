@@ -16,7 +16,7 @@ export type VjPresetApplyResult = {
 
 /**
  * Applies a serialized pattern block (pattern + params + variations + effect chain)
- * onto the fixed VJ / playground pattern and effect pools, matching by pattern name.
+ * onto the fixed VJ (or playground) pattern and effect pools, matching by pattern name.
  */
 export function applySerializedBlockToVjPool(
   store: Store,

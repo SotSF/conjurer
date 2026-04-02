@@ -2,11 +2,11 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { runInAction } from "mobx";
 
 import { Block, SerializedBlock } from "@/src/types/Block";
-import { playgroundEffects } from "@/src/effects/effects";
-import { playgroundPatterns } from "@/src/patterns/patterns";
+import { vjEffects, vjPatterns } from "@/src/components/VJPage/vjPageCatalog";
 import type { Store } from "@/src/types/Store";
 import type { ExtraParams } from "@/src/types/PatternParams";
 import { applySerializedBlockToVjPool } from "@/src/utils/applySerializedBlockToVjPool";
+import { copyPatternParamValuesBetweenBlocks } from "@/src/utils/copyPatternParamValuesBetweenBlocks";
 
 export type VJCanopySession = {
   selectedPatternIndex: number;
@@ -31,13 +31,11 @@ export type VJCanopySession = {
 
 export const useVJCanopySession = (store: Store): VJCanopySession => {
   const patternBlocks = useMemo(
-    () =>
-      playgroundPatterns.map((pattern) => new Block(store, pattern.clone())),
+    () => vjPatterns.map((pattern) => new Block(store, pattern.clone())),
     [store],
   );
   const effectBlocks = useMemo(
-    () =>
-      playgroundEffects.map((effect) => new Block(store, effect.clone())),
+    () => vjEffects.map((effect) => new Block(store, effect.clone())),
     [store],
   );
 
@@ -46,6 +44,20 @@ export const useVJCanopySession = (store: Store): VJCanopySession => {
     [],
   );
   const [renderNonce, setRenderNonce] = useState(0);
+
+  const patternPoolCount = patternBlocks.length;
+  const effectPoolCount = effectBlocks.length;
+
+  useEffect(() => {
+    if (patternPoolCount === 0) return;
+    setSelectedPatternIndex((i) => Math.min(i, patternPoolCount - 1));
+  }, [patternPoolCount]);
+
+  useEffect(() => {
+    setSelectedEffectIndices((prev) =>
+      prev.filter((i) => i >= 0 && i < effectPoolCount),
+    );
+  }, [effectPoolCount]);
 
   const applyPatternEffects = useCallback(
     (patternIndex: number, effectIndices: number[]) => {
@@ -107,6 +119,11 @@ export const useVJCanopySession = (store: Store): VJCanopySession => {
         if (targetPatternBlock.pattern.name !== sourcePatternBlock.pattern.name) {
           targetPatternBlock.pattern = sourcePatternBlock.pattern.clone();
           needsRemount = true;
+        } else {
+          copyPatternParamValuesBetweenBlocks(
+            sourcePatternBlock,
+            targetPatternBlock,
+          );
         }
         targetPatternBlock.parameterVariations =
           cloneParameterVariations(sourcePatternBlock.parameterVariations);
@@ -122,6 +139,11 @@ export const useVJCanopySession = (store: Store): VJCanopySession => {
           ) {
             targetEffectBlock.pattern = sourceEffectBlock.pattern.clone();
             needsRemount = true;
+          } else {
+            copyPatternParamValuesBetweenBlocks(
+              sourceEffectBlock,
+              targetEffectBlock,
+            );
           }
           targetEffectBlock.parameterVariations =
             cloneParameterVariations(sourceEffectBlock.parameterVariations);

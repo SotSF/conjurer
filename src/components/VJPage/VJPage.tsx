@@ -25,7 +25,7 @@ import { VJPatternEffectsPanel } from "@/src/components/VJPage/VJPatternEffectsP
 import { useVJCanopySession } from "@/src/components/VJPage/useVJCanopySession";
 import { VJParameterControls } from "@/src/components/VJPage/VJParameterControls";
 import { VJPatternRadioGroup } from "@/src/components/VJPage/VJPatternRadioGroup";
-import { VJLivePreviewCanvas } from "@/src/components/VJPage/VJLivePreviewCanvas";
+import { VJLiveCanvas } from "@/src/components/VJPage/VJLiveCanvas";
 import { LoginButton } from "@/src/components/LoginButton";
 import { RoleSelector } from "@/src/components/RoleSelector";
 import {
@@ -35,7 +35,7 @@ import {
 import { VJPresetsControls } from "@/src/components/VJPage/VJPresetsControls";
 import { VJKeyboardShortcutsHelp } from "@/src/components/VJPage/VJKeyboardShortcutsHelp";
 import { vjKeydownTargetIgnoresShortcuts } from "@/src/components/VJPage/vjKeyboardShortcuts";
-import { playgroundPatterns } from "@/src/patterns/patterns";
+import { vjPatterns } from "@/src/components/VJPage/vjPageCatalog";
 
 const previewBorderColor = "green.300";
 const inactiveBorderColor = "gray.600";
@@ -53,6 +53,9 @@ const PATTERN_NAV_KEYS = new Set([
 
 export const VJPageInner = observer(function VJPageInner() {
   const store = useStore();
+
+  const livePresetCaptureFnRef = useRef<(() => string | null) | null>(null);
+  const previewPresetCaptureFnRef = useRef<(() => string | null) | null>(null);
 
   const liveSession = useVJCanopySession(store);
   const previewSession = useVJCanopySession(store);
@@ -75,11 +78,29 @@ export const VJPageInner = observer(function VJPageInner() {
     id: number;
     toBlock: Block;
   } | null>(null);
+  const [xfadeInProgress, setXfadeInProgress] = useState(false);
+  const [cancelCrossfadeSignal, setCancelCrossfadeSignal] = useState(0);
 
-  const [crossfadeDurationSeconds, setCrossfadeDurationSeconds] = useState(0.6);
+  const [crossfadeDurationSeconds, setCrossfadeDurationSeconds] = useState(2);
   const [crossfadeDurationInput, setCrossfadeDurationInput] = useState("2.0");
 
   const [deletePresetMode, setDeletePresetMode] = useState(false);
+
+  const requestXfadePreviewToLive = () => {
+    setXfadeInProgress(true);
+    setPushRequest({
+      id: Date.now(),
+      toBlock: previewSession.selectedPatternBlock.clone(),
+    });
+  };
+
+  const handleXfadePress = () => {
+    if (xfadeInProgress) {
+      setCancelCrossfadeSignal((n) => n + 1);
+    } else {
+      requestXfadePreviewToLive();
+    }
+  };
 
   const hotkeysRef = useRef({
     editingSession,
@@ -87,7 +108,7 @@ export const VJPageInner = observer(function VJPageInner() {
     previewSession,
     setDeletePresetMode,
     setEditingSession,
-    setPushRequest,
+    handleXfadePress,
   });
   hotkeysRef.current = {
     editingSession,
@@ -95,7 +116,7 @@ export const VJPageInner = observer(function VJPageInner() {
     previewSession,
     setDeletePresetMode,
     setEditingSession,
-    setPushRequest,
+    handleXfadePress,
   };
 
   useEffect(() => {
@@ -115,7 +136,7 @@ export const VJPageInner = observer(function VJPageInner() {
       const h = hotkeysRef.current;
       const session =
         h.editingSession === "live" ? h.liveSession : h.previewSession;
-      const patternCount = playgroundPatterns.length;
+      const patternCount = vjPatterns.length;
       if (patternCount === 0) return;
 
       if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
@@ -155,10 +176,7 @@ export const VJPageInner = observer(function VJPageInner() {
       }
       if (e.key === "X") {
         e.preventDefault();
-        h.setPushRequest({
-          id: Date.now(),
-          toBlock: h.previewSession.selectedPatternBlock.clone(),
-        });
+        h.handleXfadePress();
         return;
       }
     };
@@ -267,19 +285,22 @@ export const VJPageInner = observer(function VJPageInner() {
                     >
                       LIVE
                     </Text>
-                    <VJLivePreviewCanvas
+                    <VJLiveCanvas
                       key={`live-${liveSession.renderNonce}`}
                       block={liveSession.selectedPatternBlock}
                       displayMode={displayMode}
                       transmitDataEnabled
+                      captureFnRef={livePresetCaptureFnRef}
                       pushRequest={pushRequest}
                       onCrossfadeComplete={() => {
+                        setXfadeInProgress(false);
                         // Align the live editing state to match preview after the fade.
                         liveSession.copySelectionFrom(previewSession);
                         // Prevent remounting from restarting the same crossfade.
                         setPushRequest(null);
                       }}
                       crossfadeDurationSeconds={crossfadeDurationSeconds}
+                      cancelCrossfadeSignal={cancelCrossfadeSignal}
                     />
                   </Box>
                 </Box>
@@ -336,22 +357,25 @@ export const VJPageInner = observer(function VJPageInner() {
                   </HStack>
                 </HStack>
                 <Button
-                  aria-label="Xfade preview to live"
-                  title="Xfade preview to live"
+                  aria-label={
+                    xfadeInProgress
+                      ? "Cancel crossfade and go to preview now"
+                      : "Xfade preview to live"
+                  }
+                  title={
+                    xfadeInProgress
+                      ? "Cancel crossfade and go to preview now"
+                      : "Xfade preview to live"
+                  }
                   leftIcon={<FaArrowUp />}
                   size="sm"
                   variant="outline"
                   borderColor={liveAccent}
                   color={liveAccent}
                   _hover={{ borderColor: liveHover, color: liveHover }}
-                  onClick={() => {
-                    setPushRequest({
-                      id: Date.now(),
-                      toBlock: previewSession.selectedPatternBlock.clone(),
-                    });
-                  }}
+                  onClick={handleXfadePress}
                 >
-                  Xfade preview to live
+                  {xfadeInProgress ? "Cancel xfade" : "Xfade preview to live"}
                 </Button>
                 <Button
                   aria-label="Reset preview"
@@ -435,7 +459,7 @@ export const VJPageInner = observer(function VJPageInner() {
                       block={previewSession.selectedPatternBlock}
                       displayMode={displayMode}
                       transmitDataEnabled={false}
-                      enableCameraControls={false}
+                      captureFnRef={previewPresetCaptureFnRef}
                     />
                   </Box>
                 </VStack>
@@ -445,20 +469,20 @@ export const VJPageInner = observer(function VJPageInner() {
         </Panel>
         <PanelResizeHandle />
         <Panel defaultSize={75}>
-          <VStack
-            p={0}
+          <Box
+            position="relative"
+            display="flex"
+            flexDirection="column"
             w="100%"
             minW={0}
             maxW="100%"
-            overflowX="hidden"
-            overflowY="auto"
-            height="100%"
+            h="100%"
+            minH={0}
+            overflow="hidden"
             borderWidth={1}
             borderStyle="solid"
             borderColor="gray.600"
             borderRadius={0}
-            spacing={2}
-            position="relative"
             borderLeftWidth={0}
             borderRightWidth={0}
             borderBottomWidth={0}
@@ -474,6 +498,7 @@ export const VJPageInner = observer(function VJPageInner() {
               pointerEvents="none"
             />
             <Box
+              flexShrink={0}
               width="100%"
               px={3}
               py={2}
@@ -486,57 +511,71 @@ export const VJPageInner = observer(function VJPageInner() {
             >
               Editing {liveEditing ? "Live" : "Preview"}
             </Box>
-            <VStack
-              width="100%"
+            <Box
+              flex="1"
+              minH={0}
               minW={0}
-              maxW="100%"
-              spacing={2}
-              pt={1}
-              pr={1}
-              pb={1}
-              pl={2}
+              overflowX="hidden"
+              overflowY="auto"
             >
-              <VJPresetsControls
-                session={session}
-                accentColor={activeEditBorderColor}
-                editingLabel={liveEditing ? "Live" : "Preview"}
-                deletePresetMode={deletePresetMode}
-                onDeletePresetModeChange={setDeletePresetMode}
-              />
-              <VStack align="stretch" spacing={2} width="100%" minW={0} ml={2}>
-                <Text fontSize="md" fontWeight="bold" color="gray.200">
-                  Choose a pattern
-                </Text>
-                <VJPatternRadioGroup
-                  selectedPatternName={
-                    session.selectedPatternBlock.pattern.name
+              <VStack
+                width="100%"
+                minW={0}
+                maxW="100%"
+                spacing={2}
+                pt={1}
+                pr={1}
+                pb={1}
+                pl={2}
+              >
+                <VJPresetsControls
+                  session={session}
+                  accentColor={activeEditBorderColor}
+                  editingLabel={liveEditing ? "Live" : "Preview"}
+                  deletePresetMode={deletePresetMode}
+                  onDeletePresetModeChange={setDeletePresetMode}
+                  capturePresetPreview={() =>
+                    (liveEditing
+                      ? livePresetCaptureFnRef
+                      : previewPresetCaptureFnRef
+                    ).current?.() ?? null
                   }
-                  selectedPatternIndex={session.selectedPatternIndex}
-                  onSelectPattern={session.onSelectPattern}
                 />
-              </VStack>
-              <VJParameterControls
-                key={`params-pattern-${editingSession}-${session.renderNonce}`}
-                block={session.selectedPatternBlock as any}
-              />
-              <VJPatternEffectsPanel
-                key={`effects-${editingSession}-${session.renderNonce}`}
-                selectedEffectIndices={session.selectedEffectIndices}
-                onToggleEffect={session.onToggleEffect}
-              />
-              {session.selectedEffectIndices.map((effectIndex) => {
-                const effectBlock = session.effectBlocks[effectIndex];
-                if (!effectBlock) return null;
-                return (
-                  <VJParameterControls
-                    key={`${effectBlock.id}-${editingSession}-${session.renderNonce}`}
-                    block={effectBlock as any}
+                <VStack align="stretch" spacing={2} width="100%" minW={0} ml={2}>
+                  <Text fontSize="md" fontWeight="bold" color="gray.200">
+                    Choose a pattern
+                  </Text>
+                  <VJPatternRadioGroup
+                    selectedPatternName={
+                      session.selectedPatternBlock.pattern.name
+                    }
+                    selectedPatternIndex={session.selectedPatternIndex}
+                    onSelectPattern={session.onSelectPattern}
                   />
-                );
-              })}
-              <VJKeyboardShortcutsHelp />
-            </VStack>
-          </VStack>
+                </VStack>
+                <VJParameterControls
+                  key={`params-pattern-${editingSession}-${session.renderNonce}`}
+                  block={session.selectedPatternBlock as any}
+                />
+                <VJPatternEffectsPanel
+                  key={`effects-${editingSession}-${session.renderNonce}`}
+                  selectedEffectIndices={session.selectedEffectIndices}
+                  onToggleEffect={session.onToggleEffect}
+                />
+                {session.selectedEffectIndices.map((effectIndex) => {
+                  const effectBlock = session.effectBlocks[effectIndex];
+                  if (!effectBlock) return null;
+                  return (
+                    <VJParameterControls
+                      key={`${effectBlock.id}-${editingSession}-${session.renderNonce}`}
+                      block={effectBlock as any}
+                    />
+                  );
+                })}
+                <VJKeyboardShortcutsHelp />
+              </VStack>
+            </Box>
+          </Box>
         </Panel>
       </PanelGroup>
     </Box>

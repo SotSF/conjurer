@@ -11,7 +11,7 @@ import {
   Text,
   VStack,
 } from "@chakra-ui/react";
-import { ChangeEvent, useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { Variation } from "@/src/types/Variations/Variation";
 import { action } from "mobx";
 import { FaTrashAlt } from "react-icons/fa";
@@ -246,6 +246,11 @@ function LinearVariationControls({
   );
 }
 
+/** Idle gap (seconds) after which tap-tempo sequence resets. */
+const PERIOD_TAP_TEMPO_RESET_SEC = 2;
+const PERIOD_TAP_TEMPO_MAX_TAPS = 8;
+const MIN_PERIOD_FROM_TAP_SEC = 0.01;
+
 type PeriodicVariationControlsProps = {
   uniformName: string;
   variation: PeriodicVariation;
@@ -261,6 +266,8 @@ export function PeriodicVariationControls({
   matchPeriodAndDuration,
   onChange,
 }: PeriodicVariationControlsProps) {
+  const periodTapTimesRef = useRef<number[]>([]);
+
   const [periodicType, setPeriodicType] = useState(variation.periodicType);
   const [amplitude, setAmplitude] = useState(variation.amplitude.toString());
   const [period, setPeriod] = useState(variation.period.toString());
@@ -275,6 +282,32 @@ export function PeriodicVariationControls({
   useEffect(() => {
     onChange?.();
   }, [periodicType, amplitude, period, phase, offset, min, max, onChange]);
+
+  const onTapPeriodTempo = () => {
+    const nowSec = performance.now() / 1000;
+    const times = periodTapTimesRef.current;
+    const last = times[times.length - 1];
+    if (last !== undefined && nowSec - last > PERIOD_TAP_TEMPO_RESET_SEC) {
+      times.length = 0;
+    }
+    times.push(nowSec);
+    while (times.length > PERIOD_TAP_TEMPO_MAX_TAPS) {
+      times.shift();
+    }
+    if (times.length < 2) return;
+
+    const intervals: number[] = [];
+    for (let i = 1; i < times.length; i++) {
+      intervals.push(times[i]! - times[i - 1]!);
+    }
+    const avgSec =
+      intervals.reduce((sum, dt) => sum + dt, 0) / intervals.length;
+    const nextPeriod = Math.max(MIN_PERIOD_FROM_TAP_SEC, avgSec);
+    variation.period = nextPeriod;
+    setPeriod(nextPeriod.toString());
+    if (matchPeriodAndDuration) variation.duration = nextPeriod;
+    block.triggerVariationReactions(uniformName);
+  };
 
   return (
     <>
@@ -356,17 +389,29 @@ export function PeriodicVariationControls({
           />
         </>
       )}
-      <ScalarInput
-        name="Period"
-        onChange={(valueString, valueNumber) => {
-          // do not allow setting period to 0
-          if (valueNumber) variation.period = valueNumber;
-          setPeriod(valueString);
-          if (matchPeriodAndDuration) variation.duration = valueNumber;
-          block.triggerVariationReactions(uniformName);
-        }}
-        value={period}
-      />
+      <VStack spacing={1} align="stretch" w="100%">
+        <ScalarInput
+          name="Period"
+          onChange={(valueString, valueNumber) => {
+            // do not allow setting period to 0
+            if (valueNumber) variation.period = valueNumber;
+            setPeriod(valueString);
+            if (matchPeriodAndDuration) variation.duration = valueNumber;
+            block.triggerVariationReactions(uniformName);
+          }}
+          value={period}
+        />
+        <Button
+          size="xs"
+          variant="outline"
+          alignSelf="flex-start"
+          onClick={onTapPeriodTempo}
+          aria-label="Tap tempo for period"
+          title="Tap repeatedly to set period to the average seconds between taps (sequence resets after 2s idle)"
+        >
+          Tap tempo
+        </Button>
+      </VStack>
       <ScalarInput
         name="Phase"
         onChange={(valueString, valueNumber) => {

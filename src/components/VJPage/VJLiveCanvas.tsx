@@ -1,5 +1,6 @@
 import { Canvas, useFrame } from "@react-three/fiber";
 import { observer } from "mobx-react-lite";
+import type { MutableRefObject } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { WebGLRenderTarget } from "three";
 
@@ -11,6 +12,7 @@ import { Canopy } from "@/src/components/Canvas/CanopyView";
 import { CanopySpaceView } from "@/src/components/Canvas/CanopySpaceView";
 import { CartesianSpaceView } from "@/src/components/Canvas/CartesianSpaceView";
 import { SingleBlockRenderPipeline } from "@/src/components/RenderPipeline/SingleBlockRenderPipeline";
+import { VjCanvasCaptureBridge } from "@/src/components/VJPage/VjCanvasCaptureBridge";
 import { VJCrossfadeRenderPipeline } from "@/src/components/VJPage/VJCrossfadeRenderPipeline";
 import { BrightnessAdjust } from "@/src/effects/BrightnessAdjust";
 import { runInAction } from "mobx";
@@ -36,6 +38,10 @@ type Props = {
   onCrossfadeComplete?: () => void;
 
   crossfadeDurationSeconds: number;
+  /** Increment to finish the current crossfade immediately (same outcome as completing the fade). */
+  cancelCrossfadeSignal: number;
+  /** Ref to register `() => dataUrl | null` for preset preview capture from the pipeline render target. */
+  captureFnRef?: MutableRefObject<(() => string | null) | null>;
 };
 
 function attachBrightnessAdjust(base: Block, intensity: number): Block {
@@ -57,16 +63,16 @@ const CrossfadeDriver = function CrossfadeDriver({
   active,
   startTimeRef,
   progressRef,
-  currentWithBrightness,
-  nextWithBrightness,
+  currentBlockWithBrightness,
+  nextBlockWithBrightness,
   crossfadeDurationSeconds,
   onDone,
 }: {
   active: boolean;
   startTimeRef: React.MutableRefObject<number | null>;
   progressRef: React.MutableRefObject<number>;
-  currentWithBrightness: Block | null;
-  nextWithBrightness: Block | null;
+  currentBlockWithBrightness: Block | null;
+  nextBlockWithBrightness: Block | null;
   crossfadeDurationSeconds: number;
   onDone: () => void;
 }) {
@@ -81,15 +87,15 @@ const CrossfadeDriver = function CrossfadeDriver({
     const outIntensity = 1 - p;
     const inIntensity = p;
 
-    if (!currentWithBrightness || !nextWithBrightness) return;
+    if (!currentBlockWithBrightness || !nextBlockWithBrightness) return;
 
     const currentBrightnessBlock =
-      currentWithBrightness.effectBlocks[
-        currentWithBrightness.effectBlocks.length - 1
+      currentBlockWithBrightness.effectBlocks[
+        currentBlockWithBrightness.effectBlocks.length - 1
       ];
     const nextBrightnessBlock =
-      nextWithBrightness.effectBlocks[
-        nextWithBrightness.effectBlocks.length - 1
+      nextBlockWithBrightness.effectBlocks[
+        nextBlockWithBrightness.effectBlocks.length - 1
       ];
 
     const currentIntensityParam = (
@@ -108,7 +114,7 @@ const CrossfadeDriver = function CrossfadeDriver({
   return null;
 };
 
-export const VJLivePreviewCanvas = observer(function VJLivePreviewCanvas({
+export const VJLiveCanvas = observer(function VJLiveCanvas({
   block,
   displayMode,
   transmitDataEnabled = false,
@@ -116,18 +122,24 @@ export const VJLivePreviewCanvas = observer(function VJLivePreviewCanvas({
   pushRequest,
   onCrossfadeComplete,
   crossfadeDurationSeconds,
+  cancelCrossfadeSignal,
+  captureFnRef,
 }: Props) {
   const store = useStore();
   const [renderTarget, setRenderTarget] = useState<WebGLRenderTarget | null>(
     null,
   );
 
+  const lastProcessedCancelSignalRef = useRef(0);
+  const nextBlockRef = useRef<Block | null>(null);
+
   // Snapshots only used during crossfade. When idle, we render `block` directly so
   // live edits (params, variations) stay in sync — a clone would go stale because
   // its source is the same MobX object and only id/pattern.name were previously
   // used to refresh.
-  const [currentBase, setCurrentBase] = useState<Block | null>(null);
-  const [nextBase, setNextBase] = useState<Block | null>(null);
+  const [currentBlock, setCurrentBlock] = useState<Block | null>(null);
+  const [nextBlock, setNextBlock] = useState<Block | null>(null);
+  nextBlockRef.current = nextBlock;
 
   const startTimeRef = useRef<number | null>(null);
   const progressRef = useRef(0);
@@ -143,31 +155,40 @@ export const VJLivePreviewCanvas = observer(function VJLivePreviewCanvas({
     progressRef.current = 0;
     runInAction(() => {
       // Freeze live + preview at push time so the fade is between two stable snapshots.
-      setCurrentBase(block.clone());
-      setNextBase(pushRequest.toBlock.clone());
+      setCurrentBlock(block.clone());
+      setNextBlock(pushRequest.toBlock.clone());
     });
   }, [pushRequest, block]);
 
-  const crossfading = !!nextBase;
+  const crossfading = !!nextBlock;
 
-  const currentWithBrightness = useMemo(() => {
-    if (!crossfading || !currentBase) return null;
-    return attachBrightnessAdjust(currentBase, 1);
-  }, [crossfading, currentBase]);
+  const currentBlockWithBrightness = useMemo(() => {
+    if (!crossfading || !currentBlock) return null;
+    return attachBrightnessAdjust(currentBlock, 1);
+  }, [crossfading, currentBlock]);
 
-  const nextWithBrightness = useMemo(() => {
-    if (!nextBase) return null;
-    return attachBrightnessAdjust(nextBase, 0);
-  }, [nextBase]);
+  const nextBlockWithBrightness = useMemo(() => {
+    if (!nextBlock) return null;
+    return attachBrightnessAdjust(nextBlock, 0);
+  }, [nextBlock]);
 
   const finishCrossfade = () => {
-    if (!nextBase) return;
-    setNextBase(null);
-    setCurrentBase(null);
+    if (!nextBlockRef.current) return;
+    setNextBlock(null);
+    setCurrentBlock(null);
     startTimeRef.current = null;
     progressRef.current = 0;
     onCrossfadeComplete?.();
   };
+
+  const finishCrossfadeRef = useRef(finishCrossfade);
+  finishCrossfadeRef.current = finishCrossfade;
+
+  useEffect(() => {
+    if (cancelCrossfadeSignal <= lastProcessedCancelSignalRef.current) return;
+    lastProcessedCancelSignalRef.current = cancelCrossfadeSignal;
+    finishCrossfadeRef.current();
+  }, [cancelCrossfadeSignal]);
 
   return (
     <Canvas frameloop={frameloop}>
@@ -175,14 +196,20 @@ export const VJLivePreviewCanvas = observer(function VJLivePreviewCanvas({
         <RenderingGate shouldRender={!store.playing} />
       )}
       <CameraControls />
+      {captureFnRef && (
+        <VjCanvasCaptureBridge
+          renderTarget={renderTarget}
+          captureFnRef={captureFnRef}
+        />
+      )}
 
-      {crossfading && currentWithBrightness && (
+      {crossfading && currentBlockWithBrightness && (
         <CrossfadeDriver
           active
           startTimeRef={startTimeRef}
           progressRef={progressRef}
-          currentWithBrightness={currentWithBrightness}
-          nextWithBrightness={nextWithBrightness}
+          currentBlockWithBrightness={currentBlockWithBrightness}
+          nextBlockWithBrightness={nextBlockWithBrightness}
           crossfadeDurationSeconds={crossfadeDurationSeconds}
           onDone={finishCrossfade}
         />
@@ -196,10 +223,10 @@ export const VJLivePreviewCanvas = observer(function VJLivePreviewCanvas({
         />
       )}
 
-      {crossfading && currentWithBrightness && nextWithBrightness && (
+      {crossfading && currentBlockWithBrightness && nextBlockWithBrightness && (
         <VJCrossfadeRenderPipeline
-          currentBlock={currentWithBrightness}
-          nextBlock={nextWithBrightness}
+          currentBlock={currentBlockWithBrightness}
+          nextBlock={nextBlockWithBrightness}
           setRenderTarget={setRenderTarget}
         />
       )}

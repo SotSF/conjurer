@@ -13,6 +13,7 @@ export const vjPresetRouter = router({
           id: true,
           name: true,
           serializedBlock: true,
+          previewImageDataUrl: true,
           createdAt: true,
           updatedAt: true,
         },
@@ -28,6 +29,7 @@ export const vjPresetRouter = router({
       z.object({
         name: z.string().trim().min(1).max(200),
         serializedBlock: z.any(),
+        previewImageDataUrl: z.string().max(2_500_000).optional().default(""),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -37,6 +39,7 @@ export const vjPresetRouter = router({
           name: input.name,
           userId: ctx.user.id,
           serializedBlock: input.serializedBlock,
+          previewImageDataUrl: input.previewImageDataUrl ?? "",
         })
         .returning({
           id: vjPresets.id,

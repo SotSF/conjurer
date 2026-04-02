@@ -1,6 +1,6 @@
 import { Button, HStack, Text, VStack } from "@chakra-ui/react";
 import { memo } from "react";
-import { playgroundEffects } from "@/src/effects/effects";
+import { vjEffects } from "@/src/components/VJPage/vjPageCatalog";
 
 type Props = {
   selectedEffectIndices: number[];
@@ -27,7 +27,7 @@ export const VJPatternEffectsPanel = memo(function VJPatternEffectsPanel({
         Choose any number of effects
       </Text>
       <HStack width="100%" flexWrap="wrap" gap={1} spacing={0}>
-        {playgroundEffects.map((e, index) => {
+        {vjEffects.map((e, index) => {
           const selected = selectedEffectIndices.includes(index);
           return (
             <Button

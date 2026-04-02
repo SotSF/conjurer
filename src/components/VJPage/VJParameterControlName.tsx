@@ -1,6 +1,6 @@
+import { Badge, HStack, Text } from "@chakra-ui/react";
 import { memo } from "react";
 import { PatternParam } from "@/src/types/PatternParams";
-import { Text } from "@chakra-ui/react";
 
 export const VJParameterControlName = memo(function VJParameterControlName({
   patternParam,
@@ -8,16 +8,37 @@ export const VJParameterControlName = memo(function VJParameterControlName({
   patternParam: PatternParam;
 }) {
   return (
-    <Text
-      lineHeight={1.25}
-      fontSize="sm"
-      fontWeight="bold"
+    <HStack
+      alignItems="center"
+      flexWrap="wrap"
+      spacing={1}
       w="100%"
-      wordBreak="break-word"
-      whiteSpace="normal"
+      minW={0}
     >
-      {patternParam.name}
-    </Text>
+      <Text
+        lineHeight={1.25}
+        fontSize="sm"
+        fontWeight="bold"
+        wordBreak="break-word"
+        whiteSpace="normal"
+      >
+        {patternParam.name}
+      </Text>
+      {patternParam.jumpy && (
+        <Badge
+          fontSize="xs"
+          px={1.5}
+          py={0}
+          lineHeight="short"
+          textTransform="none"
+          fontWeight="medium"
+          colorScheme="orange"
+          variant="subtle"
+        >
+          jumpy
+        </Badge>
+      )}
+    </HStack>
   );
 });
 
