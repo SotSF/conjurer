@@ -36,6 +36,7 @@ import { VJPresetsControls } from "@/src/components/VJPage/VJPresetsControls";
 import { VJKeyboardShortcutsHelp } from "@/src/components/VJPage/VJKeyboardShortcutsHelp";
 import { vjKeydownTargetIgnoresShortcuts } from "@/src/components/VJPage/vjKeyboardShortcuts";
 import { vjPatterns } from "@/src/components/VJPage/vjPageCatalog";
+import { VJMidiModal } from "@/src/components/VJPage/VJMidiModal";
 import { useVjMidiCcScalar } from "@/src/components/VJPage/useVjMidiCcScalar";
 import type { ExtraParams } from "@/src/types/PatternParams";
 
@@ -65,9 +66,13 @@ export const VJPageInner = observer(function VJPageInner() {
   const [editingSession, setEditingSession] = useState<"live" | "preview">(
     "live",
   );
+  const [midiLoggingEnabled, setMidiLoggingEnabled] = useState(false);
 
   const session = editingSession === "live" ? liveSession : previewSession;
-  useVjMidiCcScalar(session.selectedPatternBlock as Block<ExtraParams>);
+  useVjMidiCcScalar(
+    session.selectedPatternBlock as Block<ExtraParams>,
+    midiLoggingEnabled,
+  );
   const liveEditing = editingSession === "live";
   const previewEditing = editingSession === "preview";
 
@@ -207,23 +212,27 @@ export const VJPageInner = observer(function VJPageInner() {
 
   return (
     <Box position="relative" w="100vw" h="100vh">
-      <Box
+      <HStack
         position="absolute"
         top={1}
         right={2}
         zIndex={20}
-        bg="gray.600"
-        borderRadius="md"
-        px={1}
-        py={1}
+        spacing={3}
+        alignItems="center"
       >
-        <HStack spacing={2} alignItems="center">
-          <RoleSelector />
-          <Box>
-            <LoginButton />
-          </Box>
-        </HStack>
-      </Box>
+        <VJMidiModal
+          midiLoggingEnabled={midiLoggingEnabled}
+          onMidiLoggingChange={setMidiLoggingEnabled}
+        />
+        <Box bg="gray.600" borderRadius="md" px={1} py={1}>
+          <HStack spacing={2} alignItems="center">
+            <RoleSelector />
+            <Box>
+              <LoginButton />
+            </Box>
+          </HStack>
+        </Box>
+      </HStack>
       <PanelGroup autoSaveId="vj-1-v3" direction="horizontal">
         <Panel defaultSize={25}>
           <PanelGroup autoSaveId="vj-2-v3" direction="vertical">

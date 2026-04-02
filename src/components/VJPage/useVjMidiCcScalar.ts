@@ -5,9 +5,6 @@ import { ExtraParams } from "@/src/types/PatternParams";
 import { getVjFirstNonJumpyScalarUniform } from "@/src/utils/vjFirstNonJumpyScalarUniform";
 import { setBlockScalarParameterValue } from "@/src/utils/setBlockScalarParameterValue";
 
-/** Set to `true` to log each MIDI message to the console. */
-const DEBUG = true;
-
 function value01ToScalar(
   t: number,
   min: number,
@@ -68,9 +65,14 @@ function midiStatusHighName(hi: number): string {
  * Maps any control change (any CC, any channel) and pitch bend to the first non-jumpy scalar
  * on the given pattern block (same target as the top non-boolean slider in the VJ pattern panel).
  */
-export function useVjMidiCcScalar(block: Block<ExtraParams>): void {
+export function useVjMidiCcScalar(
+  block: Block<ExtraParams>,
+  midiLoggingEnabled: boolean,
+): void {
   const blockRef = useRef(block);
   blockRef.current = block;
+  const midiLoggingRef = useRef(midiLoggingEnabled);
+  midiLoggingRef.current = midiLoggingEnabled;
 
   useEffect(() => {
     if (typeof navigator === "undefined" || !navigator.requestMIDIAccess) {
@@ -96,7 +98,7 @@ export function useVjMidiCcScalar(block: Block<ExtraParams>): void {
 
       const hi = status & 0xf0;
 
-      if (DEBUG) {
+      if (midiLoggingRef.current) {
         const channel = (status & 0x0f) + 1; // MIDI channels are 1–16 in UI; wire format is 0–15
         const input = event.target as MIDIInput | null;
         const rawHex = Array.from(data)
