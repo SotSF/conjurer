@@ -34,6 +34,8 @@ export const vjPresets = sqliteTable(
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
     serializedBlock: text("serialized_block", { mode: "json" }).notNull(),
+    /** PNG data URL of the VJ canvas when the preset was saved (empty string if missing). */
+    previewImageDataUrl: text("preview_image_data_url").notNull().default(""),
     ...timestamps,
   },
   (table) => ({

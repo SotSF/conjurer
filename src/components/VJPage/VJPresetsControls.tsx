@@ -5,6 +5,7 @@ import {
   FormLabel,
   HStack,
   IconButton,
+  Image,
   Input,
   Modal,
   ModalBody,
@@ -36,6 +37,8 @@ type Props = {
   editingLabel: "Live" | "Preview";
   deletePresetMode: boolean;
   onDeletePresetModeChange: (value: boolean) => void;
+  /** Snapshot of the editing session’s canvas as a PNG data URL (live vs preview). */
+  capturePresetPreview?: () => string | null;
 };
 
 function buildSuggestedPresetBaseName(session: VJCanopySession): string {
@@ -75,6 +78,7 @@ export const VJPresetsControls = observer(function VJPresetsControls({
   editingLabel,
   deletePresetMode,
   onDeletePresetModeChange,
+  capturePresetPreview,
 }: Props) {
   const store = useStore();
   const { userStore, usingLocalData } = store;
@@ -148,15 +152,20 @@ export const VJPresetsControls = observer(function VJPresetsControls({
     const serializedBlock = session.selectedPatternBlock.serialize({
       includeParams: true,
     });
+    const previewImageDataUrl = capturePresetPreview?.() ?? "";
     createMutation.mutate({
       usingLocalData,
       username,
       name: trimmed,
       serializedBlock,
+      previewImageDataUrl,
     });
   };
 
-  const loadPresetRow = (row: { serializedBlock?: unknown }) => {
+  const loadPresetRow = (row: {
+    serializedBlock?: unknown;
+    previewImageDataUrl?: string;
+  }) => {
     if (row.serializedBlock === undefined) return;
     session.applySerializedPreset(row.serializedBlock as SerializedBlock);
   };
@@ -263,7 +272,7 @@ export const VJPresetsControls = observer(function VJPresetsControls({
                   variant="outline"
                   borderColor={accentColor}
                   color={accentColor}
-                  maxW="240px"
+                  maxW="260px"
                   rightIcon={deletePresetMode ? <FaTrashAlt /> : undefined}
                   title={
                     deletePresetMode ? `Delete “${p.name}”` : `Load “${p.name}”`
@@ -279,16 +288,37 @@ export const VJPresetsControls = observer(function VJPresetsControls({
                   isDisabled={listPending || deleteMutation.isPending}
                   _hover={{ bg: "whiteAlpha.100" }}
                 >
-                  <Text
-                    as="span"
-                    display="block"
-                    overflow="hidden"
-                    textOverflow="ellipsis"
-                    whiteSpace="nowrap"
-                    textAlign="left"
-                  >
-                    {p.name}
-                  </Text>
+                  <HStack spacing={2} w="100%" minW={0} justify="flex-start">
+                    {p.previewImageDataUrl ? (
+                      <Image
+                        src={p.previewImageDataUrl}
+                        alt=""
+                        boxSize="24px"
+                        objectFit="cover"
+                        borderRadius="full"
+                        flexShrink={0}
+                      />
+                    ) : (
+                      <Box
+                        boxSize="24px"
+                        flexShrink={0}
+                        borderRadius="full"
+                        aria-hidden
+                      />
+                    )}
+                    <Text
+                      as="span"
+                      display="block"
+                      overflow="hidden"
+                      textOverflow="ellipsis"
+                      whiteSpace="nowrap"
+                      textAlign="left"
+                      flex="1"
+                      minW={0}
+                    >
+                      {p.name}
+                    </Text>
+                  </HStack>
                 </Button>
               </WrapItem>
             ))}

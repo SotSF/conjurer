@@ -1,5 +1,6 @@
 import { Canvas, useFrame } from "@react-three/fiber";
 import { observer } from "mobx-react-lite";
+import type { MutableRefObject } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { WebGLRenderTarget } from "three";
 
@@ -11,6 +12,7 @@ import { Canopy } from "@/src/components/Canvas/CanopyView";
 import { CanopySpaceView } from "@/src/components/Canvas/CanopySpaceView";
 import { CartesianSpaceView } from "@/src/components/Canvas/CartesianSpaceView";
 import { SingleBlockRenderPipeline } from "@/src/components/RenderPipeline/SingleBlockRenderPipeline";
+import { VjCanvasCaptureBridge } from "@/src/components/VJPage/VjCanvasCaptureBridge";
 import { VJCrossfadeRenderPipeline } from "@/src/components/VJPage/VJCrossfadeRenderPipeline";
 import { BrightnessAdjust } from "@/src/effects/BrightnessAdjust";
 import { runInAction } from "mobx";
@@ -38,6 +40,8 @@ type Props = {
   crossfadeDurationSeconds: number;
   /** Increment to finish the current crossfade immediately (same outcome as completing the fade). */
   cancelCrossfadeSignal: number;
+  /** Ref to register `() => dataUrl | null` for preset preview capture from the pipeline render target. */
+  captureFnRef?: MutableRefObject<(() => string | null) | null>;
 };
 
 function attachBrightnessAdjust(base: Block, intensity: number): Block {
@@ -119,6 +123,7 @@ export const VJLiveCanvas = observer(function VJLiveCanvas({
   onCrossfadeComplete,
   crossfadeDurationSeconds,
   cancelCrossfadeSignal,
+  captureFnRef,
 }: Props) {
   const store = useStore();
   const [renderTarget, setRenderTarget] = useState<WebGLRenderTarget | null>(
@@ -191,6 +196,12 @@ export const VJLiveCanvas = observer(function VJLiveCanvas({
         <RenderingGate shouldRender={!store.playing} />
       )}
       <CameraControls />
+      {captureFnRef && (
+        <VjCanvasCaptureBridge
+          renderTarget={renderTarget}
+          captureFnRef={captureFnRef}
+        />
+      )}
 
       {crossfading && currentBlockWithBrightness && (
         <CrossfadeDriver

@@ -1,4 +1,5 @@
 import { observer } from "mobx-react-lite";
+import type { MutableRefObject } from "react";
 import { useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import type { WebGLRenderTarget } from "three";
@@ -7,6 +8,7 @@ import { Block } from "@/src/types/Block";
 import { useStore } from "@/src/types/StoreContext";
 import { RenderingGate } from "@/src/components/RenderingGate";
 import { CameraControls } from "@/src/components/CameraControls";
+import { VjCanvasCaptureBridge } from "@/src/components/VJPage/VjCanvasCaptureBridge";
 import { SingleBlockRenderPipeline } from "@/src/components/RenderPipeline/SingleBlockRenderPipeline";
 import { Canopy } from "@/src/components/Canvas/CanopyView";
 import { CanopySpaceView } from "@/src/components/Canvas/CanopySpaceView";
@@ -23,6 +25,7 @@ type Props = {
   displayMode: VJDisplayMode;
   transmitDataEnabled?: boolean;
   frameloop?: "always" | "demand";
+  captureFnRef?: MutableRefObject<(() => string | null) | null>;
 };
 
 export const VJPreviewCanvas = observer(function VJPreviewCanvas({
@@ -30,6 +33,7 @@ export const VJPreviewCanvas = observer(function VJPreviewCanvas({
   displayMode,
   transmitDataEnabled = false,
   frameloop = "demand",
+  captureFnRef,
 }: Props) {
   const store = useStore();
   const [renderTarget, setRenderTarget] = useState<WebGLRenderTarget | null>(
@@ -44,6 +48,12 @@ export const VJPreviewCanvas = observer(function VJPreviewCanvas({
         <RenderingGate shouldRender={!store.playing} />
       )}
       <CameraControls />
+      {captureFnRef && (
+        <VjCanvasCaptureBridge
+          renderTarget={renderTarget}
+          captureFnRef={captureFnRef}
+        />
+      )}
       <SingleBlockRenderPipeline
         autorun
         block={block}

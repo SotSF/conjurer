@@ -54,6 +54,9 @@ const PATTERN_NAV_KEYS = new Set([
 export const VJPageInner = observer(function VJPageInner() {
   const store = useStore();
 
+  const livePresetCaptureFnRef = useRef<(() => string | null) | null>(null);
+  const previewPresetCaptureFnRef = useRef<(() => string | null) | null>(null);
+
   const liveSession = useVJCanopySession(store);
   const previewSession = useVJCanopySession(store);
 
@@ -287,6 +290,7 @@ export const VJPageInner = observer(function VJPageInner() {
                       block={liveSession.selectedPatternBlock}
                       displayMode={displayMode}
                       transmitDataEnabled
+                      captureFnRef={livePresetCaptureFnRef}
                       pushRequest={pushRequest}
                       onCrossfadeComplete={() => {
                         setXfadeInProgress(false);
@@ -455,6 +459,7 @@ export const VJPageInner = observer(function VJPageInner() {
                       block={previewSession.selectedPatternBlock}
                       displayMode={displayMode}
                       transmitDataEnabled={false}
+                      captureFnRef={previewPresetCaptureFnRef}
                     />
                   </Box>
                 </VStack>
@@ -529,6 +534,12 @@ export const VJPageInner = observer(function VJPageInner() {
                   editingLabel={liveEditing ? "Live" : "Preview"}
                   deletePresetMode={deletePresetMode}
                   onDeletePresetModeChange={setDeletePresetMode}
+                  capturePresetPreview={() =>
+                    (liveEditing
+                      ? livePresetCaptureFnRef
+                      : previewPresetCaptureFnRef
+                    ).current?.() ?? null
+                  }
                 />
                 <VStack align="stretch" spacing={2} width="100%" minW={0} ml={2}>
                   <Text fontSize="md" fontWeight="bold" color="gray.200">
