@@ -9,7 +9,7 @@ import {
   useNumberInput,
 } from "@chakra-ui/react";
 import { observer } from "mobx-react-lite";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { FaArrowDown, FaArrowUp } from "react-icons/fa";
 
@@ -39,6 +39,12 @@ import { vjPatterns } from "@/src/components/VJPage/vjPageCatalog";
 import { VJMidiModal } from "@/src/components/VJPage/VJMidiModal";
 import { useVjMidiCcScalar } from "@/src/components/VJPage/useVjMidiCcScalar";
 import type { ExtraParams } from "@/src/types/PatternParams";
+import type { VjMidiDeviceConfigsFile } from "@/src/utils/vjMidiDeviceStorage";
+import {
+  loadVjMidiDeviceConfigsFromStorage,
+  mappingFromStorageFile,
+  saveVjMidiDeviceConfigsToStorage,
+} from "@/src/utils/vjMidiDeviceStorage";
 
 const previewBorderColor = "green.300";
 const inactiveBorderColor = "gray.600";
@@ -67,11 +73,35 @@ export const VJPageInner = observer(function VJPageInner() {
     "live",
   );
   const [midiLoggingEnabled, setMidiLoggingEnabled] = useState(false);
+  const [midiDeviceFile, setMidiDeviceFile] = useState<VjMidiDeviceConfigsFile>(
+    () => ({
+      byPortName: {},
+      lastPortName: null,
+    }),
+  );
+
+  useEffect(() => {
+    setMidiDeviceFile(loadVjMidiDeviceConfigsFromStorage());
+  }, []);
+
+  const setMidiDeviceFilePersist = useCallback(
+    (next: VjMidiDeviceConfigsFile) => {
+      setMidiDeviceFile(next);
+      saveVjMidiDeviceConfigsToStorage(next);
+    },
+    [],
+  );
+
+  const midiMapping = useMemo(
+    () => mappingFromStorageFile(midiDeviceFile),
+    [midiDeviceFile],
+  );
 
   const session = editingSession === "live" ? liveSession : previewSession;
   useVjMidiCcScalar(
     session.selectedPatternBlock as Block<ExtraParams>,
     midiLoggingEnabled,
+    midiMapping,
   );
   const liveEditing = editingSession === "live";
   const previewEditing = editingSession === "preview";
@@ -223,6 +253,8 @@ export const VJPageInner = observer(function VJPageInner() {
         <VJMidiModal
           midiLoggingEnabled={midiLoggingEnabled}
           onMidiLoggingChange={setMidiLoggingEnabled}
+          midiDeviceFile={midiDeviceFile}
+          onMidiDeviceFileChange={setMidiDeviceFilePersist}
         />
         <Box bg="gray.600" borderRadius="md" px={1} py={1}>
           <HStack spacing={2} alignItems="center">

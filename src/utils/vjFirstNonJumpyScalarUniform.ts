@@ -18,13 +18,18 @@ function isVjMidiScalarTarget(
   return true;
 }
 
+export type VjMidiScalarTarget = {
+  uniformName: string;
+  patternParam: PatternParam<number>;
+};
+
 /**
  * Same ordering and filters as {@link VJParameterControls} / {@link VJParameterControl}:
- * non-jumpy params first, then first scalar that is not a boolean toggle or base uniform.
+ * non-jumpy scalar params (sliders) in panel order, excluding base uniforms and non-number controls.
  */
-export function getVjFirstNonJumpyScalarUniform(
+export function getVjMidiScalarUniformsInOrder(
   block: Block<ExtraParams>,
-): { uniformName: string; patternParam: PatternParam<number> } | null {
+): VjMidiScalarTarget[] {
   const sorted = Object.entries<PatternParam>(block.pattern.params).sort(
     ([, a], [, b]) => {
       if (a.jumpy && !b.jumpy) return 1;
@@ -33,10 +38,20 @@ export function getVjFirstNonJumpyScalarUniform(
     },
   );
 
+  const out: VjMidiScalarTarget[] = [];
   for (const [uniformName, patternParam] of sorted) {
     if (!isVjMidiScalarTarget(uniformName, patternParam)) continue;
-    return { uniformName, patternParam };
+    out.push({ uniformName, patternParam });
   }
+  return out;
+}
 
-  return null;
+/**
+ * Same ordering and filters as {@link VJParameterControls} / {@link VJParameterControl}:
+ * non-jumpy params first, then first scalar that is not a boolean toggle or base uniform.
+ */
+export function getVjFirstNonJumpyScalarUniform(
+  block: Block<ExtraParams>,
+): VjMidiScalarTarget | null {
+  return getVjMidiScalarUniformsInOrder(block)[0] ?? null;
 }

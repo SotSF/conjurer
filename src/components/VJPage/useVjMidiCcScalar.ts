@@ -2,7 +2,11 @@ import { useEffect, useRef } from "react";
 
 import { Block } from "@/src/types/Block";
 import { ExtraParams } from "@/src/types/PatternParams";
-import { getVjFirstNonJumpyScalarUniform } from "@/src/utils/vjFirstNonJumpyScalarUniform";
+import type { VjMidiDeviceMapping } from "@/src/utils/vjMidiDeviceStorage";
+import {
+  getVjFirstNonJumpyScalarUniform,
+  getVjMidiScalarUniformsInOrder,
+} from "@/src/utils/vjFirstNonJumpyScalarUniform";
 import { setBlockScalarParameterValue } from "@/src/utils/setBlockScalarParameterValue";
 
 function value01ToScalar(
@@ -62,17 +66,21 @@ function midiStatusHighName(hi: number): string {
 }
 
 /**
- * Maps any control change (any CC, any channel) and pitch bend to the first non-jumpy scalar
- * on the given pattern block (same target as the top non-boolean slider in the VJ pattern panel).
+ * Maps control change and pitch bend to pattern scalars. With a non-empty device mapping
+ * ({@link VjMidiDeviceMapping}), only that input's CCs are used: ordered CC list → ordered
+ * scalar sliders. Otherwise any CC / pitch bend from any device targets the first scalar only.
  */
 export function useVjMidiCcScalar(
   block: Block<ExtraParams>,
   midiLoggingEnabled: boolean,
+  midiMapping: VjMidiDeviceMapping,
 ): void {
   const blockRef = useRef(block);
   blockRef.current = block;
   const midiLoggingRef = useRef(midiLoggingEnabled);
   midiLoggingRef.current = midiLoggingEnabled;
+  const midiMappingRef = useRef(midiMapping);
+  midiMappingRef.current = midiMapping;
 
   useEffect(() => {
     if (typeof navigator === "undefined" || !navigator.requestMIDIAccess) {
@@ -138,6 +146,33 @@ export function useVjMidiCcScalar(
       if (hi !== 0xb0 && hi !== 0xe0) return;
 
       const b = blockRef.current;
+      const map = midiMappingRef.current;
+      const useMapping =
+        map.portName.length > 0 && map.ccNumbers.length > 0;
+      const input = event.target as MIDIInput | null;
+
+      if (useMapping) {
+        if (input?.name !== map.portName) return;
+        if (hi === 0xe0) return;
+
+        const slot = map.ccNumbers.indexOf(controller);
+        if (slot < 0) return;
+
+        const uniforms = getVjMidiScalarUniformsInOrder(b);
+        const target = uniforms[slot];
+        if (!target) return;
+
+        const { uniformName, patternParam } = target;
+        const min = typeof patternParam.min === "number" ? patternParam.min : 0;
+        const max = typeof patternParam.max === "number" ? patternParam.max : 1;
+        const step =
+          typeof patternParam.step === "number" ? patternParam.step : 0.01;
+
+        const next = midi7ToScalar(value, min, max, step);
+        setBlockScalarParameterValue(b, uniformName, next);
+        return;
+      }
+
       const target = getVjFirstNonJumpyScalarUniform(b);
       if (!target) return;
 
