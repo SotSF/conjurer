@@ -5,6 +5,9 @@ import { ExtraParams } from "@/src/types/PatternParams";
 import { getVjFirstNonJumpyScalarUniform } from "@/src/utils/vjFirstNonJumpyScalarUniform";
 import { setBlockScalarParameterValue } from "@/src/utils/setBlockScalarParameterValue";
 
+/** Set to `true` to log each MIDI message to the console. */
+const DEBUG = true;
+
 function value01ToScalar(
   t: number,
   min: number,
@@ -39,6 +42,28 @@ function midiPitchBendToScalar(
   return value01ToScalar(bend / 16383, min, max, step);
 }
 
+/** High nibble of status byte → human-readable MIDI 1.0 channel voice message name. */
+function midiStatusHighName(hi: number): string {
+  switch (hi) {
+    case 0x80:
+      return "Note Off";
+    case 0x90:
+      return "Note On";
+    case 0xa0:
+      return "Polyphonic Key Pressure";
+    case 0xb0:
+      return "Control Change (CC)";
+    case 0xc0:
+      return "Program Change";
+    case 0xd0:
+      return "Channel Pressure";
+    case 0xe0:
+      return "Pitch Bend";
+    default:
+      return `Unknown (0x${hi.toString(16).padStart(2, "0")})`;
+  }
+}
+
 /**
  * Maps any control change (any CC, any channel) and pitch bend to the first non-jumpy scalar
  * on the given pattern block (same target as the top non-boolean slider in the VJ pattern panel).
@@ -62,10 +87,52 @@ export function useVjMidiCcScalar(block: Block<ExtraParams>): void {
       const status = data[0];
       const controller = data[1];
       const value = data[2];
-      if (status === undefined || controller === undefined || value === undefined)
+      if (
+        status === undefined ||
+        controller === undefined ||
+        value === undefined
+      )
         return;
 
       const hi = status & 0xf0;
+
+      if (DEBUG) {
+        const channel = (status & 0x0f) + 1; // MIDI channels are 1–16 in UI; wire format is 0–15
+        const input = event.target as MIDIInput | null;
+        const rawHex = Array.from(data)
+          .map((b) => b.toString(16).padStart(2, "0"))
+          .join(" ");
+
+        const midiLog: Record<string, unknown> = {
+          portName: input?.name ?? "(unknown)",
+          portId: input?.id,
+          channel,
+          message: midiStatusHighName(hi),
+          statusByte: `0x${status.toString(16).padStart(2, "0")}`,
+          rawHex,
+          timeStampMs: event.timeStamp,
+        };
+
+        if (hi === 0x80 || hi === 0x90) {
+          midiLog.note = controller;
+          midiLog.velocity = value;
+        } else if (hi === 0xb0) {
+          // CC: second byte is the controller number (which knob/slider/function); third is value 0–127
+          midiLog.ccNumber = controller;
+          midiLog.ccValue = value;
+          midiLog.ccHint =
+            "CC number = which controller on the device (0–127); value is usually 0–127.";
+        } else if (hi === 0xe0) {
+          midiLog.pitchBend14 = (value << 7) | controller;
+        } else if (hi === 0xc0) {
+          midiLog.program = controller;
+        } else {
+          midiLog.data1 = controller;
+          midiLog.data2 = value;
+        }
+
+        console.log(`[MIDI]\n${JSON.stringify(midiLog, null, 2)}`);
+      }
       if (hi !== 0xb0 && hi !== 0xe0) return;
 
       const b = blockRef.current;
