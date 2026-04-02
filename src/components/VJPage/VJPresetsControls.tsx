@@ -247,7 +247,7 @@ export const VJPresetsControls = observer(function VJPresetsControls({
               No saved presets yet.
             </Text>
           )}
-          <Wrap spacing={2} shouldWrapChildren align="center">
+          <Wrap spacing={2} align="center">
             <WrapItem maxW="100%">
               <Button
                 size="sm"

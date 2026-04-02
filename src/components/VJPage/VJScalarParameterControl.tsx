@@ -22,12 +22,13 @@ import {
   ParamType,
   PatternParam,
 } from "@/src/types/PatternParams";
-import { FlatVariation } from "@/src/types/Variations/FlatVariation";
 import { DEFAULT_PERIOD, DEFAULT_VARIATION_DURATION } from "@/src/utils/time";
 import { runInAction } from "mobx";
 import { FaTimes } from "react-icons/fa";
+import { setBlockScalarParameterValue } from "@/src/utils/setBlockScalarParameterValue";
 import { TbWaveSine } from "react-icons/tb";
 import { PeriodicVariationControls } from "@/src/components/VariationControls/VariationControls";
+import { FlatVariation } from "@/src/types/Variations/FlatVariation";
 import { PeriodicVariation } from "@/src/types/Variations/PeriodicVariation";
 import { ScalarVariationGraph } from "@/src/components/VariationGraph/ScalarVariationGraph";
 import { observer } from "mobx-react-lite";
@@ -88,18 +89,7 @@ export const VJScalarParameterControl = observer(
       if (Number.isNaN(inputNumber)) return;
 
       setParameters({ ...parameters, [uniformName]: inputNumber });
-      patternParam.value = inputNumber;
-
-      runInAction(() => {
-        // Also insert a variation so that this parameter value is serializable
-        if (!block.parameterVariations[uniformName])
-          block.parameterVariations[uniformName] = [];
-
-        block.parameterVariations[uniformName]![0] = new FlatVariation(
-          DEFAULT_VARIATION_DURATION,
-          inputNumber,
-        );
-      });
+      setBlockScalarParameterValue(block, uniformName, inputNumber);
     };
 
     const onVariationModeToggle = () => {

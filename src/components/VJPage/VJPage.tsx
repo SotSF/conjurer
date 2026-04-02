@@ -9,7 +9,7 @@ import {
   useNumberInput,
 } from "@chakra-ui/react";
 import { observer } from "mobx-react-lite";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { FaArrowDown, FaArrowUp } from "react-icons/fa";
 
@@ -36,6 +36,19 @@ import { VJPresetsControls } from "@/src/components/VJPage/VJPresetsControls";
 import { VJKeyboardShortcutsHelp } from "@/src/components/VJPage/VJKeyboardShortcutsHelp";
 import { vjKeydownTargetIgnoresShortcuts } from "@/src/components/VJPage/vjKeyboardShortcuts";
 import { vjPatterns } from "@/src/components/VJPage/vjPageCatalog";
+import { VJMidiModal } from "@/src/components/VJPage/VJMidiModal";
+import {
+  useVjMidiCcScalar,
+  type VjMidiCcLearnState,
+} from "@/src/components/VJPage/useVjMidiCcScalar";
+import { getVjMidiScalarUniformsFlatForEditableStack } from "@/src/utils/vjFirstNonJumpyScalarUniform";
+import type { ExtraParams } from "@/src/types/PatternParams";
+import type { VjMidiDeviceConfigsFile } from "@/src/utils/vjMidiDeviceStorage";
+import {
+  loadVjMidiDeviceConfigsFromStorage,
+  mappingFromStorageFile,
+  saveVjMidiDeviceConfigsToStorage,
+} from "@/src/utils/vjMidiDeviceStorage";
 
 const previewBorderColor = "green.300";
 const inactiveBorderColor = "gray.600";
@@ -63,8 +76,107 @@ export const VJPageInner = observer(function VJPageInner() {
   const [editingSession, setEditingSession] = useState<"live" | "preview">(
     "live",
   );
+  const [midiLoggingEnabled, setMidiLoggingEnabled] = useState(false);
+  const [midiDeviceFile, setMidiDeviceFile] = useState<VjMidiDeviceConfigsFile>(
+    () => ({
+      byPortName: {},
+      lastPortName: null,
+    }),
+  );
+
+  useEffect(() => {
+    setMidiDeviceFile(loadVjMidiDeviceConfigsFromStorage());
+  }, []);
+
+  const setMidiDeviceFilePersist = useCallback(
+    (next: VjMidiDeviceConfigsFile) => {
+      setMidiDeviceFile(next);
+      saveVjMidiDeviceConfigsToStorage(next);
+    },
+    [],
+  );
+
+  const midiMapping = useMemo(
+    () => mappingFromStorageFile(midiDeviceFile),
+    [midiDeviceFile],
+  );
+
+  const [midiCcLearnActive, setMidiCcLearnActive] = useState(false);
+
+  const midiCcLearnRef = useRef<VjMidiCcLearnState>({
+    active: false,
+    portName: "",
+    onLearnCc: () => {},
+  });
+
+  const handleMidiLearnCc = useCallback((cc: number) => {
+    setMidiDeviceFile((prev) => {
+      const name = prev.lastPortName;
+      if (!name) return prev;
+      const current = prev.byPortName[name]?.ccNumbers ?? [];
+      if (current.includes(cc)) return prev;
+      const next: VjMidiDeviceConfigsFile = {
+        ...prev,
+        byPortName: {
+          ...prev.byPortName,
+          [name]: { ccNumbers: [...current, cc] },
+        },
+      };
+      saveVjMidiDeviceConfigsToStorage(next);
+      return next;
+    });
+  }, []);
+
+  const beginMidiCcLearn = useCallback(() => {
+    setMidiDeviceFile((prev) => {
+      const name = prev.lastPortName;
+      if (!name) return prev;
+      const next: VjMidiDeviceConfigsFile = {
+        ...prev,
+        byPortName: {
+          ...prev.byPortName,
+          [name]: { ccNumbers: [] },
+        },
+      };
+      saveVjMidiDeviceConfigsToStorage(next);
+      return next;
+    });
+    setMidiCcLearnActive(true);
+  }, []);
+
+  const stopMidiCcLearn = useCallback(() => setMidiCcLearnActive(false), []);
+
+  midiCcLearnRef.current = {
+    active: midiCcLearnActive,
+    portName: midiMapping.portName,
+    onLearnCc: handleMidiLearnCc,
+  };
 
   const session = editingSession === "live" ? liveSession : previewSession;
+
+  const midiTargetsFlat = useMemo(
+    () =>
+      getVjMidiScalarUniformsFlatForEditableStack(
+        session.selectedPatternBlock as Block<ExtraParams>,
+        session.effectBlocks as Block<ExtraParams>[],
+        session.selectedEffectIndices,
+      ),
+    [
+      session.selectedPatternBlock,
+      session.effectBlocks,
+      session.selectedEffectIndices,
+    ],
+  );
+
+  const midiTargetsFlatRef = useRef(midiTargetsFlat);
+  midiTargetsFlatRef.current = midiTargetsFlat;
+
+  useVjMidiCcScalar(
+    midiLoggingEnabled,
+    midiMapping,
+    midiCcLearnRef,
+    midiTargetsFlatRef,
+  );
   const liveEditing = editingSession === "live";
   const previewEditing = editingSession === "preview";
 
@@ -204,23 +316,32 @@ export const VJPageInner = observer(function VJPageInner() {
 
   return (
     <Box position="relative" w="100vw" h="100vh">
-      <Box
+      <HStack
         position="absolute"
         top={1}
         right={2}
         zIndex={20}
-        bg="gray.600"
-        borderRadius="md"
-        px={1}
-        py={1}
+        spacing={3}
+        alignItems="center"
       >
-        <HStack spacing={2} alignItems="center">
-          <RoleSelector />
-          <Box>
-            <LoginButton />
-          </Box>
-        </HStack>
-      </Box>
+        <VJMidiModal
+          midiLoggingEnabled={midiLoggingEnabled}
+          onMidiLoggingChange={setMidiLoggingEnabled}
+          midiDeviceFile={midiDeviceFile}
+          onMidiDeviceFileChange={setMidiDeviceFilePersist}
+          midiCcLearnActive={midiCcLearnActive}
+          onBeginMidiCcLearn={beginMidiCcLearn}
+          onStopMidiCcLearn={stopMidiCcLearn}
+        />
+        <Box bg="gray.600" borderRadius="md" px={1} py={1}>
+          <HStack spacing={2} alignItems="center">
+            <RoleSelector />
+            <Box>
+              <LoginButton />
+            </Box>
+          </HStack>
+        </Box>
+      </HStack>
       <PanelGroup autoSaveId="vj-1-v3" direction="horizontal">
         <Panel defaultSize={25}>
           <PanelGroup autoSaveId="vj-2-v3" direction="vertical">
