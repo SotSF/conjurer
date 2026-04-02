@@ -10,6 +10,7 @@ import {
   SliderMark,
   SliderThumb,
   SliderTrack,
+  Text,
   Tooltip,
   VStack,
   useNumberInput,
@@ -24,8 +25,8 @@ import {
 import { FlatVariation } from "@/src/types/Variations/FlatVariation";
 import { DEFAULT_PERIOD, DEFAULT_VARIATION_DURATION } from "@/src/utils/time";
 import { runInAction } from "mobx";
+import { FaTimes } from "react-icons/fa";
 import { TbWaveSine } from "react-icons/tb";
-import { MdTrendingFlat } from "react-icons/md";
 import { PeriodicVariationControls } from "@/src/components/VariationControls/VariationControls";
 import { PeriodicVariation } from "@/src/types/Variations/PeriodicVariation";
 import { ScalarVariationGraph } from "@/src/components/VariationGraph/ScalarVariationGraph";
@@ -152,21 +153,27 @@ export const VJScalarParameterControl = observer(
             <Box flex="1" minW={0}>
               <VJParameterControlName patternParam={patternParam} />
             </Box>
-            <IconButton
-              flexShrink={0}
-              size="xs"
-              aria-label={variationMode === "flat" ? "Periodic" : "Flat"}
-              title={variationMode === "flat" ? "Periodic" : "Flat"}
-              height={6}
-              icon={
-                variationMode === "flat" ? (
-                  <TbWaveSine size={17} />
-                ) : (
-                  <MdTrendingFlat size={17} />
-                )
-              }
-              onClick={onVariationModeToggle}
-            />
+            {variationMode === "flat" ? (
+              <IconButton
+                flexShrink={0}
+                size="xs"
+                aria-label="Periodic variation"
+                title="Periodic variation"
+                height={6}
+                icon={<TbWaveSine size={17} />}
+                onClick={onVariationModeToggle}
+              />
+            ) : (
+              <IconButton
+                flexShrink={0}
+                size="xs"
+                aria-label="Constant value"
+                title="Constant value"
+                height={6}
+                icon={<FaTimes size={14} />}
+                onClick={onVariationModeToggle}
+              />
+            )}
           </HStack>
           {variationMode === "flat" && (
             <HStack spacing={0}>
@@ -203,13 +210,21 @@ export const VJScalarParameterControl = observer(
           )}
           {variationMode === "periodic" &&
             firstVariation instanceof PeriodicVariation && (
-              <VStack fontSize={12} width={40}>
-                <PeriodicVariationControls
-                  uniformName={uniformName}
-                  block={block}
-                  variation={firstVariation}
-                  matchPeriodAndDuration
-                />
+              <VStack align="stretch" spacing={1} w="100%" minW={0}>
+                {patternParam.jumpy && (
+                  <Text fontSize="xs" color="orange.300" lineHeight="short">
+                    Varying this parameter over time might result in jumpy
+                    visuals!
+                  </Text>
+                )}
+                <VStack fontSize={12} width={40}>
+                  <PeriodicVariationControls
+                    uniformName={uniformName}
+                    block={block}
+                    variation={firstVariation}
+                    matchPeriodAndDuration
+                  />
+                </VStack>
               </VStack>
             )}
         </VStack>

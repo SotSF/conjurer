@@ -83,8 +83,13 @@ export const VJParameterControls = observer(function VJParameterControls({
       </Box>
 
       <VStack spacing={0} align="stretch" width="100%" minW={0}>
-        {Object.entries<PatternParam>(block.pattern.params).map(
-          ([uniformName, patternParam]) => (
+        {Object.entries<PatternParam>(block.pattern.params)
+          .sort(([, a], [, b]) => {
+            if (a.jumpy && !b.jumpy) return 1;
+            if (!a.jumpy && b.jumpy) return -1;
+            return 0;
+          })
+          .map(([uniformName, patternParam]) => (
             <VJParameterControl
               key={uniformName}
               block={block}
@@ -93,8 +98,7 @@ export const VJParameterControls = observer(function VJParameterControls({
               parameters={parameters}
               setParameters={setParameters}
             />
-          ),
-        )}
+          ))}
       </VStack>
     </Box>
   );
