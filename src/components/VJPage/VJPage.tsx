@@ -37,7 +37,10 @@ import { VJKeyboardShortcutsHelp } from "@/src/components/VJPage/VJKeyboardShort
 import { vjKeydownTargetIgnoresShortcuts } from "@/src/components/VJPage/vjKeyboardShortcuts";
 import { vjPatterns } from "@/src/components/VJPage/vjPageCatalog";
 import { VJMidiModal } from "@/src/components/VJPage/VJMidiModal";
-import { useVjMidiCcScalar } from "@/src/components/VJPage/useVjMidiCcScalar";
+import {
+  useVjMidiCcScalar,
+  type VjMidiCcLearnState,
+} from "@/src/components/VJPage/useVjMidiCcScalar";
 import type { ExtraParams } from "@/src/types/PatternParams";
 import type { VjMidiDeviceConfigsFile } from "@/src/utils/vjMidiDeviceStorage";
 import {
@@ -97,11 +100,63 @@ export const VJPageInner = observer(function VJPageInner() {
     [midiDeviceFile],
   );
 
+  const [midiCcLearnActive, setMidiCcLearnActive] = useState(false);
+
+  const midiCcLearnRef = useRef<VjMidiCcLearnState>({
+    active: false,
+    portName: "",
+    onLearnCc: () => {},
+  });
+
+  const handleMidiLearnCc = useCallback((cc: number) => {
+    setMidiDeviceFile((prev) => {
+      const name = prev.lastPortName;
+      if (!name) return prev;
+      const current = prev.byPortName[name]?.ccNumbers ?? [];
+      if (current.includes(cc)) return prev;
+      const next: VjMidiDeviceConfigsFile = {
+        ...prev,
+        byPortName: {
+          ...prev.byPortName,
+          [name]: { ccNumbers: [...current, cc] },
+        },
+      };
+      saveVjMidiDeviceConfigsToStorage(next);
+      return next;
+    });
+  }, []);
+
+  const beginMidiCcLearn = useCallback(() => {
+    setMidiDeviceFile((prev) => {
+      const name = prev.lastPortName;
+      if (!name) return prev;
+      const next: VjMidiDeviceConfigsFile = {
+        ...prev,
+        byPortName: {
+          ...prev.byPortName,
+          [name]: { ccNumbers: [] },
+        },
+      };
+      saveVjMidiDeviceConfigsToStorage(next);
+      return next;
+    });
+    setMidiCcLearnActive(true);
+  }, []);
+
+  const stopMidiCcLearn = useCallback(() => setMidiCcLearnActive(false), []);
+
+  midiCcLearnRef.current = {
+    active: midiCcLearnActive,
+    portName: midiMapping.portName,
+    onLearnCc: handleMidiLearnCc,
+  };
+
   const session = editingSession === "live" ? liveSession : previewSession;
   useVjMidiCcScalar(
     session.selectedPatternBlock as Block<ExtraParams>,
     midiLoggingEnabled,
     midiMapping,
+    midiCcLearnRef,
   );
   const liveEditing = editingSession === "live";
   const previewEditing = editingSession === "preview";
@@ -255,6 +310,9 @@ export const VJPageInner = observer(function VJPageInner() {
           onMidiLoggingChange={setMidiLoggingEnabled}
           midiDeviceFile={midiDeviceFile}
           onMidiDeviceFileChange={setMidiDeviceFilePersist}
+          midiCcLearnActive={midiCcLearnActive}
+          onBeginMidiCcLearn={beginMidiCcLearn}
+          onStopMidiCcLearn={stopMidiCcLearn}
         />
         <Box bg="gray.600" borderRadius="md" px={1} py={1}>
           <HStack spacing={2} alignItems="center">

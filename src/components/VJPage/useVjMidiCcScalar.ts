@@ -1,3 +1,4 @@
+import type { MutableRefObject } from "react";
 import { useEffect, useRef } from "react";
 
 import { Block } from "@/src/types/Block";
@@ -70,10 +71,19 @@ function midiStatusHighName(hi: number): string {
  * ({@link VjMidiDeviceMapping}), only that input's CCs are used: ordered CC list → ordered
  * scalar sliders. Otherwise any CC / pitch bend from any device targets the first scalar only.
  */
+export type VjMidiCcLearnState = {
+  active: boolean;
+  portName: string;
+  onLearnCc: (controller: number) => void;
+};
+
+export type VjMidiCcLearnRef = MutableRefObject<VjMidiCcLearnState>;
+
 export function useVjMidiCcScalar(
   block: Block<ExtraParams>,
   midiLoggingEnabled: boolean,
   midiMapping: VjMidiDeviceMapping,
+  midiCcLearnRef: VjMidiCcLearnRef,
 ): void {
   const blockRef = useRef(block);
   blockRef.current = block;
@@ -145,11 +155,19 @@ export function useVjMidiCcScalar(
       }
       if (hi !== 0xb0 && hi !== 0xe0) return;
 
+      const input = event.target as MIDIInput | null;
+      const learn = midiCcLearnRef.current;
+      if (learn.active && learn.portName.length > 0) {
+        if (hi === 0xb0 && input?.name === learn.portName) {
+          learn.onLearnCc(controller);
+        }
+        return;
+      }
+
       const b = blockRef.current;
       const map = midiMappingRef.current;
       const useMapping =
         map.portName.length > 0 && map.ccNumbers.length > 0;
-      const input = event.target as MIDIInput | null;
 
       if (useMapping) {
         if (input?.name !== map.portName) return;
@@ -220,5 +238,7 @@ export function useVjMidiCcScalar(
         });
       }
     };
+    // midiCcLearnRef is read via .current inside handleMessage; no re-attach on ref updates.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 }

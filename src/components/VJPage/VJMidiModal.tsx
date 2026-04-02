@@ -21,7 +21,8 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 import { useEffect, useMemo, useState } from "react";
-import { FaArrowDown, FaArrowUp, FaMusic, FaTrash } from "react-icons/fa";
+import { FaArrowDown, FaArrowUp, FaTrash } from "react-icons/fa";
+import { MdTune } from "react-icons/md";
 
 import type { VjMidiDeviceConfigsFile } from "@/src/utils/vjMidiDeviceStorage";
 
@@ -30,6 +31,9 @@ type VJMidiModalProps = {
   onMidiLoggingChange: (enabled: boolean) => void;
   midiDeviceFile: VjMidiDeviceConfigsFile;
   onMidiDeviceFileChange: (next: VjMidiDeviceConfigsFile) => void;
+  midiCcLearnActive: boolean;
+  onBeginMidiCcLearn: () => void;
+  onStopMidiCcLearn: () => void;
 };
 
 function clampCc(n: number): number {
@@ -53,9 +57,23 @@ export function VJMidiModal({
   onMidiLoggingChange,
   midiDeviceFile,
   onMidiDeviceFileChange,
+  midiCcLearnActive,
+  onBeginMidiCcLearn,
+  onStopMidiCcLearn,
 }: VJMidiModalProps) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [midiInputNames, setMidiInputNames] = useState<string[]>([]);
+
+  const handleModalClose = () => {
+    onStopMidiCcLearn();
+    onClose();
+  };
+
+  useEffect(() => {
+    return () => {
+      onStopMidiCcLearn();
+    };
+  }, [onStopMidiCcLearn]);
 
   useEffect(() => {
     if (typeof navigator === "undefined" || !navigator.requestMIDIAccess) {
@@ -101,6 +119,7 @@ export function VJMidiModal({
   );
 
   const setPortName = (nextPort: string) => {
+    onStopMidiCcLearn();
     onMidiDeviceFileChange({
       ...midiDeviceFile,
       lastPortName: nextPort.length > 0 ? nextPort : null,
@@ -150,16 +169,18 @@ export function VJMidiModal({
 
   return (
     <>
-      <IconButton
-        aria-label="MIDI settings"
-        icon={<FaMusic />}
+      <Button
+        aria-label="Configure MIDI"
+        leftIcon={<MdTune />}
         size="sm"
         variant="ghost"
         color="gray.100"
         _hover={{ bg: "whiteAlpha.200" }}
         onClick={onOpen}
-      />
-      <Modal isOpen={isOpen} onClose={onClose} isCentered>
+      >
+        Configure MIDI
+      </Button>
+      <Modal isOpen={isOpen} onClose={handleModalClose} isCentered>
         <ModalOverlay />
         <ModalContent bg="gray.800" borderColor="gray.600">
           <ModalHeader>MIDI</ModalHeader>
@@ -215,66 +236,144 @@ export function VJMidiModal({
                   </FormControl>
 
                   <Text fontSize="sm" color="gray.400">
-                    Ordered CC numbers: the first maps to the first scalar slider in
-                    the pattern panel (non-jumpy numeric params), the second to the
-                    next, and so on. Only this device is used when the list is
-                    non-empty. Leave the list empty to use any CC / pitch bend on the
-                    first scalar only.
+                    The ordered list maps to scalar sliders in the pattern panel (first
+                    CC → first slider, and so on). Only this device is used when the list
+                    is non-empty. Leave the list empty for legacy mode: any CC / pitch
+                    bend controls the first scalar only.
                   </Text>
 
                   {portName ? (
-                    <VStack align="stretch" spacing={2}>
-                      {ccNumbers.map((cc, index) => (
-                        <HStack key={index} spacing={2}>
-                          <Text fontSize="xs" color="gray.500" w="100px" flexShrink={0}>
-                            Param {index + 1}
-                          </Text>
-                          <Text fontSize="xs" color="gray.500">
-                            CC
-                          </Text>
-                          <NumberInput
-                            size="sm"
-                            min={0}
-                            max={127}
-                            value={cc}
-                            onChange={(_, v) =>
-                              onCcChange(index, Number.isNaN(v) ? cc : v)
-                            }
-                            w="88px"
-                          >
-                            <NumberInputField bg="gray.900" borderColor="gray.600" />
-                          </NumberInput>
-                          <IconButton
-                            aria-label="Move up"
-                            icon={<FaArrowUp />}
-                            size="xs"
-                            variant="ghost"
-                            isDisabled={index === 0}
-                            onClick={() => moveSlot(index, -1)}
-                          />
-                          <IconButton
-                            aria-label="Move down"
-                            icon={<FaArrowDown />}
-                            size="xs"
-                            variant="ghost"
-                            isDisabled={index >= ccNumbers.length - 1}
-                            onClick={() => moveSlot(index, 1)}
-                          />
-                          <IconButton
-                            aria-label="Remove"
-                            icon={<FaTrash />}
-                            size="xs"
-                            variant="ghost"
-                            colorScheme="red"
-                            onClick={() => removeSlot(index)}
-                          />
-                        </HStack>
-                      ))}
-                      <Box>
-                        <Button size="sm" variant="outline" onClick={addSlot}>
-                          Add CC slot
-                        </Button>
+                    <VStack align="stretch" spacing={3}>
+                      <Box
+                        borderWidth="1px"
+                        borderRadius="md"
+                        borderColor={midiCcLearnActive ? "blue.400" : "gray.600"}
+                        bg={midiCcLearnActive ? "whiteAlpha.50" : "transparent"}
+                        px={3}
+                        py={3}
+                      >
+                        <Text fontSize="sm" fontWeight="medium" color="gray.100" mb={2}>
+                          Learn from controller
+                        </Text>
+                        {midiCcLearnActive ? (
+                          <>
+                            <Text fontSize="sm" color="blue.200" mb={3}>
+                              Listening — move each knob or slider once, in the order
+                              you want. Repeating the same control does not add it
+                              again. Click done when finished.
+                            </Text>
+                            <HStack spacing={2} flexWrap="wrap">
+                              <Button
+                                size="sm"
+                                colorScheme="blue"
+                                onClick={onStopMidiCcLearn}
+                              >
+                                Done
+                              </Button>
+                              <Text fontSize="xs" color="gray.500">
+                                {ccNumbers.length} CC
+                                {ccNumbers.length === 1 ? "" : "s"} captured
+                              </Text>
+                            </HStack>
+                          </>
+                        ) : (
+                          <>
+                            <Text fontSize="sm" color="gray.400" mb={3}>
+                              Clears the current list, then records each CC number as
+                              you touch controls in order.
+                            </Text>
+                            <Button
+                              size="sm"
+                              colorScheme="blue"
+                              variant="outline"
+                              borderColor="blue.400"
+                              color="blue.200"
+                              _hover={{ bg: "whiteAlpha.100" }}
+                              onClick={onBeginMidiCcLearn}
+                              isDisabled={!portName}
+                              title={
+                                !portName ? "Select a MIDI input first." : undefined
+                              }
+                            >
+                              Listen for MIDI controls
+                            </Button>
+                          </>
+                        )}
                       </Box>
+
+                      <Text fontSize="xs" color="gray.500" textTransform="uppercase">
+                        Manual edit
+                      </Text>
+                      <VStack align="stretch" spacing={2}>
+                        {ccNumbers.map((cc, index) => (
+                          <HStack key={index} spacing={2}>
+                            <Text
+                              fontSize="xs"
+                              color="gray.500"
+                              w="100px"
+                              flexShrink={0}
+                            >
+                              Param {index + 1}
+                            </Text>
+                            <Text fontSize="xs" color="gray.500">
+                              CC
+                            </Text>
+                            <NumberInput
+                              size="sm"
+                              min={0}
+                              max={127}
+                              value={cc}
+                              isDisabled={midiCcLearnActive}
+                              onChange={(_, v) =>
+                                onCcChange(index, Number.isNaN(v) ? cc : v)
+                              }
+                              w="88px"
+                            >
+                              <NumberInputField
+                                bg="gray.900"
+                                borderColor="gray.600"
+                              />
+                            </NumberInput>
+                            <IconButton
+                              aria-label="Move up"
+                              icon={<FaArrowUp />}
+                              size="xs"
+                              variant="ghost"
+                              isDisabled={midiCcLearnActive || index === 0}
+                              onClick={() => moveSlot(index, -1)}
+                            />
+                            <IconButton
+                              aria-label="Move down"
+                              icon={<FaArrowDown />}
+                              size="xs"
+                              variant="ghost"
+                              isDisabled={
+                                midiCcLearnActive || index >= ccNumbers.length - 1
+                              }
+                              onClick={() => moveSlot(index, 1)}
+                            />
+                            <IconButton
+                              aria-label="Remove"
+                              icon={<FaTrash />}
+                              size="xs"
+                              variant="ghost"
+                              colorScheme="red"
+                              isDisabled={midiCcLearnActive}
+                              onClick={() => removeSlot(index)}
+                            />
+                          </HStack>
+                        ))}
+                        <Box>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            isDisabled={midiCcLearnActive}
+                            onClick={addSlot}
+                          >
+                            Add CC slot
+                          </Button>
+                        </Box>
+                      </VStack>
                     </VStack>
                   ) : (
                     <Text fontSize="sm" color="gray.500">
