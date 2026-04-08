@@ -1,13 +1,10 @@
-import { Arrangement } from "@/src/components/Arrangement";
 import { Box, Grid, GridItem } from "@chakra-ui/react";
 import { Display } from "@/src/components/Display";
-import { lazy, memo, useEffect, useRef } from "react";
+import { memo, useEffect, useRef } from "react";
 import { useStore } from "@/src/types/StoreContext";
 import { KeyboardControls } from "@/src/components/KeyboardControls";
-
-const PortalNarrativeModal = lazy(
-  () => import("@/src/components/PortalNarrativeModal"),
-);
+import { TimerAndWaveform } from "@/src/components/Timeline/TimerAndWaveform";
+import PortalNarrativeModal from "@/src/components/PortalNarrativeModal";
 
 type Props = {
   portalNarrative?: boolean;
@@ -32,14 +29,14 @@ export const ViewerPage = memo(function ViewerPage({
         templateAreas={`"display"
                         "arrangement"`}
         gridTemplateColumns="100vw"
-        gridTemplateRows="minmax(0,1fr) auto"
+        gridTemplateRows="minmax(0,1fr) 80px"
         height="100vh"
       >
         <GridItem area="display">
           <Display />
         </GridItem>
         <GridItem area="arrangement">
-          <Arrangement />
+          <TimerAndWaveform />
         </GridItem>
       </Grid>
     </Box>

@@ -11,6 +11,7 @@ export type PatternParam<T = ParamType> = {
   min?: number;
   max?: number;
   step?: number;
+  jumpy?: boolean;
 };
 
 export const isBooleanParam = (

@@ -4,6 +4,7 @@ import { beatMapRouter } from "@/src/server/routers/beatMapRouter";
 import { userRouter } from "@/src/server/routers/userRouter";
 import { songRouter } from "@/src/server/routers/songRouter";
 import { playlistRouter } from "@/src/server/routers/playlistRouter";
+import { vjPresetRouter } from "@/src/server/routers/vjPresetRouter";
 
 export const appRouter = router({
   user: userRouter,
@@ -11,6 +12,7 @@ export const appRouter = router({
   experience: experienceRouter,
   playlist: playlistRouter,
   beatMap: beatMapRouter,
+  vjPreset: vjPresetRouter,
 });
 
 // export type definition of API

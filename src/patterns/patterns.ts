@@ -26,6 +26,7 @@ import { Lissajous } from "@/src/patterns//Lissajous";
 import { GradientCircles } from "@/src/patterns//GradientCircles";
 import { Perlin } from "@/src/patterns/Perlin";
 import { PulsePalette } from "@/src/patterns/PulsePalette";
+import { BloomKaleidoscope } from "@/src/patterns/BloomKaleidoscope";
 const patternFactories: Array<() => Pattern> = [
   PulsePalette,
   LogSpirals,
@@ -47,6 +48,7 @@ const patternFactories: Array<() => Pattern> = [
   SpaceOdyssey,
   SunCycle,
   Tunnel,
+  BloomKaleidoscope,
   Turbine,
   Construct,
   EasternRedbud,
@@ -65,4 +67,4 @@ for (const pattern of defaultPatterns)
   defaultPatternMap[pattern.name] = pattern;
 // Patterns that will have their uniforms updated by the pattern playground.
 const playgroundPatterns: Pattern[] = patternFactories.map((f) => f());
-export { defaultPatternMap, playgroundPatterns };
+export { defaultPatternMap, patternFactories, playgroundPatterns };

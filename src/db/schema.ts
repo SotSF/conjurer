@@ -25,8 +25,31 @@ export const users = sqliteTable("users", {
   ...timestamps,
 });
 
+export const vjPresets = sqliteTable(
+  "vj_presets",
+  {
+    id: integer("id").primaryKey(),
+    name: text("name").notNull(),
+    userId: integer("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    serializedBlock: text("serialized_block", { mode: "json" }).notNull(),
+    /** PNG data URL of the VJ canvas when the preset was saved (empty string if missing). */
+    previewImageDataUrl: text("preview_image_data_url").notNull().default(""),
+    ...timestamps,
+  },
+  (table) => ({
+    vjPresetsUserIdIndex: index("vj_presets_user_id_index").on(table.userId),
+  }),
+);
+
+export const vjPresetsRelations = relations(vjPresets, ({ one }) => ({
+  user: one(users, { fields: [vjPresets.userId], references: [users.id] }),
+}));
+
 export const usersRelations = relations(users, ({ many }) => ({
   experiences: many(experiences),
+  vjPresets: many(vjPresets),
 }));
 
 export type InsertUser = typeof users.$inferInsert;
@@ -137,3 +160,6 @@ export const playlistsRelations = relations(playlists, ({ one }) => ({
 
 export type InsertPlaylist = typeof playlists.$inferInsert;
 export type SelectPlaylist = typeof playlists.$inferSelect;
+
+export type InsertVjPreset = typeof vjPresets.$inferInsert;
+export type SelectVjPreset = typeof vjPresets.$inferSelect;

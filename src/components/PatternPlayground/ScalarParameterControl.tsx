@@ -21,7 +21,7 @@ import {
   PatternParam,
 } from "@/src/types/PatternParams";
 import { FlatVariation } from "@/src/types/Variations/FlatVariation";
-import { DEFAULT_VARIATION_DURATION } from "@/src/utils/time";
+import { DEFAULT_PERIOD, DEFAULT_VARIATION_DURATION } from "@/src/utils/time";
 import { runInAction } from "mobx";
 import { ParameterControlName } from "@/src/components/PatternPlayground/ParameterControlName";
 import { TbWaveSine } from "react-icons/tb";
@@ -30,7 +30,6 @@ import { PeriodicVariationControls } from "@/src/components/VariationControls/Va
 import { PeriodicVariation } from "@/src/types/Variations/PeriodicVariation";
 import { ScalarVariationGraph } from "@/src/components/VariationGraph/ScalarVariationGraph";
 import { observer } from "mobx-react-lite";
-import { useStore } from "@/src/types/StoreContext";
 
 const labelStyles = {
   mt: -3,
@@ -52,10 +51,14 @@ export const ScalarParameterControl = observer(function ScalarParameterControl({
   parameters,
   setParameters,
 }: ScalarParameterControlProps) {
-  const { playgroundStore } = useStore();
+  const variations = block.parameterVariations[uniformName] ?? [];
+  // Initialize the variation mode based on the first variation type found
   const [variationMode, setVariationMode] = useState<"flat" | "periodic">(
-    "flat",
+    variations.length > 0 && variations[0].type === "periodic"
+      ? "periodic"
+      : "flat",
   );
+
   const [showTooltip, setShowTooltip] = useState(false);
   const min = typeof patternParam.min === "number" ? patternParam.min : 0;
   const max = typeof patternParam.max === "number" ? patternParam.max : 1;
@@ -101,7 +104,7 @@ export const ScalarParameterControl = observer(function ScalarParameterControl({
           DEFAULT_VARIATION_DURATION,
           "sine",
           0,
-          DEFAULT_VARIATION_DURATION,
+          DEFAULT_PERIOD,
           0,
           patternParam.value,
         );

@@ -45,7 +45,7 @@ export const RoleSelector = observer(function RoleSelector() {
         <MenuItem
           onClick={action(() => {
             store.role = "vj";
-            router.push("/playground");
+            router.push("/vj");
           })}
         >
           VJ

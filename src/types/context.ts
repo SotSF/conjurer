@@ -1,5 +1,5 @@
 export type Context =
-  | "playground"
+  | "vj"
   | "viewer"
   | "experienceEditor"
   | "playlistEditor";

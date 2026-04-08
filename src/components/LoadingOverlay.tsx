@@ -9,7 +9,7 @@ const contextMatchesRole = (context: Context, role: Role) => {
       return role === "experienceCreator";
     case "playlistEditor":
       return role === "emcee";
-    case "playground":
+    case "vj":
       return role === "vj";
     default:
       return false;

@@ -1,18 +1,16 @@
 import { playgroundEffects } from "@/src/effects/effects";
 import { playgroundPatterns } from "@/src/patterns/patterns";
-import { Block, SerializedBlock } from "@/src/types/Block";
-import { Palette, SerializedPalette } from "@/src/types/Palette";
-import {
-  ExtraParams,
-  ParamType,
-  isPaletteParam,
-} from "@/src/types/PatternParams";
+import { Block } from "@/src/types/Block";
+import { ExtraParams } from "@/src/types/PatternParams";
 import type { Store } from "@/src/types/Store";
-import { deserializeVariation } from "@/src/types/Variations/variations";
-import { makeAutoObservable } from "mobx";
+import { sendConjurerStateUpdate } from "@/src/websocket/conjurerApiWebsocket";
+import { makeAutoObservable, runInAction } from "mobx";
+import { FlatVariation } from "./Variations/FlatVariation";
+import { DEFAULT_BLOCK_DURATION } from "../utils/time";
+import { generateId } from "@/src/utils/id";
 
 export class PlaygroundStore {
-  presets: SerializedBlock[] = [];
+  id = generateId();
 
   patternBlocks: Block[];
   effectBlocks: Block[];
@@ -23,6 +21,9 @@ export class PlaygroundStore {
   }
   set selectedPatternIndex(index: number) {
     this._selectedPatternIndex = index;
+
+    if (process.env.NEXT_PUBLIC_NODE_ENV !== "production")
+      sendConjurerStateUpdate(this.store);
   }
 
   _selectedEffectIndices: number[] = [];
@@ -50,13 +51,79 @@ export class PlaygroundStore {
 
     this.selectedPatternIndex = this.lastPatternIndexSelected;
     this.selectedEffectIndices = this.lastEffectIndices;
+
+    // listen for local storage changes to sending data
+    window.addEventListener("storage", (event) => {
+      if (
+        event.key === `${this.store.context}-sendingData` &&
+        event.newValue !== null
+      ) {
+        runInAction(() => {
+          // don't send data if another tab is already
+          this.store.sendingData = false;
+        });
+      }
+      if (
+        event.key === `playgroundStore-${this.store.context}` &&
+        event.newValue !== null
+      ) {
+        this.loadFromLocalStorage();
+      }
+    });
   };
 
-  get selectedPatternBlock() {
+  get selectedPatternBlock(): Block<ExtraParams> {
     return (
       this.patternBlocks[this.selectedPatternIndex] ?? this.patternBlocks[0]
     );
   }
+
+  nextPattern = () => {
+    this.selectedPatternIndex =
+      (this.selectedPatternIndex + 1) % this.patternBlocks.length;
+  };
+
+  previousPattern = () => {
+    this.selectedPatternIndex =
+      (this.selectedPatternIndex - 1 + this.patternBlocks.length) %
+      this.patternBlocks.length;
+  };
+
+  addEffects = (effectNames: string[]) => {
+    effectNames.forEach((effectName) => {
+      const newIndex = this.effectBlocks.findIndex(
+        (effectBlock) => effectBlock.pattern.name === effectName,
+      );
+      if (!this.selectedEffectIndices.includes(newIndex))
+        this.selectedEffectIndices = [...this.selectedEffectIndices, newIndex];
+    });
+  };
+
+  removeEffects = (effectNames: string[]) => {
+    this.selectedEffectIndices = this.selectedEffectIndices.filter(
+      (selectedEffectIndex) =>
+        !effectNames.includes(
+          this.effectBlocks[selectedEffectIndex].pattern.name,
+        ),
+    );
+  };
+
+  setParameterValues = (newParams: { name: string; value: number }[]) => {
+    const params = this.selectedPatternBlock.pattern.params as ExtraParams;
+    for (const { name, value } of newParams) {
+      const variations = this.selectedPatternBlock.parameterVariations;
+      if (params[name]) params[name].value = value;
+      if (!variations[name] || variations[name].length == 0) {
+        variations[name] = [new FlatVariation(DEFAULT_BLOCK_DURATION, value)];
+        return;
+      }
+      if (variations[name][0] instanceof FlatVariation) {
+        variations[name][0].value = value;
+      }
+      // TODO: handle non-numeric params
+      // TODO: handle effect params
+    }
+  };
 
   private _lastPatternIndexSelected = 0;
   get lastPatternIndexSelected() {
@@ -76,22 +143,6 @@ export class PlaygroundStore {
     this.saveToLocalStorage();
   }
 
-  loadPreset = (index: number) => {
-    const serializedBlock = this.presets[index];
-    this.onUpdate(serializedBlock);
-  };
-
-  saveCurrentPreset = () => {
-    const serializedBlock = this.selectedPatternBlock.serialize();
-    this.presets.push(serializedBlock);
-    this.saveToLocalStorage();
-  };
-
-  deletePreset = (index: number) => {
-    this.presets.splice(index, 1);
-    this.saveToLocalStorage();
-  };
-
   loadFromLocalStorage = () => {
     if (typeof window === "undefined") return;
     const data = localStorage.getItem(`playgroundStore-${this.store.context}`);
@@ -100,7 +151,6 @@ export class PlaygroundStore {
       this._lastPatternIndexSelected =
         localStorageUiSettings.lastPatternIndexSelected ?? 0;
       this._lastEffectIndices = localStorageUiSettings.lastEffectIndices ?? [];
-      this.presets = localStorageUiSettings.presets ?? [];
     }
   };
 
@@ -111,88 +161,7 @@ export class PlaygroundStore {
       JSON.stringify({
         lastPatternIndexSelected: this.lastPatternIndexSelected,
         lastEffectIndices: this.lastEffectIndices,
-        presets: this.presets,
       }),
-    );
-  };
-
-  // TODO: refactor, make performant
-  onUpdate = (serializedBlock: SerializedBlock) => {
-    const {
-      pattern: transferPattern,
-      parameterVariations: transferParameterVariations,
-      effectBlocks: transferEffectBlocks,
-    } = serializedBlock;
-    this.patternBlocks.forEach(
-      (patternBlock: Block<ExtraParams>, patternIndex: number) => {
-        if (typeof transferPattern === "string") return;
-        if (patternBlock.pattern.name !== transferPattern.name) return;
-        if (!transferPattern.params) return;
-
-        // TODO: fix duplicated code here
-        const { params } = transferPattern;
-        for (const [uniformName, param] of Object.entries(params)) {
-          const playgroundParams = patternBlock.pattern.params as ExtraParams;
-          if (playgroundParams[uniformName]) {
-            if (isPaletteParam(playgroundParams[uniformName])) {
-              (
-                playgroundParams[uniformName].value as Palette
-              ).setFromSerialized(param.value as SerializedPalette);
-            } else
-              playgroundParams[uniformName].value = param.value as ParamType;
-          }
-        }
-        for (const parameter of Object.keys(transferParameterVariations)) {
-          patternBlock.parameterVariations[parameter] =
-            transferParameterVariations[parameter]?.map((variationData: any) =>
-              deserializeVariation(this.store, variationData),
-            );
-        }
-
-        // set this pattern as selected
-        this.selectedPatternIndex = patternIndex;
-
-        const effectIndices: number[] = [];
-        for (const transferEffectBlock of transferEffectBlocks) {
-          this.effectBlocks.forEach(
-            (effectBlock: Block<ExtraParams>, effectIndex: number) => {
-              if (typeof transferEffectBlock.pattern === "string") return;
-              if (effectBlock.pattern.name !== transferEffectBlock.pattern.name)
-                return;
-              if (!transferEffectBlock.pattern.params) return;
-
-              const { params } = transferEffectBlock.pattern;
-              for (const [uniformName, param] of Object.entries(params)) {
-                const playgroundParams = effectBlock.pattern
-                  .params as ExtraParams;
-                if (playgroundParams[uniformName]) {
-                  if (isPaletteParam(playgroundParams[uniformName])) {
-                    (
-                      playgroundParams[uniformName].value as Palette
-                    ).setFromSerialized(param.value as SerializedPalette);
-                  } else
-                    playgroundParams[uniformName].value =
-                      param.value as ParamType;
-                }
-              }
-
-              for (const parameter of Object.keys(
-                transferEffectBlock.parameterVariations,
-              )) {
-                effectBlock.parameterVariations[parameter] =
-                  transferEffectBlock.parameterVariations[parameter]?.map(
-                    (variationData: any) =>
-                      deserializeVariation(this.store, variationData),
-                  );
-              }
-
-              // set this effect as selected
-              effectIndices.push(effectIndex);
-            },
-          );
-        }
-        this.selectedEffectIndices = effectIndices;
-      },
     );
   };
 }

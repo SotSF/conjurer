@@ -22,6 +22,7 @@ import { UserStore } from "@/src/types/UserStore";
 import { LayerV1 } from "./Layer/LayerV1";
 import { LayerV2 } from "./Layer/LayerV2";
 import { User } from "@/src/types/User";
+import { setupConjurerApiWebsocket } from "@/src/websocket/conjurerApiWebsocket";
 
 export type BlockSelection = { type: "block"; block: Block };
 
@@ -162,8 +163,25 @@ export class Store {
     if (this.initializationState !== "uninitialized") return;
     this.initializationState = "initializing";
 
+    // Attempt to connect to the conjurer api if not in production
+    if (process.env.NEXT_PUBLIC_NODE_ENV !== "production")
+      setupConjurerApiWebsocket(this);
+
     if (process.env.NEXT_PUBLIC_ENABLE_VOICE === "true")
       setupVoiceCommandWebsocket(this);
+
+    // At the moment viewer = portal viewer
+    if (this.context === "viewer") {
+      this.viewerMode = true;
+      // hardcoded event playlist for now
+      this.playlistStore.selectedPlaylist = {
+        id: 0,
+        name: "Burning Man 2023 Event Playlist",
+        description: "",
+        orderedExperienceIds: [6, 5, 14, 9, 25, 21, 29, 8, 31, 32],
+        user: { id: 0, username: "viewer" },
+      };
+    }
 
     // TODO:
     // this.viewerMode =
@@ -195,13 +213,17 @@ export class Store {
     if (usingLocalData && process.env.NEXT_PUBLIC_NODE_ENV !== "production")
       this._usingLocalData = usingLocalData === "true";
 
-    if (this.context === "playground") this.playgroundStore.initialize();
-    this.uiStore.initialize();
+    if (this.context === "vj") this.playgroundStore.initialize();
+    this.uiStore.initialize(this.viewerMode);
     this.audioStore.initialize();
 
     // load experience from path parameter if provided (e.g. /experience/my-experience)
     if (initialExperienceName)
       await this.experienceStore.load(initialExperienceName);
+    else if (this.context === "viewer")
+      this.experienceStore.loadById(
+        this.playlistStore.selectedPlaylist?.orderedExperienceIds[0] ?? 0,
+      );
     else if (this.context !== "playlistEditor")
       this.experienceStore.loadEmptyExperience();
 
@@ -210,6 +232,13 @@ export class Store {
 
   toggleSendingData = () => {
     this.sendingData = !this.sendingData;
+    if (this.sendingData) {
+      // If we are sending data, notify other tabs by setting a random value in localStorage
+      localStorage.setItem(
+        `${this.context}-sendingData`,
+        Math.random().toString(),
+      );
+    }
   };
 
   toggleUsingLocalData = () => {

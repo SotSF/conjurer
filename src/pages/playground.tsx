@@ -6,7 +6,7 @@ import { PlaygroundPage } from "@/src/components/PlaygroundPage";
 import { useMemo } from "react";
 
 export default function Playground() {
-  const store = useMemo(() => new Store("playground"), []);
+  const store = useMemo(() => new Store("vj"), []);
   return (
     <>
       <Head>

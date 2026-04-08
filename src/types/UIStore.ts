@@ -22,7 +22,7 @@ export class UIStore {
   showingPaletteEditorModal = false;
   showingMarkerEditorModal = false;
   showingPlaylistAddExperienceModal = false;
-  showingViewerInstructionsModal = false;
+  showingPortalNarrativeModal = true;
   showingSaveBeatMapModal = false;
   showingLoadBeatMapModal = false;
   showingLatencyModal = false;
@@ -60,7 +60,7 @@ export class UIStore {
     this.saveToLocalStorage();
   }
 
-  patternDrawerOpen = this.store.context === "playground";
+  patternDrawerOpen = this.store.context === "vj";
 
   canTimelineZoom = this.store.context === "experienceEditor";
   pixelsPerSecond = INITIAL_PIXELS_PER_SECOND; // the zoom of the timeline

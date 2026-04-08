@@ -29,6 +29,7 @@ export class AudioStore {
   audioState: "paused" | "starting" | "playing" = "paused";
 
   audioContext: AudioContext | null = null;
+  delayNode: DelayNode | null = null;
 
   _audioLatency = INITIAL_AUDIO_LATENCY; // seconds
   get audioLatency() {
