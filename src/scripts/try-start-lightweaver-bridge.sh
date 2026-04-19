@@ -1,23 +1,23 @@
 #!/bin/bash
 
-# Try to open the Unity bridge when on MacOs
+# Try to open the LightweaverBridge when on MacOS
 if [[ "$OSTYPE" = "darwin"* ]]; then
     # Define the application name pattern (e.g., MyApp_v*.app)
-    APP_NAME_PATTERN="ConjurerBridge_v*.app"
+    APP_NAME_PATTERN="LightweaverBridge_v*.app"
 
     # Look for all applications matching the pattern in /Applications
     APP_PATHS=($(find /Applications -maxdepth 1 -name "$APP_NAME_PATTERN"))
 
     # Check if any application was found
     if [[ ${#APP_PATHS[@]} -eq 0 ]]; then
-        echo "No Unity bridge application found matching the pattern $APP_NAME_PATTERN in /Applications."
+        echo "No LightweaverBridge application found matching the pattern $APP_NAME_PATTERN in /Applications."
     else
         # Extract version numbers from the app names and sort them to find the latest
         LATEST_APP=""
         LATEST_VERSION=""
 
         for APP_PATH in "${APP_PATHS[@]}"; do
-            echo "Found Unity bridge application: $APP_PATH"
+            echo "Found LightweaverBridge application: $APP_PATH"
             # Extract version number from the app name using regex
             VERSION=$(echo "$APP_PATH" | grep -o '[0-9]\+\.[0-9]\+\.[0-9]\+')
             if [[ -z "$VERSION" ]]; then
