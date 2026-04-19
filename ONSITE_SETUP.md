@@ -31,7 +31,8 @@ These steps can be skipped if you will have internet at the event.
 5. Ensure that at the top of the app it says `using local data` in orange. If it says `using prod data` in green, click it to toggle to local data.
 6. Reload the page.
 7. Verify your setup by turning off your internet and make sure you can load and play experiences still.
-8. Terminate `yarn dev` and run `yarn canopy` to test the unity bridge app. Click Tools->"Transmit data to canopy". Verify that the unity bridge app shows data from Conjurer.
+8. Download the latest (LightweaverBridge app)[https://github.com/SotSF/canopy-unity/releases/tag/lightweaver_bridge_macos_v0.0.6], and follow the instructions in the release notes.
+9. Terminate `yarn dev` and run `yarn canopy` to test the LightweaverBridge app. Click Tools->"Transmit data to canopy". Verify that the LightweaverBridge app shows data from Conjurer.
 
 You are good to go! From now on, you should not need internet access for any functionality. Whenever you open an experience or audio file, it will be loaded from the local database and `public/cloud-audio` directory respectively, and whenever you save an experience file, it will be saved locally.
 
@@ -39,25 +40,17 @@ You are good to go! From now on, you should not need internet access for any fun
 
 ### Start up and configure Conjurer
 
-1. Run `yarn canopy` to run Conjurer locally
+1. Run `yarn canopy` to run Conjurer locally as well as the LightweaverBridge app
 2. Visit http://localhost:3000 to test it out
    - Log in as someone, play any experience on the default Emcee page.
    - Verify visuals and audio are working
 3. If you don't have internet, make sure you see `using local assets` in orange
 4. Set the texture size to 1024 on the bottom right of the canvas (optimizations section for details)
 
-### Transmit data via Unity Bridge app
+### Transmit data via LightweaverBridge app
 
-1. Transmit data from Conjurer to the unity bridge app by clicking Tools->"Transmit data to canopy".
-2. Open the unity bridge app and:
-   Set HSV value (V) to 0.5
-   Set IP to 192.168.1.71 (this may be change)
-   Click Set IP
-   Click Reconnect?
-   Set Mirror port to 4
-   Set Mirror offset to 27
-   Click Use double density
-3. The canopy should be displaying Conjurer data at this point!
+1. Transmit data from Conjurer to the LightweaverBridge app by clicking Tools->"Transmit data to canopy".
+2. The canopy should be displaying Conjurer data at this point!
 
 # Optimizations
 
