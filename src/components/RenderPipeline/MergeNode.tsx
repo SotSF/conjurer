@@ -2,7 +2,6 @@ import merge from "@/src/shaders/merge.frag";
 import { WebGLRenderTarget } from "three";
 import { useFrame } from "@react-three/fiber";
 import { memo, useMemo, useRef } from "react";
-import { PatternParam } from "@/src/types/PatternParams";
 import { makeVertexShader } from "@/src/shaders/vertexShader";
 
 type MergeNodeProps = {
@@ -38,6 +37,8 @@ export const MergeNode = memo(function MergeNode({
     <mesh ref={mesh}>
       <planeGeometry args={[2, 2]} />
       <shaderMaterial
+        // TODO: the fuck?
+        key={Math.random().toString()}
         uniforms={uniforms}
         vertexShader={makeVertexShader(["v_normalized_uv"])}
         fragmentShader={merge}

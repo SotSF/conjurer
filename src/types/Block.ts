@@ -103,6 +103,11 @@ export class Block<T extends ExtraParams = {}> {
     const variations = this.parameterVariations[parameter];
     if (!variations) return;
 
+    if (!(parameter in this.pattern.params)) {
+      console.error(`Parameter ${String(parameter)} not found in pattern`);
+      return;
+    }
+
     let variationTime = 0;
     for (const variation of variations) {
       if (time < variationTime + variation.duration) {
@@ -316,6 +321,11 @@ export class Block<T extends ExtraParams = {}> {
     if (index > -1) {
       this.effectBlocks.splice(index, 1);
     }
+  };
+
+  isActive = () => {
+    const { globalTime } = this.store.audioStore;
+    return this.startTime <= globalTime && globalTime < this.endTime;
   };
 
   /**
