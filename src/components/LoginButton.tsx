@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Button,
   HStack,
@@ -16,7 +16,7 @@ import {
 } from "@chakra-ui/react";
 import { FaUser } from "react-icons/fa";
 import { useStore } from "@/src/types/StoreContext";
-import { action } from "mobx";
+import { action, runInAction } from "mobx";
 import { observer } from "mobx-react-lite";
 import { trpc } from "@/src/utils/trpc";
 import { sanitize } from "@/src/utils/sanitize";
@@ -33,20 +33,33 @@ export const LoginButton = observer(function LoginButton() {
   const {
     isPending,
     isError,
+    error,
+    refetch,
     data: users,
   } = trpc.user.listUsers.useQuery(
     { usingLocalData },
-    { enabled: uiStore.showingUserPickerModal },
+    { enabled: uiStore.showingUserPickerModal, retry: 1 },
   );
 
   const createUser = trpc.user.createUser.useMutation();
+
+  // Stale localStorage may point at prod DB without Turso credentials configured
+  useEffect(() => {
+    if (
+      !isError ||
+      usingLocalData ||
+      process.env.NEXT_PUBLIC_NODE_ENV === "production"
+    )
+      return;
+    runInAction(() => {
+      store.usingLocalData = true;
+    });
+  }, [isError, usingLocalData, store]);
 
   const onClose = action(() => {
     uiStore.showingUserPickerModal = false;
     setNewUsername("");
   });
-
-  if (isError) return null;
 
   return (
     <>
@@ -71,9 +84,17 @@ export const LoginButton = observer(function LoginButton() {
           </ModalHeader>
           <ModalCloseButton />
           <ModalBody>
+            {isError && usingLocalData && (
+              <Text color="red.300" mb={4}>
+                Could not load users ({error?.message ?? "unknown error"}).{" "}
+                <Button size="xs" variant="link" onClick={() => refetch()}>
+                  Retry
+                </Button>
+              </Text>
+            )}
             <VStack alignItems="center">
               {!isPending &&
-                users
+                (users ?? [])
                   .filter((user) => user.username !== userStore.username)
                   .map((user) => (
                     <Button

@@ -194,6 +194,11 @@ export class Store {
     //   return;
     // }
 
+    // check for a usingLocalData in local storage (not honored in production)
+    const usingLocalData = localStorage.getItem("usingLocalData");
+    if (usingLocalData && process.env.NEXT_PUBLIC_NODE_ENV !== "production")
+      this._usingLocalData = usingLocalData === "true";
+
     await this.userStore.initialize();
 
     // For now, we'll just set the role based on the context (page)
@@ -205,11 +210,6 @@ export class Store {
     // check for a global intensity in local storage
     const globalIntensity = localStorage.getItem("globalIntensity");
     if (globalIntensity) this._globalIntensity = Number(globalIntensity);
-
-    // check for a usingLocalData in local storage (not honored in production)
-    const usingLocalData = localStorage.getItem("usingLocalData");
-    if (usingLocalData && process.env.NEXT_PUBLIC_NODE_ENV !== "production")
-      this._usingLocalData = usingLocalData === "true";
 
     if (this.context === "vj") this.playgroundStore.initialize();
     this.uiStore.initialize(this.viewerMode);
