@@ -48,9 +48,14 @@ export class UserStore {
   };
 
   fetchUser = async (username: string) => {
-    return await trpcClient.user.getUser.query({
-      username,
-      usingLocalData: this.store.usingLocalData,
-    });
+    try {
+      return await trpcClient.user.getUser.query({
+        username,
+        usingLocalData: this.store.usingLocalData,
+      });
+    } catch {
+      // Stale localStorage username, or empty local DB on first run
+      return null;
+    }
   };
 }
