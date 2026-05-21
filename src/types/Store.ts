@@ -194,7 +194,7 @@ export class Store {
     //   return;
     // }
 
-    this.userStore.initialize();
+    await this.userStore.initialize();
 
     // For now, we'll just set the role based on the context (page)
     if (this.context === "playlistEditor") this._role = "emcee";
