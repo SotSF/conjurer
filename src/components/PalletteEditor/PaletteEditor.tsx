@@ -31,7 +31,8 @@ import {
   XAxis,
 } from "recharts";
 import { Button, HStack, VStack } from "@chakra-ui/react";
-import { memo, useState } from "react";
+import { memo, useCallback, useState } from "react";
+import { useDebouncedCallback } from "use-debounce";
 import { PaletteVariationGraph } from "@/src/components/VariationGraph/PaletteVariationGraph";
 import { PaletteVariation } from "@/src/types/Variations/PaletteVariation";
 import { Block } from "@/src/types/Block";
@@ -44,6 +45,8 @@ const samples = 100;
 const LINEAR_GRADIENT_PHASE_SWEEP = Math.PI / 3;
 const LINEAR_GRADIENT_PHASE_SIN = Math.sin(LINEAR_GRADIENT_PHASE_SWEEP / 2);
 const HEX_COLOR_PATTERN = /^#[0-9a-fA-F]{6}$/;
+const PALETTE_COMMIT_DEBOUNCE_MS = 50;
+const PALETTE_COMMIT_MAX_WAIT_MS = 100;
 
 const setPaletteFromLinearGradient = (
   palette: Palette,
@@ -102,26 +105,38 @@ export const PaletteEditor = memo(function PaletteEditor({
   const [gradientEndColor, setGradientEndColor] = useState(
     vector3ToHex(variation.palette.colorAt(1)),
   );
+  const debouncedCommitPalette = useDebouncedCallback(
+    (palette: Palette) => setPalette?.(palette),
+    PALETTE_COMMIT_DEBOUNCE_MS,
+    { maxWait: PALETTE_COMMIT_MAX_WAIT_MS, trailing: true },
+  );
+
   const randomize = (useSeed = false) => {
+    debouncedCommitPalette.cancel();
     variation.palette.randomize();
     if (useSeed) variation.palette.a = hexToVector3(color);
     setPalette?.(variation.palette);
     // Uncomment to log the palette constructor string
     // console.log(variation.palette.toConstructorString());
   };
-  const applyLinearGradient = (startColor: string, endColor: string) => {
-    if (
-      !HEX_COLOR_PATTERN.test(startColor) ||
-      !HEX_COLOR_PATTERN.test(endColor)
-    )
-      return;
-    setPaletteFromLinearGradient(
-      variation.palette,
-      hexToVector3(startColor),
-      hexToVector3(endColor),
-    );
-    setPalette?.(variation.palette);
-  };
+
+  const applyLinearGradient = useCallback(
+    (startColor: string, endColor: string) => {
+      if (
+        !HEX_COLOR_PATTERN.test(startColor) ||
+        !HEX_COLOR_PATTERN.test(endColor)
+      )
+        return;
+      setPaletteFromLinearGradient(
+        variation.palette,
+        hexToVector3(startColor),
+        hexToVector3(endColor),
+      );
+      debouncedCommitPalette(variation.palette);
+    },
+    [debouncedCommitPalette, variation.palette],
+  );
+
   const onStartGradientColorChange = (nextStartColor: string) => {
     setGradientStartColor(nextStartColor);
     applyLinearGradient(nextStartColor, gradientEndColor);
@@ -130,6 +145,8 @@ export const PaletteEditor = memo(function PaletteEditor({
     setGradientEndColor(nextEndColor);
     applyLinearGradient(gradientStartColor, nextEndColor);
   };
+
+  const commitPaletteNow = () => debouncedCommitPalette.flush();
 
   const series = getPaletteSeriesData(variation.palette);
   return (
@@ -177,30 +194,50 @@ export const PaletteEditor = memo(function PaletteEditor({
                           <VStack>
                             <HStack mb={3}>
                               <Text fontSize="xs">Start color</Text>
+                              <Box
+                                w="20px"
+                                h="20px"
+                                bg={gradientStartColor}
+                                border="1px solid"
+                                borderColor="whiteAlpha.400"
+                                flexShrink={0}
+                              />
                               <HexColorInput
                                 className="hexColorInput"
                                 color={gradientStartColor}
                                 onChange={onStartGradientColorChange}
                               />
                             </HStack>
-                            <HexColorPicker
-                              color={gradientStartColor}
-                              onChange={onStartGradientColorChange}
-                            />
+                            <Box onPointerUp={commitPaletteNow}>
+                              <HexColorPicker
+                                color={gradientStartColor}
+                                onChange={onStartGradientColorChange}
+                              />
+                            </Box>
                           </VStack>
                           <VStack>
                             <HStack mb={3}>
                               <Text fontSize="xs">End color</Text>
+                              <Box
+                                w="20px"
+                                h="20px"
+                                bg={gradientEndColor}
+                                border="1px solid"
+                                borderColor="whiteAlpha.400"
+                                flexShrink={0}
+                              />
                               <HexColorInput
                                 className="hexColorInput"
                                 color={gradientEndColor}
                                 onChange={onEndGradientColorChange}
                               />
                             </HStack>
-                            <HexColorPicker
-                              color={gradientEndColor}
-                              onChange={onEndGradientColorChange}
-                            />
+                            <Box onPointerUp={commitPaletteNow}>
+                              <HexColorPicker
+                                color={gradientEndColor}
+                                onChange={onEndGradientColorChange}
+                              />
+                            </Box>
                           </VStack>
                         </HStack>
                       </VStack>
