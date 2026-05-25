@@ -14,6 +14,8 @@ import { ScalarParameterControl } from "@/src/components/PatternPlayground/Scala
 import { ColorParameterControl } from "@/src/components/PatternPlayground/ColorParameterControl";
 import { PaletteParameterControl } from "@/src/components/PatternPlayground/PaletteParameterControl";
 import { BooleanParameterControl } from "@/src/components/PatternPlayground/BooleanParameterControl";
+import { NumberParam } from "@/src/paramDefinitions/NumberParam";
+import { BooleanParam } from "@/src/paramDefinitions/BooleanParam";
 
 type ParameterControlProps = {
   block: Block;
@@ -40,17 +42,17 @@ export const ParameterControl = memo(function ParameterControl({
     setParameters,
   };
   let parameterControl = null;
-  if (isBooleanParam(patternParam))
+  if (BooleanParam.isParamType(patternParam))
     parameterControl = (
-      <BooleanParameterControl
+      <BooleanParam.ParameterControl
         {...props}
         key={props.key}
         patternParam={patternParam}
       />
     );
-  else if (isNumberParam(patternParam))
+  else if (NumberParam.isParamType(patternParam))
     parameterControl = (
-      <ScalarParameterControl
+      <NumberParam.VJParameterControl
         {...props}
         key={props.key}
         patternParam={patternParam}

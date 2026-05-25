@@ -14,6 +14,8 @@ import { VJScalarParameterControl } from "@/src/components/VJPage/VJScalarParame
 import { VJColorParameterControl } from "@/src/components/VJPage/VJColorParameterControl";
 import { VJPaletteParameterControl } from "@/src/components/VJPage/VJPaletteParameterControl";
 import { VJBooleanParameterControl } from "@/src/components/VJPage/VJBooleanParameterControl";
+import { NumberParam } from "@/src/paramDefinitions/NumberParam";
+import { BooleanParam } from "@/src/paramDefinitions/BooleanParam";
 
 type VJParameterControlProps = {
   block: Block;
@@ -41,17 +43,17 @@ export const VJParameterControl = memo(function VJParameterControl({
   };
 
   let parameterControl = null;
-  if (isBooleanParam(patternParam))
+  if (BooleanParam.isParamType(patternParam))
     parameterControl = (
-      <VJBooleanParameterControl
+      <BooleanParam.VJParameterControl
         {...props}
         key={props.key}
         patternParam={patternParam}
       />
     );
-  else if (isNumberParam(patternParam))
+  else if (NumberParam.isParamType(patternParam))
     parameterControl = (
-      <VJScalarParameterControl
+      <NumberParam.VJParameterControl
         {...props}
         key={props.key}
         patternParam={patternParam}
@@ -87,4 +89,3 @@ export const VJParameterControl = memo(function VJParameterControl({
     </Box>
   );
 });
-

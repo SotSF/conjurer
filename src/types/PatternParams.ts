@@ -16,7 +16,7 @@ export type PatternParam<T = ParamType> = {
 
 export const isBooleanParam = (
   param: PatternParam,
-): param is PatternParam<number> =>
+): param is PatternParam<0 | 1> =>
   typeof param.value === "number" &&
   param.min === 0 &&
   param.max === 1 &&
