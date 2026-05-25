@@ -2,20 +2,15 @@ import { Box } from "@chakra-ui/react";
 import { memo } from "react";
 import { Block } from "@/src/types/Block";
 import {
-  ParamType,
-  PatternParam,
-  isBooleanParam,
-  isNumberParam,
   isPaletteParam,
   isVector4Param,
+  ParamType,
+  PatternParam,
 } from "@/src/types/PatternParams";
 import { BASE_UNIFORMS } from "@/src/types/Pattern";
-import { ScalarParameterControl } from "@/src/components/PatternPlayground/ScalarParameterControl";
 import { ColorParameterControl } from "@/src/components/PatternPlayground/ColorParameterControl";
 import { PaletteParameterControl } from "@/src/components/PatternPlayground/PaletteParameterControl";
-import { BooleanParameterControl } from "@/src/components/PatternPlayground/BooleanParameterControl";
-import { NumberParam } from "@/src/paramDefinitions/NumberParam";
-import { BooleanParam } from "@/src/paramDefinitions/BooleanParam";
+import { ParamDefinitions } from "@/src/paramDefinitions/ParamDefinitions";
 
 type ParameterControlProps = {
   block: Block;
@@ -41,24 +36,17 @@ export const ParameterControl = memo(function ParameterControl({
     parameters,
     setParameters,
   };
+
+  for (let paramDefinition of ParamDefinitions) {
+    const control = paramDefinition.renderControl(patternParam, props);
+    if (control) {
+      return control;
+    }
+  }
+
   let parameterControl = null;
-  if (BooleanParam.isParamType(patternParam))
-    parameterControl = (
-      <BooleanParam.ParameterControl
-        {...props}
-        key={props.key}
-        patternParam={patternParam}
-      />
-    );
-  else if (NumberParam.isParamType(patternParam))
-    parameterControl = (
-      <NumberParam.VJParameterControl
-        {...props}
-        key={props.key}
-        patternParam={patternParam}
-      />
-    );
-  else if (isVector4Param(patternParam))
+
+  if (isVector4Param(patternParam))
     parameterControl = (
       <ColorParameterControl
         {...props}
