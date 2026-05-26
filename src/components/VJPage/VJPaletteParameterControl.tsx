@@ -17,59 +17,55 @@ type VJPaletteParameterControlProps = {
   block: Block<ExtraParams>;
   uniformName: string;
   patternParam: PatternParam<Palette>;
-  parameters: Record<string, ParamType>;
-  setParameters: (params: Record<string, ParamType>) => void;
 };
 
-export const VJPaletteParameterControl = memo(function VJPaletteParameterControl({
-  block,
-  uniformName,
-  patternParam,
-  parameters,
-  setParameters,
-}: VJPaletteParameterControlProps) {
-  const updatePaletteVariation = useCallback(() => {
-    runInAction(() => {
-      if (!block.parameterVariations[uniformName])
-        block.parameterVariations[uniformName] = [];
+export const VJPaletteParameterControl = memo(
+  function VJPaletteParameterControl({
+    block,
+    uniformName,
+    patternParam,
+  }: VJPaletteParameterControlProps) {
+    const updatePaletteVariation = useCallback(() => {
+      runInAction(() => {
+        if (!block.parameterVariations[uniformName])
+          block.parameterVariations[uniformName] = [];
 
-      block.parameterVariations[uniformName]![0] = new PaletteVariation(
-        DEFAULT_VARIATION_DURATION,
-        patternParam.value,
-      );
-    });
-  }, [block.parameterVariations, patternParam.value, uniformName]);
+        block.parameterVariations[uniformName]![0] = new PaletteVariation(
+          DEFAULT_VARIATION_DURATION,
+          patternParam.value,
+        );
+      });
+    }, [block.parameterVariations, patternParam.value, uniformName]);
 
-  const variation = block.parameterVariations[uniformName]?.[0];
+    const variation = block.parameterVariations[uniformName]?.[0];
 
-  const [initialized, setInitialized] = useState(false);
-  // upon initializing a palette parameter, create a variation if one does not exist
-  // TODO: this is janky and probably should be done elsewhere
-  useEffect(() => {
-    if (variation || initialized) return;
-    setInitialized(true);
-    updatePaletteVariation();
-  }, [updatePaletteVariation, variation, initialized]);
+    const [initialized, setInitialized] = useState(false);
+    // upon initializing a palette parameter, create a variation if one does not exist
+    // TODO: this is janky and probably should be done elsewhere
+    useEffect(() => {
+      if (variation || initialized) return;
+      setInitialized(true);
+      updatePaletteVariation();
+    }, [updatePaletteVariation, variation, initialized]);
 
-  const setParameter = (value: Palette) => {
-    setParameters({ ...parameters, [uniformName]: value });
-    block.pattern.params[uniformName].value = value;
-    updatePaletteVariation();
-  };
+    const setParameter = (value: Palette) => {
+      block.pattern.params[uniformName].value = value;
+      updatePaletteVariation();
+    };
 
-  return (
-    <HStack width="100%" maxW="100%" minW={0} flexWrap="wrap" gap={4}>
-      <VJParameterControlName patternParam={patternParam} />
-      {variation?.type === "palette" && (
-        <PaletteEditor
-          uniformName={uniformName}
-          // TODO: do better type discrimination
-          variation={variation as PaletteVariation}
-          block={block}
-          setPalette={(palette) => setParameter(palette)}
-        />
-      )}
-    </HStack>
-  );
-});
-
+    return (
+      <HStack width="100%" maxW="100%" minW={0} flexWrap="wrap" gap={4}>
+        <VJParameterControlName patternParam={patternParam} />
+        {variation?.type === "palette" && (
+          <PaletteEditor
+            uniformName={uniformName}
+            // TODO: do better type discrimination
+            variation={variation as PaletteVariation}
+            block={block}
+            setPalette={(palette) => setParameter(palette)}
+          />
+        )}
+      </HStack>
+    );
+  },
+);

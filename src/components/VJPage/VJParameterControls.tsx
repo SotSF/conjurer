@@ -28,8 +28,6 @@ type VJParameterControlsProps = {
 export const VJParameterControls = observer(function VJParameterControls({
   block,
 }: VJParameterControlsProps) {
-  const [parameters, setParameters] = useState({});
-
   const isEffect = block.parentBlock !== null;
   const patternName = block.pattern.name;
 
@@ -95,8 +93,6 @@ export const VJParameterControls = observer(function VJParameterControls({
               block={block}
               uniformName={uniformName}
               patternParam={patternParam}
-              parameters={parameters}
-              setParameters={setParameters}
             />
           ))}
       </VStack>

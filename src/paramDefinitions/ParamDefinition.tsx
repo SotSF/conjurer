@@ -19,8 +19,6 @@ type ParamDefinition<T extends ParamType> = {
 type ParameterControlOtherProps = {
   block: Block<ExtraParams>;
   uniformName: string;
-  parameters: Record<string, ParamType>; // what is this? why multiple params on a single param?
-  setParameters: (params: Record<string, ParamType>) => void;
 };
 type ParameterControl<T extends ParamType> = React.FC<
   ParameterControlOtherProps & {
@@ -31,8 +29,6 @@ type ParameterControl<T extends ParamType> = React.FC<
 type VJParameterControlOtherProps = {
   block: Block<ExtraParams>;
   uniformName: string;
-  parameters: Record<string, ParamType>;
-  setParameters: (params: Record<string, ParamType>) => void;
 };
 
 type VJParameterControl<T extends ParamType> = React.FC<

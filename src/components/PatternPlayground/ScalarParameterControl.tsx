@@ -15,11 +15,7 @@ import {
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { Block } from "@/src/types/Block";
-import {
-  ExtraParams,
-  ParamType,
-  PatternParam,
-} from "@/src/types/PatternParams";
+import { ExtraParams, PatternParam } from "@/src/types/PatternParams";
 import { FlatVariation } from "@/src/types/Variations/FlatVariation";
 import { DEFAULT_PERIOD, DEFAULT_VARIATION_DURATION } from "@/src/utils/time";
 import { runInAction } from "mobx";
@@ -40,16 +36,12 @@ type ScalarParameterControlProps = {
   block: Block<ExtraParams>;
   uniformName: string;
   patternParam: PatternParam<number>;
-  parameters: Record<string, ParamType>;
-  setParameters: (params: Record<string, ParamType>) => void;
 };
 
 export const ScalarParameterControl = observer(function ScalarParameterControl({
   block,
   uniformName,
   patternParam,
-  parameters,
-  setParameters,
 }: ScalarParameterControlProps) {
   const variations = block.parameterVariations[uniformName] ?? [];
   // Initialize the variation mode based on the first variation type found
@@ -70,7 +62,6 @@ export const ScalarParameterControl = observer(function ScalarParameterControl({
 
     if (Number.isNaN(inputNumber)) return;
 
-    setParameters({ ...parameters, [uniformName]: inputNumber });
     patternParam.value = inputNumber;
 
     runInAction(() => {

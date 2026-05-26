@@ -19,19 +19,14 @@ type VJColorParameterControlProps = {
   block: Block<ExtraParams>;
   uniformName: string;
   patternParam: PatternParam<Vector4>;
-  parameters: Record<string, ParamType>;
-  setParameters: (params: Record<string, ParamType>) => void;
 };
 
 export const VJColorParameterControl = memo(function VJColorParameterControl({
   block,
   uniformName,
   patternParam,
-  parameters,
-  setParameters,
 }: VJColorParameterControlProps) {
   const setParameter = (value: Vector4) => {
-    setParameters({ ...parameters, [uniformName]: value });
     block.pattern.params[uniformName].value = value;
 
     runInAction(() => {
@@ -61,14 +56,7 @@ export const VJColorParameterControl = memo(function VJColorParameterControl({
   };
 
   return (
-    <HStack
-      pt={6}
-      width="100%"
-      maxW="100%"
-      minW={0}
-      flexWrap="wrap"
-      gap={4}
-    >
+    <HStack pt={6} width="100%" maxW="100%" minW={0} flexWrap="wrap" gap={4}>
       <VJParameterControlName patternParam={patternParam} />
       <HexColorInput
         className="hexColorInput"
@@ -79,4 +67,3 @@ export const VJColorParameterControl = memo(function VJColorParameterControl({
     </HStack>
   );
 });
-

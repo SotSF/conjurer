@@ -16,16 +16,12 @@ type ParameterControlProps = {
   block: Block;
   uniformName: string;
   patternParam: PatternParam;
-  parameters: Record<string, ParamType>;
-  setParameters: (params: Record<string, ParamType>) => void;
 };
 
 export const ParameterControl = memo(function ParameterControl({
   block,
   uniformName,
   patternParam,
-  parameters,
-  setParameters,
 }: ParameterControlProps) {
   if (BASE_UNIFORMS.includes(uniformName)) return null;
 
@@ -33,8 +29,6 @@ export const ParameterControl = memo(function ParameterControl({
     key: uniformName,
     block,
     uniformName,
-    parameters,
-    setParameters,
   };
 
   for (let paramDefinition of ParamDefinitions) {

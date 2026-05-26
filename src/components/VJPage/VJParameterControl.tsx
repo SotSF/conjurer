@@ -16,16 +16,12 @@ type VJParameterControlProps = {
   block: Block;
   uniformName: string;
   patternParam: PatternParam;
-  parameters: Record<string, ParamType>;
-  setParameters: (params: Record<string, ParamType>) => void;
 };
 
 export const VJParameterControl = memo(function VJParameterControl({
   block,
   uniformName,
   patternParam,
-  parameters,
-  setParameters,
 }: VJParameterControlProps) {
   if (BASE_UNIFORMS.includes(uniformName)) return null;
 
@@ -33,8 +29,6 @@ export const VJParameterControl = memo(function VJParameterControl({
     key: uniformName,
     block,
     uniformName,
-    parameters,
-    setParameters,
   };
 
   for (let paramDefinition of ParamDefinitions) {
