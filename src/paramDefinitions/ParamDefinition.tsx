@@ -1,8 +1,4 @@
-import {
-  ExtraParams,
-  ParamType,
-  PatternParam,
-} from "@/src/types/PatternParams";
+import { ParamType, PatternParam } from "@/src/types/PatternParams";
 import { Block } from "@/src/types/Block";
 import React from "react";
 
@@ -17,7 +13,7 @@ type ParamDefinition<T extends ParamType> = {
 };
 
 type ParameterControlOtherProps = {
-  block: Block<ExtraParams>;
+  block: Block;
   uniformName: string;
 };
 type ParameterControl<T extends ParamType> = React.FC<
@@ -27,7 +23,7 @@ type ParameterControl<T extends ParamType> = React.FC<
 >;
 
 type VJParameterControlOtherProps = {
-  block: Block<ExtraParams>;
+  block: Block;
   uniformName: string;
 };
 
