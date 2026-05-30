@@ -3,7 +3,6 @@ import { runInAction } from "mobx";
 import { Block } from "@/src/types/Block";
 import { BASE_UNIFORMS } from "@/src/types/Pattern";
 import {
-  ParamMap,
   isPaletteParam,
   isTextureParam,
   isVector4Param,
@@ -25,8 +24,8 @@ export function resetBlockParamsToDefaults(block: Block): void {
   const defaultPattern = defaultPatternEffectMap[block.pattern.name];
   if (!defaultPattern) return;
 
-  const defaultParams = defaultPattern.params as ParamMap;
-  const targetParams = block.pattern.params as ParamMap;
+  const defaultParams = defaultPattern.params;
+  const targetParams = block.pattern.params;
 
   runInAction(() => {
     for (const uniformName of Object.keys(defaultParams)) {

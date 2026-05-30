@@ -1,6 +1,6 @@
 import { Block, SerializedBlock } from "@/src/types/Block";
 import type { Store } from "@/src/types/Store";
-import { ParamMap, isPaletteParam, ParamType } from "@/src/types/PatternParams";
+import { isPaletteParam, ParamType } from "@/src/types/PatternParams";
 import { Palette, SerializedPalette } from "@/src/types/Palette";
 import { deserializeVariation } from "@/src/types/Variations/variations";
 import { runInAction } from "mobx";
@@ -38,7 +38,7 @@ export function applySerializedBlockToVjPool(
       if (patternBlock.pattern.name !== transferPattern.name) return;
 
       for (const [uniformName, param] of Object.entries(transferParams)) {
-        const playgroundParams = patternBlock.pattern.params as ParamMap;
+        const playgroundParams = patternBlock.pattern.params;
         if (playgroundParams[uniformName]) {
           if (isPaletteParam(playgroundParams[uniformName])) {
             (playgroundParams[uniformName].value as Palette).setFromSerialized(
@@ -67,7 +67,7 @@ export function applySerializedBlockToVjPool(
 
           const { params } = transferEffectBlock.pattern;
           for (const [uniformName, param] of Object.entries(params)) {
-            const playgroundParams = effectBlock.pattern.params as ParamMap;
+            const playgroundParams = effectBlock.pattern.params;
             if (playgroundParams[uniformName]) {
               if (isPaletteParam(playgroundParams[uniformName])) {
                 (
