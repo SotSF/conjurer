@@ -50,9 +50,9 @@ export type StandardParams = {
   };
 };
 
-export type ExtraParams = Record<string, PatternParam>;
+export type ParamMap = Record<string, PatternParam>;
 
-export type PatternParams = StandardParams & ExtraParams;
+export type PatternParams = StandardParams & ParamMap;
 
 // this type could be improved a bit
 type SerializedParamType = ParamType | SerializedPalette;

@@ -1,7 +1,6 @@
 import { Block } from "@/src/types/Block";
 import { BASE_UNIFORMS } from "@/src/types/Pattern";
 import {
-  ExtraParams,
   isPaletteParam,
   isTextureParam,
   isVector4Param,
@@ -18,12 +17,12 @@ import { runInAction } from "mobx";
  * uniform, and `updateParameters` only writes params for keys present in variations.
  */
 export function copyPatternParamValuesBetweenBlocks(
-  source: Block<ExtraParams>,
-  target: Block<ExtraParams>,
+  source: Block,
+  target: Block,
 ) {
   if (source.pattern.name !== target.pattern.name) return;
-  const srcParams = source.pattern.params as ExtraParams;
-  const tgtParams = target.pattern.params as ExtraParams;
+  const srcParams = source.pattern.params;
+  const tgtParams = target.pattern.params;
 
   runInAction(() => {
     for (const uniformName of Object.keys(srcParams)) {

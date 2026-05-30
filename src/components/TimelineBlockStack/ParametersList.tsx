@@ -1,5 +1,4 @@
 import { Block } from "@/src/types/Block";
-import { ExtraParams } from "@/src/types/PatternParams";
 import { ParameterView } from "@/src/components/TimelineBlockStack/ParameterView";
 import { VStack } from "@chakra-ui/react";
 import { memo } from "react";
@@ -7,7 +6,7 @@ import { memo } from "react";
 const uniformNamesToExclude = ["u_time", "u_texture"];
 
 type ParametersListProps = {
-  block: Block<ExtraParams>;
+  block: Block;
   expandMode: "expanded" | "collapsed";
 };
 

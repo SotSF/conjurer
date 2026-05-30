@@ -17,11 +17,7 @@ import {
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { Block } from "@/src/types/Block";
-import {
-  ExtraParams,
-  ParamType,
-  PatternParam,
-} from "@/src/types/PatternParams";
+import { ParamType, PatternParam } from "@/src/types/PatternParams";
 import { DEFAULT_PERIOD, DEFAULT_VARIATION_DURATION } from "@/src/utils/time";
 import { runInAction } from "mobx";
 import { FaTimes } from "react-icons/fa";
@@ -46,7 +42,7 @@ const sliderMarkMinW = "72px"; // min width for min/max labels (decimals)
 const sliderMarkHorizontalGutter = 16; // Chakra space token (~4rem)
 
 type VJScalarParameterControlProps = {
-  block: Block<ExtraParams>;
+  block: Block;
   uniformName: string;
   patternParam: PatternParam<number>;
   parameters: Record<string, ParamType>;

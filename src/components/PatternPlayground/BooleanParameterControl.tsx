@@ -10,18 +10,14 @@ import {
 } from "@chakra-ui/react";
 import { memo, useState } from "react";
 import { Block } from "@/src/types/Block";
-import {
-  ExtraParams,
-  ParamType,
-  PatternParam,
-} from "@/src/types/PatternParams";
+import { ParamType, PatternParam } from "@/src/types/PatternParams";
 import { FlatVariation } from "@/src/types/Variations/FlatVariation";
 import { DEFAULT_VARIATION_DURATION } from "@/src/utils/time";
 import { runInAction } from "mobx";
 import { ParameterControlName } from "@/src/components/PatternPlayground/ParameterControlName";
 
 type BooleanParameterControlProps = {
-  block: Block<ExtraParams>;
+  block: Block;
   uniformName: string;
   patternParam: PatternParam<number>;
   parameters: Record<string, ParamType>;

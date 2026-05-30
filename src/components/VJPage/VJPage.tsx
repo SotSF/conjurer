@@ -42,7 +42,6 @@ import {
   type VjMidiCcLearnState,
 } from "@/src/components/VJPage/useVjMidiCcScalar";
 import { getVjMidiScalarUniformsFlatForEditableStack } from "@/src/utils/vjFirstNonJumpyScalarUniform";
-import type { ExtraParams } from "@/src/types/PatternParams";
 import type { VjMidiDeviceConfigsFile } from "@/src/utils/vjMidiDeviceStorage";
 import {
   loadVjMidiDeviceConfigsFromStorage,
@@ -157,8 +156,8 @@ export const VJPageInner = observer(function VJPageInner() {
   const midiTargetsFlat = useMemo(
     () =>
       getVjMidiScalarUniformsFlatForEditableStack(
-        session.selectedPatternBlock as Block<ExtraParams>,
-        session.effectBlocks as Block<ExtraParams>[],
+        session.selectedPatternBlock,
+        session.effectBlocks,
         session.selectedEffectIndices,
       ),
     [
@@ -632,13 +631,7 @@ export const VJPageInner = observer(function VJPageInner() {
             >
               Editing {liveEditing ? "Live" : "Preview"}
             </Box>
-            <Box
-              flex="1"
-              minH={0}
-              minW={0}
-              overflowX="hidden"
-              overflowY="auto"
-            >
+            <Box flex="1" minH={0} minW={0} overflowX="hidden" overflowY="auto">
               <VStack
                 width="100%"
                 minW={0}
@@ -662,7 +655,13 @@ export const VJPageInner = observer(function VJPageInner() {
                     ).current?.() ?? null
                   }
                 />
-                <VStack align="stretch" spacing={2} width="100%" minW={0} ml={2}>
+                <VStack
+                  align="stretch"
+                  spacing={2}
+                  width="100%"
+                  minW={0}
+                  ml={2}
+                >
                   <Text fontSize="md" fontWeight="bold" color="gray.200">
                     Choose a pattern
                   </Text>
@@ -683,16 +682,31 @@ export const VJPageInner = observer(function VJPageInner() {
                   selectedEffectIndices={session.selectedEffectIndices}
                   onToggleEffect={session.onToggleEffect}
                 />
-                {session.selectedEffectIndices.map((effectIndex) => {
-                  const effectBlock = session.effectBlocks[effectIndex];
-                  if (!effectBlock) return null;
-                  return (
-                    <VJParameterControls
-                      key={`${effectBlock.id}-${editingSession}-${session.renderNonce}`}
-                      block={effectBlock as any}
-                    />
-                  );
-                })}
+                {session.selectedEffectIndices.map(
+                  (effectIndex, orderIndex) => {
+                    const effectBlock = session.effectBlocks[effectIndex];
+                    if (!effectBlock) return null;
+                    const effectCount = session.selectedEffectIndices.length;
+                    return (
+                      <VJParameterControls
+                        key={`${effectBlock.id}-${editingSession}-${session.renderNonce}`}
+                        block={effectBlock as any}
+                        effectOrder={
+                          effectCount >= 2
+                            ? {
+                                canMoveUp: orderIndex > 0,
+                                canMoveDown: orderIndex < effectCount - 1,
+                                onMoveUp: () =>
+                                  session.onMoveEffect(effectIndex, "up"),
+                                onMoveDown: () =>
+                                  session.onMoveEffect(effectIndex, "down"),
+                              }
+                            : undefined
+                        }
+                      />
+                    );
+                  },
+                )}
                 <VJKeyboardShortcutsHelp />
               </VStack>
             </Box>
