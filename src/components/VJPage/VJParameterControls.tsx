@@ -1,9 +1,10 @@
-import { Box, Text, VStack } from "@chakra-ui/react";
+import { Box, Button, HStack, Text, VStack } from "@chakra-ui/react";
 import { keyframes } from "@emotion/react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Block } from "@/src/types/Block";
 import { ExtraParams, PatternParam } from "@/src/types/PatternParams";
 import { VJParameterControl } from "@/src/components/VJPage/VJParameterControl";
+import { resetBlockParamsToDefaults } from "@/src/utils/resetBlockParamsToDefaults";
 import { observer } from "mobx-react-lite";
 
 const patternNameFlash = keyframes`
@@ -29,12 +30,19 @@ export const VJParameterControls = observer(function VJParameterControls({
   block,
 }: VJParameterControlsProps) {
   const [parameters, setParameters] = useState({});
+  const [controlsKey, setControlsKey] = useState(0);
 
   const isEffect = block.parentBlock !== null;
   const patternName = block.pattern.name;
 
   const [patternFlashKey, setPatternFlashKey] = useState(0);
   const prevPatternNameRef = useRef<string | null>(null);
+
+  const onResetDefaults = useCallback(() => {
+    resetBlockParamsToDefaults(block);
+    setParameters({});
+    setControlsKey((k) => k + 1);
+  }, [block]);
 
   useEffect(() => {
     if (isEffect) return;
@@ -58,31 +66,49 @@ export const VJParameterControls = observer(function VJParameterControls({
       overflow="hidden"
     >
       <Box px={3} pt={3} pb={2}>
-        <Text fontSize="sm" fontWeight="bold" color="gray.100">
-          {isEffect ? (
-            <>Effect: {patternName}</>
-          ) : (
-            <>
-              Pattern:{" "}
-              <Text
-                as="span"
-                key={patternFlashKey}
-                display="inline"
-                sx={{
-                  animation:
-                    patternFlashKey > 0
-                      ? `${patternNameFlash} 0.55s ease-out forwards`
-                      : undefined,
-                }}
-              >
-                {patternName}
-              </Text>
-            </>
-          )}
-        </Text>
+        <HStack justify="space-between" align="flex-start" gap={2}>
+          <Text fontSize="sm" fontWeight="bold" color="gray.100">
+            {isEffect ? (
+              <>Effect: {patternName}</>
+            ) : (
+              <>
+                Pattern:{" "}
+                <Text
+                  as="span"
+                  key={patternFlashKey}
+                  display="inline"
+                  sx={{
+                    animation:
+                      patternFlashKey > 0
+                        ? `${patternNameFlash} 0.55s ease-out forwards`
+                        : undefined,
+                  }}
+                >
+                  {patternName}
+                </Text>
+              </>
+            )}
+          </Text>
+          <Button
+            size="xs"
+            variant="ghost"
+            color="gray.400"
+            flexShrink={0}
+            onClick={onResetDefaults}
+            aria-label={`Reset ${patternName} parameters to defaults`}
+          >
+            Reset
+          </Button>
+        </HStack>
       </Box>
 
-      <VStack spacing={0} align="stretch" width="100%" minW={0}>
+      <VStack
+        key={controlsKey}
+        spacing={0}
+        align="stretch"
+        width="100%"
+        minW={0}
+      >
         {Object.entries<PatternParam>(block.pattern.params)
           .sort(([, a], [, b]) => {
             if (a.jumpy && !b.jumpy) return 1;
