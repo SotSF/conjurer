@@ -1,11 +1,7 @@
 import { HStack } from "@chakra-ui/react";
 import { memo, useCallback, useEffect, useState } from "react";
 import { Block } from "@/src/types/Block";
-import {
-  ExtraParams,
-  ParamType,
-  PatternParam,
-} from "@/src/types/PatternParams";
+import { ParamType, PatternParam } from "@/src/types/PatternParams";
 import { DEFAULT_VARIATION_DURATION } from "@/src/utils/time";
 import { runInAction } from "mobx";
 import { Palette } from "@/src/types/Palette";
@@ -14,7 +10,7 @@ import { PaletteVariation } from "@/src/types/Variations/PaletteVariation";
 import { VJParameterControlName } from "@/src/components/VJPage/VJParameterControlName";
 
 type VJPaletteParameterControlProps = {
-  block: Block<ExtraParams>;
+  block: Block;
   uniformName: string;
   patternParam: PatternParam<Palette>;
 };

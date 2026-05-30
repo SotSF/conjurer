@@ -1,4 +1,3 @@
-import { ExtraParams } from "@/src/types/PatternParams";
 import { Box } from "@chakra-ui/react";
 import { memo, useCallback, useRef, useState } from "react";
 import { Variation } from "@/src/types/Variations/Variation";
@@ -10,7 +9,7 @@ import { VARIATION_BOUND_WIDTH } from "@/src/utils/layout";
 
 type ParameterProps = {
   uniformName: string;
-  block: Block<ExtraParams>;
+  block: Block;
   variation: Variation;
 };
 

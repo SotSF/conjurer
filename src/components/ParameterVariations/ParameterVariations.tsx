@@ -1,4 +1,3 @@
-import { ExtraParams } from "@/src/types/PatternParams";
 import { HStack, VStack } from "@chakra-ui/react";
 import { VariationGraph } from "@/src/components/VariationGraph/VariationGraph";
 import {
@@ -19,7 +18,7 @@ import { VariationHandle } from "@/src/components/ParameterVariations/VariationH
 
 type ParameterVariationsProps = {
   uniformName: string;
-  block: Block<ExtraParams>;
+  block: Block;
 };
 
 export const ParameterVariations = observer(function ParameterVariations({

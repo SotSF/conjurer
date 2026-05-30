@@ -1,7 +1,6 @@
 import { Block } from "@/src/types/Block";
 import { BASE_UNIFORMS } from "@/src/types/Pattern";
 import {
-  ExtraParams,
   PatternParam,
   isBooleanParam,
   isNumberParam,
@@ -29,7 +28,7 @@ export type VjMidiScalarTarget = {
  */
 /** Scalar target plus the block it belongs to (pattern or effect). */
 export type VjMidiScalarTargetWithBlock = VjMidiScalarTarget & {
-  block: Block<ExtraParams>;
+  block: Block;
 };
 
 /**
@@ -37,8 +36,8 @@ export type VjMidiScalarTargetWithBlock = VjMidiScalarTarget & {
  * enabled effect’s scalars in selection order — same order as stacked {@link VJParameterControls}.
  */
 export function getVjMidiScalarUniformsFlatForEditableStack(
-  patternBlock: Block<ExtraParams>,
-  effectBlocks: Block<ExtraParams>[],
+  patternBlock: Block,
+  effectBlocks: Block[],
   selectedEffectIndices: number[],
 ): VjMidiScalarTargetWithBlock[] {
   const out: VjMidiScalarTargetWithBlock[] = [];
@@ -56,7 +55,7 @@ export function getVjMidiScalarUniformsFlatForEditableStack(
 }
 
 export function getVjMidiScalarUniformsInOrder(
-  block: Block<ExtraParams>,
+  block: Block,
 ): VjMidiScalarTarget[] {
   const sorted = Object.entries<PatternParam>(block.pattern.params).sort(
     ([, a], [, b]) => {
@@ -79,7 +78,7 @@ export function getVjMidiScalarUniformsInOrder(
  * non-jumpy params first, then first scalar that is not a boolean toggle or base uniform.
  */
 export function getVjFirstNonJumpyScalarUniform(
-  block: Block<ExtraParams>,
+  block: Block,
 ): VjMidiScalarTarget | null {
   return getVjMidiScalarUniformsInOrder(block)[0] ?? null;
 }

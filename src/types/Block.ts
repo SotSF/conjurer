@@ -1,6 +1,6 @@
 import { makeAutoObservable } from "mobx";
 import { BASE_UNIFORMS, Pattern, SerializedPattern } from "@/src/types/Pattern";
-import { ExtraParams, ParamType } from "@/src/types/PatternParams";
+import { ParamType } from "@/src/types/PatternParams";
 import { Variation } from "@/src/types/Variations/Variation";
 import {
   DEFAULT_VARIATION_DURATION,
@@ -27,10 +27,10 @@ export type SerializedBlock = {
   effectBlocks: SerializedBlock[];
 };
 
-export class Block<T extends ExtraParams = {}> {
+export class Block {
   id: string = generateId();
-  pattern: Pattern<T>;
-  parameterVariations: { [K in keyof T]?: Variation[] } = {};
+  pattern: Pattern;
+  parameterVariations: { [uniformName: string]: Variation[] | undefined } = {};
 
   parentBlock: Block | null = null; // if this is an effect block, this is the pattern block that it is applied to
   effectBlocks: Block[] = [];
@@ -57,7 +57,7 @@ export class Block<T extends ExtraParams = {}> {
 
   constructor(
     readonly store: Store,
-    pattern: Pattern<T>,
+    pattern: Pattern,
     parentBlock: Block | null = null,
   ) {
     this.pattern = pattern;
@@ -99,7 +99,7 @@ export class Block<T extends ExtraParams = {}> {
     }
   };
 
-  updateParameter = (parameter: keyof T, time: number, loopLast = false) => {
+  updateParameter = (parameter: string, time: number, loopLast = false) => {
     const variations = this.parameterVariations[parameter];
     if (!variations) return;
 
@@ -164,7 +164,7 @@ export class Block<T extends ExtraParams = {}> {
 
     const variations = this.parameterVariations[uniformName];
     if (!variations) {
-      this.parameterVariations[uniformName as keyof T] = [
+      this.parameterVariations[uniformName] = [
         new FlatVariation(time, parameter.value),
       ];
     } else {
@@ -185,7 +185,7 @@ export class Block<T extends ExtraParams = {}> {
   addVariation = (uniformName: string, variation: Variation) => {
     const variations = this.parameterVariations[uniformName];
     if (!variations) {
-      this.parameterVariations[uniformName as keyof T] = [variation];
+      this.parameterVariations[uniformName] = [variation];
     } else {
       variations.push(variation);
       this.triggerVariationReactions(uniformName);
@@ -288,7 +288,7 @@ export class Block<T extends ExtraParams = {}> {
     if (!variations) return;
 
     // create a new array so that mobx can detect the change
-    this.parameterVariations[uniformName as keyof T] = [...variations];
+    this.parameterVariations[uniformName] = [...variations];
   };
 
   recomputeHeaderRepetitions = (width: number) => {
@@ -339,7 +339,7 @@ export class Block<T extends ExtraParams = {}> {
 
     newBlock.parameterVariations = { ...this.parameterVariations };
     Object.entries(newBlock.parameterVariations).forEach(([key, value]) => {
-      newBlock.parameterVariations[key as keyof T] =
+      newBlock.parameterVariations[key] =
         value?.map((variation) => variation.clone()) ?? [];
     });
 
@@ -351,11 +351,11 @@ export class Block<T extends ExtraParams = {}> {
   };
 
   serializeParameterVariations = () => {
-    const serialized: { [K in keyof T]?: any[] } = {};
+    const serialized: { [uniformName: string]: any[] | undefined } = {};
     for (const parameter of Object.keys(this.parameterVariations)) {
-      serialized[parameter as keyof T] = this.parameterVariations[
-        parameter as keyof T
-      ]?.map((variation) => variation.serialize());
+      serialized[parameter] = this.parameterVariations[parameter]?.map(
+        (variation) => variation.serialize(),
+      );
     }
 
     // check for any parameters without variations and insert a flat variation
@@ -376,11 +376,11 @@ export class Block<T extends ExtraParams = {}> {
 
       const parameterValue = this.pattern.params[parameter].value;
       if (typeof parameterValue === "number") {
-        serialized[parameter as keyof T] = [
+        serialized[parameter] = [
           new FlatVariation(variationDuration, parameterValue).serialize(),
         ];
       } else if (isVector4(parameterValue)) {
-        serialized[parameter as keyof T] = [
+        serialized[parameter] = [
           new LinearVariation4(
             variationDuration,
             parameterValue,
@@ -388,7 +388,7 @@ export class Block<T extends ExtraParams = {}> {
           ).serialize(),
         ];
       } else if (isPalette(parameterValue)) {
-        serialized[parameter as keyof T] = [
+        serialized[parameter] = [
           new PaletteVariation(variationDuration, parameterValue).serialize(),
         ];
       }
@@ -411,7 +411,7 @@ export class Block<T extends ExtraParams = {}> {
     const patternName =
       typeof data.pattern === "string" ? data.pattern : data.pattern.name;
 
-    const block = new Block<ExtraParams>(
+    const block = new Block(
       store,
       defaultPatternEffectMap[patternName].clone(),
     );

@@ -1,11 +1,7 @@
 import { HStack } from "@chakra-ui/react";
 import { memo, useState } from "react";
 import { Block } from "@/src/types/Block";
-import {
-  ExtraParams,
-  ParamType,
-  PatternParam,
-} from "@/src/types/PatternParams";
+import { ParamType, PatternParam } from "@/src/types/PatternParams";
 import { DEFAULT_VARIATION_DURATION } from "@/src/utils/time";
 import { runInAction } from "mobx";
 import { Vector4 } from "three";
@@ -15,7 +11,7 @@ import { LinearVariation4 } from "@/src/types/Variations/LinearVariation4";
 import { ParameterControlName } from "@/src/components/PatternPlayground/ParameterControlName";
 
 type ColorParameterControlProps = {
-  block: Block<ExtraParams>;
+  block: Block;
   uniformName: string;
   patternParam: PatternParam<Vector4>;
 };
