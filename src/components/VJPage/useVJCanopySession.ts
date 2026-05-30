@@ -14,6 +14,7 @@ export type VJCanopySession = {
 
   selectedEffectIndices: number[];
   onToggleEffect: (index: number) => void;
+  onMoveEffect: (index: number, direction: "up" | "down") => void;
 
   selectedPatternBlock: Block<ExtraParams>;
   effectBlocks: Block[];
@@ -91,6 +92,21 @@ export const useVJCanopySession = (store: Store): VJCanopySession => {
       return prev.concat(index);
     });
   }, []);
+
+  const onMoveEffect = useCallback(
+    (index: number, direction: "up" | "down") => {
+      setSelectedEffectIndices((prev) => {
+        const pos = prev.indexOf(index);
+        if (pos < 0) return prev;
+        const swapWith = direction === "up" ? pos - 1 : pos + 1;
+        if (swapWith < 0 || swapWith >= prev.length) return prev;
+        const next = [...prev];
+        [next[pos], next[swapWith]] = [next[swapWith], next[pos]];
+        return next;
+      });
+    },
+    [],
+  );
 
   const selectedPatternBlock =
     patternBlocks[selectedPatternIndex] ?? patternBlocks[0];
@@ -183,6 +199,7 @@ export const useVJCanopySession = (store: Store): VJCanopySession => {
     onSelectPattern,
     selectedEffectIndices,
     onToggleEffect,
+    onMoveEffect,
     selectedPatternBlock,
     effectBlocks,
     renderNonce,

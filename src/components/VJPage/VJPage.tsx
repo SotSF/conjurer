@@ -683,13 +683,26 @@ export const VJPageInner = observer(function VJPageInner() {
                   selectedEffectIndices={session.selectedEffectIndices}
                   onToggleEffect={session.onToggleEffect}
                 />
-                {session.selectedEffectIndices.map((effectIndex) => {
+                {session.selectedEffectIndices.map((effectIndex, orderIndex) => {
                   const effectBlock = session.effectBlocks[effectIndex];
                   if (!effectBlock) return null;
+                  const effectCount = session.selectedEffectIndices.length;
                   return (
                     <VJParameterControls
                       key={`${effectBlock.id}-${editingSession}-${session.renderNonce}`}
                       block={effectBlock as any}
+                      effectOrder={
+                        effectCount >= 2
+                          ? {
+                              canMoveUp: orderIndex > 0,
+                              canMoveDown: orderIndex < effectCount - 1,
+                              onMoveUp: () =>
+                                session.onMoveEffect(effectIndex, "up"),
+                              onMoveDown: () =>
+                                session.onMoveEffect(effectIndex, "down"),
+                            }
+                          : undefined
+                      }
                     />
                   );
                 })}

@@ -1,6 +1,7 @@
-import { Box, Button, HStack, Text, VStack } from "@chakra-ui/react";
+import { Box, Button, HStack, IconButton, Text, VStack } from "@chakra-ui/react";
 import { keyframes } from "@emotion/react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { FaArrowDown, FaArrowUp } from "react-icons/fa";
 import { Block } from "@/src/types/Block";
 import { ExtraParams, PatternParam } from "@/src/types/PatternParams";
 import { VJParameterControl } from "@/src/components/VJPage/VJParameterControl";
@@ -22,12 +23,21 @@ const patternNameFlash = keyframes`
   }
 `;
 
+type VJEffectOrderControls = {
+  canMoveUp: boolean;
+  canMoveDown: boolean;
+  onMoveUp: () => void;
+  onMoveDown: () => void;
+};
+
 type VJParameterControlsProps = {
   block: Block<ExtraParams>;
+  effectOrder?: VJEffectOrderControls;
 };
 
 export const VJParameterControls = observer(function VJParameterControls({
   block,
+  effectOrder,
 }: VJParameterControlsProps) {
   const [parameters, setParameters] = useState({});
   const [controlsKey, setControlsKey] = useState(0);
@@ -89,16 +99,39 @@ export const VJParameterControls = observer(function VJParameterControls({
               </>
             )}
           </Text>
-          <Button
-            size="xs"
-            variant="ghost"
-            color="gray.400"
-            flexShrink={0}
-            onClick={onResetDefaults}
-            aria-label={`Reset ${patternName} parameters to defaults`}
-          >
-            Reset
-          </Button>
+          <HStack spacing={0} flexShrink={0}>
+            {effectOrder && (
+              <>
+                <IconButton
+                  aria-label={`Move ${patternName} effect up`}
+                  icon={<FaArrowUp />}
+                  size="xs"
+                  variant="ghost"
+                  color="gray.400"
+                  isDisabled={!effectOrder.canMoveUp}
+                  onClick={effectOrder.onMoveUp}
+                />
+                <IconButton
+                  aria-label={`Move ${patternName} effect down`}
+                  icon={<FaArrowDown />}
+                  size="xs"
+                  variant="ghost"
+                  color="gray.400"
+                  isDisabled={!effectOrder.canMoveDown}
+                  onClick={effectOrder.onMoveDown}
+                />
+              </>
+            )}
+            <Button
+              size="xs"
+              variant="ghost"
+              color="gray.400"
+              onClick={onResetDefaults}
+              aria-label={`Reset ${patternName} parameters to defaults`}
+            >
+              Reset
+            </Button>
+          </HStack>
         </HStack>
       </Box>
 
