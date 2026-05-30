@@ -1,7 +1,7 @@
 import { playgroundEffects } from "@/src/effects/effects";
 import { playgroundPatterns } from "@/src/patterns/patterns";
 import { Block } from "@/src/types/Block";
-import { ExtraParams } from "@/src/types/PatternParams";
+import { ParamMap } from "@/src/types/PatternParams";
 import type { Store } from "@/src/types/Store";
 import { sendConjurerStateUpdate } from "@/src/websocket/conjurerApiWebsocket";
 import { makeAutoObservable, runInAction } from "mobx";
@@ -72,7 +72,7 @@ export class PlaygroundStore {
     });
   };
 
-  get selectedPatternBlock(): Block<ExtraParams> {
+  get selectedPatternBlock(): Block {
     return (
       this.patternBlocks[this.selectedPatternIndex] ?? this.patternBlocks[0]
     );
@@ -109,7 +109,7 @@ export class PlaygroundStore {
   };
 
   setParameterValues = (newParams: { name: string; value: number }[]) => {
-    const params = this.selectedPatternBlock.pattern.params as ExtraParams;
+    const params = this.selectedPatternBlock.pattern.params as ParamMap;
     for (const { name, value } of newParams) {
       const variations = this.selectedPatternBlock.parameterVariations;
       if (params[name]) params[name].value = value;

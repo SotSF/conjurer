@@ -1,4 +1,4 @@
-import { ExtraParams, isVector4Param } from "@/src/types/PatternParams";
+import { isVector4Param } from "@/src/types/PatternParams";
 import { IconButton, VStack } from "@chakra-ui/react";
 import { memo } from "react";
 import { BsArrowUpRight } from "react-icons/bs";
@@ -29,7 +29,7 @@ import { AudioVariation } from "@/src/types/Variations/AudioVariation";
 
 type NewVariationButtonsProps = {
   uniformName: string;
-  block: Block<ExtraParams>;
+  block: Block;
 };
 
 export const NewVariationButtons = memo(function NewVariationButtons({

@@ -3,7 +3,7 @@ import { runInAction } from "mobx";
 import { Block } from "@/src/types/Block";
 import { BASE_UNIFORMS } from "@/src/types/Pattern";
 import {
-  ExtraParams,
+  ParamMap,
   isPaletteParam,
   isTextureParam,
   isVector4Param,
@@ -21,12 +21,12 @@ import { DEFAULT_VARIATION_DURATION } from "@/src/utils/time";
  * Restores a block's pattern params and flat default variations from the
  * factory defaults in {@link defaultPatternEffectMap}.
  */
-export function resetBlockParamsToDefaults(block: Block<ExtraParams>): void {
+export function resetBlockParamsToDefaults(block: Block): void {
   const defaultPattern = defaultPatternEffectMap[block.pattern.name];
   if (!defaultPattern) return;
 
-  const defaultParams = defaultPattern.params as ExtraParams;
-  const targetParams = block.pattern.params as ExtraParams;
+  const defaultParams = defaultPattern.params as ParamMap;
+  const targetParams = block.pattern.params as ParamMap;
 
   runInAction(() => {
     for (const uniformName of Object.keys(defaultParams)) {

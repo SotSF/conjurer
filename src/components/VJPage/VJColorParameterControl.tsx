@@ -1,11 +1,7 @@
 import { HStack } from "@chakra-ui/react";
 import { memo, useState } from "react";
 import { Block } from "@/src/types/Block";
-import {
-  ExtraParams,
-  ParamType,
-  PatternParam,
-} from "@/src/types/PatternParams";
+import { ParamType, PatternParam } from "@/src/types/PatternParams";
 import { DEFAULT_VARIATION_DURATION } from "@/src/utils/time";
 import { runInAction } from "mobx";
 import { Vector4 } from "three";
@@ -16,7 +12,7 @@ import { VJParameterControlName } from "@/src/components/VJPage/VJParameterContr
 import { useEffect } from "react";
 
 type VJColorParameterControlProps = {
-  block: Block<ExtraParams>;
+  block: Block;
   uniformName: string;
   patternParam: PatternParam<Vector4>;
   parameters: Record<string, ParamType>;
@@ -61,14 +57,7 @@ export const VJColorParameterControl = memo(function VJColorParameterControl({
   };
 
   return (
-    <HStack
-      pt={6}
-      width="100%"
-      maxW="100%"
-      minW={0}
-      flexWrap="wrap"
-      gap={4}
-    >
+    <HStack pt={6} width="100%" maxW="100%" minW={0} flexWrap="wrap" gap={4}>
       <VJParameterControlName patternParam={patternParam} />
       <HexColorInput
         className="hexColorInput"
@@ -79,4 +68,3 @@ export const VJColorParameterControl = memo(function VJColorParameterControl({
     </HStack>
   );
 });
-

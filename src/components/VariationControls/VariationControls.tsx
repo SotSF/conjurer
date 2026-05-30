@@ -28,7 +28,6 @@ import { HexColorPicker } from "react-colorful";
 import { hexToRgb, vector4ToHex } from "@/src/utils/color";
 import { HexColorInput } from "react-colorful";
 import { SplineVariation } from "@/src/types/Variations/SplineVariation";
-import { ExtraParams } from "@/src/types/PatternParams";
 import { useStore } from "@/src/types/StoreContext";
 import { ScalarInput } from "@/src/components/ScalarInput";
 import {
@@ -44,7 +43,7 @@ import { AudioVariationControls } from "@/src/components/VariationControls/Audio
 type VariationControlsProps = {
   uniformName: string;
   variation: Variation;
-  block: Block<ExtraParams>;
+  block: Block;
 };
 
 export const VariationControls = function VariationControls({
