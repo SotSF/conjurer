@@ -4,10 +4,7 @@ import conjurerCommon from "@/src/shaders/conjurer_common.frag";
 import { WebGLRenderTarget, ShaderChunk } from "three";
 import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect } from "react";
-import {
-  BlockNode,
-  PatternBlockNode,
-} from "@/src/components/RenderPipeline/BlockNode";
+import { BlockNode } from "@/src/components/RenderPipeline/BlockNode";
 import { useStore } from "@/src/types/StoreContext";
 import { Block } from "@/src/types/Block";
 import { observer } from "mobx-react-lite";
@@ -61,12 +58,13 @@ export const BlockStackNode = observer(function BlockStackNode({
 
   const numberEffects = parentBlock?.effectBlocks.length ?? 0;
   const evenNumberOfEffects = numberEffects % 2 === 0;
+  const pattern = parentBlock?.pattern ?? defaultPattern;
+
   return (
     <>
-      <PatternBlockNode
+      <pattern.Component
         priority={basePriority + 1}
         shaderMaterialKey={parentBlock?.id}
-        pattern={parentBlock?.pattern ?? defaultPattern}
         renderTargetOut={evenNumberOfEffects ? renderTargetOut : renderTargetIn}
       />
       {parentBlock?.effectBlocks.map((effect, i) => {
