@@ -13,16 +13,12 @@ type PaletteParameterControlProps = {
   block: Block;
   uniformName: string;
   patternParam: PatternParam<Palette>;
-  parameters: Record<string, ParamType>;
-  setParameters: (params: Record<string, ParamType>) => void;
 };
 
 export const PaletteParameterControl = memo(function PaletteParameterControl({
   block,
   uniformName,
   patternParam,
-  parameters,
-  setParameters,
 }: PaletteParameterControlProps) {
   const updatePaletteVariation = useCallback(() => {
     runInAction(() => {
@@ -48,9 +44,7 @@ export const PaletteParameterControl = memo(function PaletteParameterControl({
   }, [updatePaletteVariation, variation, initialized]);
 
   const setParameter = (value: Palette) => {
-    setParameters({ ...parameters, [uniformName]: value });
     block.pattern.params[uniformName].value = value;
-
     updatePaletteVariation();
   };
 

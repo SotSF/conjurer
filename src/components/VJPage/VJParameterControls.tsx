@@ -46,7 +46,6 @@ export const VJParameterControls = observer(function VJParameterControls({
   block,
   effectOrder,
 }: VJParameterControlsProps) {
-  const [parameters, setParameters] = useState({});
   const [controlsKey, setControlsKey] = useState(0);
 
   const isEffect = block.parentBlock !== null;
@@ -57,7 +56,6 @@ export const VJParameterControls = observer(function VJParameterControls({
 
   const onResetDefaults = useCallback(() => {
     resetBlockParamsToDefaults(block);
-    setParameters({});
     setControlsKey((k) => k + 1);
   }, [block]);
 
@@ -161,8 +159,6 @@ export const VJParameterControls = observer(function VJParameterControls({
               block={block}
               uniformName={uniformName}
               patternParam={patternParam}
-              parameters={parameters}
-              setParameters={setParameters}
             />
           ))}
       </VStack>

@@ -20,16 +20,12 @@ type BooleanParameterControlProps = {
   block: Block;
   uniformName: string;
   patternParam: PatternParam<number>;
-  parameters: Record<string, ParamType>;
-  setParameters: (params: Record<string, ParamType>) => void;
 };
 
 export const BooleanParameterControl = memo(function BooleanParameterControl({
   block,
   uniformName,
   patternParam,
-  parameters,
-  setParameters,
 }: BooleanParameterControlProps) {
   const step = typeof patternParam.step === "number" ? patternParam.step : 0.01;
 
@@ -39,7 +35,6 @@ export const BooleanParameterControl = memo(function BooleanParameterControl({
 
     if (Number.isNaN(inputNumber)) return;
 
-    setParameters({ ...parameters, [uniformName]: inputNumber });
     patternParam.value = inputNumber;
 
     runInAction(() => {

@@ -12,7 +12,6 @@ type ParameterControlsProps = {
 export const ParameterControls = memo(function ParameterControls({
   block,
 }: ParameterControlsProps) {
-  const [parameters, setParameters] = useState({});
   const [showControls, toggleControls] = useState(true);
 
   const isEffect = block.parentBlock !== null;
@@ -43,8 +42,6 @@ export const ParameterControls = memo(function ParameterControls({
               block={block}
               uniformName={uniformName}
               patternParam={patternParam}
-              parameters={parameters}
-              setParameters={setParameters}
             />
           ),
         )}

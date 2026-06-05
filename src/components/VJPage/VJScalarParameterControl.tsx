@@ -17,7 +17,7 @@ import {
 } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import { Block } from "@/src/types/Block";
-import { ParamType, PatternParam } from "@/src/types/PatternParams";
+import { PatternParam } from "@/src/types/PatternParams";
 import { DEFAULT_PERIOD, DEFAULT_VARIATION_DURATION } from "@/src/utils/time";
 import { runInAction } from "mobx";
 import { FaTimes } from "react-icons/fa";
@@ -45,8 +45,6 @@ type VJScalarParameterControlProps = {
   block: Block;
   uniformName: string;
   patternParam: PatternParam<number>;
-  parameters: Record<string, ParamType>;
-  setParameters: (params: Record<string, ParamType>) => void;
 };
 
 export const VJScalarParameterControl = observer(
@@ -54,8 +52,6 @@ export const VJScalarParameterControl = observer(
     block,
     uniformName,
     patternParam,
-    parameters,
-    setParameters,
   }: VJScalarParameterControlProps) {
     const variations = block.parameterVariations[uniformName] ?? [];
 
@@ -84,7 +80,6 @@ export const VJScalarParameterControl = observer(
 
       if (Number.isNaN(inputNumber)) return;
 
-      setParameters({ ...parameters, [uniformName]: inputNumber });
       setBlockScalarParameterValue(block, uniformName, inputNumber);
     };
 

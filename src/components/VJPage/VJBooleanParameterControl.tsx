@@ -11,7 +11,7 @@ import {
 } from "@chakra-ui/react";
 import { memo, useEffect, useState } from "react";
 import { Block } from "@/src/types/Block";
-import { ParamType, PatternParam } from "@/src/types/PatternParams";
+import { PatternParam } from "@/src/types/PatternParams";
 import { FlatVariation } from "@/src/types/Variations/FlatVariation";
 import { DEFAULT_VARIATION_DURATION } from "@/src/utils/time";
 import { runInAction } from "mobx";
@@ -21,8 +21,6 @@ type VJBooleanParameterControlProps = {
   block: Block;
   uniformName: string;
   patternParam: PatternParam<number>;
-  parameters: Record<string, ParamType>;
-  setParameters: (params: Record<string, ParamType>) => void;
 };
 
 export const VJBooleanParameterControl = memo(
@@ -30,8 +28,6 @@ export const VJBooleanParameterControl = memo(
     block,
     uniformName,
     patternParam,
-    parameters,
-    setParameters,
   }: VJBooleanParameterControlProps) {
     const step =
       typeof patternParam.step === "number" ? patternParam.step : 0.01;
@@ -49,7 +45,6 @@ export const VJBooleanParameterControl = memo(
 
       if (Number.isNaN(inputNumber)) return;
 
-      setParameters({ ...parameters, [uniformName]: inputNumber });
       patternParam.value = inputNumber;
 
       runInAction(() => {

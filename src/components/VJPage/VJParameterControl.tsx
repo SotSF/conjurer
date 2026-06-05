@@ -2,33 +2,26 @@ import { Box } from "@chakra-ui/react";
 import { memo } from "react";
 import { Block } from "@/src/types/Block";
 import {
-  ParamType,
-  PatternParam,
-  isBooleanParam,
-  isNumberParam,
   isPaletteParam,
   isVector4Param,
+  ParamType,
+  PatternParam,
 } from "@/src/types/PatternParams";
 import { BASE_UNIFORMS } from "@/src/types/Pattern";
-import { VJScalarParameterControl } from "@/src/components/VJPage/VJScalarParameterControl";
 import { VJColorParameterControl } from "@/src/components/VJPage/VJColorParameterControl";
 import { VJPaletteParameterControl } from "@/src/components/VJPage/VJPaletteParameterControl";
-import { VJBooleanParameterControl } from "@/src/components/VJPage/VJBooleanParameterControl";
+import { ParamDefinitions } from "@/src/paramDefinitions/ParamDefinitions";
 
 type VJParameterControlProps = {
   block: Block;
   uniformName: string;
   patternParam: PatternParam;
-  parameters: Record<string, ParamType>;
-  setParameters: (params: Record<string, ParamType>) => void;
 };
 
 export const VJParameterControl = memo(function VJParameterControl({
   block,
   uniformName,
   patternParam,
-  parameters,
-  setParameters,
 }: VJParameterControlProps) {
   if (BASE_UNIFORMS.includes(uniformName)) return null;
 
@@ -36,28 +29,17 @@ export const VJParameterControl = memo(function VJParameterControl({
     key: uniformName,
     block,
     uniformName,
-    parameters,
-    setParameters,
   };
 
+  for (let paramDefinition of ParamDefinitions) {
+    const control = paramDefinition.renderVJControl(patternParam, props);
+    if (control) {
+      return control;
+    }
+  }
+
   let parameterControl = null;
-  if (isBooleanParam(patternParam))
-    parameterControl = (
-      <VJBooleanParameterControl
-        {...props}
-        key={props.key}
-        patternParam={patternParam}
-      />
-    );
-  else if (isNumberParam(patternParam))
-    parameterControl = (
-      <VJScalarParameterControl
-        {...props}
-        key={props.key}
-        patternParam={patternParam}
-      />
-    );
-  else if (isVector4Param(patternParam))
+  if (isVector4Param(patternParam))
     parameterControl = (
       <VJColorParameterControl
         {...props}
@@ -87,4 +69,3 @@ export const VJParameterControl = memo(function VJParameterControl({
     </Box>
   );
 });
-

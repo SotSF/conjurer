@@ -13,8 +13,6 @@ type VJPaletteParameterControlProps = {
   block: Block;
   uniformName: string;
   patternParam: PatternParam<Palette>;
-  parameters: Record<string, ParamType>;
-  setParameters: (params: Record<string, ParamType>) => void;
 };
 
 export const VJPaletteParameterControl = memo(
@@ -22,8 +20,6 @@ export const VJPaletteParameterControl = memo(
     block,
     uniformName,
     patternParam,
-    parameters,
-    setParameters,
   }: VJPaletteParameterControlProps) {
     const updatePaletteVariation = useCallback(() => {
       runInAction(() => {
@@ -49,7 +45,6 @@ export const VJPaletteParameterControl = memo(
     }, [updatePaletteVariation, variation, initialized]);
 
     const setParameter = (value: Palette) => {
-      setParameters({ ...parameters, [uniformName]: value });
       block.pattern.params[uniformName].value = value;
       updatePaletteVariation();
     };

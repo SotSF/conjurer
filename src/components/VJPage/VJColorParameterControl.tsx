@@ -15,19 +15,14 @@ type VJColorParameterControlProps = {
   block: Block;
   uniformName: string;
   patternParam: PatternParam<Vector4>;
-  parameters: Record<string, ParamType>;
-  setParameters: (params: Record<string, ParamType>) => void;
 };
 
 export const VJColorParameterControl = memo(function VJColorParameterControl({
   block,
   uniformName,
   patternParam,
-  parameters,
-  setParameters,
 }: VJColorParameterControlProps) {
   const setParameter = (value: Vector4) => {
-    setParameters({ ...parameters, [uniformName]: value });
     block.pattern.params[uniformName].value = value;
 
     runInAction(() => {
