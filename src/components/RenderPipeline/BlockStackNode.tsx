@@ -4,10 +4,14 @@ import conjurerCommon from "@/src/shaders/conjurer_common.frag";
 import { WebGLRenderTarget, ShaderChunk } from "three";
 import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect } from "react";
-import { BlockNode } from "@/src/components/RenderPipeline/BlockNode";
+import {
+  BlockNode,
+  PatternBlockNode,
+} from "@/src/components/RenderPipeline/BlockNode";
 import { useStore } from "@/src/types/StoreContext";
 import { Block } from "@/src/types/Block";
 import { observer } from "mobx-react-lite";
+import { Pattern } from "@/src/types/Pattern";
 
 // This enables `#include <conjurer_common>`
 (ShaderChunk as any).conjurer_common = conjurerCommon;
@@ -19,6 +23,10 @@ type BlockStackNodeProps = {
   renderTargetIn: WebGLRenderTarget;
   renderTargetOut: WebGLRenderTarget;
 };
+
+const defaultPattern = new Pattern("default", blackFragmentShader);
+
+defaultPattern.fragmentShader = defaultVertexShader;
 
 export const BlockStackNode = observer(function BlockStackNode({
   autorun,
@@ -55,14 +63,10 @@ export const BlockStackNode = observer(function BlockStackNode({
   const evenNumberOfEffects = numberEffects % 2 === 0;
   return (
     <>
-      <BlockNode
+      <PatternBlockNode
         priority={basePriority + 1}
         shaderMaterialKey={parentBlock?.id}
-        uniforms={parentBlock?.pattern.params}
-        vertexShader={parentBlock?.pattern.vertexShader ?? defaultVertexShader}
-        fragmentShader={
-          parentBlock?.pattern.fragmentShader ?? blackFragmentShader
-        }
+        pattern={parentBlock?.pattern ?? defaultPattern}
         renderTargetOut={evenNumberOfEffects ? renderTargetOut : renderTargetIn}
       />
       {parentBlock?.effectBlocks.map((effect, i) => {
