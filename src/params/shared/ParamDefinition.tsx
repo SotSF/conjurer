@@ -1,4 +1,4 @@
-import { ParamType, PatternParam } from "@/src/types/PatternParams";
+import { ParamType, PatternParam } from "@/src/params/shared/patternParam";
 import { Block } from "@/src/types/Block";
 import React from "react";
 

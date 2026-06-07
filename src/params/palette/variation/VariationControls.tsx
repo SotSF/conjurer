@@ -2,9 +2,9 @@ import { Button } from "@chakra-ui/react";
 import { action } from "mobx";
 import { Block } from "@/src/types/Block";
 import { useStore } from "@/src/types/StoreContext";
-import { PaletteVariation } from "@/src/types/Variations/PaletteVariation";
-import { Palette } from "@/src/types/Palette";
-import { PaletteEditorModal } from "@/src/components/PalletteEditor/PaletteEditorModal";
+import { PaletteVariation } from "./PaletteVariation";
+import { Palette } from "../Palette";
+import { PaletteEditorModal } from "../editor/PaletteEditorModal";
 
 type PaletteVariationControlsProps = {
   uniformName: string;

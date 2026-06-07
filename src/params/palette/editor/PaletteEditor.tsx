@@ -33,10 +33,10 @@ import {
 import { Button, HStack, VStack } from "@chakra-ui/react";
 import { memo, useCallback, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
-import { PaletteVariationGraph } from "@/src/components/VariationGraph/PaletteVariationGraph";
-import { PaletteVariation } from "@/src/types/Variations/PaletteVariation";
+import { PaletteVariationGraph } from "../variation/VariationGraph";
+import { PaletteVariation } from "../variation/PaletteVariation";
 import { Block } from "@/src/types/Block";
-import { Palette } from "@/src/types/Palette";
+import { Palette } from "../Palette";
 import { HexColorInput, HexColorPicker } from "react-colorful";
 import { hexToVector3, vector3ToHex } from "@/src/utils/color";
 import { Vector3 } from "three";

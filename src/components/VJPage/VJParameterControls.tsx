@@ -10,7 +10,7 @@ import { keyframes } from "@emotion/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { FaArrowDown, FaArrowUp } from "react-icons/fa";
 import { Block } from "@/src/types/Block";
-import { PatternParam } from "@/src/types/PatternParams";
+import { PatternParam } from "@/src/params/shared/patternParam";
 import { VJParameterControl } from "@/src/components/VJPage/VJParameterControl";
 import { resetBlockParamsToDefaults } from "@/src/utils/resetBlockParamsToDefaults";
 import { observer } from "mobx-react-lite";

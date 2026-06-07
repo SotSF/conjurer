@@ -3,8 +3,8 @@ import { Block } from "@/src/types/Block";
 import { LinearVariation4 } from "@/src/types/Variations/LinearVariation4";
 import { ScalarVariationGraph } from "@/src/components/VariationGraph/ScalarVariationGraph";
 import { LinearVariationGraph4 } from "@/src/components/VariationGraph/LinearVariationGraph4";
-import { PaletteVariation } from "@/src/types/Variations/PaletteVariation";
-import { PaletteVariationGraph } from "@/src/components/VariationGraph/PaletteVariationGraph";
+import { PaletteVariation } from "@/src/params/palette/variation/PaletteVariation";
+import { PaletteVariationGraph } from "@/src/params/palette/variation/VariationGraph";
 
 type VariationGraphProps = {
   uniformName: string;

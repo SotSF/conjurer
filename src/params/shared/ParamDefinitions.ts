@@ -1,7 +1,7 @@
-import { BooleanParamDefinition } from "@/src/paramDefinitions/BooleanParam";
-import { NumberParamDefinition } from "@/src/paramDefinitions/NumberParam";
-import { PaletteParamDefinition } from "@/src/paramDefinitions/PaletteParam";
-import { Vector4ParamDefinition } from "@/src/paramDefinitions/Vector4Param";
+import { BooleanParamDefinition } from "@/src/params/boolean";
+import { NumberParamDefinition } from "@/src/params/number";
+import { PaletteParamDefinition } from "@/src/params/palette";
+import { Vector4ParamDefinition } from "@/src/params/vector4";
 
 export const ParamDefinitions = [
   BooleanParamDefinition,

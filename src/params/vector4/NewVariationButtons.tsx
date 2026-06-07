@@ -2,7 +2,7 @@ import { IconButton } from "@chakra-ui/react";
 import { memo } from "react";
 import { MdColorLens } from "react-icons/md";
 import { Block } from "@/src/types/Block";
-import { PatternParam } from "@/src/types/PatternParams";
+import { PatternParam } from "@/src/params/shared/patternParam";
 import { action } from "mobx";
 import { Vector4 } from "three";
 import { LinearVariation4 } from "@/src/types/Variations/LinearVariation4";

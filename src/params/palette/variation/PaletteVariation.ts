@@ -1,4 +1,4 @@
-import { Palette } from "@/src/types/Palette";
+import { Palette } from "../Palette";
 import { Variation } from "@/src/types/Variations/Variation";
 import type { Store } from "@/src/types/Store";
 import { Vector3 } from "three";

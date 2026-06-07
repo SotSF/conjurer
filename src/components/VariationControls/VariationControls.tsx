@@ -35,8 +35,8 @@ import {
   EasingVariationType,
 } from "@/src/types/Variations/EasingVariation";
 import { easings } from "@/src/utils/easings";
-import { PaletteVariation } from "@/src/types/Variations/PaletteVariation";
-import { PaletteVariationControls } from "@/src/components/VariationControls/PaletteVariationControls";
+import { PaletteVariation } from "@/src/params/palette/variation/PaletteVariation";
+import { PaletteVariationControls } from "@/src/params/palette/variation/VariationControls";
 import { AudioVariation } from "@/src/types/Variations/AudioVariation";
 import { AudioVariationControls } from "@/src/components/VariationControls/AudioVariationControls";
 

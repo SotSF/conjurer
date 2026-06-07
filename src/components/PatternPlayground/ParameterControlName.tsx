@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { PatternParam } from "@/src/types/PatternParams";
+import { PatternParam } from "@/src/params/shared/patternParam";
 import { Text } from "@chakra-ui/react";
 
 export const ParameterControlName = memo(function ParameterControlName({

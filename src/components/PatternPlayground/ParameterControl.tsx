@@ -1,9 +1,9 @@
 import { Box } from "@chakra-ui/react";
 import { memo } from "react";
 import { Block } from "@/src/types/Block";
-import { PatternParam } from "@/src/types/PatternParams";
+import { PatternParam } from "@/src/params/shared/patternParam";
 import { BASE_UNIFORMS } from "@/src/types/Pattern";
-import { ParamDefinitions } from "@/src/paramDefinitions/ParamDefinitions";
+import { ParamDefinitions } from "@/src/params/shared/ParamDefinitions";
 
 type ParameterControlProps = {
   block: Block;

@@ -2,7 +2,7 @@ import merge from "@/src/shaders/merge.frag";
 import { WebGLRenderTarget } from "three";
 import { useFrame } from "@react-three/fiber";
 import { memo, useMemo, useRef } from "react";
-import { PatternParam } from "@/src/types/PatternParams";
+import { PatternParam } from "@/src/params/shared/patternParam";
 import { makeVertexShader } from "@/src/shaders/vertexShader";
 
 type MergeNodeProps = {

@@ -2,11 +2,11 @@ import { IconButton } from "@chakra-ui/react";
 import { memo } from "react";
 import { MdColorLens } from "react-icons/md";
 import { Block } from "@/src/types/Block";
-import { PatternParam } from "@/src/types/PatternParams";
+import { PatternParam } from "@/src/params/shared/patternParam";
 import { action } from "mobx";
 import { useStore } from "@/src/types/StoreContext";
-import { Palette, isPalette } from "@/src/types/Palette";
-import { PaletteVariation } from "@/src/types/Variations/PaletteVariation";
+import { Palette, isPalette } from "./Palette";
+import { PaletteVariation } from "./variation/PaletteVariation";
 import { DEFAULT_VARIATION_DURATION } from "@/src/utils/time";
 
 type PaletteNewVariationButtonsProps = {

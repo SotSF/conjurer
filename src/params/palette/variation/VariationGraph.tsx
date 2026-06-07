@@ -1,6 +1,6 @@
 import { Box } from "@chakra-ui/react";
 import { Block } from "@/src/types/Block";
-import { PaletteVariation } from "@/src/types/Variations/PaletteVariation";
+import { PaletteVariation } from "./PaletteVariation";
 import { VARIATION_BOUND_WIDTH } from "@/src/utils/layout";
 import { vector3ToRgbaString } from "@/src/utils/color";
 import { useVariationClick } from "@/src/hooks/variationClick";

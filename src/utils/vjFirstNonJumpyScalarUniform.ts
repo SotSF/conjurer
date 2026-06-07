@@ -1,10 +1,8 @@
 import { Block } from "@/src/types/Block";
 import { BASE_UNIFORMS } from "@/src/types/Pattern";
-import {
-  PatternParam,
-  isBooleanParam,
-  isNumberParam,
-} from "@/src/types/PatternParams";
+import { PatternParam } from "@/src/params/shared/patternParam";
+import { isBooleanParam } from "@/src/params/boolean/isBooleanParam";
+import { isNumberParam } from "@/src/params/number/isNumberParam";
 
 function isVjMidiScalarTarget(
   uniformName: string,

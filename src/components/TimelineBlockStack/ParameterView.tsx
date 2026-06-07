@@ -1,4 +1,4 @@
-import { PatternParam } from "@/src/types/PatternParams";
+import { PatternParam } from "@/src/params/shared/patternParam";
 import { Box, Button, HStack, Text } from "@chakra-ui/react";
 import { useState } from "react";
 import { BsCaretDown, BsCaretUp } from "react-icons/bs";

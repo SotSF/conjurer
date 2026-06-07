@@ -11,10 +11,10 @@ import {
 } from "@chakra-ui/react";
 import { useStore } from "@/src/types/StoreContext";
 import { action } from "mobx";
-import { PaletteEditor } from "@/src/components/PalletteEditor/PaletteEditor";
-import { PaletteVariation } from "@/src/types/Variations/PaletteVariation";
 import { Block } from "@/src/types/Block";
-import { Palette } from "@/src/types/Palette";
+import { PaletteEditor } from "./PaletteEditor";
+import { PaletteVariation } from "../variation/PaletteVariation";
+import { Palette } from "../Palette";
 
 type PaletteEditorModalProps = {
   uniformName: string;

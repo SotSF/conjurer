@@ -11,7 +11,7 @@ import {
 } from "@chakra-ui/react";
 import { memo, useEffect, useState } from "react";
 import { Block } from "@/src/types/Block";
-import { PatternParam } from "@/src/types/PatternParams";
+import { PatternParam } from "@/src/params/shared/patternParam";
 import { FlatVariation } from "@/src/types/Variations/FlatVariation";
 import { DEFAULT_VARIATION_DURATION } from "@/src/utils/time";
 import { runInAction } from "mobx";

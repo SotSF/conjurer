@@ -1,7 +1,7 @@
 import { HStack } from "@chakra-ui/react";
 import { memo, useState } from "react";
 import { Block } from "@/src/types/Block";
-import { ParamType, PatternParam } from "@/src/types/PatternParams";
+import { ParamType, PatternParam } from "@/src/params/shared/patternParam";
 import { DEFAULT_VARIATION_DURATION } from "@/src/utils/time";
 import { runInAction } from "mobx";
 import { Vector4 } from "three";

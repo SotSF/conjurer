@@ -1,7 +1,7 @@
 import { Text, VStack } from "@chakra-ui/react";
 import { memo } from "react";
 import { Block } from "@/src/types/Block";
-import { ParamDefinitions } from "@/src/paramDefinitions/ParamDefinitions";
+import { ParamDefinitions } from "@/src/params/shared/ParamDefinitions";
 
 type NewVariationButtonsProps = {
   uniformName: string;

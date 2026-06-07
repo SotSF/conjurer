@@ -1,6 +1,6 @@
 import { makeAutoObservable } from "mobx";
 import { BASE_UNIFORMS, Pattern, SerializedPattern } from "@/src/types/Pattern";
-import { ParamType } from "@/src/types/PatternParams";
+import { ParamType } from "@/src/params/shared/patternParam";
 import { Variation } from "@/src/types/Variations/Variation";
 import {
   DEFAULT_VARIATION_DURATION,
@@ -12,8 +12,8 @@ import { FlatVariation } from "@/src/types/Variations/FlatVariation";
 import { defaultPatternEffectMap } from "@/src/utils/patternsEffects";
 import { isVector4 } from "@/src/utils/object";
 import { LinearVariation4 } from "@/src/types/Variations/LinearVariation4";
-import { isPalette } from "@/src/types/Palette";
-import { PaletteVariation } from "@/src/types/Variations/PaletteVariation";
+import { isPalette } from "@/src/params/palette/Palette";
+import { PaletteVariation } from "@/src/params/palette/variation/PaletteVariation";
 import { generateId } from "@/src/utils/id";
 import type { Store } from "@/src/types/Store";
 
