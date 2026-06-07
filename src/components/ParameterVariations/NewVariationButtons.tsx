@@ -1,5 +1,10 @@
-import { isVector4Param } from "@/src/types/PatternParams";
-import { IconButton, VStack } from "@chakra-ui/react";
+import {
+  isBooleanParam,
+  isNumberParam,
+  isPaletteParam,
+  isVector4Param,
+} from "@/src/types/PatternParams";
+import { IconButton, Text, VStack } from "@chakra-ui/react";
 import { memo } from "react";
 import { BsArrowUpRight } from "react-icons/bs";
 import {
@@ -37,9 +42,8 @@ export const NewVariationButtons = memo(function NewVariationButtons({
   block,
 }: NewVariationButtonsProps) {
   const store = useStore();
-  const newVariationButtons = isVector4Param(
-    block.pattern.params[uniformName],
-  ) ? (
+  const patternParam = block.pattern.params[uniformName];
+  const newVariationButtons = isVector4Param(patternParam) ? (
     <>
       <IconButton
         size="xs"
@@ -75,7 +79,7 @@ export const NewVariationButtons = memo(function NewVariationButtons({
         })}
       />
     </>
-  ) : isPalette(block.pattern.params[uniformName].value) ? (
+  ) : isPaletteParam(patternParam) ? (
     <>
       <IconButton
         size="xs"
@@ -106,7 +110,7 @@ export const NewVariationButtons = memo(function NewVariationButtons({
         })}
       />
     </>
-  ) : (
+  ) : isNumberParam(patternParam) && !isBooleanParam(patternParam) ? (
     <>
       <IconButton
         size="xs"
@@ -251,6 +255,10 @@ export const NewVariationButtons = memo(function NewVariationButtons({
         })}
       />
     </>
+  ) : (
+    <Text fontSize="xs" color="whiteAlpha.500">
+      not implemented
+    </Text>
   );
 
   return (
