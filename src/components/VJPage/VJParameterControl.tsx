@@ -18,38 +18,27 @@ export const VJParameterControl = memo(function VJParameterControl({
 }: VJParameterControlProps) {
   if (BASE_UNIFORMS.includes(uniformName)) return null;
 
-  const props = {
-    block,
-    uniformName,
-  };
-
-  for (let paramDefinition of ParamDefinitions) {
-    const control = paramDefinition.renderVJControl(patternParam, props);
-    if (control) {
-      return (
-        <Box
-          key={uniformName}
-          p={1}
-          width="100%"
-          minW={0}
-          maxW="100%"
-          _odd={{ bgColor: "whiteAlpha.200" }}
-          _even={{ bgColor: "whiteAlpha.50" }}
-        >
-          {control}
-        </Box>
-      );
+  const props = { block, uniformName };
+  let control: React.ReactNode = null;
+  for (const paramDefinition of ParamDefinitions) {
+    const rendered = paramDefinition.renderVJControl(patternParam, props);
+    if (rendered) {
+      control = rendered;
+      break;
     }
   }
 
   return (
     <Box
+      key={uniformName}
       p={1}
       width="100%"
       minW={0}
       maxW="100%"
       _odd={{ bgColor: "whiteAlpha.200" }}
       _even={{ bgColor: "whiteAlpha.50" }}
-    />
+    >
+      {control}
+    </Box>
   );
 });
