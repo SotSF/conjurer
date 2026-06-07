@@ -1,6 +1,6 @@
 import { Block } from "@/src/types/Block";
 import { UIStore } from "@/src/types/UIStore";
-import { makeAutoObservable } from "mobx";
+import { makeAutoObservable, runInAction } from "mobx";
 import { AudioStore } from "@/src/types/AudioStore";
 import { Variation } from "@/src/types/Variations/Variation";
 import { ExperienceStore } from "@/src/types/ExperienceStore";
@@ -201,15 +201,17 @@ export class Store {
 
     await this.userStore.initialize();
 
-    // For now, we'll just set the role based on the context (page)
-    if (this.context === "playlistEditor") this._role = "emcee";
-    else if (this.context === "experienceEditor")
-      this._role = "experienceCreator";
-    else this._role = "vj";
+    runInAction(() => {
+      // For now, we'll just set the role based on the context (page)
+      if (this.context === "playlistEditor") this.role = "emcee";
+      else if (this.context === "experienceEditor")
+        this.role = "experienceCreator";
+      else this.role = "vj";
 
-    // check for a global intensity in local storage
-    const globalIntensity = localStorage.getItem("globalIntensity");
-    if (globalIntensity) this._globalIntensity = Number(globalIntensity);
+      // check for a global intensity in local storage
+      const globalIntensity = localStorage.getItem("globalIntensity");
+      if (globalIntensity) this.globalIntensity = Number(globalIntensity);
+    });
 
     if (this.context === "vj") this.playgroundStore.initialize();
     this.uiStore.initialize(this.viewerMode);
@@ -225,7 +227,9 @@ export class Store {
     else if (this.context !== "playlistEditor")
       this.experienceStore.loadEmptyExperience();
 
-    this.initializationState = "initialized";
+    runInAction(() => {
+      this.initializationState = "initialized";
+    });
   };
 
   toggleSendingData = () => {

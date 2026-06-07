@@ -1,5 +1,5 @@
 import { Pattern } from "@/src/types/Pattern";
-import { Palette } from "@/src/types/Palette";
+import { Palette } from "@/src/params/palette/Palette";
 import { Vector3 } from "three";
 
 import gentleRings from "@/src/patterns/shaders/gentleRings.frag";

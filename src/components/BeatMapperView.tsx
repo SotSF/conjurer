@@ -28,7 +28,7 @@ import {
   groupNeighborsByTempo,
 } from "@/src/utils/audio";
 import { action, runInAction } from "mobx";
-import { ScalarInput } from "@/src/components/ScalarInput";
+import { NumberParamInput } from "@/src/components/NumberParamInput";
 import { BeatGrid } from "@/src/components/BeatGrid";
 import { cloneAudioBuffer } from "@/src/utils/audioBuffer";
 import { AudioSelector } from "@/src/components/AudioSelector";
@@ -287,13 +287,13 @@ export const BeatMapperView = observer(function BeatMapperView() {
             <Heading color="cyan.500" size="sm">
               Detect beats
             </Heading>
-            <ScalarInput
+            <NumberParamInput
               name="Lowpass cutoff frequency (Hz)"
               value={frequency}
               onChange={(valueString) => setFrequency(valueString)}
               step={50}
             />
-            <ScalarInput
+            <NumberParamInput
               name="Beat detection threshold"
               value={threshold}
               onChange={(valueString) => setThreshold(valueString)}

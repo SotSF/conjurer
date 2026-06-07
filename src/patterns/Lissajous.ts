@@ -1,6 +1,6 @@
 import { Pattern } from "@/src/types/Pattern";
 import lissajous from "./shaders/lissajous.frag";
-import { Palette } from "../types/Palette";
+import { Palette } from "@/src/params/palette/Palette";
 import { Vector3 } from "three";
 
 export { lissajous };

@@ -1,12 +1,9 @@
 import { Block } from "@/src/types/Block";
 import { BASE_UNIFORMS } from "@/src/types/Pattern";
-import {
-  isPaletteParam,
-  isTextureParam,
-  isVector4Param,
-  ParamType,
-} from "@/src/types/PatternParams";
-import { Palette } from "@/src/types/Palette";
+import { ParamType, isTextureParam } from "@/src/params/shared/patternParam";
+import { isPaletteParam } from "@/src/params/palette/isPaletteParam";
+import { isVector4Param } from "@/src/params/vector4/isVector4Param";
+import { Palette } from "@/src/params/palette/Palette";
 import { runInAction } from "mobx";
 
 /**

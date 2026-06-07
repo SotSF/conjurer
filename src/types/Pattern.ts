@@ -3,9 +3,9 @@ import {
   ParamMap,
   SerializedParams,
   StandardParams,
-  isPaletteParam,
-} from "./PatternParams";
-import { isPalette } from "@/src/types/Palette";
+} from "@/src/params/shared/patternParam";
+import { isPaletteParam } from "@/src/params/palette/isPaletteParam";
+import { isPalette } from "@/src/params/palette/Palette";
 import { makeVertexShader, Varying } from "@/src/shaders/vertexShader";
 
 export type SerializedPattern = {

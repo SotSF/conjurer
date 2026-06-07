@@ -1,16 +1,9 @@
 import { Box } from "@chakra-ui/react";
 import { memo } from "react";
 import { Block } from "@/src/types/Block";
-import {
-  isPaletteParam,
-  isVector4Param,
-  ParamType,
-  PatternParam,
-} from "@/src/types/PatternParams";
+import { PatternParam } from "@/src/params/shared/patternParam";
 import { BASE_UNIFORMS } from "@/src/types/Pattern";
-import { VJColorParameterControl } from "@/src/components/VJPage/VJColorParameterControl";
-import { VJPaletteParameterControl } from "@/src/components/VJPage/VJPaletteParameterControl";
-import { ParamDefinitions } from "@/src/paramDefinitions/ParamDefinitions";
+import { ParamDefinitions } from "@/src/params/shared/ParamDefinitions";
 
 type VJParameterControlProps = {
   block: Block;
@@ -25,39 +18,19 @@ export const VJParameterControl = memo(function VJParameterControl({
 }: VJParameterControlProps) {
   if (BASE_UNIFORMS.includes(uniformName)) return null;
 
-  const props = {
-    key: uniformName,
-    block,
-    uniformName,
-  };
-
-  for (let paramDefinition of ParamDefinitions) {
-    const control = paramDefinition.renderVJControl(patternParam, props);
-    if (control) {
-      return control;
+  const props = { block, uniformName };
+  let control: React.ReactNode = null;
+  for (const paramDefinition of ParamDefinitions) {
+    const rendered = paramDefinition.renderVJControl(patternParam, props);
+    if (rendered) {
+      control = rendered;
+      break;
     }
   }
 
-  let parameterControl = null;
-  if (isVector4Param(patternParam))
-    parameterControl = (
-      <VJColorParameterControl
-        {...props}
-        key={props.key}
-        patternParam={patternParam}
-      />
-    );
-  else if (isPaletteParam(patternParam))
-    parameterControl = (
-      <VJPaletteParameterControl
-        {...props}
-        key={props.key}
-        patternParam={patternParam}
-      />
-    );
-
   return (
     <Box
+      key={uniformName}
       p={1}
       width="100%"
       minW={0}
@@ -65,7 +38,7 @@ export const VJParameterControl = memo(function VJParameterControl({
       _odd={{ bgColor: "whiteAlpha.200" }}
       _even={{ bgColor: "whiteAlpha.50" }}
     >
-      {parameterControl}
+      {control}
     </Box>
   );
 });

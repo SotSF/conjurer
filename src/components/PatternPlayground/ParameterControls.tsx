@@ -1,7 +1,7 @@
 import { Button, Heading, VStack } from "@chakra-ui/react";
 import { memo, useState } from "react";
 import { Block } from "@/src/types/Block";
-import { PatternParam } from "@/src/types/PatternParams";
+import { PatternParam } from "@/src/params/shared/patternParam";
 import { BsArrowsCollapse, BsArrowsExpand } from "react-icons/bs";
 import { ParameterControl } from "@/src/components/PatternPlayground/ParameterControl";
 
