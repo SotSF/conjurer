@@ -1,9 +1,8 @@
 import { Box } from "@chakra-ui/react";
 import { memo } from "react";
 import { Block } from "@/src/types/Block";
-import { isPaletteParam, PatternParam } from "@/src/types/PatternParams";
+import { PatternParam } from "@/src/types/PatternParams";
 import { BASE_UNIFORMS } from "@/src/types/Pattern";
-import { VJPaletteParameterControl } from "@/src/components/VJPage/VJPaletteParameterControl";
 import { ParamDefinitions } from "@/src/paramDefinitions/ParamDefinitions";
 
 type VJParameterControlProps = {
@@ -43,16 +42,6 @@ export const VJParameterControl = memo(function VJParameterControl({
     }
   }
 
-  let parameterControl = null;
-  if (isPaletteParam(patternParam))
-    parameterControl = (
-      <VJPaletteParameterControl
-        {...props}
-        key={uniformName}
-        patternParam={patternParam}
-      />
-    );
-
   return (
     <Box
       p={1}
@@ -61,8 +50,6 @@ export const VJParameterControl = memo(function VJParameterControl({
       maxW="100%"
       _odd={{ bgColor: "whiteAlpha.200" }}
       _even={{ bgColor: "whiteAlpha.50" }}
-    >
-      {parameterControl}
-    </Box>
+    />
   );
 });
