@@ -236,11 +236,11 @@ export function VJMidiModal({
                   </FormControl>
 
                   <Text fontSize="sm" color="gray.400">
-                    The ordered list maps to scalar sliders in the sidebar: pattern
+                    The ordered list maps to number sliders in the sidebar: pattern
                     first, then each enabled effect in order (first CC → first slider
                     along that full list). Only this device is used when the list is
                     non-empty. Leave the list empty for legacy mode: any CC / pitch bend
-                    controls the first scalar in that list only.
+                    controls the first number param in that list only.
                   </Text>
 
                   {portName ? (
@@ -260,7 +260,7 @@ export function VJMidiModal({
                           <>
                             <Text fontSize="sm" color="blue.200" mb={3}>
                               Listening — move each knob or slider once, in order (pattern
-                              scalars, then each active effect’s scalars). Repeating the
+                              number params, then each active effect’s number params). Repeating the
                               same control does not add it again. Click done when
                               finished.
                             </Text>

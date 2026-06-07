@@ -2,10 +2,10 @@ import type { MutableRefObject } from "react";
 import { useEffect, useRef } from "react";
 
 import type { VjMidiDeviceMapping } from "@/src/utils/vjMidiDeviceStorage";
-import type { VjMidiScalarTargetWithBlock } from "@/src/utils/vjFirstNonJumpyScalarUniform";
-import { setBlockScalarParameterValue } from "@/src/utils/setBlockScalarParameterValue";
+import type { VjMidiNumberTargetWithBlock } from "@/src/utils/vjFirstNonJumpyNumberUniform";
+import { setBlockNumberParameterValue } from "@/src/utils/setBlockNumberParameterValue";
 
-function value01ToScalar(
+function value01ToNumber(
   t: number,
   min: number,
   max: number,
@@ -19,24 +19,24 @@ function value01ToScalar(
   return Math.min(max, Math.max(min, raw));
 }
 
-/** CC data byte 0–127 → scalar range. */
-function midi7ToScalar(
+/** CC data byte 0–127 → number param range. */
+function midi7ToNumber(
   midi: number,
   min: number,
   max: number,
   step: number,
 ): number {
-  return value01ToScalar(midi / 127, min, max, step);
+  return value01ToNumber(midi / 127, min, max, step);
 }
 
-/** Pitch bend 14-bit value 0–16383 → scalar range (treats full sweep like a 0–127 knob). */
-function midiPitchBendToScalar(
+/** Pitch bend 14-bit value 0–16383 → number param range (treats full sweep like a 0–127 knob). */
+function midiPitchBendToNumber(
   bend: number,
   min: number,
   max: number,
   step: number,
 ): number {
-  return value01ToScalar(bend / 16383, min, max, step);
+  return value01ToNumber(bend / 16383, min, max, step);
 }
 
 /** High nibble of status byte → human-readable MIDI 1.0 channel voice message name. */
@@ -61,13 +61,13 @@ function midiStatusHighName(hi: number): string {
   }
 }
 
-export type VjMidiTargetsFlatRef = MutableRefObject<VjMidiScalarTargetWithBlock[]>;
+export type VjMidiTargetsFlatRef = MutableRefObject<VjMidiNumberTargetWithBlock[]>;
 
 /**
- * Maps control change and pitch bend to VJ scalars (pattern, then enabled effects in order).
+ * Maps control change and pitch bend to VJ number params (pattern, then enabled effects in order).
  * With a non-empty device mapping ({@link VjMidiDeviceMapping}), only that input's CCs are used:
- * ordered CC list → ordered scalars in that flat list. Otherwise any CC / pitch bend from any
- * device targets the first scalar in that list only.
+ * ordered CC list → ordered number params in that flat list. Otherwise any CC / pitch bend from any
+ * device targets the first number param in that list only.
  */
 export type VjMidiCcLearnState = {
   active: boolean;
@@ -77,7 +77,7 @@ export type VjMidiCcLearnState = {
 
 export type VjMidiCcLearnRef = MutableRefObject<VjMidiCcLearnState>;
 
-export function useVjMidiCcScalar(
+export function useVjMidiCcNumber(
   midiLoggingEnabled: boolean,
   midiMapping: VjMidiDeviceMapping,
   midiCcLearnRef: VjMidiCcLearnRef,
@@ -181,8 +181,8 @@ export function useVjMidiCcScalar(
         const step =
           typeof patternParam.step === "number" ? patternParam.step : 0.01;
 
-        const next = midi7ToScalar(value, min, max, step);
-        setBlockScalarParameterValue(block, uniformName, next);
+        const next = midi7ToNumber(value, min, max, step);
+        setBlockNumberParameterValue(block, uniformName, next);
         return;
       }
 
@@ -197,10 +197,10 @@ export function useVjMidiCcScalar(
 
       const next =
         hi === 0xb0
-          ? midi7ToScalar(value, min, max, step)
-          : midiPitchBendToScalar((value << 7) | controller, min, max, step);
+          ? midi7ToNumber(value, min, max, step)
+          : midiPitchBendToNumber((value << 7) | controller, min, max, step);
 
-      setBlockScalarParameterValue(block, uniformName, next);
+      setBlockNumberParameterValue(block, uniformName, next);
     };
 
     const attachAllInputs = () => {

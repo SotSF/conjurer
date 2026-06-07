@@ -6,9 +6,9 @@ import { DEFAULT_VARIATION_DURATION } from "@/src/utils/time";
 
 /**
  * Sets a numeric pattern param and syncs a flat variation for serialization,
- * matching {@link VJScalarParameterControl} in flat mode (`params/number/VJParameterControl`).
+ * matching {@link VJNumberParameterControl} in flat mode (`params/number/VJParameterControl`).
  */
-export function setBlockScalarParameterValue(
+export function setBlockNumberParameterValue(
   block: Block,
   uniformName: string,
   value: number,

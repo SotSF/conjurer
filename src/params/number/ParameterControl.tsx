@@ -24,7 +24,7 @@ import { TbWaveSine } from "react-icons/tb";
 import { MdTrendingFlat } from "react-icons/md";
 import { PeriodicVariationControls } from "@/src/components/VariationControls/VariationControls";
 import { PeriodicVariation } from "@/src/types/Variations/PeriodicVariation";
-import { ScalarVariationGraph } from "@/src/components/VariationGraph/ScalarVariationGraph";
+import { NumberVariationGraph } from "@/src/components/VariationGraph/NumberVariationGraph";
 import { observer } from "mobx-react-lite";
 
 const labelStyles = {
@@ -32,17 +32,17 @@ const labelStyles = {
   fontSize: "sm",
 };
 
-type ScalarParameterControlProps = {
+type NumberParameterControlProps = {
   block: Block;
   uniformName: string;
   patternParam: PatternParam<number>;
 };
 
-export const ScalarParameterControl = observer(function ScalarParameterControl({
+export const NumberParameterControl = observer(function NumberParameterControl({
   block,
   uniformName,
   patternParam,
-}: ScalarParameterControlProps) {
+}: NumberParameterControlProps) {
   const variations = block.parameterVariations[uniformName] ?? [];
   // Initialize the variation mode based on the first variation type found
   const [variationMode, setVariationMode] = useState<"flat" | "periodic">(
@@ -215,7 +215,7 @@ export const ScalarParameterControl = observer(function ScalarParameterControl({
       {variationMode === "periodic" &&
         firstVariation instanceof PeriodicVariation && (
           <VStack fontSize="small" ml={4}>
-            <ScalarVariationGraph
+            <NumberVariationGraph
               uniformName={uniformName}
               block={block}
               variation={firstVariation}

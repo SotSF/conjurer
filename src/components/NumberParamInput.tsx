@@ -14,7 +14,7 @@ type Props = {
   value: string;
 };
 
-export const ScalarInput = ({ name, step = 0.1, onChange, value }: Props) => {
+export const NumberParamInput = ({ name, step = 0.1, onChange, value }: Props) => {
   const { getIncrementButtonProps, getDecrementButtonProps } = useNumberInput({
     step,
     value,

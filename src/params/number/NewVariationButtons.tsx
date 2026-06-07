@@ -23,16 +23,16 @@ import { useStore } from "@/src/types/StoreContext";
 import { EasingVariation } from "@/src/types/Variations/EasingVariation";
 import { AudioVariation } from "@/src/types/Variations/AudioVariation";
 
-type ScalarNewVariationButtonsProps = {
+type NumberNewVariationButtonsProps = {
   block: Block;
   uniformName: string;
   patternParam: PatternParam<number>;
 };
 
-export const ScalarNewVariationButtons = memo(function ScalarNewVariationButtons({
+export const NumberNewVariationButtons = memo(function NumberNewVariationButtons({
   block,
   uniformName,
-}: ScalarNewVariationButtonsProps) {
+}: NumberNewVariationButtonsProps) {
   const store = useStore();
 
   return (

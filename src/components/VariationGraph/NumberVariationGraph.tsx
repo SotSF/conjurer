@@ -7,7 +7,7 @@ import { SplineVariation } from "@/src/types/Variations/SplineVariation";
 import { SplineVariationGraph } from "@/src/components/VariationGraph/SplineVariationGraph";
 import { useVariationClick } from "@/src/hooks/variationClick";
 
-type ScalarVariationGraphProps = {
+type NumberVariationGraphProps = {
   uniformName: string;
   variation: Variation;
   width: number;
@@ -15,13 +15,13 @@ type ScalarVariationGraphProps = {
   block: Block;
 };
 
-export const ScalarVariationGraph = function ScalarVariationGraph({
+export const NumberVariationGraph = function NumberVariationGraph({
   uniformName,
   variation,
   width,
   domain,
   block,
-}: ScalarVariationGraphProps) {
+}: NumberVariationGraphProps) {
   const orange = useToken("colors", "orange.400");
 
   const onVariationClick = useVariationClick(block, uniformName);
@@ -65,14 +65,14 @@ export const ScalarVariationGraph = function ScalarVariationGraph({
           stroke={orange}
           yAxisId={0}
         />
-        <Tooltip isAnimationActive={false} content={<ScalarValueTooltip />} />
+        <Tooltip isAnimationActive={false} content={<NumberValueTooltip />} />
         <YAxis type="number" domain={domain} hide allowDataOverflow={false} />
       </LineChart>
     </Box>
   );
 };
 
-const ScalarValueTooltip = ({
+const NumberValueTooltip = ({
   active,
   payload,
 }: {

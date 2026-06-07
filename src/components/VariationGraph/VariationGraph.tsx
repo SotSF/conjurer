@@ -1,7 +1,7 @@
 import { Variation } from "@/src/types/Variations/Variation";
 import { Block } from "@/src/types/Block";
 import { LinearVariation4 } from "@/src/types/Variations/LinearVariation4";
-import { ScalarVariationGraph } from "@/src/components/VariationGraph/ScalarVariationGraph";
+import { NumberVariationGraph } from "@/src/components/VariationGraph/NumberVariationGraph";
 import { LinearVariationGraph4 } from "@/src/components/VariationGraph/LinearVariationGraph4";
 import { PaletteVariation } from "@/src/params/palette/variation/PaletteVariation";
 import { PaletteVariationGraph } from "@/src/params/palette/variation/VariationGraph";
@@ -27,6 +27,6 @@ export const VariationGraph = function VariationGraph({
   ) : variation instanceof PaletteVariation ? (
     <PaletteVariationGraph {...props} variation={variation} />
   ) : (
-    <ScalarVariationGraph {...props} variation={variation} domain={domain} />
+    <NumberVariationGraph {...props} variation={variation} domain={domain} />
   );
 };

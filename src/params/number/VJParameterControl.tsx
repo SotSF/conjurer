@@ -21,12 +21,12 @@ import { PatternParam } from "@/src/params/shared/patternParam";
 import { DEFAULT_PERIOD, DEFAULT_VARIATION_DURATION } from "@/src/utils/time";
 import { runInAction } from "mobx";
 import { FaTimes } from "react-icons/fa";
-import { setBlockScalarParameterValue } from "@/src/utils/setBlockScalarParameterValue";
+import { setBlockNumberParameterValue } from "@/src/utils/setBlockNumberParameterValue";
 import { TbWaveSine } from "react-icons/tb";
 import { PeriodicVariationControls } from "@/src/components/VariationControls/VariationControls";
 import { FlatVariation } from "@/src/types/Variations/FlatVariation";
 import { PeriodicVariation } from "@/src/types/Variations/PeriodicVariation";
-import { ScalarVariationGraph } from "@/src/components/VariationGraph/ScalarVariationGraph";
+import { NumberVariationGraph } from "@/src/components/VariationGraph/NumberVariationGraph";
 import { observer } from "mobx-react-lite";
 import { VJParameterControlName } from "@/src/components/VJPage/VJParameterControlName";
 
@@ -41,18 +41,18 @@ const sliderMarkMinW = "72px"; // min width for min/max labels (decimals)
 /** Horizontal inset so min/max marks (which sit outside the track) stay visible without overflow clipping. */
 const sliderMarkHorizontalGutter = 16; // Chakra space token (~4rem)
 
-type VJScalarParameterControlProps = {
+type VJNumberParameterControlProps = {
   block: Block;
   uniformName: string;
   patternParam: PatternParam<number>;
 };
 
-export const VJScalarParameterControl = observer(
-  function VJScalarParameterControl({
+export const VJNumberParameterControl = observer(
+  function VJNumberParameterControl({
     block,
     uniformName,
     patternParam,
-  }: VJScalarParameterControlProps) {
+  }: VJNumberParameterControlProps) {
     const variations = block.parameterVariations[uniformName] ?? [];
 
     const [variationMode, setVariationMode] = useState<"flat" | "periodic">(
@@ -80,7 +80,7 @@ export const VJScalarParameterControl = observer(
 
       if (Number.isNaN(inputNumber)) return;
 
-      setBlockScalarParameterValue(block, uniformName, inputNumber);
+      setBlockNumberParameterValue(block, uniformName, inputNumber);
     };
 
     const onVariationModeToggle = () => {
@@ -284,7 +284,7 @@ export const VJScalarParameterControl = observer(
         {variationMode === "periodic" &&
           firstVariation instanceof PeriodicVariation && (
             <VStack fontSize="small" ml={4} alignSelf="center">
-              <ScalarVariationGraph
+              <NumberVariationGraph
                 uniformName={uniformName}
                 block={block}
                 variation={firstVariation}
