@@ -2,16 +2,6 @@ import { ParamType, PatternParam } from "@/src/types/PatternParams";
 import { Block } from "@/src/types/Block";
 import React from "react";
 
-// Would be good to remove ParamType constraint
-// but really this is a function of what can be passed into a shader uniform (not yet abstracted)
-// Maybe there's a world where that's generic, part of param definition is a shader that provides a function?
-type ParamDefinition<T extends ParamType> = {
-  isParamType: (param: PatternParam) => param is PatternParam<T>;
-
-  ParameterControl: ParameterControl<T>;
-  VJParameterControl: VJParameterControl<T>;
-};
-
 type ParameterControlOtherProps = {
   block: Block;
   uniformName: string;
@@ -33,10 +23,33 @@ type VJParameterControl<T extends ParamType> = React.FC<
   }
 >;
 
+type NewVariationButtonsOtherProps = {
+  block: Block;
+  uniformName: string;
+};
+
+type NewVariationButtons<T extends ParamType> = React.FC<
+  NewVariationButtonsOtherProps & {
+    patternParam: PatternParam<T>;
+  }
+>;
+
+// Would be good to remove ParamType constraint
+// but really this is a function of what can be passed into a shader uniform (not yet abstracted)
+// Maybe there's a world where that's generic, part of param definition is a shader that provides a function?
+type ParamDefinition<T extends ParamType> = {
+  isParamType: (param: PatternParam) => param is PatternParam<T>;
+
+  ParameterControl: ParameterControl<T>;
+  VJParameterControl: VJParameterControl<T>;
+  NewVariationButtons: NewVariationButtons<T>;
+};
+
 export const createParamType = <T extends ParamType>({
   isParamType,
   ParameterControl,
   VJParameterControl,
+  NewVariationButtons,
 }: ParamDefinition<T>) => ({
   renderControl: (
     param: PatternParam<any>,
@@ -53,6 +66,15 @@ export const createParamType = <T extends ParamType>({
   ): React.ReactNode | void => {
     if (isParamType(param)) {
       return <VJParameterControl patternParam={param} {...props} />;
+    }
+  },
+
+  renderNewVariationButtons: (
+    param: PatternParam<any>,
+    props: NewVariationButtonsOtherProps,
+  ): React.ReactNode | void => {
+    if (isParamType(param)) {
+      return <NewVariationButtons patternParam={param} {...props} />;
     }
   },
 });

@@ -3,9 +3,11 @@ import { VJPaletteParameterControl } from "@/src/components/VJPage/VJPalettePara
 import { isPaletteParam } from "@/src/types/PatternParams";
 import { createParamType } from "@/src/paramDefinitions/ParamDefinition";
 import { Palette } from "@/src/types/Palette";
+import { PaletteNewVariationButtons } from "@/src/components/ParameterVariations/PaletteNewVariationButtons";
 
 export const PaletteParamDefinition = createParamType<Palette>({
   isParamType: isPaletteParam,
   ParameterControl: PaletteParameterControl,
   VJParameterControl: VJPaletteParameterControl,
+  NewVariationButtons: PaletteNewVariationButtons,
 });
