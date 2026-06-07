@@ -1,14 +1,8 @@
 import { Box } from "@chakra-ui/react";
 import { memo } from "react";
 import { Block } from "@/src/types/Block";
-import {
-  isPaletteParam,
-  isVector4Param,
-  ParamType,
-  PatternParam,
-} from "@/src/types/PatternParams";
+import { isPaletteParam, PatternParam } from "@/src/types/PatternParams";
 import { BASE_UNIFORMS } from "@/src/types/Pattern";
-import { VJColorParameterControl } from "@/src/components/VJPage/VJColorParameterControl";
 import { VJPaletteParameterControl } from "@/src/components/VJPage/VJPaletteParameterControl";
 import { ParamDefinitions } from "@/src/paramDefinitions/ParamDefinitions";
 
@@ -34,20 +28,23 @@ export const VJParameterControl = memo(function VJParameterControl({
   for (let paramDefinition of ParamDefinitions) {
     const control = paramDefinition.renderVJControl(patternParam, props);
     if (control) {
-      return control;
+      return (
+        <Box
+          p={1}
+          width="100%"
+          minW={0}
+          maxW="100%"
+          _odd={{ bgColor: "whiteAlpha.200" }}
+          _even={{ bgColor: "whiteAlpha.50" }}
+        >
+          {control}
+        </Box>
+      );
     }
   }
 
   let parameterControl = null;
-  if (isVector4Param(patternParam))
-    parameterControl = (
-      <VJColorParameterControl
-        {...props}
-        key={props.key}
-        patternParam={patternParam}
-      />
-    );
-  else if (isPaletteParam(patternParam))
+  if (isPaletteParam(patternParam))
     parameterControl = (
       <VJPaletteParameterControl
         {...props}

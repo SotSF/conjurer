@@ -1,14 +1,8 @@
 import { Box } from "@chakra-ui/react";
 import { memo } from "react";
 import { Block } from "@/src/types/Block";
-import {
-  isPaletteParam,
-  isVector4Param,
-  ParamType,
-  PatternParam,
-} from "@/src/types/PatternParams";
+import { isPaletteParam, PatternParam } from "@/src/types/PatternParams";
 import { BASE_UNIFORMS } from "@/src/types/Pattern";
-import { ColorParameterControl } from "@/src/components/PatternPlayground/ColorParameterControl";
 import { PaletteParameterControl } from "@/src/components/PatternPlayground/PaletteParameterControl";
 import { ParamDefinitions } from "@/src/paramDefinitions/ParamDefinitions";
 
@@ -34,21 +28,22 @@ export const ParameterControl = memo(function ParameterControl({
   for (let paramDefinition of ParamDefinitions) {
     const control = paramDefinition.renderControl(patternParam, props);
     if (control) {
-      return control;
+      return (
+        <Box
+          p={1}
+          width="100%"
+          _odd={{ bgColor: "whiteAlpha.200" }}
+          _even={{ bgColor: "whiteAlpha.50" }}
+        >
+          {control}
+        </Box>
+      );
     }
   }
 
   let parameterControl = null;
 
-  if (isVector4Param(patternParam))
-    parameterControl = (
-      <ColorParameterControl
-        {...props}
-        key={props.key}
-        patternParam={patternParam}
-      />
-    );
-  else if (isPaletteParam(patternParam))
+  if (isPaletteParam(patternParam))
     parameterControl = (
       <PaletteParameterControl
         {...props}
