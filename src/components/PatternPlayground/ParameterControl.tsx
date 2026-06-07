@@ -20,7 +20,6 @@ export const ParameterControl = memo(function ParameterControl({
   if (BASE_UNIFORMS.includes(uniformName)) return null;
 
   const props = {
-    key: uniformName,
     block,
     uniformName,
   };
@@ -30,6 +29,7 @@ export const ParameterControl = memo(function ParameterControl({
     if (control) {
       return (
         <Box
+          key={uniformName}
           p={1}
           width="100%"
           _odd={{ bgColor: "whiteAlpha.200" }}
@@ -47,7 +47,7 @@ export const ParameterControl = memo(function ParameterControl({
     parameterControl = (
       <PaletteParameterControl
         {...props}
-        key={props.key}
+        key={uniformName}
         patternParam={patternParam}
       />
     );

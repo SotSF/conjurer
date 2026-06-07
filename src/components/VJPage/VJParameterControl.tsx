@@ -20,7 +20,6 @@ export const VJParameterControl = memo(function VJParameterControl({
   if (BASE_UNIFORMS.includes(uniformName)) return null;
 
   const props = {
-    key: uniformName,
     block,
     uniformName,
   };
@@ -30,6 +29,7 @@ export const VJParameterControl = memo(function VJParameterControl({
     if (control) {
       return (
         <Box
+          key={uniformName}
           p={1}
           width="100%"
           minW={0}
@@ -48,7 +48,7 @@ export const VJParameterControl = memo(function VJParameterControl({
     parameterControl = (
       <VJPaletteParameterControl
         {...props}
-        key={props.key}
+        key={uniformName}
         patternParam={patternParam}
       />
     );
