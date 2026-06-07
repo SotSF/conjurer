@@ -10,9 +10,9 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
+  SimpleGrid,
   Spinner,
   Text,
-  VStack,
 } from "@chakra-ui/react";
 import { FaUser } from "react-icons/fa";
 import { useStore } from "@/src/types/StoreContext";
@@ -92,7 +92,7 @@ export const LoginButton = observer(function LoginButton() {
                 </Button>
               </Text>
             )}
-            <VStack alignItems="center">
+            <SimpleGrid columns={2} spacing={2} w="100%">
               {!isPending &&
                 (users ?? [])
                   .filter((user) => user.username !== userStore.username)
@@ -113,7 +113,7 @@ export const LoginButton = observer(function LoginButton() {
                       {user.username}
                     </Button>
                   ))}
-            </VStack>
+            </SimpleGrid>
 
             <Text my={4}>Click a name above or type a new name:</Text>
             <HStack>
