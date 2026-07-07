@@ -1,11 +1,11 @@
 import { deepClone, isVector4 } from "@/src/utils/object";
 import {
-  ExtraParams,
+  ParamMap,
   SerializedParams,
   StandardParams,
-  isPaletteParam,
-} from "./PatternParams";
-import { isPalette } from "@/src/types/Palette";
+} from "@/src/params/shared/patternParam";
+import { isPaletteParam } from "@/src/params/palette/isPaletteParam";
+import { isPalette } from "@/src/params/palette/Palette";
 import { makeVertexShader, Varying } from "@/src/shaders/vertexShader";
 
 export type SerializedPattern = {
@@ -15,7 +15,7 @@ export type SerializedPattern = {
 
 export const BASE_UNIFORMS = ["u_time", "u_texture"];
 
-export class Pattern<T extends ExtraParams = ExtraParams> {
+export class Pattern<T extends ParamMap = ParamMap> {
   name: string;
   fragmentShader: string;
   vertexShader: string;

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Button,
   HStack,
@@ -10,13 +10,13 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
+  SimpleGrid,
   Spinner,
   Text,
-  VStack,
 } from "@chakra-ui/react";
 import { FaUser } from "react-icons/fa";
 import { useStore } from "@/src/types/StoreContext";
-import { action } from "mobx";
+import { action, runInAction } from "mobx";
 import { observer } from "mobx-react-lite";
 import { trpc } from "@/src/utils/trpc";
 import { sanitize } from "@/src/utils/sanitize";
@@ -33,20 +33,33 @@ export const LoginButton = observer(function LoginButton() {
   const {
     isPending,
     isError,
+    error,
+    refetch,
     data: users,
   } = trpc.user.listUsers.useQuery(
     { usingLocalData },
-    { enabled: uiStore.showingUserPickerModal },
+    { enabled: uiStore.showingUserPickerModal, retry: 1 },
   );
 
   const createUser = trpc.user.createUser.useMutation();
+
+  // Stale localStorage may point at prod DB without Turso credentials configured
+  useEffect(() => {
+    if (
+      !isError ||
+      usingLocalData ||
+      process.env.NEXT_PUBLIC_NODE_ENV === "production"
+    )
+      return;
+    runInAction(() => {
+      store.usingLocalData = true;
+    });
+  }, [isError, usingLocalData, store]);
 
   const onClose = action(() => {
     uiStore.showingUserPickerModal = false;
     setNewUsername("");
   });
-
-  if (isError) return null;
 
   return (
     <>
@@ -71,9 +84,17 @@ export const LoginButton = observer(function LoginButton() {
           </ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            <VStack alignItems="center">
+            {isError && usingLocalData && (
+              <Text color="red.300" mb={4}>
+                Could not load users ({error?.message ?? "unknown error"}).{" "}
+                <Button size="xs" variant="link" onClick={() => refetch()}>
+                  Retry
+                </Button>
+              </Text>
+            )}
+            <SimpleGrid columns={2} spacing={2} w="100%">
               {!isPending &&
-                users
+                (users ?? [])
                   .filter((user) => user.username !== userStore.username)
                   .map((user) => (
                     <Button
@@ -81,7 +102,7 @@ export const LoginButton = observer(function LoginButton() {
                       leftIcon={<FaUser />}
                       width="100%"
                       onClick={action(() => {
-                        userStore.me = user;
+                        userStore.setMe(user);
                         if (store.context === "experienceEditor") {
                           uiStore.showingOpenExperienceModal = true;
                           experienceStore.openEmptyExperience(router);
@@ -92,7 +113,7 @@ export const LoginButton = observer(function LoginButton() {
                       {user.username}
                     </Button>
                   ))}
-            </VStack>
+            </SimpleGrid>
 
             <Text my={4}>Click a name above or type a new name:</Text>
             <HStack>
@@ -111,7 +132,7 @@ export const LoginButton = observer(function LoginButton() {
                     usingLocalData,
                     username: newUsername,
                   });
-                  userStore.me = newUser;
+                  userStore.setMe(newUser);
                   if (store.context === "experienceEditor") {
                     experienceStore.openEmptyExperience(router);
                   }

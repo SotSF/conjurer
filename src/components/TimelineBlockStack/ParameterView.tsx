@@ -1,4 +1,4 @@
-import { ExtraParams, PatternParam } from "@/src/types/PatternParams";
+import { PatternParam } from "@/src/params/shared/patternParam";
 import { Box, Button, HStack, Text } from "@chakra-ui/react";
 import { useState } from "react";
 import { BsCaretDown, BsCaretUp } from "react-icons/bs";
@@ -13,7 +13,7 @@ import { ParameterVariations } from "@/src/components/ParameterVariations/Parame
 type ParameterProps = {
   uniformName: string;
   patternParam: PatternParam;
-  block: Block<ExtraParams>;
+  block: Block;
   expandMode?: "expanded" | "collapsed";
 };
 

@@ -28,23 +28,22 @@ import { HexColorPicker } from "react-colorful";
 import { hexToRgb, vector4ToHex } from "@/src/utils/color";
 import { HexColorInput } from "react-colorful";
 import { SplineVariation } from "@/src/types/Variations/SplineVariation";
-import { ExtraParams } from "@/src/types/PatternParams";
 import { useStore } from "@/src/types/StoreContext";
-import { ScalarInput } from "@/src/components/ScalarInput";
+import { NumberParamInput } from "@/src/components/NumberParamInput";
 import {
   EasingVariation,
   EasingVariationType,
 } from "@/src/types/Variations/EasingVariation";
 import { easings } from "@/src/utils/easings";
-import { PaletteVariation } from "@/src/types/Variations/PaletteVariation";
-import { PaletteVariationControls } from "@/src/components/VariationControls/PaletteVariationControls";
+import { PaletteVariation } from "@/src/params/palette/variation/PaletteVariation";
+import { PaletteVariationControls } from "@/src/params/palette/variation/VariationControls";
 import { AudioVariation } from "@/src/types/Variations/AudioVariation";
 import { AudioVariationControls } from "@/src/components/VariationControls/AudioVariationControls";
 
 type VariationControlsProps = {
   uniformName: string;
   variation: Variation;
-  block: Block<ExtraParams>;
+  block: Block;
 };
 
 export const VariationControls = function VariationControls({
@@ -88,7 +87,7 @@ export const VariationControls = function VariationControls({
       </VStack>
       <VStack spacing={1}>
         {controls}
-        <ScalarInput
+        <NumberParamInput
           name="Duration"
           onChange={(valueString, valueNumber) => {
             variation.duration = valueNumber;
@@ -144,7 +143,7 @@ function FlatVariationControls({
   const [value, setValue] = useState(variation.value.toString());
 
   return (
-    <ScalarInput
+    <NumberParamInput
       name="Value"
       onChange={(valueString, valueNumber) => {
         variation.value = valueNumber;
@@ -224,7 +223,7 @@ function LinearVariationControls({
 
   return (
     <>
-      <ScalarInput
+      <NumberParamInput
         name="From"
         onChange={(valueString, valueNumber) => {
           variation.from = valueNumber;
@@ -233,7 +232,7 @@ function LinearVariationControls({
         }}
         value={from}
       />
-      <ScalarInput
+      <NumberParamInput
         name="To"
         onChange={(valueString, valueNumber) => {
           variation.to = valueNumber;
@@ -344,7 +343,7 @@ export function PeriodicVariationControls({
       </HStack>
       {showingMinMax ? (
         <>
-          <ScalarInput
+          <NumberParamInput
             name="Min"
             onChange={(valueString, valueNumber) => {
               setMin(valueString);
@@ -355,7 +354,7 @@ export function PeriodicVariationControls({
             }}
             value={min}
           />
-          <ScalarInput
+          <NumberParamInput
             name="Max"
             onChange={(valueString, valueNumber) => {
               setMax(valueString);
@@ -369,7 +368,7 @@ export function PeriodicVariationControls({
         </>
       ) : (
         <>
-          <ScalarInput
+          <NumberParamInput
             name="Offset"
             onChange={(valueString, valueNumber) => {
               variation.offset = valueNumber;
@@ -378,7 +377,7 @@ export function PeriodicVariationControls({
             }}
             value={offset}
           />
-          <ScalarInput
+          <NumberParamInput
             name="Amplitude"
             onChange={(valueString, valueNumber) => {
               variation.amplitude = valueNumber;
@@ -390,7 +389,7 @@ export function PeriodicVariationControls({
         </>
       )}
       <VStack spacing={1} align="stretch" w="100%">
-        <ScalarInput
+        <NumberParamInput
           name="Period"
           onChange={(valueString, valueNumber) => {
             // do not allow setting period to 0
@@ -412,7 +411,7 @@ export function PeriodicVariationControls({
           Tap tempo
         </Button>
       </VStack>
-      <ScalarInput
+      <NumberParamInput
         name="Phase"
         onChange={(valueString, valueNumber) => {
           variation.phase = valueNumber;
@@ -441,7 +440,7 @@ function SplineVariationControls({
 
   return (
     <>
-      <ScalarInput
+      <NumberParamInput
         name="Min"
         onChange={(valueString, valueNumber) => {
           variation.domainMin = valueNumber;
@@ -450,7 +449,7 @@ function SplineVariationControls({
         }}
         value={min}
       />
-      <ScalarInput
+      <NumberParamInput
         name="Max"
         onChange={(valueString, valueNumber) => {
           variation.domainMax = valueNumber;
@@ -500,7 +499,7 @@ function EasingVariationControls({
           </option>
         ))}
       </Select>
-      <ScalarInput
+      <NumberParamInput
         name="From"
         onChange={(valueString, valueNumber) => {
           variation.from = valueNumber;
@@ -509,7 +508,7 @@ function EasingVariationControls({
         }}
         value={from}
       />
-      <ScalarInput
+      <NumberParamInput
         name="To"
         onChange={(valueString, valueNumber) => {
           variation.to = valueNumber;

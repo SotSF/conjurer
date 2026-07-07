@@ -4,7 +4,6 @@ import { runInAction } from "mobx";
 import { Block, SerializedBlock } from "@/src/types/Block";
 import { vjEffects, vjPatterns } from "@/src/components/VJPage/vjPageCatalog";
 import type { Store } from "@/src/types/Store";
-import type { ExtraParams } from "@/src/types/PatternParams";
 import { applySerializedBlockToVjPool } from "@/src/utils/applySerializedBlockToVjPool";
 import { copyPatternParamValuesBetweenBlocks } from "@/src/utils/copyPatternParamValuesBetweenBlocks";
 
@@ -14,8 +13,9 @@ export type VJCanopySession = {
 
   selectedEffectIndices: number[];
   onToggleEffect: (index: number) => void;
+  onMoveEffect: (index: number, direction: "up" | "down") => void;
 
-  selectedPatternBlock: Block<ExtraParams>;
+  selectedPatternBlock: Block;
   effectBlocks: Block[];
 
   // Used to force remounts when we replace non-observable `block.pattern`.
@@ -92,6 +92,21 @@ export const useVJCanopySession = (store: Store): VJCanopySession => {
     });
   }, []);
 
+  const onMoveEffect = useCallback(
+    (index: number, direction: "up" | "down") => {
+      setSelectedEffectIndices((prev) => {
+        const pos = prev.indexOf(index);
+        if (pos < 0) return prev;
+        const swapWith = direction === "up" ? pos - 1 : pos + 1;
+        if (swapWith < 0 || swapWith >= prev.length) return prev;
+        const next = [...prev];
+        [next[pos], next[swapWith]] = [next[swapWith], next[pos]];
+        return next;
+      });
+    },
+    [],
+  );
+
   const selectedPatternBlock =
     patternBlocks[selectedPatternIndex] ?? patternBlocks[0];
 
@@ -116,7 +131,9 @@ export const useVJCanopySession = (store: Store): VJCanopySession => {
 
         // `Block.pattern` is non-observable, so if we replace the pattern object
         // we need a remount for shaderMaterial uniforms to point at the new params.
-        if (targetPatternBlock.pattern.name !== sourcePatternBlock.pattern.name) {
+        if (
+          targetPatternBlock.pattern.name !== sourcePatternBlock.pattern.name
+        ) {
           targetPatternBlock.pattern = sourcePatternBlock.pattern.clone();
           needsRemount = true;
         } else {
@@ -125,8 +142,9 @@ export const useVJCanopySession = (store: Store): VJCanopySession => {
             targetPatternBlock,
           );
         }
-        targetPatternBlock.parameterVariations =
-          cloneParameterVariations(sourcePatternBlock.parameterVariations);
+        targetPatternBlock.parameterVariations = cloneParameterVariations(
+          sourcePatternBlock.parameterVariations,
+        );
 
         // Copy effect block parameter states for the selected effects.
         source.selectedEffectIndices.forEach((effectIndex) => {
@@ -145,8 +163,9 @@ export const useVJCanopySession = (store: Store): VJCanopySession => {
               targetEffectBlock,
             );
           }
-          targetEffectBlock.parameterVariations =
-            cloneParameterVariations(sourceEffectBlock.parameterVariations);
+          targetEffectBlock.parameterVariations = cloneParameterVariations(
+            sourceEffectBlock.parameterVariations,
+          );
         });
       });
 
@@ -183,6 +202,7 @@ export const useVJCanopySession = (store: Store): VJCanopySession => {
     onSelectPattern,
     selectedEffectIndices,
     onToggleEffect,
+    onMoveEffect,
     selectedPatternBlock,
     effectBlocks,
     renderNonce,
@@ -190,4 +210,3 @@ export const useVJCanopySession = (store: Store): VJCanopySession => {
     applySerializedPreset,
   };
 };
-

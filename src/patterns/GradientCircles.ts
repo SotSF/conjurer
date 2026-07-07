@@ -1,6 +1,6 @@
 import { Pattern } from "@/src/types/Pattern";
 import gradientCircles from "./shaders/gradientCircles.frag";
-import { Palette } from "../types/Palette";
+import { Palette } from "@/src/params/palette/Palette";
 import { Vector3 } from "three";
 
 export { gradientCircles };

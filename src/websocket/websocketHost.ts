@@ -1,6 +1,6 @@
 // Lightweaver (canopy-unity) websocket server where conjurer sends frame data
 export const UNITY_APP_WEBSOCKET_HOST = "127.0.0.1";
-export const UNITY_APP_WEBSOCKET_PORT = 8080;
+export const UNITY_APP_WEBSOCKET_PORT = 8082;
 
 // Conjurer API websocket server, see src/api/conjurerAPI.ts
 export const CONJURER_API_WEBSOCKET_HOST = "127.0.0.1";

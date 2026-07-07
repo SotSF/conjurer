@@ -5,7 +5,7 @@ import {
   ConjurerAPIStateMessage,
   ExtraStateData,
 } from "@/src/types/ConjurerAPIMessage";
-import { PatternParam } from "@/src/types/PatternParams";
+import { PatternParam } from "@/src/params/shared/patternParam";
 
 export const handleConjurerAPIMessage = (
   store: Store,
