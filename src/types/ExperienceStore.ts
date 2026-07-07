@@ -46,7 +46,7 @@ export class ExperienceStore {
       song: NO_SONG,
       status: "inprogress",
       version: EXPERIENCE_VERSION,
-      data: { layers: [{ patternBlocks: [] }, { patternBlocks: [] }] },
+      data: { layers: [{ blockMap: {} }, { blockMap: {} }] },
       thumbnailURL: "",
     });
 
