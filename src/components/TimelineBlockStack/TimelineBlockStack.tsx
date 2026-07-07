@@ -34,8 +34,11 @@ export const TimelineBlockStack = observer(function TimelineBlockStack({
     // Anytime the TimelineBlockStack is resized,
     new ResizeObserver(
       action(() => {
-        // recompute the height of the layer
-        patternBlock.layer?.recomputeHeight();
+        // report the block's height so the layer can size its lanes
+        patternBlock.layer?.reportBlockHeight(
+          patternBlock,
+          dragNodeRef.current?.offsetHeight ?? 0,
+        );
 
         // recompute the number of header repetitions
         patternBlock.recomputeHeaderRepetitions(
@@ -148,16 +151,20 @@ export const TimelineBlockStack = observer(function TimelineBlockStack({
           handleBlockClick={handleBlockClick}
           isSelected={isSelected}
         />
-        {patternBlock.effectBlocks.map((effectBlock, index) => (
-          <PatternOrEffectBlock
-            key={effectBlock.id}
-            block={effectBlock}
-            effectIndex={index}
-            handleBlockClick={handleBlockClick}
-            isSelected={isSelected}
-          />
-        ))}
-        <AddEffectButton block={patternBlock} isSelected={isSelected} />
+        {patternBlock.showDetails && (
+          <>
+            {patternBlock.effectBlocks.map((effectBlock, index) => (
+              <PatternOrEffectBlock
+                key={effectBlock.id}
+                block={effectBlock}
+                effectIndex={index}
+                handleBlockClick={handleBlockClick}
+                isSelected={isSelected}
+              />
+            ))}
+            <AddEffectButton block={patternBlock} isSelected={isSelected} />
+          </>
+        )}
       </Card>
     </Draggable>
   );

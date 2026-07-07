@@ -27,7 +27,8 @@ export type Layer = {
 
   resizeBlockLeftBound(block: Block, delta: number): void;
   resizeBlockRightBound(block: Block, delta: number): void;
-  recomputeHeight(): void;
+  // blocks report their rendered height so the layer can size itself
+  reportBlockHeight(block: Block, heightPx: number): void;
   // vertical pixel offset of the block within the layer's timeline row (blocks
   // overlapping in time are displayed stacked in lanes)
   blockTopOffset(block: Block): number;

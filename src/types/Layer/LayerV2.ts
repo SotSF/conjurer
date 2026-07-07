@@ -6,13 +6,17 @@ import { generateId } from "@/src/utils/id";
 import { Layer } from ".";
 import { BlockMap } from "../BlockMap";
 
+// used for a block's lane until its actual rendered height is reported
+const UNMEASURED_BLOCK_HEIGHT = 50;
+
 export class LayerV2 implements Layer {
   id = generateId();
   name = "";
   visible = true;
 
-  // measured from the tallest rendered block (see recomputeHeight)
-  laneHeight = 350;
+  // rendered block heights in px, reported from the DOM as blocks
+  // mount/resize (see reportBlockHeight)
+  blockHeights = new Map<string, number>();
 
   blockMap = new BlockMap();
 
@@ -91,12 +95,32 @@ export class LayerV2 implements Layer {
     return count;
   }
 
-  get height() {
-    return this.laneCount * this.laneHeight;
+  // each lane is exactly as tall as its tallest block
+  get laneHeights(): number[] {
+    const heights = Array(this.laneCount).fill(UNMEASURED_BLOCK_HEIGHT);
+    for (const [blockId, lane] of this.blockLanes) {
+      heights[lane] = Math.max(
+        heights[lane],
+        this.blockHeights.get(blockId) ?? UNMEASURED_BLOCK_HEIGHT,
+      );
+    }
+    return heights;
   }
 
-  blockTopOffset = (block: Block) =>
-    (this.blockLanes.get(block.id) ?? 0) * this.laneHeight;
+  get height() {
+    return this.laneHeights.reduce((sum, laneHeight) => sum + laneHeight, 0);
+  }
+
+  blockTopOffset = (block: Block) => {
+    const lane = this.blockLanes.get(block.id) ?? 0;
+    return this.laneHeights
+      .slice(0, lane)
+      .reduce((sum, laneHeight) => sum + laneHeight, 0);
+  };
+
+  reportBlockHeight = (block: Block, heightPx: number) => {
+    this.blockHeights.set(block.id, heightPx);
+  };
 
   insertCloneOfBlock = (block: Block) => {
     const newBlock = block.clone();
@@ -165,21 +189,6 @@ export class LayerV2 implements Layer {
     if (desiredEndTime <= block.startTime) return;
 
     block.duration += delta;
-  };
-
-  recomputeHeight = () => {
-    const element = document.getElementById("timeline-layer-" + this.id);
-    const blockstackElements = element?.children;
-
-    if (!blockstackElements || blockstackElements.length === 0) return;
-
-    let maxHeight = 0;
-    for (const blockstackElement of blockstackElements) {
-      const blockElement = blockstackElement.children[0];
-      const blockHeight = blockElement.clientHeight;
-      maxHeight = Math.max(maxHeight, blockHeight);
-    }
-    this.laneHeight = maxHeight + 6; // to account for border
   };
 
   serialize = () => ({

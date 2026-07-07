@@ -40,6 +40,10 @@ export class Block {
 
   headerRepetitions: number = 1; // number of times to repeat the headers in this block
 
+  // UI state: whether the timeline shows this block's parameters/effects or
+  // just its header
+  showDetails = false;
+
   private _layer: Layer | null = null; // the layer that this block is in
 
   get layer() {
@@ -74,6 +78,10 @@ export class Block {
   regenerateId = () => {
     this.id = generateId();
     this.effectBlocks.forEach((effectBlock) => effectBlock.regenerateId());
+  };
+
+  toggleShowDetails = () => {
+    this.showDetails = !this.showDetails;
   };
 
   setTiming = ({

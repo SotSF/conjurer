@@ -298,19 +298,14 @@ export class LayerV1 implements Layer {
     block.duration += delta;
   };
 
-  recomputeHeight = () => {
-    const element = document.getElementById("timeline-layer-" + this.id);
-    const blockstackElements = element?.children;
+  blockHeights = new Map<string, number>();
 
-    if (!blockstackElements || blockstackElements.length === 0) return;
-
+  reportBlockHeight = (block: Block, heightPx: number) => {
+    this.blockHeights.set(block.id, heightPx);
     let maxHeight = 0;
-    for (const blockstackElement of blockstackElements) {
-      const blockElement = blockstackElement.children[0];
-      const blockHeight = blockElement.clientHeight;
-      maxHeight = Math.max(maxHeight, blockHeight);
-    }
-    this.height = maxHeight + 6; // to account for border
+    for (const height of this.blockHeights.values())
+      maxHeight = Math.max(maxHeight, height);
+    this.height = maxHeight;
   };
 
   // v1 layers never contain overlapping blocks, so everything is in lane 0
