@@ -313,6 +313,9 @@ export class LayerV1 implements Layer {
     this.height = maxHeight + 6; // to account for border
   };
 
+  // v1 layers never contain overlapping blocks, so everything is in lane 0
+  blockTopOffset = () => 0;
+
   serialize = () => ({
     id: this.id,
     name: this.name,

@@ -11,7 +11,6 @@ export type ActivePatternsWindow = {
 
 export class BlockMap {
   map: Map<string, Block> = new Map();
-  activePatternsIndex: ActivePatternsWindow[] = [];
 
   constructor() {
     makeAutoObservable(this);
@@ -35,18 +34,15 @@ export class BlockMap {
       blockMap.map.set(id, block);
     });
 
-    blockMap.computeActivePatternsIndex();
     return blockMap;
   };
 
   addBlock = (block: Block) => {
     this.map.set(block.id, block);
-    this.computeActivePatternsIndex();
   };
 
   removeBlock = (block: Block) => {
     this.map.delete(block.id);
-    this.computeActivePatternsIndex();
   };
 
   getActivePatternsWindow(
@@ -65,7 +61,9 @@ export class BlockMap {
 
   getAllBlocks = () => [...this.map.values()];
 
-  computeActivePatternsIndex = () => {
+  // a computed rather than a manually-invalidated cache so that any mutation
+  // of block timing (moves, resizes, timing modal edits) is reflected
+  get activePatternsIndex(): ActivePatternsWindow[] {
     const blocks = this.getAllBlocks();
     const patternStartTimes = blocks.map((b) => b.startTime);
     const patternEndTimes = blocks.map((b) => b.endTime);
@@ -83,6 +81,6 @@ export class BlockMap {
       windows.push({ startTime, endTime, patterns });
     }
 
-    this.activePatternsIndex = windows;
-  };
+    return windows;
+  }
 }

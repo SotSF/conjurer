@@ -131,7 +131,7 @@ export const TimelineBlockStack = observer(function TimelineBlockStack({
       <Card
         ref={dragNodeRef}
         position="absolute"
-        top={0}
+        top={`${patternBlock.layer?.blockTopOffset(patternBlock) ?? 0}px`}
         left={uiStore.timeToXPixels(patternBlock.startTime)}
         width={uiStore.timeToXPixels(patternBlock.duration)}
         border="solid"

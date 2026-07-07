@@ -28,5 +28,8 @@ export type Layer = {
   resizeBlockLeftBound(block: Block, delta: number): void;
   resizeBlockRightBound(block: Block, delta: number): void;
   recomputeHeight(): void;
+  // vertical pixel offset of the block within the layer's timeline row (blocks
+  // overlapping in time are displayed stacked in lanes)
+  blockTopOffset(block: Block): number;
   serialize(): object;
 };

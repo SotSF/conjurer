@@ -9,8 +9,10 @@ import { BlockMap } from "../BlockMap";
 export class LayerV2 implements Layer {
   id = generateId();
   name = "";
-  height = 350;
   visible = true;
+
+  // measured from the tallest rendered block (see recomputeHeight)
+  laneHeight = 350;
 
   blockMap = new BlockMap();
 
@@ -61,6 +63,41 @@ export class LayerV2 implements Layer {
     );
   }
 
+  // Overlapping blocks are displayed stacked in "lanes" within the layer.
+  // Greedy interval partitioning: in start time order, each block goes into
+  // the first lane whose previous block has ended.
+  get blockLanes(): Map<string, number> {
+    const sorted = this.getAllBlocks().sort(
+      (a, b) => a.startTime - b.startTime || a.id.localeCompare(b.id),
+    );
+    const laneEndTimes: number[] = [];
+    const lanes = new Map<string, number>();
+    for (const block of sorted) {
+      let lane = laneEndTimes.findIndex((end) => end <= block.startTime);
+      if (lane === -1) {
+        lane = laneEndTimes.length;
+        laneEndTimes.push(0);
+      }
+      laneEndTimes[lane] = block.endTime;
+      lanes.set(block.id, lane);
+    }
+    return lanes;
+  }
+
+  get laneCount() {
+    let count = 1;
+    for (const lane of this.blockLanes.values())
+      count = Math.max(count, lane + 1);
+    return count;
+  }
+
+  get height() {
+    return this.laneCount * this.laneHeight;
+  }
+
+  blockTopOffset = (block: Block) =>
+    (this.blockLanes.get(block.id) ?? 0) * this.laneHeight;
+
   insertCloneOfBlock = (block: Block) => {
     const newBlock = block.clone();
     newBlock.setTiming({
@@ -102,7 +139,6 @@ export class LayerV2 implements Layer {
   attemptMoveBlock = (block: Block, desiredTime: number, relative = false) => {
     if (block.layer != this) return;
     block.startTime = relative ? desiredTime + block.startTime : desiredTime;
-    this.blockMap.computeActivePatternsIndex();
   };
 
   resizeBlockLeftBound = (block: Block, delta: number) => {
@@ -143,7 +179,7 @@ export class LayerV2 implements Layer {
       const blockHeight = blockElement.clientHeight;
       maxHeight = Math.max(maxHeight, blockHeight);
     }
-    this.height = maxHeight + 6; // to account for border
+    this.laneHeight = maxHeight + 6; // to account for border
   };
 
   serialize = () => ({
