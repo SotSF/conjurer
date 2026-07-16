@@ -2,13 +2,27 @@ import { Pattern } from "@/src/types/Pattern";
 import { Palette } from "@/src/params/palette/Palette";
 
 import plasma from "@/src/patterns/shaders/plasma.frag";
+import { Vector3 } from "three";
 
 export { plasma };
 export const Plasma = () =>
   new Pattern("Plasma", plasma, {
     u_palette: {
       name: "Palette",
-      value: Palette.default(),
+      value: new Palette(
+        new Vector3(
+          0.47967221822927486,
+          0.4112174018764163,
+          0.5648945880898314,
+        ),
+        new Vector3(0.848554322039427, 0.9881387017846937, 0.5292205015158838),
+        new Vector3(0.2527375059891426, 0.9059075704747941, 0.9918541100325586),
+        new Vector3(
+          0.5850150146759521,
+          0.3051078711938151,
+          0.34256605961312814,
+        ),
+      ),
     },
     u_timeFactor: {
       name: "Time Factor",

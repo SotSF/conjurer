@@ -2,13 +2,31 @@ import { Pattern } from "@/src/types/Pattern";
 import { Palette } from "@/src/params/palette/Palette";
 
 import fireflies from "@/src/patterns/shaders/fireflies.frag";
+import { Vector3 } from "three";
 
 export { fireflies };
 export const Fireflies = () =>
   new Pattern("Fireflies", fireflies, {
     u_palette: {
       name: "Palette",
-      value: Palette.default(),
+      value: new Palette(
+        new Vector3(
+          0.9124527182847688,
+          0.35201719030020073,
+          0.22607142640425104,
+        ),
+        new Vector3(
+          0.08661284008429093,
+          0.9683164334331708,
+          0.6575666533654505,
+        ),
+        new Vector3(0.6544835024461954, 0.8646366284628692, 0.673712935060783),
+        new Vector3(
+          0.5750644351786812,
+          0.16811504964194957,
+          0.7065968595480202,
+        ),
+      ),
     },
     u_timeFactor: {
       name: "Time Factor",

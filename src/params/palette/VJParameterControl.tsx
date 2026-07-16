@@ -1,5 +1,5 @@
 import { HStack } from "@chakra-ui/react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect } from "react";
 import { observer } from "mobx-react-lite";
 import { Block } from "@/src/types/Block";
 import { ParamType, PatternParam } from "@/src/params/shared/patternParam";
@@ -36,14 +36,11 @@ export const VJPaletteParameterControl = observer(
 
     const variation = block.parameterVariations[uniformName]?.[0];
 
-    const [initialized, setInitialized] = useState(false);
-    // upon initializing a palette parameter, create a variation if one does not exist
-    // TODO: this is janky and probably should be done elsewhere
     useEffect(() => {
-      if (variation || initialized) return;
-      setInitialized(true);
-      updatePaletteVariation();
-    }, [updatePaletteVariation, variation, initialized]);
+      if (!variation) {
+        updatePaletteVariation();
+      }
+    }, [block.id, uniformName, variation, updatePaletteVariation]);
 
     const setParameter = useCallback(
       (value: Palette) => {

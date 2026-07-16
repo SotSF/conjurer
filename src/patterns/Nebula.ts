@@ -2,13 +2,27 @@ import { Pattern } from "@/src/types/Pattern";
 import { Palette } from "@/src/params/palette/Palette";
 
 import nebula from "@/src/patterns/shaders/nebula.frag";
+import { Vector3 } from "three";
 
 export { nebula };
 export const Nebula = () =>
   new Pattern("Nebula", nebula, {
     u_palette: {
       name: "Palette",
-      value: Palette.default(),
+      value: new Palette(
+        new Vector3(
+          0.4578141942070545,
+          0.13747096755858157,
+          0.6218188281115182,
+        ),
+        new Vector3(0.4672476443540443, 0.4642310181462297, 0.6766260507523637),
+        new Vector3(
+          0.17720996009264467,
+          0.14253811784468085,
+          0.8633613193190549,
+        ),
+        new Vector3(0.04930616403488419, 0.850407449162364, 0.4605103864304909),
+      ),
     },
     u_timeFactor: {
       name: "Time Factor",
