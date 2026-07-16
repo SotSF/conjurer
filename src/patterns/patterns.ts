@@ -1,3 +1,4 @@
+import { Nebula } from "@/src/patterns/Nebula";
 import { Fireflies } from "@/src/patterns/Fireflies";
 import { Plasma } from "@/src/patterns/Plasma";
 import { Cymatics } from "@/src/patterns/Cymatics";
@@ -31,6 +32,7 @@ import { Perlin } from "@/src/patterns/Perlin";
 import { PulsePalette } from "@/src/patterns/PulsePalette";
 import { BloomKaleidoscope } from "@/src/patterns/BloomKaleidoscope";
 const patternFactories: Array<() => Pattern> = [
+    Nebula,
     Fireflies,
     Plasma,
     Cymatics,
