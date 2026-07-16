@@ -1,5 +1,6 @@
 import { HStack } from "@chakra-ui/react";
-import { memo, useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { observer } from "mobx-react-lite";
 import { Block } from "@/src/types/Block";
 import { ParamType, PatternParam } from "@/src/params/shared/patternParam";
 import { DEFAULT_VARIATION_DURATION } from "@/src/utils/time";
@@ -15,7 +16,7 @@ type VJPaletteParameterControlProps = {
   patternParam: PatternParam<Palette>;
 };
 
-export const VJPaletteParameterControl = memo(
+export const VJPaletteParameterControl = observer(
   function VJPaletteParameterControl({
     block,
     uniformName,
@@ -44,10 +45,13 @@ export const VJPaletteParameterControl = memo(
       updatePaletteVariation();
     }, [updatePaletteVariation, variation, initialized]);
 
-    const setParameter = (value: Palette) => {
-      block.pattern.params[uniformName].value = value;
-      updatePaletteVariation();
-    };
+    const setParameter = useCallback(
+      (value: Palette) => {
+        block.pattern.params[uniformName].value = value;
+        updatePaletteVariation();
+      },
+      [block.pattern.params, uniformName, updatePaletteVariation],
+    );
 
     return (
       <HStack width="100%" maxW="100%" minW={0} flexWrap="wrap" gap={4}>
