@@ -1,3 +1,4 @@
+import { Fireflies } from "@/src/patterns/Fireflies";
 import { Plasma } from "@/src/patterns/Plasma";
 import { Cymatics } from "@/src/patterns/Cymatics";
 import { Turbine } from "@/src/patterns/Turbine";
@@ -30,45 +31,46 @@ import { Perlin } from "@/src/patterns/Perlin";
 import { PulsePalette } from "@/src/patterns/PulsePalette";
 import { BloomKaleidoscope } from "@/src/patterns/BloomKaleidoscope";
 const patternFactories: Array<() => Pattern> = [
-  Plasma,
-  Cymatics,
-  PulsePalette,
-  LogSpirals,
-  Lightwaves,
-  Barcode,
-  Clouds,
-  Disc,
-  Fire,
-  GentleRings,
-  Globules,
-  GradientCircles,
-  Lissajous,
-  Melt,
-  Perlin,
-  Pulse,
-  Rainbow,
-  GalaxyTour,
-  Starfield,
-  SpaceOdyssey,
-  SunCycle,
-  Tunnel,
-  BloomKaleidoscope,
-  Turbine,
-  Construct,
-  EasternRedbud,
-  Convergence,
-  CircleOfPipe,
-  PipeTime,
-  BoxTime,
+    Fireflies,
+    Plasma,
+    Cymatics,
+    PulsePalette,
+    LogSpirals,
+    Lightwaves,
+    Barcode,
+    Clouds,
+    Disc,
+    Fire,
+    GentleRings,
+    Globules,
+    GradientCircles,
+    Lissajous,
+    Melt,
+    Perlin,
+    Pulse,
+    Rainbow,
+    GalaxyTour,
+    Starfield,
+    SpaceOdyssey,
+    SunCycle,
+    Tunnel,
+    BloomKaleidoscope,
+    Turbine,
+    Construct,
+    EasternRedbud,
+    Convergence,
+    CircleOfPipe,
+    PipeTime,
+    BoxTime,
 ];
 // Patterns that will not have their uniforms changed. These are used for checking what the default
 // uniform values are.
 const defaultPatterns: Pattern[] = patternFactories.map((f) => f());
 const defaultPatternMap: {
-  [key: string]: Pattern;
+    [key: string]: Pattern;
 } = {};
 for (const pattern of defaultPatterns)
-  defaultPatternMap[pattern.name] = pattern;
+    defaultPatternMap[pattern.name] = pattern;
 // Patterns that will have their uniforms updated by the pattern playground.
 const playgroundPatterns: Pattern[] = patternFactories.map((f) => f());
 export { defaultPatternMap, patternFactories, playgroundPatterns };
