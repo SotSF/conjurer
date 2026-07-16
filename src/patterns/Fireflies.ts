@@ -19,9 +19,9 @@ export const Fireflies = () =>
     },
     u_period: {
       name: "Period",
-      value: 4.0,
+      value: 14.0,
       min: 1.0,
-      max: 15.0,
+      max: 30.0,
       step: 0.5,
     },
     u_jitter: {
@@ -33,7 +33,7 @@ export const Fireflies = () =>
     },
     u_glow: {
       name: "Glow",
-      value: 0.5,
+      value: 0.19,
       min: 0.05,
       max: 1.0,
       step: 0.01,
@@ -54,7 +54,7 @@ export const Fireflies = () =>
     },
     u_colorShift: {
       name: "Color Shift",
-      value: 0.05,
+      value: 0.1,
       min: 0.0,
       max: 1.0,
       step: 0.01,
