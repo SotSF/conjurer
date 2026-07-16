@@ -1,3 +1,4 @@
+import { Plasma } from "@/src/patterns/Plasma";
 import { Cymatics } from "@/src/patterns/Cymatics";
 import { Turbine } from "@/src/patterns/Turbine";
 import { CircleOfPipe } from "@/src/patterns/CircleOfPipe";
@@ -29,6 +30,7 @@ import { Perlin } from "@/src/patterns/Perlin";
 import { PulsePalette } from "@/src/patterns/PulsePalette";
 import { BloomKaleidoscope } from "@/src/patterns/BloomKaleidoscope";
 const patternFactories: Array<() => Pattern> = [
+  Plasma,
   Cymatics,
   PulsePalette,
   LogSpirals,
