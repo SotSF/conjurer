@@ -31,6 +31,7 @@ import { useSaveExperience } from "@/src/hooks/experience";
 import { DisplayMode } from "@/src/types/UIStore";
 import { action } from "mobx";
 import { LatencyModal } from "@/src/components/LatencyModal/LatencyModal";
+import { LawsOfConjuryDrawer } from "@/src/components/Menu/LawsOfConjuryDrawer";
 import { ExperienceThumbnail } from "@/src/components/ExperienceThumbnail";
 import { ExperienceStatusIndicator } from "../ExperienceStatusIndicator";
 import { useRouter } from "next/router";
@@ -87,6 +88,7 @@ export const MenuBar = observer(function MenuBar() {
         </ModalContent>
       </Modal>
       <LatencyModal />
+      <LawsOfConjuryDrawer />
       <HStack>
         {store.context === "experienceEditor" && store.canEditExperience ? (
           <ExperienceThumbnail
@@ -368,6 +370,13 @@ export const MenuBar = observer(function MenuBar() {
                 Keyboard shortcuts
               </MenuItem>
             )}
+            <MenuItem
+              onClick={action(
+                () => (uiStore.showingLawsOfConjuryDrawer = true),
+              )}
+            >
+              Laws of Conjury
+            </MenuItem>
             <MenuItem
               as="a"
               href="https://github.com/SotSF/conjurer/issues/new/choose"
