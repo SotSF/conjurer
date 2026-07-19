@@ -9,7 +9,7 @@ import { action, runInAction } from "mobx";
 import { DisplayModeButtons } from "@/src/components/PatternPlayground/DisplayModeButtons";
 import { SendDataButton } from "@/src/components/SendDataButton";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
-import { RecordCanvasControls } from "@/src/components/PatternPlayground/RecordCanvasControls";
+// import { RecordCanvasControls } from "@/src/components/PatternPlayground/RecordCanvasControls";
 
 export const PatternPlayground = observer(function PatternPlayground() {
   const store = useStore();
@@ -110,7 +110,7 @@ export const PatternPlayground = observer(function PatternPlayground() {
                     width="100%"
                   >
                     <DisplayModeButtons />
-                    <RecordCanvasControls />
+                    {/* <RecordCanvasControls /> */}
                     {context === "vj" && <SendDataButton />}
                     {context === "experienceEditor" && (
                       <Button
