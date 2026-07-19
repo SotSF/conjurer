@@ -1,35 +1,26 @@
 import { Heading, Text, VStack } from "@chakra-ui/react";
 import { ReactNode } from "react";
+import { NegativeSpaceLaw } from "@/src/components/Menu/LawsOfConjury/laws/NegativeSpaceLaw";
+import { SpeedLimitLaw } from "@/src/components/Menu/LawsOfConjury/laws/SpeedLimitLaw";
+import { ViewingAngleLaw } from "@/src/components/Menu/LawsOfConjury/laws/ViewingAngleLaw";
 
 type Law = {
   title: string;
-  body: ReactNode;
+  content: ReactNode;
 };
 
 const LAWS: Law[] = [
   {
     title: "Speed Limit",
-    body: (
-      <Text>
-        Patterns should change slowly enough that the eye can follow them.
-      </Text>
-    ),
+    content: <SpeedLimitLaw />,
   },
   {
     title: "Negative Space",
-    body: (
-      <Text>
-        Leave darkness and empty space so the light has room to breathe.
-      </Text>
-    ),
+    content: <NegativeSpaceLaw />,
   },
   {
     title: "Viewing Angle",
-    body: (
-      <Text>
-        Design for how the canopy is seen from the ground, not only from above.
-      </Text>
-    ),
+    content: <ViewingAngleLaw />,
   },
 ];
 
@@ -46,7 +37,7 @@ export function LawsOfConjuryContent() {
       {LAWS.map((law) => (
         <VStack key={law.title} alignItems="flex-start" spacing={2}>
           <Heading size="md">{law.title}</Heading>
-          {law.body}
+          {law.content}
         </VStack>
       ))}
     </VStack>
