@@ -16,7 +16,7 @@ export function SpeedLimitLaw() {
         </VStack>
       </HStack>
       <Text>
-        The first pattern could seem pretty innocuous. It has a wave moving
+        The first pattern might seem pretty innocuous. It has a wave moving
         across the canopy in the space of one second. On your computer screen
         that might translate to 2 inches per second - literally the pace of a
         turtle.
@@ -34,8 +34,9 @@ export function SpeedLimitLaw() {
         So this is a very important thing to keep in mind because some patterns
         have defaults that are borderline aggressive, and as you start tweaking
         things yourself it's easy to get something that looks cool but breaks
-        this (vaguely defined) speed limit. Of course occasionally going faster
-        to make a memorable moment is fine.
+        this (vaguely defined) speed limit. That said, occasionally going faster
+        to make a memorable moment is is probably fine, just keep things on
+        average slow and smooth.
       </Text>
       <Text>
         <strong>

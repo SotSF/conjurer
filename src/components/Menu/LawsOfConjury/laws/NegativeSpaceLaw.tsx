@@ -6,7 +6,7 @@ export function NegativeSpaceLaw() {
     <VStack alignItems="flex-start" spacing={3}>
       <Text>
         Next, you should seek to incorporate lots of black or "negative space"
-        and very rarely have every light on the canopy on.
+        and ideally never have every light on the canopy on.
       </Text>
       <HStack alignItems="flex-start" spacing={4}>
         <VStack alignItems="center" spacing={2}>
