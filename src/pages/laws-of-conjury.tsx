@@ -13,9 +13,20 @@ export default function LawsOfConjury() {
       </Head>
 
       <ChakraProvider theme={theme}>
-        <Box height="100vh" width="100vw" bgColor="gray.700" p={8}>
-          <Heading mb={8}>✨ Laws of Conjury ✨</Heading>
-          <LawsOfConjuryContent />
+        <Box
+          h="100vh"
+          w="100%"
+          overflowY="auto"
+          bgColor="gray.700"
+          py={8}
+          px={4}
+        >
+          <Box maxW="40rem" mx="auto" w="full" pb={8}>
+            <Heading mb={8} textAlign="center">
+              ✨ Laws of Conjury ✨
+            </Heading>
+            <LawsOfConjuryContent />
+          </Box>
         </Box>
       </ChakraProvider>
     </>

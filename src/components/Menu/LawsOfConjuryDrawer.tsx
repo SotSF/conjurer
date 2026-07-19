@@ -1,4 +1,5 @@
 import {
+  Box,
   Drawer,
   DrawerBody,
   DrawerCloseButton,
@@ -25,7 +26,7 @@ export const LawsOfConjuryDrawer = observer(function LawsOfConjuryDrawer() {
   return (
     <Drawer size="full" isOpen={isOpen} placement="left" onClose={onClose}>
       <DrawerOverlay />
-      <DrawerContent bgColor="gray.700">
+      <DrawerContent bgColor="gray.700" overflow="hidden">
         <DrawerHeader>
           <HStack spacing={2}>
             <span>✨ Laws of Conjury ✨</span>
@@ -40,8 +41,10 @@ export const LawsOfConjuryDrawer = observer(function LawsOfConjuryDrawer() {
             />
           </HStack>
         </DrawerHeader>
-        <DrawerBody>
-          <LawsOfConjuryContent />
+        <DrawerBody overflowY="auto">
+          <Box maxW="40rem" mx="auto" w="full" pb={8}>
+            <LawsOfConjuryContent />
+          </Box>
         </DrawerBody>
         <DrawerCloseButton />
       </DrawerContent>

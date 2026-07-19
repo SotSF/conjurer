@@ -26,7 +26,7 @@ const LAWS: Law[] = [
 
 export function LawsOfConjuryContent() {
   return (
-    <VStack alignItems="flex-start" spacing={8} maxW="40rem">
+    <VStack alignItems="flex-start" spacing={8} w="full" pb={8}>
       <Text>
         After years of trying different things on the canopy, we have developed
         a good sense of what <strong>works well on the canopy</strong> ✅ and
