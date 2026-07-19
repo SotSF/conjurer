@@ -14,6 +14,13 @@ export const Threshold = () =>
         max: 1,
         step: 0.01,
       },
+      u_softness: {
+        name: "Softness",
+        value: 0,
+        min: 0,
+        max: 1,
+        step: 0.01,
+      },
     },
     ["v_normalized_uv"],
   );
