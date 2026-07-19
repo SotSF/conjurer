@@ -16,9 +16,10 @@ export function SpeedLimitLaw() {
         </VStack>
       </HStack>
       <Text>
-        The first pattern may seem pretty innocuous. It has a wave moving across
-        the canopy in the space of one second. On your computer screen that
-        might translate to 2 inches per second - literally the pace of a turtle.
+        The first pattern could seem pretty innocuous. It has a wave moving
+        across the canopy in the space of one second. On your computer screen
+        that might translate to 2 inches per second - literally the pace of a
+        turtle.
       </Text>
       <Text>
         <em>But!</em>
@@ -26,14 +27,21 @@ export function SpeedLimitLaw() {
       <Text>
         These patterns are destined for a large, 16-foot diameter, 14k LED
         surface with humans viewing from a pretty close distance. And
-        importantly, while it's 2 inches per second on your screen, it's 16 feet
-        per second on the canopy. That's SO fast!
+        importantly, while it's 2 inches per second on your screen, it's{" "}
+        <em>16 feet per second</em> on the canopy. That's too fast!
       </Text>
       <Text>
-        So this is a very important thing to keep in mind because a lot of the
-        patterns even have defaults that will be borderline aggressive, and as
-        you start tweaking things yourself it's easy to get something that looks
-        cool but breaks the speed limit.
+        So this is a very important thing to keep in mind because some patterns
+        have defaults that are borderline aggressive, and as you start tweaking
+        things yourself it's easy to get something that looks cool but breaks
+        this (vaguely defined) speed limit. Of course occasionally going faster
+        to make a memorable moment is fine.
+      </Text>
+      <Text>
+        <strong>
+          A key takeaway we've had from lots of tinkering is: slowly evolving
+          patterns look better than fast and flashy patterns.
+        </strong>
       </Text>
     </VStack>
   );

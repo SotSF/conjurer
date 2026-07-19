@@ -11,15 +11,15 @@ type Law = {
 
 const LAWS: Law[] = [
   {
-    title: "Speed Limit",
+    title: "I. Speed Limit",
     content: <SpeedLimitLaw />,
   },
   {
-    title: "Negative Space",
+    title: "II. Negative Space",
     content: <NegativeSpaceLaw />,
   },
   {
-    title: "Viewing Angle",
+    title: "III. Viewing Angle",
     content: <ViewingAngleLaw />,
   },
 ];
