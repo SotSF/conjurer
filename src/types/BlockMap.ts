@@ -1,6 +1,6 @@
 import type { Store } from "@/src/types/Store";
 import { Block } from "./Block";
-import { LayerV2 } from "./Layer/LayerV2";
+import type { Layer } from "./Layer";
 import { makeAutoObservable } from "mobx";
 
 export type ActivePatternsWindow = {
@@ -26,7 +26,7 @@ export class BlockMap {
     return serialized;
   };
 
-  static deserialize = (store: Store, layer: LayerV2, data: any) => {
+  static deserialize = (store: Store, layer: Layer, data: any) => {
     const blockMap = new BlockMap();
     Object.entries(data ?? {}).forEach(([id, blockData]: [string, any]) => {
       const block = Block.deserialize(store, blockData);
