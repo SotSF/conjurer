@@ -94,14 +94,6 @@ export const BlockDevicePanel = observer(function BlockDevicePanel() {
       display="flex"
       flexDirection="column"
     >
-      {reorderable && (
-        <HStack justify="flex-end" mb={2} flexShrink={0}>
-          <Text fontSize="10px" color="gray.500">
-            drag units to reorder effects
-          </Text>
-        </HStack>
-      )}
-
       <Box flex="1" minH={0} overflowX="auto" overflowY="hidden">
         <DragDropContext onDragEnd={onDragEnd}>
           <HStack align="stretch" spacing={0} minW="min-content" height="100%">
