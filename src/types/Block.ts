@@ -9,6 +9,7 @@ import {
 import { deserializeVariation } from "@/src/types/Variations/variations";
 import type { Layer } from "@/src/types/Layer";
 import { FlatVariation } from "@/src/types/Variations/FlatVariation";
+import { EasingVariation } from "@/src/types/Variations/EasingVariation";
 import { defaultPatternEffectMap } from "@/src/utils/patternsEffects";
 import { isVector4 } from "@/src/utils/object";
 import { LinearVariation4 } from "@/src/types/Variations/LinearVariation4";
@@ -43,6 +44,11 @@ export class Block {
   // UI state: whether the timeline shows this block's parameters/effects or
   // just its header. Expanded by default; the header caret can collapse it.
   showDetails = true;
+
+  // UI state: uniform names whose automation lane is toggled open directly
+  // beneath this block in the timeline (see the dot-row / automation lanes).
+  // Not serialized.
+  lanedParams: Set<string> = new Set();
 
   private _layer: Layer | null = null; // the layer that this block is in
 
@@ -82,6 +88,13 @@ export class Block {
 
   toggleShowDetails = () => {
     this.showDetails = !this.showDetails;
+  };
+
+  // toggles whether the given param's automation lane is shown beneath this
+  // block in the timeline
+  toggleParamLane = (uniformName: string) => {
+    if (this.lanedParams.has(uniformName)) this.lanedParams.delete(uniformName);
+    else this.lanedParams.add(uniformName);
   };
 
   setTiming = ({
@@ -334,6 +347,83 @@ export class Block {
   isActive = () => {
     const { globalTime } = this.store.audioStore;
     return this.startTime <= globalTime && globalTime < this.endTime;
+  };
+
+  get hasManualOpacity() {
+    return !!this.parameterVariations["u_opacity"]?.length;
+  }
+
+  // The opacity of this block's final output, applied by the render pipeline
+  // after the entire effect chain. Manually-authored opacity variations take
+  // precedence; otherwise an equal-power crossfade is derived from overlaps.
+  currentMergeOpacity = (globalTime: number): number => {
+    if (this.hasManualOpacity) {
+      // kept current every frame by updateParameters
+      const opacity = this.pattern.params.u_opacity.value;
+      return typeof opacity === "number" ? opacity : 1;
+    }
+    const opacity = this.layer?.autoBlockOpacityAt(this, globalTime) ?? 1;
+    // reflect the derived value so UI readouts of the param stay truthful
+    this.pattern.params.u_opacity.value = opacity;
+    return opacity;
+  };
+
+  // copies the auto-derived crossfade into real variations so the user can
+  // edit from there; rendering is unchanged until they do
+  materializeAutoOpacity = () => {
+    const derived = this.layer?.autoOpacityVariations(this);
+    this.parameterVariations["u_opacity"] = derived ?? [
+      new FlatVariation(
+        Math.min(this.duration, DEFAULT_VARIATION_DURATION),
+        1,
+      ),
+    ];
+  };
+
+  resetOpacityToAuto = () => {
+    delete this.parameterVariations["u_opacity"];
+  };
+
+  // Drags an opacity fade knee via the edge-line handle. Materializes the auto
+  // crossfade first (so there is something to edit), then lengthens/shortens
+  // the leading fade-in ("in") or trailing fade-out ("out") by deltaTime,
+  // trading the time with the adjacent segment so the total stays put.
+  adjustOpacityFade = (side: "in" | "out", deltaTime: number) => {
+    if (!this.hasManualOpacity) this.materializeAutoOpacity();
+    const variations = this.parameterVariations["u_opacity"];
+    if (!variations || variations.length === 0) return;
+
+    if (side === "in") {
+      const fadeIn = variations[0];
+      // only a leading rising easing (0 -> 1) is a fade-in
+      if (!(fadeIn instanceof EasingVariation) || fadeIn.from >= fadeIn.to)
+        return;
+      const next = variations[1];
+      const newFadeIn = fadeIn.duration + deltaTime;
+      if (newFadeIn < MINIMUM_VARIATION_DURATION) return;
+      if (next) {
+        const newNext = next.duration - deltaTime;
+        if (newNext < MINIMUM_VARIATION_DURATION) return;
+        next.duration = newNext;
+      }
+      fadeIn.duration = newFadeIn;
+    } else {
+      const fadeOut = variations[variations.length - 1];
+      // only a trailing falling easing (1 -> 0) is a fade-out
+      if (!(fadeOut instanceof EasingVariation) || fadeOut.from <= fadeOut.to)
+        return;
+      const prev = variations[variations.length - 2];
+      // dragging the knee left (deltaTime < 0) lengthens the fade-out
+      const newFadeOut = fadeOut.duration - deltaTime;
+      if (newFadeOut < MINIMUM_VARIATION_DURATION) return;
+      if (prev) {
+        const newPrev = prev.duration + deltaTime;
+        if (newPrev < MINIMUM_VARIATION_DURATION) return;
+        prev.duration = newPrev;
+      }
+      fadeOut.duration = newFadeOut;
+    }
+    this.triggerVariationReactions("u_opacity");
   };
 
   /**

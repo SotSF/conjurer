@@ -1,5 +1,6 @@
 import type { Store } from "@/src/types/Store";
 import { Block } from "@/src/types/Block";
+import type { Variation } from "@/src/types/Variations/Variation";
 
 export type ActivePatternsWindow = {
   startTime: number;
@@ -29,6 +30,13 @@ export type Layer = {
   resizeBlockRightBound(block: Block, delta: number): void;
   // blocks report their rendered height so the layer can size itself
   reportBlockHeight(block: Block, heightPx: number): void;
+  // the opacity the render pipeline applies to a block's final output when
+  // the block has no manually-authored opacity variations (auto crossfade)
+  autoBlockOpacityAt(block: Block, globalTime: number): number;
+  // that same auto crossfade expressed as variations (null when the block has
+  // no overlaps and therefore no auto fade); used for display and for
+  // materializing into manually-editable variations
+  autoOpacityVariations(block: Block): Variation<number>[] | null;
   // vertical pixel offset of the block within the layer's timeline row (blocks
   // overlapping in time are displayed stacked in lanes)
   blockTopOffset(block: Block): number;
