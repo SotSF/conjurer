@@ -89,6 +89,19 @@ export class UIStore {
   timeToX = (time: number) => time * this.pixelsPerSecond;
   xToTime = (x: number) => x / this.pixelsPerSecond;
 
+  // Horizontally scrolls the timeline so the given time sits just inside the
+  // left of the view (past the fixed layer-header column). Used by the device
+  // panel's "locate" button to jump back to the selected block.
+  scrollToTime = (time: number) => {
+    const timeline = document.getElementById("timeline");
+    if (!timeline) return;
+    const margin = 24;
+    timeline.scrollTo({
+      left: Math.max(0, time * this.pixelsPerSecond - margin),
+      behavior: "smooth",
+    });
+  };
+
   /**
    * Set an absolute zoom level (pixels per second).
    * @param anchorClientX optional mouse X to keep that time fixed in the viewport;

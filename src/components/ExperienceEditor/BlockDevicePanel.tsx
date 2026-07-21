@@ -6,6 +6,7 @@ import {
   Box,
   Button,
   HStack,
+  IconButton,
   Menu,
   MenuButton,
   MenuItem,
@@ -14,6 +15,7 @@ import {
   Text,
   Tooltip,
 } from "@chakra-ui/react";
+import { MdMyLocation } from "react-icons/md";
 import {
   DragDropContext,
   Draggable,
@@ -291,6 +293,7 @@ const ParamColumns = function ParamColumns({
 };
 
 const PatternUnit = function PatternUnit({ block }: { block: Block }) {
+  const { uiStore } = useStore();
   const uniformNames = Object.keys(block.pattern.params).filter(
     (name) => !BASE_EXCLUDED.includes(name),
   );
@@ -304,16 +307,29 @@ const PatternUnit = function PatternUnit({ block }: { block: Block }) {
       borderRadius="6px"
       p={2}
     >
-      <Text
-        fontSize="11px"
-        fontWeight={600}
-        color="#63b3ed"
-        mb="6px"
-        flexShrink={0}
-        noOfLines={1}
-      >
-        {block.pattern.name}
-      </Text>
+      <HStack justify="space-between" mb="6px" spacing={1} flexShrink={0}>
+        <Text fontSize="11px" fontWeight={600} color="#63b3ed" noOfLines={1}>
+          {block.pattern.name}
+        </Text>
+        <Tooltip
+          label="Scroll timeline to this block"
+          openDelay={0}
+          hasArrow
+          fontSize="xs"
+        >
+          <IconButton
+            aria-label="Scroll timeline to this block"
+            icon={<MdMyLocation />}
+            size="xs"
+            height="18px"
+            minW="18px"
+            variant="ghost"
+            color="#63b3ed"
+            flexShrink={0}
+            onClick={action(() => uiStore.scrollToTime(block.startTime))}
+          />
+        </Tooltip>
+      </HStack>
       <ParamColumns block={block} uniformNames={uniformNames} isEffect={false} />
     </Box>
   );
