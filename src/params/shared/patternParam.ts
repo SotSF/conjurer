@@ -26,6 +26,16 @@ export type StandardParams = {
     name: "Input Texture";
     value: Texture | null;
   };
+  // opacity of the block's final output, applied by the render pipeline after
+  // the entire effect chain has run. With no variations authored, the pipeline
+  // derives an equal-power crossfade from block overlaps instead.
+  readonly u_opacity: {
+    name: "Opacity";
+    value: number;
+    min?: number;
+    max?: number;
+    step?: number;
+  };
 };
 
 export type ParamMap = Record<string, PatternParam>;
