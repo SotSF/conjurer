@@ -5,7 +5,10 @@ import { TbArrowBigRightLines } from "react-icons/tb";
 import { useStore } from "@/src/types/StoreContext";
 import { action } from "mobx";
 import { AudioControls } from "@/src/components/AudioControls";
+import { AudioVolumeControls } from "@/src/components/AudioVolumeControls";
 import { IntensitySlider } from "@/src/components/IntensitySlider";
+import { BrightnessLimiterIndicator } from "@/src/components/BrightnessLimiterIndicator";
+import { ControlGroup } from "@/src/components/ControlGroup";
 import { FaMinus, FaPlus, FaShareAlt } from "react-icons/fa";
 import { INITIAL_PIXELS_PER_SECOND } from "@/src/utils/time";
 import {
@@ -94,7 +97,11 @@ export const ExperienceEditorControls = observer(
                 !uiStore.keepingPlayHeadVisible),
           )}
         />
-        <IntensitySlider />
+        <AudioVolumeControls />
+        <ControlGroup>
+          <IntensitySlider />
+          <BrightnessLimiterIndicator />
+        </ControlGroup>
         {/* TODO: re implement given viewerMode */}
         <IconButton
           aria-label="Copy link to experience"

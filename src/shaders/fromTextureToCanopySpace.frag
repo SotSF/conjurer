@@ -6,6 +6,7 @@ precision mediump float;
 
 uniform sampler2D u_texture;
 uniform float u_intensity;
+uniform float u_limiterGain;
 
 varying vec2 v_uv;
 
@@ -31,6 +32,7 @@ void main() {
     vec4 sampled = texture2D(u_texture, textureCoordinates);
     vec4 black = vec4(0.0, 0.0, 0.0, 1.0);
     vec4 color = mix(black, sampled, u_intensity);
+    color.rgb *= u_limiterGain;
 
     gl_FragColor = color;
 }

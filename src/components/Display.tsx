@@ -9,6 +9,7 @@ import { useState } from "react";
 import { LoginButton } from "@/src/components/LoginButton";
 import { RoleSelector } from "@/src/components/RoleSelector";
 import { ExperienceHeading } from "@/src/components/Menu/ExperienceHeading";
+import { EmceeOutputControlsToggle } from "@/src/components/PlaylistEditor/EmceeOutputControlsToggle";
 
 export const Display = observer(function Display() {
   const store = useStore();
@@ -49,6 +50,7 @@ export const Display = observer(function Display() {
           </>
         )}
         <DisplayControls canvasContainer={containerElement} />
+        {store.context === "playlistEditor" && <EmceeOutputControlsToggle />}
       </Box>
 
       <Box
