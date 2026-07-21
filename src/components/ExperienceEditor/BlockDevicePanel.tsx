@@ -5,7 +5,6 @@ import { useStore } from "@/src/types/StoreContext";
 import {
   Box,
   Button,
-  Grid,
   HStack,
   Menu,
   MenuButton,
@@ -14,7 +13,6 @@ import {
   Portal,
   Text,
   Tooltip,
-  VStack,
 } from "@chakra-ui/react";
 import {
   DragDropContext,
@@ -30,10 +28,11 @@ const BASE_EXCLUDED = ["u_time", "u_texture"];
 const ARMED_COLOR = "#63b3ed"; // blue.300 — param armed to a timeline lane
 const UNARMED_COLOR = "#4a5568"; // gray.600
 const PANEL_HEIGHT = 210;
+const CELL_WIDTH = 120;
 
-// the top-level pattern block whose device chain the panel shows: the selected
-// block, or the parent of a selected effect/variation
-const selectedPatternBlock = (store: ReturnType<typeof useStore>): Block | null => {
+const selectedPatternBlock = (
+  store: ReturnType<typeof useStore>,
+): Block | null => {
   for (const selection of store.selectedBlocksOrVariations) {
     const block = selection.block;
     return block.parentBlock ?? block;
@@ -61,8 +60,8 @@ export const BlockDevicePanel = observer(function BlockDevicePanel() {
   const block = selectedPatternBlock(store);
   if (!block) return null;
 
-  // Read the observable array here in the component's own (tracked) render so
-  // the observer re-renders on add/remove/reorder. Reading it only inside the
+  // Read the observable array in the component's own (tracked) render so the
+  // observer re-renders on add/remove/reorder — reading it only inside the
   // Droppable render-prop below would happen outside this component's tracking.
   const effectBlocks = [...block.effectBlocks];
 
@@ -84,10 +83,10 @@ export const BlockDevicePanel = observer(function BlockDevicePanel() {
       borderColor="#2d3748"
       px={3}
       py={2}
-      overflowX="auto"
-      overflowY="hidden"
+      display="flex"
+      flexDirection="column"
     >
-      <HStack justify="space-between" mb={2}>
+      <HStack justify="space-between" mb={2} flexShrink={0}>
         <Text fontSize="11px" fontWeight={600} color="gray.400">
           Device chain — {block.pattern.name}{" "}
           <Text as="span" color="gray.500" fontWeight={400}>
@@ -99,49 +98,51 @@ export const BlockDevicePanel = observer(function BlockDevicePanel() {
         </Text>
       </HStack>
 
-      <DragDropContext onDragEnd={onDragEnd}>
-        <HStack align="stretch" spacing={0} minW="min-content">
-          <PatternUnit block={block} />
-          <Connector />
-          <Droppable droppableId={`device-${block.id}`} direction="horizontal">
-            {(provided) => (
-              <HStack
-                ref={provided.innerRef}
-                {...provided.droppableProps}
-                align="stretch"
-                spacing={0}
-              >
-                {effectBlocks.map((effectBlock, index) => (
-                  <Draggable
-                    key={effectBlock.id}
-                    draggableId={effectBlock.id}
-                    index={index}
-                  >
-                    {(prov) => (
-                      <HStack
-                        ref={prov.innerRef}
-                        {...prov.draggableProps}
-                        align="stretch"
-                        spacing={0}
-                      >
-                        {index > 0 && <Connector />}
-                        <EffectUnit
-                          parentBlock={block}
-                          effectBlock={effectBlock}
-                          index={index}
-                          dragHandleProps={prov.dragHandleProps}
-                        />
-                      </HStack>
-                    )}
-                  </Draggable>
-                ))}
-                {provided.placeholder}
-              </HStack>
-            )}
-          </Droppable>
-          <AddEffectUnit block={block} />
-        </HStack>
-      </DragDropContext>
+      <Box flex="1" minH={0} overflowX="auto" overflowY="hidden">
+        <DragDropContext onDragEnd={onDragEnd}>
+          <HStack align="stretch" spacing={0} minW="min-content" height="100%">
+            <PatternUnit block={block} />
+            <Connector />
+            <Droppable droppableId={`device-${block.id}`} direction="horizontal">
+              {(provided) => (
+                <HStack
+                  ref={provided.innerRef}
+                  {...provided.droppableProps}
+                  align="stretch"
+                  spacing={0}
+                >
+                  {effectBlocks.map((effectBlock, index) => (
+                    <Draggable
+                      key={effectBlock.id}
+                      draggableId={effectBlock.id}
+                      index={index}
+                    >
+                      {(prov) => (
+                        <HStack
+                          ref={prov.innerRef}
+                          {...prov.draggableProps}
+                          align="stretch"
+                          spacing={0}
+                        >
+                          {index > 0 && <Connector />}
+                          <EffectUnit
+                            parentBlock={block}
+                            effectBlock={effectBlock}
+                            index={index}
+                            dragHandleProps={prov.dragHandleProps}
+                          />
+                        </HStack>
+                      )}
+                    </Draggable>
+                  ))}
+                  {provided.placeholder}
+                </HStack>
+              )}
+            </Droppable>
+            <AddEffectUnit block={block} />
+          </HStack>
+        </DragDropContext>
+      </Box>
     </Box>
   );
 });
@@ -204,6 +205,8 @@ const ParamCell = function ParamCell({
   const palette = isPalette(param.value);
   return (
     <HStack
+      width={`${CELL_WIDTH}px`}
+      flexShrink={0}
       justify="space-between"
       bg={isEffect ? "#12161d" : "#141a24"}
       borderRadius="3px"
@@ -234,14 +237,49 @@ const ParamCell = function ParamCell({
   );
 };
 
+// Renders param cells top-to-bottom in a single column, wrapping into further
+// columns only when they exceed the available height (no hardcoded per-pattern
+// column count). Relies on a bounded parent height (the fixed panel height).
+const ParamColumns = function ParamColumns({
+  block,
+  uniformNames,
+  isEffect,
+}: {
+  block: Block;
+  uniformNames: string[];
+  isEffect: boolean;
+}) {
+  return (
+    <Box
+      flex="1"
+      minH={0}
+      display="flex"
+      flexDirection="column"
+      flexWrap="wrap"
+      alignContent="flex-start"
+      sx={{ columnGap: "4px", rowGap: "4px" }}
+    >
+      {uniformNames.map((uniformName) => (
+        <ParamCell
+          key={uniformName}
+          block={block}
+          uniformName={uniformName}
+          isEffect={isEffect}
+        />
+      ))}
+    </Box>
+  );
+};
+
 const PatternUnit = function PatternUnit({ block }: { block: Block }) {
   const uniformNames = Object.keys(block.pattern.params).filter(
     (name) => !BASE_EXCLUDED.includes(name),
   );
   return (
     <Box
-      width="250px"
       flexShrink={0}
+      display="flex"
+      flexDirection="column"
       bg="#1e2635"
       border="1px solid #3a4658"
       borderRadius="6px"
@@ -252,20 +290,12 @@ const PatternUnit = function PatternUnit({ block }: { block: Block }) {
         fontWeight={600}
         color="#63b3ed"
         mb="6px"
+        flexShrink={0}
         noOfLines={1}
       >
         PATTERN · {block.pattern.name}
       </Text>
-      <Grid templateColumns="1fr 1fr" gap="4px">
-        {uniformNames.map((uniformName) => (
-          <ParamCell
-            key={uniformName}
-            block={block}
-            uniformName={uniformName}
-            isEffect={false}
-          />
-        ))}
-      </Grid>
+      <ParamColumns block={block} uniformNames={uniformNames} isEffect={false} />
     </Box>
   );
 };
@@ -286,14 +316,15 @@ const EffectUnit = function EffectUnit({
   );
   return (
     <Box
-      width="190px"
       flexShrink={0}
+      display="flex"
+      flexDirection="column"
       bg="#1b212b"
       border="1px solid #2f3a48"
       borderRadius="6px"
       p={2}
     >
-      <HStack justify="space-between" mb="6px" spacing={1}>
+      <HStack justify="space-between" mb="6px" spacing={1} flexShrink={0}>
         <HStack spacing={1} minW={0}>
           <Box {...dragHandleProps} cursor="grab" color="#718096" flexShrink={0}>
             ⠿
@@ -315,25 +346,12 @@ const EffectUnit = function EffectUnit({
           </Text>
         </Tooltip>
       </HStack>
-      <VStack spacing="4px" align="stretch">
-        {uniformNames.map((uniformName) => (
-          <ParamCell
-            key={uniformName}
-            block={effectBlock}
-            uniformName={uniformName}
-            isEffect
-          />
-        ))}
-      </VStack>
+      <ParamColumns block={effectBlock} uniformNames={uniformNames} isEffect />
     </Box>
   );
 };
 
-const AddEffectUnit = function AddEffectUnit({
-  block,
-}: {
-  block: Block;
-}) {
+const AddEffectUnit = function AddEffectUnit({ block }: { block: Block }) {
   return (
     <Menu placement="top">
       <MenuButton
@@ -352,7 +370,11 @@ const AddEffectUnit = function AddEffectUnit({
         ＋
       </MenuButton>
       <Portal>
-        <MenuList rootProps={{ style: { zIndex: 12 } }} maxH="300px" overflowY="auto">
+        <MenuList
+          rootProps={{ style: { zIndex: 12 } }}
+          maxH="300px"
+          overflowY="auto"
+        >
           {playgroundEffects.map((effect) => (
             <MenuItem
               key={effect.name}
