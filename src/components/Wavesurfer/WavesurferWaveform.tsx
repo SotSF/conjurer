@@ -12,6 +12,7 @@ import { debounce } from "lodash";
 import { NO_SONG } from "@/src/types/Song";
 import { INITIAL_PIXELS_PER_SECOND } from "@/src/utils/time";
 import { getTimelineLabelIntervals } from "@/src/utils/timelineZoom";
+import { MinimapViewfinder } from "@/src/components/Wavesurfer/MinimapViewfinder";
 
 const DEFAULT_MINIMAP_HEIGHT = 20;
 const WAVESURFER_ZOOM_DEBOUNCE_MS = 80;
@@ -289,7 +290,6 @@ const WavesurferWaveform = observer(function WavesurferWaveform() {
   return uiStore.canTimelineZoom ? (
     <Box width="100%" height={20} bgColor="gray.500">
       <Box
-        id="minimap"
         position="sticky"
         top={0}
         left="150px"
@@ -301,7 +301,12 @@ const WavesurferWaveform = observer(function WavesurferWaveform() {
         width={`calc(${uiStore.horizontalLayout ? "100vw" : "60vw"} - 150px)`}
         height={`${DEFAULT_MINIMAP_HEIGHT}px`}
         zIndex={100}
-      />
+        overflow="hidden"
+      >
+        {/* Wavesurfer owns #minimap's children — keep it empty of React nodes */}
+        <Box id="minimap" width="100%" height="100%" />
+        <MinimapViewfinder />
+      </Box>
       {commonWavesurferUI}
       {uiStore.showingWaveformOverlay && (
         <Box
