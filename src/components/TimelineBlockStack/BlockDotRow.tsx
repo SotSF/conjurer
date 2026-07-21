@@ -1,6 +1,7 @@
 import { Block } from "@/src/types/Block";
 import { isPalette } from "@/src/params/palette/Palette";
 import { isParamAuthored } from "@/src/utils/isParamAuthored";
+import { TIMELINE_HEADER_WIDTH } from "@/src/types/UIStore";
 import { useStore } from "@/src/types/StoreContext";
 import { Box, HStack, Text, Tooltip } from "@chakra-ui/react";
 import { action } from "mobx";
@@ -112,7 +113,17 @@ export const BlockDotRow = observer(function BlockDotRow({
 
   if (!narrow) {
     return (
-      <DotList patternSignals={patternSignals} effectSignals={effectSignals} />
+      // pin the dots to the left of the visible timeline, like the block name,
+      // so they stay in view when the block is scrolled wider than the viewport
+      <Box
+        position="sticky"
+        left={`${TIMELINE_HEADER_WIDTH}px`}
+        width="fit-content"
+        maxWidth="100%"
+        zIndex={1}
+      >
+        <DotList patternSignals={patternSignals} effectSignals={effectSignals} />
+      </Box>
     );
   }
 
@@ -184,7 +195,7 @@ const DotList = function DotList({
   return (
     // pt gives the lane-on focus ring room so it isn't clipped by the header
     // above; no overflow clip here since narrow blocks collapse to a badge
-    <HStack spacing="5px" px={2} pt="4px" pb="3px" width="100%" align="center">
+    <HStack spacing="5px" px={2} pt="4px" pb="3px" width="max-content" align="center">
       {patternSignals.map((signal) => (
         <Dot key={signal.uniformName} signal={signal} />
       ))}

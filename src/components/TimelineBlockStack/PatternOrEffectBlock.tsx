@@ -1,10 +1,10 @@
 import { Block } from "@/src/types/Block";
-import { HStack, Heading } from "@chakra-ui/react";
+import { Box, Heading, HStack } from "@chakra-ui/react";
 import { observer } from "mobx-react-lite";
 import { MouseEvent as ReactMouseEvent } from "react";
 import { MdDragIndicator } from "react-icons/md";
-import { HeaderRepeat } from "@/src/components/TimelineBlockStack/HeaderRepeat";
 import { PatternTimingModal } from "@/src/components/TimelineBlockStack/PatternTimingModal";
+import { TIMELINE_HEADER_WIDTH } from "@/src/types/UIStore";
 
 type Props = {
   block: Block;
@@ -12,8 +12,9 @@ type Props = {
   isSelected: boolean;
 };
 
-// The pattern block's timeline header. Params and the effect chain live in the
-// bottom device panel now, so this is just the draggable name row + timing.
+// The pattern block's timeline header: a draggable name pinned to the left of
+// the visible timeline (stays in view when the block is scrolled wider than the
+// viewport) and the timing control at the block's right edge.
 export const PatternOrEffectBlock = observer(function PatternOrEffectBlock({
   block,
   handleBlockClick,
@@ -23,29 +24,38 @@ export const PatternOrEffectBlock = observer(function PatternOrEffectBlock({
   return (
     <HStack
       position="relative"
-      pt={1}
       width="100%"
+      minH="26px"
       className="handle"
-      justify="space-evenly"
       cursor="grab"
       spacing={0}
       color={color}
       role="button"
       onClick={handleBlockClick}
     >
-      <HeaderRepeat times={block.headerRepetitions}>
-        <MdDragIndicator size={30} />
+      <HStack
+        position="sticky"
+        left={`${TIMELINE_HEADER_WIDTH}px`}
+        spacing={0}
+        pl={1}
+        flexShrink={0}
+        zIndex={1}
+      >
+        <MdDragIndicator size={18} />
         <Heading
-          size="md"
+          size="sm"
+          fontSize="13px"
           userSelect="none"
-          textOverflow="clip"
-          overflowWrap="anywhere"
+          whiteSpace="nowrap"
           color={color}
         >
-          Pattern: {block.pattern.name}
+          {block.pattern.name}
         </Heading>
+      </HStack>
+      <Box flex="1" />
+      <Box flexShrink={0} pr={1}>
         <PatternTimingModal block={block} />
-      </HeaderRepeat>
+      </Box>
     </HStack>
   );
 });
