@@ -205,10 +205,7 @@ const DotList = function DotList({
 };
 
 const Dot = function Dot({ signal }: { signal: Signal }) {
-  const { authored, laneOn, isOpacity, fading, isEffect, isPalette } = signal;
-
-  // palettes have no automation lane; the dot is a read-only authored indicator
-  const toggleable = !isPalette;
+  const { authored, laneOn, isOpacity, fading, isEffect } = signal;
 
   const fill = isOpacity
     ? authored
@@ -229,17 +226,20 @@ const Dot = function Dot({ signal }: { signal: Signal }) {
       ? "rgba(237,137,54,.35)"
       : "rgba(113,128,150,.4)";
 
-  const title =
-    signal.label + (isPalette ? " · palette (edit in details)" : "");
-
   const onClick = action((e: ReactMouseEvent) => {
     e.stopPropagation();
-    if (toggleable) signal.block.toggleParamLane(signal.uniformName);
+    signal.block.toggleParamLane(signal.uniformName);
   });
 
   const size = laneOn ? "10px" : "9px";
   return (
-    <Tooltip label={title} openDelay={0} hasArrow placement="top" fontSize="xs">
+    <Tooltip
+      label={signal.label}
+      openDelay={0}
+      hasArrow
+      placement="top"
+      fontSize="xs"
+    >
       <Box
         as="span"
         flexShrink={0}
@@ -251,7 +251,7 @@ const Dot = function Dot({ signal }: { signal: Signal }) {
         borderRadius={isEffect ? "2px" : "50%"}
         transform={isEffect ? "rotate(45deg)" : undefined}
         boxShadow={laneOn ? `0 0 0 2px ${ringColor}` : undefined}
-        cursor={toggleable ? "pointer" : "default"}
+        cursor="pointer"
       />
     </Tooltip>
   );

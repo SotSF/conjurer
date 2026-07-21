@@ -231,16 +231,12 @@ const ParamCell = function ParamCell({
       borderRadius="3px"
       px="6px"
       spacing={2}
-      cursor={palette ? "default" : "pointer"}
-      _hover={palette ? undefined : { bg: isEffect ? "#1a222e" : "#1c2432" }}
-      onClick={
-        palette
-          ? undefined
-          : action((e: ReactMouseEvent) => {
-              e.stopPropagation();
-              block.toggleParamLane(uniformName);
-            })
-      }
+      cursor="pointer"
+      _hover={{ bg: isEffect ? "#1a222e" : "#1c2432" }}
+      onClick={action((e: ReactMouseEvent) => {
+        e.stopPropagation();
+        block.toggleParamLane(uniformName);
+      })}
     >
       <Text
         fontSize="10.5px"
@@ -250,17 +246,17 @@ const ParamCell = function ParamCell({
       >
         {param.name}
       </Text>
-      {palette ? (
-        <Box
-          flexShrink={0}
-          width="22px"
-          height="8px"
-          borderRadius="2px"
-          background={paletteToGradient(param.value as Palette)}
-        />
-      ) : (
+      <HStack spacing={1} flexShrink={0}>
+        {palette && (
+          <Box
+            width="22px"
+            height="8px"
+            borderRadius="2px"
+            background={paletteToGradient(param.value as Palette)}
+          />
+        )}
         <ArmIndicator block={block} uniformName={uniformName} />
-      )}
+      </HStack>
     </HStack>
   );
 };

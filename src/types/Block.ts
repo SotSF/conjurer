@@ -13,7 +13,7 @@ import { EasingVariation } from "@/src/types/Variations/EasingVariation";
 import { defaultPatternEffectMap } from "@/src/utils/patternsEffects";
 import { isVector4 } from "@/src/utils/object";
 import { LinearVariation4 } from "@/src/types/Variations/LinearVariation4";
-import { isPalette } from "@/src/params/palette/Palette";
+import { isPalette, Palette } from "@/src/params/palette/Palette";
 import { PaletteVariation } from "@/src/params/palette/variation/PaletteVariation";
 import { generateId } from "@/src/utils/id";
 import type { Store } from "@/src/types/Store";
@@ -90,27 +90,41 @@ export class Block {
     this.showDetails = !this.showDetails;
   };
 
+  // arms a param's automation lane; a palette gets a default region spanning
+  // the whole block so its lane isn't empty (palettes are discrete regions, not
+  // a continuous curve)
+  private armParamLane = (uniformName: string) => {
+    if (
+      isPalette(this.pattern.params[uniformName]?.value) &&
+      !this.parameterVariations[uniformName]?.length
+    )
+      this.parameterVariations[uniformName] = [
+        new PaletteVariation(this.duration, Palette.default()),
+      ];
+    this.lanedParams.add(uniformName);
+  };
+
   // toggles whether the given param's automation lane is shown beneath this
   // block in the timeline
   toggleParamLane = (uniformName: string) => {
     if (this.lanedParams.has(uniformName)) this.lanedParams.delete(uniformName);
-    else this.lanedParams.add(uniformName);
+    else this.armParamLane(uniformName);
   };
 
   // uniform names on this block that can be given an automation lane: excludes
-  // machinery uniforms, opacity on effects (applied per pattern), and palettes
-  // (a fixed gradient, not a time curve)
+  // machinery uniforms and opacity on effects (applied per pattern). Palettes
+  // are included — their lane shows discrete color regions over time.
   get lanableParamNames(): string[] {
     const excluded = new Set(["u_time", "u_texture"]);
     if (this.parentBlock) excluded.add("u_opacity");
-    return Object.entries(this.pattern.params)
-      .filter(([name, param]) => !excluded.has(name) && !isPalette(param.value))
-      .map(([name]) => name);
+    return Object.keys(this.pattern.params).filter(
+      (name) => !excluded.has(name),
+    );
   }
 
   setParamLanes = (uniformNames: string[], on: boolean) => {
     for (const uniformName of uniformNames) {
-      if (on) this.lanedParams.add(uniformName);
+      if (on) this.armParamLane(uniformName);
       else this.lanedParams.delete(uniformName);
     }
   };
