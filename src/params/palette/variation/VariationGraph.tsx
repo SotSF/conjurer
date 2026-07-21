@@ -91,8 +91,9 @@ export const PaletteVariationGraph = function PaletteVariationGraph({
           width="auto"
           bg="#12151c"
           borderColor="#2d3748"
-          // clear the sticky layer header (zIndex 11) and floating controls
-          zIndex={1500}
+          // z-index must go on the popper positioner (like the app's menus),
+          // not the content box, to clear the sticky layer header (zIndex 11)
+          rootProps={{ style: { zIndex: 1500 } }}
           onClick={(e) => e.stopPropagation()}
         >
           <PopoverArrow bg="#12151c" />
