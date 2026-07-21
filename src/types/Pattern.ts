@@ -7,6 +7,8 @@ import {
 import { isPaletteParam } from "@/src/params/palette/isPaletteParam";
 import { isPalette } from "@/src/params/palette/Palette";
 import { makeVertexShader, Varying } from "@/src/shaders/vertexShader";
+import { PatternRender } from "./pattern/renderPattern";
+import { WebGLRenderTarget } from "three";
 
 export type SerializedPattern = {
   name: string;
@@ -15,17 +17,27 @@ export type SerializedPattern = {
 
 export const BASE_UNIFORMS = ["u_time", "u_texture"];
 
+type PatternComponent = React.FC<{
+  priority: number;
+  renderTargetOut: WebGLRenderTarget;
+  shaderMaterialKey?: string;
+}>;
+
 export class Pattern<T extends ParamMap = ParamMap> {
   name: string;
   fragmentShader: string;
   vertexShader: string;
   params: StandardParams & T;
+  Component: PatternComponent;
 
   constructor(
     name: string,
     src: string,
     parameters: T = {} as T,
     vertexShaderVaryings: Varying[] = ["v_uv"],
+    PatternComponentFactory: (
+      pattern: Pattern<ParamMap>,
+    ) => PatternComponent = PatternRender,
   ) {
     this.name = name;
     this.fragmentShader = src;
@@ -42,6 +54,8 @@ export class Pattern<T extends ParamMap = ParamMap> {
       },
       ...parameters,
     };
+
+    this.Component = PatternComponentFactory(this);
   }
 
   clone = () => {
