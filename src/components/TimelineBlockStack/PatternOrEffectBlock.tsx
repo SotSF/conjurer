@@ -41,6 +41,11 @@ export const PatternOrEffectBlock = observer(function PatternOrEffectBlock({
           left={`${TIMELINE_HEADER_WIDTH}px`}
           spacing={0}
           pl={1}
+          // fit-content (not auto) so the sticky element is narrower than its
+          // track and therefore has room to slide/pin as the card scrolls;
+          // capped at the track width so it still truncates and never reaches
+          // the timing control
+          width="fit-content"
           maxW="100%"
         >
           <Box flexShrink={0} display="flex">
