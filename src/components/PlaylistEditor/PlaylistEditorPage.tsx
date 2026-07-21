@@ -8,6 +8,7 @@ import { TimerAndWaveform } from "@/src/components/Timeline/TimerAndWaveform";
 import { PlaylistEditor } from "@/src/components/PlaylistEditor/PlaylistEditor";
 import { PlaylistLibrary } from "@/src/components/PlaylistEditor/PlaylistLibrary";
 import { PlaylistQueryParent } from "@/src/components/PlaylistEditor/PlaylistQueryParent";
+import { EmceeOutputControls } from "@/src/components/PlaylistEditor/EmceeOutputControls";
 import { LoadingOverlay } from "@/src/components/LoadingOverlay";
 import { observer } from "mobx-react-lite";
 
@@ -40,7 +41,10 @@ export const PlaylistEditorPage = observer(function PlaylistEditorPage() {
               <PanelResizeHandle />
               <Panel>
                 <Box height="100%" overflowX="hidden" overflowY="auto">
-                  <TimerAndWaveform />
+                  <Box position="sticky" top={0} zIndex={20}>
+                    <EmceeOutputControls />
+                    <TimerAndWaveform />
+                  </Box>
                   <PlaylistEditor />
                 </Box>
               </Panel>

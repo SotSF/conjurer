@@ -1,12 +1,24 @@
-.marquee {
-  animation: advance 8s linear infinite;
+.track {
+  display: flex;
+  width: max-content;
+  animation-name: advance;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  will-change: transform;
+}
+
+.item {
+  flex-shrink: 0;
+  white-space: nowrap;
+  padding-inline: 0.75rem;
 }
 
 @keyframes advance {
   from {
-    transform: translateX(0px);
+    transform: translateX(0);
   }
   to {
+    /* Two equal .item children → -50% lands exactly on a loop seam */
     transform: translateX(-50%);
   }
 }

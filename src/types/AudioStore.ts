@@ -20,6 +20,15 @@ export class AudioStore {
   selectedSong: Song = NO_SONG;
   audioMuted = false;
 
+  private _audioVolume = 1;
+  get audioVolume() {
+    return this._audioVolume;
+  }
+  set audioVolume(volume: number) {
+    this._audioVolume = volume;
+    this.wavesurfer?.setVolume(volume);
+  }
+
   wavesurfer: WaveSurfer | null = null;
   timelinePlugin: TimelinePlugin | null = null;
   minimapPlugin: MinimapPlugin | null = null;

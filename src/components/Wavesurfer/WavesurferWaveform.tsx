@@ -100,6 +100,12 @@ const WavesurferWaveform = observer(function WavesurferWaveform() {
     audioStore.wavesurfer.setMuted(audioStore.audioMuted);
   }, [audioStore.audioMuted, audioStore.wavesurfer, audioStore.audioReady]);
 
+  // on volume change
+  useEffect(() => {
+    if (!audioStore.wavesurfer || !audioStore.audioReady) return;
+    audioStore.wavesurfer.setVolume(audioStore.audioVolume);
+  }, [audioStore.audioVolume, audioStore.wavesurfer, audioStore.audioReady]);
+
   // on zoom change
   useEffect(() => {
     if (
@@ -176,6 +182,7 @@ const WavesurferWaveform = observer(function WavesurferWaveform() {
           onReady={action((wavesurfer) => {
             audioStore.wavesurfer = wavesurfer;
             if (audioStore.audioMuted) wavesurfer.setMuted(true);
+            wavesurfer.setVolume(audioStore.audioVolume);
             uiStore.canTimelineZoom && wavesurfer.zoom(uiStore.pixelsPerSecond);
             wavesurfer.seekTo(0);
             const audioBuffer = wavesurfer.getDecodedData();

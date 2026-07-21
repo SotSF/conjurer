@@ -24,7 +24,7 @@ export const SendDataButton = observer(function SendDataButton() {
       }
       onClick={store.toggleSendingData}
     >
-      {store.sendingData ? "Sending" : "Send Data"}
+      {store.sendingData ? "Sending" : "Not sending"}
     </Button>
   );
 });

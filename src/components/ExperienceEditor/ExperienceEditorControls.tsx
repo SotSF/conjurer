@@ -7,8 +7,10 @@ import { TbArrowBigRightLines } from "react-icons/tb";
 import { useStore } from "@/src/types/StoreContext";
 import { action } from "mobx";
 import { AudioControls } from "@/src/components/AudioControls";
+import { AudioVolumeControls } from "@/src/components/AudioVolumeControls";
 import { IntensitySlider } from "@/src/components/IntensitySlider";
 import { BrightnessLimiterIndicator } from "@/src/components/BrightnessLimiterIndicator";
+import { ControlGroup } from "@/src/components/ControlGroup";
 import { FaShareAlt } from "react-icons/fa";
 
 export const ExperienceEditorControls = observer(
@@ -92,8 +94,11 @@ export const ExperienceEditorControls = observer(
                 !uiStore.keepingPlayHeadVisible),
           )}
         />
-        <IntensitySlider />
-        <BrightnessLimiterIndicator />
+        <AudioVolumeControls />
+        <ControlGroup>
+          <IntensitySlider />
+          <BrightnessLimiterIndicator />
+        </ControlGroup>
         {/* TODO: re implement given viewerMode */}
         <IconButton
           aria-label="Copy link to experience"

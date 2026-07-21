@@ -29,6 +29,15 @@ export class UIStore {
   showingLawsOfConjuryDrawer = false;
   capturingThumbnail = false;
 
+  private _emceeOutputControlsMinimized = false;
+  get emceeOutputControlsMinimized() {
+    return this._emceeOutputControlsMinimized;
+  }
+  set emceeOutputControlsMinimized(minimized: boolean) {
+    this._emceeOutputControlsMinimized = minimized;
+    this.saveToLocalStorage();
+  }
+
   pendingAction: "open" | "save" | "" = "";
 
   private _renderTargetSize = INITIAL_RENDER_TARGET_SIZE;
@@ -180,6 +189,8 @@ export class UIStore {
         localStorageUiSettings.playgroundDisplayMode || "canopy";
       this.renderTargetSize =
         localStorageUiSettings.renderTargetSize || INITIAL_RENDER_TARGET_SIZE;
+      this._emceeOutputControlsMinimized =
+        !!localStorageUiSettings.emceeOutputControlsMinimized;
       if (this.store.context === "experienceEditor")
         this.pixelsPerSecond =
           localStorageUiSettings.pixelsPerSecond || INITIAL_PIXELS_PER_SECOND;
@@ -197,6 +208,7 @@ export class UIStore {
         playgroundDisplayMode: this.playgroundDisplayMode,
         renderTargetSize: this.renderTargetSize,
         pixelsPerSecond: this.pixelsPerSecond,
+        emceeOutputControlsMinimized: this._emceeOutputControlsMinimized,
       }),
     );
   };
