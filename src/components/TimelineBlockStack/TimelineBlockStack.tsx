@@ -16,6 +16,9 @@ import { DraggableData } from "react-draggable";
 import { DraggableEvent } from "react-draggable";
 import { PatternOrEffectBlock } from "@/src/components/TimelineBlockStack/PatternOrEffectBlock";
 import { AddEffectButton } from "@/src/components/TimelineBlockStack/AddEffectButton";
+import { BlockDotRow } from "@/src/components/TimelineBlockStack/BlockDotRow";
+import { BlockAutomationLanes } from "@/src/components/TimelineBlockStack/BlockAutomationLanes";
+import { BlockOpacityEdgeLine } from "@/src/components/TimelineBlockStack/BlockOpacityEdgeLine";
 
 type Props = {
   patternBlock: Block;
@@ -151,6 +154,13 @@ export const TimelineBlockStack = observer(function TimelineBlockStack({
           handleBlockClick={handleBlockClick}
           isSelected={isSelected}
         />
+        {!patternBlock.showDetails && (
+          <>
+            <BlockDotRow block={patternBlock} isSelected={isSelected} />
+            <BlockOpacityEdgeLine block={patternBlock} />
+            <BlockAutomationLanes block={patternBlock} />
+          </>
+        )}
         {patternBlock.showDetails && (
           <>
             {patternBlock.effectBlocks.map((effectBlock, index) => (
