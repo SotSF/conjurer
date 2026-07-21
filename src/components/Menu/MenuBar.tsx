@@ -32,7 +32,6 @@ import { useSaveExperience } from "@/src/hooks/experience";
 import { DisplayMode } from "@/src/types/UIStore";
 import { action } from "mobx";
 import { LatencyModal } from "@/src/components/LatencyModal/LatencyModal";
-import { LawsOfConjuryDrawer } from "@/src/components/Menu/LawsOfConjuryDrawer";
 import { ExperienceThumbnail } from "@/src/components/ExperienceThumbnail";
 import { ExperienceStatusIndicator } from "../ExperienceStatusIndicator";
 import { useRouter } from "next/router";
@@ -89,7 +88,6 @@ export const MenuBar = observer(function MenuBar() {
         </ModalContent>
       </Modal>
       <LatencyModal />
-      <LawsOfConjuryDrawer />
       <HStack>
         {store.context === "experienceEditor" && store.canEditExperience ? (
           <ExperienceThumbnail
@@ -382,11 +380,7 @@ export const MenuBar = observer(function MenuBar() {
                   Keyboard shortcuts
                 </MenuItem>
               )}
-              <MenuItem
-                onClick={action(
-                  () => (uiStore.showingLawsOfConjuryDrawer = true),
-                )}
-              >
+              <MenuItem as="a" href="/laws-of-conjury" target="_blank">
                 Laws of Conjury
               </MenuItem>
               <MenuItem

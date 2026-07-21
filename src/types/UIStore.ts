@@ -28,7 +28,6 @@ export class UIStore {
   showingSaveBeatMapModal = false;
   showingLoadBeatMapModal = false;
   showingLatencyModal = false;
-  showingLawsOfConjuryDrawer = false;
   capturingThumbnail = false;
 
   private _emceeOutputControlsMinimized = true;
