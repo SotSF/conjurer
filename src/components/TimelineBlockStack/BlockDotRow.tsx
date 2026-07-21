@@ -1,7 +1,8 @@
 import { Block } from "@/src/types/Block";
 import { isPalette } from "@/src/params/palette/Palette";
+import { isParamAuthored } from "@/src/utils/isParamAuthored";
 import { useStore } from "@/src/types/StoreContext";
-import { Box, HStack, Text } from "@chakra-ui/react";
+import { Box, HStack, Text, Tooltip } from "@chakra-ui/react";
 import { action } from "mobx";
 import { observer } from "mobx-react-lite";
 import { MouseEvent as ReactMouseEvent, useState } from "react";
@@ -16,7 +17,7 @@ const DEFAULT_BORDER = "#4a5568"; // gray.600
 
 // approximate horizontal footprint of one dot (dot + gap), for deciding when
 // the row is too wide for the block and must collapse to a badge
-const DOT_FOOTPRINT = 11;
+const DOT_FOOTPRINT = 13;
 const ROW_PADDING = 20;
 
 type Signal = {
@@ -40,8 +41,12 @@ const gatherSignals = (block: Block) => {
   const patternSignals: Signal[] = Object.entries(block.pattern.params)
     .filter(([uniformName]) => !BASE_EXCLUDED.includes(uniformName))
     .map(([uniformName, patternParam]) => {
-      const authored = !!block.parameterVariations[uniformName]?.length;
       const isOpacity = uniformName === "u_opacity";
+      // opacity is special: the pipeline writes the live crossfade value back
+      // onto the param, so authored-ness is whether a manual variation exists
+      const authored = isOpacity
+        ? block.hasManualOpacity
+        : isParamAuthored(block, uniformName);
       return {
         block,
         uniformName,
@@ -65,7 +70,7 @@ const gatherSignals = (block: Block) => {
         block: effectBlock,
         uniformName,
         label: `${effectBlock.pattern.name} · ${patternParam.name}`,
-        authored: !!effectBlock.parameterVariations[uniformName]?.length,
+        authored: isParamAuthored(effectBlock, uniformName),
         laneOn: effectBlock.lanedParams.has(uniformName),
         isOpacity: false,
         fading: false,
@@ -178,7 +183,9 @@ const DotList = function DotList({
   effectSignals: Signal[];
 }) {
   return (
-    <HStack spacing="4px" px={2} pb={1} width="100%" overflow="hidden" align="center">
+    // pt gives the lane-on focus ring room so it isn't clipped by the header
+    // above; no overflow clip here since narrow blocks collapse to a badge
+    <HStack spacing="5px" px={2} pt="4px" pb="3px" width="100%" align="center">
       {patternSignals.map((signal) => (
         <Dot key={signal.uniformName} signal={signal} />
       ))}
@@ -186,7 +193,7 @@ const DotList = function DotList({
         <Box
           flexShrink={0}
           width="1px"
-          height="9px"
+          height="11px"
           bg={DEFAULT_BORDER}
           mx="1px"
         />
@@ -234,21 +241,22 @@ const Dot = function Dot({ signal }: { signal: Signal }) {
     if (toggleable) signal.block.toggleParamLane(signal.uniformName);
   });
 
-  const size = laneOn ? "8px" : "7px";
+  const size = laneOn ? "10px" : "9px";
   return (
-    <Box
-      as="span"
-      flexShrink={0}
-      title={title}
-      onClick={onClick}
-      width={size}
-      height={size}
-      bg={fill}
-      border={filled ? undefined : `1px solid ${DEFAULT_BORDER}`}
-      borderRadius={isEffect ? "1px" : "50%"}
-      transform={isEffect ? "rotate(45deg)" : undefined}
-      boxShadow={laneOn ? `0 0 0 2px ${ringColor}` : undefined}
-      cursor={toggleable ? "pointer" : "default"}
-    />
+    <Tooltip label={title} openDelay={0} hasArrow placement="top" fontSize="xs">
+      <Box
+        as="span"
+        flexShrink={0}
+        onClick={onClick}
+        width={size}
+        height={size}
+        bg={fill}
+        border={filled ? undefined : `1px solid ${DEFAULT_BORDER}`}
+        borderRadius={isEffect ? "2px" : "50%"}
+        transform={isEffect ? "rotate(45deg)" : undefined}
+        boxShadow={laneOn ? `0 0 0 2px ${ringColor}` : undefined}
+        cursor={toggleable ? "pointer" : "default"}
+      />
+    </Tooltip>
   );
 };
