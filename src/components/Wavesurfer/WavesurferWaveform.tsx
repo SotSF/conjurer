@@ -191,8 +191,12 @@ const WavesurferWaveform = observer(function WavesurferWaveform() {
               audioStore.audioState === "starting" ||
               audioStore.audioState === "playing"
             )
-              // will throw NotAllowedError if autoplay is blocked
-              wavesurfer.play().catch((e) => console.error(e));
+              // will throw NotAllowedError if autoplay is blocked;
+              // AbortError is expected if a newer load supersedes this play()
+              wavesurfer.play().catch((e: DOMException) => {
+                if (e?.name === "AbortError") return;
+                console.error(e);
+              });
             cloneCanvas();
           })}
           onRedraw={() => setAudioReady(true)}
@@ -207,10 +211,18 @@ const WavesurferWaveform = observer(function WavesurferWaveform() {
             audioStore.audioState = "paused";
             if (playlistStore.autoplay) playlistStore.playNextExperience();
           })}
-          onLoading={(wavesurfer) => {
+          onLoad={action(() => {
             setAudioReady(false);
-            wavesurfer.stop();
             audioStore.setTimeWithCursor(0);
+          })}
+          onError={(_wavesurfer, error: Error | MediaError) => {
+            // Intentional track switches abort the previous media fetch on the shared <audio>
+            if (
+              ("name" in error && error.name === "AbortError") ||
+              ("code" in error && error.code === MediaError.MEDIA_ERR_ABORTED)
+            )
+              return;
+            console.error(error);
           }}
         />
       </Box>

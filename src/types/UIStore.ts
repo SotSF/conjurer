@@ -29,7 +29,7 @@ export class UIStore {
   showingLawsOfConjuryDrawer = false;
   capturingThumbnail = false;
 
-  private _emceeOutputControlsMinimized = false;
+  private _emceeOutputControlsMinimized = true;
   get emceeOutputControlsMinimized() {
     return this._emceeOutputControlsMinimized;
   }
