@@ -6,20 +6,14 @@ import {
   AccordionPanel,
   Box,
   Button,
+  Grid,
   HStack,
   Input,
   NumberInput,
   NumberInputField,
   SimpleGrid,
-  Table,
-  TableContainer,
-  Tbody,
-  Td,
   Text,
-  Th,
-  Thead,
   Tooltip,
-  Tr,
   VStack,
 } from "@chakra-ui/react";
 import {
@@ -30,7 +24,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { useCallback, useState } from "react";
+import { Fragment, useCallback, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import { PaletteVariation } from "../variation/PaletteVariation";
 import { Block } from "@/src/types/Block";
@@ -259,6 +253,11 @@ const RgbChart = ({ palette }: { palette: Palette }) => {
   );
 };
 
+const CHANNELS = ["r", "g", "b"] as const;
+const vectorAccessorMap = { r: "x", g: "y", b: "z" } as const;
+
+// compact 4-column grid (label + R/G/B) so all three channels fit the popover
+// width without horizontal scroll
 const ManualPaletteEditor = ({
   palette,
   onChange,
@@ -266,58 +265,42 @@ const ManualPaletteEditor = ({
   palette: Palette;
   onChange: () => void;
 }) => (
-  <TableContainer style={{ marginTop: 12 }}>
-    <Table variant="simple" size="sm">
-      <Thead>
-        <Tr>
-          <Th />
-          <Th style={{ textAlign: "center" }}>R</Th>
-          <Th style={{ textAlign: "center" }}>G</Th>
-          <Th style={{ textAlign: "center" }}>B</Th>
-        </Tr>
-      </Thead>
-      <Tbody>
-        {(["a", "b", "c", "d"] as const).map((component) => (
-          <PaletteColorRow
-            key={component}
-            component={component}
-            palette={palette}
+  <Grid
+    templateColumns="16px repeat(3, 1fr)"
+    columnGap={1}
+    rowGap={1}
+    alignItems="center"
+    mt={3}
+  >
+    <Box />
+    {CHANNELS.map((channel) => (
+      <Text
+        key={channel}
+        fontSize="10px"
+        fontWeight={600}
+        color="gray.400"
+        textAlign="center"
+      >
+        {channel.toUpperCase()}
+      </Text>
+    ))}
+    {(["a", "b", "c", "d"] as const).map((component) => (
+      <Fragment key={component}>
+        <Text fontSize="11px" color="gray.400">
+          {component.toUpperCase()}
+        </Text>
+        {CHANNELS.map((channel) => (
+          <PaletteColorComponent
+            key={channel}
+            data={palette[component]}
+            channel={channel}
             onChange={onChange}
           />
         ))}
-      </Tbody>
-    </Table>
-  </TableContainer>
+      </Fragment>
+    ))}
+  </Grid>
 );
-
-type PaletteComponent = "a" | "b" | "c" | "d";
-
-const vectorAccessorMap = { r: "x", g: "y", b: "z" } as const;
-
-const PaletteColorRow = ({
-  component,
-  palette,
-  onChange,
-}: {
-  component: PaletteComponent;
-  palette: Palette;
-  onChange: () => void;
-}) => {
-  const data = palette[component];
-  return (
-    <Tr>
-      <Td>{component.toUpperCase()}</Td>
-      {(["r", "g", "b"] as const).map((channel) => (
-        <PaletteColorComponent
-          key={channel}
-          data={data}
-          channel={channel}
-          onChange={onChange}
-        />
-      ))}
-    </Tr>
-  );
-};
 
 const PaletteColorComponent = ({
   data,
@@ -329,24 +312,21 @@ const PaletteColorComponent = ({
   onChange: () => void;
 }) => {
   const accessor = vectorAccessorMap[channel];
-  const [strValue, setStrValue] = useState(data[accessor].toFixed(5));
+  const [strValue, setStrValue] = useState(data[accessor].toFixed(4));
   return (
-    <Td>
-      <NumberInput
-        size="sm"
-        width="5rem"
-        value={strValue}
-        onChange={(valueString, valueNumber) => {
-          setStrValue(valueString);
-          if (!isNaN(valueNumber)) {
-            data[accessor] = valueNumber;
-            onChange();
-          }
-        }}
-      >
-        <NumberInputField paddingInlineEnd={0} />
-      </NumberInput>
-    </Td>
+    <NumberInput
+      size="xs"
+      value={strValue}
+      onChange={(valueString, valueNumber) => {
+        setStrValue(valueString);
+        if (!isNaN(valueNumber)) {
+          data[accessor] = valueNumber;
+          onChange();
+        }
+      }}
+    >
+      <NumberInputField px={1} fontSize="11px" textAlign="center" />
+    </NumberInput>
   );
 };
 
