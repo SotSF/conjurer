@@ -17,8 +17,31 @@ const INITIAL_AUDIO_LATENCY = 0.15;
 
 export class AudioStore {
   audioReady = false;
-  selectedSong: Song = NO_SONG;
   audioMuted = false;
+
+  private _selectedSong: Song = NO_SONG;
+  get selectedSong() {
+    return this._selectedSong;
+  }
+  set selectedSong(song: Song) {
+    const songChanged = this._selectedSong.id !== song.id;
+    this._selectedSong = song;
+    // Invalidate before WaveSurfer remounts so effects don't play/seek the dying instance
+    // (which aborts the shared <audio> fetch and logs AbortError).
+    if (songChanged) {
+      this.audioReady = false;
+      this.wavesurfer = null;
+    }
+  }
+
+  private _audioVolume = 1;
+  get audioVolume() {
+    return this._audioVolume;
+  }
+  set audioVolume(volume: number) {
+    this._audioVolume = volume;
+    this.wavesurfer?.setVolume(volume);
+  }
 
   wavesurfer: WaveSurfer | null = null;
   timelinePlugin: TimelinePlugin | null = null;
@@ -135,11 +158,11 @@ export class AudioStore {
   }
 
   setTimeWithCursor = (time: number) => {
-    if (!this.wavesurfer) return;
-
     const validTime = Math.max(0, time);
     this.lastCursorPosition = validTime;
     this.globalTime = validTime;
+
+    if (!this.wavesurfer) return;
 
     const duration = this.wavesurfer.getDuration();
     if (this.wavesurfer.getCurrentTime() === validTime || duration === 0)
