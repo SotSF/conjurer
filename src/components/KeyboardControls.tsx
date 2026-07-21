@@ -61,8 +61,8 @@ export const KeyboardControls = observer(function KeyboardControls({
         store.duplicateSelected();
         e.preventDefault();
       } else if (editMode && (e.key === "+" || e.key === "=") && e.ctrlKey)
-        uiStore.zoomIn(10);
-      else if (editMode && e.key === "-" && e.ctrlKey) uiStore.zoomOut(10);
+        uiStore.zoomIn();
+      else if (editMode && e.key === "-" && e.ctrlKey) uiStore.zoomOut();
     });
     window.addEventListener("keydown", handleKeyDown);
 

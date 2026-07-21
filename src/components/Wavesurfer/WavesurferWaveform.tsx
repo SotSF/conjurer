@@ -1,7 +1,7 @@
 import { useStore } from "@/src/types/StoreContext";
 import { Box, Skeleton } from "@chakra-ui/react";
 import { observer } from "mobx-react-lite";
-import { useRef, useEffect, useState, useMemo } from "react";
+import { useRef, useEffect, useMemo } from "react";
 import { clamp } from "three/src/math/MathUtils";
 import WaveSurferPlayer from "@wavesurfer/react";
 import TimelinePlugin from "wavesurfer.js/dist/plugins/timeline";
@@ -10,8 +10,26 @@ import { action, runInAction } from "mobx";
 import { useCloneCanvas } from "@/src/components/Wavesurfer/hooks/cloneCanvas";
 import { debounce } from "lodash";
 import { NO_SONG } from "@/src/types/Song";
+import { INITIAL_PIXELS_PER_SECOND } from "@/src/utils/time";
+import { getTimelineLabelIntervals } from "@/src/utils/timelineZoom";
+import { MinimapViewfinder } from "@/src/components/Wavesurfer/MinimapViewfinder";
 
 const DEFAULT_MINIMAP_HEIGHT = 20;
+const WAVESURFER_ZOOM_DEBOUNCE_MS = 80;
+
+type TimelineLabelOptions = ReturnType<typeof getTimelineLabelIntervals>;
+
+const setTimelineLabelIntervals = (
+  timelinePlugin: TimelinePlugin | null,
+  pps: number,
+) => {
+  if (!timelinePlugin) return;
+  Object.assign(
+    (timelinePlugin as TimelinePlugin & { options: TimelineLabelOptions })
+      .options,
+    getTimelineLabelIntervals(pps),
+  );
+};
 
 const scrollIntoView = debounce(
   () =>
@@ -34,6 +52,11 @@ const WavesurferWaveform = observer(function WavesurferWaveform() {
 
   const clonedWaveformRef = useRef<HTMLDivElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
+  // Keep Wavesurfer's React prop stable so layout zoom doesn't force an
+  // immediate redraw; we drive zoom imperatively (debounced) instead.
+  const initialMinPxPerSecRef = useRef(
+    uiStore.canTimelineZoom ? uiStore.pixelsPerSecond : INITIAL_PIXELS_PER_SECOND,
+  );
 
   const cloneCanvas = useCloneCanvas(clonedWaveformRef);
 
@@ -42,9 +65,13 @@ const WavesurferWaveform = observer(function WavesurferWaveform() {
       insertPosition: "beforebegin",
       style: { fontSize: "14px", color: "#000000", zIndex: "100" },
       height: uiStore.canTimelineZoom ? 60 : 80,
-      primaryLabelInterval: uiStore.canTimelineZoom ? 5 : 30,
-      secondaryLabelInterval: uiStore.canTimelineZoom ? 1 : 0,
-      timeInterval: uiStore.canTimelineZoom ? 0.25 : 5,
+      ...(uiStore.canTimelineZoom
+        ? getTimelineLabelIntervals(uiStore.pixelsPerSecond)
+        : {
+            primaryLabelInterval: 30,
+            secondaryLabelInterval: 0,
+            timeInterval: 5,
+          }),
     });
     const minimapPlugin = MinimapPlugin.create({
       waveColor: "#bbb",
@@ -60,8 +87,32 @@ const WavesurferWaveform = observer(function WavesurferWaveform() {
       );
       scrollIntoView();
     });
+    runInAction(() => {
+      audioStore.timelinePlugin = timelinePlugin;
+      audioStore.minimapPlugin = minimapPlugin;
+    });
     return [timelinePlugin, minimapPlugin];
+    // Intentionally omit pixelsPerSecond — label intervals are updated on zoom
+    // via mutating timelinePlugin.options, not by recreating plugins.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [audioStore, uiStore.canTimelineZoom]);
+
+  const applyWavesurferZoom = useMemo(
+    () =>
+      debounce((pps: number) => {
+        setTimelineLabelIntervals(audioStore.timelinePlugin, pps);
+        audioStore.wavesurfer?.zoom(pps);
+        cloneCanvas();
+      }, WAVESURFER_ZOOM_DEBOUNCE_MS),
+    [audioStore, cloneCanvas],
+  );
+
+  useEffect(() => {
+    return () => {
+      applyWavesurferZoom.flush();
+      applyWavesurferZoom.cancel();
+    };
+  }, [applyWavesurferZoom]);
 
   // on audio latency change
   useEffect(() => {
@@ -106,7 +157,8 @@ const WavesurferWaveform = observer(function WavesurferWaveform() {
     audioStore.wavesurfer.setVolume(audioStore.audioVolume);
   }, [audioStore.audioVolume, audioStore.wavesurfer, audioStore.audioReady]);
 
-  // on zoom change
+  // Debounced Wavesurfer zoom: blocks/layout update immediately via MobX;
+  // the expensive canvas redraw catches up shortly after zooming settles.
   useEffect(() => {
     if (
       !audioStore.wavesurfer ||
@@ -114,10 +166,10 @@ const WavesurferWaveform = observer(function WavesurferWaveform() {
       !uiStore.canTimelineZoom
     )
       return;
-    audioStore.wavesurfer.zoom(uiStore.pixelsPerSecond);
-    cloneCanvas();
+
+    applyWavesurferZoom(uiStore.pixelsPerSecond);
   }, [
-    cloneCanvas,
+    applyWavesurferZoom,
     uiStore.pixelsPerSecond,
     uiStore.canTimelineZoom,
     audioStore.wavesurfer,
@@ -169,7 +221,7 @@ const WavesurferWaveform = observer(function WavesurferWaveform() {
           height={uiStore.canTimelineZoom ? 60 : 80}
           fillParent={!uiStore.canTimelineZoom}
           minPxPerSec={
-            uiStore.canTimelineZoom ? uiStore.pixelsPerSecond : undefined
+            uiStore.canTimelineZoom ? initialMinPxPerSecRef.current : undefined
           }
           hideScrollbar={true}
           autoScroll={false}
@@ -183,7 +235,13 @@ const WavesurferWaveform = observer(function WavesurferWaveform() {
             audioStore.wavesurfer = wavesurfer;
             if (audioStore.audioMuted) wavesurfer.setMuted(true);
             wavesurfer.setVolume(audioStore.audioVolume);
-            uiStore.canTimelineZoom && wavesurfer.zoom(uiStore.pixelsPerSecond);
+            if (uiStore.canTimelineZoom) {
+              setTimelineLabelIntervals(
+                audioStore.timelinePlugin,
+                uiStore.pixelsPerSecond,
+              );
+              wavesurfer.zoom(uiStore.pixelsPerSecond);
+            }
             wavesurfer.seekTo(0);
             const audioBuffer = wavesurfer.getDecodedData();
             if (audioBuffer) audioStore.computePeaks(audioBuffer);
@@ -232,7 +290,6 @@ const WavesurferWaveform = observer(function WavesurferWaveform() {
   return uiStore.canTimelineZoom ? (
     <Box width="100%" height={20} bgColor="gray.500">
       <Box
-        id="minimap"
         position="sticky"
         top={0}
         left="150px"
@@ -244,7 +301,12 @@ const WavesurferWaveform = observer(function WavesurferWaveform() {
         width={`calc(${uiStore.horizontalLayout ? "100vw" : "60vw"} - 150px)`}
         height={`${DEFAULT_MINIMAP_HEIGHT}px`}
         zIndex={100}
-      />
+        overflow="hidden"
+      >
+        {/* Wavesurfer owns #minimap's children — keep it empty of React nodes */}
+        <Box id="minimap" width="100%" height="100%" />
+        <MinimapViewfinder />
+      </Box>
       {commonWavesurferUI}
       {uiStore.showingWaveformOverlay && (
         <Box

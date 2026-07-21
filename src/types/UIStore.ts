@@ -4,6 +4,8 @@ import type { Store } from "@/src/types/Store";
 
 export const MAX_PIXELS_PER_SECOND = 160;
 export const MIN_PIXELS_PER_SECOND = 4;
+export const ZOOM_FACTOR = 1.25;
+export const TIMELINE_HEADER_WIDTH = 150;
 
 const INITIAL_RENDER_TARGET_SIZE = 512;
 
@@ -88,25 +90,60 @@ export class UIStore {
   timeToX = (time: number) => time * this.pixelsPerSecond;
   xToTime = (x: number) => x / this.pixelsPerSecond;
 
-  zoomOut = (amount?: number) => {
-    this.pixelsPerSecond -= amount || 4;
-    if (this.pixelsPerSecond < MIN_PIXELS_PER_SECOND) {
-      this.pixelsPerSecond = MIN_PIXELS_PER_SECOND;
+  /**
+   * Set an absolute zoom level (pixels per second).
+   * @param anchorClientX optional mouse X to keep that time fixed in the viewport;
+   *   when omitted, anchors to the viewport center
+   */
+  setZoom = (pixelsPerSecond: number, anchorClientX?: number) => {
+    if (!this.canTimelineZoom) return;
+
+    const oldPps = this.pixelsPerSecond;
+    const newPps = Math.min(
+      MAX_PIXELS_PER_SECOND,
+      Math.max(MIN_PIXELS_PER_SECOND, pixelsPerSecond),
+    );
+    if (newPps === oldPps) return;
+
+    const timeline = document.getElementById("timeline");
+    if (timeline) {
+      const rect = timeline.getBoundingClientRect();
+      const offsetX =
+        anchorClientX !== undefined
+          ? anchorClientX - rect.left
+          : rect.width / 2;
+      const contentX = timeline.scrollLeft + offsetX;
+      const anchorTime = Math.max(
+        0,
+        (contentX - TIMELINE_HEADER_WIDTH) / oldPps,
+      );
+
+      this.pixelsPerSecond = newPps;
+      timeline.scrollLeft =
+        TIMELINE_HEADER_WIDTH + anchorTime * newPps - offsetX;
+    } else {
+      this.pixelsPerSecond = newPps;
     }
 
-    // resetting the time will restart the playhead animation
-    this.store.audioStore.setTimeWithCursor(this.store.audioStore.globalTime);
+    this.saveToLocalStorage();
   };
 
-  zoomIn = (amount?: number) => {
-    this.pixelsPerSecond += amount || 4;
-    if (this.pixelsPerSecond > MAX_PIXELS_PER_SECOND) {
-      this.pixelsPerSecond = MAX_PIXELS_PER_SECOND;
-    }
-
-    // resetting the time will restart the playhead animation
-    this.store.audioStore.setTimeWithCursor(this.store.audioStore.globalTime);
+  /**
+   * Multiplicatively zoom the timeline.
+   * @param factor >1 zooms in, <1 zooms out
+   * @param anchorClientX optional mouse X to keep that time fixed in the viewport;
+   *   when omitted, anchors to the viewport center
+   */
+  zoomBy = (factor: number, anchorClientX?: number) => {
+    if (factor === 1) return;
+    this.setZoom(this.pixelsPerSecond * factor, anchorClientX);
   };
+
+  zoomIn = (anchorClientX?: number) =>
+    this.zoomBy(ZOOM_FACTOR, anchorClientX);
+
+  zoomOut = (anchorClientX?: number) =>
+    this.zoomBy(1 / ZOOM_FACTOR, anchorClientX);
 
   toggleLayout = () => {
     this.horizontalLayout = !this.horizontalLayout;

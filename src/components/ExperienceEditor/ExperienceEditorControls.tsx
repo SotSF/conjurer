@@ -1,16 +1,17 @@
 import { observer } from "mobx-react-lite";
 import { HStack, IconButton } from "@chakra-ui/react";
-import { RiZoomInLine, RiZoomOutLine } from "react-icons/ri";
-import { HiZoomIn, HiZoomOut } from "react-icons/hi";
 import { RxAlignCenterHorizontally } from "react-icons/rx";
 import { TbArrowBigRightLines } from "react-icons/tb";
+import { BsSoundwave } from "react-icons/bs";
 import { useStore } from "@/src/types/StoreContext";
 import { action } from "mobx";
-import { AudioControls } from "@/src/components/AudioControls";
+import { AudioSelector } from "@/src/components/AudioSelector";
 import { AudioVolumeControls } from "@/src/components/AudioVolumeControls";
 import { IntensitySlider } from "@/src/components/IntensitySlider";
 import { BrightnessLimiterIndicator } from "@/src/components/BrightnessLimiterIndicator";
 import { ControlGroup } from "@/src/components/ControlGroup";
+import { ZoomControls } from "@/src/components/ZoomControls";
+import { BeatMapControls } from "@/src/components/BeatMapControls";
 import { FaShareAlt } from "react-icons/fa";
 
 export const ExperienceEditorControls = observer(
@@ -27,34 +28,27 @@ export const ExperienceEditorControls = observer(
         overflowX="clip"
         borderColor="black"
       >
-        <AudioControls />
+        <AudioSelector />
+        <AudioVolumeControls />
+        <ControlGroup>
+          <IntensitySlider />
+          <BrightnessLimiterIndicator />
+        </ControlGroup>
+        <ZoomControls />
         <IconButton
-          aria-label="Zoom way in"
-          title="Zoom way in"
+          aria-label="Show waveform overlay"
+          title="Show waveform overlay"
           height={6}
-          icon={<RiZoomInLine size={17} />}
-          onClick={action(() => uiStore.zoomIn(50))}
-        />
-        <IconButton
-          aria-label="Zoom in"
-          title="Zoom in"
-          height={6}
-          icon={<HiZoomIn size={17} />}
-          onClick={action(() => uiStore.zoomIn())}
-        />
-        <IconButton
-          aria-label="Zoom out"
-          title="Zoom out"
-          height={6}
-          icon={<HiZoomOut size={17} />}
-          onClick={action(() => uiStore.zoomOut())}
-        />
-        <IconButton
-          aria-label="Zoom way out"
-          title="Zoom way out"
-          height={6}
-          icon={<RiZoomOutLine size={17} />}
-          onClick={action(() => uiStore.zoomOut(50))}
+          icon={<BsSoundwave size={17} />}
+          bgColor={uiStore.showingWaveformOverlay ? "orange.700" : undefined}
+          _hover={
+            uiStore.showingWaveformOverlay
+              ? {
+                  bgColor: "orange.600",
+                }
+              : undefined
+          }
+          onClick={action(() => uiStore.toggleWaveformOverlay())}
         />
         <IconButton
           aria-label="Keep playhead centered"
@@ -94,12 +88,6 @@ export const ExperienceEditorControls = observer(
                 !uiStore.keepingPlayHeadVisible),
           )}
         />
-        <AudioVolumeControls />
-        <ControlGroup>
-          <IntensitySlider />
-          <BrightnessLimiterIndicator />
-        </ControlGroup>
-        {/* TODO: re implement given viewerMode */}
         <IconButton
           aria-label="Copy link to experience"
           title="Copy link to experience"
@@ -107,6 +95,7 @@ export const ExperienceEditorControls = observer(
           icon={<FaShareAlt size={17} />}
           onClick={store.copyLinkToExperience}
         />
+        <BeatMapControls />
       </HStack>
     );
   },

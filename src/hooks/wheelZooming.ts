@@ -1,49 +1,42 @@
 import { useStore } from "@/src/types/StoreContext";
-import { useCallback, useEffect } from "react";
+import { useEffect } from "react";
+
+// Convert wheel delta into a multiplicative zoom factor. Trackpads send many
+// small deltas; mouse wheels send larger discrete notches.
+const deltaToZoomFactor = (deltaY: number) => Math.exp(-deltaY * 0.005);
 
 export function useWheelZooming(element: HTMLElement | null) {
   const { uiStore } = useStore();
 
-  const wheelZooming = useCallback(
-    (e: WheelEvent) => {
-      // If scrolling horizontally, don't zoom
-      if (e.deltaX > 1 || e.deltaX < -1) return;
-
-      // Only zoom when holding ctrl
-      if (!e.ctrlKey) return;
-
-      if (e.deltaY > 1) {
-        uiStore.zoomOut();
-        e.preventDefault();
-      } else if (e.deltaY < -1) {
-        uiStore.zoomIn();
-        e.preventDefault();
-      }
-    },
-    [uiStore],
-  );
-
-  useEffect(() => {
-    element?.addEventListener("wheel", wheelZooming);
-    return () => {
-      element?.removeEventListener("wheel", wheelZooming);
-    };
-  }, [wheelZooming, element]);
-}
-
-export function useDisableWheelEventPropagation(element: HTMLElement | null) {
-  const wheelZooming = useCallback((e: WheelEvent) => {
-    // If inside this container, don't zoom
-    e.stopPropagation();
-  }, []);
-
   useEffect(() => {
     if (!element) return;
 
-    element.addEventListener("wheel", wheelZooming);
-    const cachedElement = element;
-    return () => {
-      cachedElement.removeEventListener("wheel", wheelZooming);
+    const onWheel = (e: WheelEvent) => {
+      // If scrolling horizontally, don't zoom
+      if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+
+      // Only zoom when holding ctrl (or meta — trackpad pinch often reports as ctrl)
+      if (!e.ctrlKey && !e.metaKey) return;
+
+      e.preventDefault();
+      uiStore.zoomBy(deltaToZoomFactor(e.deltaY), e.clientX);
     };
-  }, [element, wheelZooming]);
+
+    element.addEventListener("wheel", onWheel, { passive: false });
+    return () => element.removeEventListener("wheel", onWheel);
+  }, [element, uiStore]);
+}
+
+export function useDisableWheelEventPropagation(element: HTMLElement | null) {
+  useEffect(() => {
+    if (!element) return;
+
+    const onWheel = (e: WheelEvent) => {
+      // If inside this container, don't zoom
+      e.stopPropagation();
+    };
+
+    element.addEventListener("wheel", onWheel);
+    return () => element.removeEventListener("wheel", onWheel);
+  }, [element]);
 }

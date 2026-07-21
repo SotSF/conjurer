@@ -28,13 +28,7 @@ export const PlaylistQueryParent = observer(function PlaylistQueryParent({
       undefined,
       { shallow: true },
     );
-  }, [
-    router.isReady,
-    router.pathname,
-    router.query,
-    router.replace,
-    queryParam,
-  ]);
+  }, [router, queryParam]);
 
   return <>{children}</>;
 });
