@@ -22,13 +22,20 @@ import {
 } from "@hello-pangea/dnd";
 import { action } from "mobx";
 import { observer } from "mobx-react-lite";
-import { MouseEvent as ReactMouseEvent } from "react";
+import {
+  MouseEvent as ReactMouseEvent,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 
 const BASE_EXCLUDED = ["u_time", "u_texture"];
 const ARMED_COLOR = "#63b3ed"; // blue.300 — param armed to a timeline lane
 const UNARMED_COLOR = "#4a5568"; // gray.600
-const PANEL_HEIGHT = 210;
+export const DEVICE_PANEL_HEIGHT = 210;
 const CELL_WIDTH = 120;
+const CELL_HEIGHT = 22;
+const CELL_GAP = 4;
 
 const selectedPatternBlock = (
   store: ReturnType<typeof useStore>,
@@ -51,7 +58,7 @@ const paletteToGradient = (palette: Palette): string => {
 };
 
 // 4a device panel — a fixed-height bottom panel (Ableton Device View) showing
-// the selected pattern block's chain: the pattern unit and its effects as
+// the selected pattern block's chain: the pattern and its effects as
 // left-to-right units in signal order. It is the roster + effect-chain home;
 // motion is still authored on the timeline lanes. Arming a param (◉) opens its
 // lane in the timeline (drives block.lanedParams).
@@ -64,6 +71,7 @@ export const BlockDevicePanel = observer(function BlockDevicePanel() {
   // observer re-renders on add/remove/reorder — reading it only inside the
   // Droppable render-prop below would happen outside this component's tracking.
   const effectBlocks = [...block.effectBlocks];
+  const reorderable = effectBlocks.length >= 2;
 
   const onDragEnd: OnDragEndResponder = action((result) => {
     if (!result.destination) return;
@@ -77,7 +85,7 @@ export const BlockDevicePanel = observer(function BlockDevicePanel() {
 
   return (
     <Box
-      height={`${PANEL_HEIGHT}px`}
+      height={`${DEVICE_PANEL_HEIGHT}px`}
       bg="#12151c"
       borderTopWidth="1px"
       borderColor="#2d3748"
@@ -86,17 +94,13 @@ export const BlockDevicePanel = observer(function BlockDevicePanel() {
       display="flex"
       flexDirection="column"
     >
-      <HStack justify="space-between" mb={2} flexShrink={0}>
-        <Text fontSize="11px" fontWeight={600} color="gray.400">
-          Device chain — {block.pattern.name}{" "}
-          <Text as="span" color="gray.500" fontWeight={400}>
-            · signal flows left → right
+      {reorderable && (
+        <HStack justify="flex-end" mb={2} flexShrink={0}>
+          <Text fontSize="10px" color="gray.500">
+            drag units to reorder effects
           </Text>
-        </Text>
-        <Text fontSize="10px" color="gray.500">
-          drag units to reorder effects
-        </Text>
-      </HStack>
+        </HStack>
+      )}
 
       <Box flex="1" minH={0} overflowX="auto" overflowY="hidden">
         <DragDropContext onDragEnd={onDragEnd}>
@@ -116,6 +120,7 @@ export const BlockDevicePanel = observer(function BlockDevicePanel() {
                       key={effectBlock.id}
                       draggableId={effectBlock.id}
                       index={index}
+                      isDragDisabled={!reorderable}
                     >
                       {(prov) => (
                         <HStack
@@ -128,8 +133,9 @@ export const BlockDevicePanel = observer(function BlockDevicePanel() {
                           <EffectUnit
                             parentBlock={block}
                             effectBlock={effectBlock}
-                            index={index}
-                            dragHandleProps={prov.dragHandleProps}
+                            dragHandleProps={
+                              reorderable ? prov.dragHandleProps : undefined
+                            }
                           />
                         </HStack>
                       )}
@@ -205,13 +211,11 @@ const ParamCell = function ParamCell({
   const palette = isPalette(param.value);
   return (
     <HStack
-      width={`${CELL_WIDTH}px`}
-      flexShrink={0}
+      height={`${CELL_HEIGHT}px`}
       justify="space-between"
       bg={isEffect ? "#12161d" : "#141a24"}
       borderRadius="3px"
       px="6px"
-      py="3px"
       spacing={2}
     >
       <Text
@@ -237,9 +241,11 @@ const ParamCell = function ParamCell({
   );
 };
 
-// Renders param cells top-to-bottom in a single column, wrapping into further
-// columns only when they exceed the available height (no hardcoded per-pattern
-// column count). Relies on a bounded parent height (the fixed panel height).
+// Lays params out top-to-bottom in a single column, spilling into further
+// columns only when they exceed the available height. Rows-per-column is
+// measured from the container's height (no hardcoded per-pattern count); a CSS
+// grid with column auto-flow grows its width to fit the extra columns (unlike
+// flex column-wrap, which overflows).
 const ParamColumns = function ParamColumns({
   block,
   uniformNames,
@@ -249,15 +255,36 @@ const ParamColumns = function ParamColumns({
   uniformNames: string[];
   isEffect: boolean;
 }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [rows, setRows] = useState(Math.max(1, uniformNames.length));
+
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const measure = () => {
+      const perColumn = Math.max(
+        1,
+        Math.floor((el.clientHeight + CELL_GAP) / (CELL_HEIGHT + CELL_GAP)),
+      );
+      setRows(perColumn);
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <Box
+      ref={ref}
       flex="1"
       minH={0}
-      display="flex"
-      flexDirection="column"
-      flexWrap="wrap"
-      alignContent="flex-start"
-      sx={{ columnGap: "4px", rowGap: "4px" }}
+      display="grid"
+      gridAutoFlow="column"
+      gridTemplateRows={`repeat(${rows}, ${CELL_HEIGHT}px)`}
+      gridAutoColumns={`${CELL_WIDTH}px`}
+      alignContent="start"
+      sx={{ columnGap: `${CELL_GAP}px`, rowGap: `${CELL_GAP}px` }}
     >
       {uniformNames.map((uniformName) => (
         <ParamCell
@@ -293,7 +320,7 @@ const PatternUnit = function PatternUnit({ block }: { block: Block }) {
         flexShrink={0}
         noOfLines={1}
       >
-        PATTERN · {block.pattern.name}
+        {block.pattern.name}
       </Text>
       <ParamColumns block={block} uniformNames={uniformNames} isEffect={false} />
     </Box>
@@ -303,12 +330,10 @@ const PatternUnit = function PatternUnit({ block }: { block: Block }) {
 const EffectUnit = function EffectUnit({
   parentBlock,
   effectBlock,
-  index,
   dragHandleProps,
 }: {
   parentBlock: Block;
   effectBlock: Block;
-  index: number;
   dragHandleProps: any;
 }) {
   const uniformNames = Object.keys(effectBlock.pattern.params).filter(
@@ -326,11 +351,13 @@ const EffectUnit = function EffectUnit({
     >
       <HStack justify="space-between" mb="6px" spacing={1} flexShrink={0}>
         <HStack spacing={1} minW={0}>
-          <Box {...dragHandleProps} cursor="grab" color="#718096" flexShrink={0}>
-            ⠿
-          </Box>
+          {dragHandleProps && (
+            <Box {...dragHandleProps} cursor="grab" color="#718096" flexShrink={0}>
+              ⠿
+            </Box>
+          )}
           <Text fontSize="10px" fontWeight={600} color="#9fb0c3" noOfLines={1}>
-            FX {index + 1} · {effectBlock.pattern.name}
+            {effectBlock.pattern.name}
           </Text>
         </HStack>
         <Tooltip label="Remove effect" openDelay={0} hasArrow fontSize="xs">
