@@ -91,18 +91,17 @@ export class UIStore {
   xToTime = (x: number) => x / this.pixelsPerSecond;
 
   /**
-   * Multiplicatively zoom the timeline.
-   * @param factor >1 zooms in, <1 zooms out
+   * Set an absolute zoom level (pixels per second).
    * @param anchorClientX optional mouse X to keep that time fixed in the viewport;
    *   when omitted, anchors to the viewport center
    */
-  zoomBy = (factor: number, anchorClientX?: number) => {
-    if (!this.canTimelineZoom || factor === 1) return;
+  setZoom = (pixelsPerSecond: number, anchorClientX?: number) => {
+    if (!this.canTimelineZoom) return;
 
     const oldPps = this.pixelsPerSecond;
     const newPps = Math.min(
       MAX_PIXELS_PER_SECOND,
-      Math.max(MIN_PIXELS_PER_SECOND, oldPps * factor),
+      Math.max(MIN_PIXELS_PER_SECOND, pixelsPerSecond),
     );
     if (newPps === oldPps) return;
 
@@ -127,6 +126,17 @@ export class UIStore {
     }
 
     this.saveToLocalStorage();
+  };
+
+  /**
+   * Multiplicatively zoom the timeline.
+   * @param factor >1 zooms in, <1 zooms out
+   * @param anchorClientX optional mouse X to keep that time fixed in the viewport;
+   *   when omitted, anchors to the viewport center
+   */
+  zoomBy = (factor: number, anchorClientX?: number) => {
+    if (factor === 1) return;
+    this.setZoom(this.pixelsPerSecond * factor, anchorClientX);
   };
 
   zoomIn = (anchorClientX?: number) =>
