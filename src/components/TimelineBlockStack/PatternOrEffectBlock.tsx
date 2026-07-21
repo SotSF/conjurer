@@ -33,26 +33,24 @@ export const PatternOrEffectBlock = observer(function PatternOrEffectBlock({
       role="button"
       onClick={handleBlockClick}
     >
-      <HStack
-        position="sticky"
-        left={`${TIMELINE_HEADER_WIDTH}px`}
-        spacing={0}
-        pl={1}
-        flexShrink={0}
-        zIndex={1}
-      >
-        <MdDragIndicator size={18} />
-        <Heading
-          size="sm"
-          fontSize="13px"
-          userSelect="none"
-          whiteSpace="nowrap"
-          color={color}
+      {/* the name track is flex:1 and position:relative, so the sticky name is
+          constrained to it and can never slide over the timing control */}
+      <Box flex="1" minW={0} position="relative">
+        <HStack
+          position="sticky"
+          left={`${TIMELINE_HEADER_WIDTH}px`}
+          spacing={0}
+          pl={1}
+          maxW="100%"
         >
-          {block.pattern.name}
-        </Heading>
-      </HStack>
-      <Box flex="1" />
+          <Box flexShrink={0} display="flex">
+            <MdDragIndicator size={18} />
+          </Box>
+          <Heading size="sm" fontSize="13px" userSelect="none" isTruncated color={color}>
+            {block.pattern.name}
+          </Heading>
+        </HStack>
+      </Box>
       <Box flexShrink={0} pr={1}>
         <PatternTimingModal block={block} />
       </Box>

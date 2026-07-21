@@ -113,16 +113,21 @@ export const BlockDotRow = observer(function BlockDotRow({
 
   if (!narrow) {
     return (
-      // pin the dots to the left of the visible timeline, like the block name,
-      // so they stay in view when the block is scrolled wider than the viewport
-      <Box
-        position="sticky"
-        left={`${TIMELINE_HEADER_WIDTH}px`}
-        width="fit-content"
-        maxWidth="100%"
-        zIndex={1}
-      >
-        <DotList patternSignals={patternSignals} effectSignals={effectSignals} />
+      // full-width track (so the card's center-alignment doesn't center the
+      // dots) holding a sticky, left-pinned dot cluster that stays visible when
+      // the block is scrolled wider than the viewport
+      <Box width="100%" position="relative">
+        <Box
+          position="sticky"
+          left={`${TIMELINE_HEADER_WIDTH}px`}
+          width="fit-content"
+          maxWidth="100%"
+        >
+          <DotList
+            patternSignals={patternSignals}
+            effectSignals={effectSignals}
+          />
+        </Box>
       </Box>
     );
   }
