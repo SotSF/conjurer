@@ -8,7 +8,8 @@ import { BlockDevicePanel } from "@/src/components/ExperienceEditor/BlockDeviceP
 export const Arrangement = observer(function Arrangement() {
   const store = useStore();
 
-  const showDevicePanel = store.context !== "viewer";
+  const showDevicePanel =
+    store.context !== "viewer" && store.uiStore.showDevicePanel;
   return (
     <Grid
       width="100%"

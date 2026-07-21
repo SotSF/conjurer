@@ -15,7 +15,7 @@ import {
   Text,
   Tooltip,
 } from "@chakra-ui/react";
-import { MdMyLocation } from "react-icons/md";
+import { MdMyLocation, MdViewStream, MdClose } from "react-icons/md";
 import {
   DragDropContext,
   Draggable,
@@ -26,6 +26,7 @@ import { action } from "mobx";
 import { observer } from "mobx-react-lite";
 import {
   MouseEvent as ReactMouseEvent,
+  ReactElement,
   useLayoutEffect,
   useRef,
   useState,
@@ -297,6 +298,15 @@ const PatternUnit = function PatternUnit({ block }: { block: Block }) {
   const uniformNames = Object.keys(block.pattern.params).filter(
     (name) => !BASE_EXCLUDED.includes(name),
   );
+
+  const toggleAllLanes = action(() => {
+    const blocks = [block, ...block.effectBlocks];
+    const allArmed = blocks.every((b) =>
+      b.lanableParamNames.every((name) => b.lanedParams.has(name)),
+    );
+    blocks.forEach((b) => b.setParamLanes(b.lanableParamNames, !allArmed));
+  });
+
   return (
     <Box
       flexShrink={0}
@@ -311,27 +321,54 @@ const PatternUnit = function PatternUnit({ block }: { block: Block }) {
         <Text fontSize="11px" fontWeight={600} color="#63b3ed" noOfLines={1}>
           {block.pattern.name}
         </Text>
-        <Tooltip
-          label="Scroll timeline to this block"
-          openDelay={0}
-          hasArrow
-          fontSize="xs"
-        >
-          <IconButton
-            aria-label="Scroll timeline to this block"
+        <HStack spacing={0} flexShrink={0}>
+          <PanelIconButton
+            label="Toggle all lanes"
+            icon={<MdViewStream />}
+            onClick={toggleAllLanes}
+          />
+          <PanelIconButton
+            label="Scroll timeline to this block"
             icon={<MdMyLocation />}
-            size="xs"
-            height="18px"
-            minW="18px"
-            variant="ghost"
-            color="#63b3ed"
-            flexShrink={0}
             onClick={action(() => uiStore.scrollToTime(block.startTime))}
           />
-        </Tooltip>
+          <PanelIconButton
+            label="Close device panel"
+            icon={<MdClose />}
+            onClick={action(() => {
+              uiStore.showDevicePanel = false;
+            })}
+          />
+        </HStack>
       </HStack>
       <ParamColumns block={block} uniformNames={uniformNames} isEffect={false} />
     </Box>
+  );
+};
+
+const PanelIconButton = function PanelIconButton({
+  label,
+  icon,
+  onClick,
+}: {
+  label: string;
+  icon: ReactElement;
+  onClick: (e: ReactMouseEvent) => void;
+}) {
+  return (
+    <Tooltip label={label} openDelay={0} hasArrow fontSize="xs">
+      <IconButton
+        aria-label={label}
+        icon={icon}
+        size="xs"
+        height="18px"
+        minW="18px"
+        variant="ghost"
+        color="#63b3ed"
+        flexShrink={0}
+        onClick={onClick}
+      />
+    </Tooltip>
   );
 };
 

@@ -12,7 +12,9 @@ export const AddPatternButton = observer(function AddPatternButton() {
   // when a block is selected the device panel occupies the bottom of the
   // screen, so lift the button above it
   const devicePanelOpen =
-    store.context !== "viewer" && store.selectedBlocksOrVariations.size > 0;
+    store.context !== "viewer" &&
+    store.uiStore.showDevicePanel &&
+    store.selectedBlocksOrVariations.size > 0;
 
   return (
     <Box

@@ -262,10 +262,12 @@ export class Store {
 
   selectBlock = (block: Block) => {
     this.selectedBlocksOrVariations = new Set([{ type: "block", block }]);
+    this.uiStore.showDevicePanel = true;
   };
 
   addBlockToSelection = (block: Block) => {
     this.selectedBlocksOrVariations.add({ type: "block", block });
+    this.uiStore.showDevicePanel = true;
   };
 
   selectVariation = (

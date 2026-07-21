@@ -73,6 +73,10 @@ export class UIStore {
 
   patternDrawerOpen = this.store.context === "vj";
 
+  // whether the device panel is shown for the selected block; closing it here
+  // keeps the block selected, and selecting a block re-opens it
+  showDevicePanel = true;
+
   canTimelineZoom = this.store.context === "experienceEditor";
   pixelsPerSecond = INITIAL_PIXELS_PER_SECOND; // the zoom of the timeline
 

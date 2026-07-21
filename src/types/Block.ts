@@ -97,6 +97,24 @@ export class Block {
     else this.lanedParams.add(uniformName);
   };
 
+  // uniform names on this block that can be given an automation lane: excludes
+  // machinery uniforms, opacity on effects (applied per pattern), and palettes
+  // (a fixed gradient, not a time curve)
+  get lanableParamNames(): string[] {
+    const excluded = new Set(["u_time", "u_texture"]);
+    if (this.parentBlock) excluded.add("u_opacity");
+    return Object.entries(this.pattern.params)
+      .filter(([name, param]) => !excluded.has(name) && !isPalette(param.value))
+      .map(([name]) => name);
+  }
+
+  setParamLanes = (uniformNames: string[], on: boolean) => {
+    for (const uniformName of uniformNames) {
+      if (on) this.lanedParams.add(uniformName);
+      else this.lanedParams.delete(uniformName);
+    }
+  };
+
   setTiming = ({
     startTime,
     duration,
