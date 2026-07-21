@@ -336,6 +336,41 @@ export class Block {
     return this.startTime <= globalTime && globalTime < this.endTime;
   };
 
+  get hasManualOpacity() {
+    return !!this.parameterVariations["u_opacity"]?.length;
+  }
+
+  // The opacity of this block's final output, applied by the render pipeline
+  // after the entire effect chain. Manually-authored opacity variations take
+  // precedence; otherwise an equal-power crossfade is derived from overlaps.
+  currentMergeOpacity = (globalTime: number): number => {
+    if (this.hasManualOpacity) {
+      // kept current every frame by updateParameters
+      const opacity = this.pattern.params.u_opacity.value;
+      return typeof opacity === "number" ? opacity : 1;
+    }
+    const opacity = this.layer?.autoBlockOpacityAt(this, globalTime) ?? 1;
+    // reflect the derived value so UI readouts of the param stay truthful
+    this.pattern.params.u_opacity.value = opacity;
+    return opacity;
+  };
+
+  // copies the auto-derived crossfade into real variations so the user can
+  // edit from there; rendering is unchanged until they do
+  materializeAutoOpacity = () => {
+    const derived = this.layer?.autoOpacityVariations(this);
+    this.parameterVariations["u_opacity"] = derived ?? [
+      new FlatVariation(
+        Math.min(this.duration, DEFAULT_VARIATION_DURATION),
+        1,
+      ),
+    ];
+  };
+
+  resetOpacityToAuto = () => {
+    delete this.parameterVariations["u_opacity"];
+  };
+
   /**
    * Adds a clone of the effect to the block
    *

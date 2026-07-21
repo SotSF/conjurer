@@ -18,7 +18,6 @@ const effectFactories: Array<() => Pattern> = [
   Tiler,
   Shaper,
   Leaf,
-  BrightnessAdjust,
   Threshold,
   ColorTint,
   CartesianProjection,
@@ -29,9 +28,17 @@ const effectFactories: Array<() => Pattern> = [
   Kaleidoscope,
 ];
 
+// Deprecated effects can no longer be added, but remain registered so that
+// old serialized data containing them still deserializes. Brightness Adjust
+// was replaced by the per-block opacity channel.
+const deprecatedEffectFactories: Array<() => Pattern> = [BrightnessAdjust];
+
 // Effects that will not have their uniforms changed. These are used for checking what the default
 // uniform values are.
-const defaultEffects: Pattern[] = effectFactories.map((f) => f());
+const defaultEffects: Pattern[] = [
+  ...effectFactories,
+  ...deprecatedEffectFactories,
+].map((f) => f());
 const defaultEffectMap: { [key: string]: Pattern } = {};
 for (const effect of defaultEffects) defaultEffectMap[effect.name] = effect;
 

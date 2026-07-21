@@ -311,6 +311,10 @@ export class LayerV1 implements Layer {
   // v1 layers never contain overlapping blocks, so everything is in lane 0
   blockTopOffset = () => 0;
 
+  // v1 layers never contain overlapping blocks, so there is never a crossfade
+  autoBlockOpacityAt = () => 1;
+  autoOpacityVariations = () => null;
+
   serialize = () => ({
     id: this.id,
     name: this.name,
