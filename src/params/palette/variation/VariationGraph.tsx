@@ -91,6 +91,8 @@ export const PaletteVariationGraph = function PaletteVariationGraph({
           width="auto"
           bg="#12151c"
           borderColor="#2d3748"
+          // clear the sticky layer header (zIndex 11) and floating controls
+          zIndex={1500}
           onClick={(e) => e.stopPropagation()}
         >
           <PopoverArrow bg="#12151c" />
