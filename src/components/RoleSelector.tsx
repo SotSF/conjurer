@@ -1,4 +1,11 @@
-import { Button, Menu, MenuButton, MenuItem, MenuList } from "@chakra-ui/react";
+import {
+  Button,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
+  Portal,
+} from "@chakra-ui/react";
 import { FaCaretDown } from "react-icons/fa";
 import { useStore } from "@/src/types/StoreContext";
 import { action } from "mobx";
@@ -25,32 +32,34 @@ export const RoleSelector = observer(function RoleSelector() {
       >
         Role: {store.roleText}
       </MenuButton>
-      <MenuList zIndex={12}>
-        <MenuItem
-          onClick={action(() => {
-            store.role = "emcee";
-            router.push("/");
-          })}
-        >
-          Emcee
-        </MenuItem>
-        <MenuItem
-          onClick={action(() => {
-            store.role = "experienceCreator";
-            experienceStore.openExperience(router, store.experienceName);
-          })}
-        >
-          Experience Creator
-        </MenuItem>
-        <MenuItem
-          onClick={action(() => {
-            store.role = "vj";
-            router.push("/vj");
-          })}
-        >
-          VJ
-        </MenuItem>
-      </MenuList>
+      <Portal>
+        <MenuList zIndex="dropdown">
+          <MenuItem
+            onClick={action(() => {
+              store.role = "emcee";
+              router.push("/");
+            })}
+          >
+            Emcee
+          </MenuItem>
+          <MenuItem
+            onClick={action(() => {
+              store.role = "experienceCreator";
+              experienceStore.openExperience(router, store.experienceName);
+            })}
+          >
+            Experience Creator
+          </MenuItem>
+          <MenuItem
+            onClick={action(() => {
+              store.role = "vj";
+              router.push("/vj");
+            })}
+          >
+            VJ
+          </MenuItem>
+        </MenuList>
+      </Portal>
     </Menu>
   );
 });

@@ -1,5 +1,5 @@
 import styles from "@/styles/Display.module.css";
-import { Box, Heading, HStack, VStack } from "@chakra-ui/react";
+import { Box, Heading, HStack } from "@chakra-ui/react";
 import { DisplayCanvas } from "@/src/components/Canvas/DisplayCanvas";
 import { DisplayControls } from "@/src/components/DisplayControls";
 import { observer } from "mobx-react-lite";
@@ -9,6 +9,7 @@ import { useState } from "react";
 import { LoginButton } from "@/src/components/LoginButton";
 import { RoleSelector } from "@/src/components/RoleSelector";
 import { ExperienceHeading } from "@/src/components/Menu/ExperienceHeading";
+import { EmceeOutputControlsToggle } from "@/src/components/PlaylistEditor/EmceeOutputControlsToggle";
 
 export const Display = observer(function Display() {
   const store = useStore();
@@ -30,11 +31,18 @@ export const Display = observer(function Display() {
         {!viewerMode && (
           <>
             <MenuBar />
-            <VStack position="absolute" width="100%" marginY="2" zIndex={1}>
-              <Heading className={styles.fadeOut} userSelect="none">
-                Conjurer
-              </Heading>
-            </VStack>
+            <Heading
+              className={styles.fadeOut}
+              position="absolute"
+              top="50%"
+              left="50%"
+              transform="translate(-50%, -50%)"
+              zIndex={1}
+              pointerEvents="none"
+              userSelect="none"
+            >
+              Conjurer
+            </Heading>
             <HStack
               p={2}
               position="absolute"
@@ -49,6 +57,7 @@ export const Display = observer(function Display() {
           </>
         )}
         <DisplayControls canvasContainer={containerElement} />
+        {store.context === "playlistEditor" && <EmceeOutputControlsToggle />}
       </Box>
 
       <Box

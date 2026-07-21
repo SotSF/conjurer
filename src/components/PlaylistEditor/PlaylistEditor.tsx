@@ -25,6 +25,13 @@ import { PlaylistNameEditable } from "@/src/components/PlaylistEditor/PlaylistNa
 import { useEffect, useRef } from "react";
 import { FaPlus } from "react-icons/fa";
 import { useRouter } from "next/router";
+import {
+  DragDropContext,
+  Droppable,
+  OnDragEndResponder,
+} from "@hello-pangea/dnd";
+import { reorder } from "@/src/utils/array";
+import { useSavePlaylist } from "@/src/hooks/playlist";
 
 export const PlaylistEditor = observer(function PlaylistEditor() {
   const store = useStore();
@@ -34,6 +41,8 @@ export const PlaylistEditor = observer(function PlaylistEditor() {
   const { selectedPlaylist } = playlistStore;
 
   const isEditable = username === selectedPlaylist?.user.username;
+
+  const { savePlaylist } = useSavePlaylist();
 
   const { isPending, isError, data } = trpc.playlist.getPlaylist.useQuery(
     {
@@ -67,6 +76,20 @@ export const PlaylistEditor = observer(function PlaylistEditor() {
   if (isPending || isError) return null;
 
   const { playlist, playlistExperiences } = data;
+
+  const onDragEnd: OnDragEndResponder = (result) => {
+    if (!result.destination) return;
+    if (result.source.index === result.destination.index) return;
+
+    savePlaylist({
+      ...playlist,
+      orderedExperienceIds: reorder(
+        playlist.orderedExperienceIds,
+        result.source.index,
+        result.destination.index,
+      ),
+    });
+  };
 
   return (
     <VStack m={6} justify="start" alignItems="start">
@@ -143,46 +166,52 @@ export const PlaylistEditor = observer(function PlaylistEditor() {
       </HStack>
 
       <TableContainer m={4}>
-        <Table size="sm" variant="simple">
-          <Thead>
-            <Tr>
-              <Th isNumeric></Th>
-              <Th>Experience</Th>
-              <Th>Status</Th>
-              <Th>Artist</Th>
-              <Th>Song</Th>
-              <Th></Th>
-            </Tr>
-          </Thead>
-          <Tbody>
-            {playlistExperiences.length === 0 ? (
-              <>
-                <Tr>
-                  <Td></Td>
-                  <Td>
-                    <Text>No experiences added yet!</Text>
-                  </Td>
-                  <Td>-</Td>
-                  <Td>-</Td>
-                  <Td></Td>
-                </Tr>
-              </>
-            ) : (
-              playlistExperiences.map((experience, index) => (
-                <Tr key={experience.id}>
-                  <PlaylistItem
-                    playlist={playlist}
-                    experience={experience}
-                    user={experience.user}
-                    index={index}
-                    playlistLength={playlistExperiences.length}
-                    editable={isEditable}
-                  />
-                </Tr>
-              ))
-            )}
-          </Tbody>
-        </Table>
+        <DragDropContext onDragEnd={onDragEnd}>
+          <Table size="sm" variant="simple">
+            <Thead>
+              <Tr>
+                <Th isNumeric></Th>
+                <Th>Experience</Th>
+                <Th>Status</Th>
+                <Th>Artist</Th>
+                <Th>Song</Th>
+                <Th></Th>
+              </Tr>
+            </Thead>
+            <Droppable
+              droppableId="playlist-experiences"
+              isDropDisabled={!isEditable}
+            >
+              {(provided) => (
+                <Tbody ref={provided.innerRef} {...provided.droppableProps}>
+                  {playlistExperiences.length === 0 ? (
+                    <Tr>
+                      <Td></Td>
+                      <Td>
+                        <Text>No experiences added yet!</Text>
+                      </Td>
+                      <Td>-</Td>
+                      <Td>-</Td>
+                      <Td></Td>
+                    </Tr>
+                  ) : (
+                    playlistExperiences.map((experience, index) => (
+                      <PlaylistItem
+                        key={experience.id}
+                        playlist={playlist}
+                        experience={experience}
+                        user={experience.user}
+                        index={index}
+                        editable={isEditable}
+                      />
+                    ))
+                  )}
+                  {provided.placeholder}
+                </Tbody>
+              )}
+            </Droppable>
+          </Table>
+        </DragDropContext>
       </TableContainer>
 
       {isEditable && (

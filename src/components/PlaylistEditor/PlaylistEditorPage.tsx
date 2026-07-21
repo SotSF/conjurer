@@ -7,6 +7,8 @@ import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { TimerAndWaveform } from "@/src/components/Timeline/TimerAndWaveform";
 import { PlaylistEditor } from "@/src/components/PlaylistEditor/PlaylistEditor";
 import { PlaylistLibrary } from "@/src/components/PlaylistEditor/PlaylistLibrary";
+import { PlaylistQueryParent } from "@/src/components/PlaylistEditor/PlaylistQueryParent";
+import { EmceeOutputControls } from "@/src/components/PlaylistEditor/EmceeOutputControls";
 import { LoadingOverlay } from "@/src/components/LoadingOverlay";
 import { observer } from "mobx-react-lite";
 
@@ -20,34 +22,39 @@ export const PlaylistEditorPage = observer(function PlaylistEditorPage() {
   }, [store, store.initializationState]);
 
   return (
-    <Box key={userStore.username} position="relative" w="100vw" h="100vh">
-      <PanelGroup
-        key={userStore.username}
-        autoSaveId="playlistEditor-1"
-        direction="horizontal"
-      >
-        <Panel defaultSize={25} minSize={20}>
-          <PlaylistLibrary />
-        </Panel>
-        <PanelResizeHandle />
-        <Panel>
-          <PanelGroup autoSaveId="playlistEditor-2" direction="vertical">
-            <Panel defaultSize={45}>
-              <Display />
-            </Panel>
-            <PanelResizeHandle />
-            <Panel>
-              <Box height="100%" overflowX="hidden" overflowY="auto">
-                <TimerAndWaveform />
-                <PlaylistEditor />
-              </Box>
-            </Panel>
-          </PanelGroup>
-        </Panel>
-      </PanelGroup>
+    <PlaylistQueryParent>
+      <Box key={userStore.username} position="relative" w="100vw" h="100vh">
+        <PanelGroup
+          key={userStore.username}
+          autoSaveId="playlistEditor-1"
+          direction="horizontal"
+        >
+          <Panel defaultSize={25} minSize={20}>
+            <PlaylistLibrary />
+          </Panel>
+          <PanelResizeHandle />
+          <Panel>
+            <PanelGroup autoSaveId="playlistEditor-2" direction="vertical">
+              <Panel defaultSize={45}>
+                <Display />
+              </Panel>
+              <PanelResizeHandle />
+              <Panel>
+                <Box height="100%" overflowX="hidden" overflowY="auto">
+                  <Box position="sticky" top={0} zIndex={20}>
+                    <EmceeOutputControls />
+                    <TimerAndWaveform />
+                  </Box>
+                  <PlaylistEditor />
+                </Box>
+              </Panel>
+            </PanelGroup>
+          </Panel>
+        </PanelGroup>
 
-      <LoadingOverlay />
-      <KeyboardControls editMode={false} />
-    </Box>
+        <LoadingOverlay />
+        <KeyboardControls editMode={false} />
+      </Box>
+    </PlaylistQueryParent>
   );
 });

@@ -101,6 +101,34 @@ float plot(vec2 st, float pct) {
 //  theta goes from 0.0 to 1.0, which describes the angle around the center from 0 to 2pi
 //  radius goes from 0.0 to 1.0, which describes the distance from the center to the edge of the canopy
 
+// ---------- CATENARY ARC LENGTH CORRECTION ----------
+
+// Physically, the LEDs of a strip are equidistant along the *arc* of the catenary that the
+// strip forms between the apex ring and the outer ring. When the canopy is viewed from below,
+// this means the LEDs are NOT equidistant radially: the strip is steepest near the outer edge,
+// so consecutive LEDs bunch closer together radially there.
+
+// These constants describe the catenary y = cosh(a * (x - xMin)) / a + bias hanging between
+// (APEX_RADIUS, APEX_HEIGHT) and (BASE_RADIUS, 0) with length STRIP_LENGTH. They are derived
+// from the physical dimensions in src/utils/size.ts. If those dimensions change, regenerate
+// them by running `yarn generateCanopy`, which logs the new values.
+#define CATENARY_A 0.2078183
+#define CATENARY_X_MIN 2.6545448
+#define CATENARY_SINH_APEX -0.3506603
+#define CATENARY_STRIP_LENGTH 8.2021
+#define CATENARY_APEX_RADIUS 1.0
+#define CATENARY_BASE_RADIUS 8.0
+
+// Converts a normalized position along the strip's arc (0 = first LED at the apex, 1 = last
+// LED at the outer edge) into that LED's true normalized radial position (0 to 1) as seen when
+// the canopy is viewed from below.
+float canopyArcToRadialFraction(float arcFraction) {
+    float z = CATENARY_A * CATENARY_STRIP_LENGTH * arcFraction + CATENARY_SINH_APEX;
+    // asinh(z) = log(z + sqrt(z^2 + 1)), not built into GLSL ES
+    float x = CATENARY_X_MIN + log(z + sqrt(z * z + 1.0)) / CATENARY_A;
+    return (x - CATENARY_APEX_RADIUS) / (CATENARY_BASE_RADIUS - CATENARY_APEX_RADIUS);
+}
+
 // ---------- ---------- ---------- ----------
 
 // Converts canopy coordinates to cartesian coordinates

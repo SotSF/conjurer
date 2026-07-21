@@ -155,7 +155,7 @@ export const VJParameterControls = observer(function VJParameterControls({
           })
           .map(([uniformName, patternParam]) => (
             <VJParameterControl
-              key={uniformName}
+              key={`${uniformName}-${block.id}`}
               block={block}
               uniformName={uniformName}
               patternParam={patternParam}

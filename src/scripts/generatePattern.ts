@@ -7,8 +7,10 @@ if (process.argv.length != 3) {
   process.exit(1);
 }
 
-if (!patternArg.match(/^[a-zA-Z]+$/)) {
-  console.error("Please only use alphabet characters ([a-zA-Z]). Exiting.");
+if (!patternArg.match(/^[a-zA-Z0-9]+$/)) {
+  console.error(
+    "Please only use alphanumeric characters ([a-zA-Z0-9]). Exiting.",
+  );
   process.exit(1);
 }
 
