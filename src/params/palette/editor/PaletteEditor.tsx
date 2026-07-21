@@ -125,13 +125,7 @@ export const PaletteEditor = function PaletteEditor({
   };
 
   return (
-    <VStack
-      align="stretch"
-      spacing={3}
-      width="320px"
-      maxHeight="70vh"
-      overflowY="auto"
-    >
+    <VStack align="stretch" spacing={3} width="320px">
       <Box
         height="26px"
         borderRadius="4px"
