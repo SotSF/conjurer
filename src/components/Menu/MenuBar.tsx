@@ -348,6 +348,10 @@ export const MenuBar = observer(function MenuBar() {
                   Set audio latency ({(audioStore.audioLatency * 1000).toFixed()}
                   ms)
                 </MenuItem>
+                <MenuDivider />
+                <MenuItem as="a" href="/admin" target="_blank">
+                  Admin
+                </MenuItem>
               </MenuList>
             </Portal>
           </Menu>
