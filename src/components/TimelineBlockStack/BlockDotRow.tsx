@@ -12,7 +12,8 @@ const BASE_EXCLUDED = ["u_time", "u_texture"];
 
 const AUTHORED_COLOR = "#ed8936"; // orange.400
 const EFFECT_COLOR = "#c99a63"; // muted amber for effect params
-const FADING_COLOR = "#63b3ed"; // blue.300
+const OPACITY_COLOR = "#3182ce"; // blue.500 — authored/manual opacity
+const FADING_COLOR = "#63b3ed"; // blue.300 — auto crossfade
 const DEFAULT_BORDER = "#4a5568"; // gray.600
 
 // approximate horizontal footprint of one dot (dot + gap), for deciding when
@@ -120,7 +121,7 @@ export const BlockDotRow = observer(function BlockDotRow({
   ).length;
   const opacitySignal = patternSignals.find((s) => s.isOpacity);
   const opacityFill = opacitySignal?.authored
-    ? AUTHORED_COLOR
+    ? OPACITY_COLOR
     : opacitySignal?.fading
       ? FADING_COLOR
       : "transparent";
@@ -213,7 +214,7 @@ const Dot = function Dot({ signal }: { signal: Signal }) {
 
   const fill = isOpacity
     ? authored
-      ? AUTHORED_COLOR
+      ? OPACITY_COLOR
       : fading
         ? FADING_COLOR
         : "transparent"
@@ -224,7 +225,11 @@ const Dot = function Dot({ signal }: { signal: Signal }) {
       : "transparent";
 
   const filled = fill !== "transparent";
-  const ringColor = authored ? "rgba(237,137,54,.35)" : "rgba(113,128,150,.4)";
+  const ringColor = isOpacity
+    ? "rgba(49,130,206,.4)"
+    : authored
+      ? "rgba(237,137,54,.35)"
+      : "rgba(113,128,150,.4)";
 
   const title =
     signal.label + (isPalette ? " · palette (edit in details)" : "");
