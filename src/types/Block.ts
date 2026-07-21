@@ -41,8 +41,8 @@ export class Block {
   headerRepetitions: number = 1; // number of times to repeat the headers in this block
 
   // UI state: whether the timeline shows this block's parameters/effects or
-  // just its header
-  showDetails = false;
+  // just its header. Expanded by default; the header caret can collapse it.
+  showDetails = true;
 
   private _layer: Layer | null = null; // the layer that this block is in
 
