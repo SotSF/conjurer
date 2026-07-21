@@ -1,7 +1,10 @@
 import { Block } from "@/src/types/Block";
 import { isPalette, Palette } from "@/src/params/palette/Palette";
 import { playgroundEffects } from "@/src/effects/effects";
+import { paramValueAtTime } from "@/src/utils/paramValueAtTime";
+import { vector4ToRgbaString } from "@/src/utils/color";
 import { useStore } from "@/src/types/StoreContext";
+import { Vector4 } from "three";
 import {
   Box,
   Button,
@@ -222,7 +225,6 @@ const ParamCell = function ParamCell({
   isEffect: boolean;
 }) {
   const param = block.pattern.params[uniformName];
-  const palette = isPalette(param.value);
   return (
     <HStack
       height={`${CELL_HEIGHT}px`}
@@ -246,20 +248,58 @@ const ParamCell = function ParamCell({
       >
         {param.name}
       </Text>
-      <HStack spacing={1} flexShrink={0}>
-        {palette && (
-          <Box
-            width="22px"
-            height="8px"
-            borderRadius="2px"
-            background={paletteToGradient(param.value as Palette)}
-          />
-        )}
+      <HStack spacing={1.5} flexShrink={0}>
+        <ParamValueReadout block={block} uniformName={uniformName} />
         <ArmIndicator block={block} uniformName={uniformName} />
       </HStack>
     </HStack>
   );
 };
+
+const formatNumber = (n: number) =>
+  Number.isInteger(n) ? String(n) : Math.abs(n) < 1000 ? n.toFixed(2) : n.toFixed(0);
+
+// Shows a param's value at the current playhead time (clamped to the block's
+// start/end when the playhead is outside the block). Observer so it tracks the
+// playhead live as it moves.
+const ParamValueReadout = observer(function ParamValueReadout({
+  block,
+  uniformName,
+}: {
+  block: Block;
+  uniformName: string;
+}) {
+  const { audioStore } = useStore();
+  const value = paramValueAtTime(block, uniformName, audioStore.globalTime);
+
+  if (isPalette(value))
+    return (
+      <Box
+        width="22px"
+        height="8px"
+        borderRadius="2px"
+        flexShrink={0}
+        background={paletteToGradient(value)}
+      />
+    );
+  if (value instanceof Vector4)
+    return (
+      <Box
+        width="12px"
+        height="12px"
+        borderRadius="2px"
+        flexShrink={0}
+        bg={vector4ToRgbaString(value)}
+      />
+    );
+  if (typeof value === "number")
+    return (
+      <Text fontFamily="mono" fontSize="9px" color="gray.400">
+        {formatNumber(value)}
+      </Text>
+    );
+  return null;
+});
 
 // Lays params out top-to-bottom in a single column, spilling into further
 // columns only when they exceed the available height. Rows-per-column is
