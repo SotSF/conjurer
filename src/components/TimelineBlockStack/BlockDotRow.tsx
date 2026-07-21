@@ -168,7 +168,9 @@ export const BlockDotRow = observer(function BlockDotRow({
   );
 });
 
-const DotList = observer(function DotList({
+// plain (not observer): renders already-computed plain props; the observable
+// reads happen in BlockDotRow above
+const DotList = function DotList({
   patternSignals,
   effectSignals,
 }: {
@@ -194,9 +196,9 @@ const DotList = observer(function DotList({
       ))}
     </HStack>
   );
-});
+};
 
-const Dot = observer(function Dot({ signal }: { signal: Signal }) {
+const Dot = function Dot({ signal }: { signal: Signal }) {
   const { authored, laneOn, isOpacity, fading, isEffect, isPalette } = signal;
 
   // palettes have no automation lane; the dot is a read-only authored indicator
@@ -249,4 +251,4 @@ const Dot = observer(function Dot({ signal }: { signal: Signal }) {
       cursor={toggleable ? "pointer" : "default"}
     />
   );
-});
+};
