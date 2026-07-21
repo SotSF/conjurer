@@ -61,6 +61,11 @@ export const BlockDevicePanel = observer(function BlockDevicePanel() {
   const block = selectedPatternBlock(store);
   if (!block) return null;
 
+  // Read the observable array here in the component's own (tracked) render so
+  // the observer re-renders on add/remove/reorder. Reading it only inside the
+  // Droppable render-prop below would happen outside this component's tracking.
+  const effectBlocks = [...block.effectBlocks];
+
   const onDragEnd: OnDragEndResponder = action((result) => {
     if (!result.destination) return;
     const effectBlock = block.effectBlocks[result.source.index];
@@ -106,7 +111,7 @@ export const BlockDevicePanel = observer(function BlockDevicePanel() {
                 align="stretch"
                 spacing={0}
               >
-                {block.effectBlocks.map((effectBlock, index) => (
+                {effectBlocks.map((effectBlock, index) => (
                   <Draggable
                     key={effectBlock.id}
                     draggableId={effectBlock.id}
