@@ -11,6 +11,7 @@ export const SendDataButton = observer(function SendDataButton() {
   return (
     <Button
       size="sm"
+      height={6}
       bgColor={store.sendingData ? "orange.700" : undefined}
       _hover={
         store.sendingData

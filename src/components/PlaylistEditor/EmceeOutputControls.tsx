@@ -31,7 +31,6 @@ export const EmceeOutputControls = observer(function EmceeOutputControls() {
         <IntensitySlider />
         <BrightnessLimiterIndicator />
       </ControlGroup>
-      <SendDataButton />
       <Button
         size="sm"
         height={6}
@@ -43,6 +42,7 @@ export const EmceeOutputControls = observer(function EmceeOutputControls() {
       >
         {uiStore.renderTargetSize}
       </Button>
+      <SendDataButton />
     </HStack>
   );
 });
