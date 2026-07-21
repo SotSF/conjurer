@@ -158,7 +158,9 @@ const Connector = () => (
   </Box>
 );
 
-const ArmToggle = observer(function ArmToggle({
+// display-only ◉/○ reflecting whether the param's lane is armed; the whole
+// ParamCell is the click target
+const ArmIndicator = observer(function ArmIndicator({
   block,
   uniformName,
 }: {
@@ -167,26 +169,14 @@ const ArmToggle = observer(function ArmToggle({
 }) {
   const armed = block.lanedParams.has(uniformName);
   return (
-    <Tooltip
-      label={armed ? "Remove lane from timeline" : "Arm: show lane in timeline"}
-      openDelay={0}
-      hasArrow
-      fontSize="xs"
+    <Text
+      as="span"
+      fontFamily="mono"
+      fontSize="10px"
+      color={armed ? ARMED_COLOR : UNARMED_COLOR}
     >
-      <Text
-        as="span"
-        fontFamily="mono"
-        fontSize="10px"
-        cursor="pointer"
-        color={armed ? ARMED_COLOR : UNARMED_COLOR}
-        onClick={action((e: ReactMouseEvent) => {
-          e.stopPropagation();
-          block.toggleParamLane(uniformName);
-        })}
-      >
-        {armed ? "◉" : "○"}
-      </Text>
-    </Tooltip>
+      {armed ? "◉" : "○"}
+    </Text>
   );
 });
 
@@ -209,6 +199,16 @@ const ParamCell = function ParamCell({
       borderRadius="3px"
       px="6px"
       spacing={2}
+      cursor={palette ? "default" : "pointer"}
+      _hover={palette ? undefined : { bg: isEffect ? "#1a222e" : "#1c2432" }}
+      onClick={
+        palette
+          ? undefined
+          : action((e: ReactMouseEvent) => {
+              e.stopPropagation();
+              block.toggleParamLane(uniformName);
+            })
+      }
     >
       <Text
         fontSize="10.5px"
@@ -227,7 +227,7 @@ const ParamCell = function ParamCell({
           background={paletteToGradient(param.value as Palette)}
         />
       ) : (
-        <ArmToggle block={block} uniformName={uniformName} />
+        <ArmIndicator block={block} uniformName={uniformName} />
       )}
     </HStack>
   );
