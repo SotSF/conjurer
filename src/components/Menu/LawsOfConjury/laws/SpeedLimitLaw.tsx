@@ -27,20 +27,20 @@ export function SpeedLimitLaw() {
       <Text>
         These patterns are destined for a large, 16-foot diameter, 14k LED
         surface with humans viewing from a pretty close distance. And
-        importantly, while it's 2 inches per second on your screen, it's{" "}
-        <em>16 feet per second</em> on the canopy. That's too fast!
+        importantly, while it&apos;s 2 inches per second on your screen, it&apos;s{" "}
+        <em>16 feet per second</em> on the canopy. That&apos;s too fast!
       </Text>
       <Text>
         So this is a very important thing to keep in mind because some patterns
         have defaults that are borderline aggressive, and as you start tweaking
-        things yourself it's easy to get something that looks cool but breaks
+        things yourself it&apos;s easy to get something that looks cool but breaks
         this (vaguely defined) speed limit. That said, occasionally going faster
         to make a memorable moment is is probably fine, just keep things on
         average slow and smooth.
       </Text>
       <Text>
         <strong>
-          A key takeaway we've had from lots of tinkering is: slowly evolving
+          A key takeaway we&apos;ve had from lots of tinkering is: slowly evolving
           patterns look better than fast and flashy patterns.
         </strong>
       </Text>

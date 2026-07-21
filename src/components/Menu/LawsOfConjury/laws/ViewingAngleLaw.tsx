@@ -17,7 +17,7 @@ export function ViewingAngleLaw() {
         the canopy.
       </Text>
       <Text>
-        This "Fire" pattern has a few issues. However it seems nice enough to
+        This &quot;Fire&quot; pattern has a few issues. However it seems nice enough to
         begin with:
       </Text>
       <HStack alignItems="flex-start" spacing={4}>
@@ -29,7 +29,7 @@ export function ViewingAngleLaw() {
       </HStack>
       <Text>
         Additionally the viewing experience for someone right underneath the
-        center of the canopy isn't great for negative space reasons:
+        center of the canopy isn&apos;t great for negative space reasons:
       </Text>
       <HStack alignItems="flex-start" spacing={4}>
         <LawVideo src="/laws-of-conjury/viewing-angle-3.loop.webm" />
@@ -39,9 +39,9 @@ export function ViewingAngleLaw() {
           Consider how the pattern will be viewed from various angles.
         </strong>{" "}
         The answer is pretty situational, and this is another rule that can be
-        broken at times, but it's something to be aware of. It's probably the
+        broken at times, but it&apos;s something to be aware of. It&apos;s probably the
         case that more people see the canopy from the side than from underneath,
-        so it's worth catering to their experience as well.
+        so it&apos;s worth catering to their experience as well.
       </Text>
     </VStack>
   );
