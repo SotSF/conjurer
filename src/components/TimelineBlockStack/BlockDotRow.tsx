@@ -174,8 +174,6 @@ export const BlockDotRow = observer(function BlockDotRow({
   );
 });
 
-// plain (not observer): renders already-computed plain props; the observable
-// reads happen in BlockDotRow above
 const DotList = function DotList({
   patternSignals,
   effectSignals,

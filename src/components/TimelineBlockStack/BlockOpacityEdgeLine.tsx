@@ -66,8 +66,6 @@ export const BlockOpacityEdgeLine = observer(function BlockOpacityEdgeLine({
   );
 });
 
-// plain (not observer): its render reads no observable; drag callbacks read the
-// store lazily, and the parent re-renders it when the fade extents change
 const FadeHandle = function FadeHandle({
   block,
   side,

@@ -154,7 +154,7 @@ const Connector = () => (
   </Box>
 );
 
-const ArmToggle = function ArmToggle({
+const ArmToggle = observer(function ArmToggle({
   block,
   uniformName,
 }: {
@@ -184,9 +184,9 @@ const ArmToggle = function ArmToggle({
       </Text>
     </Tooltip>
   );
-};
+});
 
-const ParamCell = observer(function ParamCell({
+const ParamCell = function ParamCell({
   block,
   uniformName,
   isEffect,
@@ -227,9 +227,9 @@ const ParamCell = observer(function ParamCell({
       )}
     </HStack>
   );
-});
+};
 
-const PatternUnit = observer(function PatternUnit({ block }: { block: Block }) {
+const PatternUnit = function PatternUnit({ block }: { block: Block }) {
   const uniformNames = Object.keys(block.pattern.params).filter(
     (name) => !BASE_EXCLUDED.includes(name),
   );
@@ -263,9 +263,9 @@ const PatternUnit = observer(function PatternUnit({ block }: { block: Block }) {
       </Grid>
     </Box>
   );
-});
+};
 
-const EffectUnit = observer(function EffectUnit({
+const EffectUnit = function EffectUnit({
   parentBlock,
   effectBlock,
   index,
@@ -322,9 +322,9 @@ const EffectUnit = observer(function EffectUnit({
       </VStack>
     </Box>
   );
-});
+};
 
-const AddEffectUnit = observer(function AddEffectUnit({
+const AddEffectUnit = function AddEffectUnit({
   block,
 }: {
   block: Block;
@@ -360,4 +360,4 @@ const AddEffectUnit = observer(function AddEffectUnit({
       </Portal>
     </Menu>
   );
-});
+};
