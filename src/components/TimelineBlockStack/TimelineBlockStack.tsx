@@ -144,6 +144,9 @@ export const TimelineBlockStack = observer(function TimelineBlockStack({
         borderColor={isSelected ? "blue.500" : "white"}
         borderWidth={3}
         alignItems="center"
+        // allow the automation-lane gutter labels and the narrow-block dot-row
+        // popover to render just outside the block's own width
+        overflow="visible"
         onClick={(e: ReactMouseEvent) => e.stopPropagation()}
       >
         <TimelineBlockBound block={patternBlock} bound="left" />
