@@ -227,14 +227,7 @@ const Dot = function Dot({ signal }: { signal: Signal }) {
   const ringColor = authored ? "rgba(237,137,54,.35)" : "rgba(113,128,150,.4)";
 
   const title =
-    `${signal.label} — ` +
-    (isOpacity && fading && !authored
-      ? "auto crossfade"
-      : authored
-        ? "authored"
-        : "default") +
-    (isEffect ? " (effect)" : "") +
-    (isPalette ? " · palette (edit in details)" : laneOn ? " (lane on)" : "");
+    signal.label + (isPalette ? " · palette (edit in details)" : "");
 
   const onClick = action((e: ReactMouseEvent) => {
     e.stopPropagation();
