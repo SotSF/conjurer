@@ -40,7 +40,7 @@ export const VJSendDataButton = observer(function VJSendDataButton() {
       }
       onClick={store.toggleSendingData}
     >
-      {sending ? "Sending" : "Send Data"}
+      {sending ? "Sending" : "Not sending"}
     </Button>
   );
 });
