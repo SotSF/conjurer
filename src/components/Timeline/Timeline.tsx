@@ -1,20 +1,21 @@
 import { observer } from "mobx-react-lite";
 import { Box } from "@chakra-ui/react";
 import { useStore } from "@/src/types/StoreContext";
-import { useRef } from "react";
+import { useState } from "react";
 import { useWheelZooming } from "@/src/hooks/wheelZooming";
 import { TimerAndWaveform } from "@/src/components/Timeline/TimerAndWaveform";
 import { TimelineLayerStack } from "@/src/components/Timeline/TimelineLayerStack";
 
 export const Timeline = observer(function Timeline() {
   const store = useStore();
-  const timelineRef = useRef<HTMLDivElement>(null);
+  const [timelineEl, setTimelineEl] = useState<HTMLDivElement | null>(null);
 
-  useWheelZooming(timelineRef.current);
+  useWheelZooming(timelineEl);
 
   return (
     <Box
-      ref={timelineRef}
+      id="timeline"
+      ref={setTimelineEl}
       position="relative"
       height="100%"
       overflow="scroll"

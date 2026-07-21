@@ -1,19 +1,25 @@
 import { observer } from "mobx-react-lite";
-import { HStack, IconButton } from "@chakra-ui/react";
-import { RiZoomInLine, RiZoomOutLine } from "react-icons/ri";
-import { HiZoomIn, HiZoomOut } from "react-icons/hi";
+import { HStack, IconButton, Text } from "@chakra-ui/react";
 import { RxAlignCenterHorizontally } from "react-icons/rx";
 import { TbArrowBigRightLines } from "react-icons/tb";
 import { useStore } from "@/src/types/StoreContext";
 import { action } from "mobx";
 import { AudioControls } from "@/src/components/AudioControls";
 import { IntensitySlider } from "@/src/components/IntensitySlider";
-import { FaShareAlt } from "react-icons/fa";
+import { FaMinus, FaPlus, FaShareAlt } from "react-icons/fa";
+import { INITIAL_PIXELS_PER_SECOND } from "@/src/utils/time";
+import {
+  MAX_PIXELS_PER_SECOND,
+  MIN_PIXELS_PER_SECOND,
+} from "@/src/types/UIStore";
 
 export const ExperienceEditorControls = observer(
   function ExperienceEditorControls() {
     const store = useStore();
     const { uiStore } = store;
+    const zoomPercent = Math.round(
+      (uiStore.pixelsPerSecond / INITIAL_PIXELS_PER_SECOND) * 100,
+    );
 
     return (
       <HStack
@@ -26,32 +32,29 @@ export const ExperienceEditorControls = observer(
       >
         <AudioControls />
         <IconButton
-          aria-label="Zoom way in"
-          title="Zoom way in"
+          aria-label="Zoom out"
+          title="Zoom out"
           height={6}
-          icon={<RiZoomInLine size={17} />}
-          onClick={action(() => uiStore.zoomIn(50))}
+          icon={<FaMinus size={12} />}
+          onClick={action(() => uiStore.zoomOut())}
+          isDisabled={uiStore.pixelsPerSecond <= MIN_PIXELS_PER_SECOND}
         />
+        <Text
+          fontSize="xs"
+          minWidth="36px"
+          textAlign="center"
+          userSelect="none"
+          title={`${uiStore.pixelsPerSecond.toFixed(0)} px/s`}
+        >
+          {zoomPercent}%
+        </Text>
         <IconButton
           aria-label="Zoom in"
           title="Zoom in"
           height={6}
-          icon={<HiZoomIn size={17} />}
+          icon={<FaPlus size={12} />}
           onClick={action(() => uiStore.zoomIn())}
-        />
-        <IconButton
-          aria-label="Zoom out"
-          title="Zoom out"
-          height={6}
-          icon={<HiZoomOut size={17} />}
-          onClick={action(() => uiStore.zoomOut())}
-        />
-        <IconButton
-          aria-label="Zoom way out"
-          title="Zoom way out"
-          height={6}
-          icon={<RiZoomOutLine size={17} />}
-          onClick={action(() => uiStore.zoomOut(50))}
+          isDisabled={uiStore.pixelsPerSecond >= MAX_PIXELS_PER_SECOND}
         />
         <IconButton
           aria-label="Keep playhead centered"
