@@ -5,7 +5,7 @@ import { observer } from "mobx-react-lite";
 import { MouseEvent as ReactMouseEvent, useState } from "react";
 import { MdDragIndicator } from "react-icons/md";
 import { BsArrowsCollapse, BsArrowsExpand } from "react-icons/bs";
-import { RxCaretDown, RxCaretUp } from "react-icons/rx";
+import { RxCaretDown, RxCaretRight, RxCaretUp } from "react-icons/rx";
 import { FaTrashAlt } from "react-icons/fa";
 import { HeaderRepeat } from "@/src/components/TimelineBlockStack/HeaderRepeat";
 import { PatternTimingModal } from "@/src/components/TimelineBlockStack/PatternTimingModal";
@@ -65,23 +65,43 @@ export const PatternOrEffectBlock = observer(function PatternOrEffectBlock({
           <IconButton
             variant="ghost"
             size="xs"
-            aria-label="Collapse/Expand"
-            title="Collapse/Expand"
+            aria-label={block.showDetails ? "Hide details" : "Show details"}
+            title={block.showDetails ? "Hide details" : "Show details"}
             height={6}
             icon={
-              expandMode === "collapsed" ? (
-                <BsArrowsExpand size={15} />
+              block.showDetails ? (
+                <RxCaretDown size={20} />
               ) : (
-                <BsArrowsCollapse size={15} />
+                <RxCaretRight size={20} />
               )
             }
-            onClick={(e) => {
-              setExpandMode(
-                expandMode === "expanded" ? "collapsed" : "expanded",
-              );
+            onClick={action((e: ReactMouseEvent) => {
+              block.toggleShowDetails();
               e.stopPropagation();
-            }}
+            })}
           />
+          {block.showDetails && (
+            <IconButton
+              variant="ghost"
+              size="xs"
+              aria-label="Collapse/Expand parameters"
+              title="Collapse/Expand parameters"
+              height={6}
+              icon={
+                expandMode === "collapsed" ? (
+                  <BsArrowsExpand size={15} />
+                ) : (
+                  <BsArrowsCollapse size={15} />
+                )
+              }
+              onClick={(e) => {
+                setExpandMode(
+                  expandMode === "expanded" ? "collapsed" : "expanded",
+                );
+                e.stopPropagation();
+              }}
+            />
+          )}
           {!isEffect && <PatternTimingModal block={block} />}
           {isEffect && (
             <HStack position="absolute" right={0}>
@@ -124,7 +144,9 @@ export const PatternOrEffectBlock = observer(function PatternOrEffectBlock({
           )}
         </HeaderRepeat>
       </HStack>
-      <ParametersList expandMode={expandMode} block={block} />
+      {block.showDetails && (
+        <ParametersList expandMode={expandMode} block={block} />
+      )}
     </>
   );
 });

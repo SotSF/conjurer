@@ -40,6 +40,10 @@ export class Block {
 
   headerRepetitions: number = 1; // number of times to repeat the headers in this block
 
+  // UI state: whether the timeline shows this block's parameters/effects or
+  // just its header. Expanded by default; the header caret can collapse it.
+  showDetails = true;
+
   private _layer: Layer | null = null; // the layer that this block is in
 
   get layer() {
@@ -76,6 +80,10 @@ export class Block {
     this.effectBlocks.forEach((effectBlock) => effectBlock.regenerateId());
   };
 
+  toggleShowDetails = () => {
+    this.showDetails = !this.showDetails;
+  };
+
   setTiming = ({
     startTime,
     duration,
@@ -102,6 +110,11 @@ export class Block {
   updateParameter = (parameter: string, time: number, loopLast = false) => {
     const variations = this.parameterVariations[parameter];
     if (!variations) return;
+
+    if (!(parameter in this.pattern.params)) {
+      console.error(`Parameter ${String(parameter)} not found in pattern`);
+      return;
+    }
 
     let variationTime = 0;
     for (const variation of variations) {
@@ -316,6 +329,11 @@ export class Block {
     if (index > -1) {
       this.effectBlocks.splice(index, 1);
     }
+  };
+
+  isActive = () => {
+    const { globalTime } = this.store.audioStore;
+    return this.startTime <= globalTime && globalTime < this.endTime;
   };
 
   /**

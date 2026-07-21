@@ -58,7 +58,7 @@ export const TimelineLayer = observer(function TimelineLayer({
           store.deselectAll();
         })}
       >
-        {layer.patternBlocks.map((block) => (
+        {layer.getAllBlocks().map((block) => (
           <TimelineBlockStack key={block.id} patternBlock={block} />
         ))}
       </Box>

@@ -1,8 +1,7 @@
 import merge from "@/src/shaders/merge.frag";
 import { WebGLRenderTarget } from "three";
 import { useFrame } from "@react-three/fiber";
-import { memo, useMemo, useRef } from "react";
-import { PatternParam } from "@/src/params/shared/patternParam";
+import { memo, useRef } from "react";
 import { makeVertexShader } from "@/src/shaders/vertexShader";
 
 type MergeNodeProps = {
@@ -19,16 +18,21 @@ export const MergeNode = memo(function MergeNode({
   renderTargetOut,
 }: MergeNodeProps) {
   const mesh = useRef<THREE.Mesh>(null);
-  const uniforms = useMemo(
-    () => ({
-      u_texture1: { value: renderTargetIn1.texture },
-      u_texture2: { value: renderTargetIn2.texture },
-    }),
-    [renderTargetIn1, renderTargetIn2],
-  );
+
+  // three.js only reads this object at material construction, so it must keep
+  // a stable identity; the texture values are refreshed each frame below,
+  // since the pipeline swaps this node's render targets as the number of
+  // active blocks/layers changes
+  const uniforms = useRef({
+    u_texture1: { value: renderTargetIn1.texture },
+    u_texture2: { value: renderTargetIn2.texture },
+  });
 
   useFrame(({ gl, camera }) => {
     if (!mesh.current) return;
+
+    uniforms.current.u_texture1.value = renderTargetIn1.texture;
+    uniforms.current.u_texture2.value = renderTargetIn2.texture;
 
     gl.setRenderTarget(renderTargetOut);
     gl.render(mesh.current, camera);
@@ -38,7 +42,7 @@ export const MergeNode = memo(function MergeNode({
     <mesh ref={mesh}>
       <planeGeometry args={[2, 2]} />
       <shaderMaterial
-        uniforms={uniforms}
+        uniforms={uniforms.current}
         vertexShader={makeVertexShader(["v_normalized_uv"])}
         fragmentShader={merge}
       />
