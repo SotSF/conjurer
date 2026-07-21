@@ -75,6 +75,15 @@ export const BlockDevicePanel = observer(function BlockDevicePanel() {
   // Droppable render-prop below would happen outside this component's tracking.
   const effectBlocks = [...block.effectBlocks];
   const reorderable = effectBlocks.length >= 2;
+  const { uiStore } = store;
+
+  const toggleAllLanes = action(() => {
+    const blocks = [block, ...block.effectBlocks];
+    const allArmed = blocks.every((b) =>
+      b.lanableParamNames.every((name) => b.lanedParams.has(name)),
+    );
+    blocks.forEach((b) => b.setParamLanes(b.lanableParamNames, !allArmed));
+  });
 
   const onDragEnd: OnDragEndResponder = action((result) => {
     if (!result.destination) return;
@@ -97,6 +106,26 @@ export const BlockDevicePanel = observer(function BlockDevicePanel() {
       display="flex"
       flexDirection="column"
     >
+      <HStack justify="flex-end" spacing={0} mb={1} flexShrink={0}>
+        <PanelIconButton
+          label="Toggle all lanes"
+          icon={<MdViewStream />}
+          onClick={toggleAllLanes}
+        />
+        <PanelIconButton
+          label="Scroll timeline to this block"
+          icon={<MdMyLocation />}
+          onClick={action(() => uiStore.scrollToTime(block.startTime))}
+        />
+        <PanelIconButton
+          label="Close device panel"
+          icon={<MdClose />}
+          onClick={action(() => {
+            uiStore.showDevicePanel = false;
+          })}
+        />
+      </HStack>
+
       <Box flex="1" minH={0} overflowX="auto" overflowY="hidden">
         <DragDropContext onDragEnd={onDragEnd}>
           <HStack align="stretch" spacing={0} minW="min-content" height="100%">
@@ -294,19 +323,9 @@ const ParamColumns = function ParamColumns({
 };
 
 const PatternUnit = function PatternUnit({ block }: { block: Block }) {
-  const { uiStore } = useStore();
   const uniformNames = Object.keys(block.pattern.params).filter(
     (name) => !BASE_EXCLUDED.includes(name),
   );
-
-  const toggleAllLanes = action(() => {
-    const blocks = [block, ...block.effectBlocks];
-    const allArmed = blocks.every((b) =>
-      b.lanableParamNames.every((name) => b.lanedParams.has(name)),
-    );
-    blocks.forEach((b) => b.setParamLanes(b.lanableParamNames, !allArmed));
-  });
-
   return (
     <Box
       flexShrink={0}
@@ -317,30 +336,16 @@ const PatternUnit = function PatternUnit({ block }: { block: Block }) {
       borderRadius="6px"
       p={2}
     >
-      <HStack justify="space-between" mb="6px" spacing={1} flexShrink={0}>
-        <Text fontSize="11px" fontWeight={600} color="#63b3ed" noOfLines={1}>
-          {block.pattern.name}
-        </Text>
-        <HStack spacing={0} flexShrink={0}>
-          <PanelIconButton
-            label="Toggle all lanes"
-            icon={<MdViewStream />}
-            onClick={toggleAllLanes}
-          />
-          <PanelIconButton
-            label="Scroll timeline to this block"
-            icon={<MdMyLocation />}
-            onClick={action(() => uiStore.scrollToTime(block.startTime))}
-          />
-          <PanelIconButton
-            label="Close device panel"
-            icon={<MdClose />}
-            onClick={action(() => {
-              uiStore.showDevicePanel = false;
-            })}
-          />
-        </HStack>
-      </HStack>
+      <Text
+        fontSize="11px"
+        fontWeight={600}
+        color="#63b3ed"
+        mb="6px"
+        flexShrink={0}
+        noOfLines={1}
+      >
+        {block.pattern.name}
+      </Text>
       <ParamColumns block={block} uniformNames={uniformNames} isEffect={false} />
     </Box>
   );
