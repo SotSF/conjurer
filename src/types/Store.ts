@@ -21,6 +21,11 @@ import "@/src/utils/mobx";
 import { UserStore } from "@/src/types/UserStore";
 import { User } from "@/src/types/User";
 import { setupConjurerApiWebsocket } from "@/src/websocket/conjurerApiWebsocket";
+import {
+  DEFAULT_BRIGHTNESS_LIMITER_ENABLED,
+  DEFAULT_BRIGHTNESS_LIMITER_RELEASE_SEC,
+  DEFAULT_BRIGHTNESS_LIMIT_THRESHOLD,
+} from "@/src/utils/brightnessLimiter";
 
 export type BlockSelection = { type: "block"; block: Block };
 
@@ -65,6 +70,12 @@ export class Store {
     this._globalIntensity = value;
     localStorage.setItem("globalIntensity", String(value));
   }
+
+  /** Current brightness-limiter envelope (1 = no reduction). Not persisted. */
+  brightnessLimiterGain = 1;
+  brightnessLimiterEnabled = DEFAULT_BRIGHTNESS_LIMITER_ENABLED;
+  brightnessLimiterThreshold = DEFAULT_BRIGHTNESS_LIMIT_THRESHOLD;
+  brightnessLimiterReleaseSec = DEFAULT_BRIGHTNESS_LIMITER_RELEASE_SEC;
 
   private _usingLocalData = process.env.NEXT_PUBLIC_NODE_ENV !== "production";
   get usingLocalData(): boolean {

@@ -8,6 +8,7 @@ import { useStore } from "@/src/types/StoreContext";
 import { action } from "mobx";
 import { AudioControls } from "@/src/components/AudioControls";
 import { IntensitySlider } from "@/src/components/IntensitySlider";
+import { BrightnessLimiterIndicator } from "@/src/components/BrightnessLimiterIndicator";
 import { FaShareAlt } from "react-icons/fa";
 
 export const ExperienceEditorControls = observer(
@@ -92,6 +93,7 @@ export const ExperienceEditorControls = observer(
           )}
         />
         <IntensitySlider />
+        <BrightnessLimiterIndicator />
         {/* TODO: re implement given viewerMode */}
         <IconButton
           aria-label="Copy link to experience"
