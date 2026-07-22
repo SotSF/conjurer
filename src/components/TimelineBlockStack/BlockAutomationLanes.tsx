@@ -1,15 +1,42 @@
 import { Block } from "@/src/types/Block";
+import { Variation } from "@/src/types/Variations/Variation";
 import { ParameterVariations } from "@/src/components/ParameterVariations/ParameterVariations";
 import { sampleBlockOpacity } from "@/src/utils/blockOpacity";
 import { paramValueAtTime } from "@/src/utils/paramValueAtTime";
+import { reorder } from "@/src/utils/array";
 import { useStore } from "@/src/types/StoreContext";
 import { Box, Button, HStack, Text, VStack } from "@chakra-ui/react";
 import { TIMELINE_HEADER_WIDTH } from "@/src/types/UIStore";
+import {
+  DragDropContext,
+  Draggable,
+  Droppable,
+  OnDragEndResponder,
+} from "@hello-pangea/dnd";
 import { action } from "mobx";
 import { observer } from "mobx-react-lite";
 import { MouseEvent as ReactMouseEvent } from "react";
 
 const OPACITY_CURVE_HEIGHT = 26;
+const REGION_BAR_HEIGHT = 18;
+
+// A region's modulation type → its label + accent color (the type is conveyed
+// by the tab's accent color even at rest; the label appears on hover).
+const regionTypeStyle = (variation: Variation): { label: string; color: string } => {
+  switch (variation.type) {
+    case "periodic":
+      return { label: "LFO", color: "#66bb94" };
+    case "audio":
+      return { label: "AUDIO", color: "#63b3ed" };
+    case "palette":
+      return { label: "PALETTE", color: "#b794f4" };
+    case "linear4":
+      return { label: "COLOR", color: "#f6ad55" };
+    default:
+      // flat / linear / easing / spline all read as a drawn curve
+      return { label: "CURVE", color: "#ed8936" };
+  }
+};
 
 type Lane = {
   // the block the param lives on (the pattern block, or one of its effects)
@@ -50,9 +77,9 @@ const gatherLanes = (block: Block): Lane[] => {
   return lanes;
 };
 
-// Automation lanes rendered directly beneath a block, spanning only the
-// block's width. Each lane shows the parameter's value-over-time curve (or, for
-// opacity, its auto crossfade) with the param name in the gutter to its left.
+// Automation lanes rendered directly beneath a block, spanning only the block's
+// width. Each lane is just its curve + a pinned name at rest; a per-region
+// control bar reveals in the strip above the curve on hover (never over it).
 export const BlockAutomationLanes = observer(function BlockAutomationLanes({
   block,
 }: {
@@ -90,51 +117,260 @@ const AutomationLane = observer(function AutomationLane({
 
   return (
     <Box position="relative" width="100%" role="group">
-      {isOpacity ? (
-        <OpacityLaneBody block={ownerBlock} />
-      ) : (
-        <ParameterVariations uniformName={uniformName} block={ownerBlock} />
-      )}
-      {/* param label: lives inside the lane, pinned to the left of the view
-          (like the block name), click-through, and faint on hover so it never
-          obstructs editing the curve underneath */}
-      <Box
-        position="absolute"
-        top={0}
-        left={0}
-        width="100%"
-        zIndex={3}
-        pointerEvents="none"
-      >
+      {/* region control bar — its own strip above the curve, so it never
+          covers a node; a thin colored region map at rest, full controls on
+          hover */}
+      <RegionBar block={ownerBlock} uniformName={uniformName} isOpacity={isOpacity} />
+
+      {/* the curve, with the pinned param name overlaid top-left */}
+      <Box position="relative" width="100%">
+        {isOpacity ? (
+          <OpacityLaneBody block={ownerBlock} />
+        ) : (
+          <ParameterVariations uniformName={uniformName} block={ownerBlock} />
+        )}
         <Box
-          position="sticky"
-          left={`${TIMELINE_HEADER_WIDTH}px`}
-          width="fit-content"
-          opacity={0.9}
-          transition="opacity 0.12s"
-          _groupHover={{ opacity: 0.4 }}
+          position="absolute"
+          top={0}
+          left={0}
+          width="100%"
+          zIndex={3}
+          pointerEvents="none"
         >
-          <HStack
-            spacing={1.5}
-            align="baseline"
-            bg="rgba(15,17,21,.6)"
-            borderBottomRightRadius="4px"
-            px="5px"
-            py="1px"
+          <Box
+            position="sticky"
+            left={`${TIMELINE_HEADER_WIDTH}px`}
+            width="fit-content"
+            opacity={0.9}
+            transition="opacity 0.12s"
+            _groupHover={{ opacity: 0.4 }}
           >
-            <Text
-              fontSize="10px"
-              fontWeight={600}
-              color="#ed8936"
-              whiteSpace="nowrap"
+            <HStack
+              spacing={1.5}
+              align="baseline"
+              bg="rgba(15,17,21,.6)"
+              borderBottomRightRadius="4px"
+              px="5px"
+              py="1px"
             >
-              {label}
-            </Text>
-            <LaneValueReadout block={ownerBlock} uniformName={uniformName} />
-          </HStack>
+              <Text
+                fontSize="10px"
+                fontWeight={600}
+                color="#ed8936"
+                whiteSpace="nowrap"
+              >
+                {label}
+              </Text>
+              <LaneValueReadout block={ownerBlock} uniformName={uniformName} />
+            </HStack>
+          </Box>
         </Box>
       </Box>
     </Box>
+  );
+});
+
+// The control bar above a lane: one tab per region, sized to the region's
+// width (so the bar doubles as a region map). Quiet at rest (colored accents
+// only); type label + reorder/reset/delete reveal on lane hover.
+const RegionBar = observer(function RegionBar({
+  block,
+  uniformName,
+  isOpacity,
+}: {
+  block: Block;
+  uniformName: string;
+  isOpacity: boolean;
+}) {
+  const variations = block.parameterVariations[uniformName] ?? [];
+
+  // opacity in auto mode has no regions — its bar is a single AUTO tab that
+  // materializes into an editable curve
+  if (isOpacity && !block.hasManualOpacity)
+    return (
+      <HStack height={`${REGION_BAR_HEIGHT}px`} width="100%" spacing={0}>
+        <HStack
+          width="100%"
+          spacing={2}
+          px="8px"
+          borderTopWidth="2px"
+          borderColor="#3182ce"
+          bg="rgba(49,130,206,.08)"
+          align="center"
+        >
+          <Text
+            fontSize="9px"
+            fontWeight={700}
+            color="#8fcbf5"
+            opacity={0.6}
+            _groupHover={{ opacity: 1 }}
+          >
+            AUTO
+          </Text>
+          <Button
+            size="xs"
+            height="14px"
+            fontSize="9px"
+            variant="ghost"
+            marginLeft="auto"
+            opacity={0}
+            _groupHover={{ opacity: 1 }}
+            onClick={action((e: ReactMouseEvent) => {
+              e.stopPropagation();
+              block.materializeAutoOpacity();
+            })}
+          >
+            Customize
+          </Button>
+        </HStack>
+      </HStack>
+    );
+
+  if (variations.length === 0)
+    return <Box height={`${REGION_BAR_HEIGHT}px`} width="100%" />;
+
+  const multiple = variations.length > 1;
+  const onDragEnd: OnDragEndResponder = action((result) => {
+    if (!result.destination) return;
+    block.parameterVariations[uniformName] = reorder(
+      variations,
+      result.source.index,
+      result.destination.index,
+    );
+  });
+
+  return (
+    <DragDropContext onDragEnd={onDragEnd}>
+      <Droppable droppableId={`bar-${block.id}-${uniformName}`} direction="horizontal">
+        {(provided) => (
+          <HStack
+            ref={provided.innerRef}
+            {...provided.droppableProps}
+            height={`${REGION_BAR_HEIGHT}px`}
+            width="100%"
+            spacing={0}
+            align="stretch"
+          >
+            {variations.map((variation, index) => (
+              <Draggable
+                key={variation.id}
+                draggableId={variation.id}
+                index={index}
+                isDragDisabled={!multiple}
+              >
+                {(prov) => (
+                  <Box
+                    ref={prov.innerRef}
+                    {...prov.draggableProps}
+                    width={`${(variation.duration / block.duration) * 100}%`}
+                    minW={0}
+                  >
+                    <RegionTab
+                      block={block}
+                      uniformName={uniformName}
+                      variation={variation}
+                      multiple={multiple}
+                      dragHandleProps={prov.dragHandleProps}
+                    />
+                  </Box>
+                )}
+              </Draggable>
+            ))}
+            {provided.placeholder}
+          </HStack>
+        )}
+      </Droppable>
+    </DragDropContext>
+  );
+});
+
+const RegionTab = observer(function RegionTab({
+  block,
+  uniformName,
+  variation,
+  multiple,
+  dragHandleProps,
+}: {
+  block: Block;
+  uniformName: string;
+  variation: Variation;
+  multiple: boolean;
+  dragHandleProps: any;
+}) {
+  const store = useStore();
+  const { label, color } = regionTypeStyle(variation);
+  return (
+    <HStack
+      height="100%"
+      spacing="5px"
+      px="6px"
+      borderTopWidth="2px"
+      borderColor={color}
+      bg={`${color}14`}
+      align="center"
+      overflow="hidden"
+    >
+      {multiple && (
+        <Box
+          {...dragHandleProps}
+          cursor="grab"
+          color="#8a97a8"
+          fontSize="10px"
+          flexShrink={0}
+          opacity={0}
+          _groupHover={{ opacity: 1 }}
+        >
+          ⠿
+        </Box>
+      )}
+      <Text
+        fontSize="9px"
+        fontWeight={700}
+        letterSpacing="0.02em"
+        color={color}
+        noOfLines={1}
+        opacity={0.5}
+        _groupHover={{ opacity: 1 }}
+      >
+        {label}
+      </Text>
+      <HStack
+        marginLeft="auto"
+        spacing="8px"
+        flexShrink={0}
+        color="#c3cdda"
+        fontSize="11px"
+        opacity={0}
+        _groupHover={{ opacity: 1 }}
+      >
+        <Box
+          as="span"
+          cursor="pointer"
+          title="Reset region to default"
+          _hover={{ color: "#63b3ed" }}
+          onClick={action((e: ReactMouseEvent) => {
+            e.stopPropagation();
+            block.resetVariationToDefault(uniformName, variation);
+          })}
+        >
+          ↺
+        </Box>
+        {multiple && (
+          <Box
+            as="span"
+            cursor="pointer"
+            title="Delete region"
+            _hover={{ color: "#fc8181" }}
+            onClick={action((e: ReactMouseEvent) => {
+              e.stopPropagation();
+              store.deleteVariation(block, uniformName, variation);
+            })}
+          >
+            ✕
+          </Box>
+        )}
+      </HStack>
+    </HStack>
   );
 });
 
@@ -168,49 +404,11 @@ const OpacityLaneBody = observer(function OpacityLaneBody({
 }) {
   const { uiStore } = useStore();
 
-  // controls float top-right and reveal on lane hover (quiet by default)
-  const hoverControls = {
-    position: "absolute" as const,
-    top: "1px",
-    right: "2px",
-    zIndex: 3,
-    bg: "rgba(15,17,21,.85)",
-    borderRadius: "3px",
-    px: "4px",
-    opacity: 0,
-    pointerEvents: "none" as const,
-    transition: "opacity 0.12s",
-    _groupHover: { opacity: 1, pointerEvents: "auto" as const },
-  };
-
   if (block.hasManualOpacity)
     return <ParameterVariations uniformName="u_opacity" block={block} />;
 
-  const hasAutoFade = !!block.layer?.autoOpacityVariations(block);
   const width = uiStore.timeToX(block.duration);
-
-  return (
-    <Box position="relative" width="100%">
-      <OpacityAutoCurve block={block} width={width} />
-      <HStack spacing={1} align="center" {...hoverControls}>
-        <Text fontSize="9px" color="#68d391">
-          {hasAutoFade ? "auto crossfade" : "fully opaque"}
-        </Text>
-        <Button
-          size="xs"
-          height="16px"
-          fontSize="9px"
-          variant="ghost"
-          onClick={action((e: ReactMouseEvent) => {
-            e.stopPropagation();
-            block.materializeAutoOpacity();
-          })}
-        >
-          Customize
-        </Button>
-      </HStack>
-    </Box>
-  );
+  return <OpacityAutoCurve block={block} width={width} />;
 });
 
 // A read-only sparkline of a block's auto-derived opacity across its duration.
