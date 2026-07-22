@@ -90,7 +90,7 @@ export const BlockAutomationLanes = observer(function BlockAutomationLanes({
 
   return (
     <VStack
-      spacing={0.5}
+      spacing={0}
       width="100%"
       align="stretch"
       py={1}
@@ -117,11 +117,6 @@ const AutomationLane = observer(function AutomationLane({
 
   return (
     <Box position="relative" width="100%" role="group">
-      {/* region control bar — its own strip above the curve, so it never
-          covers a node; a thin colored region map at rest, full controls on
-          hover */}
-      <RegionBar block={ownerBlock} uniformName={uniformName} isOpacity={isOpacity} />
-
       {/* the curve, with the pinned param name overlaid top-left */}
       <Box position="relative" width="100%">
         {isOpacity ? (
@@ -129,6 +124,28 @@ const AutomationLane = observer(function AutomationLane({
         ) : (
           <ParameterVariations uniformName={uniformName} block={ownerBlock} />
         )}
+
+        {/* region control bar — nothing at rest (lanes stay flush); on hover it
+            appears as an overlay floating just above the curve, so it never
+            covers a node and costs no vertical space */}
+        <Box
+          position="absolute"
+          bottom="100%"
+          left={0}
+          width="100%"
+          zIndex={5}
+          opacity={0}
+          pointerEvents="none"
+          transition="opacity 0.12s"
+          _groupHover={{ opacity: 1, pointerEvents: "auto" }}
+        >
+          <RegionBar
+            block={ownerBlock}
+            uniformName={uniformName}
+            isOpacity={isOpacity}
+          />
+        </Box>
+
         <Box
           position="absolute"
           top={0}
@@ -188,46 +205,38 @@ const RegionBar = observer(function RegionBar({
   // materializes into an editable curve
   if (isOpacity && !block.hasManualOpacity)
     return (
-      <HStack height={`${REGION_BAR_HEIGHT}px`} width="100%" spacing={0}>
-        <HStack
-          width="100%"
-          spacing={2}
-          px="8px"
-          borderTopWidth="2px"
-          borderColor="#3182ce"
-          bg="rgba(49,130,206,.08)"
-          align="center"
+      <HStack
+        height={`${REGION_BAR_HEIGHT}px`}
+        width="100%"
+        spacing={2}
+        px="8px"
+        borderTopWidth="2px"
+        borderColor="#3182ce"
+        borderTopRadius="6px"
+        bg="#141c26"
+        boxShadow="0 -2px 10px rgba(0,0,0,.4)"
+        align="center"
+      >
+        <Text fontSize="9px" fontWeight={700} color="#8fcbf5">
+          AUTO
+        </Text>
+        <Button
+          size="xs"
+          height="14px"
+          fontSize="9px"
+          variant="ghost"
+          marginLeft="auto"
+          onClick={action((e: ReactMouseEvent) => {
+            e.stopPropagation();
+            block.materializeAutoOpacity();
+          })}
         >
-          <Text
-            fontSize="9px"
-            fontWeight={700}
-            color="#8fcbf5"
-            opacity={0.6}
-            _groupHover={{ opacity: 1 }}
-          >
-            AUTO
-          </Text>
-          <Button
-            size="xs"
-            height="14px"
-            fontSize="9px"
-            variant="ghost"
-            marginLeft="auto"
-            opacity={0}
-            _groupHover={{ opacity: 1 }}
-            onClick={action((e: ReactMouseEvent) => {
-              e.stopPropagation();
-              block.materializeAutoOpacity();
-            })}
-          >
-            Customize
-          </Button>
-        </HStack>
+          Customize
+        </Button>
       </HStack>
     );
 
-  if (variations.length === 0)
-    return <Box height={`${REGION_BAR_HEIGHT}px`} width="100%" />;
+  if (variations.length === 0) return null;
 
   const multiple = variations.length > 1;
   const onDragEnd: OnDragEndResponder = action((result) => {
@@ -250,6 +259,10 @@ const RegionBar = observer(function RegionBar({
             width="100%"
             spacing={0}
             align="stretch"
+            bg="#161d28"
+            boxShadow="0 -2px 10px rgba(0,0,0,.4)"
+            borderTopRadius="6px"
+            overflow="hidden"
           >
             {variations.map((variation, index) => (
               <Draggable
@@ -306,7 +319,7 @@ const RegionTab = observer(function RegionTab({
       px="6px"
       borderTopWidth="2px"
       borderColor={color}
-      bg={`${color}14`}
+      bg={`${color}22`}
       align="center"
       overflow="hidden"
     >
@@ -317,8 +330,6 @@ const RegionTab = observer(function RegionTab({
           color="#8a97a8"
           fontSize="10px"
           flexShrink={0}
-          opacity={0}
-          _groupHover={{ opacity: 1 }}
         >
           ⠿
         </Box>
@@ -329,8 +340,6 @@ const RegionTab = observer(function RegionTab({
         letterSpacing="0.02em"
         color={color}
         noOfLines={1}
-        opacity={0.5}
-        _groupHover={{ opacity: 1 }}
       >
         {label}
       </Text>
@@ -340,8 +349,6 @@ const RegionTab = observer(function RegionTab({
         flexShrink={0}
         color="#c3cdda"
         fontSize="11px"
-        opacity={0}
-        _groupHover={{ opacity: 1 }}
       >
         <Box
           as="span"
