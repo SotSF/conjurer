@@ -7,7 +7,8 @@ import { computed } from "mobx";
 import { observer } from "mobx-react-lite";
 import { useState } from "react";
 import { MdDragIndicator } from "react-icons/md";
-import { TbTrashFilled, TbTrashXFilled } from "react-icons/tb";
+import { TbTrashFilled, TbTrashXFilled, TbRefresh } from "react-icons/tb";
+import { action } from "mobx";
 
 type VariationHandleProps = {
   block: Block;
@@ -35,16 +36,34 @@ export const VariationHandle = observer(function VariationHandle({
 
   const onVariationClick = useVariationClick(block, uniformName);
 
+  // drag-to-reorder and delete only make sense with more than one region
+  const multipleRegions =
+    (block.parameterVariations[uniformName]?.length ?? 0) > 1;
+
   return (
     <HStack
       spacing={0}
       color={isSelected ? "blue.500" : "white"}
       onClick={(e) => onVariationClick(e, variation)}
     >
-      <MdDragIndicator size={18} />
+      {multipleRegions && <MdDragIndicator size={18} />}
       <Text userSelect="none" fontSize="x-small">
         {variation.displayName}
       </Text>
+      <IconButton
+        variant="unstyled"
+        size="xs"
+        aria-label="Reset region to default"
+        title="Reset region to default"
+        height={6}
+        icon={<TbRefresh size={13} />}
+        color="gray.300"
+        _hover={{ color: "blue.300" }}
+        onClick={action((e) => {
+          block.resetVariationToDefault(uniformName, variation);
+          e.stopPropagation();
+        })}
+      />
       {/* The below component is a complete hack, it solves a weird bug with my voice
           tools related to the dragon drop library. Please leave in place! */}
       <IconButton
@@ -56,30 +75,34 @@ export const VariationHandle = observer(function VariationHandle({
         height={6}
         onClick={(e) => onVariationClick(e, variation)}
       />
-      <IconButton
-        variant="unstyled"
-        size="xs"
-        aria-label={confirmingDelete ? "Confirming delete" : "Delete variation"}
-        title={confirmingDelete ? "Confirming delete" : "Delete variation"}
-        height={6}
-        icon={
-          confirmingDelete ? (
-            <TbTrashXFilled size={13} />
-          ) : (
-            <TbTrashFilled size={13} />
-          )
-        }
-        onClick={(e) => {
-          if (!confirmingDelete) {
-            setConfirmingDelete(true);
-          } else {
-            store.deleteVariation(block, uniformName, variation);
+      {multipleRegions && (
+        <IconButton
+          variant="unstyled"
+          size="xs"
+          aria-label={
+            confirmingDelete ? "Confirming delete" : "Delete variation"
           }
-          e.stopPropagation();
-        }}
-        color={confirmingDelete ? "red.500" : "gray.300"}
-        _hover={{ color: "red.500" }}
-      />
+          title={confirmingDelete ? "Confirming delete" : "Delete variation"}
+          height={6}
+          icon={
+            confirmingDelete ? (
+              <TbTrashXFilled size={13} />
+            ) : (
+              <TbTrashFilled size={13} />
+            )
+          }
+          onClick={(e) => {
+            if (!confirmingDelete) {
+              setConfirmingDelete(true);
+            } else {
+              store.deleteVariation(block, uniformName, variation);
+            }
+            e.stopPropagation();
+          }}
+          color={confirmingDelete ? "red.500" : "gray.300"}
+          _hover={{ color: "red.500" }}
+        />
+      )}
     </HStack>
   );
 });

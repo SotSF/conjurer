@@ -140,6 +140,30 @@ export class Block {
     this.persistLanes();
   };
 
+  // resets a single region (variation) back to the param's default value,
+  // keeping its duration/placement in the lane
+  resetVariationToDefault = (uniformName: string, variation: Variation) => {
+    const variations = this.parameterVariations[uniformName];
+    if (!variations) return;
+    const index = variations.indexOf(variation);
+    if (index < 0) return;
+
+    const defaultValue =
+      defaultPatternEffectMap[this.pattern.name]?.params[uniformName]?.value;
+    const duration = variation.duration;
+    let replacement: Variation | undefined;
+    if (typeof defaultValue === "number")
+      replacement = new FlatVariation(duration, defaultValue);
+    else if (isVector4(defaultValue))
+      replacement = new LinearVariation4(duration, defaultValue, defaultValue);
+    else if (isPalette(defaultValue))
+      replacement = new PaletteVariation(duration, defaultValue);
+    if (!replacement) return;
+
+    variations[index] = replacement;
+    this.triggerVariationReactions(uniformName);
+  };
+
   // arms every lanable param across this block and its effect chain, or clears
   // them all if they are already all armed
   toggleAllLanes = () => {
