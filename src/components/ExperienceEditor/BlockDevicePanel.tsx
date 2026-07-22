@@ -80,14 +80,6 @@ export const BlockDevicePanel = observer(function BlockDevicePanel() {
   const reorderable = effectBlocks.length >= 2;
   const { uiStore } = store;
 
-  const toggleAllLanes = action(() => {
-    const blocks = [block, ...block.effectBlocks];
-    const allArmed = blocks.every((b) =>
-      b.lanableParamNames.every((name) => b.lanedParams.has(name)),
-    );
-    blocks.forEach((b) => b.setParamLanes(b.lanableParamNames, !allArmed));
-  });
-
   const onDragEnd: OnDragEndResponder = action((result) => {
     if (!result.destination) return;
     const effectBlock = block.effectBlocks[result.source.index];
@@ -113,7 +105,7 @@ export const BlockDevicePanel = observer(function BlockDevicePanel() {
         <PanelIconButton
           label="Toggle all lanes"
           icon={<MdViewStream />}
-          onClick={toggleAllLanes}
+          onClick={action(() => block.toggleAllLanes())}
         />
         <PanelIconButton
           label="Scroll timeline to this block"
@@ -134,7 +126,10 @@ export const BlockDevicePanel = observer(function BlockDevicePanel() {
           <HStack align="stretch" spacing={0} minW="min-content" height="100%">
             <PatternUnit block={block} />
             <Connector />
-            <Droppable droppableId={`device-${block.id}`} direction="horizontal">
+            <Droppable
+              droppableId={`device-${block.id}`}
+              direction="horizontal"
+            >
               {(provided) => (
                 <HStack
                   ref={provided.innerRef}
@@ -257,7 +252,11 @@ const ParamCell = function ParamCell({
 };
 
 const formatNumber = (n: number) =>
-  Number.isInteger(n) ? String(n) : Math.abs(n) < 1000 ? n.toFixed(2) : n.toFixed(0);
+  Number.isInteger(n)
+    ? String(n)
+    : Math.abs(n) < 1000
+      ? n.toFixed(2)
+      : n.toFixed(0);
 
 // Shows a param's value at the current playhead time (clamped to the block's
 // start/end when the playhead is outside the block). Observer so it tracks the
@@ -382,7 +381,11 @@ const PatternUnit = function PatternUnit({ block }: { block: Block }) {
       >
         {block.pattern.name}
       </Text>
-      <ParamColumns block={block} uniformNames={uniformNames} isEffect={false} />
+      <ParamColumns
+        block={block}
+        uniformNames={uniformNames}
+        isEffect={false}
+      />
     </Box>
   );
 };
@@ -438,7 +441,12 @@ const EffectUnit = function EffectUnit({
       <HStack justify="space-between" mb="6px" spacing={1} flexShrink={0}>
         <HStack spacing={1} minW={0}>
           {dragHandleProps && (
-            <Box {...dragHandleProps} cursor="grab" color="#718096" flexShrink={0}>
+            <Box
+              {...dragHandleProps}
+              cursor="grab"
+              color="#718096"
+              flexShrink={0}
+            >
               ⠿
             </Box>
           )}

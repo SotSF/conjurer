@@ -6,6 +6,7 @@ import { useStore } from "@/src/types/StoreContext";
 import { Box, HStack, Text, Tooltip } from "@chakra-ui/react";
 import { action } from "mobx";
 import { observer } from "mobx-react-lite";
+import { MdViewStream } from "react-icons/md";
 import { MouseEvent as ReactMouseEvent, useState } from "react";
 
 // params that are machinery rather than user-facing controls
@@ -124,6 +125,7 @@ export const BlockDotRow = observer(function BlockDotRow({
           maxWidth="100%"
         >
           <DotList
+            block={block}
             patternSignals={patternSignals}
             effectSignals={effectSignals}
           />
@@ -181,6 +183,7 @@ export const BlockDotRow = observer(function BlockDotRow({
           py="4px"
         >
           <DotList
+            block={block}
             patternSignals={patternSignals}
             effectSignals={effectSignals}
           />
@@ -191,16 +194,55 @@ export const BlockDotRow = observer(function BlockDotRow({
 });
 
 const DotList = function DotList({
+  block,
   patternSignals,
   effectSignals,
 }: {
+  block: Block;
   patternSignals: Signal[];
   effectSignals: Signal[];
 }) {
   return (
     // pt gives the lane-on focus ring room so it isn't clipped by the header
     // above; no overflow clip here since narrow blocks collapse to a badge
-    <HStack spacing="5px" px={2} pt="4px" pb="3px" width="max-content" align="center">
+    <HStack
+      spacing="5px"
+      px={2}
+      pt="4px"
+      pb="3px"
+      width="max-content"
+      align="center"
+    >
+      <Tooltip
+        label="Toggle all lanes"
+        openDelay={0}
+        hasArrow
+        placement="top"
+        fontSize="xs"
+      >
+        <Box
+          as="span"
+          flexShrink={0}
+          display="flex"
+          alignItems="center"
+          color="#718096"
+          cursor="pointer"
+          _hover={{ color: "#cbd5e0" }}
+          onClick={action((e: ReactMouseEvent) => {
+            e.stopPropagation();
+            block.toggleAllLanes();
+          })}
+        >
+          <MdViewStream size={13} />
+        </Box>
+      </Tooltip>
+      <Box
+        flexShrink={0}
+        width="1px"
+        height="11px"
+        bg={DEFAULT_BORDER}
+        mx="1px"
+      />
       {patternSignals.map((signal) => (
         <Dot key={signal.uniformName} signal={signal} />
       ))}

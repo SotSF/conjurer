@@ -129,6 +129,18 @@ export class Block {
     }
   };
 
+  // arms every lanable param across this block and its effect chain, or clears
+  // them all if they are already all armed
+  toggleAllLanes = () => {
+    const blocks = [this, ...this.effectBlocks];
+    const allArmed = blocks.every((block) =>
+      block.lanableParamNames.every((name) => block.lanedParams.has(name)),
+    );
+    blocks.forEach((block) =>
+      block.setParamLanes(block.lanableParamNames, !allArmed),
+    );
+  };
+
   setTiming = ({
     startTime,
     duration,
@@ -405,10 +417,7 @@ export class Block {
   materializeAutoOpacity = () => {
     const derived = this.layer?.autoOpacityVariations(this);
     this.parameterVariations["u_opacity"] = derived ?? [
-      new FlatVariation(
-        Math.min(this.duration, DEFAULT_VARIATION_DURATION),
-        1,
-      ),
+      new FlatVariation(Math.min(this.duration, DEFAULT_VARIATION_DURATION), 1),
     ];
   };
 
