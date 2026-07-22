@@ -15,26 +15,31 @@ import {
 } from "@hello-pangea/dnd";
 import { action } from "mobx";
 import { observer } from "mobx-react-lite";
-import { MouseEvent as ReactMouseEvent } from "react";
+import { MouseEvent as ReactMouseEvent, useState } from "react";
 
 const OPACITY_CURVE_HEIGHT = 26;
 const REGION_BAR_HEIGHT = 18;
+// below this rendered width a region tab collapses to just its colored segment,
+// revealing its full header (over neighbors) only when that region is hovered
+const NARROW_TAB_PX = 84;
 
-// A region's modulation type → its label + accent color (the type is conveyed
-// by the tab's accent color even at rest; the label appears on hover).
-const regionTypeStyle = (variation: Variation): { label: string; color: string } => {
+// A region's modulation type → its label, accent color, and an opaque tab
+// background (opaque so an earlier tab never shows through a later one).
+const regionTypeStyle = (
+  variation: Variation,
+): { label: string; color: string; bg: string } => {
   switch (variation.type) {
     case "periodic":
-      return { label: "LFO", color: "#66bb94" };
+      return { label: "LFO", color: "#66bb94", bg: "#17251e" };
     case "audio":
-      return { label: "AUDIO", color: "#63b3ed" };
+      return { label: "AUDIO", color: "#63b3ed", bg: "#16202b" };
     case "palette":
-      return { label: "PALETTE", color: "#b794f4" };
+      return { label: "PALETTE", color: "#b794f4", bg: "#221b2e" };
     case "linear4":
-      return { label: "COLOR", color: "#f6ad55" };
+      return { label: "COLOR", color: "#f6ad55", bg: "#2a2216" };
     default:
       // flat / linear / easing / spline all read as a drawn curve
-      return { label: "CURVE", color: "#ed8936" };
+      return { label: "CURVE", color: "#ed8936", bg: "#2a2018" };
   }
 };
 
@@ -287,6 +292,8 @@ const RegionBar = observer(function RegionBar({
                     {...prov.draggableProps}
                     width={`${(variation.duration / block.duration) * 100}%`}
                     minW={0}
+                    position="relative"
+                    _hover={{ zIndex: 20 }}
                   >
                     <RegionTab
                       block={block}
@@ -321,7 +328,96 @@ const RegionTab = observer(function RegionTab({
   dragHandleProps: any;
 }) {
   const store = useStore();
-  const { label, color } = regionTypeStyle(variation);
+  const { uiStore } = store;
+  const { label, color, bg } = regionTypeStyle(variation);
+  const [hovered, setHovered] = useState(false);
+  const narrow = uiStore.timeToX(variation.duration) < NARROW_TAB_PX;
+
+  const dragHandle = multiple ? (
+    <Box {...dragHandleProps} cursor="grab" color="#8a97a8" fontSize="10px" flexShrink={0}>
+      ⠿
+    </Box>
+  ) : null;
+  const typeLabel = (
+    <Text
+      fontSize="9px"
+      fontWeight={700}
+      letterSpacing="0.02em"
+      color={color}
+      noOfLines={1}
+    >
+      {label}
+    </Text>
+  );
+  const controls = (
+    <HStack spacing="8px" flexShrink={0} color="#c3cdda" fontSize="11px">
+      <Box
+        as="span"
+        cursor="pointer"
+        title="Reset region to default"
+        _hover={{ color: "#63b3ed" }}
+        onClick={action((e: ReactMouseEvent) => {
+          e.stopPropagation();
+          block.resetVariationToDefault(uniformName, variation);
+        })}
+      >
+        ↺
+      </Box>
+      {multiple && (
+        <Box
+          as="span"
+          cursor="pointer"
+          title="Delete region"
+          _hover={{ color: "#fc8181" }}
+          onClick={action((e: ReactMouseEvent) => {
+            e.stopPropagation();
+            store.deleteVariation(block, uniformName, variation);
+          })}
+        >
+          ✕
+        </Box>
+      )}
+    </HStack>
+  );
+
+  // narrow: just a colored segment at rest; on hover the full header pops out
+  // (over neighbors, on top) to the right
+  if (narrow)
+    return (
+      <Box
+        position="relative"
+        height="100%"
+        borderTopWidth="2px"
+        borderColor={color}
+        bg={bg}
+        zIndex={hovered ? 20 : undefined}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+      >
+        {hovered && (
+          <HStack
+            position="absolute"
+            top={0}
+            left={0}
+            height="100%"
+            width="max-content"
+            spacing="5px"
+            px="6px"
+            bg={bg}
+            borderTopWidth="2px"
+            borderColor={color}
+            boxShadow="2px 2px 8px rgba(0,0,0,.5)"
+          >
+            {dragHandle}
+            {typeLabel}
+            {controls}
+          </HStack>
+        )}
+      </Box>
+    );
+
+  // wide: label pinned to the left of the view, controls to the right, so they
+  // survive horizontal scroll; opaque so nothing shows through
   return (
     <HStack
       position="relative"
@@ -330,71 +426,26 @@ const RegionTab = observer(function RegionTab({
       px="6px"
       borderTopWidth="2px"
       borderColor={color}
-      bg={`${color}22`}
+      bg={bg}
       align="center"
+      zIndex={hovered ? 20 : undefined}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
     >
-      {/* type label (+ drag handle) pinned to the left of the view so it stays
-          visible when the region's left edge scrolls off */}
       <HStack
         position="sticky"
         left={`${TIMELINE_HEADER_WIDTH}px`}
         spacing="5px"
         flexShrink={0}
         zIndex={1}
+        bg={bg}
       >
-        {multiple && (
-          <Box {...dragHandleProps} cursor="grab" color="#8a97a8" fontSize="10px">
-            ⠿
-          </Box>
-        )}
-        <Text
-          fontSize="9px"
-          fontWeight={700}
-          letterSpacing="0.02em"
-          color={color}
-          noOfLines={1}
-        >
-          {label}
-        </Text>
+        {dragHandle}
+        {typeLabel}
       </HStack>
       <Box flex="1" minW={0} />
-      {/* controls pinned to the right of the view so they stay reachable when
-          the region's right edge scrolls off */}
-      <HStack
-        position="sticky"
-        right="0"
-        spacing="8px"
-        flexShrink={0}
-        zIndex={1}
-        color="#c3cdda"
-        fontSize="11px"
-      >
-        <Box
-          as="span"
-          cursor="pointer"
-          title="Reset region to default"
-          _hover={{ color: "#63b3ed" }}
-          onClick={action((e: ReactMouseEvent) => {
-            e.stopPropagation();
-            block.resetVariationToDefault(uniformName, variation);
-          })}
-        >
-          ↺
-        </Box>
-        {multiple && (
-          <Box
-            as="span"
-            cursor="pointer"
-            title="Delete region"
-            _hover={{ color: "#fc8181" }}
-            onClick={action((e: ReactMouseEvent) => {
-              e.stopPropagation();
-              store.deleteVariation(block, uniformName, variation);
-            })}
-          >
-            ✕
-          </Box>
-        )}
+      <HStack position="sticky" right="0" flexShrink={0} zIndex={1} bg={bg} pl="4px">
+        {controls}
       </HStack>
     </HStack>
   );
