@@ -16,6 +16,10 @@ import { LinearVariation4 } from "@/src/types/Variations/LinearVariation4";
 import { isPalette, Palette } from "@/src/params/palette/Palette";
 import { PaletteVariation } from "@/src/params/palette/variation/PaletteVariation";
 import { generateId } from "@/src/utils/id";
+import {
+  loadBlockLanes,
+  saveBlockLanes,
+} from "@/src/utils/laneStatePersistence";
 import type { Store } from "@/src/types/Store";
 
 export type SerializedBlock = {
@@ -109,6 +113,12 @@ export class Block {
   toggleParamLane = (uniformName: string) => {
     if (this.lanedParams.has(uniformName)) this.lanedParams.delete(uniformName);
     else this.armParamLane(uniformName);
+    this.persistLanes();
+  };
+
+  // persists this block's open lanes locally so a refresh restores them
+  private persistLanes = () => {
+    saveBlockLanes(this.store.experienceName, this.id, [...this.lanedParams]);
   };
 
   // uniform names on this block that can be given an automation lane: excludes
@@ -127,6 +137,7 @@ export class Block {
       if (on) this.armParamLane(uniformName);
       else this.lanedParams.delete(uniformName);
     }
+    this.persistLanes();
   };
 
   // arms every lanable param across this block and its effect chain, or clears
@@ -583,6 +594,12 @@ export class Block {
     block.effectBlocks = data.effectBlocks.map((effectBlockData: any) =>
       Block.deserialize(store, effectBlockData, block),
     );
+
+    // restore locally-persisted open lanes for this experience (UI state, not
+    // part of the serialized experience data)
+    for (const uniformName of loadBlockLanes(store.experienceName, block.id))
+      if (uniformName in block.pattern.params)
+        block.lanedParams.add(uniformName);
 
     return block;
   };
