@@ -19,13 +19,14 @@ type Lane = {
   isOpacity: boolean;
 };
 
-// The set of parameters whose automation lanes are toggled open beneath a
-// block, gathered from the pattern block and each of its effect blocks.
+// The parameters whose automation lanes are open beneath a block, gathered from
+// the pattern block and each of its effect blocks. Iterating params in
+// declaration order (rather than arm order) keeps lanes in the same order as
+// the dot-row, so a newly-armed lane slots into place instead of appending.
 const gatherLanes = (block: Block): Lane[] => {
   const lanes: Lane[] = [];
-  for (const uniformName of block.lanedParams) {
-    const param = block.pattern.params[uniformName];
-    if (!param) continue;
+  for (const [uniformName, param] of Object.entries(block.pattern.params)) {
+    if (!block.lanedParams.has(uniformName)) continue;
     lanes.push({
       ownerBlock: block,
       uniformName,
@@ -34,9 +35,10 @@ const gatherLanes = (block: Block): Lane[] => {
     });
   }
   for (const effectBlock of block.effectBlocks) {
-    for (const uniformName of effectBlock.lanedParams) {
-      const param = effectBlock.pattern.params[uniformName];
-      if (!param) continue;
+    for (const [uniformName, param] of Object.entries(
+      effectBlock.pattern.params,
+    )) {
+      if (!effectBlock.lanedParams.has(uniformName)) continue;
       lanes.push({
         ownerBlock: effectBlock,
         uniformName,
