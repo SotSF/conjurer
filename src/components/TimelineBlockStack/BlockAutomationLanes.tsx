@@ -15,7 +15,7 @@ import {
 } from "@hello-pangea/dnd";
 import { action } from "mobx";
 import { observer } from "mobx-react-lite";
-import { MouseEvent as ReactMouseEvent, useState } from "react";
+import { MouseEvent as ReactMouseEvent } from "react";
 
 const OPACITY_CURVE_HEIGHT = 26;
 const REGION_BAR_HEIGHT = 18;
@@ -330,7 +330,6 @@ const RegionTab = observer(function RegionTab({
   const store = useStore();
   const { uiStore } = store;
   const { label, color, bg } = regionTypeStyle(variation);
-  const [hovered, setHovered] = useState(false);
   const narrow = uiStore.timeToX(variation.duration) < NARROW_TAB_PX;
 
   const dragHandle = multiple ? (
@@ -380,8 +379,10 @@ const RegionTab = observer(function RegionTab({
     </HStack>
   );
 
-  // narrow: just a colored segment at rest; on hover the full header pops out
-  // (over neighbors, on top) to the right
+  // narrow: the tab is just a colored segment, but its full header renders as an
+  // overflow to the right (opaque, so the next tab covers it unless this one is
+  // hovered, which lifts it via the wrapper's z-index). top:-2px so the header's
+  // top border lines up with the bar's, not 2px below the tab's own border.
   if (narrow)
     return (
       <Box
@@ -390,29 +391,23 @@ const RegionTab = observer(function RegionTab({
         borderTopWidth="2px"
         borderColor={color}
         bg={bg}
-        zIndex={hovered ? 20 : undefined}
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
       >
-        {hovered && (
-          <HStack
-            position="absolute"
-            top={0}
-            left={0}
-            height="100%"
-            width="max-content"
-            spacing="5px"
-            px="6px"
-            bg={bg}
-            borderTopWidth="2px"
-            borderColor={color}
-            boxShadow="2px 2px 8px rgba(0,0,0,.5)"
-          >
-            {dragHandle}
-            {typeLabel}
-            {controls}
-          </HStack>
-        )}
+        <HStack
+          position="absolute"
+          top="-2px"
+          left={0}
+          height={`${REGION_BAR_HEIGHT}px`}
+          width="max-content"
+          spacing="5px"
+          px="6px"
+          bg={bg}
+          borderTopWidth="2px"
+          borderColor={color}
+        >
+          {dragHandle}
+          {typeLabel}
+          {controls}
+        </HStack>
       </Box>
     );
 
@@ -428,9 +423,6 @@ const RegionTab = observer(function RegionTab({
       borderColor={color}
       bg={bg}
       align="center"
-      zIndex={hovered ? 20 : undefined}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
     >
       <HStack
         position="sticky"
