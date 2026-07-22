@@ -183,30 +183,8 @@ const OpacityLaneBody = observer(function OpacityLaneBody({
     _groupHover: { opacity: 1, pointerEvents: "auto" as const },
   };
 
-  if (block.hasManualOpacity) {
-    return (
-      <Box position="relative" width="100%">
-        <ParameterVariations uniformName="u_opacity" block={block} />
-        <HStack spacing={1} align="center" {...hoverControls}>
-          <Text fontSize="9px" color="#a0aec0">
-            manual
-          </Text>
-          <Button
-            size="xs"
-            height="16px"
-            fontSize="9px"
-            variant="ghost"
-            onClick={action((e: ReactMouseEvent) => {
-              e.stopPropagation();
-              block.resetOpacityToAuto();
-            })}
-          >
-            Reset to auto
-          </Button>
-        </HStack>
-      </Box>
-    );
-  }
+  if (block.hasManualOpacity)
+    return <ParameterVariations uniformName="u_opacity" block={block} />;
 
   const hasAutoFade = !!block.layer?.autoOpacityVariations(block);
   const width = uiStore.timeToX(block.duration);
