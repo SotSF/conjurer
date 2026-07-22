@@ -206,9 +206,10 @@ const RegionBar = observer(function RegionBar({
   if (isOpacity && !block.hasManualOpacity)
     return (
       <HStack
+        position="relative"
         height={`${REGION_BAR_HEIGHT}px`}
         width="100%"
-        spacing={2}
+        spacing={0}
         px="8px"
         borderTopWidth="2px"
         borderColor="#3182ce"
@@ -217,15 +218,25 @@ const RegionBar = observer(function RegionBar({
         boxShadow="0 -2px 10px rgba(0,0,0,.4)"
         align="center"
       >
-        <Text fontSize="9px" fontWeight={700} color="#8fcbf5">
+        <Text
+          position="sticky"
+          left={`${TIMELINE_HEADER_WIDTH}px`}
+          fontSize="9px"
+          fontWeight={700}
+          color="#8fcbf5"
+          flexShrink={0}
+        >
           AUTO
         </Text>
+        <Box flex="1" minW={0} />
         <Button
+          position="sticky"
+          right="0"
           size="xs"
           height="14px"
           fontSize="9px"
           variant="ghost"
-          marginLeft="auto"
+          flexShrink={0}
           onClick={action((e: ReactMouseEvent) => {
             e.stopPropagation();
             block.materializeAutoOpacity();
@@ -262,7 +273,6 @@ const RegionBar = observer(function RegionBar({
             bg="#161d28"
             boxShadow="0 -2px 10px rgba(0,0,0,.4)"
             borderTopRadius="6px"
-            overflow="hidden"
           >
             {variations.map((variation, index) => (
               <Draggable
@@ -314,39 +324,48 @@ const RegionTab = observer(function RegionTab({
   const { label, color } = regionTypeStyle(variation);
   return (
     <HStack
+      position="relative"
       height="100%"
-      spacing="5px"
+      spacing={0}
       px="6px"
       borderTopWidth="2px"
       borderColor={color}
       bg={`${color}22`}
       align="center"
-      overflow="hidden"
     >
-      {multiple && (
-        <Box
-          {...dragHandleProps}
-          cursor="grab"
-          color="#8a97a8"
-          fontSize="10px"
-          flexShrink={0}
-        >
-          ⠿
-        </Box>
-      )}
-      <Text
-        fontSize="9px"
-        fontWeight={700}
-        letterSpacing="0.02em"
-        color={color}
-        noOfLines={1}
-      >
-        {label}
-      </Text>
+      {/* type label (+ drag handle) pinned to the left of the view so it stays
+          visible when the region's left edge scrolls off */}
       <HStack
-        marginLeft="auto"
+        position="sticky"
+        left={`${TIMELINE_HEADER_WIDTH}px`}
+        spacing="5px"
+        flexShrink={0}
+        zIndex={1}
+      >
+        {multiple && (
+          <Box {...dragHandleProps} cursor="grab" color="#8a97a8" fontSize="10px">
+            ⠿
+          </Box>
+        )}
+        <Text
+          fontSize="9px"
+          fontWeight={700}
+          letterSpacing="0.02em"
+          color={color}
+          noOfLines={1}
+        >
+          {label}
+        </Text>
+      </HStack>
+      <Box flex="1" minW={0} />
+      {/* controls pinned to the right of the view so they stay reachable when
+          the region's right edge scrolls off */}
+      <HStack
+        position="sticky"
+        right="0"
         spacing="8px"
         flexShrink={0}
+        zIndex={1}
         color="#c3cdda"
         fontSize="11px"
       >
