@@ -1,6 +1,7 @@
 import { Block } from "@/src/types/Block";
 import { ParameterVariations } from "@/src/components/ParameterVariations/ParameterVariations";
 import { sampleBlockOpacity } from "@/src/utils/blockOpacity";
+import { paramValueAtTime } from "@/src/utils/paramValueAtTime";
 import { useStore } from "@/src/types/StoreContext";
 import { Box, Button, HStack, Text, VStack } from "@chakra-ui/react";
 import { action } from "mobx";
@@ -101,32 +102,68 @@ const AutomationLane = observer(function AutomationLane({
 
   return (
     <Box position="relative" width="100%">
-      <Text
+      <VStack
         position="absolute"
         top="2px"
         left={`${labelLeft}px`}
         width={`${LABEL_WIDTH}px`}
-        textAlign={clamped ? "left" : "right"}
-        fontSize="10px"
-        fontWeight={600}
-        color="#ed8936"
-        whiteSpace="nowrap"
-        overflow="hidden"
-        textOverflow="ellipsis"
+        align={clamped ? "flex-start" : "flex-end"}
+        spacing={0}
         pointerEvents="none"
         zIndex={2}
         bg={clamped ? "rgba(15,17,21,.82)" : undefined}
         borderRadius={clamped ? "0 3px 3px 0" : undefined}
         px={clamped ? "4px" : undefined}
       >
-        {label}
-      </Text>
+        <Text
+          width="100%"
+          textAlign={clamped ? "left" : "right"}
+          fontSize="10px"
+          fontWeight={600}
+          color="#ed8936"
+          whiteSpace="nowrap"
+          overflow="hidden"
+          textOverflow="ellipsis"
+        >
+          {label}
+        </Text>
+        <LaneValueReadout
+          block={ownerBlock}
+          uniformName={uniformName}
+          align={clamped ? "left" : "right"}
+        />
+      </VStack>
       {isOpacity ? (
         <OpacityLaneBody block={ownerBlock} />
       ) : (
         <ParameterVariations uniformName={uniformName} block={ownerBlock} />
       )}
     </Box>
+  );
+});
+
+const formatLaneValue = (n: number) =>
+  Number.isInteger(n) ? String(n) : parseFloat(n.toFixed(3)).toString();
+
+// The param's value at the current playhead time, shown under the lane label
+// (clamped to the block edges when the playhead is outside the block). Observer
+// so it tracks the playhead live.
+const LaneValueReadout = observer(function LaneValueReadout({
+  block,
+  uniformName,
+  align,
+}: {
+  block: Block;
+  uniformName: string;
+  align: "left" | "right";
+}) {
+  const { audioStore } = useStore();
+  const value = paramValueAtTime(block, uniformName, audioStore.globalTime);
+  if (typeof value !== "number") return null;
+  return (
+    <Text width="100%" textAlign={align} fontFamily="mono" fontSize="9px" color="#a0aec0">
+      {formatLaneValue(value)}
+    </Text>
   );
 });
 
