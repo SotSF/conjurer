@@ -15,7 +15,6 @@ import { HexColorPicker } from "react-colorful";
 import { Block } from "@/src/types/Block";
 import { LinearVariation4 } from "@/src/types/Variations/LinearVariation4";
 import { hexToRgb, vector4ToHex } from "@/src/utils/color";
-import { VARIATION_BOUND_WIDTH } from "@/src/utils/layout";
 
 type LinearVariationGraph4Props = {
   uniformName: string;
@@ -40,8 +39,19 @@ export const LinearVariationGraph4 = function LinearVariationGraph4({
   return (
     <Popover isLazy placement="bottom">
       <PopoverTrigger>
-        <Box py={1} cursor="pointer" role="button" _hover={{ bgColor: "gray.500" }}>
-          <svg width={width - VARIATION_BOUND_WIDTH} height={60}>
+        <Box
+          py={1}
+          width={`${width}px`}
+          flexShrink={0}
+          cursor="pointer"
+          role="button"
+          _hover={{ bgColor: "gray.500" }}
+        >
+          {/* Fill the full region slot (not width - VARIATION_BOUND_WIDTH): the
+              region-model seam is drawn by the RegionBoundary overlay at the true
+              boundary x, so the band must tile the whole slot to align with the
+              region tabs above and reach the block's end. */}
+          <svg width={width} height={60}>
             <defs>
               <linearGradient
                 id={`gradient${variation.id}`}
