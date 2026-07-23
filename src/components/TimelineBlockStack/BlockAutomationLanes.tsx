@@ -15,7 +15,7 @@ import {
 } from "@hello-pangea/dnd";
 import { action } from "mobx";
 import { observer } from "mobx-react-lite";
-import { MouseEvent as ReactMouseEvent } from "react";
+import { MouseEvent as ReactMouseEvent, useState } from "react";
 
 const OPACITY_CURVE_HEIGHT = 26;
 const REGION_BAR_HEIGHT = 18;
@@ -119,11 +119,37 @@ const AutomationLane = observer(function AutomationLane({
   lane: Lane;
 }) {
   const { ownerBlock, uniformName, label, isOpacity } = lane;
+  const { uiStore } = useStore();
+  // the region under the cursor (mapped from mouse X), so hovering anywhere in
+  // the lane — not just the header tab — lifts that region's header to front
+  const [hoveredRegionId, setHoveredRegionId] = useState<string | null>(null);
+
+  const onMouseMove = (e: ReactMouseEvent<HTMLDivElement>) => {
+    const variations = ownerBlock.parameterVariations[uniformName];
+    if (!variations || variations.length === 0) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const time = uiStore.xToTime(e.clientX - rect.left);
+    let acc = 0;
+    for (const variation of variations) {
+      if (time < acc + variation.duration) {
+        if (hoveredRegionId !== variation.id) setHoveredRegionId(variation.id);
+        return;
+      }
+      acc += variation.duration;
+    }
+    const last = variations[variations.length - 1];
+    if (last && hoveredRegionId !== last.id) setHoveredRegionId(last.id);
+  };
 
   return (
     <Box position="relative" width="100%" role="group">
       {/* the curve, with the pinned param name overlaid top-left */}
-      <Box position="relative" width="100%">
+      <Box
+        position="relative"
+        width="100%"
+        onMouseMove={onMouseMove}
+        onMouseLeave={() => setHoveredRegionId(null)}
+      >
         {isOpacity ? (
           <OpacityLaneBody block={ownerBlock} />
         ) : (
@@ -148,6 +174,7 @@ const AutomationLane = observer(function AutomationLane({
             block={ownerBlock}
             uniformName={uniformName}
             isOpacity={isOpacity}
+            hoveredRegionId={hoveredRegionId}
           />
         </Box>
 
@@ -199,10 +226,12 @@ const RegionBar = observer(function RegionBar({
   block,
   uniformName,
   isOpacity,
+  hoveredRegionId,
 }: {
   block: Block;
   uniformName: string;
   isOpacity: boolean;
+  hoveredRegionId: string | null;
 }) {
   const variations = block.parameterVariations[uniformName] ?? [];
 
@@ -293,7 +322,7 @@ const RegionBar = observer(function RegionBar({
                     width={`${(variation.duration / block.duration) * 100}%`}
                     minW={0}
                     position="relative"
-                    _hover={{ zIndex: 20 }}
+                    zIndex={variation.id === hoveredRegionId ? 20 : undefined}
                   >
                     <RegionTab
                       block={block}
