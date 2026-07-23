@@ -302,6 +302,10 @@ export class CurveVariation extends Variation<number> {
     const j = this.nodes.findIndex((n) => n.id === id);
     if (leftWasStraight && j > 0) this.setSegmentStraight(j - 1);
     if (rightWasStraight && j < this.nodes.length - 1) this.setSegmentStraight(j);
+    // moving a node can shrink an adjacent curved segment until its handles
+    // cross — re-clamp so the curve never loops back.
+    if (j > 0) this.clampSegmentHandles(j - 1);
+    if (j < this.nodes.length - 1) this.clampSegmentHandles(j);
   };
 
   /**
@@ -322,6 +326,29 @@ export class CurveVariation extends Variation<number> {
       const gap = prev ? node.time - prev.time : 0;
       node.handleIn = { dt: gap > 0 ? Math.max(Math.min(dt, 0), -gap) : 0, dv };
     }
+  };
+
+  /**
+   * Keep segment [i, i+1]'s handle control points inside the segment in time
+   * (0 ≤ out.dt ≤ gap, −gap ≤ in.dt ≤ 0). With both control points in range,
+   * X(time) is monotonic, so the curve can't loop back on itself. Called after a
+   * node move, which can shrink a curved segment until a fixed-offset handle
+   * pokes past the segment end (the cause of the self-intersecting loop).
+   */
+  private clampSegmentHandles = (i: number) => {
+    const a = this.nodes[i];
+    const b = this.nodes[i + 1];
+    if (!a || !b) return;
+    const gap = b.time - a.time;
+    if (gap <= 0) return; // step boundary
+    a.handleOut = {
+      dt: Math.min(Math.max(a.handleOut.dt, 0), gap),
+      dv: a.handleOut.dv,
+    };
+    b.handleIn = {
+      dt: Math.max(Math.min(b.handleIn.dt, 0), -gap),
+      dv: b.handleIn.dv,
+    };
   };
 
   /** Reset the segment between node `index` and the next node to a straight line. */
