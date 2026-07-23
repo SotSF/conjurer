@@ -3,6 +3,7 @@ import {
   HStack,
   IconButton,
   Input,
+  Portal,
   Text,
   VStack,
   useToken,
@@ -443,6 +444,7 @@ export const EnvelopeGraph = function EnvelopeGraph({
         {selectedSegment != null && renderSegmentHandles(selectedSegment)}
       </svg>
       {selectedNode && editingId === selectedNode.id && !dragging && (
+        <Portal>
         <NodeNumericEditor
           key={selectedNode.id}
           node={selectedNode}
@@ -453,6 +455,8 @@ export const EnvelopeGraph = function EnvelopeGraph({
           nextTime={nodes[selectedIdx + 1]?.time ?? duration}
           x={xOfTime(selectedNode.time)}
           y={yOfValue(selectedNode.value)}
+          originX={svgRef.current?.getBoundingClientRect().left ?? 0}
+          originY={svgRef.current?.getBoundingClientRect().top ?? 0}
           innerWidth={innerWidth}
           onCommit={(t, v) =>
             commit(() => variation.setNode(selectedNode.id, t, v))
@@ -473,6 +477,7 @@ export const EnvelopeGraph = function EnvelopeGraph({
             setEditingId(null);
           }}
         />
+        </Portal>
       )}
     </Box>
   );
@@ -497,6 +502,8 @@ function NodeNumericEditor({
   nextTime,
   x,
   y,
+  originX,
+  originY,
   innerWidth,
   onCommit,
   onDelete,
@@ -511,6 +518,8 @@ function NodeNumericEditor({
   nextTime: number;
   x: number;
   y: number;
+  originX: number;
+  originY: number;
   innerWidth: number;
   onCommit: (t: number, v: number) => void;
   onDelete: () => void;
@@ -641,20 +650,21 @@ function NodeNumericEditor({
     }
   };
 
-  // Position the panel beside the node (it's now a tall, narrow stack). Prefer
-  // the right of the dot, flipping to the left near the right edge; vertically
-  // centered on the dot. Coordinates are relative to the graph Box, whose
-  // py={1} (4px) offsets the svg's y downward.
+  // Position the panel beside the node (it's a tall, narrow stack). Prefer the
+  // right of the dot, flipping to the left near the right edge; vertically
+  // centered on the dot. Rendered in a Portal with fixed positioning (viewport
+  // coordinates) so it escapes lane clipping/stacking and paints above the
+  // neighboring lanes. (originX/Y = the svg's viewport top-left; x/y = the
+  // node's position within the svg.)
   const PANEL_W = 66;
   const PANEL_H = timeFixed ? 26 : 66;
   const GAP = 5;
   const R = NODE_RADIUS + 1.5;
-  const rightLeft = x + R + GAP;
-  const left =
-    rightLeft + PANEL_W <= innerWidth
-      ? rightLeft
-      : Math.max(0, x - R - GAP - PANEL_W);
-  const top = 4 + y - PANEL_H / 2;
+  const placeRight = x + R + GAP + PANEL_W <= innerWidth;
+  const left = placeRight
+    ? originX + x + R + GAP
+    : originX + x - R - GAP - PANEL_W;
+  const top = originY + y - PANEL_H / 2;
   const inputProps = {
     size: "xs" as const,
     height: "16px",
@@ -677,7 +687,7 @@ function NodeNumericEditor({
     <VStack
       ref={containerRef}
       tabIndex={-1}
-      position="absolute"
+      position="fixed"
       left={`${left}px`}
       top={`${top}px`}
       spacing={1}
