@@ -437,6 +437,11 @@ function NodeNumericEditor({
   const [tStr, setTStr] = useState(fmtNum(node.time));
   const vFocused = useRef(false);
   const tFocused = useRef(false);
+  // node (t, v) captured when a field gains focus, so Esc can restore what the
+  // node was before this edit session (live edits have already moved it).
+  const editStart = useRef<{ time: number; value: number } | null>(null);
+  // set by an Esc revert so the ensuing blur doesn't re-commit the typed value.
+  const suppressBlurCommit = useRef(false);
   const timeFixed = isFirst || isLast;
 
   useEffect(() => {
@@ -467,6 +472,32 @@ function NodeNumericEditor({
   const commitT = () => {
     if (Number.isFinite(parseFloat(tStr))) applyT(tStr);
     setTStr(fmtNum(node.time));
+  };
+  // Esc: undo the whole edit session by restoring the node to its focus-time
+  // (t, v). Suppress the blur that follows so it doesn't re-apply the typed text.
+  const revert = () => {
+    const start = editStart.current;
+    if (start) onCommit(start.time, start.value);
+    suppressBlurCommit.current = true;
+    setVStr(fmtNum(start?.value ?? node.value));
+    setTStr(fmtNum(start?.time ?? node.time));
+  };
+  const onFieldFocus = (focusedRef: React.MutableRefObject<boolean>) => {
+    focusedRef.current = true;
+    editStart.current = { time: node.time, value: node.value };
+  };
+  const onFieldBlur = (
+    focusedRef: React.MutableRefObject<boolean>,
+    commitFn: () => void,
+  ) => {
+    focusedRef.current = false;
+    if (suppressBlurCommit.current) {
+      suppressBlurCommit.current = false;
+      setVStr(fmtNum(node.value));
+      setTStr(fmtNum(node.time));
+    } else {
+      commitFn();
+    }
   };
 
   // Coarse step on arrow, fine (÷10) with Shift.
@@ -558,18 +589,15 @@ function NodeNumericEditor({
           setVStr(e.target.value);
           applyV(e.target.value);
         }}
-        onFocus={() => (vFocused.current = true)}
-        onBlur={() => {
-          vFocused.current = false;
-          commitV();
-        }}
+        onFocus={() => onFieldFocus(vFocused)}
+        onBlur={() => onFieldBlur(vFocused, commitV)}
         onKeyDown={keyHandler(
           node.value,
           VALUE_STEP,
           setVStr,
           applyV,
           commitV,
-          () => setVStr(fmtNum(node.value)),
+          revert,
         )}
       />
       {!timeFixed && (
@@ -585,18 +613,15 @@ function NodeNumericEditor({
               setTStr(e.target.value);
               applyT(e.target.value);
             }}
-            onFocus={() => (tFocused.current = true)}
-            onBlur={() => {
-              tFocused.current = false;
-              commitT();
-            }}
+            onFocus={() => onFieldFocus(tFocused)}
+            onBlur={() => onFieldBlur(tFocused, commitT)}
             onKeyDown={keyHandler(
               node.time,
               TIME_STEP,
               setTStr,
               applyT,
               commitT,
-              () => setTStr(fmtNum(node.time)),
+              revert,
             )}
           />
         </>
