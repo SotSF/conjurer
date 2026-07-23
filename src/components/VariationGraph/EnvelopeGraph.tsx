@@ -67,6 +67,22 @@ export const EnvelopeGraph = function EnvelopeGraph({
   const [selectedSegment, setSelectedSegment] = useState<number | null>(null);
   // node whose inline numeric editor is open (opened by double-clicking a node)
   const [editingId, setEditingId] = useState<string | null>(null);
+  // (t, v) of the editing node when the editor opened / last navigated, so Esc
+  // can abort the whole session (live edits have already moved the node).
+  const editStart = useRef<{ id: string; time: number; value: number } | null>(
+    null,
+  );
+
+  // Open the numeric editor on a node: select it and snapshot its (t, v) so Esc
+  // can restore it. Used by node double-click and Shift+←/→ navigation.
+  const openEditor = (id: string) => {
+    const n = variation.nodes.find((nn) => nn.id === id);
+    if (!n) return;
+    setSelectedId(id);
+    setSelectedSegment(null);
+    setEditingId(id);
+    editStart.current = { id, time: n.time, value: n.value };
+  };
   // value a node is currently snapping to (for the guide line), or null
   const [snapValue, setSnapValue] = useState<number | null>(null);
   // true while a node is being dragged — the numeric editor hides so it doesn't
@@ -316,13 +332,15 @@ export const EnvelopeGraph = function EnvelopeGraph({
     if (selectedId == null && selectedSegment == null) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "Escape") return;
+      // while the numeric editor is open, Esc is its abort (handled in the
+      // panel), not a deselect
+      if (editingId != null) return;
       setSelectedId(null);
       setSelectedSegment(null);
-      setEditingId(null);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [selectedId, selectedSegment]);
+  }, [selectedId, selectedSegment, editingId]);
 
   const renderSegmentHandles = (seg: number) => {
     const a = nodes[seg];
@@ -396,9 +414,7 @@ export const EnvelopeGraph = function EnvelopeGraph({
               onPointerDown={(e) => onNodePointerDown(e, node.id)}
               onDoubleClick={(e) => {
                 e.stopPropagation();
-                setSelectedId(node.id);
-                setSelectedSegment(null);
-                setEditingId(node.id);
+                openEditor(node.id);
               }}
             />
           );
@@ -426,6 +442,15 @@ export const EnvelopeGraph = function EnvelopeGraph({
             setSelectedSegment(null);
             setEditingId(null);
           }}
+          onNavigate={(dir) => {
+            const target = nodes[selectedIdx + dir];
+            if (target) openEditor(target.id);
+          }}
+          onAbort={() => {
+            const s = editStart.current;
+            if (s) commit(() => variation.setNode(s.id, s.time, s.value));
+            setEditingId(null);
+          }}
         />
       )}
     </Box>
@@ -435,10 +460,13 @@ export const EnvelopeGraph = function EnvelopeGraph({
 // Compact numeric editor for the selected node (opened by double-click): stacked
 // value (v) and, for interior nodes, local-time (t) fields, plus a delete button
 // for interior nodes. Floats beside the node (right, or left near the right
-// edge). Fields stay in sync with the live node except while focused, so
-// dragging updates them without clobbering an in-progress edit. Typing/arrows
-// apply live; Esc reverts the whole edit session. Endpoints anchor the region
-// bounds, so their time is fixed and they can't be deleted.
+// edge). The panel is focused on open, so keys work at the "modal open" scope:
+// with no field focused, Up/Down adjust the value and Left/Right the time (same
+// clamps), and Shift+Left/Right hop the panel to the prior/next node; inside a
+// field, Up/Down nudge that field (Shift = fine) and Enter commits. Esc aborts
+// the whole session, restoring the node to its open-time (t, v). Typing/arrows
+// apply live; fields stay in sync with the node except while focused. Endpoints
+// anchor the region bounds, so their time is fixed and they can't be deleted.
 function NodeNumericEditor({
   node,
   isFirst,
@@ -451,6 +479,8 @@ function NodeNumericEditor({
   innerWidth,
   onCommit,
   onDelete,
+  onNavigate,
+  onAbort,
 }: {
   node: CurveNode;
   isFirst: boolean;
@@ -463,18 +493,23 @@ function NodeNumericEditor({
   innerWidth: number;
   onCommit: (t: number, v: number) => void;
   onDelete: () => void;
+  onNavigate: (dir: number) => void;
+  onAbort: () => void;
 }) {
   const [vStr, setVStr] = useState(fmtNum(node.value));
   const [tStr, setTStr] = useState(fmtNum(node.time));
   const vFocused = useRef(false);
   const tFocused = useRef(false);
-  // node (t, v) captured when a field gains focus, so Esc can restore what the
-  // node was before this edit session (live edits have already moved it).
-  const editStart = useRef<{ time: number; value: number } | null>(null);
-  // set by an Esc revert so the ensuing blur doesn't re-commit the typed value.
-  const suppressBlurCommit = useRef(false);
+  const containerRef = useRef<HTMLDivElement>(null);
   const timeFixed = isFirst || isLast;
 
+  // Focus the panel when it opens (and on navigation, since it remounts per
+  // node) so the arrow keys drive it without a field needing focus.
+  useEffect(() => {
+    containerRef.current?.focus({ preventScroll: true });
+  }, []);
+
+  // Keep fields synced to the live node except while that field is focused.
   useEffect(() => {
     if (!vFocused.current) setVStr(fmtNum(node.value));
   }, [node.value]);
@@ -488,7 +523,10 @@ function NodeNumericEditor({
   const tMax = Math.min(nextTime, duration);
   const clampT = (t: number) => Math.max(tMin, Math.min(tMax, t));
 
-  // Live-apply as the field changes (typing or arrow-nudging) so the node moves
+  const VALUE_STEP = 0.1;
+  const TIME_STEP = 0.1;
+
+  // Live-apply as a field changes (typing / field arrow-nudge) so the node moves
   // in real time — no Enter needed. Value is unclamped (out-of-range values just
   // expand the axis); time clamps into [tMin, tMax].
   const applyV = (raw: string) => {
@@ -500,95 +538,80 @@ function NodeNumericEditor({
     const t = parseFloat(raw);
     if (Number.isFinite(t)) onCommit(clampT(t), node.value);
   };
-  // Blur normalizes the display (and reverts an unparseable field).
-  const commitV = () => {
-    if (Number.isFinite(parseFloat(vStr))) applyV(vStr);
-    setVStr(fmtNum(node.value));
-  };
-  const commitT = () => {
-    if (Number.isFinite(parseFloat(tStr))) applyT(tStr);
-    setTStr(fmtNum(node.time));
-  };
-  // Esc: undo the whole edit session by restoring the node to its focus-time
-  // (t, v). Suppress the blur that follows so it doesn't re-apply the typed text.
-  const revert = () => {
-    const start = editStart.current;
-    if (start) onCommit(start.time, start.value);
-    suppressBlurCommit.current = true;
-    setVStr(fmtNum(start?.value ?? node.value));
-    setTStr(fmtNum(start?.time ?? node.time));
-  };
+  // Edits are already applied live, so blur just normalizes the display.
+  const commitV = () => setVStr(fmtNum(node.value));
+  const commitT = () => setTStr(fmtNum(node.time));
   const onFieldFocus = (focusedRef: React.MutableRefObject<boolean>) => {
     focusedRef.current = true;
-    editStart.current = { time: node.time, value: node.value };
   };
   const onFieldBlur = (
     focusedRef: React.MutableRefObject<boolean>,
     commitFn: () => void,
   ) => {
     focusedRef.current = false;
-    if (suppressBlurCommit.current) {
-      suppressBlurCommit.current = false;
-      setVStr(fmtNum(node.value));
-      setTStr(fmtNum(node.time));
-    } else {
-      commitFn();
-    }
+    commitFn();
   };
 
-  // Coarse step on arrow, fine (÷10) with Shift.
-  const VALUE_STEP = 0.1;
-  const TIME_STEP = 0.1;
-  const nudge = (
-    cur: string,
-    fallback: number,
-    step: number,
-    setStr: (s: string) => void,
-    apply: (raw: string) => void,
-    dir: number,
-    fine: boolean,
-    clamp?: (n: number) => number,
-  ) => {
-    const base = Number.isFinite(parseFloat(cur)) ? parseFloat(cur) : fallback;
-    let next = base + dir * step * (fine ? 0.1 : 1);
-    if (clamp) next = clamp(next);
-    const s = fmtNum(next);
-    setStr(s);
-    apply(s);
-  };
-  const keyHandler =
+  // Per-field key handling (only while that field is focused): Enter commits and
+  // blurs; Up/Down nudge that field (Shift = fine); Escape is left to bubble to
+  // the panel handler (abort). Other keys are stopped so they don't double-fire
+  // at the panel scope or trigger node deletion (Backspace) at the window scope.
+  const fieldKeyHandler =
     (
-      fallback: number,
-      step: number,
       setStr: (s: string) => void,
       apply: (raw: string) => void,
       commitFn: () => void,
-      revert: () => void,
+      step: number,
       clamp?: (n: number) => number,
     ) =>
     (e: React.KeyboardEvent<HTMLInputElement>) => {
-      e.stopPropagation();
+      if (e.key !== "Escape") e.stopPropagation();
       if (e.key === "Enter") {
         commitFn();
-        e.currentTarget.blur();
-      } else if (e.key === "Escape") {
-        revert();
         e.currentTarget.blur();
       } else if (e.key === "ArrowUp" || e.key === "ArrowDown") {
         e.preventDefault();
         // read the live DOM value so holding the arrow accumulates correctly
-        nudge(
-          e.currentTarget.value,
-          fallback,
-          step,
-          setStr,
-          apply,
-          e.key === "ArrowUp" ? 1 : -1,
-          e.shiftKey,
-          clamp,
-        );
+        const base = Number.isFinite(parseFloat(e.currentTarget.value))
+          ? parseFloat(e.currentTarget.value)
+          : 0;
+        let next = base + (e.key === "ArrowUp" ? 1 : -1) * step * (e.shiftKey ? 0.1 : 1);
+        if (clamp) next = clamp(next);
+        const s = fmtNum(next);
+        setStr(s);
+        apply(s);
       }
     };
+
+  // Panel-scope key handling (active whenever the panel or one of its fields has
+  // focus, i.e. the whole "modal open" timeframe). Esc aborts the edit session;
+  // with no field focused, Up/Down adjust the value and Left/Right adjust the
+  // time (same clamp), while Shift+Left/Right hop the panel to the prior/next
+  // node. Reads the live node object so holding a key accumulates.
+  const onPanelKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === "Escape") {
+      e.preventDefault();
+      e.stopPropagation(); // don't also trip the window Esc-deselect handler
+      onAbort();
+      return;
+    }
+    const inField = (e.target as HTMLElement).tagName === "INPUT";
+    if (inField) return; // the focused field handles its own keys
+    if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+      e.preventDefault();
+      const dv = (e.key === "ArrowUp" ? 1 : -1) * VALUE_STEP * (e.shiftKey ? 0.1 : 1);
+      onCommit(node.time, node.value + dv);
+    } else if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+      e.preventDefault();
+      if (e.shiftKey) {
+        onNavigate(e.key === "ArrowRight" ? 1 : -1);
+        return;
+      }
+      if (timeFixed) return;
+      const dir = e.key === "ArrowRight" ? 1 : -1;
+      onCommit(clampT(node.time + dir * TIME_STEP), node.value);
+    }
+  };
 
   // Position the panel beside the node (it's now a tall, narrow stack). Prefer
   // the right of the dot, flipping to the left near the right edge; vertically
@@ -624,6 +647,8 @@ function NodeNumericEditor({
 
   return (
     <VStack
+      ref={containerRef}
+      tabIndex={-1}
       position="absolute"
       left={`${left}px`}
       top={`${top}px`}
@@ -635,6 +660,8 @@ function NodeNumericEditor({
       borderRadius="sm"
       boxShadow="md"
       zIndex={1500}
+      outline="none"
+      onKeyDown={onPanelKeyDown}
       onPointerDown={(e) => e.stopPropagation()}
       onDoubleClick={(e) => e.stopPropagation()}
     >
@@ -650,14 +677,7 @@ function NodeNumericEditor({
           }}
           onFocus={() => onFieldFocus(vFocused)}
           onBlur={() => onFieldBlur(vFocused, commitV)}
-          onKeyDown={keyHandler(
-            node.value,
-            VALUE_STEP,
-            setVStr,
-            applyV,
-            commitV,
-            revert,
-          )}
+          onKeyDown={fieldKeyHandler(setVStr, applyV, commitV, VALUE_STEP)}
         />
       </HStack>
       {!timeFixed && (
@@ -674,13 +694,11 @@ function NodeNumericEditor({
               }}
               onFocus={() => onFieldFocus(tFocused)}
               onBlur={() => onFieldBlur(tFocused, commitT)}
-              onKeyDown={keyHandler(
-                node.time,
-                TIME_STEP,
+              onKeyDown={fieldKeyHandler(
                 setTStr,
                 applyT,
                 commitT,
-                revert,
+                TIME_STEP,
                 clampT,
               )}
             />
