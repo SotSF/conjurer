@@ -51,6 +51,10 @@ export class AudioStore {
     this._playbackRate = rate;
     // preservePitch keeps the chant recognizable when slowed
     this.wavesurfer?.setPlaybackRate(rate, true);
+    // The timeline playhead is a wall-clock CSS animation anchored at lastCursor;
+    // changing rate restarts that animation, so re-anchor it to the live position
+    // (works paused or playing) to keep it from jumping back to the old anchor.
+    this.lastCursorPosition = this._globalTime;
     this.saveToLocalStorage();
   }
 
