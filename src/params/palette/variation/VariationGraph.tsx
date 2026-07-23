@@ -11,7 +11,6 @@ import { Block } from "@/src/types/Block";
 import { PaletteVariation } from "./PaletteVariation";
 import { Palette } from "../Palette";
 import { PaletteEditor } from "../editor/PaletteEditor";
-import { VARIATION_BOUND_WIDTH } from "@/src/utils/layout";
 import { vector3ToRgbaString } from "@/src/utils/color";
 
 type PaletteVariationGraphProps = {
@@ -31,7 +30,10 @@ export const PaletteVariationGraph = function PaletteVariationGraph({
 }: PaletteVariationGraphProps) {
   const { palette } = variation;
   const colorCells = 14;
-  const colorCellSize = (width - VARIATION_BOUND_WIDTH) / colorCells;
+  // Fill the full region slot: the region-model seam is drawn by the
+  // RegionBoundary overlay at the true boundary x, so the band must tile the
+  // whole slot to align with the region tabs above and reach the block's end.
+  const colorCellSize = width / colorCells;
 
   const setPalette = (newPalette: Palette) => {
     variation.palette = newPalette;
@@ -43,11 +45,11 @@ export const PaletteVariationGraph = function PaletteVariationGraph({
       <PopoverTrigger>
         <Box
           py={1}
-          width={`${width - VARIATION_BOUND_WIDTH}px`}
+          width={`${width}px`}
           cursor="pointer"
           _hover={{ bgColor: "gray.500" }}
         >
-          <svg width={width - VARIATION_BOUND_WIDTH} height={60}>
+          <svg width={width} height={60}>
             <defs>
               {Array.from({ length: colorCells }).map((_, i) => (
                 <linearGradient

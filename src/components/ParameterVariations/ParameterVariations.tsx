@@ -122,20 +122,29 @@ export const ParameterVariations = observer(function ParameterVariations({
       onMouseLeave={() => setCursorX(null)}
     >
       <HStack width="100%" justify="start" spacing={0}>
-        {variations.map((variation) => (
-          <VariationGraph
-            key={variation.id}
-            uniformName={uniformName}
-            variation={variation}
-            width={
-              variation.duration < 0
-                ? width
-                : (variation.duration / block.duration) * width
-            }
-            domain={domain}
-            block={block}
-          />
-        ))}
+        {variations.map((variation) => {
+          // Each region occupies a slot proportional to its duration. Wrap the
+          // graph in a fixed-width, non-shrinking slot so regions tile to the
+          // full lane width and align with the region tabs / RegionBoundary
+          // seams above. (Curve/spline/number graphs draw their svg 3px narrow
+          // for node clearance from the seam handle; the wrapper keeps that from
+          // accumulating into leftward drift. Color/palette bands fill the slot.)
+          const slotWidth =
+            variation.duration < 0
+              ? width
+              : (variation.duration / block.duration) * width;
+          return (
+            <Box key={variation.id} width={`${slotWidth}px`} flexShrink={0} minW={0}>
+              <VariationGraph
+                uniformName={uniformName}
+                variation={variation}
+                width={slotWidth}
+                domain={domain}
+                block={block}
+              />
+            </Box>
+          );
+        })}
       </HStack>
 
       {/* draggable dividers at each internal region seam (resize by moving the
