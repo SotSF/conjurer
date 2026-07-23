@@ -15,6 +15,7 @@ import { isVector4 } from "@/src/utils/object";
 import { LinearVariation4 } from "@/src/types/Variations/LinearVariation4";
 import { isPalette, Palette } from "@/src/params/palette/Palette";
 import { PaletteVariation } from "@/src/params/palette/variation/PaletteVariation";
+import { CurveVariation } from "@/src/types/Variations/CurveVariation";
 import { generateId } from "@/src/utils/id";
 import {
   loadBlockLanes,
@@ -153,7 +154,9 @@ export class Block {
     const duration = variation.duration;
     let replacement: Variation | undefined;
     if (typeof defaultValue === "number")
-      replacement = new FlatVariation(duration, defaultValue);
+      // region model: a numeric reset is a flat full-span Curve (editable as a
+      // Curve region), not the legacy FlatVariation.
+      replacement = CurveVariation.flat(duration, defaultValue);
     else if (isVector4(defaultValue))
       replacement = new LinearVariation4(duration, defaultValue, defaultValue);
     else if (isPalette(defaultValue))
@@ -161,6 +164,152 @@ export class Block {
     if (!replacement) return;
 
     variations[index] = replacement;
+    this.triggerVariationReactions(uniformName);
+  };
+
+  // ===== Region-model layout operations (full-block lane) =====
+  // The lane is always exactly block-width and always full: these keep the
+  // region durations summing to the lane span, so time is conserved on every op.
+
+  // The [a,b] local slice of a region, rebased to its own frame. Curves cut
+  // faithfully (De Casteljau); generators just take the sub-duration.
+  private sliceRegion = (v: Variation, a: number, b: number): Variation => {
+    const c = v.clone();
+    if (c instanceof CurveVariation) {
+      c.resizeEnd(b);
+      c.shiftStart(a);
+    } else {
+      c.duration = Math.max(MINIMUM_VARIATION_DURATION, b - a);
+    }
+    return c;
+  };
+
+  // Fold runs of adjacent Curve regions into single Curves (structural merge —
+  // preserves steps/corners at the seam). Used after remove/insert.
+  private mergeAdjacentCurves = (regions: Variation[]): Variation[] => {
+    const out: Variation[] = [];
+    for (const r of regions) {
+      const prev = out[out.length - 1];
+      if (prev instanceof CurveVariation && r instanceof CurveVariation)
+        out[out.length - 1] = CurveVariation.mergeAdjacent(prev, r);
+      else out.push(r);
+    }
+    return out;
+  };
+
+  // Move the boundary between region `index` and `index+1` by `deltaTime`
+  // (positive = later). One region grows exactly as the other shrinks, so the
+  // lane total never changes. Clamped so both stay above the minimum width.
+  moveBoundary = (uniformName: string, index: number, deltaTime: number) => {
+    const vs = this.parameterVariations[uniformName];
+    if (!vs || index < 0 || index + 1 >= vs.length) return;
+    const left = vs[index];
+    const right = vs[index + 1];
+    const maxGrow = right.duration - MINIMUM_VARIATION_DURATION; // right can give
+    const maxShrink = left.duration - MINIMUM_VARIATION_DURATION; // left can give
+    const delta = Math.max(-maxShrink, Math.min(maxGrow, deltaTime));
+    if (Math.abs(delta) < 1e-9) return;
+    if (left instanceof CurveVariation) left.resizeEnd(left.duration + delta);
+    else left.duration += delta;
+    if (right instanceof CurveVariation) right.shiftStart(delta);
+    else right.duration -= delta;
+    this.triggerVariationReactions(uniformName);
+  };
+
+  // Insert a new region spanning lane-local [startT, endT], carving that span
+  // out of whatever region(s) it overlaps (they shrink; a fully-overlapped
+  // interior region is removed; a Curve split in the middle yields two copies).
+  // `makeRegion(duration)` builds the region to drop in. Adjacent Curves that
+  // become neighbors are auto-merged.
+  insertRegion = (
+    uniformName: string,
+    startT: number,
+    endT: number,
+    makeRegion: (duration: number) => Variation,
+  ) => {
+    const vs = this.parameterVariations[uniformName];
+    if (!vs || vs.length === 0) return;
+    const total = vs.reduce((sum, v) => sum + v.duration, 0);
+    const s = Math.max(0, Math.min(total - MINIMUM_VARIATION_DURATION, startT));
+    const e = Math.max(s + MINIMUM_VARIATION_DURATION, Math.min(total, endT));
+
+    const out: Variation[] = [];
+    let acc = 0;
+    let inserted = false;
+    const insert = () => {
+      if (!inserted) {
+        out.push(makeRegion(e - s));
+        inserted = true;
+      }
+    };
+    for (const v of vs) {
+      const vStart = acc;
+      const vEnd = acc + v.duration;
+      acc = vEnd;
+      if (vEnd <= s + 1e-9) {
+        out.push(v);
+        continue;
+      }
+      if (vStart >= e - 1e-9) {
+        insert();
+        out.push(v);
+        continue;
+      }
+      // v overlaps [s, e]
+      if (s > vStart + 1e-9) out.push(this.sliceRegion(v, 0, s - vStart));
+      insert();
+      if (vEnd > e + 1e-9)
+        out.push(this.sliceRegion(v, e - vStart, v.duration));
+    }
+    insert(); // span lands at the very end
+
+    this.parameterVariations[uniformName] = this.mergeAdjacentCurves(out);
+    this.triggerVariationReactions(uniformName);
+  };
+
+  // Remove a region and conserve the lane: the left neighbor extends right to
+  // cover the vacated span (or the right neighbor extends left if the removed
+  // region was leftmost); adjacent Curves then auto-merge. The sole region can't
+  // be removed — it degrades to a reset to the param default.
+  removeRegionWithBackfill = (uniformName: string, variation: Variation) => {
+    const vs = this.parameterVariations[uniformName];
+    if (!vs) return;
+    const idx = vs.indexOf(variation);
+    if (idx < 0) return;
+    if (vs.length === 1) {
+      this.resetVariationToDefault(uniformName, variation);
+      return;
+    }
+    const removedDur = variation.duration;
+    const out = vs.slice();
+    out.splice(idx, 1);
+    if (idx - 1 >= 0) {
+      const left = out[idx - 1];
+      if (left instanceof CurveVariation)
+        left.resizeEnd(left.duration + removedDur);
+      else left.duration += removedDur;
+    } else {
+      const right = out[0];
+      if (right instanceof CurveVariation) right.shiftStart(-removedDur);
+      else right.duration += removedDur;
+    }
+    this.parameterVariations[uniformName] = this.mergeAdjacentCurves(out);
+    this.triggerVariationReactions(uniformName);
+  };
+
+  // Swap a region for another in place, preserving its span (its duration is
+  // forced onto the replacement). Used by type-conversion (Curve↔LFO↔Audio).
+  replaceRegionInPlace = (
+    uniformName: string,
+    variation: Variation,
+    replacement: Variation,
+  ) => {
+    const vs = this.parameterVariations[uniformName];
+    if (!vs) return;
+    const idx = vs.indexOf(variation);
+    if (idx < 0) return;
+    replacement.duration = variation.duration;
+    vs[idx] = replacement;
     this.triggerVariationReactions(uniformName);
   };
 

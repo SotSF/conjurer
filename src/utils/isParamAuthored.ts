@@ -5,6 +5,7 @@ import { FlatVariation } from "@/src/types/Variations/FlatVariation";
 import { LinearVariation } from "@/src/types/Variations/LinearVariation";
 import { LinearVariation4 } from "@/src/types/Variations/LinearVariation4";
 import { PaletteVariation } from "@/src/params/palette/variation/PaletteVariation";
+import { CurveVariation } from "@/src/types/Variations/CurveVariation";
 import { Palette, isPalette } from "@/src/params/palette/Palette";
 import { isVector4 } from "@/src/utils/object";
 
@@ -44,7 +45,20 @@ const isConstantAtDefault = (
     return (
       isPalette(defaultValue) && palettesEqual(variation.palette, defaultValue)
     );
-  // periodic / spline / easing / audio variations are inherently time-varying
+  // A Curve is un-authored only if it resolves to the flat default everywhere:
+  // every node at the default value with no curvature (this is what migration
+  // produces for an un-authored param). Any deviating value or bend = authored.
+  if (variation instanceof CurveVariation)
+    return (
+      variation.nodes.length > 0 &&
+      variation.nodes.every(
+        (n) =>
+          valuesEqual(n.value, defaultValue) &&
+          Math.abs(n.handleIn.dv) < 1e-9 &&
+          Math.abs(n.handleOut.dv) < 1e-9,
+      )
+    );
+  // periodic / audio variations are inherently time-varying
   return false;
 };
 

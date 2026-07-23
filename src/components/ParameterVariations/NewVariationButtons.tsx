@@ -1,17 +1,22 @@
 import { Text, VStack } from "@chakra-ui/react";
-import { memo } from "react";
 import { Block } from "@/src/types/Block";
 import { ParamDefinitions } from "@/src/params/shared/ParamDefinitions";
+import { useStore } from "@/src/types/StoreContext";
+import { observer } from "mobx-react-lite";
 
 type NewVariationButtonsProps = {
   uniformName: string;
   block: Block;
 };
 
-export const NewVariationButtons = memo(function NewVariationButtons({
+export const NewVariationButtons = observer(function NewVariationButtons({
   uniformName,
   block,
 }: NewVariationButtonsProps) {
+  const store = useStore();
+  // In region-preview mode you build regions within the lane, not old variants.
+  if (store.curvesPreview) return null;
+
   const patternParam = block.pattern.params[uniformName];
   const props = { block, uniformName };
 

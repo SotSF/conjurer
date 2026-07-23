@@ -5,7 +5,17 @@ import { sampleBlockOpacity } from "@/src/utils/blockOpacity";
 import { paramValueAtTime } from "@/src/utils/paramValueAtTime";
 import { reorder } from "@/src/utils/array";
 import { useStore } from "@/src/types/StoreContext";
-import { Box, Button, HStack, Text, VStack } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  HStack,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
+  Text,
+  VStack,
+} from "@chakra-ui/react";
 import { TIMELINE_HEADER_WIDTH } from "@/src/types/UIStore";
 import {
   DragDropContext,
@@ -15,7 +25,20 @@ import {
 } from "@hello-pangea/dnd";
 import { action } from "mobx";
 import { observer } from "mobx-react-lite";
-import { MouseEvent as ReactMouseEvent, useState } from "react";
+import { MouseEvent as ReactMouseEvent, useEffect, useState } from "react";
+import { AddRegionMenu } from "@/src/components/ParameterVariations/AddRegionMenu";
+import { CurveRangeControl } from "@/src/components/ParameterVariations/CurveRangeControl";
+import { RegionSettingsPopover } from "@/src/components/ParameterVariations/RegionSettingsPopover";
+import { CurveVariation } from "@/src/types/Variations/CurveVariation";
+import { PeriodicVariation } from "@/src/types/Variations/PeriodicVariation";
+import { AudioVariation } from "@/src/types/Variations/AudioVariation";
+import {
+  allowedInsertTypes,
+  convertRegion,
+  InsertType,
+  regionTypeOf,
+  RegionType,
+} from "@/src/utils/regionConvert";
 
 const OPACITY_CURVE_HEIGHT = 26;
 const REGION_BAR_HEIGHT = 18;
@@ -49,6 +72,9 @@ type Lane = {
   uniformName: string;
   label: string;
   isOpacity: boolean;
+  // Duration the lane spans: always the parent pattern block's duration (effect
+  // blocks carry a placeholder duration, so their param lanes must use this).
+  laneDuration: number;
 };
 
 // The parameters whose automation lanes are open beneath a block, gathered from
@@ -64,6 +90,7 @@ const gatherLanes = (block: Block): Lane[] => {
       uniformName,
       label: param.name,
       isOpacity: uniformName === "u_opacity",
+      laneDuration: block.duration,
     });
   }
   for (const effectBlock of block.effectBlocks) {
@@ -76,6 +103,7 @@ const gatherLanes = (block: Block): Lane[] => {
         uniformName,
         label: `${effectBlock.pattern.name} · ${param.name}`,
         isOpacity: false,
+        laneDuration: block.duration,
       });
     }
   }
@@ -129,6 +157,22 @@ const AutomationLane = observer(function AutomationLane({
   const [headerRegionId, setHeaderRegionId] = useState<string | null>(null);
   const hoveredRegionId = headerRegionId ?? curveRegionId;
 
+  // Region insert: the RegionBar ＋ arms a one-shot insert of a chosen type
+  // (gated to the param's sensible types); the insert overlay in the lane body
+  // then captures paint/click. Esc cancels. Not offered on the opacity lane.
+  const insertTypes = isOpacity
+    ? []
+    : allowedInsertTypes(ownerBlock.pattern.params[uniformName]);
+  const [armedType, setArmedType] = useState<InsertType | null>(null);
+  useEffect(() => {
+    if (!armedType) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setArmedType(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [armedType]);
+
   const onMouseMove = (e: ReactMouseEvent<HTMLDivElement>) => {
     const variations = ownerBlock.parameterVariations[uniformName];
     if (!variations || variations.length === 0) return;
@@ -158,30 +202,47 @@ const AutomationLane = observer(function AutomationLane({
         {isOpacity ? (
           <OpacityLaneBody block={ownerBlock} />
         ) : (
-          <ParameterVariations uniformName={uniformName} block={ownerBlock} />
+          <ParameterVariations
+            uniformName={uniformName}
+            block={ownerBlock}
+            laneDuration={lane.laneDuration}
+            armedType={armedType}
+            onInserted={() => setArmedType(null)}
+          />
         )}
 
-        {/* region control bar — nothing at rest (lanes stay flush); on hover it
-            appears as an overlay floating just above the curve, so it never
-            covers a node and costs no vertical space */}
+        {/* region control bar — nothing at rest (lanes stay flush); on hover (or
+            while an insert is armed) it floats just above the curve, so it never
+            covers a node and costs no vertical space. The ＋ sits at the right. */}
         <Box
           position="absolute"
           bottom="100%"
           left={0}
           width="100%"
           zIndex={5}
-          opacity={0}
-          pointerEvents="none"
+          opacity={armedType ? 1 : 0}
+          pointerEvents={armedType ? "auto" : "none"}
           transition="opacity 0.12s"
           _groupHover={{ opacity: 1, pointerEvents: "auto" }}
         >
-          <RegionBar
-            block={ownerBlock}
-            uniformName={uniformName}
-            isOpacity={isOpacity}
-            hoveredRegionId={hoveredRegionId}
-            setHeaderRegionId={setHeaderRegionId}
-          />
+          <Box position="relative" width="100%">
+            <RegionBar
+              block={ownerBlock}
+              uniformName={uniformName}
+              isOpacity={isOpacity}
+              hoveredRegionId={hoveredRegionId}
+              setHeaderRegionId={setHeaderRegionId}
+            />
+            {insertTypes.length > 0 && (
+              <Box position="absolute" top="0" right="2px" zIndex={30}>
+                <AddRegionMenu
+                  types={insertTypes}
+                  armedType={armedType}
+                  setArmedType={setArmedType}
+                />
+              </Box>
+            )}
+          </Box>
         </Box>
 
         <Box
@@ -384,7 +445,7 @@ const RegionTab = observer(function RegionTab({
       ⠿
     </Box>
   ) : null;
-  const typeLabel = (
+  const typeLabelText = (
     <Text
       fontSize="9px"
       fontWeight={700}
@@ -395,8 +456,71 @@ const RegionTab = observer(function RegionTab({
       {label}
     </Text>
   );
+  // the type label doubles as a convert menu for scalar regions; color regions
+  // (palette / linear4) aren't convertible so it stays a plain label
+  const current = regionTypeOf(variation);
+  const convertTargets =
+    current === "other"
+      ? []
+      : (["curve", "lfo", "audio"] as RegionType[]).filter((t) => t !== current);
+  const typeLabel =
+    convertTargets.length === 0 ? (
+      typeLabelText
+    ) : (
+      <Menu isLazy placement="bottom-start">
+        <MenuButton
+          onClick={(e) => e.stopPropagation()}
+          title="Convert region type"
+          style={{ cursor: "pointer" }}
+        >
+          {typeLabelText}
+        </MenuButton>
+        <MenuList minW="140px" bg="gray.700" py={1}>
+          {convertTargets.map((t) => (
+            <MenuItem
+              key={t}
+              fontSize={11}
+              bg="gray.700"
+              _hover={{ bg: "gray.600" }}
+              onClick={action((e: ReactMouseEvent) => {
+                e.stopPropagation();
+                const replacement = convertRegion(
+                  variation,
+                  t,
+                  store,
+                  block.pattern.params[uniformName],
+                  block.startTime,
+                );
+                block.replaceRegionInPlace(uniformName, variation, replacement);
+              })}
+            >
+              Convert to {t === "lfo" ? "LFO" : t[0].toUpperCase() + t.slice(1)}
+            </MenuItem>
+          ))}
+        </MenuList>
+      </Menu>
+    );
+
+  // per-type settings (gear): Curve → Min/Max range; LFO/Audio → rate/etc.
+  const settings =
+    variation instanceof CurveVariation ? (
+      <CurveRangeControl
+        block={block}
+        uniformName={uniformName}
+        variation={variation}
+      />
+    ) : variation instanceof PeriodicVariation ||
+      variation instanceof AudioVariation ? (
+      <RegionSettingsPopover
+        block={block}
+        uniformName={uniformName}
+        variation={variation}
+      />
+    ) : null;
+
   const controls = (
-    <HStack spacing="8px" flexShrink={0} color="#c3cdda" fontSize="11px">
+    <HStack spacing="6px" flexShrink={0} color="#c3cdda" fontSize="11px">
+      {settings}
       <Box
         as="span"
         cursor="pointer"

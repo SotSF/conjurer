@@ -5,6 +5,8 @@ import { Block } from "@/src/types/Block";
 import { VARIATION_BOUND_WIDTH } from "@/src/utils/layout";
 import { SplineVariation } from "@/src/types/Variations/SplineVariation";
 import { SplineVariationGraph } from "@/src/components/VariationGraph/SplineVariationGraph";
+import { CurveVariation } from "@/src/types/Variations/CurveVariation";
+import { EnvelopeGraph } from "@/src/components/VariationGraph/EnvelopeGraph";
 import { useVariationClick } from "@/src/hooks/variationClick";
 
 type NumberVariationGraphProps = {
@@ -25,6 +27,21 @@ export const NumberVariationGraph = function NumberVariationGraph({
   const orange = useToken("colors", "orange.400");
 
   const onVariationClick = useVariationClick(block, uniformName);
+
+  if (variation instanceof CurveVariation)
+    // No key={width} here: the SVG editor recomputes all coordinates from the
+    // `width` prop on each render, so it must NOT remount when zoom changes the
+    // width — remounting would wipe the selected-segment/handle state, making
+    // the curvature handles disappear on zoom.
+    return (
+      <EnvelopeGraph
+        uniformName={uniformName}
+        variation={variation}
+        width={width}
+        domain={domain}
+        block={block}
+      />
+    );
 
   if (variation instanceof SplineVariation)
     return (

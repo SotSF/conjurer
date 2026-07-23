@@ -6,6 +6,7 @@ import { PaletteVariation } from "@/src/params/palette/variation/PaletteVariatio
 import { PeriodicVariation } from "@/src/types/Variations/PeriodicVariation";
 import { SplineVariation } from "@/src/types/Variations/SplineVariation";
 import { AudioVariation } from "@/src/types/Variations/AudioVariation";
+import { CurveVariation } from "@/src/types/Variations/CurveVariation";
 import { Variation } from "@/src/types/Variations/Variation";
 import type { Store } from "@/src/types/Store";
 
@@ -19,6 +20,8 @@ export const deserializeVariation = (store: Store, data: any): Variation => {
       return PeriodicVariation.deserialize(store, data);
     case "spline":
       return SplineVariation.deserialize(store, data);
+    case "curve":
+      return CurveVariation.deserialize(store, data);
     case "easing":
       return EasingVariation.deserialize(store, data);
     case "audio":
