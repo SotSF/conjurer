@@ -14,6 +14,7 @@ import {
   MenuItem,
   MenuList,
   Text,
+  Tooltip,
   VStack,
 } from "@chakra-ui/react";
 import { TIMELINE_HEADER_WIDTH } from "@/src/types/UIStore";
@@ -159,10 +160,13 @@ const AutomationLane = observer(function AutomationLane({
 
   // Region insert: the RegionBar ＋ arms a one-shot insert of a chosen type
   // (gated to the param's sensible types); the insert overlay in the lane body
-  // then captures paint/click. Esc cancels. Not offered on the opacity lane.
-  const insertTypes = isOpacity
-    ? []
-    : allowedInsertTypes(ownerBlock.pattern.params[uniformName]);
+  // then captures paint/click. Esc cancels. Available on a MANUAL opacity lane
+  // (numeric → curve/lfo/audio), but not on an auto-opacity lane (no regions
+  // yet — Customize materializes them first).
+  const insertTypes =
+    isOpacity && !ownerBlock.hasManualOpacity
+      ? []
+      : allowedInsertTypes(ownerBlock.pattern.params[uniformName]);
   const [armedType, setArmedType] = useState<InsertType | null>(null);
   useEffect(() => {
     if (!armedType) return;
@@ -200,7 +204,11 @@ const AutomationLane = observer(function AutomationLane({
         onMouseLeave={() => setCurveRegionId(null)}
       >
         {isOpacity ? (
-          <OpacityLaneBody block={ownerBlock} />
+          <OpacityLaneBody
+            block={ownerBlock}
+            armedType={armedType}
+            onInserted={() => setArmedType(null)}
+          />
         ) : (
           <ParameterVariations
             uniformName={uniformName}
@@ -232,6 +240,7 @@ const AutomationLane = observer(function AutomationLane({
               isOpacity={isOpacity}
               hoveredRegionId={hoveredRegionId}
               setHeaderRegionId={setHeaderRegionId}
+              reserveAddSpace={insertTypes.length > 0}
             />
             {insertTypes.length > 0 && (
               <Box position="absolute" top="0" right="2px" zIndex={30}>
@@ -295,12 +304,15 @@ const RegionBar = observer(function RegionBar({
   isOpacity,
   hoveredRegionId,
   setHeaderRegionId,
+  reserveAddSpace,
 }: {
   block: Block;
   uniformName: string;
   isOpacity: boolean;
   hoveredRegionId: string | null;
   setHeaderRegionId: (id: string | null) => void;
+  // reserve room on the last tab's right so the lane-level ＋ doesn't overlap it
+  reserveAddSpace: boolean;
 }) {
   const variations = block.parameterVariations[uniformName] ?? [];
 
@@ -400,6 +412,7 @@ const RegionBar = observer(function RegionBar({
                       multiple={multiple}
                       dragHandleProps={prov.dragHandleProps}
                       setHeaderRegionId={setHeaderRegionId}
+                      reserveRight={reserveAddSpace && index === variations.length - 1}
                     />
                   </Box>
                 )}
@@ -420,6 +433,7 @@ const RegionTab = observer(function RegionTab({
   multiple,
   dragHandleProps,
   setHeaderRegionId,
+  reserveRight,
 }: {
   block: Block;
   uniformName: string;
@@ -427,6 +441,8 @@ const RegionTab = observer(function RegionTab({
   multiple: boolean;
   dragHandleProps: any;
   setHeaderRegionId: (id: string | null) => void;
+  // leave room on the right for the lane-level ＋ (last tab only)
+  reserveRight: boolean;
 }) {
   const store = useStore();
   const { uiStore } = store;
@@ -468,13 +484,20 @@ const RegionTab = observer(function RegionTab({
       typeLabelText
     ) : (
       <Menu isLazy placement="bottom-start">
-        <MenuButton
-          onClick={(e) => e.stopPropagation()}
-          title="Convert region type"
-          style={{ cursor: "pointer" }}
+        <Tooltip
+          label="Convert region type"
+          openDelay={0}
+          hasArrow
+          placement="top"
+          fontSize="xs"
         >
-          {typeLabelText}
-        </MenuButton>
+          <MenuButton
+            onClick={(e) => e.stopPropagation()}
+            style={{ cursor: "pointer" }}
+          >
+            {typeLabelText}
+          </MenuButton>
+        </Tooltip>
         <MenuList minW="140px" bg="gray.700" py={1}>
           {convertTargets.map((t) => (
             <MenuItem
@@ -521,31 +544,45 @@ const RegionTab = observer(function RegionTab({
   const controls = (
     <HStack spacing="6px" flexShrink={0} color="#c3cdda" fontSize="11px">
       {settings}
-      <Box
-        as="span"
-        cursor="pointer"
-        title="Reset region to default"
-        _hover={{ color: "#63b3ed" }}
-        onClick={action((e: ReactMouseEvent) => {
-          e.stopPropagation();
-          block.resetVariationToDefault(uniformName, variation);
-        })}
+      <Tooltip
+        label="Reset region to default"
+        openDelay={0}
+        hasArrow
+        placement="top"
+        fontSize="xs"
       >
-        ↺
-      </Box>
-      {multiple && (
         <Box
           as="span"
           cursor="pointer"
-          title="Delete region"
-          _hover={{ color: "#fc8181" }}
+          _hover={{ color: "#63b3ed" }}
           onClick={action((e: ReactMouseEvent) => {
             e.stopPropagation();
-            store.deleteVariation(block, uniformName, variation);
+            block.resetVariationToDefault(uniformName, variation);
           })}
         >
-          ✕
+          ↺
         </Box>
+      </Tooltip>
+      {multiple && (
+        <Tooltip
+          label="Delete region"
+          openDelay={0}
+          hasArrow
+          placement="top"
+          fontSize="xs"
+        >
+          <Box
+            as="span"
+            cursor="pointer"
+            _hover={{ color: "#fc8181" }}
+            onClick={action((e: ReactMouseEvent) => {
+              e.stopPropagation();
+              store.deleteVariation(block, uniformName, variation);
+            })}
+          >
+            ✕
+          </Box>
+        </Tooltip>
       )}
     </HStack>
   );
@@ -571,6 +608,7 @@ const RegionTab = observer(function RegionTab({
           width="max-content"
           spacing="5px"
           px="6px"
+          pr={reserveRight ? "24px" : undefined}
           bg={bg}
           borderTopWidth="2px"
           borderColor={color}
@@ -609,7 +647,15 @@ const RegionTab = observer(function RegionTab({
         {typeLabel}
       </HStack>
       <Box flex="1" minW={0} />
-      <HStack position="sticky" right="0" flexShrink={0} zIndex={1} bg={bg} pl="4px">
+      <HStack
+        position="sticky"
+        right="0"
+        flexShrink={0}
+        zIndex={1}
+        bg={bg}
+        pl="4px"
+        pr={reserveRight ? "20px" : undefined}
+      >
         {controls}
       </HStack>
     </HStack>
@@ -641,13 +687,24 @@ const LaneValueReadout = observer(function LaneValueReadout({
 
 const OpacityLaneBody = observer(function OpacityLaneBody({
   block,
+  armedType,
+  onInserted,
 }: {
   block: Block;
+  armedType: InsertType | null;
+  onInserted: () => void;
 }) {
   const { uiStore } = useStore();
 
   if (block.hasManualOpacity)
-    return <ParameterVariations uniformName="u_opacity" block={block} />;
+    return (
+      <ParameterVariations
+        uniformName="u_opacity"
+        block={block}
+        armedType={armedType}
+        onInserted={onInserted}
+      />
+    );
 
   const width = uiStore.timeToX(block.duration);
   return <OpacityAutoCurve block={block} width={width} />;

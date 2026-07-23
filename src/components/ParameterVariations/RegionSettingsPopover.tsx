@@ -13,6 +13,7 @@ import {
   PopoverTrigger,
   Portal,
   Text,
+  Tooltip,
   VStack,
 } from "@chakra-ui/react";
 import { observer } from "mobx-react-lite";
@@ -42,18 +43,25 @@ export const RegionSettingsPopover = observer(function RegionSettingsPopover({
   return (
     <Popover placement="bottom" isLazy>
       <PopoverTrigger>
-        <IconButton
-          variant="unstyled"
-          size="xs"
-          height="14px"
-          minW="14px"
-          aria-label={`${variation.displayName} settings`}
-          title={`${variation.displayName} settings`}
-          icon={<TbSettings size={12} />}
-          color="gray.300"
-          _hover={{ color: "blue.300" }}
-          onClick={(e) => e.stopPropagation()}
-        />
+        <Tooltip
+          label={`${variation.displayName} settings`}
+          openDelay={0}
+          hasArrow
+          placement="top"
+          fontSize="xs"
+        >
+          <IconButton
+            variant="unstyled"
+            size="xs"
+            height="14px"
+            minW="14px"
+            aria-label={`${variation.displayName} settings`}
+            icon={<TbSettings size={12} />}
+            color="gray.300"
+            _hover={{ color: "blue.300" }}
+            onClick={(e) => e.stopPropagation()}
+          />
+        </Tooltip>
       </PopoverTrigger>
       <Portal>
         <PopoverContent width="200px" bg="gray.700" fontSize={10}>

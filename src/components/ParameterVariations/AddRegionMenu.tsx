@@ -6,6 +6,7 @@ import {
   MenuItem,
   MenuList,
   Text,
+  Tooltip,
 } from "@chakra-ui/react";
 import { TbPlus } from "react-icons/tb";
 import { InsertType } from "@/src/utils/regionConvert";
@@ -55,19 +56,26 @@ export const AddRegionMenu = ({ types, armedType, setArmedType }: Props) => {
 
   return (
     <Menu placement="bottom-end" isLazy>
-      <MenuButton
-        as={IconButton}
-        variant="unstyled"
-        size="xs"
-        height={5}
-        minW={5}
-        aria-label="Add region"
-        title="Add region"
-        icon={<TbPlus size={14} />}
-        color="gray.300"
-        _hover={{ color: "blue.300" }}
-        onClick={(e) => e.stopPropagation()}
-      />
+      <Tooltip
+        label="Add region"
+        openDelay={0}
+        hasArrow
+        placement="top"
+        fontSize="xs"
+      >
+        <MenuButton
+          as={IconButton}
+          variant="unstyled"
+          size="xs"
+          height={5}
+          minW={5}
+          aria-label="Add region"
+          icon={<TbPlus size={14} />}
+          color="gray.300"
+          _hover={{ color: "blue.300" }}
+          onClick={(e) => e.stopPropagation()}
+        />
+      </Tooltip>
       <MenuList minW="110px" bg="gray.700" py={1}>
         {types.map((t) => (
           <MenuItem

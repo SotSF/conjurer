@@ -10,6 +10,7 @@ import {
   PopoverTrigger,
   Portal,
   Text,
+  Tooltip,
   VStack,
 } from "@chakra-ui/react";
 import { action } from "mobx";
@@ -51,13 +52,19 @@ export const CurveRangeControl = observer(function CurveRangeControl({
   return (
     <Popover placement="bottom" isLazy>
       <PopoverTrigger>
+        <Tooltip
+          label="Value range (min / max)"
+          openDelay={0}
+          hasArrow
+          placement="top"
+          fontSize="xs"
+        >
         <IconButton
           variant="unstyled"
           size="xs"
           height="14px"
           minW="14px"
           aria-label="Region settings"
-          title="Value range (min / max)"
           icon={<TbSettings size={12} />}
           color={variation.hasExplicitRange ? "blue.300" : "gray.300"}
           _hover={{ color: "blue.300" }}
@@ -68,6 +75,7 @@ export const CurveRangeControl = observer(function CurveRangeControl({
             e.stopPropagation();
           }}
         />
+        </Tooltip>
       </PopoverTrigger>
       <Portal>
         <PopoverContent width="170px" bg="gray.700" fontSize={10}>
