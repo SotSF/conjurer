@@ -1,4 +1,13 @@
-import { Box, HStack, Input, Text, useToken } from "@chakra-ui/react";
+import {
+  Box,
+  HStack,
+  IconButton,
+  Input,
+  Text,
+  VStack,
+  useToken,
+} from "@chakra-ui/react";
+import { TbTrash } from "react-icons/tb";
 import { useRef, useState, useEffect } from "react";
 import { runInAction } from "mobx";
 import { Block } from "@/src/types/Block";
@@ -411,18 +420,25 @@ export const EnvelopeGraph = function EnvelopeGraph({
           onCommit={(t, v) =>
             commit(() => variation.setNode(selectedNode.id, t, v))
           }
+          onDelete={() => {
+            commit(() => variation.removeNode(selectedNode.id));
+            setSelectedId(null);
+            setSelectedSegment(null);
+            setEditingId(null);
+          }}
         />
       )}
     </Box>
   );
 };
 
-// Compact numeric readout/editor for the selected node: type an exact value (v)
-// and, for interior nodes, an exact local time (t). Floats just above the node
-// (below it near the top edge). Fields stay in sync with the live node except
-// while focused, so dragging updates them without clobbering an in-progress
-// edit. Enter/blur commits; Esc reverts the field. Endpoints anchor the region
-// bounds, so their time is fixed (0 / duration) and shown read-only.
+// Compact numeric editor for the selected node (opened by double-click): stacked
+// value (v) and, for interior nodes, local-time (t) fields, plus a delete button
+// for interior nodes. Floats beside the node (right, or left near the right
+// edge). Fields stay in sync with the live node except while focused, so
+// dragging updates them without clobbering an in-progress edit. Typing/arrows
+// apply live; Esc reverts the whole edit session. Endpoints anchor the region
+// bounds, so their time is fixed and they can't be deleted.
 function NodeNumericEditor({
   node,
   isFirst,
@@ -434,6 +450,7 @@ function NodeNumericEditor({
   y,
   innerWidth,
   onCommit,
+  onDelete,
 }: {
   node: CurveNode;
   isFirst: boolean;
@@ -445,6 +462,7 @@ function NodeNumericEditor({
   y: number;
   innerWidth: number;
   onCommit: (t: number, v: number) => void;
+  onDelete: () => void;
 }) {
   const [vStr, setVStr] = useState(fmtNum(node.value));
   const [tStr, setTStr] = useState(fmtNum(node.time));
@@ -572,18 +590,20 @@ function NodeNumericEditor({
       }
     };
 
-  // Position the panel to hug the node. Horizontally centered on the node x
-  // (clamped to stay on-screen); vertically just above the node's dot, flipping
-  // to just below when the node sits near the top. Coordinates are relative to
-  // the graph Box, whose py={1} (4px) offsets the svg's y downward.
-  const PANEL_W = timeFixed ? 92 : 150;
-  const PANEL_H = 22;
-  const GAP = 4;
-  const left = Math.max(0, Math.min(innerWidth - PANEL_W, x - PANEL_W / 2));
-  const nodeTop = 4 + y - (NODE_RADIUS + 1.5);
-  const nodeBottom = 4 + y + (NODE_RADIUS + 1.5);
-  const aboveTop = nodeTop - GAP - PANEL_H;
-  const top = aboveTop < -8 ? nodeBottom + GAP : aboveTop;
+  // Position the panel beside the node (it's now a tall, narrow stack). Prefer
+  // the right of the dot, flipping to the left near the right edge; vertically
+  // centered on the dot. Coordinates are relative to the graph Box, whose
+  // py={1} (4px) offsets the svg's y downward.
+  const PANEL_W = 66;
+  const PANEL_H = timeFixed ? 26 : 66;
+  const GAP = 5;
+  const R = NODE_RADIUS + 1.5;
+  const rightLeft = x + R + GAP;
+  const left =
+    rightLeft + PANEL_W <= innerWidth
+      ? rightLeft
+      : Math.max(0, x - R - GAP - PANEL_W);
+  const top = 4 + y - PANEL_H / 2;
   const inputProps = {
     size: "xs" as const,
     height: "16px",
@@ -596,14 +616,21 @@ function NodeNumericEditor({
     _focusVisible: { boxShadow: "0 0 0 1px var(--chakra-colors-blue-300)" },
   };
 
+  const fieldLabel = (t: string) => (
+    <Text fontSize="9px" color="gray.400" width="8px" textAlign="right">
+      {t}
+    </Text>
+  );
+
   return (
-    <HStack
+    <VStack
       position="absolute"
       left={`${left}px`}
       top={`${top}px`}
       spacing={1}
+      align="stretch"
       px={1}
-      py="1px"
+      py="2px"
       bg="gray.800"
       borderRadius="sm"
       boxShadow="md"
@@ -611,55 +638,67 @@ function NodeNumericEditor({
       onPointerDown={(e) => e.stopPropagation()}
       onDoubleClick={(e) => e.stopPropagation()}
     >
-      <Text fontSize="9px" color="gray.400">
-        v
-      </Text>
-      <Input
-        {...inputProps}
-        value={vStr}
-        aria-label="node value"
-        onChange={(e) => {
-          setVStr(e.target.value);
-          applyV(e.target.value);
-        }}
-        onFocus={() => onFieldFocus(vFocused)}
-        onBlur={() => onFieldBlur(vFocused, commitV)}
-        onKeyDown={keyHandler(
-          node.value,
-          VALUE_STEP,
-          setVStr,
-          applyV,
-          commitV,
-          revert,
-        )}
-      />
+      <HStack spacing={1}>
+        {fieldLabel("v")}
+        <Input
+          {...inputProps}
+          value={vStr}
+          aria-label="node value"
+          onChange={(e) => {
+            setVStr(e.target.value);
+            applyV(e.target.value);
+          }}
+          onFocus={() => onFieldFocus(vFocused)}
+          onBlur={() => onFieldBlur(vFocused, commitV)}
+          onKeyDown={keyHandler(
+            node.value,
+            VALUE_STEP,
+            setVStr,
+            applyV,
+            commitV,
+            revert,
+          )}
+        />
+      </HStack>
       {!timeFixed && (
         <>
-          <Text fontSize="9px" color="gray.400">
-            t
-          </Text>
-          <Input
-            {...inputProps}
-            value={tStr}
-            aria-label="node time"
-            onChange={(e) => {
-              setTStr(e.target.value);
-              applyT(e.target.value);
-            }}
-            onFocus={() => onFieldFocus(tFocused)}
-            onBlur={() => onFieldBlur(tFocused, commitT)}
-            onKeyDown={keyHandler(
-              node.time,
-              TIME_STEP,
-              setTStr,
-              applyT,
-              commitT,
-              revert,
-              clampT,
-            )}
+          <HStack spacing={1}>
+            {fieldLabel("t")}
+            <Input
+              {...inputProps}
+              value={tStr}
+              aria-label="node time"
+              onChange={(e) => {
+                setTStr(e.target.value);
+                applyT(e.target.value);
+              }}
+              onFocus={() => onFieldFocus(tFocused)}
+              onBlur={() => onFieldBlur(tFocused, commitT)}
+              onKeyDown={keyHandler(
+                node.time,
+                TIME_STEP,
+                setTStr,
+                applyT,
+                commitT,
+                revert,
+                clampT,
+              )}
+            />
+          </HStack>
+          <IconButton
+            aria-label="delete node"
+            icon={<TbTrash size={12} />}
+            size="xs"
+            height="16px"
+            minW="16px"
+            variant="ghost"
+            color="gray.400"
+            alignSelf="center"
+            _hover={{ color: "red.300", bg: "whiteAlpha.200" }}
+            onClick={onDelete}
           />
         </>
       )}
-    </HStack>
+    </VStack>
   );
 }
