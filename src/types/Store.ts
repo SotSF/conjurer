@@ -53,8 +53,6 @@ export class Store {
   userStore = new UserStore(this);
 
   layers: Layer[] = [];
-  // DEV/eval flag: browsing an experience as migrated regions (?curves in URL).
-  curvesPreview = false;
 
   sendingData = false;
   viewerMode = false;
@@ -580,10 +578,8 @@ export class Store {
     // Select first layer
     this.selectedLayer = this.layers[0];
 
-    // The region model is now the default: migrate every scalar param's legacy
+    // The region model is the only model: migrate every scalar param's legacy
     // variation sequence into full-block regions (Curve / LFO / Audio) on load.
-    // (Was gated behind ?curves during the redesign; that gate is retired.)
-    this.curvesPreview = true;
     try {
       this.previewAllParamsAsCurves();
     } catch (e) {

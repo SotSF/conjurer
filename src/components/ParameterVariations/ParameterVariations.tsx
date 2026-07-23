@@ -51,7 +51,8 @@ export const ParameterVariations = observer(function ParameterVariations({
   // (Min/Max control). When present it governs the axis — don't force-include the
   // default [0,1] — and lets nodes/handles be dragged into the headroom.
   const rangedCurves = variations.filter(
-    (v): v is CurveVariation => v instanceof CurveVariation && v.hasExplicitRange,
+    (v): v is CurveVariation =>
+      v instanceof CurveVariation && v.hasExplicitRange,
   );
   if (rangedCurves.length) {
     domain[0] = Math.min(...rangedCurves.map((v) => v.rangeMin!));
@@ -62,7 +63,6 @@ export const ParameterVariations = observer(function ParameterVariations({
   // the regions to the new duration — extend the trailing region on grow,
   // truncate/drop it on shrink. (The lane never defines its own duration.)
   useEffect(() => {
-    if (!store.curvesPreview) return;
     const regions = block.parameterVariations[uniformName];
     if (!regions || regions.length === 0) return;
     const total = regions.reduce((sum, v) => sum + (v.duration || 0), 0);
@@ -77,7 +77,7 @@ export const ParameterVariations = observer(function ParameterVariations({
       );
       block.triggerVariationReactions(uniformName);
     });
-  }, [store.curvesPreview, block, uniformName, spanDuration]);
+  }, [block, uniformName, spanDuration]);
 
   const multipleRegions = variations.length > 1;
 
