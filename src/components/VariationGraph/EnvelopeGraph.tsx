@@ -31,9 +31,9 @@ type EnvelopeGraphProps = {
  * interior nodes clamp in time between their neighbors; Shift axis-locks the
  * drag, values snap to neighbor values / the range bounds unless Ctrl is held,
  * and Esc deselects), double-click the line
- * to add a node on the curve, Backspace to delete the selected node. A selected
- * node also shows an inline editor to type an exact value (and, for interior
- * nodes, an exact time). Click a
+ * to add a node on the curve, Backspace to delete the selected node.
+ * Double-click a node to open an inline editor to type an exact value (and, for
+ * interior nodes, an exact time). Click a
  * segment to reveal its two Bézier handles and drag each in both axes (the
  * horizontal reach bows the curve — pen-tool style); Alt-drag a handle mirrors
  * the opposite one across the segment's midline (symmetric shapes);
@@ -56,6 +56,8 @@ export const EnvelopeGraph = function EnvelopeGraph({
   const draggingId = useRef<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [selectedSegment, setSelectedSegment] = useState<number | null>(null);
+  // node whose inline numeric editor is open (opened by double-clicking a node)
+  const [editingId, setEditingId] = useState<string | null>(null);
   // value a node is currently snapping to (for the guide line), or null
   const [snapValue, setSnapValue] = useState<number | null>(null);
   // true while a node is being dragged — the numeric editor hides so it doesn't
@@ -98,6 +100,8 @@ export const EnvelopeGraph = function EnvelopeGraph({
     e.stopPropagation();
     setSelectedId(id);
     setSelectedSegment(null);
+    // a plain click/drag closes any open editor; a double-click re-opens it
+    setEditingId(null);
     draggingId.current = id;
     setDragging(true);
     // Force the 4-directional move cursor everywhere for the whole drag — a
@@ -233,6 +237,7 @@ export const EnvelopeGraph = function EnvelopeGraph({
     const seg = segmentIndexAtX(px);
     setSelectedSegment(seg >= 0 ? seg : null);
     setSelectedId(null);
+    setEditingId(null);
     if (seg >= 0 && e.altKey) {
       const ns = variation.nodes;
       const a = ns[seg];
@@ -290,6 +295,7 @@ export const EnvelopeGraph = function EnvelopeGraph({
       commit(() => variation.removeNode(selectedId));
       setSelectedId(null);
       setSelectedSegment(null);
+      setEditingId(null);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -303,6 +309,7 @@ export const EnvelopeGraph = function EnvelopeGraph({
       if (e.key !== "Escape") return;
       setSelectedId(null);
       setSelectedSegment(null);
+      setEditingId(null);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -378,12 +385,18 @@ export const EnvelopeGraph = function EnvelopeGraph({
               strokeWidth={2}
               style={{ cursor: "pointer" }}
               onPointerDown={(e) => onNodePointerDown(e, node.id)}
+              onDoubleClick={(e) => {
+                e.stopPropagation();
+                setSelectedId(node.id);
+                setSelectedSegment(null);
+                setEditingId(node.id);
+              }}
             />
           );
         })}
         {selectedSegment != null && renderSegmentHandles(selectedSegment)}
       </svg>
-      {selectedNode && !dragging && (
+      {selectedNode && editingId === selectedNode.id && !dragging && (
         <NodeNumericEditor
           key={selectedNode.id}
           node={selectedNode}
