@@ -597,12 +597,19 @@ function NodeNumericEditor({
     }
     const inField = (e.target as HTMLElement).tagName === "INPUT";
     if (inField) return; // the focused field handles its own keys
+    const isArrow =
+      e.key === "ArrowUp" ||
+      e.key === "ArrowDown" ||
+      e.key === "ArrowLeft" ||
+      e.key === "ArrowRight";
+    if (!isArrow) return;
+    // keep the arrow keys local — don't also scrub the global playhead / scroll
+    e.preventDefault();
+    e.stopPropagation();
     if (e.key === "ArrowUp" || e.key === "ArrowDown") {
-      e.preventDefault();
       const dv = (e.key === "ArrowUp" ? 1 : -1) * VALUE_STEP * (e.shiftKey ? 0.1 : 1);
       onCommit(node.time, node.value + dv);
-    } else if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
-      e.preventDefault();
+    } else {
       if (e.shiftKey) {
         onNavigate(e.key === "ArrowRight" ? 1 : -1);
         return;
