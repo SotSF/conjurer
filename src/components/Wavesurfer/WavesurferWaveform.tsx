@@ -55,7 +55,9 @@ const WavesurferWaveform = observer(function WavesurferWaveform() {
   // Keep Wavesurfer's React prop stable so layout zoom doesn't force an
   // immediate redraw; we drive zoom imperatively (debounced) instead.
   const initialMinPxPerSecRef = useRef(
-    uiStore.canTimelineZoom ? uiStore.pixelsPerSecond : INITIAL_PIXELS_PER_SECOND,
+    uiStore.canTimelineZoom
+      ? uiStore.pixelsPerSecond
+      : INITIAL_PIXELS_PER_SECOND,
   );
 
   const cloneCanvas = useCloneCanvas(clonedWaveformRef);
@@ -235,6 +237,8 @@ const WavesurferWaveform = observer(function WavesurferWaveform() {
             audioStore.wavesurfer = wavesurfer;
             if (audioStore.audioMuted) wavesurfer.setMuted(true);
             wavesurfer.setVolume(audioStore.audioVolume);
+            // re-apply rate: wavesurfer remounts (e.g. song switch) reset it to 1
+            wavesurfer.setPlaybackRate(audioStore.playbackRate, true);
             if (uiStore.canTimelineZoom) {
               setTimelineLabelIntervals(
                 audioStore.timelinePlugin,

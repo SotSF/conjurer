@@ -43,6 +43,17 @@ export class AudioStore {
     this.wavesurfer?.setVolume(volume);
   }
 
+  private _playbackRate = 1;
+  get playbackRate() {
+    return this._playbackRate;
+  }
+  set playbackRate(rate: number) {
+    this._playbackRate = rate;
+    // preservePitch keeps the chant recognizable when slowed
+    this.wavesurfer?.setPlaybackRate(rate, true);
+    this.saveToLocalStorage();
+  }
+
   wavesurfer: WaveSurfer | null = null;
   timelinePlugin: TimelinePlugin | null = null;
   minimapPlugin: MinimapPlugin | null = null;
@@ -83,6 +94,7 @@ export class AudioStore {
       const localStorageAudioSettings = JSON.parse(data);
       this.audioLatency =
         localStorageAudioSettings.audioLatency || INITIAL_AUDIO_LATENCY;
+      this.playbackRate = localStorageAudioSettings.playbackRate || 1;
     }
   };
 
@@ -92,6 +104,7 @@ export class AudioStore {
       "audioStore",
       JSON.stringify({
         audioLatency: this.audioLatency,
+        playbackRate: this.playbackRate,
       }),
     );
   };

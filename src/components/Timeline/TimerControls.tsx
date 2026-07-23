@@ -1,9 +1,17 @@
 import { observer } from "mobx-react-lite";
-import { ButtonGroup, HStack, IconButton, VStack } from "@chakra-ui/react";
+import {
+  Button,
+  ButtonGroup,
+  HStack,
+  IconButton,
+  VStack,
+} from "@chakra-ui/react";
 import { FaPlay, FaPause, FaStepForward, FaStepBackward } from "react-icons/fa";
 import { useStore } from "@/src/types/StoreContext";
 import { action } from "mobx";
 import { MdForward10, MdReplay10 } from "react-icons/md";
+
+const PLAYBACK_RATES = [0.25, 0.5, 1] as const;
 
 export const TimerControls = observer(function TimerControls() {
   const store = useStore();
@@ -83,6 +91,33 @@ export const TimerControls = observer(function TimerControls() {
               icon={<MdForward10 size={17} />}
               onClick={action(() => audioStore.skip(10))}
             />
+          </ButtonGroup>
+        </HStack>
+      )}
+      {showSkipButtons && (
+        <HStack width="100%" justify="center" overflowX="clip">
+          <ButtonGroup isAttached>
+            {PLAYBACK_RATES.map((rate) => {
+              const active = audioStore.playbackRate === rate;
+              return (
+                <Button
+                  key={rate}
+                  borderStyle="solid"
+                  borderWidth={1}
+                  aria-label={`Set playback speed to ${rate}x`}
+                  title={`Set playback speed to ${rate}x`}
+                  height={5}
+                  minWidth={9}
+                  px={2}
+                  fontSize="xs"
+                  color={active ? "green" : "white"}
+                  bgColor={active ? "gray.500" : "gray.600"}
+                  onClick={action(() => (audioStore.playbackRate = rate))}
+                >
+                  {rate}x
+                </Button>
+              );
+            })}
           </ButtonGroup>
         </HStack>
       )}
