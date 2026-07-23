@@ -1,5 +1,5 @@
-import { Box, Text, useToken } from "@chakra-ui/react";
-import { LineChart, Line, Tooltip, YAxis } from "recharts";
+import { Box, useToken } from "@chakra-ui/react";
+import { LineChart, Line, YAxis } from "recharts";
 import { Variation } from "@/src/types/Variations/Variation";
 import { Block } from "@/src/types/Block";
 import { VARIATION_BOUND_WIDTH } from "@/src/utils/layout";
@@ -82,27 +82,8 @@ export const NumberVariationGraph = function NumberVariationGraph({
           stroke={orange}
           yAxisId={0}
         />
-        <Tooltip isAnimationActive={false} content={<NumberValueTooltip />} />
         <YAxis type="number" domain={domain} hide allowDataOverflow={false} />
       </LineChart>
     </Box>
   );
-};
-
-const NumberValueTooltip = ({
-  active,
-  payload,
-}: {
-  active?: boolean;
-  payload?: any;
-}) => {
-  if (!(active && payload && payload.length)) {
-    return null;
-  }
-  let value = payload[0].value;
-  if (typeof payload[0].value === "number") {
-    value = payload[0].value.toFixed(2);
-  }
-
-  return <Text fontSize={12}>{`${value}`}</Text>;
 };

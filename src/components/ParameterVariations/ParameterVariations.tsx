@@ -1,6 +1,6 @@
-import { Box, HStack } from "@chakra-ui/react";
+import { Box, HStack, Text } from "@chakra-ui/react";
 import { VariationGraph } from "@/src/components/VariationGraph/VariationGraph";
-import { useEffect } from "react";
+import { MouseEvent as ReactMouseEvent, useEffect, useState } from "react";
 import { Block } from "@/src/types/Block";
 import { runInAction } from "mobx";
 import { spanRegionsToBlock } from "@/src/utils/migrateVariations";
@@ -81,9 +81,46 @@ export const ParameterVariations = observer(function ParameterVariations({
 
   const multipleRegions = variations.length > 1;
 
+  // Hover value cursor: a vertical line + readout that follows the mouse to any
+  // x (not quantized to samples) and reports the param's value there via each
+  // region's valueAtTime — works across all region types (curve/LFO/audio/...).
+  const [cursorX, setCursorX] = useState<number | null>(null);
+  let cursorValue: number | null = null;
+  if (cursorX != null && variations.length) {
+    const time = uiStore.xToTime(cursorX);
+    let acc = 0;
+    for (let i = 0; i < variations.length; i++) {
+      const v = variations[i];
+      if (time < acc + v.duration || i === variations.length - 1) {
+        const local = Math.max(0, Math.min(v.duration, time - acc));
+        const value = v.valueAtTime(local, block.startTime + time);
+        if (typeof value === "number") cursorValue = value;
+        break;
+      }
+      acc += v.duration;
+    }
+  }
+  // dot y within the graph (its svg is 50px tall inside a 4px py box, 6px pad)
+  const span = domain[1] - domain[0] || 1;
+  const dotTop =
+    cursorValue == null
+      ? 0
+      : Math.max(
+          10,
+          Math.min(48, 10 + (1 - (cursorValue - domain[0]) / span) * 38),
+        );
+  const labelNearRight = cursorX != null && cursorX > width - 44;
+
   return (
     // make variation graphs extend over the block border
-    <Box position="relative" mx="-2px">
+    <Box
+      position="relative"
+      mx="-2px"
+      onMouseMove={(e: ReactMouseEvent<HTMLDivElement>) =>
+        setCursorX(e.clientX - e.currentTarget.getBoundingClientRect().left)
+      }
+      onMouseLeave={() => setCursorX(null)}
+    >
       <HStack width="100%" justify="start" spacing={0}>
         {variations.map((variation) => (
           <VariationGraph
@@ -124,6 +161,53 @@ export const ParameterVariations = observer(function ParameterVariations({
           regionType={armedType}
           onInserted={() => onInserted?.()}
         />
+      )}
+
+      {/* hover value cursor — line + dot + readout that track the mouse. Only
+          shown when there's a numeric value here, so it never appears on palette
+          or color lanes (no meaningful value-over-time within a region). */}
+      {cursorX != null && cursorValue != null && (
+        <Box
+          position="absolute"
+          top={0}
+          left={0}
+          width="100%"
+          height="100%"
+          pointerEvents="none"
+          zIndex={4}
+        >
+          <Box
+            position="absolute"
+            top={0}
+            bottom={0}
+            left={`${cursorX}px`}
+            width="1px"
+            bg="whiteAlpha.700"
+          />
+          <Box
+            position="absolute"
+            left={`${cursorX - 3}px`}
+            top={`${dotTop - 3}px`}
+            boxSize="6px"
+            borderRadius="full"
+            bg="gray.800"
+            border="2px solid"
+            borderColor="orange.400"
+          />
+          <Text
+            position="absolute"
+            top="1px"
+            left={`${cursorX + (labelNearRight ? -6 : 6)}px`}
+            transform={labelNearRight ? "translateX(-100%)" : undefined}
+            fontSize="11px"
+            fontWeight={600}
+            color="white"
+            whiteSpace="nowrap"
+            textShadow="0 1px 2px rgba(0,0,0,.85)"
+          >
+            {Number.isInteger(cursorValue) ? cursorValue : cursorValue.toFixed(2)}
+          </Text>
+        </Box>
       )}
     </Box>
   );
