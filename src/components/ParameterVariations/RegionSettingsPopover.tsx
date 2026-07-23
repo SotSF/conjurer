@@ -18,6 +18,7 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { observer } from "mobx-react-lite";
+import { useState } from "react";
 import { TbSettings } from "react-icons/tb";
 
 type Props = {
@@ -37,6 +38,7 @@ export const RegionSettingsPopover = observer(function RegionSettingsPopover({
 }: Props) {
   const isPeriodic = variation instanceof PeriodicVariation;
   const isAudio = variation instanceof AudioVariation;
+  const [popoverOpen, setPopoverOpen] = useState(false);
   if (!isPeriodic && !isAudio) return null;
 
   const controlProps = { block, uniformName };
@@ -48,9 +50,15 @@ export const RegionSettingsPopover = observer(function RegionSettingsPopover({
       hasArrow
       placement="top"
       fontSize="xs"
+      isDisabled={popoverOpen}
     >
       <Box as="span" display="inline-flex">
-        <Popover placement="bottom" isLazy>
+        <Popover
+          placement="bottom"
+          isLazy
+          onOpen={() => setPopoverOpen(true)}
+          onClose={() => setPopoverOpen(false)}
+        >
           <PopoverTrigger>
             <IconButton
               variant="unstyled"
@@ -65,7 +73,7 @@ export const RegionSettingsPopover = observer(function RegionSettingsPopover({
             />
           </PopoverTrigger>
           <Portal>
-            <PopoverContent width="200px" bg="gray.700" fontSize={10}>
+            <PopoverContent width="200px" bg="gray.700" fontSize={10} zIndex={1600}>
               <PopoverArrow bg="gray.700" />
               <PopoverBody>
                 <VStack

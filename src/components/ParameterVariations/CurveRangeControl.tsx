@@ -44,6 +44,8 @@ export const CurveRangeControl = observer(function CurveRangeControl({
 
   const [minStr, setMinStr] = useState(String(effectiveMin));
   const [maxStr, setMaxStr] = useState(String(effectiveMax));
+  // suppress the tooltip while the popover is open (the trigger keeps focus)
+  const [popoverOpen, setPopoverOpen] = useState(false);
 
   const remap = action((toMin: number, toMax: number) => {
     variation.remapRange(effectiveMin, effectiveMax, toMin, toMax);
@@ -57,9 +59,15 @@ export const CurveRangeControl = observer(function CurveRangeControl({
       hasArrow
       placement="top"
       fontSize="xs"
+      isDisabled={popoverOpen}
     >
       <Box as="span" display="inline-flex">
-        <Popover placement="bottom" isLazy>
+        <Popover
+          placement="bottom"
+          isLazy
+          onOpen={() => setPopoverOpen(true)}
+          onClose={() => setPopoverOpen(false)}
+        >
           <PopoverTrigger>
             <IconButton
               variant="unstyled"
@@ -79,7 +87,12 @@ export const CurveRangeControl = observer(function CurveRangeControl({
             />
           </PopoverTrigger>
       <Portal>
-        <PopoverContent width="170px" bg="gray.700" fontSize={10}>
+        <PopoverContent
+          width="170px"
+          bg="gray.700"
+          fontSize={10}
+          zIndex={1600}
+        >
           <PopoverArrow bg="gray.700" />
           <PopoverBody>
             <VStack spacing={1} onClick={(e) => e.stopPropagation()}>

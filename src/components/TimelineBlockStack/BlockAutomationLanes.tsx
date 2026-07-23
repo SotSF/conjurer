@@ -13,6 +13,7 @@ import {
   MenuButton,
   MenuItem,
   MenuList,
+  Portal,
   Text,
   Tooltip,
   VStack,
@@ -173,6 +174,10 @@ const AutomationLane = observer(function AutomationLane({
       ? []
       : allowedInsertTypes(ownerBlock.pattern.params[uniformName]);
   const [armedType, setArmedType] = useState<InsertType | null>(null);
+  // keep the ＋ expanded while its menu is open (even as the cursor leaves the
+  // lane onto the menu) or while an insert is armed
+  const [addMenuOpen, setAddMenuOpen] = useState(false);
+  const plusVisible = armedType != null || addMenuOpen;
   useEffect(() => {
     if (!armedType) return;
     const onKey = (e: KeyboardEvent) => {
@@ -244,15 +249,7 @@ const AutomationLane = observer(function AutomationLane({
             isOpacity={isOpacity}
             hoveredRegionId={hoveredRegionId}
             setHeaderRegionId={setHeaderRegionId}
-            addMenu={
-              insertTypes.length > 0 ? (
-                <AddRegionMenu
-                  types={insertTypes}
-                  armedType={armedType}
-                  setArmedType={setArmedType}
-                />
-              ) : null
-            }
+            addMenu={null}
           />
         </Box>
 
@@ -264,31 +261,64 @@ const AutomationLane = observer(function AutomationLane({
           zIndex={3}
           pointerEvents="none"
         >
-          <Box
-            position="sticky"
-            left={`${TIMELINE_HEADER_WIDTH}px`}
-            width="fit-content"
-            opacity={0.9}
-            transition="opacity 0.12s"
-            _groupHover={{ opacity: 0.4 }}
-          >
+          <Box position="sticky" left={`${TIMELINE_HEADER_WIDTH}px`} width="fit-content">
             <HStack
-              spacing={1.5}
-              align="baseline"
+              spacing={0}
+              align="center"
               bg="rgba(15,17,21,.6)"
               borderBottomRightRadius="4px"
               px="5px"
               py="1px"
             >
-              <Text
-                fontSize="10px"
-                fontWeight={600}
-                color="#ed8936"
-                whiteSpace="nowrap"
+              {/* the lane name + value fade on hover so they never obstruct */}
+              <HStack
+                spacing={1.5}
+                align="baseline"
+                opacity={0.9}
+                transition="opacity 0.12s"
+                _groupHover={{ opacity: 0.4 }}
               >
-                {label}
-              </Text>
-              <LaneValueReadout block={ownerBlock} uniformName={uniformName} />
+                <Text
+                  fontSize="10px"
+                  fontWeight={600}
+                  color="#ed8936"
+                  whiteSpace="nowrap"
+                >
+                  {label}
+                </Text>
+                <LaneValueReadout block={ownerBlock} uniformName={uniformName} />
+              </HStack>
+              {/* lane-level ＋ add-region, next to the lane name. Collapsed to
+                  zero width when idle (no reserved space) but kept in layout —
+                  NOT display:none — so its menu/tooltip anchor stays valid even
+                  after the cursor leaves the lane onto the open menu. Expands on
+                  hover or while armed. */}
+              {insertTypes.length > 0 && (
+                <Box
+                  display="flex"
+                  alignItems="center"
+                  color="#c3cdda"
+                  overflow="hidden"
+                  maxW={plusVisible ? "18px" : "0px"}
+                  ml={plusVisible ? 1.5 : 0}
+                  opacity={plusVisible ? 1 : 0}
+                  pointerEvents={plusVisible ? "auto" : "none"}
+                  transition="max-width 0.12s, opacity 0.12s, margin-left 0.12s"
+                  _groupHover={{
+                    maxW: "18px",
+                    ml: 1.5,
+                    opacity: 1,
+                    pointerEvents: "auto",
+                  }}
+                >
+                  <AddRegionMenu
+                    types={insertTypes}
+                    armedType={armedType}
+                    setArmedType={setArmedType}
+                    onOpenChange={setAddMenuOpen}
+                  />
+                </Box>
+              )}
             </HStack>
           </Box>
         </Box>
@@ -452,6 +482,8 @@ const RegionTab = observer(function RegionTab({
   const { uiStore } = store;
   const { label, color, bg } = regionTypeStyle(variation);
   const narrow = uiStore.timeToX(variation.duration) < NARROW_TAB_PX;
+  // suppress the convert tooltip while its menu is open (trigger keeps focus)
+  const [convertOpen, setConvertOpen] = useState(false);
 
   // keep this region's header active (front + reachable) while the cursor is
   // over it, even if it overflows onto a neighbor's X
@@ -493,43 +525,51 @@ const RegionTab = observer(function RegionTab({
         hasArrow
         placement="top"
         fontSize="xs"
+        isDisabled={convertOpen}
       >
         <Box as="span" display="inline-flex">
-          <Menu isLazy placement="bottom-start">
+          <Menu
+            isLazy
+            placement="bottom-start"
+            onOpen={() => setConvertOpen(true)}
+            onClose={() => setConvertOpen(false)}
+          >
             <MenuButton
               onClick={(e) => e.stopPropagation()}
               style={{ cursor: "pointer" }}
             >
               {typeLabelText}
             </MenuButton>
-            <MenuList minW="140px" bg="gray.700" py={1}>
-              {convertTargets.map((t) => (
-                <MenuItem
-                  key={t}
-                  fontSize={11}
-                  bg="gray.700"
-                  _hover={{ bg: "gray.600" }}
-                  onClick={action((e: ReactMouseEvent) => {
-                    e.stopPropagation();
-                    const replacement = convertRegion(
-                      variation,
-                      t,
-                      store,
-                      block.pattern.params[uniformName],
-                      block.startTime,
-                    );
-                    block.replaceRegionInPlace(
-                      uniformName,
-                      variation,
-                      replacement,
-                    );
-                  })}
-                >
-                  Convert to{" "}
-                  {t === "lfo" ? "LFO" : t[0].toUpperCase() + t.slice(1)}
-                </MenuItem>
-              ))}
-            </MenuList>
+            <Portal>
+              <MenuList minW="140px" bg="gray.700" py={1} zIndex={1600}>
+                {convertTargets.map((t) => (
+                  <MenuItem
+                    key={t}
+                    fontSize={11}
+                    bg="gray.700"
+                    _hover={{ bg: "gray.600" }}
+                    onClick={action((e: ReactMouseEvent) => {
+                      e.stopPropagation();
+                      const replacement = convertRegion(
+                        variation,
+                        t,
+                        store,
+                        block.pattern.params[uniformName],
+                        block.startTime,
+                      );
+                      block.replaceRegionInPlace(
+                        uniformName,
+                        variation,
+                        replacement,
+                      );
+                    })}
+                  >
+                    Convert to{" "}
+                    {t === "lfo" ? "LFO" : t[0].toUpperCase() + t.slice(1)}
+                  </MenuItem>
+                ))}
+              </MenuList>
+            </Portal>
           </Menu>
         </Box>
       </Tooltip>
