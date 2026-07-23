@@ -67,10 +67,13 @@ export const AddRegionMenu = ({ types, armedType, setArmedType }: Props) => {
           as={IconButton}
           variant="unstyled"
           size="xs"
-          height={5}
-          minW={5}
+          height="14px"
+          minW="14px"
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
           aria-label="Add region"
-          icon={<TbPlus size={14} />}
+          icon={<TbPlus size={13} />}
           color="gray.300"
           _hover={{ color: "blue.300" }}
           onClick={(e) => e.stopPropagation()}

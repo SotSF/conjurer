@@ -243,7 +243,15 @@ const AutomationLane = observer(function AutomationLane({
               reserveAddSpace={insertTypes.length > 0}
             />
             {insertTypes.length > 0 && (
-              <Box position="absolute" top="0" right="2px" zIndex={30}>
+              <Box
+                position="absolute"
+                top={0}
+                bottom={0}
+                right="4px"
+                zIndex={30}
+                display="flex"
+                alignItems="center"
+              >
                 <AddRegionMenu
                   types={insertTypes}
                   armedType={armedType}
