@@ -163,8 +163,10 @@ export const ParameterVariations = observer(function ParameterVariations({
         />
       )}
 
-      {/* hover value cursor — line + dot + readout that track the mouse */}
-      {cursorX != null && (
+      {/* hover value cursor — line + dot + readout that track the mouse. Only
+          shown when there's a numeric value here, so it never appears on palette
+          or color lanes (no meaningful value-over-time within a region). */}
+      {cursorX != null && cursorValue != null && (
         <Box
           position="absolute"
           top={0}
@@ -182,35 +184,29 @@ export const ParameterVariations = observer(function ParameterVariations({
             width="1px"
             bg="whiteAlpha.700"
           />
-          {cursorValue != null && (
-            <>
-              <Box
-                position="absolute"
-                left={`${cursorX - 3}px`}
-                top={`${dotTop - 3}px`}
-                boxSize="6px"
-                borderRadius="full"
-                bg="gray.800"
-                border="2px solid"
-                borderColor="orange.400"
-              />
-              <Text
-                position="absolute"
-                top="1px"
-                left={`${cursorX + (labelNearRight ? -6 : 6)}px`}
-                transform={labelNearRight ? "translateX(-100%)" : undefined}
-                fontSize="11px"
-                fontWeight={600}
-                color="white"
-                whiteSpace="nowrap"
-                textShadow="0 1px 2px rgba(0,0,0,.85)"
-              >
-                {Number.isInteger(cursorValue)
-                  ? cursorValue
-                  : cursorValue.toFixed(2)}
-              </Text>
-            </>
-          )}
+          <Box
+            position="absolute"
+            left={`${cursorX - 3}px`}
+            top={`${dotTop - 3}px`}
+            boxSize="6px"
+            borderRadius="full"
+            bg="gray.800"
+            border="2px solid"
+            borderColor="orange.400"
+          />
+          <Text
+            position="absolute"
+            top="1px"
+            left={`${cursorX + (labelNearRight ? -6 : 6)}px`}
+            transform={labelNearRight ? "translateX(-100%)" : undefined}
+            fontSize="11px"
+            fontWeight={600}
+            color="white"
+            whiteSpace="nowrap"
+            textShadow="0 1px 2px rgba(0,0,0,.85)"
+          >
+            {Number.isInteger(cursorValue) ? cursorValue : cursorValue.toFixed(2)}
+          </Text>
         </Box>
       )}
     </Box>
