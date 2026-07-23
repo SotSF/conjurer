@@ -41,8 +41,8 @@ type EnvelopeGraphProps = {
  * drag, values snap to neighbor values / the range bounds unless Ctrl is held,
  * and Esc deselects), double-click the line
  * to add a node on the curve, Backspace to delete the selected node.
- * Double-click a node to open an inline editor to type an exact value (and, for
- * interior nodes, an exact time). Click a
+ * Double-click a node (or select it and press "e" / Enter) to open an inline
+ * editor to type an exact value (and, for interior nodes, an exact time). Click a
  * segment to reveal its two Bézier handles and drag each in both axes (the
  * horizontal reach bows the curve — pen-tool style); Alt-drag a handle mirrors
  * the opposite one across the segment's midline (symmetric shapes);
@@ -341,6 +341,27 @@ export const EnvelopeGraph = function EnvelopeGraph({
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [selectedId, selectedSegment, editingId]);
+
+  // With a node selected but its editor closed, "e" or Enter opens the editor.
+  useEffect(() => {
+    if (selectedId == null || editingId != null) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "e" && e.key !== "Enter") return;
+      const el = e.target as HTMLElement | null;
+      if (
+        el &&
+        (el.tagName === "INPUT" ||
+          el.tagName === "TEXTAREA" ||
+          el.isContentEditable)
+      )
+        return;
+      e.preventDefault();
+      openEditor(selectedId);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedId, editingId]);
 
   const renderSegmentHandles = (seg: number) => {
     const a = nodes[seg];
