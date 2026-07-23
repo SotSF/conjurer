@@ -2,6 +2,7 @@ import { CurveVariation } from "@/src/types/Variations/CurveVariation";
 import { Block } from "@/src/types/Block";
 import { NumberParamInput } from "@/src/components/NumberParamInput";
 import {
+  Box,
   IconButton,
   Popover,
   PopoverArrow,
@@ -50,33 +51,33 @@ export const CurveRangeControl = observer(function CurveRangeControl({
   });
 
   return (
-    <Popover placement="bottom" isLazy>
-      <PopoverTrigger>
-        <Tooltip
-          label="Value range (min / max)"
-          openDelay={0}
-          hasArrow
-          placement="top"
-          fontSize="xs"
-        >
-        <IconButton
-          variant="unstyled"
-          size="xs"
-          height="14px"
-          minW="14px"
-          aria-label="Region settings"
-          icon={<TbSettings size={12} />}
-          color={variation.hasExplicitRange ? "blue.300" : "gray.300"}
-          _hover={{ color: "blue.300" }}
-          onClick={(e) => {
-            // sync the fields to the current effective range when opening
-            setMinStr(String(effectiveMin));
-            setMaxStr(String(effectiveMax));
-            e.stopPropagation();
-          }}
-        />
-        </Tooltip>
-      </PopoverTrigger>
+    <Tooltip
+      label="Value range (min / max)"
+      openDelay={0}
+      hasArrow
+      placement="top"
+      fontSize="xs"
+    >
+      <Box as="span" display="inline-flex">
+        <Popover placement="bottom" isLazy>
+          <PopoverTrigger>
+            <IconButton
+              variant="unstyled"
+              size="xs"
+              height="14px"
+              minW="14px"
+              aria-label="Region settings"
+              icon={<TbSettings size={12} />}
+              color={variation.hasExplicitRange ? "blue.300" : "gray.300"}
+              _hover={{ color: "blue.300" }}
+              onClick={(e) => {
+                // sync the fields to the current effective range when opening
+                setMinStr(String(effectiveMin));
+                setMaxStr(String(effectiveMax));
+                e.stopPropagation();
+              }}
+            />
+          </PopoverTrigger>
       <Portal>
         <PopoverContent width="170px" bg="gray.700" fontSize={10}>
           <PopoverArrow bg="gray.700" />
@@ -103,6 +104,8 @@ export const CurveRangeControl = observer(function CurveRangeControl({
           </PopoverBody>
         </PopoverContent>
       </Portal>
-    </Popover>
+        </Popover>
+      </Box>
+    </Tooltip>
   );
 });

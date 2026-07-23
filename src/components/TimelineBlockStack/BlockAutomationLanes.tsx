@@ -26,7 +26,12 @@ import {
 } from "@hello-pangea/dnd";
 import { action } from "mobx";
 import { observer } from "mobx-react-lite";
-import { MouseEvent as ReactMouseEvent, useEffect, useState } from "react";
+import {
+  MouseEvent as ReactMouseEvent,
+  ReactNode,
+  useEffect,
+  useState,
+} from "react";
 import { AddRegionMenu } from "@/src/components/ParameterVariations/AddRegionMenu";
 import { CurveRangeControl } from "@/src/components/ParameterVariations/CurveRangeControl";
 import { RegionSettingsPopover } from "@/src/components/ParameterVariations/RegionSettingsPopover";
@@ -233,33 +238,22 @@ const AutomationLane = observer(function AutomationLane({
           transition="opacity 0.12s"
           _groupHover={{ opacity: 1, pointerEvents: "auto" }}
         >
-          <Box position="relative" width="100%">
-            <RegionBar
-              block={ownerBlock}
-              uniformName={uniformName}
-              isOpacity={isOpacity}
-              hoveredRegionId={hoveredRegionId}
-              setHeaderRegionId={setHeaderRegionId}
-              reserveAddSpace={insertTypes.length > 0}
-            />
-            {insertTypes.length > 0 && (
-              <Box
-                position="absolute"
-                top={0}
-                bottom={0}
-                right="4px"
-                zIndex={30}
-                display="flex"
-                alignItems="center"
-              >
+          <RegionBar
+            block={ownerBlock}
+            uniformName={uniformName}
+            isOpacity={isOpacity}
+            hoveredRegionId={hoveredRegionId}
+            setHeaderRegionId={setHeaderRegionId}
+            addMenu={
+              insertTypes.length > 0 ? (
                 <AddRegionMenu
                   types={insertTypes}
                   armedType={armedType}
                   setArmedType={setArmedType}
                 />
-              </Box>
-            )}
-          </Box>
+              ) : null
+            }
+          />
         </Box>
 
         <Box
@@ -312,15 +306,15 @@ const RegionBar = observer(function RegionBar({
   isOpacity,
   hoveredRegionId,
   setHeaderRegionId,
-  reserveAddSpace,
+  addMenu,
 }: {
   block: Block;
   uniformName: string;
   isOpacity: boolean;
   hoveredRegionId: string | null;
   setHeaderRegionId: (id: string | null) => void;
-  // reserve room on the last tab's right so the lane-level ＋ doesn't overlap it
-  reserveAddSpace: boolean;
+  // the lane-level ＋ control, rendered inline in the LAST tab's control row
+  addMenu: ReactNode;
 }) {
   const variations = block.parameterVariations[uniformName] ?? [];
 
@@ -420,7 +414,9 @@ const RegionBar = observer(function RegionBar({
                       multiple={multiple}
                       dragHandleProps={prov.dragHandleProps}
                       setHeaderRegionId={setHeaderRegionId}
-                      reserveRight={reserveAddSpace && index === variations.length - 1}
+                      addMenu={
+                        index === variations.length - 1 ? addMenu : null
+                      }
                     />
                   </Box>
                 )}
@@ -441,7 +437,7 @@ const RegionTab = observer(function RegionTab({
   multiple,
   dragHandleProps,
   setHeaderRegionId,
-  reserveRight,
+  addMenu,
 }: {
   block: Block;
   uniformName: string;
@@ -449,8 +445,8 @@ const RegionTab = observer(function RegionTab({
   multiple: boolean;
   dragHandleProps: any;
   setHeaderRegionId: (id: string | null) => void;
-  // leave room on the right for the lane-level ＋ (last tab only)
-  reserveRight: boolean;
+  // the lane-level ＋ control, rendered inline in the controls (last tab only)
+  addMenu?: ReactNode;
 }) {
   const store = useStore();
   const { uiStore } = store;
@@ -491,45 +487,52 @@ const RegionTab = observer(function RegionTab({
     convertTargets.length === 0 ? (
       typeLabelText
     ) : (
-      <Menu isLazy placement="bottom-start">
-        <Tooltip
-          label="Convert region type"
-          openDelay={0}
-          hasArrow
-          placement="top"
-          fontSize="xs"
-        >
-          <MenuButton
-            onClick={(e) => e.stopPropagation()}
-            style={{ cursor: "pointer" }}
-          >
-            {typeLabelText}
-          </MenuButton>
-        </Tooltip>
-        <MenuList minW="140px" bg="gray.700" py={1}>
-          {convertTargets.map((t) => (
-            <MenuItem
-              key={t}
-              fontSize={11}
-              bg="gray.700"
-              _hover={{ bg: "gray.600" }}
-              onClick={action((e: ReactMouseEvent) => {
-                e.stopPropagation();
-                const replacement = convertRegion(
-                  variation,
-                  t,
-                  store,
-                  block.pattern.params[uniformName],
-                  block.startTime,
-                );
-                block.replaceRegionInPlace(uniformName, variation, replacement);
-              })}
+      <Tooltip
+        label="Convert region type"
+        openDelay={0}
+        hasArrow
+        placement="top"
+        fontSize="xs"
+      >
+        <Box as="span" display="inline-flex">
+          <Menu isLazy placement="bottom-start">
+            <MenuButton
+              onClick={(e) => e.stopPropagation()}
+              style={{ cursor: "pointer" }}
             >
-              Convert to {t === "lfo" ? "LFO" : t[0].toUpperCase() + t.slice(1)}
-            </MenuItem>
-          ))}
-        </MenuList>
-      </Menu>
+              {typeLabelText}
+            </MenuButton>
+            <MenuList minW="140px" bg="gray.700" py={1}>
+              {convertTargets.map((t) => (
+                <MenuItem
+                  key={t}
+                  fontSize={11}
+                  bg="gray.700"
+                  _hover={{ bg: "gray.600" }}
+                  onClick={action((e: ReactMouseEvent) => {
+                    e.stopPropagation();
+                    const replacement = convertRegion(
+                      variation,
+                      t,
+                      store,
+                      block.pattern.params[uniformName],
+                      block.startTime,
+                    );
+                    block.replaceRegionInPlace(
+                      uniformName,
+                      variation,
+                      replacement,
+                    );
+                  })}
+                >
+                  Convert to{" "}
+                  {t === "lfo" ? "LFO" : t[0].toUpperCase() + t.slice(1)}
+                </MenuItem>
+              ))}
+            </MenuList>
+          </Menu>
+        </Box>
+      </Tooltip>
     );
 
   // per-type settings (gear): Curve → Min/Max range; LFO/Audio → rate/etc.
@@ -592,6 +595,7 @@ const RegionTab = observer(function RegionTab({
           </Box>
         </Tooltip>
       )}
+      {addMenu}
     </HStack>
   );
 
@@ -616,7 +620,6 @@ const RegionTab = observer(function RegionTab({
           width="max-content"
           spacing="5px"
           px="6px"
-          pr={reserveRight ? "24px" : undefined}
           bg={bg}
           borderTopWidth="2px"
           borderColor={color}
@@ -655,15 +658,7 @@ const RegionTab = observer(function RegionTab({
         {typeLabel}
       </HStack>
       <Box flex="1" minW={0} />
-      <HStack
-        position="sticky"
-        right="0"
-        flexShrink={0}
-        zIndex={1}
-        bg={bg}
-        pl="4px"
-        pr={reserveRight ? "20px" : undefined}
-      >
+      <HStack position="sticky" right="0" flexShrink={0} zIndex={1} bg={bg} pl="4px">
         {controls}
       </HStack>
     </HStack>
