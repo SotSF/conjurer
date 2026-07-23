@@ -225,7 +225,10 @@ const foldRunToCurve = (
 
 // Clamp/extend a region list so durations sum to exactly blockDuration: truncate
 // overrun (rule 1); if short, extend the trailing region to the block end
-// (rule 3) — a Curve ending flat moves its final node to the new edge.
+// (rule 3). Growth holds the last value flat to the block end and anchors a
+// terminal node there, so a Curve lane always ends on a node — playback already
+// holds that value past the authored content, so this only materializes what was
+// implicit (see CurveVariation.ensureTerminalNode).
 export const spanRegionsToBlock = (
   regions: Variation[],
   blockDuration: number,
@@ -237,7 +240,8 @@ export const spanRegionsToBlock = (
     if (acc >= blockDuration - 1e-6) break;
     const remaining = blockDuration - acc;
     if ((r.duration || 0) > remaining) {
-      r.duration = remaining;
+      if (r instanceof CurveVariation) r.resizeEnd(remaining);
+      else r.duration = remaining;
       out.push(r);
       acc = blockDuration;
       break;
@@ -248,14 +252,8 @@ export const spanRegionsToBlock = (
   if (acc < blockDuration - 1e-6) {
     if (out.length) {
       const last = out[out.length - 1];
-      last.duration += blockDuration - acc;
-      if (last instanceof CurveVariation && last.nodes.length) {
-        const n = last.nodes;
-        const endsFlat =
-          n.length === 1 ||
-          Math.abs(n[n.length - 1].value - n[n.length - 2].value) < 1e-9;
-        if (endsFlat) n[n.length - 1].time = last.duration;
-      }
+      if (last instanceof CurveVariation) last.resizeEnd(blockDuration - acc + (last.duration || 0));
+      else last.duration += blockDuration - acc;
     } else {
       out.push(CurveVariation.flat(blockDuration, defaultValue));
     }

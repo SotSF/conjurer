@@ -397,16 +397,57 @@ export class CurveVariation extends Variation<number> {
 
   /**
    * Resize the region's END to `newDur`. Shrinking is a faithful De Casteljau
-   * right-cut; growing just extends the duration (the trailing hold covers the
-   * new tail via `valueAtTime`).
+   * right-cut (which leaves a node exactly at the new end). Growing holds the
+   * last value flat across the new tail and anchors a terminal node there, so
+   * the lane always ends on a node (see `ensureTerminalNode`).
    */
   resizeEnd = (newDur: number) => {
     if (newDur < 1e-6) return;
     if (newDur < this.duration - 1e-9) {
       const [left] = this.splitAtTime(newDur);
       this.nodes = left.nodes;
+      this.duration = newDur;
+    } else {
+      this.duration = newDur;
+      this.ensureTerminalNode();
     }
-    this.duration = newDur;
+  };
+
+  /**
+   * Guarantee a node at t = `duration`. During playback the last authored value
+   * is held flat to the region/block end, so any gap between the final node and
+   * the end is implicitly a flat hold; we materialize it as a real terminal node
+   * (the editor treats the last node as the end anchor, so a missing one makes a
+   * node dragged near the end snap to the edge). No-op if a node already sits
+   * within `eps` of the end. If materializing leaves the former final node as a
+   * redundant point on a flat run (a flat tail), that stray node is dropped so a
+   * flat region stays one clean segment rather than keeping a dot at the old
+   * authored boundary.
+   */
+  ensureTerminalNode = (eps = 1e-6) => {
+    if (this.nodes.length === 0) {
+      this.nodes = [makeCurveNode(0, 0), makeCurveNode(this.duration, 0)];
+      return;
+    }
+    const last = this.nodes[this.nodes.length - 1];
+    const gap = this.duration - last.time;
+    if (gap <= eps) return; // already ends at (or past) the edge
+    last.handleOut = straightOut(gap, 0); // hold flat out to the new terminal
+    this.nodes = [
+      ...this.nodes,
+      makeCurveNode(this.duration, last.value, straightIn(gap, 0), noHandle()),
+    ];
+    // former last node, now interior — prune if it sits on a flat run
+    const li = this.nodes.length - 2;
+    const prev = this.nodes[li - 1];
+    if (
+      prev &&
+      Math.abs(prev.value - last.value) < 1e-9 &&
+      this.isSegmentStraight(li - 1)
+    ) {
+      this.nodes = this.nodes.filter((_, k) => k !== li);
+      this.setSegmentStraight(li - 1);
+    }
   };
 
   /**
