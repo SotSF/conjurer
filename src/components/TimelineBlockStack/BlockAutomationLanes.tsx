@@ -120,9 +120,14 @@ const AutomationLane = observer(function AutomationLane({
 }) {
   const { ownerBlock, uniformName, label, isOpacity } = lane;
   const { uiStore } = useStore();
-  // the region under the cursor (mapped from mouse X), so hovering anywhere in
-  // the lane — not just the header tab — lifts that region's header to front
-  const [hoveredRegionId, setHoveredRegionId] = useState<string | null>(null);
+  // the region under the cursor, mapped from mouse X, so hovering anywhere in
+  // the lane lifts that region's header to front
+  const [curveRegionId, setCurveRegionId] = useState<string | null>(null);
+  // the region whose header the cursor is directly over; takes precedence so a
+  // header that overflows onto a neighbor stays reachable (its buttons don't
+  // get covered when the cursor crosses into the neighbor's X)
+  const [headerRegionId, setHeaderRegionId] = useState<string | null>(null);
+  const hoveredRegionId = headerRegionId ?? curveRegionId;
 
   const onMouseMove = (e: ReactMouseEvent<HTMLDivElement>) => {
     const variations = ownerBlock.parameterVariations[uniformName];
@@ -132,13 +137,13 @@ const AutomationLane = observer(function AutomationLane({
     let acc = 0;
     for (const variation of variations) {
       if (time < acc + variation.duration) {
-        if (hoveredRegionId !== variation.id) setHoveredRegionId(variation.id);
+        if (curveRegionId !== variation.id) setCurveRegionId(variation.id);
         return;
       }
       acc += variation.duration;
     }
     const last = variations[variations.length - 1];
-    if (last && hoveredRegionId !== last.id) setHoveredRegionId(last.id);
+    if (last && curveRegionId !== last.id) setCurveRegionId(last.id);
   };
 
   return (
@@ -148,7 +153,7 @@ const AutomationLane = observer(function AutomationLane({
         position="relative"
         width="100%"
         onMouseMove={onMouseMove}
-        onMouseLeave={() => setHoveredRegionId(null)}
+        onMouseLeave={() => setCurveRegionId(null)}
       >
         {isOpacity ? (
           <OpacityLaneBody block={ownerBlock} />
@@ -175,6 +180,7 @@ const AutomationLane = observer(function AutomationLane({
             uniformName={uniformName}
             isOpacity={isOpacity}
             hoveredRegionId={hoveredRegionId}
+            setHeaderRegionId={setHeaderRegionId}
           />
         </Box>
 
@@ -227,11 +233,13 @@ const RegionBar = observer(function RegionBar({
   uniformName,
   isOpacity,
   hoveredRegionId,
+  setHeaderRegionId,
 }: {
   block: Block;
   uniformName: string;
   isOpacity: boolean;
   hoveredRegionId: string | null;
+  setHeaderRegionId: (id: string | null) => void;
 }) {
   const variations = block.parameterVariations[uniformName] ?? [];
 
@@ -330,6 +338,7 @@ const RegionBar = observer(function RegionBar({
                       variation={variation}
                       multiple={multiple}
                       dragHandleProps={prov.dragHandleProps}
+                      setHeaderRegionId={setHeaderRegionId}
                     />
                   </Box>
                 )}
@@ -349,17 +358,26 @@ const RegionTab = observer(function RegionTab({
   variation,
   multiple,
   dragHandleProps,
+  setHeaderRegionId,
 }: {
   block: Block;
   uniformName: string;
   variation: Variation;
   multiple: boolean;
   dragHandleProps: any;
+  setHeaderRegionId: (id: string | null) => void;
 }) {
   const store = useStore();
   const { uiStore } = store;
   const { label, color, bg } = regionTypeStyle(variation);
   const narrow = uiStore.timeToX(variation.duration) < NARROW_TAB_PX;
+
+  // keep this region's header active (front + reachable) while the cursor is
+  // over it, even if it overflows onto a neighbor's X
+  const headerHover = {
+    onMouseEnter: () => setHeaderRegionId(variation.id),
+    onMouseLeave: () => setHeaderRegionId(null),
+  };
 
   const dragHandle = multiple ? (
     <Box {...dragHandleProps} cursor="grab" color="#8a97a8" fontSize="10px" flexShrink={0}>
@@ -432,6 +450,7 @@ const RegionTab = observer(function RegionTab({
           bg={bg}
           borderTopWidth="2px"
           borderColor={color}
+          {...headerHover}
         >
           {dragHandle}
           {typeLabel}
@@ -452,6 +471,7 @@ const RegionTab = observer(function RegionTab({
       borderColor={color}
       bg={bg}
       align="center"
+      {...headerHover}
     >
       <HStack
         position="sticky"
