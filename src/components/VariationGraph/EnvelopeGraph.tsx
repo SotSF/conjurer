@@ -1,10 +1,14 @@
-import { Box, useToken } from "@chakra-ui/react";
+import { Box, HStack, Input, Text, useToken } from "@chakra-ui/react";
 import { useRef, useState, useEffect } from "react";
 import { runInAction } from "mobx";
 import { Block } from "@/src/types/Block";
-import { CurveVariation } from "@/src/types/Variations/CurveVariation";
+import { CurveVariation, CurveNode } from "@/src/types/Variations/CurveVariation";
 import { VARIATION_BOUND_WIDTH } from "@/src/utils/layout";
 import { sampleCurveGeometry } from "@/src/utils/curveGeometry";
+
+// Trim a number to a short, human-editable string (no trailing-zero noise).
+const fmtNum = (n: number) =>
+  Number.isFinite(n) ? parseFloat(n.toFixed(4)).toString() : "0";
 
 const HEIGHT = 50;
 const PADDING = 6;
@@ -27,7 +31,9 @@ type EnvelopeGraphProps = {
  * interior nodes clamp in time between their neighbors; Shift axis-locks the
  * drag, values snap to neighbor values / the range bounds unless Ctrl is held,
  * and Esc deselects), double-click the line
- * to add a node on the curve, Backspace to delete the selected node. Click a
+ * to add a node on the curve, Backspace to delete the selected node. A selected
+ * node also shows an inline editor to type an exact value (and, for interior
+ * nodes, an exact time). Click a
  * segment to reveal its two Bézier handles and drag each in both axes (the
  * horizontal reach bows the curve — pen-tool style); Alt-drag a handle mirrors
  * the opposite one across the segment's midline (symmetric shapes);
@@ -52,6 +58,9 @@ export const EnvelopeGraph = function EnvelopeGraph({
   const [selectedSegment, setSelectedSegment] = useState<number | null>(null);
   // value a node is currently snapping to (for the guide line), or null
   const [snapValue, setSnapValue] = useState<number | null>(null);
+  // true while a node is being dragged — the numeric editor hides so it doesn't
+  // sit under the cursor / thrash as values stream in.
+  const [dragging, setDragging] = useState(false);
 
   const innerWidth = Math.max(1, width - VARIATION_BOUND_WIDTH);
   const { nodes, duration } = variation;
@@ -90,6 +99,7 @@ export const EnvelopeGraph = function EnvelopeGraph({
     setSelectedId(id);
     setSelectedSegment(null);
     draggingId.current = id;
+    setDragging(true);
     // Force the 4-directional move cursor everywhere for the whole drag — a
     // global !important rule, so it beats the node's own pointer cursor while
     // the pointer is still over the dot.
@@ -156,6 +166,7 @@ export const EnvelopeGraph = function EnvelopeGraph({
     };
     const up = () => {
       draggingId.current = null;
+      setDragging(false);
       setSnapValue(null);
       cursorStyle.remove();
       window.removeEventListener("pointermove", move);
@@ -325,8 +336,13 @@ export const EnvelopeGraph = function EnvelopeGraph({
     )
     .join(" ");
 
+  const selectedIdx = selectedId
+    ? nodes.findIndex((n) => n.id === selectedId)
+    : -1;
+  const selectedNode = selectedIdx >= 0 ? nodes[selectedIdx] : null;
+
   return (
-    <Box py={1} bgColor="gray.600" _hover={{ bgColor: "gray.500" }}>
+    <Box position="relative" py={1} bgColor="gray.600" _hover={{ bgColor: "gray.500" }}>
       <svg
         ref={svgRef}
         width={innerWidth}
@@ -367,6 +383,160 @@ export const EnvelopeGraph = function EnvelopeGraph({
         })}
         {selectedSegment != null && renderSegmentHandles(selectedSegment)}
       </svg>
+      {selectedNode && !dragging && (
+        <NodeNumericEditor
+          key={selectedNode.id}
+          node={selectedNode}
+          isFirst={selectedIdx === 0}
+          isLast={selectedIdx === nodes.length - 1}
+          duration={duration}
+          prevTime={nodes[selectedIdx - 1]?.time ?? 0}
+          nextTime={nodes[selectedIdx + 1]?.time ?? duration}
+          x={xOfTime(selectedNode.time)}
+          y={yOfValue(selectedNode.value)}
+          innerWidth={innerWidth}
+          onCommit={(t, v) =>
+            commit(() => variation.setNode(selectedNode.id, t, v))
+          }
+        />
+      )}
     </Box>
   );
 };
+
+// Compact numeric readout/editor for the selected node: type an exact value (v)
+// and, for interior nodes, an exact local time (t). Floats just above the node
+// (below it near the top edge). Fields stay in sync with the live node except
+// while focused, so dragging updates them without clobbering an in-progress
+// edit. Enter/blur commits; Esc reverts the field. Endpoints anchor the region
+// bounds, so their time is fixed (0 / duration) and shown read-only.
+function NodeNumericEditor({
+  node,
+  isFirst,
+  isLast,
+  duration,
+  prevTime,
+  nextTime,
+  x,
+  y,
+  innerWidth,
+  onCommit,
+}: {
+  node: CurveNode;
+  isFirst: boolean;
+  isLast: boolean;
+  duration: number;
+  prevTime: number;
+  nextTime: number;
+  x: number;
+  y: number;
+  innerWidth: number;
+  onCommit: (t: number, v: number) => void;
+}) {
+  const [vStr, setVStr] = useState(fmtNum(node.value));
+  const [tStr, setTStr] = useState(fmtNum(node.time));
+  const vFocused = useRef(false);
+  const tFocused = useRef(false);
+  const timeFixed = isFirst || isLast;
+
+  useEffect(() => {
+    if (!vFocused.current) setVStr(fmtNum(node.value));
+  }, [node.value]);
+  useEffect(() => {
+    if (!tFocused.current) setTStr(fmtNum(node.time));
+  }, [node.time]);
+
+  const commitV = () => {
+    const v = parseFloat(vStr);
+    if (Number.isFinite(v)) onCommit(node.time, v);
+    else setVStr(fmtNum(node.value));
+  };
+  const commitT = () => {
+    if (timeFixed) return;
+    let t = parseFloat(tStr);
+    if (!Number.isFinite(t)) {
+      setTStr(fmtNum(node.time));
+      return;
+    }
+    t = Math.max(prevTime, Math.min(nextTime, t));
+    onCommit(t, node.value);
+  };
+  const keyHandler =
+    (commitFn: () => void, revert: () => void) =>
+    (e: React.KeyboardEvent<HTMLInputElement>) => {
+      e.stopPropagation();
+      if (e.key === "Enter") {
+        commitFn();
+        e.currentTarget.blur();
+      } else if (e.key === "Escape") {
+        revert();
+        e.currentTarget.blur();
+      }
+    };
+
+  const PANEL_W = timeFixed ? 92 : 150;
+  const left = Math.max(0, Math.min(innerWidth - PANEL_W, x - PANEL_W / 2));
+  const inputProps = {
+    size: "xs" as const,
+    height: "16px",
+    width: "48px",
+    px: 1,
+    fontSize: "10px",
+    bg: "gray.900",
+    border: "none",
+    borderRadius: "sm",
+    _focusVisible: { boxShadow: "0 0 0 1px var(--chakra-colors-blue-300)" },
+  };
+
+  return (
+    <HStack
+      position="absolute"
+      left={`${left}px`}
+      top={y < 22 ? `${HEIGHT}px` : "-20px"}
+      spacing={1}
+      px={1}
+      py="1px"
+      bg="gray.800"
+      borderRadius="sm"
+      boxShadow="md"
+      zIndex={1500}
+      onPointerDown={(e) => e.stopPropagation()}
+      onDoubleClick={(e) => e.stopPropagation()}
+    >
+      <Text fontSize="9px" color="gray.400">
+        v
+      </Text>
+      <Input
+        {...inputProps}
+        value={vStr}
+        aria-label="node value"
+        onChange={(e) => setVStr(e.target.value)}
+        onFocus={() => (vFocused.current = true)}
+        onBlur={() => {
+          vFocused.current = false;
+          commitV();
+        }}
+        onKeyDown={keyHandler(commitV, () => setVStr(fmtNum(node.value)))}
+      />
+      {!timeFixed && (
+        <>
+          <Text fontSize="9px" color="gray.400">
+            t
+          </Text>
+          <Input
+            {...inputProps}
+            value={tStr}
+            aria-label="node time"
+            onChange={(e) => setTStr(e.target.value)}
+            onFocus={() => (tFocused.current = true)}
+            onBlur={() => {
+              tFocused.current = false;
+              commitT();
+            }}
+            onKeyDown={keyHandler(commitT, () => setTStr(fmtNum(node.time)))}
+          />
+        </>
+      )}
+    </HStack>
+  );
+}
