@@ -261,13 +261,47 @@ export class CurveVariation extends Variation<number> {
     this.nodes = this.nodes.filter((n) => n.id !== id);
   };
 
-  /** Set a node's time & value, re-sorting to keep nodes time-ordered. */
+  /**
+   * Whether segment [i, i+1] is a straight line — i.e. its two Bézier control
+   * points lie on the chord between the endpoints. A step (zero-width) is not a
+   * straight segment. Used to keep a linear segment linear when a node moves.
+   */
+  isSegmentStraight = (i: number): boolean => {
+    const a = this.nodes[i];
+    const b = this.nodes[i + 1];
+    if (!a || !b) return false;
+    const dt = b.time - a.time;
+    if (dt <= 0) return false;
+    const chordV = (t: number) =>
+      a.value + ((b.value - a.value) * (t - a.time)) / dt;
+    const p1v = a.value + a.handleOut.dv;
+    const p2v = b.value + b.handleIn.dv;
+    const eps = 1e-5 * (Math.abs(a.value) + Math.abs(b.value) + 1);
+    return (
+      Math.abs(p1v - chordV(a.time + a.handleOut.dt)) < eps &&
+      Math.abs(p2v - chordV(b.time + b.handleIn.dt)) < eps
+    );
+  };
+
+  /**
+   * Set a node's time & value, re-sorting to keep nodes time-ordered. Segments
+   * that were STRAIGHT stay straight: their handles are re-derived from the new
+   * chord after the move (so a flat line dragged by an endpoint becomes a
+   * straight ramp, not a flat-ended S-curve). Curved segments keep their shape.
+   */
   setNode = (id: string, time: number, value: number) => {
-    const node = this.nodes.find((n) => n.id === id);
-    if (!node) return;
+    const idx = this.nodes.findIndex((n) => n.id === id);
+    if (idx < 0) return;
+    const leftWasStraight = idx > 0 && this.isSegmentStraight(idx - 1);
+    const rightWasStraight =
+      idx < this.nodes.length - 1 && this.isSegmentStraight(idx);
+    const node = this.nodes[idx];
     node.time = time;
     node.value = value;
     this.nodes = [...this.nodes].sort((a, b) => a.time - b.time);
+    const j = this.nodes.findIndex((n) => n.id === id);
+    if (leftWasStraight && j > 0) this.setSegmentStraight(j - 1);
+    if (rightWasStraight && j < this.nodes.length - 1) this.setSegmentStraight(j);
   };
 
   /**
