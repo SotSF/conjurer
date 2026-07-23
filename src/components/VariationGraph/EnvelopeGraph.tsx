@@ -446,23 +446,55 @@ function NodeNumericEditor({
     if (!tFocused.current) setTStr(fmtNum(node.time));
   }, [node.time]);
 
-  const commitV = () => {
-    const v = parseFloat(vStr);
+  // Live-apply as the field changes (typing or arrow-nudging) so the node moves
+  // in real time — no Enter needed. Value is unclamped (out-of-range values just
+  // expand the axis); time clamps between the neighbors.
+  const applyV = (raw: string) => {
+    const v = parseFloat(raw);
     if (Number.isFinite(v)) onCommit(node.time, v);
-    else setVStr(fmtNum(node.value));
+  };
+  const applyT = (raw: string) => {
+    if (timeFixed) return;
+    const t = parseFloat(raw);
+    if (Number.isFinite(t))
+      onCommit(Math.max(prevTime, Math.min(nextTime, t)), node.value);
+  };
+  // Blur normalizes the display (and reverts an unparseable field).
+  const commitV = () => {
+    if (Number.isFinite(parseFloat(vStr))) applyV(vStr);
+    setVStr(fmtNum(node.value));
   };
   const commitT = () => {
-    if (timeFixed) return;
-    let t = parseFloat(tStr);
-    if (!Number.isFinite(t)) {
-      setTStr(fmtNum(node.time));
-      return;
-    }
-    t = Math.max(prevTime, Math.min(nextTime, t));
-    onCommit(t, node.value);
+    if (Number.isFinite(parseFloat(tStr))) applyT(tStr);
+    setTStr(fmtNum(node.time));
+  };
+
+  // Coarse step on arrow, fine (÷10) with Shift.
+  const VALUE_STEP = 0.1;
+  const TIME_STEP = 0.1;
+  const nudge = (
+    cur: string,
+    fallback: number,
+    step: number,
+    setStr: (s: string) => void,
+    apply: (raw: string) => void,
+    dir: number,
+    fine: boolean,
+  ) => {
+    const base = Number.isFinite(parseFloat(cur)) ? parseFloat(cur) : fallback;
+    const s = fmtNum(base + dir * step * (fine ? 0.1 : 1));
+    setStr(s);
+    apply(s);
   };
   const keyHandler =
-    (commitFn: () => void, revert: () => void) =>
+    (
+      fallback: number,
+      step: number,
+      setStr: (s: string) => void,
+      apply: (raw: string) => void,
+      commitFn: () => void,
+      revert: () => void,
+    ) =>
     (e: React.KeyboardEvent<HTMLInputElement>) => {
       e.stopPropagation();
       if (e.key === "Enter") {
@@ -471,6 +503,18 @@ function NodeNumericEditor({
       } else if (e.key === "Escape") {
         revert();
         e.currentTarget.blur();
+      } else if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+        e.preventDefault();
+        // read the live DOM value so holding the arrow accumulates correctly
+        nudge(
+          e.currentTarget.value,
+          fallback,
+          step,
+          setStr,
+          apply,
+          e.key === "ArrowUp" ? 1 : -1,
+          e.shiftKey,
+        );
       }
     };
 
@@ -510,13 +554,23 @@ function NodeNumericEditor({
         {...inputProps}
         value={vStr}
         aria-label="node value"
-        onChange={(e) => setVStr(e.target.value)}
+        onChange={(e) => {
+          setVStr(e.target.value);
+          applyV(e.target.value);
+        }}
         onFocus={() => (vFocused.current = true)}
         onBlur={() => {
           vFocused.current = false;
           commitV();
         }}
-        onKeyDown={keyHandler(commitV, () => setVStr(fmtNum(node.value)))}
+        onKeyDown={keyHandler(
+          node.value,
+          VALUE_STEP,
+          setVStr,
+          applyV,
+          commitV,
+          () => setVStr(fmtNum(node.value)),
+        )}
       />
       {!timeFixed && (
         <>
@@ -527,13 +581,23 @@ function NodeNumericEditor({
             {...inputProps}
             value={tStr}
             aria-label="node time"
-            onChange={(e) => setTStr(e.target.value)}
+            onChange={(e) => {
+              setTStr(e.target.value);
+              applyT(e.target.value);
+            }}
             onFocus={() => (tFocused.current = true)}
             onBlur={() => {
               tFocused.current = false;
               commitT();
             }}
-            onKeyDown={keyHandler(commitT, () => setTStr(fmtNum(node.time)))}
+            onKeyDown={keyHandler(
+              node.time,
+              TIME_STEP,
+              setTStr,
+              applyT,
+              commitT,
+              () => setTStr(fmtNum(node.time)),
+            )}
           />
         </>
       )}
