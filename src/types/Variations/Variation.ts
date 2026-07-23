@@ -4,6 +4,7 @@ import type { Store } from "@/src/types/Store";
 
 type VariationType =
   | "flat"
+  | "curve"
   | "linear"
   | "periodic"
   | "spline"

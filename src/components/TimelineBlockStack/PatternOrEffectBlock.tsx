@@ -1,152 +1,64 @@
 import { Block } from "@/src/types/Block";
-import { HStack, Heading, IconButton } from "@chakra-ui/react";
-import { action } from "mobx";
+import { Box, Heading, HStack } from "@chakra-ui/react";
 import { observer } from "mobx-react-lite";
-import { MouseEvent as ReactMouseEvent, useState } from "react";
+import { MouseEvent as ReactMouseEvent } from "react";
 import { MdDragIndicator } from "react-icons/md";
-import { BsArrowsCollapse, BsArrowsExpand } from "react-icons/bs";
-import { RxCaretDown, RxCaretRight, RxCaretUp } from "react-icons/rx";
-import { FaTrashAlt } from "react-icons/fa";
-import { HeaderRepeat } from "@/src/components/TimelineBlockStack/HeaderRepeat";
 import { PatternTimingModal } from "@/src/components/TimelineBlockStack/PatternTimingModal";
-import { ParametersList } from "@/src/components/TimelineBlockStack/ParametersList";
+import { TIMELINE_HEADER_WIDTH } from "@/src/types/UIStore";
 
 type Props = {
   block: Block;
   handleBlockClick: (e: ReactMouseEvent) => void;
   isSelected: boolean;
-  effectIndex?: number;
 };
 
+// The pattern block's timeline header: a draggable name pinned to the left of
+// the visible timeline (stays in view when the block is scrolled wider than the
+// viewport) and the timing control at the block's right edge.
 export const PatternOrEffectBlock = observer(function PatternOrEffectBlock({
   block,
   handleBlockClick,
   isSelected,
-  effectIndex = -1,
 }: Props) {
-  const [expandMode, setExpandMode] = useState<"expanded" | "collapsed">(
-    "collapsed",
-  );
-
-  const parentBlock = block.parentBlock;
-  const isEffect = parentBlock !== null;
-  const lastEffectIndex =
-    (isEffect ? parentBlock : block).effectBlocks.length - 1;
-
   const color = isSelected ? "blue.500" : "white";
   return (
-    <>
-      <HStack
-        position="relative"
-        pt={1}
-        width="100%"
-        borderTopWidth={isEffect ? 2 : 0}
-        borderColor={color}
-        borderStyle="solid"
-        className={isEffect ? "" : "handle"}
-        justify="space-evenly"
-        cursor={isEffect ? "pointer" : "grab"}
-        spacing={0}
-        color={color}
-        role="button"
-        onClick={handleBlockClick}
-      >
-        <HeaderRepeat times={block.headerRepetitions}>
-          {!isEffect && <MdDragIndicator size={30} />}
-          <Heading
-            size="md"
-            userSelect="none"
-            textOverflow="clip"
-            overflowWrap="anywhere"
-            color={color}
-          >
-            {isEffect ? "Effect" : "Pattern"}: {block.pattern.name}
+    <HStack
+      position="relative"
+      width="100%"
+      minH="26px"
+      className="handle"
+      cursor="grab"
+      spacing={0}
+      color={color}
+      role="button"
+      onClick={handleBlockClick}
+    >
+      {/* the name track is flex:1 and position:relative, so the sticky name is
+          constrained to it and can never slide over the timing control */}
+      <Box flex="1" minW={0} position="relative">
+        <HStack
+          position="sticky"
+          left={`${TIMELINE_HEADER_WIDTH}px`}
+          spacing={0}
+          pl={1}
+          // fit-content (not auto) so the sticky element is narrower than its
+          // track and therefore has room to slide/pin as the card scrolls;
+          // capped at the track width so it still truncates and never reaches
+          // the timing control
+          width="fit-content"
+          maxW="100%"
+        >
+          <Box flexShrink={0} display="flex">
+            <MdDragIndicator size={18} />
+          </Box>
+          <Heading size="sm" fontSize="13px" userSelect="none" isTruncated color={color}>
+            {block.pattern.name}
           </Heading>
-          <IconButton
-            variant="ghost"
-            size="xs"
-            aria-label={block.showDetails ? "Hide details" : "Show details"}
-            title={block.showDetails ? "Hide details" : "Show details"}
-            height={6}
-            icon={
-              block.showDetails ? (
-                <RxCaretDown size={20} />
-              ) : (
-                <RxCaretRight size={20} />
-              )
-            }
-            onClick={action((e: ReactMouseEvent) => {
-              block.toggleShowDetails();
-              e.stopPropagation();
-            })}
-          />
-          {block.showDetails && (
-            <IconButton
-              variant="ghost"
-              size="xs"
-              aria-label="Collapse/Expand parameters"
-              title="Collapse/Expand parameters"
-              height={6}
-              icon={
-                expandMode === "collapsed" ? (
-                  <BsArrowsExpand size={15} />
-                ) : (
-                  <BsArrowsCollapse size={15} />
-                )
-              }
-              onClick={(e) => {
-                setExpandMode(
-                  expandMode === "expanded" ? "collapsed" : "expanded",
-                );
-                e.stopPropagation();
-              }}
-            />
-          )}
-          {!isEffect && <PatternTimingModal block={block} />}
-          {isEffect && (
-            <HStack position="absolute" right={0}>
-              {effectIndex < lastEffectIndex && (
-                <IconButton
-                  variant="link"
-                  aria-label="Move down"
-                  title="Move down"
-                  height={6}
-                  _hover={{ color: "blue.500" }}
-                  icon={<RxCaretDown size={28} />}
-                  onClick={action(() =>
-                    parentBlock.reorderEffectBlock(block, 1),
-                  )}
-                />
-              )}
-              {effectIndex > 0 && (
-                <IconButton
-                  variant="link"
-                  aria-label="Move up"
-                  title="Move up"
-                  height={6}
-                  _hover={{ color: "blue.500" }}
-                  icon={<RxCaretUp size={28} />}
-                  onClick={action(() =>
-                    parentBlock.reorderEffectBlock(block, -1),
-                  )}
-                />
-              )}
-              <IconButton
-                variant="link"
-                aria-label="Delete effect"
-                title="Delete effect"
-                height={6}
-                _hover={{ color: "red.500" }}
-                icon={<FaTrashAlt size={12} />}
-                onClick={action(() => parentBlock.removeEffectBlock(block))}
-              />
-            </HStack>
-          )}
-        </HeaderRepeat>
-      </HStack>
-      {block.showDetails && (
-        <ParametersList expandMode={expandMode} block={block} />
-      )}
-    </>
+        </HStack>
+      </Box>
+      <Box flexShrink={0} pr={1}>
+        <PatternTimingModal block={block} />
+      </Box>
+    </HStack>
   );
 });

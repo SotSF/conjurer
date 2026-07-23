@@ -21,6 +21,7 @@ import "@/src/utils/mobx";
 import { UserStore } from "@/src/types/UserStore";
 import { LayerV2 } from "./Layer/LayerV2";
 import { migrateV1ExperienceData } from "@/src/utils/migrateV1ExperienceData";
+import { migrateSequenceToRegions } from "@/src/utils/migrateVariations";
 import { User } from "@/src/types/User";
 import { setupConjurerApiWebsocket } from "@/src/websocket/conjurerApiWebsocket";
 import {
@@ -262,10 +263,12 @@ export class Store {
 
   selectBlock = (block: Block) => {
     this.selectedBlocksOrVariations = new Set([{ type: "block", block }]);
+    this.uiStore.showDevicePanel = true;
   };
 
   addBlockToSelection = (block: Block) => {
     this.selectedBlocksOrVariations.add({ type: "block", block });
+    this.uiStore.showDevicePanel = true;
   };
 
   selectVariation = (
@@ -386,11 +389,11 @@ export class Store {
     uniformName: string,
     variation: Variation,
   ) => {
-    const removeIndex = block.removeVariation(uniformName, variation);
-    const nextVariation = block.findVariationAtIndex(uniformName, removeIndex);
-
-    if (nextVariation) this.selectVariation(block, uniformName, nextVariation);
-    else this.deselectVariation(block, uniformName, variation);
+    // Region model: removing a region backfills the vacated span (left neighbor
+    // extends, adjacent Curves auto-merge) so the lane stays full; the sole
+    // region degrades to a reset. Then drop it from the selection.
+    block.removeRegionWithBackfill(uniformName, variation);
+    this.deselectVariation(block, uniformName, variation);
   };
 
   copyLinkToExperience = () => {
@@ -574,5 +577,37 @@ export class Store {
 
     // Select first layer
     this.selectedLayer = this.layers[0];
+
+    // The region model is the only model: migrate every scalar param's legacy
+    // variation sequence into full-block regions (Curve / LFO / Audio) on load.
+    try {
+      this.previewAllParamsAsCurves();
+    } catch (e) {
+      console.error("previewAllParamsAsCurves failed:", e);
+    }
+  };
+
+  // Replace every scalar (number) parameter's variations across all blocks with
+  // one full-block preview Curve (in-memory only; not saved). Evaluation aid for
+  // the continuous-parameter redesign — see sequenceToPreviewCurve.
+  previewAllParamsAsCurves = () => {
+    const convert = (block: Block, laneDuration: number) => {
+      const params = block.pattern?.params ?? {};
+      for (const uniformName of Object.keys(block.parameterVariations ?? {})) {
+        const param = params[uniformName];
+        if (!param || typeof param.value !== "number") continue;
+        block.parameterVariations[uniformName] = migrateSequenceToRegions(
+          block.parameterVariations[uniformName],
+          laneDuration,
+          param.value,
+        );
+        block.triggerVariationReactions(uniformName);
+      }
+      // Effect blocks store a placeholder duration; their params run over the
+      // PARENT pattern block's timeline, so span them to the parent's duration.
+      (block.effectBlocks ?? []).forEach((eff) => convert(eff, laneDuration));
+    };
+    for (const layer of this.layers)
+      layer.getAllBlocks().forEach((b) => convert(b, b.duration));
   };
 }

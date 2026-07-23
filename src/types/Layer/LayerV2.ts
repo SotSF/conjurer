@@ -5,6 +5,9 @@ import { makeAutoObservable } from "mobx";
 import { generateId } from "@/src/utils/id";
 import { Layer } from ".";
 import { BlockMap } from "../BlockMap";
+import { Variation } from "@/src/types/Variations/Variation";
+import { EasingVariation } from "@/src/types/Variations/EasingVariation";
+import { FlatVariation } from "@/src/types/Variations/FlatVariation";
 
 // used for a block's lane until its actual rendered height is reported
 const UNMEASURED_BLOCK_HEIGHT = 50;
@@ -116,6 +119,89 @@ export class LayerV2 implements Layer {
     return this.laneHeights
       .slice(0, lane)
       .reduce((sum, laneHeight) => sum + laneHeight, 0);
+  };
+
+  // Fade windows derived from staggered block overlaps: a block fades in
+  // while an earlier-starting block is still playing, and fades out once a
+  // later-starting block that outlasts it has begun. Blocks entirely
+  // containing/contained by another get no auto fade (there is no obvious
+  // intent), rendering both at full opacity.
+  get autoFadeWindows(): Map<
+    string,
+    { fadeInEnd: number | null; fadeOutStart: number | null }
+  > {
+    const blocks = this.getAllBlocks();
+    const windows = new Map();
+    for (const block of blocks) {
+      let fadeInEnd: number | null = null;
+      let fadeOutStart: number | null = null;
+      for (const other of blocks) {
+        if (other === block) continue;
+        if (
+          other.startTime < block.startTime &&
+          other.endTime > block.startTime &&
+          other.endTime <= block.endTime
+        )
+          fadeInEnd = Math.max(fadeInEnd ?? -Infinity, other.endTime);
+        if (
+          other.startTime > block.startTime &&
+          other.startTime < block.endTime &&
+          other.endTime >= block.endTime
+        )
+          fadeOutStart = Math.min(fadeOutStart ?? Infinity, other.startTime);
+      }
+      if (fadeInEnd !== null || fadeOutStart !== null)
+        windows.set(block.id, { fadeInEnd, fadeOutStart });
+    }
+    return windows;
+  }
+
+  // The auto fades expressed as ordinary variations: equal-power crossfade
+  // curves (easeOutSine 0->1 in, easeInSine 1->0 out) so summed brightness
+  // stays constant through the overlap. Serving as the single source of truth
+  // for rendering, display, and materialization into manual mode.
+  get autoOpacityVariationsByBlock(): Map<string, Variation<number>[]> {
+    const variationsByBlock = new Map<string, Variation<number>[]>();
+    for (const [blockId, window] of this.autoFadeWindows) {
+      const block = this.blockMap.map.get(blockId);
+      if (!block) continue;
+
+      const fadeInEnd = window.fadeInEnd ?? block.startTime;
+      const fadeOutStart = window.fadeOutStart ?? block.endTime;
+      // crossing fade windows (a block overlapped on both sides at once) have
+      // no clean sequential expression; fall back to full opacity
+      if (fadeInEnd > fadeOutStart) continue;
+
+      const variations: Variation<number>[] = [];
+      if (fadeInEnd > block.startTime)
+        variations.push(
+          new EasingVariation(fadeInEnd - block.startTime, "easeOutSine", 0, 1),
+        );
+      if (fadeOutStart > fadeInEnd)
+        variations.push(new FlatVariation(fadeOutStart - fadeInEnd, 1));
+      if (block.endTime > fadeOutStart)
+        variations.push(
+          new EasingVariation(block.endTime - fadeOutStart, "easeInSine", 1, 0),
+        );
+      variationsByBlock.set(blockId, variations);
+    }
+    return variationsByBlock;
+  }
+
+  autoOpacityVariations = (block: Block): Variation<number>[] | null =>
+    this.autoOpacityVariationsByBlock.get(block.id) ?? null;
+
+  autoBlockOpacityAt = (block: Block, globalTime: number) => {
+    const variations = this.autoOpacityVariations(block);
+    if (!variations) return 1;
+
+    let time = globalTime - block.startTime;
+    for (const variation of variations) {
+      if (time < variation.duration)
+        return variation.valueAtTime(time, globalTime);
+      time -= variation.duration;
+    }
+    return 1;
   };
 
   reportBlockHeight = (block: Block, heightPx: number) => {

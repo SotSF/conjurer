@@ -73,6 +73,10 @@ export class UIStore {
 
   patternDrawerOpen = this.store.context === "vj";
 
+  // whether the device panel is shown for the selected block; closing it here
+  // keeps the block selected, and selecting a block re-opens it
+  showDevicePanel = true;
+
   canTimelineZoom = this.store.context === "experienceEditor";
   pixelsPerSecond = INITIAL_PIXELS_PER_SECOND; // the zoom of the timeline
 
@@ -88,6 +92,19 @@ export class UIStore {
   timeToXPixels = (time: number) => `${time * this.pixelsPerSecond}px`;
   timeToX = (time: number) => time * this.pixelsPerSecond;
   xToTime = (x: number) => x / this.pixelsPerSecond;
+
+  // Horizontally scrolls the timeline so the given time sits just inside the
+  // left of the view (past the fixed layer-header column). Used by the device
+  // panel's "locate" button to jump back to the selected block.
+  scrollToTime = (time: number) => {
+    const timeline = document.getElementById("timeline");
+    if (!timeline) return;
+    const margin = 24;
+    timeline.scrollTo({
+      left: Math.max(0, time * this.pixelsPerSecond - margin),
+      behavior: "smooth",
+    });
+  };
 
   /**
    * Set an absolute zoom level (pixels per second).
