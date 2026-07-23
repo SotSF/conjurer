@@ -42,3 +42,6 @@ output.png
 public/cloud-assets
 local.db
 local.sql
+
+# robots
+.claude/worktrees
