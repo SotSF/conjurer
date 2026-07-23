@@ -559,8 +559,18 @@ function NodeNumericEditor({
       }
     };
 
+  // Position the panel to hug the node. Horizontally centered on the node x
+  // (clamped to stay on-screen); vertically just above the node's dot, flipping
+  // to just below when the node sits near the top. Coordinates are relative to
+  // the graph Box, whose py={1} (4px) offsets the svg's y downward.
   const PANEL_W = timeFixed ? 92 : 150;
+  const PANEL_H = 22;
+  const GAP = 4;
   const left = Math.max(0, Math.min(innerWidth - PANEL_W, x - PANEL_W / 2));
+  const nodeTop = 4 + y - (NODE_RADIUS + 1.5);
+  const nodeBottom = 4 + y + (NODE_RADIUS + 1.5);
+  const aboveTop = nodeTop - GAP - PANEL_H;
+  const top = aboveTop < -8 ? nodeBottom + GAP : aboveTop;
   const inputProps = {
     size: "xs" as const,
     height: "16px",
@@ -577,7 +587,7 @@ function NodeNumericEditor({
     <HStack
       position="absolute"
       left={`${left}px`}
-      top={y < 22 ? `${HEIGHT}px` : "-20px"}
+      top={`${top}px`}
       spacing={1}
       px={1}
       py="1px"
