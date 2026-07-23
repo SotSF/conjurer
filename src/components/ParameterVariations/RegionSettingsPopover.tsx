@@ -5,6 +5,7 @@ import { AudioVariation } from "@/src/types/Variations/AudioVariation";
 import { PeriodicVariationControls } from "@/src/components/VariationControls/VariationControls";
 import { AudioVariationControls } from "@/src/components/VariationControls/AudioVariationControls";
 import {
+  Box,
   IconButton,
   Popover,
   PopoverArrow,
@@ -41,43 +42,55 @@ export const RegionSettingsPopover = observer(function RegionSettingsPopover({
   const controlProps = { block, uniformName };
 
   return (
-    <Popover placement="bottom" isLazy>
-      <PopoverTrigger>
-        <Tooltip
-          label={`${variation.displayName} settings`}
-          openDelay={0}
-          hasArrow
-          placement="top"
-          fontSize="xs"
-        >
-          <IconButton
-            variant="unstyled"
-            size="xs"
-            height="14px"
-            minW="14px"
-            aria-label={`${variation.displayName} settings`}
-            icon={<TbSettings size={12} />}
-            color="gray.300"
-            _hover={{ color: "blue.300" }}
-            onClick={(e) => e.stopPropagation()}
-          />
-        </Tooltip>
-      </PopoverTrigger>
-      <Portal>
-        <PopoverContent width="200px" bg="gray.700" fontSize={10}>
-          <PopoverArrow bg="gray.700" />
-          <PopoverBody>
-            <VStack spacing={1} align="stretch" onClick={(e) => e.stopPropagation()}>
-              <Text fontWeight="bold">{variation.displayName}</Text>
-              {isPeriodic ? (
-                <PeriodicVariationControls variation={variation} {...controlProps} />
-              ) : (
-                <AudioVariationControls variation={variation as AudioVariation} {...controlProps} />
-              )}
-            </VStack>
-          </PopoverBody>
-        </PopoverContent>
-      </Portal>
-    </Popover>
+    <Tooltip
+      label={`${variation.displayName} settings`}
+      openDelay={0}
+      hasArrow
+      placement="top"
+      fontSize="xs"
+    >
+      <Box as="span" display="inline-flex">
+        <Popover placement="bottom" isLazy>
+          <PopoverTrigger>
+            <IconButton
+              variant="unstyled"
+              size="xs"
+              height="14px"
+              minW="14px"
+              aria-label={`${variation.displayName} settings`}
+              icon={<TbSettings size={12} />}
+              color="gray.300"
+              _hover={{ color: "blue.300" }}
+              onClick={(e) => e.stopPropagation()}
+            />
+          </PopoverTrigger>
+          <Portal>
+            <PopoverContent width="200px" bg="gray.700" fontSize={10}>
+              <PopoverArrow bg="gray.700" />
+              <PopoverBody>
+                <VStack
+                  spacing={1}
+                  align="stretch"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <Text fontWeight="bold">{variation.displayName}</Text>
+                  {isPeriodic ? (
+                    <PeriodicVariationControls
+                      variation={variation}
+                      {...controlProps}
+                    />
+                  ) : (
+                    <AudioVariationControls
+                      variation={variation as AudioVariation}
+                      {...controlProps}
+                    />
+                  )}
+                </VStack>
+              </PopoverBody>
+            </PopoverContent>
+          </Portal>
+        </Popover>
+      </Box>
+    </Tooltip>
   );
 });

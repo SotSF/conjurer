@@ -58,41 +58,43 @@ export const AddRegionMenu = ({ types, armedType, setArmedType }: Props) => {
     );
 
   return (
-    <Menu placement="bottom-end" isLazy>
-      <Tooltip
-        label="Add region"
-        openDelay={0}
-        hasArrow
-        placement="top"
-        fontSize="xs"
-      >
-        <MenuButton
-          as="span"
-          display="flex"
-          alignItems="center"
-          cursor="pointer"
-          _hover={{ color: "#63b3ed" }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <TbPlus size={13} />
-        </MenuButton>
-      </Tooltip>
-      <MenuList minW="110px" bg="gray.700" py={1}>
-        {types.map((t) => (
-          <MenuItem
-            key={t}
-            fontSize={11}
-            bg="gray.700"
-            _hover={{ bg: "gray.600" }}
-            onClick={(e) => {
-              e.stopPropagation();
-              setArmedType(t);
-            }}
+    <Tooltip
+      label="Add region"
+      openDelay={0}
+      hasArrow
+      placement="top"
+      fontSize="xs"
+    >
+      <Box as="span" display="inline-flex" alignItems="center">
+        <Menu placement="bottom-end" isLazy>
+          <MenuButton
+            as="span"
+            display="flex"
+            alignItems="center"
+            cursor="pointer"
+            _hover={{ color: "#63b3ed" }}
+            onClick={(e) => e.stopPropagation()}
           >
-            {LABEL[t]}
-          </MenuItem>
-        ))}
-      </MenuList>
-    </Menu>
+            <TbPlus size={13} />
+          </MenuButton>
+          <MenuList minW="110px" bg="gray.700" py={1}>
+            {types.map((t) => (
+              <MenuItem
+                key={t}
+                fontSize={11}
+                bg="gray.700"
+                _hover={{ bg: "gray.600" }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setArmedType(t);
+                }}
+              >
+                {LABEL[t]}
+              </MenuItem>
+            ))}
+          </MenuList>
+        </Menu>
+      </Box>
+    </Tooltip>
   );
 };

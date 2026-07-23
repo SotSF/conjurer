@@ -487,45 +487,52 @@ const RegionTab = observer(function RegionTab({
     convertTargets.length === 0 ? (
       typeLabelText
     ) : (
-      <Menu isLazy placement="bottom-start">
-        <Tooltip
-          label="Convert region type"
-          openDelay={0}
-          hasArrow
-          placement="top"
-          fontSize="xs"
-        >
-          <MenuButton
-            onClick={(e) => e.stopPropagation()}
-            style={{ cursor: "pointer" }}
-          >
-            {typeLabelText}
-          </MenuButton>
-        </Tooltip>
-        <MenuList minW="140px" bg="gray.700" py={1}>
-          {convertTargets.map((t) => (
-            <MenuItem
-              key={t}
-              fontSize={11}
-              bg="gray.700"
-              _hover={{ bg: "gray.600" }}
-              onClick={action((e: ReactMouseEvent) => {
-                e.stopPropagation();
-                const replacement = convertRegion(
-                  variation,
-                  t,
-                  store,
-                  block.pattern.params[uniformName],
-                  block.startTime,
-                );
-                block.replaceRegionInPlace(uniformName, variation, replacement);
-              })}
+      <Tooltip
+        label="Convert region type"
+        openDelay={0}
+        hasArrow
+        placement="top"
+        fontSize="xs"
+      >
+        <Box as="span" display="inline-flex">
+          <Menu isLazy placement="bottom-start">
+            <MenuButton
+              onClick={(e) => e.stopPropagation()}
+              style={{ cursor: "pointer" }}
             >
-              Convert to {t === "lfo" ? "LFO" : t[0].toUpperCase() + t.slice(1)}
-            </MenuItem>
-          ))}
-        </MenuList>
-      </Menu>
+              {typeLabelText}
+            </MenuButton>
+            <MenuList minW="140px" bg="gray.700" py={1}>
+              {convertTargets.map((t) => (
+                <MenuItem
+                  key={t}
+                  fontSize={11}
+                  bg="gray.700"
+                  _hover={{ bg: "gray.600" }}
+                  onClick={action((e: ReactMouseEvent) => {
+                    e.stopPropagation();
+                    const replacement = convertRegion(
+                      variation,
+                      t,
+                      store,
+                      block.pattern.params[uniformName],
+                      block.startTime,
+                    );
+                    block.replaceRegionInPlace(
+                      uniformName,
+                      variation,
+                      replacement,
+                    );
+                  })}
+                >
+                  Convert to{" "}
+                  {t === "lfo" ? "LFO" : t[0].toUpperCase() + t.slice(1)}
+                </MenuItem>
+              ))}
+            </MenuList>
+          </Menu>
+        </Box>
+      </Tooltip>
     );
 
   // per-type settings (gear): Curve → Min/Max range; LFO/Audio → rate/etc.
