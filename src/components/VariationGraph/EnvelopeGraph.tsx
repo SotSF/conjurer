@@ -451,9 +451,15 @@ function NodeNumericEditor({
     if (!tFocused.current) setTStr(fmtNum(node.time));
   }, [node.time]);
 
+  // A node's time is bounded by its neighbors and the region ends: it can't pass
+  // the prior node (nor go below 0) or the next node (nor past the region end).
+  const tMin = Math.max(0, prevTime);
+  const tMax = Math.min(nextTime, duration);
+  const clampT = (t: number) => Math.max(tMin, Math.min(tMax, t));
+
   // Live-apply as the field changes (typing or arrow-nudging) so the node moves
   // in real time — no Enter needed. Value is unclamped (out-of-range values just
-  // expand the axis); time clamps between the neighbors.
+  // expand the axis); time clamps into [tMin, tMax].
   const applyV = (raw: string) => {
     const v = parseFloat(raw);
     if (Number.isFinite(v)) onCommit(node.time, v);
@@ -461,8 +467,7 @@ function NodeNumericEditor({
   const applyT = (raw: string) => {
     if (timeFixed) return;
     const t = parseFloat(raw);
-    if (Number.isFinite(t))
-      onCommit(Math.max(prevTime, Math.min(nextTime, t)), node.value);
+    if (Number.isFinite(t)) onCommit(clampT(t), node.value);
   };
   // Blur normalizes the display (and reverts an unparseable field).
   const commitV = () => {
@@ -511,9 +516,12 @@ function NodeNumericEditor({
     apply: (raw: string) => void,
     dir: number,
     fine: boolean,
+    clamp?: (n: number) => number,
   ) => {
     const base = Number.isFinite(parseFloat(cur)) ? parseFloat(cur) : fallback;
-    const s = fmtNum(base + dir * step * (fine ? 0.1 : 1));
+    let next = base + dir * step * (fine ? 0.1 : 1);
+    if (clamp) next = clamp(next);
+    const s = fmtNum(next);
     setStr(s);
     apply(s);
   };
@@ -525,6 +533,7 @@ function NodeNumericEditor({
       apply: (raw: string) => void,
       commitFn: () => void,
       revert: () => void,
+      clamp?: (n: number) => number,
     ) =>
     (e: React.KeyboardEvent<HTMLInputElement>) => {
       e.stopPropagation();
@@ -545,6 +554,7 @@ function NodeNumericEditor({
           apply,
           e.key === "ArrowUp" ? 1 : -1,
           e.shiftKey,
+          clamp,
         );
       }
     };
@@ -622,6 +632,7 @@ function NodeNumericEditor({
               applyT,
               commitT,
               revert,
+              clampT,
             )}
           />
         </>
