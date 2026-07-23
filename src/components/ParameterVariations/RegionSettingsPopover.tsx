@@ -65,7 +65,7 @@ export const RegionSettingsPopover = observer(function RegionSettingsPopover({
             />
           </PopoverTrigger>
           <Portal>
-            <PopoverContent width="200px" bg="gray.700" fontSize={10}>
+            <PopoverContent width="248px" bg="gray.700" fontSize={10}>
               <PopoverArrow bg="gray.700" />
               <PopoverBody>
                 <VStack

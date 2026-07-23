@@ -11,7 +11,6 @@ import {
 import { Layer } from "@/src/types/Layer";
 import { action } from "mobx";
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
-import { VariationControls } from "@/src/components/VariationControls/VariationControls";
 
 type Props = {
   index: number;
@@ -23,7 +22,7 @@ export const TimelineLayerHeader = observer(function TimelineLayerHeader({
   layer,
 }: Props) {
   const store = useStore();
-  const { selectedLayer, singleVariationSelection } = store;
+  const { selectedLayer } = store;
 
   const bgColor = selectedLayer === layer ? "gray.300" : "gray.400";
 
@@ -85,16 +84,6 @@ export const TimelineLayerHeader = observer(function TimelineLayerHeader({
           })}
         />
       </HStack>
-      <VStack justify="center" flexGrow={1}>
-        {singleVariationSelection && store.selectedLayer === layer && (
-          <VariationControls
-            key={singleVariationSelection.variation.id}
-            block={singleVariationSelection.block}
-            uniformName={singleVariationSelection.uniformName}
-            variation={singleVariationSelection.variation}
-          />
-        )}
-      </VStack>
     </VStack>
   );
 });
