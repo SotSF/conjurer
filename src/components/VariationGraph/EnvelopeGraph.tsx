@@ -9,6 +9,8 @@ import { sampleCurveGeometry } from "@/src/utils/curveGeometry";
 const HEIGHT = 50;
 const PADDING = 6;
 const NODE_RADIUS = 4;
+// how close (px) a dragged value must get to a magnet target to snap
+const SNAP_PX = 6;
 
 type EnvelopeGraphProps = {
   uniformName: string;
@@ -22,7 +24,9 @@ type EnvelopeGraphProps = {
  * Interactive SVG editor for a Curve region of the continuous-parameter lane.
  * Renders the cubic-Bézier value line + breakpoint nodes and supports the core
  * node gestures: click to select, drag to move (endpoints move in value only;
- * interior nodes clamp in time between their neighbors), double-click the line
+ * interior nodes clamp in time between their neighbors; Shift axis-locks the
+ * drag, values snap to neighbor values / the range bounds unless Ctrl is held,
+ * and Esc deselects), double-click the line
  * to add a node on the curve, Backspace to delete the selected node. Click a
  * segment to reveal its two Bézier handles and drag each in both axes (the
  * horizontal reach bows the curve — pen-tool style); Alt-drag a handle mirrors
@@ -46,6 +50,8 @@ export const EnvelopeGraph = function EnvelopeGraph({
   const draggingId = useRef<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [selectedSegment, setSelectedSegment] = useState<number | null>(null);
+  // value a node is currently snapping to (for the guide line), or null
+  const [snapValue, setSnapValue] = useState<number | null>(null);
 
   const innerWidth = Math.max(1, width - VARIATION_BOUND_WIDTH);
   const { nodes, duration } = variation;
@@ -90,20 +96,67 @@ export const EnvelopeGraph = function EnvelopeGraph({
     const cursorStyle = document.createElement("style");
     cursorStyle.textContent = "*{cursor:move !important;}";
     document.head.appendChild(cursorStyle);
+    // remember where the drag started, for Shift axis-lock
+    const startNode = variation.nodes.find((n) => n.id === id);
+    const startTime = startNode?.time ?? 0;
+    const startValue = startNode?.value ?? 0;
+    const startClientX = e.clientX;
+    const startClientY = e.clientY;
     const move = (ev: PointerEvent) => {
       if (draggingId.current !== id || !svgRef.current) return;
       const { px, py } = localPoint(ev.clientX, ev.clientY);
       const ns = variation.nodes;
       const idx = ns.findIndex((n) => n.id === id);
       if (idx < 0) return;
-      let t: number;
-      if (idx === 0) t = 0;
-      else if (idx === ns.length - 1) t = variation.duration;
-      else t = Math.max(ns[idx - 1].time, Math.min(ns[idx + 1].time, timeOfX(px)));
-      commit(() => variation.setNode(id, t, valueOfY(py)));
+      const isFirst = idx === 0;
+      const isLast = idx === ns.length - 1;
+      let t = isFirst
+        ? 0
+        : isLast
+          ? variation.duration
+          : Math.max(ns[idx - 1].time, Math.min(ns[idx + 1].time, timeOfX(px)));
+      let v = valueOfY(py);
+      let valueLocked = false;
+
+      // Shift = lock the drag to its dominant axis: horizontal keeps the value,
+      // vertical keeps the time.
+      if (ev.shiftKey) {
+        const horizontal =
+          Math.abs(ev.clientX - startClientX) >=
+          Math.abs(ev.clientY - startClientY);
+        if (horizontal) {
+          v = startValue;
+          valueLocked = true;
+        } else if (!isFirst && !isLast) {
+          t = startTime;
+        }
+      }
+
+      // Value-snap magnet: pull the value onto a neighbor's value or the axis
+      // bounds when within SNAP_PX. Ctrl frees it; a locked value never snaps.
+      let snap: number | null = null;
+      if (!ev.ctrlKey && !valueLocked) {
+        const candidates: number[] = [domainMin, domainMax];
+        if (ns[idx - 1]) candidates.push(ns[idx - 1].value);
+        if (ns[idx + 1]) candidates.push(ns[idx + 1].value);
+        const yv = yOfValue(v);
+        let bestDist = SNAP_PX;
+        for (const c of candidates) {
+          const d = Math.abs(yOfValue(c) - yv);
+          if (d < bestDist) {
+            bestDist = d;
+            snap = c;
+          }
+        }
+        if (snap != null) v = snap;
+      }
+
+      setSnapValue(snap);
+      commit(() => variation.setNode(id, t, v));
     };
     const up = () => {
       draggingId.current = null;
+      setSnapValue(null);
       cursorStyle.remove();
       window.removeEventListener("pointermove", move);
       window.removeEventListener("pointerup", up);
@@ -232,6 +285,18 @@ export const EnvelopeGraph = function EnvelopeGraph({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedId, variation, block, uniformName]);
 
+  // Esc deselects the current node/segment (hides handles, drops selection).
+  useEffect(() => {
+    if (selectedId == null && selectedSegment == null) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      setSelectedId(null);
+      setSelectedSegment(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [selectedId, selectedSegment]);
+
   const renderSegmentHandles = (seg: number) => {
     const a = nodes[seg];
     const b = nodes[seg + 1];
@@ -271,6 +336,19 @@ export const EnvelopeGraph = function EnvelopeGraph({
         onDoubleClick={onDoubleClick}
       >
         <path d={linePath} fill="none" stroke={orange} strokeWidth={2} />
+        {snapValue != null && (
+          <line
+            x1={0}
+            y1={yOfValue(snapValue)}
+            x2={innerWidth}
+            y2={yOfValue(snapValue)}
+            stroke="#8fcbf5"
+            strokeWidth={1}
+            strokeDasharray="3 3"
+            opacity={0.7}
+            pointerEvents="none"
+          />
+        )}
         {nodes.map((node) => {
           const selected = node.id === selectedId;
           return (
