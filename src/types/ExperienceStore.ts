@@ -46,7 +46,8 @@ export class ExperienceStore {
       song: NO_SONG,
       status: "inprogress",
       version: EXPERIENCE_VERSION,
-      data: { layers: [{ blockMap: {} }, { blockMap: {} }] },
+      // new experiences start with a single layer; authors add more as needed
+      data: { layers: [{ blockMap: {} }] },
       thumbnailURL: "",
     });
 
