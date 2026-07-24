@@ -97,6 +97,63 @@ export class Store {
     this._selectedLayer = value;
   }
 
+  // ================================ layers ==================================
+  // Layer mutations live here so the timeline UI and the editing API share one
+  // implementation of the invariants (a layer is always selected; the last
+  // layer cannot be removed; blocks never linger in the selection after their
+  // layer is gone).
+
+  // Create a new empty layer. Inserts at `index` (clamped; appended when
+  // omitted) and selects it by default. Returns the created layer.
+  addLayer = (
+    options: { name?: string; index?: number; select?: boolean } = {},
+  ): Layer => {
+    const layer = new LayerV2(this);
+    if (options.name !== undefined) layer.name = options.name;
+    const index =
+      options.index === undefined
+        ? this.layers.length
+        : Math.max(0, Math.min(options.index, this.layers.length));
+    this.layers.splice(index, 0, layer);
+    if (options.select ?? true) this._selectedLayer = layer;
+    return layer;
+  };
+
+  renameLayer = (layer: Layer, name: string) => {
+    layer.name = name;
+  };
+
+  // Remove a layer (and its blocks). No-op on the last remaining layer so the
+  // always-one-layer invariant holds. Purges the removed layer's blocks from
+  // the selection and reselects a neighbor if the removed layer was selected.
+  removeLayer = (layer: Layer) => {
+    if (this.layers.length <= 1) return;
+    const index = this.layers.indexOf(layer);
+    if (index === -1) return;
+
+    this.selectedBlocksOrVariations = new Set(
+      Array.from(this.selectedBlocksOrVariations).filter(
+        (selection) => selection.block.layer !== layer,
+      ),
+    );
+
+    this.layers.splice(index, 1);
+
+    if (this._selectedLayer === layer)
+      this._selectedLayer = this.layers[Math.min(index, this.layers.length - 1)];
+  };
+
+  // Move a layer to a new position. Layer order is additive render-priority
+  // order (see RenderPipelineV2), so this is meaningful, not cosmetic.
+  reorderLayer = (layer: Layer, toIndex: number) => {
+    const from = this.layers.indexOf(layer);
+    if (from === -1) return;
+    const to = Math.max(0, Math.min(toIndex, this.layers.length - 1));
+    if (from === to) return;
+    this.layers.splice(from, 1);
+    this.layers.splice(to, 0, layer);
+  };
+
   selectedBlocksOrVariations: Set<BlockOrVariation> = new Set();
 
   get singleBlockSelection(): Block | null {

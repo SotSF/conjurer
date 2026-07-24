@@ -30,6 +30,10 @@ export class UIStore {
   showingLatencyModal = false;
   capturingThumbnail = false;
 
+  // transient: the id of a just-created layer whose name field should open in
+  // edit mode (and focus) when its header mounts. Cleared once consumed.
+  layerIdToNameOnMount: string | null = null;
+
   private _emceeOutputControlsMinimized = true;
   get emceeOutputControlsMinimized() {
     return this._emceeOutputControlsMinimized;
