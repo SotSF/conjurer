@@ -43,6 +43,21 @@ export class AudioStore {
     this.wavesurfer?.setVolume(volume);
   }
 
+  private _playbackRate = 1;
+  get playbackRate() {
+    return this._playbackRate;
+  }
+  set playbackRate(rate: number) {
+    this._playbackRate = rate;
+    // preservePitch keeps the chant recognizable when slowed
+    this.wavesurfer?.setPlaybackRate(rate, true);
+    // The timeline playhead is a wall-clock CSS animation anchored at lastCursor;
+    // changing rate restarts that animation, so re-anchor it to the live position
+    // (works paused or playing) to keep it from jumping back to the old anchor.
+    this.lastCursorPosition = this._globalTime;
+    this.saveToLocalStorage();
+  }
+
   wavesurfer: WaveSurfer | null = null;
   timelinePlugin: TimelinePlugin | null = null;
   minimapPlugin: MinimapPlugin | null = null;
@@ -83,6 +98,7 @@ export class AudioStore {
       const localStorageAudioSettings = JSON.parse(data);
       this.audioLatency =
         localStorageAudioSettings.audioLatency || INITIAL_AUDIO_LATENCY;
+      this.playbackRate = localStorageAudioSettings.playbackRate || 1;
     }
   };
 
@@ -92,6 +108,7 @@ export class AudioStore {
       "audioStore",
       JSON.stringify({
         audioLatency: this.audioLatency,
+        playbackRate: this.playbackRate,
       }),
     );
   };
