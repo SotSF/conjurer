@@ -5,48 +5,50 @@ import {
   AccordionItem,
   AccordionPanel,
   Box,
-  Center,
+  Button,
+  Grid,
+  HStack,
+  Input,
   NumberInput,
   NumberInputField,
-  Tab,
-  TabList,
-  TabPanel,
-  TabPanels,
-  Tabs,
-  Table,
-  TableContainer,
-  Tbody,
-  Td,
+  SimpleGrid,
   Text,
-  Th,
-  Thead,
-  Tr,
+  Tooltip,
+  VStack,
 } from "@chakra-ui/react";
 import {
-  LineChart,
-  Line,
-  Tooltip,
-  YAxis,
   CartesianGrid,
+  Line,
+  LineChart,
+  Tooltip as RechartsTooltip,
   XAxis,
+  YAxis,
 } from "recharts";
-import { Button, HStack, VStack } from "@chakra-ui/react";
-import { memo, useCallback, useState } from "react";
+import { Fragment, useCallback, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
-import { PaletteVariationGraph } from "../variation/VariationGraph";
 import { PaletteVariation } from "../variation/PaletteVariation";
 import { Block } from "@/src/types/Block";
 import { Palette } from "../Palette";
-import { HexColorInput, HexColorPicker } from "react-colorful";
+import { PALETTE_PRESETS } from "../presets";
 import { hexToVector3, vector3ToHex } from "@/src/utils/color";
 import { Vector3 } from "three";
 
 const samples = 100;
 const LINEAR_GRADIENT_PHASE_SWEEP = Math.PI / 3;
 const LINEAR_GRADIENT_PHASE_SIN = Math.sin(LINEAR_GRADIENT_PHASE_SWEEP / 2);
-const HEX_COLOR_PATTERN = /^#[0-9a-fA-F]{6}$/;
-const PALETTE_COMMIT_DEBOUNCE_MS = 50;
-const PALETTE_COMMIT_MAX_WAIT_MS = 100;
+const COMMIT_DEBOUNCE_MS = 50;
+const COMMIT_MAX_WAIT_MS = 100;
+
+// CSS gradient sampled from the cosine palette, for previews / swatches
+const paletteCss = (palette: Palette) => {
+  const stops = Array.from({ length: 9 }, (_, i) => {
+    const c = palette.colorAt(i / 8);
+    return `rgb(${Math.round(c.x * 255)},${Math.round(c.y * 255)},${Math.round(
+      c.z * 255,
+    )}) ${Math.round((i / 8) * 100)}%`;
+  });
+  return `linear-gradient(90deg, ${stops.join(",")})`;
+};
 
 const setPaletteFromLinearGradient = (
   palette: Palette,
@@ -55,16 +57,156 @@ const setPaletteFromLinearGradient = (
 ) => {
   const c = LINEAR_GRADIENT_PHASE_SWEEP / (2 * Math.PI);
   const d = (Math.PI / 2 - LINEAR_GRADIENT_PHASE_SWEEP / 2) / (2 * Math.PI);
-
   palette.c.set(c, c, c);
   palette.d.set(d, d, d);
-
   (["x", "y", "z"] as const).forEach((axis) => {
     const start = from[axis];
     const end = to[axis];
     palette.a[axis] = (start + end) / 2;
     palette.b[axis] = (start - end) / (2 * LINEAR_GRADIENT_PHASE_SIN);
   });
+};
+
+type PaletteEditorProps = {
+  uniformName: string;
+  variation: PaletteVariation;
+  block: Block;
+  setPalette?: (palette: Palette) => void;
+};
+
+export const PaletteEditor = function PaletteEditor({
+  variation,
+  setPalette,
+}: PaletteEditorProps) {
+  const palette = variation.palette;
+  // palette is mutated in place; bump to re-render the previews after edits
+  const [, setTick] = useState(0);
+  const rerender = () => setTick((t) => t + 1);
+
+  const debouncedCommit = useDebouncedCallback(
+    () => setPalette?.(palette),
+    COMMIT_DEBOUNCE_MS,
+    { maxWait: COMMIT_MAX_WAIT_MS, trailing: true },
+  );
+
+  const commit = useCallback(() => {
+    rerender();
+    debouncedCommit();
+  }, [debouncedCommit]);
+
+  const applyPreset = (preset: Palette) => {
+    palette.a.copy(preset.a);
+    palette.b.copy(preset.b);
+    palette.c.copy(preset.c);
+    palette.d.copy(preset.d);
+    debouncedCommit.cancel();
+    rerender();
+    setPalette?.(palette);
+  };
+
+  const randomize = () => {
+    palette.randomize();
+    debouncedCommit.cancel();
+    rerender();
+    setPalette?.(palette);
+  };
+
+  const startHex = vector3ToHex(palette.colorAt(0));
+  const endHex = vector3ToHex(palette.colorAt(1));
+  const applyGradient = (start: string, end: string) => {
+    setPaletteFromLinearGradient(palette, hexToVector3(start), hexToVector3(end));
+    commit();
+  };
+
+  return (
+    <VStack align="stretch" spacing={3} width="320px">
+      <Box
+        height="26px"
+        borderRadius="4px"
+        border="1px solid"
+        borderColor="whiteAlpha.300"
+        background={paletteCss(palette)}
+        // clip the gradient to inside the border so Chrome doesn't bleed a
+        // hairline of the opposite-end color into the rounded corners/border seam
+        backgroundClip="padding-box"
+      />
+
+      <HStack justify="space-between">
+        <HStack spacing={2}>
+          <Text fontSize="xs" color="gray.300">
+            Gradient
+          </Text>
+          <Input
+            type="color"
+            value={startHex}
+            onChange={(e) => applyGradient(e.target.value, endHex)}
+            width="28px"
+            height="24px"
+            p={0}
+            border="none"
+            cursor="pointer"
+            title="Start color"
+          />
+          <Text fontSize="xs" color="gray.500">
+            →
+          </Text>
+          <Input
+            type="color"
+            value={endHex}
+            onChange={(e) => applyGradient(startHex, e.target.value)}
+            width="28px"
+            height="24px"
+            p={0}
+            border="none"
+            cursor="pointer"
+            title="End color"
+          />
+        </HStack>
+        <Button size="xs" onClick={randomize}>
+          Randomize
+        </Button>
+      </HStack>
+
+      <Box>
+        <Text fontSize="xs" color="gray.300" mb={1}>
+          Presets
+        </Text>
+        <SimpleGrid columns={3} spacing={1}>
+          {PALETTE_PRESETS.map((preset) => {
+            const previewPalette = preset.make();
+            return (
+              <Tooltip key={preset.name} label={preset.name} openDelay={0}>
+                <Box
+                  height="20px"
+                  borderRadius="3px"
+                  cursor="pointer"
+                  border="1px solid"
+                  borderColor="whiteAlpha.300"
+                  background={paletteCss(previewPalette)}
+                  onClick={() => applyPreset(previewPalette)}
+                />
+              </Tooltip>
+            );
+          })}
+        </SimpleGrid>
+      </Box>
+
+      <Accordion allowToggle>
+        <AccordionItem border="none">
+          <AccordionButton px={1} py={1}>
+            <Text fontSize="xs" color="gray.400">
+              Advanced
+            </Text>
+            <AccordionIcon fontSize="sm" />
+          </AccordionButton>
+          <AccordionPanel px={0}>
+            <RgbChart palette={palette} />
+            <ManualPaletteEditor palette={palette} onChange={commit} />
+          </AccordionPanel>
+        </AccordionItem>
+      </Accordion>
+    </VStack>
+  );
 };
 
 const getPaletteSeriesData = (palette: Palette) => {
@@ -85,340 +227,109 @@ const getPaletteSeriesData = (palette: Palette) => {
   ];
 };
 
-type PaletteEditorProps = {
-  uniformName: string;
-  variation: PaletteVariation;
-  block: Block;
-  setPalette?: (palette: Palette) => void;
-};
-
-export const PaletteEditor = memo(function PaletteEditor({
-  uniformName,
-  variation,
-  block,
-  setPalette,
-}: PaletteEditorProps) {
-  const [color, setColor] = useState("#efa6b4");
-  const [gradientStartColor, setGradientStartColor] = useState(
-    vector3ToHex(variation.palette.colorAt(0)),
-  );
-  const [gradientEndColor, setGradientEndColor] = useState(
-    vector3ToHex(variation.palette.colorAt(1)),
-  );
-  const debouncedCommitPalette = useDebouncedCallback(
-    (palette: Palette) => setPalette?.(palette),
-    PALETTE_COMMIT_DEBOUNCE_MS,
-    { maxWait: PALETTE_COMMIT_MAX_WAIT_MS, trailing: true },
-  );
-
-  const randomize = (useSeed = false) => {
-    debouncedCommitPalette.cancel();
-    variation.palette.randomize();
-    if (useSeed) variation.palette.a = hexToVector3(color);
-    setPalette?.(variation.palette);
-    // Uncomment to log the palette constructor string
-    // console.log(variation.palette.toConstructorString());
-  };
-
-  const applyLinearGradient = useCallback(
-    (startColor: string, endColor: string) => {
-      if (
-        !HEX_COLOR_PATTERN.test(startColor) ||
-        !HEX_COLOR_PATTERN.test(endColor)
-      )
-        return;
-      setPaletteFromLinearGradient(
-        variation.palette,
-        hexToVector3(startColor),
-        hexToVector3(endColor),
-      );
-      debouncedCommitPalette(variation.palette);
-    },
-    [debouncedCommitPalette, variation.palette],
-  );
-
-  const onStartGradientColorChange = (nextStartColor: string) => {
-    setGradientStartColor(nextStartColor);
-    applyLinearGradient(nextStartColor, gradientEndColor);
-  };
-  const onEndGradientColorChange = (nextEndColor: string) => {
-    setGradientEndColor(nextEndColor);
-    applyLinearGradient(gradientStartColor, nextEndColor);
-  };
-
-  const commitPaletteNow = () => debouncedCommitPalette.flush();
-
-  const series = getPaletteSeriesData(variation.palette);
+const RgbChart = ({ palette }: { palette: Palette }) => {
+  const series = getPaletteSeriesData(palette);
   return (
-    <VStack align="start">
-      <Accordion allowToggle>
-        <AccordionItem border="none">
-          <HStack justify="left">
-            <PaletteVariationGraph
-              uniformName={uniformName}
-              variation={variation}
-              width={300}
-              block={block}
-            />
-            <VStack alignItems="start" height="100%" justify="center">
-              <Button size="xs" width="100%" onClick={() => randomize()}>
-                Randomize
-              </Button>
-              <AccordionButton as={Button} size="xs" px={2}>
-                <Text fontSize="xs">Configure</Text>
-                <AccordionIcon fontSize="sm" />
-              </AccordionButton>
-            </VStack>
-          </HStack>
-
-          <AccordionPanel>
-            <Center>
-              <VStack>
-                <Tabs size="sm" variant="enclosed">
-                  <TabList>
-                    <Tab _selected={{ color: "white" }} color="gray.300">
-                      2-Color gradient
-                    </Tab>
-                    <Tab _selected={{ color: "white" }} color="gray.300">
-                      Randomize w/ color
-                    </Tab>
-                    <Tab _selected={{ color: "white" }} color="gray.300">
-                      Raw
-                    </Tab>
-                  </TabList>
-
-                  <TabPanels>
-                    <TabPanel px={0}>
-                      <VStack w="100%">
-                        <HStack alignItems="flex-start">
-                          <VStack>
-                            <HStack mb={3}>
-                              <Text fontSize="xs">Start color</Text>
-                              <Box
-                                w="20px"
-                                h="20px"
-                                bg={gradientStartColor}
-                                border="1px solid"
-                                borderColor="whiteAlpha.400"
-                                flexShrink={0}
-                              />
-                              <HexColorInput
-                                className="hexColorInput"
-                                color={gradientStartColor}
-                                onChange={onStartGradientColorChange}
-                              />
-                            </HStack>
-                            <Box onPointerUp={commitPaletteNow}>
-                              <HexColorPicker
-                                color={gradientStartColor}
-                                onChange={onStartGradientColorChange}
-                              />
-                            </Box>
-                          </VStack>
-                          <VStack>
-                            <HStack mb={3}>
-                              <Text fontSize="xs">End color</Text>
-                              <Box
-                                w="20px"
-                                h="20px"
-                                bg={gradientEndColor}
-                                border="1px solid"
-                                borderColor="whiteAlpha.400"
-                                flexShrink={0}
-                              />
-                              <HexColorInput
-                                className="hexColorInput"
-                                color={gradientEndColor}
-                                onChange={onEndGradientColorChange}
-                              />
-                            </HStack>
-                            <Box onPointerUp={commitPaletteNow}>
-                              <HexColorPicker
-                                color={gradientEndColor}
-                                onChange={onEndGradientColorChange}
-                              />
-                            </Box>
-                          </VStack>
-                        </HStack>
-                      </VStack>
-                    </TabPanel>
-
-                    <TabPanel px={0}>
-                      <HStack mt={2}>
-                        <VStack>
-                          <HexColorInput
-                            className="hexColorInput"
-                            color={color}
-                            onChange={setColor}
-                          />
-                          <HexColorPicker color={color} onChange={setColor} />
-                        </VStack>
-                        <VStack>
-                          <Box w="60px" h="60px" bg={color} />
-                          <Button
-                            size="xs"
-                            height={8}
-                            onClick={() => randomize(true)}
-                          >
-                            Randomize
-                            <br />
-                            with color
-                          </Button>
-                        </VStack>
-                      </HStack>
-                    </TabPanel>
-
-                    <TabPanel px={0}>
-                      <VStack alignItems="stretch" w="100%">
-                        <LineChart
-                          width={300}
-                          height={100}
-                          margin={{ top: 0, left: 0, right: 0, bottom: 0 }}
-                        >
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="t" type="number" hide />
-                          <YAxis
-                            type="number"
-                            domain={[0, 1]}
-                            hide
-                            allowDataOverflow
-                          />
-                          {series.map(({ name, data }) => (
-                            <Line
-                              key={name}
-                              dot={false}
-                              isAnimationActive={false}
-                              type="monotone"
-                              dataKey="value"
-                              data={data}
-                              name={name}
-                              stroke={name}
-                              strokeWidth={2}
-                            />
-                          ))}
-                          <Tooltip
-                            isAnimationActive={false}
-                            content={<ColorValuesTooltip />}
-                          />
-                        </LineChart>
-                        <ManualPaletteEditor
-                          palette={variation.palette}
-                          setPalette={setPalette}
-                        />
-                      </VStack>
-                    </TabPanel>
-                  </TabPanels>
-                </Tabs>
-              </VStack>
-            </Center>
-          </AccordionPanel>
-        </AccordionItem>
-      </Accordion>
-    </VStack>
+    <LineChart
+      width={300}
+      height={90}
+      margin={{ top: 4, left: 0, right: 0, bottom: 0 }}
+    >
+      <CartesianGrid strokeDasharray="3 3" />
+      <XAxis dataKey="t" type="number" hide />
+      <YAxis type="number" domain={[0, 1]} hide allowDataOverflow />
+      {series.map(({ name, data }) => (
+        <Line
+          key={name}
+          dot={false}
+          isAnimationActive={false}
+          type="monotone"
+          dataKey="value"
+          data={data}
+          name={name}
+          stroke={name}
+          strokeWidth={2}
+        />
+      ))}
+      <RechartsTooltip isAnimationActive={false} content={<ColorValuesTooltip />} />
+    </LineChart>
   );
-});
-
-type ManualPaletteEditorProps = {
-  palette: Palette;
-  setPalette?: (palette: Palette) => void;
 };
 
+const CHANNELS = ["r", "g", "b"] as const;
+const vectorAccessorMap = { r: "x", g: "y", b: "z" } as const;
+
+// compact 4-column grid (label + R/G/B) so all three channels fit the popover
+// width without horizontal scroll
 const ManualPaletteEditor = ({
   palette,
-  setPalette,
-}: ManualPaletteEditorProps) => {
-  const onChange = (component: PaletteComponent, color: Vector3) => {
-    palette[component].copy(color);
-    setPalette?.(palette);
-  };
-
-  return (
-    <TableContainer style={{ marginTop: 20 }}>
-      <Table variant="simple" size="sm">
-        <Thead>
-          <Tr>
-            <Th />
-            <Th style={{ textAlign: "center" }}>R</Th>
-            <Th style={{ textAlign: "center" }}>G</Th>
-            <Th style={{ textAlign: "center" }}>B</Th>
-          </Tr>
-        </Thead>
-        <Tbody>
-          <PaletteColorRow component="a" {...{ palette, onChange }} />
-          <PaletteColorRow component="b" {...{ palette, onChange }} />
-          <PaletteColorRow component="c" {...{ palette, onChange }} />
-          <PaletteColorRow component="d" {...{ palette, onChange }} />
-        </Tbody>
-      </Table>
-    </TableContainer>
-  );
-};
-
-type PaletteComponent = "a" | "b" | "c" | "d";
-type PaletteColorRowProps = {
-  component: PaletteComponent;
+  onChange,
+}: {
   palette: Palette;
-  onChange: (component: PaletteComponent, color: Vector3) => void;
-};
-
-const PaletteColorRow = ({
-  component,
-  palette,
-  onChange: handleChange,
-}: PaletteColorRowProps) => {
-  const onChange = (newColor: Vector3) => handleChange(component, newColor);
-  const data = palette[component];
-  return (
-    <Tr>
-      <Td>{component.toUpperCase()}</Td>
-      <PaletteColorComponent color="r" {...{ data, onChange }} />
-      <PaletteColorComponent color="g" {...{ data, onChange }} />
-      <PaletteColorComponent color="b" {...{ data, onChange }} />
-    </Tr>
-  );
-};
-
-type ColorComponent = "r" | "g" | "b";
-type PaletteColorComponentProps = {
-  data: Vector3;
-  color: ColorComponent;
-  onChange: (newColor: Vector3) => void;
-};
-
-const vectorAccessorMap = {
-  r: "x",
-  g: "y",
-  b: "z",
-} as const;
+  onChange: () => void;
+}) => (
+  <Grid
+    templateColumns="16px repeat(3, 1fr)"
+    columnGap={1}
+    rowGap={1}
+    alignItems="center"
+    mt={3}
+  >
+    <Box />
+    {CHANNELS.map((channel) => (
+      <Text
+        key={channel}
+        fontSize="10px"
+        fontWeight={600}
+        color="gray.400"
+        textAlign="center"
+      >
+        {channel.toUpperCase()}
+      </Text>
+    ))}
+    {(["a", "b", "c", "d"] as const).map((component) => (
+      <Fragment key={component}>
+        <Text fontSize="11px" color="gray.400">
+          {component.toUpperCase()}
+        </Text>
+        {CHANNELS.map((channel) => (
+          <PaletteColorComponent
+            key={channel}
+            data={palette[component]}
+            channel={channel}
+            onChange={onChange}
+          />
+        ))}
+      </Fragment>
+    ))}
+  </Grid>
+);
 
 const PaletteColorComponent = ({
   data,
-  color,
+  channel,
   onChange,
-}: PaletteColorComponentProps) => {
-  const vectorAccessor = vectorAccessorMap[color];
-  const [strValue, setStrValue] = useState(data[vectorAccessor].toFixed(5));
-
+}: {
+  data: Vector3;
+  channel: "r" | "g" | "b";
+  onChange: () => void;
+}) => {
+  const accessor = vectorAccessorMap[channel];
+  const [strValue, setStrValue] = useState(data[accessor].toFixed(4));
   return (
-    <Td>
-      <NumberInput
-        size="sm"
-        min={0}
-        max={1}
-        width="5rem"
-        value={strValue}
-        onChange={(valueString, valueNumber) => {
-          setStrValue(valueString);
-          if (!isNaN(valueNumber)) {
-            const newColor = data.clone();
-            newColor[vectorAccessor] = valueNumber;
-            onChange(newColor);
-          }
-        }}
-      >
-        <NumberInputField paddingInlineEnd={0} />
-      </NumberInput>
-    </Td>
+    <NumberInput
+      size="xs"
+      value={strValue}
+      onChange={(valueString, valueNumber) => {
+        setStrValue(valueString);
+        if (!isNaN(valueNumber)) {
+          data[accessor] = valueNumber;
+          onChange();
+        }
+      }}
+    >
+      <NumberInputField px={1} fontSize="11px" textAlign="center" />
+    </NumberInput>
   );
 };
 
@@ -430,7 +341,6 @@ const ColorValuesTooltip = ({
   payload?: any;
 }) => {
   if (!(active && payload && payload.length)) return null;
-
   return (
     <>
       <Text fontSize={12}>{`red: ${payload[0].value.toFixed(2)}`}</Text>
