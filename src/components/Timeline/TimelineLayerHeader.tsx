@@ -23,7 +23,7 @@ import { Layer } from "@/src/types/Layer";
 import { action, runInAction } from "mobx";
 import { useEffect } from "react";
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
-import { MdDragIndicator } from "react-icons/md";
+import { MdDragIndicator, MdExpandMore, MdChevronRight } from "react-icons/md";
 import { FaTrashAlt } from "react-icons/fa";
 import type { DraggableProvidedDragHandleProps } from "@hello-pangea/dnd";
 
@@ -48,6 +48,7 @@ export const TimelineLayerHeader = observer(function TimelineLayerHeader({
 
   const displayName = layer.name || `Layer ${index + 1}`;
   const blockCount = layer.getAllBlocks().length;
+  const collapsed = layer.collapsed;
 
   const confirmDelete = useDisclosure();
 
@@ -99,8 +100,38 @@ export const TimelineLayerHeader = observer(function TimelineLayerHeader({
           </Box>
         )}
 
+        <IconButton
+          minW={5}
+          height={5}
+          variant="unstyled"
+          color="gray.600"
+          _hover={{ color: "gray.800" }}
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          aria-label={layer.collapsed ? "Expand layer" : "Collapse layer"}
+          title={layer.collapsed ? "Expand layer" : "Collapse layer"}
+          icon={
+            layer.collapsed ? (
+              <MdChevronRight size={18} />
+            ) : (
+              <MdExpandMore size={18} />
+            )
+          }
+          onClick={action((e) => {
+            layer.collapsed = !layer.collapsed;
+            e.stopPropagation();
+          })}
+        />
+
         <Editable
           flexGrow={1}
+          // collapsed: let this shrink below its content size (flex items
+          // default to min-width:auto) so the name can clip to an ellipsis.
+          // Expanded: leave it be, so a long name is free to wrap and overflow
+          // into the row's vertical space.
+          minW={collapsed ? 0 : undefined}
+          overflow={collapsed ? "hidden" : undefined}
           px={2}
           placeholder={`Layer ${index + 1}`}
           value={layer.name}
@@ -111,7 +142,15 @@ export const TimelineLayerHeader = observer(function TimelineLayerHeader({
           fontWeight="bold"
           textAlign="center"
         >
-          <EditablePreview />
+          <EditablePreview
+            display={collapsed ? "block" : undefined}
+            width={collapsed ? "100%" : undefined}
+            whiteSpace={collapsed ? "nowrap" : undefined}
+            overflow={collapsed ? "hidden" : undefined}
+            textOverflow={collapsed ? "ellipsis" : undefined}
+            // only truncated when collapsed, so only then is a tooltip useful
+            title={collapsed ? displayName : undefined}
+          />
           <EditableInput _placeholder={{ color: "gray.600" }} />
         </Editable>
 

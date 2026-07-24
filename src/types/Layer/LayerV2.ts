@@ -9,10 +9,15 @@ import { BlockMap } from "../BlockMap";
 // used for a block's lane until its actual rendered height is reported
 const UNMEASURED_BLOCK_HEIGHT = 50;
 
+// timeline row height when a layer is collapsed (just enough for its header)
+export const COLLAPSED_LAYER_HEIGHT = 48;
+
 export class LayerV2 implements Layer {
   id = generateId();
   name = "";
   visible = true;
+  // editor-only view state; see Layer.collapsed. Not serialized.
+  collapsed = false;
 
   // rendered block heights in px, reported from the DOM as blocks
   // mount/resize (see reportBlockHeight)
@@ -108,6 +113,7 @@ export class LayerV2 implements Layer {
   }
 
   get height() {
+    if (this.collapsed) return COLLAPSED_LAYER_HEIGHT;
     return this.laneHeights.reduce((sum, laneHeight) => sum + laneHeight, 0);
   }
 

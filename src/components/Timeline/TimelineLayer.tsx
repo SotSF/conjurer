@@ -31,12 +31,17 @@ export const TimelineLayer = observer(function TimelineLayer({
   // wouldn't re-render when e.g. layer.height grows as a param lane opens).
   // Same footgun the TimelineLayerStack observer hit; see commit 573059d.
   const layerHeight = layer.height;
+  const collapsed = layer.collapsed;
   const contentWidth = uiStore.timeToXPixels(MAX_TIME);
-  const blockStacks = layer
-    .getAllBlocks()
-    .map((block) => (
-      <TimelineBlockStack key={block.id} patternBlock={block} />
-    ));
+  // when collapsed the row shrinks to its header and the blocks are hidden from
+  // the timeline (the layer still renders to the canopy — that's `visible`)
+  const blockStacks = collapsed
+    ? null
+    : layer
+        .getAllBlocks()
+        .map((block) => (
+          <TimelineBlockStack key={block.id} patternBlock={block} />
+        ));
 
   return (
     <Draggable
