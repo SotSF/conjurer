@@ -86,6 +86,26 @@ export class Palette {
       new Vector3(1.497, 1.219, 1.176),
       new Vector3(3.613, 5.485, 0.773),
     );
+
+  // A smooth two-color gradient (from -> to) expressed in the cosine model: a
+  // gentle phase sweep so colorAt(0)=from and colorAt(1)=to.
+  static fromLinearGradient = (from: Vector3, to: Vector3) => {
+    const sweep = Math.PI / 3;
+    const sinHalf = Math.sin(sweep / 2);
+    const c = sweep / (2 * Math.PI);
+    const d = (Math.PI / 2 - sweep / 2) / (2 * Math.PI);
+    const palette = new Palette(
+      new Vector3(),
+      new Vector3(),
+      new Vector3(c, c, c),
+      new Vector3(d, d, d),
+    );
+    (["x", "y", "z"] as const).forEach((axis) => {
+      palette.a[axis] = (from[axis] + to[axis]) / 2;
+      palette.b[axis] = (from[axis] - to[axis]) / (2 * sinHalf);
+    });
+    return palette;
+  };
 }
 
 export const isPalette = (obj: any): obj is Palette =>
