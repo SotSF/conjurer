@@ -54,10 +54,12 @@ export const PlayHead = observer(function PlayHead() {
 
     // Account for the zoom level. The distance the playhead travels stays the same, 144000px.
     // The duration of the animation changes based on the zoom level.
+    // Also scale by playbackRate so the playhead slows in lockstep with the audio
+    // (the CSS animation runs on wall-clock time, so it must be stretched when slowed).
     playHead.current.style.animationDuration = `${
-      144000 / uiStore.pixelsPerSecond
+      144000 / (uiStore.pixelsPerSecond * audioStore.playbackRate)
     }s`;
-  }, [audioStore.lastCursor, uiStore.pixelsPerSecond]);
+  }, [audioStore.lastCursor, uiStore.pixelsPerSecond, audioStore.playbackRate]);
 
   return (
     <Box

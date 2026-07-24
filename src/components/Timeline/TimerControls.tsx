@@ -1,9 +1,17 @@
 import { observer } from "mobx-react-lite";
-import { ButtonGroup, HStack, IconButton, VStack } from "@chakra-ui/react";
+import {
+  ButtonGroup,
+  HStack,
+  IconButton,
+  Select,
+  VStack,
+} from "@chakra-ui/react";
 import { FaPlay, FaPause, FaStepForward, FaStepBackward } from "react-icons/fa";
 import { useStore } from "@/src/types/StoreContext";
 import { action } from "mobx";
 import { MdForward10, MdReplay10 } from "react-icons/md";
+
+const PLAYBACK_RATES = [1, 0.5, 0.25] as const;
 
 export const TimerControls = observer(function TimerControls() {
   const store = useStore();
@@ -61,7 +69,7 @@ export const TimerControls = observer(function TimerControls() {
         </ButtonGroup>
       </HStack>
       {showSkipButtons && (
-        <HStack width="100%" justify="center" overflowX="clip">
+        <HStack width="100%" justify="center" overflowX="clip" spacing={1}>
           <ButtonGroup isAttached>
             <IconButton
               borderStyle="solid"
@@ -69,6 +77,7 @@ export const TimerControls = observer(function TimerControls() {
               aria-label="Go back 10 seconds "
               title="Go back 10 seconds "
               height={6}
+              minWidth={7}
               bgColor="gray.600"
               icon={<MdReplay10 size={17} />}
               onClick={action(() => audioStore.skip(-10))}
@@ -79,11 +88,34 @@ export const TimerControls = observer(function TimerControls() {
               aria-label="Go forward 10 seconds"
               title="Go forward 10 seconds"
               height={6}
+              minWidth={7}
               bgColor="gray.600"
               icon={<MdForward10 size={17} />}
               onClick={action(() => audioStore.skip(10))}
             />
           </ButtonGroup>
+          <Select
+            aria-label="Playback speed"
+            title="Playback speed"
+            size="xs"
+            width="16"
+            height={6}
+            borderStyle="solid"
+            borderWidth={1}
+            bgColor="gray.600"
+            borderRadius="md"
+            iconSize="14px"
+            value={audioStore.playbackRate}
+            onChange={action((e) => {
+              audioStore.playbackRate = Number(e.target.value);
+            })}
+          >
+            {PLAYBACK_RATES.map((rate) => (
+              <option key={rate} value={rate}>
+                {rate}×
+              </option>
+            ))}
+          </Select>
         </HStack>
       )}
     </VStack>
