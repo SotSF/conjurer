@@ -1,8 +1,8 @@
-import { WebGLRenderTarget } from "three";
 import { useFrame } from "@react-three/fiber";
-import { memo, useRef } from "react";
-import { ParamMap } from "@/src/types/PatternParams";
-import { Pattern } from "@/src/types/Pattern";
+import { useRef } from "react";
+import type { WebGLRenderTarget } from "three";
+import type { ParamMap } from "@/src/params/shared/patternParam";
+import type { Pattern } from "@/src/types/Pattern";
 
 export const PatternRender = (pattern: Pattern<ParamMap>) =>
   function PatternBlockNode({

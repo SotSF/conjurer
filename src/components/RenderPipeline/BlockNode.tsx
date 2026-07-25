@@ -1,8 +1,6 @@
 import { WebGLRenderTarget } from "three";
 import { useFrame } from "@react-three/fiber";
 import { memo, useRef } from "react";
-import { ParamMap } from "@/src/types/PatternParams";
-import { Pattern } from "@/src/types/Pattern";
 
 type BlockNodeProps = {
   shaderMaterialKey?: string;
@@ -48,4 +46,3 @@ export const BlockNode = memo(function BlockNode({
     </mesh>
   );
 });
-

@@ -8,7 +8,7 @@ import { isPaletteParam } from "@/src/params/palette/isPaletteParam";
 import { isPalette } from "@/src/params/palette/Palette";
 import { makeVertexShader, Varying } from "@/src/shaders/vertexShader";
 import { PatternRender } from "./pattern/renderPattern";
-import { WebGLRenderTarget } from "three";
+import type { WebGLRenderTarget } from "three";
 
 export type SerializedPattern = {
   name: string;
