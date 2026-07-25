@@ -2,7 +2,7 @@ import { observer } from "mobx-react-lite";
 import { Button, Heading, VStack } from "@chakra-ui/react";
 import { useStore } from "@/src/types/StoreContext";
 import { action } from "mobx";
-import { ScalarInput } from "@/src/components/ScalarInput";
+import { NumberParamInput } from "@/src/components/NumberParamInput";
 import { SaveBeatMapModal } from "@/src/components/SaveBeatMapModal";
 import { LoadBeatMapModal } from "@/src/components/LoadBeatMapModal";
 
@@ -27,13 +27,13 @@ export const ComputedBeatsPanel = observer(function ComputedBeatsPanel({
       <Heading color="pink.500" size="sm">
         Computed beats
       </Heading>
-      <ScalarInput
+      <NumberParamInput
         name="Song tempo (BPM)"
         value={tempoString}
         onChange={(valueString) => setTempoString(valueString)}
         step={0.01}
       />
-      <ScalarInput
+      <NumberParamInput
         name="Song tempo offset (seconds)"
         value={tempoOffsetString}
         onChange={(valueString) => setTempoOffsetString(valueString)}

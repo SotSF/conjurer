@@ -2,16 +2,13 @@ import { runInAction } from "mobx";
 
 import { Block } from "@/src/types/Block";
 import { BASE_UNIFORMS } from "@/src/types/Pattern";
-import {
-  isPaletteParam,
-  isTextureParam,
-  isVector4Param,
-  ParamType,
-} from "@/src/types/PatternParams";
-import { isPalette, Palette } from "@/src/types/Palette";
+import { ParamType, isTextureParam } from "@/src/params/shared/patternParam";
+import { isPaletteParam } from "@/src/params/palette/isPaletteParam";
+import { isVector4Param } from "@/src/params/vector4/isVector4Param";
+import { isPalette, Palette } from "@/src/params/palette/Palette";
 import { FlatVariation } from "@/src/types/Variations/FlatVariation";
 import { LinearVariation4 } from "@/src/types/Variations/LinearVariation4";
-import { PaletteVariation } from "@/src/types/Variations/PaletteVariation";
+import { PaletteVariation } from "@/src/params/palette/variation/PaletteVariation";
 import { isVector4 } from "@/src/utils/object";
 import { defaultPatternEffectMap } from "@/src/utils/patternsEffects";
 import { DEFAULT_VARIATION_DURATION } from "@/src/utils/time";

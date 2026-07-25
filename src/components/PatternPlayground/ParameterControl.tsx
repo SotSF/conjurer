@@ -1,16 +1,9 @@
 import { Box } from "@chakra-ui/react";
 import { memo } from "react";
 import { Block } from "@/src/types/Block";
-import {
-  isPaletteParam,
-  isVector4Param,
-  ParamType,
-  PatternParam,
-} from "@/src/types/PatternParams";
+import { PatternParam } from "@/src/params/shared/patternParam";
 import { BASE_UNIFORMS } from "@/src/types/Pattern";
-import { ColorParameterControl } from "@/src/components/PatternPlayground/ColorParameterControl";
-import { PaletteParameterControl } from "@/src/components/PatternPlayground/PaletteParameterControl";
-import { ParamDefinitions } from "@/src/paramDefinitions/ParamDefinitions";
+import { ParamDefinitions } from "@/src/params/shared/ParamDefinitions";
 
 type ParameterControlProps = {
   block: Block;
@@ -25,46 +18,25 @@ export const ParameterControl = memo(function ParameterControl({
 }: ParameterControlProps) {
   if (BASE_UNIFORMS.includes(uniformName)) return null;
 
-  const props = {
-    key: uniformName,
-    block,
-    uniformName,
-  };
-
-  for (let paramDefinition of ParamDefinitions) {
-    const control = paramDefinition.renderControl(patternParam, props);
-    if (control) {
-      return control;
+  const props = { block, uniformName };
+  let control: React.ReactNode = null;
+  for (const paramDefinition of ParamDefinitions) {
+    const rendered = paramDefinition.renderControl(patternParam, props);
+    if (rendered) {
+      control = rendered;
+      break;
     }
   }
 
-  let parameterControl = null;
-
-  if (isVector4Param(patternParam))
-    parameterControl = (
-      <ColorParameterControl
-        {...props}
-        key={props.key}
-        patternParam={patternParam}
-      />
-    );
-  else if (isPaletteParam(patternParam))
-    parameterControl = (
-      <PaletteParameterControl
-        {...props}
-        key={props.key}
-        patternParam={patternParam}
-      />
-    );
-
   return (
     <Box
+      key={uniformName}
       p={1}
       width="100%"
       _odd={{ bgColor: "whiteAlpha.200" }}
       _even={{ bgColor: "whiteAlpha.50" }}
     >
-      {parameterControl}
+      {control}
     </Box>
   );
 });

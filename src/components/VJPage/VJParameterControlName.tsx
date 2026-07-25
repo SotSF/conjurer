@@ -1,6 +1,6 @@
 import { Badge, HStack, Text } from "@chakra-ui/react";
 import { memo } from "react";
-import { PatternParam } from "@/src/types/PatternParams";
+import { PatternParam } from "@/src/params/shared/patternParam";
 
 export const VJParameterControlName = memo(function VJParameterControlName({
   patternParam,

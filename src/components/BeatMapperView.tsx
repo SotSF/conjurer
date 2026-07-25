@@ -16,7 +16,7 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { useStore } from "@/src/types/StoreContext";
-import { Fragment, useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { LazyWavesurferWaveform } from "@/src/components/Wavesurfer/LazyWavesurferWaveform";
 import { MAX_TIME } from "@/src/utils/time";
 import { TimerReadout } from "@/src/components/Timeline/TimerReadout";
@@ -28,7 +28,7 @@ import {
   groupNeighborsByTempo,
 } from "@/src/utils/audio";
 import { action, runInAction } from "mobx";
-import { ScalarInput } from "@/src/components/ScalarInput";
+import { NumberParamInput } from "@/src/components/NumberParamInput";
 import { BeatGrid } from "@/src/components/BeatGrid";
 import { cloneAudioBuffer } from "@/src/utils/audioBuffer";
 import { AudioSelector } from "@/src/components/AudioSelector";
@@ -44,9 +44,9 @@ export const BeatMapperView = observer(function BeatMapperView() {
   const { audioStore, beatMapStore, uiStore } = store;
   const { beatMap } = beatMapStore;
 
-  const timelineRef = useRef<HTMLDivElement>(null);
+  const [timelineEl, setTimelineEl] = useState<HTMLDivElement | null>(null);
 
-  useWheelZooming(timelineRef.current);
+  useWheelZooming(timelineEl);
 
   const [audioBuffer, setAudioBuffer] = useState<AudioBuffer | null>(null);
   const [songDuration, setSongDuration] = useState(0);
@@ -163,7 +163,8 @@ export const BeatMapperView = observer(function BeatMapperView() {
   return (
     <>
       <Box
-        ref={timelineRef}
+        id="timeline"
+        ref={setTimelineEl}
         position="relative"
         overflow="scroll"
         overscrollBehavior="none"
@@ -287,13 +288,13 @@ export const BeatMapperView = observer(function BeatMapperView() {
             <Heading color="cyan.500" size="sm">
               Detect beats
             </Heading>
-            <ScalarInput
+            <NumberParamInput
               name="Lowpass cutoff frequency (Hz)"
               value={frequency}
               onChange={(valueString) => setFrequency(valueString)}
               step={50}
             />
-            <ScalarInput
+            <NumberParamInput
               name="Beat detection threshold"
               value={threshold}
               onChange={(valueString) => setThreshold(valueString)}

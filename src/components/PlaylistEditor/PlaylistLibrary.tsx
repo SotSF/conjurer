@@ -12,14 +12,17 @@ import { FaPlus } from "react-icons/fa";
 import { runInAction } from "mobx";
 import { trpc } from "@/src/utils/trpc";
 import { SelectablePlaylist } from "@/src/components/PlaylistEditor/SelectablePlaylist";
-import { useEffect, useRef, useState } from "react";
+import { queryParamToPlaylistId } from "@/src/types/Playlist";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
 
 export const PlaylistLibrary = observer(function PlaylistLibrary() {
   const store = useStore();
   const { userStore, usingLocalData, playlistStore } = store;
   const { username } = userStore;
+  const router = useRouter();
 
-  const [viewingAllPlaylists, setViewingAllPlaylists] = useState(false);
+  const [viewingAllPlaylists, setViewingAllPlaylists] = useState(true);
 
   const isEditable = userStore.isAuthenticated;
 
@@ -42,13 +45,38 @@ export const PlaylistLibrary = observer(function PlaylistLibrary() {
     },
   );
 
-  const selectedInitialPlaylist = useRef(false);
+  // Restore selection from `?playlist=` (initial load + back/forward).
+  // Falls back to the first playlist when the param is missing or unknown.
   useEffect(() => {
-    if (!playlists?.length || selectedInitialPlaylist.current) return;
-    selectedInitialPlaylist.current = true;
-    // Once the playlists are fetched and if we have not done so already, select the first playlist
-    runInAction(() => (playlistStore.selectedPlaylist = playlists[0]));
-  }, [playlists, playlistStore]);
+    if (!playlists?.length || !router.isReady) return;
+
+    const param =
+      typeof router.query.playlist === "string" ? router.query.playlist : null;
+    const playlistId = param ? queryParamToPlaylistId(param) : null;
+    const fromUrl =
+      playlistId != null
+        ? playlists.find((playlist) => playlist.id === playlistId)
+        : undefined;
+
+    if (fromUrl) {
+      if (playlistStore.selectedPlaylist?.id === fromUrl.id) return;
+      runInAction(() => {
+        playlistStore.selectedPlaylist = fromUrl;
+      });
+      return;
+    }
+
+    if (!playlistStore.selectedPlaylist) {
+      runInAction(() => {
+        playlistStore.selectedPlaylist = playlists[0];
+      });
+    }
+  }, [
+    playlists,
+    playlistStore,
+    router.isReady,
+    router.query.playlist,
+  ]);
 
   if (isError) return null;
 

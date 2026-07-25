@@ -1,4 +1,4 @@
-import { PatternParam } from "@/src/types/PatternParams";
+import { PatternParam } from "@/src/params/shared/patternParam";
 import { Box, Button, HStack, Text } from "@chakra-ui/react";
 import { useState } from "react";
 import { BsCaretDown, BsCaretUp } from "react-icons/bs";
@@ -27,9 +27,11 @@ export const ParameterView = observer(function ParameterView({
   const variations = block.parameterVariations[uniformName] ?? [];
   const [isExpanded, setExpanded] = useState(expandMode === "expanded");
 
-  const isCurrentBlock =
-    block.layer?.currentBlock &&
-    [block, block.parentBlock].includes(block.layer.currentBlock);
+  // FIXME: this is a hack to delay implementing the `currentBlock` stuff for V2
+  const isActive = true;
+  // const isActive =
+  //   block.layer?.currentBlock &&
+  //   [block, block.parentBlock].includes(block.layer.currentBlock);
 
   // TODO: re-implement
   // const headerColor = variations.length ? "orange.400" : "gray.300";
@@ -64,7 +66,7 @@ export const ParameterView = observer(function ParameterView({
               color={headerColor}
             >
               {patternParam.name}
-              {isCurrentBlock && isExpanded && (
+              {isActive && isExpanded && (
                 <ParameterValue parameter={block.pattern.params[uniformName]} />
               )}
             </Text>

@@ -3,7 +3,7 @@ const STORAGE_KEY_LAST_PORT = "conjurer:vjMidi:lastPortName";
 
 export type VjMidiDeviceMapping = {
   portName: string;
-  /** Ordered CC numbers: index i maps to the i-th scalar slider in the pattern panel. */
+  /** Ordered CC numbers: index i maps to the i-th number slider in the pattern panel. */
   ccNumbers: number[];
 };
 

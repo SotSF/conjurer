@@ -5,6 +5,7 @@ import fromTextureToCanopySpace from "@/src/shaders/fromTextureToCanopySpace.fra
 import { observer } from "mobx-react-lite";
 import { useStore } from "@/src/types/StoreContext";
 import { useDataTransmission } from "@/src/hooks/dataTransmission";
+import { useBrightnessLimiter } from "@/src/hooks/brightnessLimiter";
 import { makeVertexShader } from "@/src/shaders/vertexShader";
 
 type Props = {
@@ -23,6 +24,7 @@ export const CanopySpaceView = observer(function CanopySpaceView({
   const outputUniforms = useRef({
     u_texture: { value: renderTarget.texture },
     u_intensity: { value: 1 },
+    u_limiterGain: { value: 1 },
   });
 
   useEffect(() => {
@@ -34,6 +36,15 @@ export const CanopySpaceView = observer(function CanopySpaceView({
     if (!outputUniforms.current) return;
     outputUniforms.current.u_intensity.value = store.globalIntensity;
   }, [store.globalIntensity]);
+
+  // Own analysis when this view is the active canopy-space output (same as
+  // transmission ownership). Still apply store gain when not the owner.
+  useBrightnessLimiter(outputMesh, outputUniforms, transmitData);
+
+  useEffect(() => {
+    if (transmitData) return;
+    outputUniforms.current.u_limiterGain.value = store.brightnessLimiterGain;
+  }, [transmitData, store.brightnessLimiterGain]);
 
   // render the canopy space view
   useFrame(({ gl, camera }) => {

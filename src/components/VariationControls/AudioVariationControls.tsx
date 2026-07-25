@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Block } from "@/src/types/Block";
-import { ScalarInput } from "@/src/components/ScalarInput";
+import { NumberParamInput } from "@/src/components/NumberParamInput";
 import { AudioVariation } from "@/src/types/Variations/AudioVariation";
 
 type AudioVariationControlsProps = {
@@ -20,7 +20,7 @@ export function AudioVariationControls({
 
   return (
     <>
-      <ScalarInput
+      <NumberParamInput
         name="Factor"
         onChange={(valueString, valueNumber) => {
           variation.factor = valueNumber;
@@ -29,7 +29,7 @@ export function AudioVariationControls({
         }}
         value={factor}
       />
-      <ScalarInput
+      <NumberParamInput
         name="Offset"
         onChange={(valueString, valueNumber) => {
           variation.offset = valueNumber;
@@ -38,7 +38,7 @@ export function AudioVariationControls({
         }}
         value={offset}
       />
-      <ScalarInput
+      <NumberParamInput
         name="Smoothing"
         onChange={(valueString, valueNumber) => {
           variation.smoothing = valueNumber;

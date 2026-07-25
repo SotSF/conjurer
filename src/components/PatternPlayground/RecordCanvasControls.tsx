@@ -15,7 +15,7 @@ export const RecordCanvasControls = memo(function RecordCanvasControls() {
 
     const mr = new MediaRecorder(stream, {
       mimeType: "video/webm; codecs=vp9",
-      videoBitsPerSecond: 50000000,
+      videoBitsPerSecond: 4_000_000,
     });
 
     function download() {

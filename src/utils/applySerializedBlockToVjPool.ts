@@ -1,7 +1,8 @@
 import { Block, SerializedBlock } from "@/src/types/Block";
 import type { Store } from "@/src/types/Store";
-import { isPaletteParam, ParamType } from "@/src/types/PatternParams";
-import { Palette, SerializedPalette } from "@/src/types/Palette";
+import { ParamType } from "@/src/params/shared/patternParam";
+import { isPaletteParam } from "@/src/params/palette/isPaletteParam";
+import { Palette, SerializedPalette } from "@/src/params/palette/Palette";
 import { deserializeVariation } from "@/src/types/Variations/variations";
 import { runInAction } from "mobx";
 

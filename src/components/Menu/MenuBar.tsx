@@ -17,6 +17,7 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
+  Portal,
   Text,
   VStack,
   useDisclosure,
@@ -169,49 +170,51 @@ export const MenuBar = observer(function MenuBar() {
               >
                 File
               </MenuButton>
-              <MenuList zIndex={12}>
-                {store.context === "experienceEditor" && (
-                  <>
-                    <MenuItem
-                      icon={<FaFile size={17} />}
-                      command="⌘N"
-                      onClick={() =>
-                        experienceStore.openEmptyExperience(router)
-                      }
-                    >
-                      New experience
-                    </MenuItem>
-                    <MenuDivider />
-                  </>
-                )}
-                <MenuItem
-                  icon={<FaFolderOpen size={17} />}
-                  command="⌘O"
-                  onClick={uiStore.attemptShowOpenExperienceModal}
-                >
-                  Open...
-                </MenuItem>
-                {store.context === "experienceEditor" && (
-                  <>
-                    <MenuDivider />
-                    <MenuItem
-                      icon={<FiSave size={17} />}
-                      command="⌘S"
-                      onClick={() => saveExperience()}
-                      isDisabled={!store.canEditExperience}
-                    >
-                      Save
-                    </MenuItem>
-                    <MenuItem
-                      icon={<FiSave size={17} />}
-                      command="⌘⇧S"
-                      onClick={uiStore.attemptShowSaveExperienceModal}
-                    >
-                      Save as...
-                    </MenuItem>
-                  </>
-                )}
-              </MenuList>
+              <Portal>
+                <MenuList zIndex="dropdown">
+                  {store.context === "experienceEditor" && (
+                    <>
+                      <MenuItem
+                        icon={<FaFile size={17} />}
+                        command="⌘N"
+                        onClick={() =>
+                          experienceStore.openEmptyExperience(router)
+                        }
+                      >
+                        New experience
+                      </MenuItem>
+                      <MenuDivider />
+                    </>
+                  )}
+                  <MenuItem
+                    icon={<FaFolderOpen size={17} />}
+                    command="⌘O"
+                    onClick={uiStore.attemptShowOpenExperienceModal}
+                  >
+                    Open...
+                  </MenuItem>
+                  {store.context === "experienceEditor" && (
+                    <>
+                      <MenuDivider />
+                      <MenuItem
+                        icon={<FiSave size={17} />}
+                        command="⌘S"
+                        onClick={() => saveExperience()}
+                        isDisabled={!store.canEditExperience}
+                      >
+                        Save
+                      </MenuItem>
+                      <MenuItem
+                        icon={<FiSave size={17} />}
+                        command="⌘⇧S"
+                        onClick={uiStore.attemptShowSaveExperienceModal}
+                      >
+                        Save as...
+                      </MenuItem>
+                    </>
+                  )}
+                </MenuList>
+              </Portal>
             </Menu>
             <Menu>
               <MenuButton
@@ -227,14 +230,16 @@ export const MenuBar = observer(function MenuBar() {
               >
                 Edit
               </MenuButton>
-              <MenuList zIndex={12}>
-                <MenuItem
-                  icon={<FaRegClipboard size={17} />}
-                  onClick={experienceStore.copyToClipboard}
-                >
-                  Copy experience JSON to clipboard
-                </MenuItem>
-              </MenuList>
+              <Portal>
+                <MenuList zIndex="dropdown">
+                  <MenuItem
+                    icon={<FaRegClipboard size={17} />}
+                    onClick={experienceStore.copyToClipboard}
+                  >
+                    Copy experience JSON to clipboard
+                  </MenuItem>
+                </MenuList>
+              </Portal>
             </Menu>
           </>
         )}
@@ -254,60 +259,64 @@ export const MenuBar = observer(function MenuBar() {
           >
             View
           </MenuButton>
-          <MenuList zIndex={12}>
-            {store.context === "experienceEditor" && (
-              <>
-                <MenuOptionGroup
-                  defaultValue={uiStore.renderTargetSize.toString()}
-                  title="App orientation"
-                  type="radio"
-                  value={uiStore.horizontalLayout ? "horizontal" : "vertical"}
-                  onChange={uiStore.toggleLayout}
-                >
-                  <MenuItemOption value="horizontal">Horizontal</MenuItemOption>
-                  <MenuItemOption value="vertical">Vertical</MenuItemOption>
-                </MenuOptionGroup>
-                <MenuDivider />
-              </>
-            )}
-            <MenuOptionGroup
-              defaultValue={uiStore.renderTargetSize.toString()}
-              title="Render size (resolution)"
-              type="radio"
-              value={uiStore.renderTargetSize.toString()}
-              onChange={action(
-                (value) =>
-                  (uiStore.renderTargetSize = parseInt(value as string)),
+          <Portal>
+            <MenuList zIndex="dropdown">
+              {store.context === "experienceEditor" && (
+                <>
+                  <MenuOptionGroup
+                    defaultValue={uiStore.renderTargetSize.toString()}
+                    title="App orientation"
+                    type="radio"
+                    value={uiStore.horizontalLayout ? "horizontal" : "vertical"}
+                    onChange={uiStore.toggleLayout}
+                  >
+                    <MenuItemOption value="horizontal">
+                      Horizontal
+                    </MenuItemOption>
+                    <MenuItemOption value="vertical">Vertical</MenuItemOption>
+                  </MenuOptionGroup>
+                  <MenuDivider />
+                </>
               )}
-            >
-              <MenuItemOption value="256">256 x 256</MenuItemOption>
-              <MenuItemOption value="512">512 x 512</MenuItemOption>
-              <MenuItemOption value="1024">1024 x 1024</MenuItemOption>
-            </MenuOptionGroup>
-            <MenuDivider />
-            <MenuOptionGroup
-              defaultValue={uiStore.displayMode}
-              title="Display mode"
-              type="radio"
-              value={uiStore.displayMode}
-              onChange={action(
-                (value) => (uiStore.displayMode = value as DisplayMode),
-              )}
-            >
-              <MenuItemOption value="canopy">Canopy</MenuItemOption>
-              <MenuItemOption value="cartesianSpace">
-                Cartesian space
+              <MenuOptionGroup
+                defaultValue={uiStore.renderTargetSize.toString()}
+                title="Render size (resolution)"
+                type="radio"
+                value={uiStore.renderTargetSize.toString()}
+                onChange={action(
+                  (value) =>
+                    (uiStore.renderTargetSize = parseInt(value as string)),
+                )}
+              >
+                <MenuItemOption value="256">256 x 256</MenuItemOption>
+                <MenuItemOption value="512">512 x 512</MenuItemOption>
+                <MenuItemOption value="1024">1024 x 1024</MenuItemOption>
+              </MenuOptionGroup>
+              <MenuDivider />
+              <MenuOptionGroup
+                defaultValue={uiStore.displayMode}
+                title="Display mode"
+                type="radio"
+                value={uiStore.displayMode}
+                onChange={action(
+                  (value) => (uiStore.displayMode = value as DisplayMode),
+                )}
+              >
+                <MenuItemOption value="canopy">Canopy</MenuItemOption>
+                <MenuItemOption value="cartesianSpace">
+                  Cartesian space
+                </MenuItemOption>
+                <MenuItemOption value="canopySpace">Canopy space</MenuItemOption>
+              </MenuOptionGroup>
+              <MenuDivider />
+              <MenuItemOption
+                isChecked={uiStore.showingPerformance}
+                onClick={uiStore.togglePerformance}
+              >
+                Show performance overlay
               </MenuItemOption>
-              <MenuItemOption value="canopySpace">Canopy space</MenuItemOption>
-            </MenuOptionGroup>
-            <MenuDivider />
-            <MenuItemOption
-              isChecked={uiStore.showingPerformance}
-              onClick={uiStore.togglePerformance}
-            >
-              Show performance overlay
-            </MenuItemOption>
-          </MenuList>
+            </MenuList>
+          </Portal>
         </Menu>
         {process.env.NEXT_PUBLIC_NODE_ENV !== "production" && (
           <Menu closeOnSelect={false}>
@@ -324,21 +333,27 @@ export const MenuBar = observer(function MenuBar() {
             >
               Tools
             </MenuButton>
-            <MenuList zIndex={12}>
-              <MenuItemOption
-                isChecked={store.sendingData}
-                onClick={store.toggleSendingData}
-              >
-                Transmit data to canopy
-              </MenuItemOption>
-              <MenuDivider />
-              <MenuItem
-                onClick={action(() => (uiStore.showingLatencyModal = true))}
-              >
-                Set audio latency ({(audioStore.audioLatency * 1000).toFixed()}
-                ms)
-              </MenuItem>
-            </MenuList>
+            <Portal>
+              <MenuList zIndex="dropdown">
+                <MenuItemOption
+                  isChecked={store.sendingData}
+                  onClick={store.toggleSendingData}
+                >
+                  Transmit data to canopy
+                </MenuItemOption>
+                <MenuDivider />
+                <MenuItem
+                  onClick={action(() => (uiStore.showingLatencyModal = true))}
+                >
+                  Set audio latency ({(audioStore.audioLatency * 1000).toFixed()}
+                  ms)
+                </MenuItem>
+                <MenuDivider />
+                <MenuItem as="a" href="/admin" target="_blank">
+                  Admin
+                </MenuItem>
+              </MenuList>
+            </Portal>
           </Menu>
         )}
         <Menu>
@@ -355,27 +370,32 @@ export const MenuBar = observer(function MenuBar() {
           >
             Help
           </MenuButton>
-          <MenuList zIndex={12}>
-            <MenuItem
-              as="a"
-              href="https://github.com/SotSF/conjurer#conjurer"
-              target="_blank"
-            >
-              About Conjurer
-            </MenuItem>
-            {store.context === "experienceEditor" && (
-              <MenuItem onClick={onOpenKeyboardShortcuts}>
-                Keyboard shortcuts
+          <Portal>
+            <MenuList zIndex="dropdown">
+              <MenuItem
+                as="a"
+                href="https://github.com/SotSF/conjurer#conjurer"
+                target="_blank"
+              >
+                About Conjurer
               </MenuItem>
-            )}
-            <MenuItem
-              as="a"
-              href="https://github.com/SotSF/conjurer/issues/new/choose"
-              target="_blank"
-            >
-              Report an issue
-            </MenuItem>
-          </MenuList>
+              {store.context === "experienceEditor" && (
+                <MenuItem onClick={onOpenKeyboardShortcuts}>
+                  Keyboard shortcuts
+                </MenuItem>
+              )}
+              <MenuItem as="a" href="/laws-of-conjury" target="_blank">
+                Laws of Conjury
+              </MenuItem>
+              <MenuItem
+                as="a"
+                href="https://github.com/SotSF/conjurer/issues/new/choose"
+                target="_blank"
+              >
+                Report an issue
+              </MenuItem>
+            </MenuList>
+          </Portal>
           <Button
             as={Button}
             px={1}

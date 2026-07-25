@@ -31,8 +31,14 @@ void main() {
     // x represents the angle around the center of the canopy
     // y represents the distance from the apex of the canopy
 
+    // uv.y is the normalized position along the strip (the LED index). Convert it to the LED's
+    // true radial position, accounting for the catenary curve of the strip, so that the
+    // texture is sampled where the LED actually appears when viewed from below. This mirrors
+    // the sampling done in fromTextureToCanopySpace.frag for the physical canopy.
+    vec2 canopyCoordinates = vec2(uv.x, canopyArcToRadialFraction(uv.y));
+
     // Convert uv to cartesian coordinates
-    v_uv = canopyToCartesianProjection(uv);
+    v_uv = canopyToCartesianProjection(canopyCoordinates);
 
     // This varying is currently not being used by the fragment shader
     // v_normalized_uv = cartesianToNormalizedProjection(v_uv);

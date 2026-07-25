@@ -1,31 +1,67 @@
 import { observer } from "mobx-react-lite";
 import { useStore } from "@/src/types/StoreContext";
 import {
+  Box,
+  Button,
   Editable,
   EditableInput,
   EditablePreview,
   HStack,
   IconButton,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
+  Text,
   VStack,
+  useDisclosure,
 } from "@chakra-ui/react";
 import { Layer } from "@/src/types/Layer";
-import { action } from "mobx";
+import { action, runInAction } from "mobx";
+import { useEffect } from "react";
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
+import { MdDragIndicator, MdExpandMore, MdChevronRight } from "react-icons/md";
+import { FaTrashAlt } from "react-icons/fa";
+import type { DraggableProvidedDragHandleProps } from "@hello-pangea/dnd";
 import { VariationControls } from "@/src/components/VariationControls/VariationControls";
 
 type Props = {
   index: number;
   layer: Layer;
+  dragHandleProps?: DraggableProvidedDragHandleProps | null;
 };
 
 export const TimelineLayerHeader = observer(function TimelineLayerHeader({
   index,
   layer,
+  dragHandleProps,
 }: Props) {
   const store = useStore();
   const { selectedLayer, singleVariationSelection } = store;
 
   const bgColor = selectedLayer === layer ? "gray.300" : "gray.400";
+
+  const canDelete = store.layers.length > 1;
+  const canReorder = store.layers.length > 1;
+
+  const displayName = layer.name || `Layer ${index + 1}`;
+  const blockCount = layer.getAllBlocks().length;
+  const collapsed = layer.collapsed;
+
+  const confirmDelete = useDisclosure();
+
+  // a just-created layer opens its name field in edit mode; consume the flag on
+  // mount so it fires exactly once (only the new layer's header mounts fresh)
+  const startNamingOnMount = store.uiStore.layerIdToNameOnMount === layer.id;
+  useEffect(() => {
+    if (startNamingOnMount)
+      runInAction(() => (store.uiStore.layerIdToNameOnMount = null));
+    // run once, on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <VStack
@@ -50,18 +86,72 @@ export const TimelineLayerHeader = observer(function TimelineLayerHeader({
         m={3}
         spacing={0}
       >
+        {canReorder && (
+          <Box
+            {...dragHandleProps}
+            cursor="grab"
+            color="gray.500"
+            _hover={{ color: "gray.700" }}
+            display="flex"
+            alignItems="center"
+            aria-label="Drag to reorder layer"
+            title="Drag to reorder layer"
+          >
+            <MdDragIndicator size={16} />
+          </Box>
+        )}
+
+        <IconButton
+          minW={5}
+          height={5}
+          variant="unstyled"
+          color="gray.600"
+          _hover={{ color: "gray.800" }}
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          aria-label={layer.collapsed ? "Expand layer" : "Collapse layer"}
+          title={layer.collapsed ? "Expand layer" : "Collapse layer"}
+          icon={
+            layer.collapsed ? (
+              <MdChevronRight size={18} />
+            ) : (
+              <MdExpandMore size={18} />
+            )
+          }
+          onClick={action((e) => {
+            layer.collapsed = !layer.collapsed;
+            e.stopPropagation();
+          })}
+        />
+
         <Editable
           flexGrow={1}
+          // collapsed: let this shrink below its content size (flex items
+          // default to min-width:auto) so the name can clip to an ellipsis.
+          // Expanded: leave it be, so a long name is free to wrap and overflow
+          // into the row's vertical space.
+          minW={collapsed ? 0 : undefined}
+          overflow={collapsed ? "hidden" : undefined}
           px={2}
           placeholder={`Layer ${index + 1}`}
           value={layer.name}
-          onChange={action((value) => (layer.name = value))}
+          startWithEditView={startNamingOnMount}
+          onChange={action((value) => store.renameLayer(layer, value))}
           color="black"
           fontSize={16}
           fontWeight="bold"
           textAlign="center"
         >
-          <EditablePreview />
+          <EditablePreview
+            display={collapsed ? "block" : undefined}
+            width={collapsed ? "100%" : undefined}
+            whiteSpace={collapsed ? "nowrap" : undefined}
+            overflow={collapsed ? "hidden" : undefined}
+            textOverflow={collapsed ? "ellipsis" : undefined}
+            // only truncated when collapsed, so only then is a tooltip useful
+            title={collapsed ? displayName : undefined}
+          />
           <EditableInput _placeholder={{ color: "gray.600" }} />
         </Editable>
 
@@ -84,17 +174,76 @@ export const TimelineLayerHeader = observer(function TimelineLayerHeader({
             e.stopPropagation();
           })}
         />
+
+        <IconButton
+          minW={6}
+          height={6}
+          variant="unstyled"
+          color="gray.600"
+          _hover={{ color: "red.500" }}
+          aria-label="Delete layer"
+          title={canDelete ? "Delete layer" : "Can't delete the only layer"}
+          isDisabled={!canDelete}
+          icon={<FaTrashAlt size={13} />}
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          onClick={(e) => {
+            e.stopPropagation();
+            confirmDelete.onOpen();
+          }}
+        />
       </HStack>
-      <VStack justify="center" flexGrow={1}>
-        {singleVariationSelection && store.selectedLayer === layer && (
-          <VariationControls
-            key={singleVariationSelection.variation.id}
-            block={singleVariationSelection.block}
-            uniformName={singleVariationSelection.uniformName}
-            variation={singleVariationSelection.variation}
-          />
-        )}
-      </VStack>
+
+      {/* Controls for the selected variation live in this layer's header gutter.
+          Skipped while collapsed, where the row is only tall enough for the
+          header row itself. */}
+      {!collapsed && (
+        <VStack justify="center" flexGrow={1}>
+          {singleVariationSelection && store.selectedLayer === layer && (
+            <VariationControls
+              key={singleVariationSelection.variation.id}
+              block={singleVariationSelection.block}
+              uniformName={singleVariationSelection.uniformName}
+              variation={singleVariationSelection.variation}
+            />
+          )}
+        </VStack>
+      )}
+
+      <Modal
+        isOpen={confirmDelete.isOpen}
+        onClose={confirmDelete.onClose}
+        isCentered
+      >
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Delete {displayName}?</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <Text>
+              {blockCount > 0
+                ? `Its ${blockCount} block${blockCount === 1 ? "" : "s"} will be removed. `
+                : ""}
+              This can&apos;t be undone.
+            </Text>
+          </ModalBody>
+          <ModalFooter gap={3}>
+            <Button variant="ghost" onClick={confirmDelete.onClose}>
+              Cancel
+            </Button>
+            <Button
+              colorScheme="red"
+              onClick={action(() => {
+                store.removeLayer(layer);
+                confirmDelete.onClose();
+              })}
+            >
+              Delete
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </VStack>
   );
 });

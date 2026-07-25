@@ -6,10 +6,13 @@ import { RxColumns } from "react-icons/rx";
 import { PiArrowsInLineHorizontalBold } from "react-icons/pi";
 import { LoadBeatMapModal } from "@/src/components/LoadBeatMapModal";
 import { RiFolderMusicLine } from "react-icons/ri";
+import { BEAT_GRID_UI_ENABLED } from "@/src/utils/featureFlags";
 
 export const BeatMapControls = observer(function BeatMapControls() {
   const store = useStore();
   const { uiStore } = store;
+
+  if (!BEAT_GRID_UI_ENABLED) return null;
 
   return (
     <>

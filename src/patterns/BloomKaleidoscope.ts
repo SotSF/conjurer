@@ -1,6 +1,6 @@
 import { Pattern } from "@/src/types/Pattern";
 import bloomKaleidoscope from "./shaders/bloomKaleidoscope.frag";
-import { Palette } from "../types/Palette";
+import { Palette } from "@/src/params/palette/Palette";
 
 export { bloomKaleidoscope };
 

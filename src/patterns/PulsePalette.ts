@@ -1,7 +1,7 @@
 import { Pattern } from "@/src/types/Pattern";
 import pulsePalette from "./shaders/pulsePalette.frag";
 import { Vector3 } from "three";
-import { Palette } from "@/src/types/Palette";
+import { Palette } from "@/src/params/palette/Palette";
 
 export { pulsePalette };
 export const PulsePalette = () =>

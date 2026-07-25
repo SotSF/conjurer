@@ -1,6 +1,6 @@
 import { Block } from "@/src/types/Block";
 import { UIStore } from "@/src/types/UIStore";
-import { makeAutoObservable } from "mobx";
+import { makeAutoObservable, runInAction } from "mobx";
 import { AudioStore } from "@/src/types/AudioStore";
 import { Variation } from "@/src/types/Variations/Variation";
 import { ExperienceStore } from "@/src/types/ExperienceStore";
@@ -19,8 +19,15 @@ import { NO_SONG } from "@/src/types/Song";
 import { Context, Role } from "@/src/types/context";
 import "@/src/utils/mobx";
 import { UserStore } from "@/src/types/UserStore";
+import { LayerV2 } from "./Layer/LayerV2";
+import { migrateV1ExperienceData } from "@/src/utils/migrateV1ExperienceData";
 import { User } from "@/src/types/User";
 import { setupConjurerApiWebsocket } from "@/src/websocket/conjurerApiWebsocket";
+import {
+  DEFAULT_BRIGHTNESS_LIMITER_ENABLED,
+  DEFAULT_BRIGHTNESS_LIMITER_RELEASE_SEC,
+  DEFAULT_BRIGHTNESS_LIMIT_THRESHOLD,
+} from "@/src/utils/brightnessLimiter";
 
 export type BlockSelection = { type: "block"; block: Block };
 
@@ -66,6 +73,12 @@ export class Store {
     localStorage.setItem("globalIntensity", String(value));
   }
 
+  /** Current brightness-limiter envelope (1 = no reduction). Not persisted. */
+  brightnessLimiterGain = 1;
+  brightnessLimiterEnabled = DEFAULT_BRIGHTNESS_LIMITER_ENABLED;
+  brightnessLimiterThreshold = DEFAULT_BRIGHTNESS_LIMIT_THRESHOLD;
+  brightnessLimiterReleaseSec = DEFAULT_BRIGHTNESS_LIMITER_RELEASE_SEC;
+
   private _usingLocalData = process.env.NEXT_PUBLIC_NODE_ENV !== "production";
   get usingLocalData(): boolean {
     return this._usingLocalData;
@@ -83,6 +96,63 @@ export class Store {
     if (this._selectedLayer === value) return;
     this._selectedLayer = value;
   }
+
+  // ================================ layers ==================================
+  // Layer mutations live here so the timeline UI and the editing API share one
+  // implementation of the invariants (a layer is always selected; the last
+  // layer cannot be removed; blocks never linger in the selection after their
+  // layer is gone).
+
+  // Create a new empty layer. Inserts at `index` (clamped; appended when
+  // omitted) and selects it by default. Returns the created layer.
+  addLayer = (
+    options: { name?: string; index?: number; select?: boolean } = {},
+  ): Layer => {
+    const layer = new LayerV2(this);
+    if (options.name !== undefined) layer.name = options.name;
+    const index =
+      options.index === undefined
+        ? this.layers.length
+        : Math.max(0, Math.min(options.index, this.layers.length));
+    this.layers.splice(index, 0, layer);
+    if (options.select ?? true) this._selectedLayer = layer;
+    return layer;
+  };
+
+  renameLayer = (layer: Layer, name: string) => {
+    layer.name = name;
+  };
+
+  // Remove a layer (and its blocks). No-op on the last remaining layer so the
+  // always-one-layer invariant holds. Purges the removed layer's blocks from
+  // the selection and reselects a neighbor if the removed layer was selected.
+  removeLayer = (layer: Layer) => {
+    if (this.layers.length <= 1) return;
+    const index = this.layers.indexOf(layer);
+    if (index === -1) return;
+
+    this.selectedBlocksOrVariations = new Set(
+      Array.from(this.selectedBlocksOrVariations).filter(
+        (selection) => selection.block.layer !== layer,
+      ),
+    );
+
+    this.layers.splice(index, 1);
+
+    if (this._selectedLayer === layer)
+      this._selectedLayer = this.layers[Math.min(index, this.layers.length - 1)];
+  };
+
+  // Move a layer to a new position. Layer order is additive render-priority
+  // order (see RenderPipelineV2), so this is meaningful, not cosmetic.
+  reorderLayer = (layer: Layer, toIndex: number) => {
+    const from = this.layers.indexOf(layer);
+    if (from === -1) return;
+    const to = Math.max(0, Math.min(toIndex, this.layers.length - 1));
+    if (from === to) return;
+    this.layers.splice(from, 1);
+    this.layers.splice(to, 0, layer);
+  };
 
   selectedBlocksOrVariations: Set<BlockOrVariation> = new Set();
 
@@ -201,15 +271,17 @@ export class Store {
 
     await this.userStore.initialize();
 
-    // For now, we'll just set the role based on the context (page)
-    if (this.context === "playlistEditor") this._role = "emcee";
-    else if (this.context === "experienceEditor")
-      this._role = "experienceCreator";
-    else this._role = "vj";
+    runInAction(() => {
+      // For now, we'll just set the role based on the context (page)
+      if (this.context === "playlistEditor") this.role = "emcee";
+      else if (this.context === "experienceEditor")
+        this.role = "experienceCreator";
+      else this.role = "vj";
 
-    // check for a global intensity in local storage
-    const globalIntensity = localStorage.getItem("globalIntensity");
-    if (globalIntensity) this._globalIntensity = Number(globalIntensity);
+      // check for a global intensity in local storage
+      const globalIntensity = localStorage.getItem("globalIntensity");
+      if (globalIntensity) this.globalIntensity = Number(globalIntensity);
+    });
 
     if (this.context === "vj") this.playgroundStore.initialize();
     this.uiStore.initialize(this.viewerMode);
@@ -225,7 +297,9 @@ export class Store {
     else if (this.context !== "playlistEditor")
       this.experienceStore.loadEmptyExperience();
 
-    this.initializationState = "initialized";
+    runInAction(() => {
+      this.initializationState = "initialized";
+    });
   };
 
   toggleSendingData = () => {
@@ -309,7 +383,7 @@ export class Store {
 
   selectAllBlocks = () => {
     const allBlocks = this.layers
-      .flatMap((l) => l.patternBlocks)
+      .flatMap((l) => l.getAllBlocks())
       .map((block) => ({
         type: "block" as const,
         block,
@@ -416,7 +490,7 @@ export class Store {
       blocksToPaste.forEach((block) => block.regenerateId());
       this.selectedBlocksOrVariations = new Set();
       for (const blockToPaste of blocksToPaste) {
-        const nextGap = layerToPasteInto.nextFiniteGap(
+        const nextGap = layerToPasteInto.getNextValidStartAndDuration(
           this.audioStore.globalTime,
           blockToPaste.duration,
         );
@@ -464,7 +538,7 @@ export class Store {
       this.selectedBlocksOrVariations = new Set();
       for (const selectedBlock of selectedBlocks) {
         const newBlock = selectedBlock.clone();
-        const nextGap = layerToPasteInto.nextFiniteGap(
+        const nextGap = layerToPasteInto.getNextValidStartAndDuration(
           selectedBlock.endTime,
           selectedBlock.duration,
         );
@@ -543,12 +617,17 @@ export class Store {
     this.experienceName = experience.name;
     this.audioStore.selectedSong = experience.song || NO_SONG;
     this.experienceStatus = experience.status;
-    this.experienceVersion = experience.version;
     this.experienceThumbnailURL = experience.thumbnailURL;
     this.experienceUser = experience.user;
-    this.layers = experience.data.layers.map((l: any) =>
-      Layer.deserialize(this, l),
-    );
+
+    // v1 experiences are migrated to the v2 data model on load and will be
+    // saved in v2 format; the stored v1 row is untouched until then
+    const data =
+      experience.version === 1
+        ? migrateV1ExperienceData(experience.data)
+        : experience.data;
+    this.experienceVersion = EXPERIENCE_VERSION;
+    this.layers = data.layers.map((l: any) => LayerV2.deserialize(this, l));
 
     // Select first layer
     this.selectedLayer = this.layers[0];

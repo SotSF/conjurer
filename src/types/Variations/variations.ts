@@ -2,7 +2,7 @@ import { EasingVariation } from "@/src/types/Variations/EasingVariation";
 import { FlatVariation } from "@/src/types/Variations/FlatVariation";
 import { LinearVariation } from "@/src/types/Variations/LinearVariation";
 import { LinearVariation4 } from "@/src/types/Variations/LinearVariation4";
-import { PaletteVariation } from "@/src/types/Variations/PaletteVariation";
+import { PaletteVariation } from "@/src/params/palette/variation/PaletteVariation";
 import { PeriodicVariation } from "@/src/types/Variations/PeriodicVariation";
 import { SplineVariation } from "@/src/types/Variations/SplineVariation";
 import { AudioVariation } from "@/src/types/Variations/AudioVariation";

@@ -1,8 +1,6 @@
-import {
-  PatternParam,
-  isNumberParam,
-  isVector4Param,
-} from "@/src/types/PatternParams";
+import { PatternParam } from "@/src/params/shared/patternParam";
+import { isNumberParam } from "@/src/params/number/isNumberParam";
+import { isVector4Param } from "@/src/params/vector4/isVector4Param";
 import { observer } from "mobx-react-lite";
 import { useStore } from "@/src/types/StoreContext";
 

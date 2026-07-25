@@ -1,7 +1,7 @@
 import { Pattern } from "@/src/types/Pattern";
 import convergence from "./shaders/convergence.frag";
 import { Vector3 } from "three";
-import { Palette } from "@/src/types/Palette";
+import { Palette } from "@/src/params/palette/Palette";
 
 export { convergence };
 export const Convergence = () =>

@@ -1,7 +1,7 @@
 import type { Store } from "@/src/types/Store";
 import { FullUser } from "@/src/types/User";
 import { trpcClient } from "@/src/utils/trpc";
-import { makeAutoObservable } from "mobx";
+import { makeAutoObservable, runInAction } from "mobx";
 
 export class UserStore {
   private _lastAuthenticatedUsername = "";
@@ -13,14 +13,7 @@ export class UserStore {
     localStorage.setItem("lastAuthenticatedUsername", value);
   }
 
-  private _me: FullUser | null = null;
-  get me() {
-    return this._me;
-  }
-  set me(value: FullUser | null) {
-    this._me = value;
-    if (value) this.lastAuthenticatedUsername = value.username;
-  }
+  me: FullUser | null = null;
 
   get isAuthenticated() {
     return !!this.me;
@@ -34,17 +27,30 @@ export class UserStore {
     makeAutoObservable(this);
   }
 
+  setMe = (value: FullUser | null) => {
+    this.me = value;
+    if (value) this.lastAuthenticatedUsername = value.username;
+  };
+
   initialize = async () => {
-    this._lastAuthenticatedUsername =
-      localStorage.getItem("lastAuthenticatedUsername") || "";
+    runInAction(() => {
+      this._lastAuthenticatedUsername =
+        localStorage.getItem("lastAuthenticatedUsername") || "";
+    });
 
-    if (this._lastAuthenticatedUsername)
-      this.me = (await this.fetchUser(this._lastAuthenticatedUsername)) ?? null;
-
-    if (!this.me) {
-      this.lastAuthenticatedUsername = "";
-      this.store.uiStore.showingUserPickerModal = true;
+    if (this._lastAuthenticatedUsername) {
+      const user = await this.fetchUser(this._lastAuthenticatedUsername);
+      runInAction(() => {
+        this.setMe(user ?? null);
+      });
     }
+
+    runInAction(() => {
+      if (!this.me) {
+        this.lastAuthenticatedUsername = "";
+        this.store.uiStore.showingUserPickerModal = true;
+      }
+    });
   };
 
   fetchUser = async (username: string) => {

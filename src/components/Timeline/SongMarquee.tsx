@@ -6,20 +6,30 @@ import styles from "@/styles/SongMarquee.module.css";
 export const SongMarquee = observer(function SongMarquee() {
   const { audioStore } = useStore();
   const { selectedSong } = audioStore;
+  const label = `${selectedSong.artist} - ${selectedSong.name}`;
+  // Keep a steady pixel speed so long titles don't whip by.
+  const durationSeconds = Math.max(8, label.length * 0.35);
 
   return (
-    <Box position="relative" width="150px" height={5}>
+    <Box
+      key={selectedSong.id}
+      position="relative"
+      width="100%"
+      height={5}
+      flexShrink={0}
+      overflow="hidden"
+      userSelect="none"
+    >
       <Box
-        position="absolute"
-        boxSizing="border-box"
-        left={0}
-        top={0}
-        className={styles.marquee}
-        fontSize="sm"
-        whiteSpace="nowrap"
+        className={styles.track}
+        style={{ animationDuration: `${durationSeconds}s` }}
       >
-        {selectedSong.artist} - {selectedSong.name} . . . .{" "}
-        {selectedSong.artist} - {selectedSong.name} . . . .
+        <Box as="span" className={styles.item} fontSize="sm">
+          {label}
+        </Box>
+        <Box as="span" className={styles.item} fontSize="sm" aria-hidden>
+          {label}
+        </Box>
       </Box>
     </Box>
   );

@@ -5,7 +5,7 @@ import { SplineVariation } from "@/src/types/Variations/SplineVariation";
 import { useVariationClick } from "@/src/hooks/variationClick";
 import { VARIATION_BOUND_WIDTH } from "@/src/utils/layout";
 
-type ScalarVariationGraphProps = {
+type SplineVariationGraphProps = {
   uniformName: string;
   variation: SplineVariation;
   width: number;
@@ -19,7 +19,7 @@ export const SplineVariationGraph = memo(function SplineVariationGraph({
   width,
   domain,
   block,
-}: ScalarVariationGraphProps) {
+}: SplineVariationGraphProps) {
   const didInitialize = useRef(false);
   const id = `spline-${variation.id}`;
 

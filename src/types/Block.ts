@@ -1,6 +1,6 @@
 import { makeAutoObservable } from "mobx";
 import { BASE_UNIFORMS, Pattern, SerializedPattern } from "@/src/types/Pattern";
-import { ParamType } from "@/src/types/PatternParams";
+import { ParamType } from "@/src/params/shared/patternParam";
 import { Variation } from "@/src/types/Variations/Variation";
 import {
   DEFAULT_VARIATION_DURATION,
@@ -12,8 +12,8 @@ import { FlatVariation } from "@/src/types/Variations/FlatVariation";
 import { defaultPatternEffectMap } from "@/src/utils/patternsEffects";
 import { isVector4 } from "@/src/utils/object";
 import { LinearVariation4 } from "@/src/types/Variations/LinearVariation4";
-import { isPalette } from "@/src/types/Palette";
-import { PaletteVariation } from "@/src/types/Variations/PaletteVariation";
+import { isPalette } from "@/src/params/palette/Palette";
+import { PaletteVariation } from "@/src/params/palette/variation/PaletteVariation";
 import { generateId } from "@/src/utils/id";
 import type { Store } from "@/src/types/Store";
 
@@ -39,6 +39,10 @@ export class Block {
   duration: number = 5; // duration that block plays for in seconds
 
   headerRepetitions: number = 1; // number of times to repeat the headers in this block
+
+  // UI state: whether the timeline shows this block's parameters/effects or
+  // just its header. Expanded by default; the header caret can collapse it.
+  showDetails = true;
 
   private _layer: Layer | null = null; // the layer that this block is in
 
@@ -76,6 +80,10 @@ export class Block {
     this.effectBlocks.forEach((effectBlock) => effectBlock.regenerateId());
   };
 
+  toggleShowDetails = () => {
+    this.showDetails = !this.showDetails;
+  };
+
   setTiming = ({
     startTime,
     duration,
@@ -102,6 +110,11 @@ export class Block {
   updateParameter = (parameter: string, time: number, loopLast = false) => {
     const variations = this.parameterVariations[parameter];
     if (!variations) return;
+
+    if (!(parameter in this.pattern.params)) {
+      console.error(`Parameter ${String(parameter)} not found in pattern`);
+      return;
+    }
 
     let variationTime = 0;
     for (const variation of variations) {
@@ -316,6 +329,11 @@ export class Block {
     if (index > -1) {
       this.effectBlocks.splice(index, 1);
     }
+  };
+
+  isActive = () => {
+    const { globalTime } = this.store.audioStore;
+    return this.startTime <= globalTime && globalTime < this.endTime;
   };
 
   /**

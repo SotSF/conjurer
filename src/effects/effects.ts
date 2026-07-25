@@ -11,6 +11,8 @@ import { ConstructMask } from "@/src/effects/ConstructMask";
 import { BrightnessAdjust } from "./BrightnessAdjust";
 import { Kaleidoscope } from "@/src/effects/Kaleidoscope";
 import { ShapeMask } from "@/src/effects/ShapeMask";
+import { Threshold } from "@/src/effects/Threshold";
+import { ColorRemap } from "@/src/effects/ColorRemap";
 
 const effectFactories: Array<() => Pattern> = [
   ShapeMask,
@@ -18,7 +20,9 @@ const effectFactories: Array<() => Pattern> = [
   Shaper,
   Leaf,
   BrightnessAdjust,
+  Threshold,
   ColorTint,
+  ColorRemap,
   CartesianProjection,
   Rotate,
   ChromaticAberration,

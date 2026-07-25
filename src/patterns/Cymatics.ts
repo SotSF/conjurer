@@ -1,5 +1,5 @@
 import { Pattern } from "@/src/types/Pattern";
-import { Palette } from "@/src/types/Palette";
+import { Palette } from "@/src/params/palette/Palette";
 import { Vector3 } from "three";
 
 import cymatics from "@/src/patterns/shaders/cymatics.frag";

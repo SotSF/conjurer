@@ -1,4 +1,4 @@
-import { ParamType } from "@/src/types/PatternParams";
+import { ParamType } from "@/src/params/shared/patternParam";
 import { generateId } from "@/src/utils/id";
 import type { Store } from "@/src/types/Store";
 

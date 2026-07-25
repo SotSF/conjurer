@@ -38,10 +38,10 @@ import { vjKeydownTargetIgnoresShortcuts } from "@/src/components/VJPage/vjKeybo
 import { vjPatterns } from "@/src/components/VJPage/vjPageCatalog";
 import { VJMidiModal } from "@/src/components/VJPage/VJMidiModal";
 import {
-  useVjMidiCcScalar,
+  useVjMidiCcNumber,
   type VjMidiCcLearnState,
-} from "@/src/components/VJPage/useVjMidiCcScalar";
-import { getVjMidiScalarUniformsFlatForEditableStack } from "@/src/utils/vjFirstNonJumpyScalarUniform";
+} from "@/src/components/VJPage/useVjMidiCcNumber";
+import { getVjMidiNumberUniformsFlatForEditableStack } from "@/src/utils/vjFirstNonJumpyNumberUniform";
 import type { VjMidiDeviceConfigsFile } from "@/src/utils/vjMidiDeviceStorage";
 import {
   loadVjMidiDeviceConfigsFromStorage,
@@ -155,7 +155,7 @@ export const VJPageInner = observer(function VJPageInner() {
 
   const midiTargetsFlat = useMemo(
     () =>
-      getVjMidiScalarUniformsFlatForEditableStack(
+      getVjMidiNumberUniformsFlatForEditableStack(
         session.selectedPatternBlock,
         session.effectBlocks,
         session.selectedEffectIndices,
@@ -170,7 +170,7 @@ export const VJPageInner = observer(function VJPageInner() {
   const midiTargetsFlatRef = useRef(midiTargetsFlat);
   midiTargetsFlatRef.current = midiTargetsFlat;
 
-  useVjMidiCcScalar(
+  useVjMidiCcNumber(
     midiLoggingEnabled,
     midiMapping,
     midiCcLearnRef,

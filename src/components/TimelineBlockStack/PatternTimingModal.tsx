@@ -15,7 +15,7 @@ import {
 } from "@chakra-ui/react";
 
 import { Block } from "@/src/types/Block";
-import { ScalarInput } from "@/src/components/ScalarInput";
+import { NumberParamInput } from "@/src/components/NumberParamInput";
 import { observer } from "mobx-react-lite";
 
 type PatternTimingModalProps = {
@@ -64,7 +64,7 @@ export const PatternTimingModal = observer(function PatternTimingModal({
           <ModalCloseButton />
           <ModalBody>
             <VStack spacing={4}>
-              <ScalarInput
+              <NumberParamInput
                 name="Start time (s)"
                 onChange={(valueString, valueNumber) => {
                   setStartTime(valueString);
@@ -79,7 +79,7 @@ export const PatternTimingModal = observer(function PatternTimingModal({
                 value={startTime}
               />
 
-              <ScalarInput
+              <NumberParamInput
                 name="End time (s)"
                 onChange={(valueString, valueNumber) => {
                   setEndTime(valueString);
@@ -90,7 +90,7 @@ export const PatternTimingModal = observer(function PatternTimingModal({
                 value={endTime}
               />
 
-              <ScalarInput
+              <NumberParamInput
                 name="Duration (s)"
                 onChange={(valueString, valueNumber) => {
                   setDuration(valueString);
