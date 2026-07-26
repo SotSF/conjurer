@@ -33,7 +33,7 @@ import { DisplayMode } from "@/src/types/UIStore";
 import { action } from "mobx";
 import { LatencyModal } from "@/src/components/LatencyModal/LatencyModal";
 import { ExperienceThumbnail } from "@/src/components/ExperienceThumbnail";
-import { ExperienceStatusIndicator } from "../ExperienceStatusIndicator";
+import { ExperienceStatusToggle } from "@/src/components/ExperienceStatusToggle";
 import { useRouter } from "next/router";
 
 export const MenuBar = observer(function MenuBar() {
@@ -418,24 +418,13 @@ export const MenuBar = observer(function MenuBar() {
               </MenuItem>
             </MenuList>
           </Portal>
-          <Button
-            as={Button}
-            px={1}
-            py={0}
-            variant="ghost"
-            size="xs"
-            fontSize="xs"
-            transition="all 0.2s"
-            borderRadius="md"
-            _hover={{ bg: "gray.500" }}
-            _focus={{ boxShadow: "outline" }}
-          >
-            <ExperienceStatusIndicator
-              experienceStatus={store.experienceStatus}
-              withLabel
-            />
-          </Button>
         </Menu>
+        <ExperienceStatusToggle
+          experienceId={store.experienceId}
+          experienceUserId={store.experienceUser?.id ?? -1}
+          status={store.experienceStatus}
+          withLabel
+        />
       </HStack>
     </VStack>
   );

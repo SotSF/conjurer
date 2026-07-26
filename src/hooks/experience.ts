@@ -1,4 +1,5 @@
 import { useStore } from "@/src/types/StoreContext";
+import { NO_SONG } from "@/src/types/Song";
 import { trpc } from "@/src/utils/trpc";
 import { useToast } from "@chakra-ui/react";
 import { runInAction } from "mobx";
@@ -24,6 +25,16 @@ export const useSaveExperience = () => {
     }
     if ((saveMetadata?.name ?? store.experienceName) === "untitled") {
       runInAction(() => (store.uiStore.showingSaveExperienceModal = true));
+      return;
+    }
+    if (store.audioStore.selectedSong.id === NO_SONG.id) {
+      toast({
+        title: "Select a song",
+        description: "Please select a song before saving this experience.",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
       return;
     }
 

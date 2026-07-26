@@ -1,6 +1,6 @@
 import { router, databaseProcedure, userProcedure } from "@/src/server/trpc";
 import { z } from "zod";
-import { experiences, users } from "@/src/db/schema";
+import { experiences, songs, users } from "@/src/db/schema";
 import { eq } from "drizzle-orm";
 import { EXPERIENCE_STATUSES } from "@/src/types/Experience";
 import { TRPCError } from "@trpc/server";
@@ -74,6 +74,16 @@ export const experienceRouter = router({
       const { id, name, song, data, status, version, thumbnailURL } = input;
       const { id: songId } = song;
 
+      const songRecord = await ctx.db.query.songs
+        .findFirst({ where: eq(songs.id, songId) })
+        .execute();
+      if (!songRecord) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Please select a song before saving this experience.",
+        });
+      }
+
       if (id) {
         // Check if the user has permission to save this experience
         const userToExperience = await ctx.db.query.experiences
@@ -116,6 +126,45 @@ export const experienceRouter = router({
       }
 
       return updatedExperience.id;
+    }),
+
+  updateExperienceStatus: userProcedure
+    .input(
+      z.object({
+        experienceId: z.number(),
+        status: z.enum(EXPERIENCE_STATUSES),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const experience = await ctx.db.query.experiences
+        .findFirst({
+          where: eq(experiences.id, input.experienceId),
+        })
+        .execute();
+
+      if (!experience) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Experience not found",
+        });
+      }
+
+      const isOwner = experience.userId === ctx.user.id;
+      const isAdmin = ctx.user.isAdmin;
+      if (!isOwner && !isAdmin) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "You do not have permission to update this experience status",
+        });
+      }
+
+      await ctx.db
+        .update(experiences)
+        .set({ status: input.status })
+        .where(eq(experiences.id, input.experienceId))
+        .execute();
+
+      return input.status;
     }),
 
   getExperience: databaseProcedure
