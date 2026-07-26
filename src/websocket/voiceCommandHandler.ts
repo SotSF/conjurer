@@ -1,6 +1,7 @@
 import type { Store } from "@/src/types/Store";
 import { VoiceCommandActionMessage } from "@/src/types/VoiceCommandMessage";
 import { convertSpokenTimeToSeconds } from "@/src/utils/spoken";
+import { scrollPlayheadIntoView } from "@/src/utils/scrollPlayheadIntoView";
 import { MAX_TIME } from "@/src/utils/time";
 import { action } from "mobx";
 import { clamp } from "three/src/math/MathUtils";
@@ -14,9 +15,11 @@ export const handleVoiceCommandActionMessage = action(
       store.togglePlaying();
     } else if (action === "goToBeginning") {
       store.audioStore.setTimeWithCursor(0);
+      scrollPlayheadIntoView();
     } else if (action === "goToEnd") {
-      store.audioStore.setTimeWithCursor(MAX_TIME);
+      store.audioStore.goToEnd();
       store.pause();
+      scrollPlayheadIntoView();
     } else if (action === "selectLayer") {
       if (message.value < 1 || message.value > store.layers.length) return;
       store.selectedLayer = store.layers[message.value - 1];
@@ -27,6 +30,7 @@ export const handleVoiceCommandActionMessage = action(
         MAX_TIME,
       );
       store.audioStore.setTimeWithCursor(time);
+      scrollPlayheadIntoView();
     } else if (
       action === "moveBlockForwardRelative" ||
       action === "moveBlockBackwardRelative"

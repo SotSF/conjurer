@@ -187,6 +187,12 @@ export class AudioStore {
     this.wavesurfer.seekTo(validTime / duration);
   };
 
+  /** Jump to the end of the loaded song (not the full timeline length). */
+  goToEnd = () => {
+    const duration = this.wavesurfer?.getDuration() ?? 0;
+    this.setTimeWithCursor(duration);
+  };
+
   skipForward = () => this.setTimeWithCursor(this.globalTime + 0.01);
   skipBackward = () => this.setTimeWithCursor(this.globalTime - 0.01);
 
