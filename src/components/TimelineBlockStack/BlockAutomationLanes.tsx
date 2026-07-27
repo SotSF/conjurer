@@ -29,13 +29,13 @@ import { action } from "mobx";
 import { observer } from "mobx-react-lite";
 import {
   MouseEvent as ReactMouseEvent,
-  ReactNode,
   useEffect,
   useState,
 } from "react";
 import { AddRegionMenu } from "@/src/components/ParameterVariations/AddRegionMenu";
 import { CurveRangeControl } from "@/src/components/ParameterVariations/CurveRangeControl";
 import { RegionSettingsPopover } from "@/src/components/ParameterVariations/RegionSettingsPopover";
+import { HeaderRepeat } from "@/src/components/TimelineBlockStack/HeaderRepeat";
 import { CurveVariation } from "@/src/types/Variations/CurveVariation";
 import { PeriodicVariation } from "@/src/types/Variations/PeriodicVariation";
 import { AudioVariation } from "@/src/types/Variations/AudioVariation";
@@ -48,28 +48,30 @@ import {
 } from "@/src/utils/regionConvert";
 
 const OPACITY_CURVE_HEIGHT = 26;
-const REGION_BAR_HEIGHT = 18;
+const LANE_NAME_HEIGHT = 20;
+const REGION_BAR_HEIGHT = 16;
 // below this rendered width a region tab collapses to just its colored segment,
 // revealing its full header (over neighbors) only when that region is hovered
 const NARROW_TAB_PX = 84;
 
-// A region's modulation type → its label, accent color, and an opaque tab
-// background (opaque so an earlier tab never shows through a later one).
+// A region's modulation type → its label + a quiet accent. Accents stay muted so
+// the param name above remains the visual parent; the type is readable but not
+// competing with it.
 const regionTypeStyle = (
   variation: Variation,
 ): { label: string; color: string; bg: string } => {
   switch (variation.type) {
     case "periodic":
-      return { label: "LFO", color: "#66bb94", bg: "#17251e" };
+      return { label: "LFO", color: "#5a8f74", bg: "#151c22" };
     case "audio":
-      return { label: "AUDIO", color: "#63b3ed", bg: "#16202b" };
+      return { label: "AUDIO", color: "#5a8fb0", bg: "#151a22" };
     case "palette":
-      return { label: "PALETTE", color: "#b794f4", bg: "#221b2e" };
+      return { label: "PALETTE", color: "#7a6a9e", bg: "#18161f" };
     case "linear4":
-      return { label: "COLOR", color: "#f6ad55", bg: "#2a2216" };
+      return { label: "COLOR", color: "#a07a4a", bg: "#1a1714" };
     default:
       // flat / linear / easing / spline all read as a drawn curve
-      return { label: "CURVE", color: "#ed8936", bg: "#2a2018" };
+      return { label: "CURVE", color: "#a07850", bg: "#1a1714" };
   }
 };
 
@@ -118,8 +120,9 @@ const gatherLanes = (block: Block): Lane[] => {
 };
 
 // Automation lanes rendered directly beneath a block, spanning only the block's
-// width. Each lane is just its curve + a pinned name at rest; a per-region
-// control bar reveals in the strip above the curve on hover (never over it).
+// width. Each lane has permanent chrome above the curve (repeating param name +
+// region bar) that separates lanes visually and keeps controls out of the
+// editable curve area.
 export const BlockAutomationLanes = observer(function BlockAutomationLanes({
   block,
 }: {
@@ -164,7 +167,7 @@ const AutomationLane = observer(function AutomationLane({
   const [headerRegionId, setHeaderRegionId] = useState<string | null>(null);
   const hoveredRegionId = headerRegionId ?? curveRegionId;
 
-  // Region insert: the RegionBar ＋ arms a one-shot insert of a chosen type
+  // Region insert: the name-row ＋ arms a one-shot insert of a chosen type
   // (gated to the param's sensible types); the insert overlay in the lane body
   // then captures paint/click. Esc cancels. Available on a MANUAL opacity lane
   // (numeric → curve/lfo/audio), but not on an auto-opacity lane (no regions
@@ -174,10 +177,6 @@ const AutomationLane = observer(function AutomationLane({
       ? []
       : allowedInsertTypes(ownerBlock.pattern.params[uniformName]);
   const [armedType, setArmedType] = useState<InsertType | null>(null);
-  // keep the ＋ expanded while its menu is open (even as the cursor leaves the
-  // lane onto the menu) or while an insert is armed
-  const [addMenuOpen, setAddMenuOpen] = useState(false);
-  const plusVisible = armedType != null || addMenuOpen;
   useEffect(() => {
     if (!armedType) return;
     const onKey = (e: KeyboardEvent) => {
@@ -205,146 +204,135 @@ const AutomationLane = observer(function AutomationLane({
   };
 
   return (
-    <Box position="relative" width="100%" role="group">
-      {/* the curve, with the pinned param name overlaid top-left */}
-      <Box
-        position="relative"
-        width="100%"
-        onMouseMove={onMouseMove}
-        onMouseLeave={() => setCurveRegionId(null)}
-      >
-        {isOpacity ? (
-          <OpacityLaneBody
-            block={ownerBlock}
-            armedType={armedType}
-            onInserted={() => setArmedType(null)}
-          />
-        ) : (
-          <ParameterVariations
-            uniformName={uniformName}
-            block={ownerBlock}
-            laneDuration={lane.laneDuration}
-            armedType={armedType}
-            onInserted={() => setArmedType(null)}
-          />
-        )}
+    <Box
+      position="relative"
+      width="100%"
+      role="group"
+      borderTopWidth="1px"
+      borderColor="#2a3444"
+      onMouseMove={onMouseMove}
+      onMouseLeave={() => setCurveRegionId(null)}
+    >
+      {/* permanent chrome between params: repeating name + region map/controls.
+          Lives in layout (not over the curve) so nodes stay clickable and each
+          lane has a clear top edge for reading max/min proximity. */}
+      <LaneNameHeader
+        block={ownerBlock}
+        uniformName={uniformName}
+        label={label}
+        insertTypes={insertTypes}
+        armedType={armedType}
+        setArmedType={setArmedType}
+      />
+      <RegionBar
+        block={ownerBlock}
+        uniformName={uniformName}
+        isOpacity={isOpacity}
+        hoveredRegionId={hoveredRegionId}
+        setHeaderRegionId={setHeaderRegionId}
+      />
 
-        {/* region control bar — nothing at rest (lanes stay flush); on hover (or
-            while an insert is armed) it floats just above the curve, so it never
-            covers a node and costs no vertical space. The ＋ sits at the right. */}
-        <Box
-          position="absolute"
-          bottom="100%"
-          left={0}
-          width="100%"
-          zIndex={5}
-          opacity={armedType ? 1 : 0}
-          pointerEvents={armedType ? "auto" : "none"}
-          transition="opacity 0.12s"
-          _groupHover={{ opacity: 1, pointerEvents: "auto" }}
-        >
-          <RegionBar
-            block={ownerBlock}
-            uniformName={uniformName}
-            isOpacity={isOpacity}
-            hoveredRegionId={hoveredRegionId}
-            setHeaderRegionId={setHeaderRegionId}
-            addMenu={null}
-          />
-        </Box>
-
-        <Box
-          position="absolute"
-          top={0}
-          left={0}
-          width="100%"
-          zIndex={3}
-          pointerEvents="none"
-        >
-          <Box position="sticky" left={`${TIMELINE_HEADER_WIDTH}px`} width="fit-content">
-            <HStack
-              spacing={0}
-              align="center"
-              bg="rgba(15,17,21,.6)"
-              borderBottomRightRadius="4px"
-              px="5px"
-              py="1px"
-            >
-              {/* the lane name + value fade on hover so they never obstruct */}
-              <HStack
-                spacing={1.5}
-                align="baseline"
-                opacity={0.9}
-                transition="opacity 0.12s"
-                _groupHover={{ opacity: 0.4 }}
-              >
-                <Text
-                  fontSize="10px"
-                  fontWeight={600}
-                  color="#ed8936"
-                  whiteSpace="nowrap"
-                >
-                  {label}
-                </Text>
-                <LaneValueReadout block={ownerBlock} uniformName={uniformName} />
-              </HStack>
-              {/* lane-level ＋ add-region, next to the lane name. Collapsed to
-                  zero width when idle (no reserved space) but kept in layout —
-                  NOT display:none — so its menu/tooltip anchor stays valid even
-                  after the cursor leaves the lane onto the open menu. Expands on
-                  hover or while armed. */}
-              {insertTypes.length > 0 && (
-                <Box
-                  display="flex"
-                  alignItems="center"
-                  color="#c3cdda"
-                  overflow="hidden"
-                  maxW={plusVisible ? "18px" : "0px"}
-                  ml={plusVisible ? 1.5 : 0}
-                  opacity={plusVisible ? 1 : 0}
-                  pointerEvents={plusVisible ? "auto" : "none"}
-                  transition="max-width 0.12s, opacity 0.12s, margin-left 0.12s"
-                  _groupHover={{
-                    maxW: "18px",
-                    ml: 1.5,
-                    opacity: 1,
-                    pointerEvents: "auto",
-                  }}
-                >
-                  <AddRegionMenu
-                    types={insertTypes}
-                    armedType={armedType}
-                    setArmedType={setArmedType}
-                    onOpenChange={setAddMenuOpen}
-                  />
-                </Box>
-              )}
-            </HStack>
-          </Box>
-        </Box>
-      </Box>
+      {isOpacity ? (
+        <OpacityLaneBody
+          block={ownerBlock}
+          armedType={armedType}
+          onInserted={() => setArmedType(null)}
+        />
+      ) : (
+        <ParameterVariations
+          uniformName={uniformName}
+          block={ownerBlock}
+          laneDuration={lane.laneDuration}
+          armedType={armedType}
+          onInserted={() => setArmedType(null)}
+        />
+      )}
     </Box>
   );
 });
 
+// Param name row above the region bar. The visual parent of the lane — stronger
+// than the region tabs below. Repeats across wide blocks and hosts the
+// lane-level ＋ so it never overlays editable curve points.
+const LaneNameHeader = observer(function LaneNameHeader({
+  block,
+  uniformName,
+  label,
+  insertTypes,
+  armedType,
+  setArmedType,
+}: {
+  block: Block;
+  uniformName: string;
+  label: string;
+  insertTypes: InsertType[];
+  armedType: InsertType | null;
+  setArmedType: (t: InsertType | null) => void;
+}) {
+  return (
+    <HStack
+      height={`${LANE_NAME_HEIGHT}px`}
+      width="100%"
+      spacing={0}
+      px="6px"
+      bg="#1c2533"
+      borderBottomWidth="1px"
+      borderColor="#3a4658"
+      align="center"
+    >
+      <HStack flex="1" minW={0} justify="space-evenly" spacing={0}>
+        <HeaderRepeat times={block.headerRepetitions}>
+          <HStack spacing={1.5} align="baseline">
+            <Text
+              fontSize="12px"
+              fontWeight={700}
+              color="#f6ad55"
+              whiteSpace="nowrap"
+              letterSpacing="0.01em"
+            >
+              {label}
+            </Text>
+            <LaneValueReadout block={block} uniformName={uniformName} />
+          </HStack>
+        </HeaderRepeat>
+      </HStack>
+      {insertTypes.length > 0 && (
+        <Box
+          position="sticky"
+          right={0}
+          flexShrink={0}
+          display="flex"
+          alignItems="center"
+          color="#a0aec0"
+          pl={1}
+          bg="#1c2533"
+        >
+          <AddRegionMenu
+            types={insertTypes}
+            armedType={armedType}
+            setArmedType={setArmedType}
+          />
+        </Box>
+      )}
+    </HStack>
+  );
+});
+
 // The control bar above a lane: one tab per region, sized to the region's
-// width (so the bar doubles as a region map). Quiet at rest (colored accents
-// only); type label + reorder/reset/delete reveal on lane hover.
+// width (so the bar doubles as a region map). Always in layout so it separates
+// lanes and never covers curve nodes.
 const RegionBar = observer(function RegionBar({
   block,
   uniformName,
   isOpacity,
   hoveredRegionId,
   setHeaderRegionId,
-  addMenu,
 }: {
   block: Block;
   uniformName: string;
   isOpacity: boolean;
   hoveredRegionId: string | null;
   setHeaderRegionId: (id: string | null) => void;
-  // the lane-level ＋ control, rendered inline in the LAST tab's control row
-  addMenu: ReactNode;
 }) {
   const variations = block.parameterVariations[uniformName] ?? [];
 
@@ -358,19 +346,18 @@ const RegionBar = observer(function RegionBar({
         width="100%"
         spacing={0}
         px="8px"
-        borderTopWidth="2px"
-        borderColor="#3182ce"
-        borderTopRadius="6px"
-        bg="#141c26"
-        boxShadow="0 -2px 10px rgba(0,0,0,.4)"
+        borderTopWidth="1px"
+        borderColor="#3a5a78"
+        bg="#141820"
         align="center"
       >
         <Text
           position="sticky"
           left={`${TIMELINE_HEADER_WIDTH}px`}
-          fontSize="9px"
-          fontWeight={700}
-          color="#8fcbf5"
+          fontSize="8px"
+          fontWeight={600}
+          letterSpacing="0.04em"
+          color="#6a8fa8"
           flexShrink={0}
         >
           AUTO
@@ -417,9 +404,7 @@ const RegionBar = observer(function RegionBar({
             width="100%"
             spacing={0}
             align="stretch"
-            bg="#161d28"
-            boxShadow="0 -2px 10px rgba(0,0,0,.4)"
-            borderTopRadius="6px"
+            bg="#141820"
           >
             {variations.map((variation, index) => (
               <Draggable
@@ -444,9 +429,6 @@ const RegionBar = observer(function RegionBar({
                       multiple={multiple}
                       dragHandleProps={prov.dragHandleProps}
                       setHeaderRegionId={setHeaderRegionId}
-                      addMenu={
-                        index === variations.length - 1 ? addMenu : null
-                      }
                     />
                   </Box>
                 )}
@@ -467,7 +449,6 @@ const RegionTab = observer(function RegionTab({
   multiple,
   dragHandleProps,
   setHeaderRegionId,
-  addMenu,
 }: {
   block: Block;
   uniformName: string;
@@ -475,8 +456,6 @@ const RegionTab = observer(function RegionTab({
   multiple: boolean;
   dragHandleProps: any;
   setHeaderRegionId: (id: string | null) => void;
-  // the lane-level ＋ control, rendered inline in the controls (last tab only)
-  addMenu?: ReactNode;
 }) {
   const store = useStore();
   const { uiStore } = store;
@@ -499,11 +478,12 @@ const RegionTab = observer(function RegionTab({
   ) : null;
   const typeLabelText = (
     <Text
-      fontSize="9px"
-      fontWeight={700}
-      letterSpacing="0.02em"
+      fontSize="8px"
+      fontWeight={600}
+      letterSpacing="0.06em"
       color={color}
       noOfLines={1}
+      textTransform="uppercase"
     >
       {label}
     </Text>
@@ -635,33 +615,32 @@ const RegionTab = observer(function RegionTab({
           </Box>
         </Tooltip>
       )}
-      {addMenu}
     </HStack>
   );
 
   // narrow: the tab is just a colored segment, but its full header renders as an
   // overflow to the right (opaque, so the next tab covers it unless this one is
-  // hovered, which lifts it via the wrapper's z-index). top:-2px so the header's
-  // top border lines up with the bar's, not 2px below the tab's own border.
+  // hovered, which lifts it via the wrapper's z-index). top:-1px so the header's
+  // top border lines up with the bar's, not 1px below the tab's own border.
   if (narrow)
     return (
       <Box
         position="relative"
         height="100%"
-        borderTopWidth="2px"
+        borderTopWidth="1px"
         borderColor={color}
         bg={bg}
       >
         <HStack
           position="absolute"
-          top="-2px"
+          top="-1px"
           left={0}
           height={`${REGION_BAR_HEIGHT}px`}
           width="max-content"
           spacing="5px"
           px="6px"
           bg={bg}
-          borderTopWidth="2px"
+          borderTopWidth="1px"
           borderColor={color}
           {...headerHover}
         >
@@ -680,7 +659,7 @@ const RegionTab = observer(function RegionTab({
       height="100%"
       spacing={0}
       px="6px"
-      borderTopWidth="2px"
+      borderTopWidth="1px"
       borderColor={color}
       bg={bg}
       align="center"

@@ -30,10 +30,9 @@ type Props = {
   onOpenChange?: (open: boolean) => void;
 };
 
-// The ＋ add-region control, rendered inline in the last region tab's control
-// row (matching the reset/delete glyphs). Choosing a type arms a one-shot insert
-// (paint or click the lane to place it, Esc to cancel); while armed it shows an
-// active ＋ that cancels on click.
+// The ＋ add-region control in the lane name row. Choosing a type arms a
+// one-shot insert (paint or click the lane to place it, Esc to cancel); while
+// armed it shows an active ＋ that cancels on click.
 export const AddRegionMenu = ({
   types,
   armedType,

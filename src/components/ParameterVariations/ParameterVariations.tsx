@@ -27,7 +27,8 @@ type ParameterVariationsProps = {
 // The parameter's curve(s) across the block, plus the region-manipulation layers
 // that live on the lane body: draggable seam dividers (resize) and the armed
 // insert overlay. Region controls (type/convert, min-max, LFO/Audio settings,
-// reorder, reset, delete, ＋) live in the RegionBar above the lane.
+// reorder, reset, delete) live in the RegionBar above the lane; the lane-level
+// ＋ lives in the name row above that.
 export const ParameterVariations = observer(function ParameterVariations({
   uniformName,
   block,
