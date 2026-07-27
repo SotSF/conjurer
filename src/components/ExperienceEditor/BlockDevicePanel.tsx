@@ -38,10 +38,10 @@ import {
 const BASE_EXCLUDED = ["u_time", "u_texture"];
 const ARMED_COLOR = "#63b3ed"; // blue.300 — param armed to a timeline lane
 const UNARMED_COLOR = "#4a5568"; // gray.600
-export const DEVICE_PANEL_HEIGHT = 210;
+export const DEVICE_PANEL_HEIGHT = 168;
 const CELL_WIDTH = 120;
 const CELL_HEIGHT = 22;
-const CELL_GAP = 4;
+const CELL_GAP = 3;
 
 const selectedPatternBlock = (
   store: ReturnType<typeof useStore>,
@@ -96,12 +96,14 @@ export const BlockDevicePanel = observer(function BlockDevicePanel() {
       bg="#12151c"
       borderTopWidth="1px"
       borderColor="#2d3748"
-      px={3}
-      py={2}
+      px={2}
+      py={1}
+      position="relative"
       display="flex"
       flexDirection="column"
     >
-      <HStack justify="flex-end" spacing={0} mb={1} flexShrink={0}>
+      {/* Overlay so the toolbar doesn't consume a full row of vertical space */}
+      <HStack position="absolute" top="2px" right="4px" zIndex={1} spacing={0}>
         <PanelIconButton
           label="Scroll timeline to this block"
           icon={<MdMyLocation />}
@@ -369,10 +371,11 @@ const PatternUnit = function PatternUnit({ block }: { block: Block }) {
       flexDirection="column"
       bg="#1e2635"
       border="1px solid #3a4658"
-      borderRadius="6px"
-      p={2}
+      borderRadius="4px"
+      px={1.5}
+      py={1}
     >
-      <HStack justify="space-between" mb="6px" spacing={1} flexShrink={0}>
+      <HStack justify="space-between" mb="2px" spacing={1} flexShrink={0}>
         <Text
           fontSize="11px"
           fontWeight={600}
@@ -445,10 +448,11 @@ const EffectUnit = function EffectUnit({
       flexDirection="column"
       bg="#1b212b"
       border="1px solid #2f3a48"
-      borderRadius="6px"
-      p={2}
+      borderRadius="4px"
+      px={1.5}
+      py={1}
     >
-      <HStack justify="space-between" mb="6px" spacing={1} flexShrink={0}>
+      <HStack justify="space-between" mb="2px" spacing={1} flexShrink={0}>
         <HStack spacing={1} minW={0}>
           {dragHandleProps && (
             <Box
@@ -498,14 +502,14 @@ const AddEffectUnit = function AddEffectUnit({ block }: { block: Block }) {
       <MenuButton
         as={Button}
         variant="unstyled"
-        ml={3}
-        width="60px"
+        ml={2}
+        width="48px"
         height="auto"
         flexShrink={0}
         border="1px dashed #3a4658"
-        borderRadius="6px"
+        borderRadius="4px"
         color="#718096"
-        fontSize="22px"
+        fontSize="20px"
         fontWeight={400}
       >
         ＋
