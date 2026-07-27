@@ -1,7 +1,7 @@
 import { Box, Button, HStack, VStack } from "@chakra-ui/react";
 import { PatternList } from "@/src/components/PatternPlayground/PatternList";
 import { PreviewCanvas } from "@/src/components/Canvas/PreviewCanvas";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ParameterControls } from "@/src/components/PatternPlayground/ParameterControls";
 import { observer } from "mobx-react-lite";
 import { useStore } from "@/src/types/StoreContext";
@@ -23,6 +23,11 @@ export const PatternPlayground = observer(function PatternPlayground() {
     lastEffectIndices,
     selectedPatternBlock,
   } = playgroundStore;
+
+  // Bumped whenever parameters are randomized, so both the pattern's and its applied
+  // effects' ParameterControls remount together and pick up the new values.
+  const [randomizeNonce, setRandomizeNonce] = useState(0);
+  const onRandomize = useCallback(() => setRandomizeNonce((n) => n + 1), []);
 
   const applyPatternEffects = useCallback(
     (patternIndex: number, effectIndices: number[]) => {
@@ -155,11 +160,14 @@ export const PatternPlayground = observer(function PatternPlayground() {
                 <ParameterControls
                   key={selectedPatternBlock.id}
                   block={selectedPatternBlock}
+                  randomizeNonce={randomizeNonce}
+                  onRandomize={onRandomize}
                 />
                 {selectedEffectIndices.map((effectIndex, i) => (
                   <ParameterControls
                     key={`${effectBlocks[effectIndex].id}-${i}`}
                     block={effectBlocks[effectIndex]}
+                    randomizeNonce={randomizeNonce}
                   />
                 ))}
               </VStack>

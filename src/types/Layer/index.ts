@@ -12,6 +12,10 @@ export type Layer = {
   id: string;
   name: string;
   visible: boolean;
+  // editor-only: when true the layer's timeline row shrinks to just its header
+  // (its blocks are hidden from the timeline). Distinct from `visible`, which
+  // controls whether the layer renders to the canopy. Not serialized.
+  collapsed: boolean;
   height: number;
   store: Store;
 

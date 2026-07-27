@@ -17,6 +17,8 @@ export class LayerV1 implements Layer {
   name = "";
   height = 350;
   visible = true;
+  // interface compliance; collapse is a V2/editor feature (see Layer.collapsed)
+  collapsed = false;
 
   patternBlocks: Block[] = [];
   _lastComputedCurrentBlock: Block | null = null;

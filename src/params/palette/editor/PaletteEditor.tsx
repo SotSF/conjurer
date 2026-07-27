@@ -114,7 +114,11 @@ export const PaletteEditor = function PaletteEditor({
   const startHex = vector3ToHex(palette.colorAt(0));
   const endHex = vector3ToHex(palette.colorAt(1));
   const applyGradient = (start: string, end: string) => {
-    setPaletteFromLinearGradient(palette, hexToVector3(start), hexToVector3(end));
+    setPaletteFromLinearGradient(
+      palette,
+      hexToVector3(start),
+      hexToVector3(end),
+    );
     commit();
   };
 
@@ -126,6 +130,9 @@ export const PaletteEditor = function PaletteEditor({
         border="1px solid"
         borderColor="whiteAlpha.300"
         background={paletteCss(palette)}
+        // clip the gradient to inside the border so Chrome doesn't bleed a
+        // hairline of the opposite-end color into the rounded corners/border seam
+        backgroundClip="padding-box"
       />
 
       <HStack justify="space-between">
@@ -248,7 +255,10 @@ const RgbChart = ({ palette }: { palette: Palette }) => {
           strokeWidth={2}
         />
       ))}
-      <RechartsTooltip isAnimationActive={false} content={<ColorValuesTooltip />} />
+      <RechartsTooltip
+        isAnimationActive={false}
+        content={<ColorValuesTooltip />}
+      />
     </LineChart>
   );
 };

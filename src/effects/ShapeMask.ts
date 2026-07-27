@@ -8,9 +8,35 @@ export const ShapeMask = () =>
     "Shape Mask",
     shapeMask,
     {
+      u_inner_radius: {
+        name: "Inner radius",
+        value: 0,
+        min: 0,
+        max: 1,
+        step: 0.01,
+      },
+      // Data name kept as u_radius for backwards compatibility; displayed as
+      // "Outer radius" now that an inner radius exists.
       u_radius: {
-        name: "Radius",
+        name: "Outer radius",
         value: 0.5,
+        min: 0,
+        max: 1,
+        step: 0.01,
+      },
+      u_theta_min: {
+        name: "Theta min",
+        value: 0,
+        min: 0,
+        max: 360,
+        step: 1,
+      },
+      u_theta_max: {
+        name: "Theta max",
+        value: 360,
+        min: 0,
+        max: 360,
+        step: 1,
       },
       u_inverse: {
         name: "Inverse",

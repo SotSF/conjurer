@@ -12,6 +12,7 @@ import { debounce } from "lodash";
 import { NO_SONG } from "@/src/types/Song";
 import { INITIAL_PIXELS_PER_SECOND } from "@/src/utils/time";
 import { getTimelineLabelIntervals } from "@/src/utils/timelineZoom";
+import { scrollPlayheadIntoView } from "@/src/utils/scrollPlayheadIntoView";
 import { MinimapViewfinder } from "@/src/components/Wavesurfer/MinimapViewfinder";
 
 const DEFAULT_MINIMAP_HEIGHT = 20;
@@ -31,17 +32,6 @@ const setTimelineLabelIntervals = (
   );
 };
 
-const scrollIntoView = debounce(
-  () =>
-    document.getElementById("playhead")?.scrollIntoView({
-      behavior: "smooth",
-      block: "nearest",
-      inline: "center",
-    }),
-  20,
-  { leading: false, trailing: true },
-);
-
 const WavesurferWaveform = observer(function WavesurferWaveform() {
   const store = useStore();
   const { audioStore, uiStore, playlistStore } = store;
@@ -55,7 +45,9 @@ const WavesurferWaveform = observer(function WavesurferWaveform() {
   // Keep Wavesurfer's React prop stable so layout zoom doesn't force an
   // immediate redraw; we drive zoom imperatively (debounced) instead.
   const initialMinPxPerSecRef = useRef(
-    uiStore.canTimelineZoom ? uiStore.pixelsPerSecond : INITIAL_PIXELS_PER_SECOND,
+    uiStore.canTimelineZoom
+      ? uiStore.pixelsPerSecond
+      : INITIAL_PIXELS_PER_SECOND,
   );
 
   const cloneCanvas = useCloneCanvas(clonedWaveformRef);
@@ -85,7 +77,7 @@ const WavesurferWaveform = observer(function WavesurferWaveform() {
       audioStore.setTimeWithCursor(
         Math.max(0, audioStore.wavesurfer!.getCurrentTime()),
       );
-      scrollIntoView();
+      scrollPlayheadIntoView();
     });
     runInAction(() => {
       audioStore.timelinePlugin = timelinePlugin;
@@ -235,6 +227,8 @@ const WavesurferWaveform = observer(function WavesurferWaveform() {
             audioStore.wavesurfer = wavesurfer;
             if (audioStore.audioMuted) wavesurfer.setMuted(true);
             wavesurfer.setVolume(audioStore.audioVolume);
+            // re-apply rate: wavesurfer remounts (e.g. song switch) reset it to 1
+            wavesurfer.setPlaybackRate(audioStore.playbackRate, true);
             if (uiStore.canTimelineZoom) {
               setTimelineLabelIntervals(
                 audioStore.timelinePlugin,

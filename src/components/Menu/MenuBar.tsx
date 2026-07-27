@@ -33,7 +33,7 @@ import { DisplayMode } from "@/src/types/UIStore";
 import { action } from "mobx";
 import { LatencyModal } from "@/src/components/LatencyModal/LatencyModal";
 import { ExperienceThumbnail } from "@/src/components/ExperienceThumbnail";
-import { ExperienceStatusIndicator } from "../ExperienceStatusIndicator";
+import { ExperienceStatusToggle } from "@/src/components/ExperienceStatusToggle";
 import { useRouter } from "next/router";
 
 export const MenuBar = observer(function MenuBar() {
@@ -244,7 +244,7 @@ export const MenuBar = observer(function MenuBar() {
           </>
         )}
 
-        {/* Experience editor and playlist editor both get View, Tools, and Help menus */}
+        {/* Experience editor and playlist editor both get View, Tools, Navigate, and Help menus */}
         <Menu>
           <MenuButton
             as={Button}
@@ -318,44 +318,66 @@ export const MenuBar = observer(function MenuBar() {
             </MenuList>
           </Portal>
         </Menu>
-        {process.env.NEXT_PUBLIC_NODE_ENV !== "production" && (
-          <Menu closeOnSelect={false}>
-            <MenuButton
-              as={Button}
-              px={1}
-              py={0}
-              variant="ghost"
-              size="sm"
-              transition="all 0.2s"
-              borderRadius="md"
-              _hover={{ bg: "gray.500" }}
-              _focus={{ boxShadow: "outline" }}
-            >
-              Tools
-            </MenuButton>
-            <Portal>
-              <MenuList zIndex="dropdown">
-                <MenuItemOption
-                  isChecked={store.sendingData}
-                  onClick={store.toggleSendingData}
-                >
-                  Transmit data to canopy
-                </MenuItemOption>
-                <MenuDivider />
-                <MenuItem
-                  onClick={action(() => (uiStore.showingLatencyModal = true))}
-                >
-                  Set audio latency ({(audioStore.audioLatency * 1000).toFixed()}
-                  ms)
-                </MenuItem>
-                <MenuDivider />
-                <MenuItem as="a" href="/admin" target="_blank">
-                  Admin
-                </MenuItem>
-              </MenuList>
-            </Portal>
-          </Menu>
-        )}
+        <Menu closeOnSelect={false}>
+          <MenuButton
+            as={Button}
+            px={1}
+            py={0}
+            variant="ghost"
+            size="sm"
+            transition="all 0.2s"
+            borderRadius="md"
+            _hover={{ bg: "gray.500" }}
+            _focus={{ boxShadow: "outline" }}
+          >
+            Tools
+          </MenuButton>
+          <Portal>
+            <MenuList zIndex="dropdown">
+              <MenuItemOption
+                isChecked={store.sendingData}
+                onClick={store.toggleSendingData}
+                isDisabled={
+                  process.env.NEXT_PUBLIC_NODE_ENV === "production"
+                }
+              >
+                Transmit data to canopy
+              </MenuItemOption>
+              <MenuDivider />
+              <MenuItem
+                onClick={action(() => (uiStore.showingLatencyModal = true))}
+              >
+                Set audio latency ({(audioStore.audioLatency * 1000).toFixed()}
+                ms)
+              </MenuItem>
+            </MenuList>
+          </Portal>
+        </Menu>
+        <Menu>
+          <MenuButton
+            as={Button}
+            px={1}
+            py={0}
+            variant="ghost"
+            size="sm"
+            transition="all 0.2s"
+            borderRadius="md"
+            _hover={{ bg: "gray.500" }}
+            _focus={{ boxShadow: "outline" }}
+          >
+            Navigate
+          </MenuButton>
+          <Portal>
+            <MenuList zIndex="dropdown">
+              <MenuItem as="a" href="/playground" target="_blank">
+                Playground
+              </MenuItem>
+              <MenuItem as="a" href="/admin" target="_blank">
+                Admin
+              </MenuItem>
+            </MenuList>
+          </Portal>
+        </Menu>
         <Menu>
           <MenuButton
             as={Button}
@@ -396,24 +418,13 @@ export const MenuBar = observer(function MenuBar() {
               </MenuItem>
             </MenuList>
           </Portal>
-          <Button
-            as={Button}
-            px={1}
-            py={0}
-            variant="ghost"
-            size="xs"
-            fontSize="xs"
-            transition="all 0.2s"
-            borderRadius="md"
-            _hover={{ bg: "gray.500" }}
-            _focus={{ boxShadow: "outline" }}
-          >
-            <ExperienceStatusIndicator
-              experienceStatus={store.experienceStatus}
-              withLabel
-            />
-          </Button>
         </Menu>
+        <ExperienceStatusToggle
+          experienceId={store.experienceId}
+          experienceUserId={store.experienceUser?.id ?? -1}
+          status={store.experienceStatus}
+          withLabel
+        />
       </HStack>
     </VStack>
   );

@@ -31,7 +31,9 @@ export const ExperienceEditorPage = observer(function ExperienceEditorPage() {
     router.query.experienceName,
   ]);
 
-  // Listen for url changes and load any new experience by name
+  // Listen for url changes and load any new experience by name.
+  // Only URL changes should trigger a load — omit store.experienceName from
+  // deps so renaming on save does not reload the stale URL name.
   useEffect(() => {
     if (
       initializationState !== "initialized" ||
@@ -41,12 +43,12 @@ export const ExperienceEditorPage = observer(function ExperienceEditorPage() {
     )
       return;
     experienceStore.load(router.query.experienceName as string);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- store.experienceName intentionally omitted
   }, [
     store,
     experienceStore,
     initializationState,
     loadingExperienceName,
-    store.experienceName,
     router.query.experienceName,
   ]);
 

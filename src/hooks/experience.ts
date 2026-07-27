@@ -1,10 +1,13 @@
 import { useStore } from "@/src/types/StoreContext";
+import { NO_SONG } from "@/src/types/Song";
 import { trpc } from "@/src/utils/trpc";
 import { useToast } from "@chakra-ui/react";
 import { runInAction } from "mobx";
+import { useRouter } from "next/router";
 
 export const useSaveExperience = () => {
   const store = useStore();
+  const router = useRouter();
   const { userStore, usingLocalData } = store;
   const { username } = userStore;
   const saveExperienceMutation = trpc.experience.saveExperience.useMutation();
@@ -22,6 +25,16 @@ export const useSaveExperience = () => {
     }
     if ((saveMetadata?.name ?? store.experienceName) === "untitled") {
       runInAction(() => (store.uiStore.showingSaveExperienceModal = true));
+      return;
+    }
+    if (store.audioStore.selectedSong.id === NO_SONG.id) {
+      toast({
+        title: "Select a song",
+        description: "Please select a song before saving this experience.",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
       return;
     }
 
@@ -56,6 +69,13 @@ export const useSaveExperience = () => {
       store.experienceId = savedId;
       store.experienceName = savePayload.name;
     });
+
+    if (
+      store.context === "experienceEditor" &&
+      router.query.experienceName !== savePayload.name
+    ) {
+      void router.replace(`/experience/${savePayload.name}`);
+    }
 
     toast({
       title: "Experience saved",
