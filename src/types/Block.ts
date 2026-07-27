@@ -13,7 +13,7 @@ import { EasingVariation } from "@/src/types/Variations/EasingVariation";
 import { defaultPatternEffectMap } from "@/src/utils/patternsEffects";
 import { isVector4 } from "@/src/utils/object";
 import { LinearVariation4 } from "@/src/types/Variations/LinearVariation4";
-import { isPalette, Palette } from "@/src/params/palette/Palette";
+import { isPalette } from "@/src/params/palette/Palette";
 import { PaletteVariation } from "@/src/params/palette/variation/PaletteVariation";
 import { CurveVariation } from "@/src/types/Variations/CurveVariation";
 import { generateId } from "@/src/utils/id";
@@ -95,17 +95,32 @@ export class Block {
     this.showDetails = !this.showDetails;
   };
 
-  // arms a param's automation lane; a palette gets a default region spanning
-  // the whole block so its lane isn't empty (palettes are discrete regions, not
-  // a continuous curve)
+  // arms a param's automation lane. Seeds a full-block default region when the
+  // param has none yet, so the lane has height and is editable (without this,
+  // empty ParameterVariations collapse to 0px and stacked lanes overlap).
+  // Opacity is left empty on purpose: auto mode draws its own sparkline, and
+  // seeding would switch it to manual.
   private armParamLane = (uniformName: string) => {
     if (
-      isPalette(this.pattern.params[uniformName]?.value) &&
+      uniformName !== "u_opacity" &&
       !this.parameterVariations[uniformName]?.length
-    )
-      this.parameterVariations[uniformName] = [
-        new PaletteVariation(this.duration, Palette.default()),
-      ];
+    ) {
+      // effect blocks carry a placeholder duration; span the parent pattern
+      const duration = this.parentBlock?.duration ?? this.duration;
+      const value = this.pattern.params[uniformName]?.value;
+      if (typeof value === "number")
+        this.parameterVariations[uniformName] = [
+          CurveVariation.flat(duration, value),
+        ];
+      else if (isVector4(value))
+        this.parameterVariations[uniformName] = [
+          new LinearVariation4(duration, value, value),
+        ];
+      else if (isPalette(value))
+        this.parameterVariations[uniformName] = [
+          new PaletteVariation(duration, value),
+        ];
+    }
     this.lanedParams.add(uniformName);
   };
 
