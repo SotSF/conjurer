@@ -23,6 +23,9 @@ import { Layer } from "@/src/types/Layer";
 import { action, runInAction } from "mobx";
 import { useEffect } from "react";
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
+import { MdDragIndicator, MdExpandMore, MdChevronRight } from "react-icons/md";
+import { FaTrashAlt } from "react-icons/fa";
+import type { DraggableProvidedDragHandleProps } from "@hello-pangea/dnd";
 
 type Props = {
   index: number;
@@ -190,6 +193,40 @@ export const TimelineLayerHeader = observer(function TimelineLayerHeader({
           }}
         />
       </HStack>
+
+      <Modal
+        isOpen={confirmDelete.isOpen}
+        onClose={confirmDelete.onClose}
+        isCentered
+      >
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Delete {displayName}?</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <Text>
+              {blockCount > 0
+                ? `Its ${blockCount} block${blockCount === 1 ? "" : "s"} will be removed. `
+                : ""}
+              This can&apos;t be undone.
+            </Text>
+          </ModalBody>
+          <ModalFooter gap={3}>
+            <Button variant="ghost" onClick={confirmDelete.onClose}>
+              Cancel
+            </Button>
+            <Button
+              colorScheme="red"
+              onClick={action(() => {
+                store.removeLayer(layer);
+                confirmDelete.onClose();
+              })}
+            >
+              Delete
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </VStack>
   );
 });
