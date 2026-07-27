@@ -103,11 +103,6 @@ export const BlockDevicePanel = observer(function BlockDevicePanel() {
     >
       <HStack justify="flex-end" spacing={0} mb={1} flexShrink={0}>
         <PanelIconButton
-          label="Toggle all lanes"
-          icon={<MdViewStream />}
-          onClick={action(() => block.toggleAllLanes())}
-        />
-        <PanelIconButton
           label="Scroll timeline to this block"
           icon={<MdMyLocation />}
           onClick={action(() => uiStore.scrollToTime(block.startTime))}
@@ -357,6 +352,12 @@ const ParamColumns = function ParamColumns({
   );
 };
 
+const toggleBlockLanes = (block: Block) => {
+  const names = block.lanableParamNames;
+  const allArmed = names.every((name) => block.lanedParams.has(name));
+  block.setParamLanes(names, !allArmed);
+};
+
 const PatternUnit = function PatternUnit({ block }: { block: Block }) {
   const uniformNames = Object.keys(block.pattern.params).filter(
     (name) => !BASE_EXCLUDED.includes(name),
@@ -371,16 +372,25 @@ const PatternUnit = function PatternUnit({ block }: { block: Block }) {
       borderRadius="6px"
       p={2}
     >
-      <Text
-        fontSize="11px"
-        fontWeight={600}
-        color="#63b3ed"
-        mb="6px"
-        flexShrink={0}
-        noOfLines={1}
-      >
-        {block.pattern.name}
-      </Text>
+      <HStack justify="space-between" mb="6px" spacing={1} flexShrink={0}>
+        <Text
+          fontSize="11px"
+          fontWeight={600}
+          color="#63b3ed"
+          noOfLines={1}
+          minW={0}
+        >
+          {block.pattern.name}
+        </Text>
+        <PanelIconButton
+          label="Toggle all lanes"
+          icon={<MdViewStream />}
+          onClick={action((e) => {
+            e.stopPropagation();
+            toggleBlockLanes(block);
+          })}
+        />
+      </HStack>
       <ParamColumns
         block={block}
         uniformNames={uniformNames}
@@ -454,18 +464,28 @@ const EffectUnit = function EffectUnit({
             {effectBlock.pattern.name}
           </Text>
         </HStack>
-        <Tooltip label="Remove effect" openDelay={0} hasArrow fontSize="xs">
-          <Text
-            as="span"
-            color="#718096"
-            cursor="pointer"
-            flexShrink={0}
-            _hover={{ color: "#fc8181" }}
-            onClick={action(() => parentBlock.removeEffectBlock(effectBlock))}
-          >
-            ✕
-          </Text>
-        </Tooltip>
+        <HStack spacing={0} flexShrink={0}>
+          <PanelIconButton
+            label="Toggle all lanes"
+            icon={<MdViewStream />}
+            onClick={action((e) => {
+              e.stopPropagation();
+              toggleBlockLanes(effectBlock);
+            })}
+          />
+          <Tooltip label="Remove effect" openDelay={0} hasArrow fontSize="xs">
+            <Text
+              as="span"
+              color="#718096"
+              cursor="pointer"
+              flexShrink={0}
+              _hover={{ color: "#fc8181" }}
+              onClick={action(() => parentBlock.removeEffectBlock(effectBlock))}
+            >
+              ✕
+            </Text>
+          </Tooltip>
+        </HStack>
       </HStack>
       <ParamColumns block={effectBlock} uniformNames={uniformNames} isEffect />
     </Box>
