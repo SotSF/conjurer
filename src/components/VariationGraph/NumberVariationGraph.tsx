@@ -7,6 +7,9 @@ import { SplineVariation } from "@/src/types/Variations/SplineVariation";
 import { SplineVariationGraph } from "@/src/components/VariationGraph/SplineVariationGraph";
 import { CurveVariation } from "@/src/types/Variations/CurveVariation";
 import { EnvelopeGraph } from "@/src/components/VariationGraph/EnvelopeGraph";
+import { PeriodicVariation } from "@/src/types/Variations/PeriodicVariation";
+import { AudioVariation } from "@/src/types/Variations/AudioVariation";
+import { RegionSettingsPopover } from "@/src/components/ParameterVariations/RegionSettingsPopover";
 import { useVariationClick } from "@/src/hooks/variationClick";
 
 type NumberVariationGraphProps = {
@@ -60,13 +63,20 @@ export const NumberVariationGraph = function NumberVariationGraph({
     block.startTime,
   );
 
-  return (
+  const isGenerator =
+    variation instanceof PeriodicVariation ||
+    variation instanceof AudioVariation;
+
+  const graph = (
     <Box
       py={1}
       bgColor="gray.600"
       _hover={{ bgColor: "gray.500" }}
       role="button"
-      onClick={(e) => onVariationClick(e, variation)}
+      cursor="pointer"
+      onClick={
+        isGenerator ? undefined : (e) => onVariationClick(e, variation)
+      }
     >
       <LineChart
         width={width - VARIATION_BOUND_WIDTH}
@@ -86,4 +96,19 @@ export const NumberVariationGraph = function NumberVariationGraph({
       </LineChart>
     </Box>
   );
+
+  // Mirror palette/color regions: clicking the LFO or Audio band opens settings.
+  if (isGenerator) {
+    return (
+      <RegionSettingsPopover
+        block={block}
+        uniformName={uniformName}
+        variation={variation}
+      >
+        {graph}
+      </RegionSettingsPopover>
+    );
+  }
+
+  return graph;
 };

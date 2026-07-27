@@ -18,23 +18,27 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { observer } from "mobx-react-lite";
-import { useState } from "react";
+import { ReactElement, useState } from "react";
 import { TbSettings } from "react-icons/tb";
 
 type Props = {
   block: Block;
   uniformName: string;
   variation: Variation;
+  // Optional custom trigger (e.g. the region graph). Defaults to the gear
+  // icon used in the region bar — same pattern as palette/color regions,
+  // where clicking the band opens settings.
+  children?: ReactElement;
 };
 
 // Settings popover for a generator region (LFO / Audio). Reuses the existing
-// PeriodicVariationControls / AudioVariationControls in the hover-revealed region
-// controls, mirroring the Curve Min/Max popover. Interim: these controls will be
-// reworked once the region-manipulation UX lands (see the design agent).
+// PeriodicVariationControls / AudioVariationControls. Can be triggered from the
+// region-bar gear or by wrapping the region graph (click opens settings).
 export const RegionSettingsPopover = observer(function RegionSettingsPopover({
   block,
   uniformName,
   variation,
+  children,
 }: Props) {
   const isPeriodic = variation instanceof PeriodicVariation;
   const isAudio = variation instanceof AudioVariation;
@@ -42,6 +46,66 @@ export const RegionSettingsPopover = observer(function RegionSettingsPopover({
   if (!isPeriodic && !isAudio) return null;
 
   const controlProps = { block, uniformName };
+
+  const popover = (
+    <Popover
+      placement="bottom"
+      isLazy
+      onOpen={() => setPopoverOpen(true)}
+      onClose={() => setPopoverOpen(false)}
+    >
+      <PopoverTrigger>
+        {children ?? (
+          <IconButton
+            variant="unstyled"
+            size="xs"
+            height="14px"
+            minW="14px"
+            aria-label={`${variation.displayName} settings`}
+            icon={<TbSettings size={12} />}
+            color="gray.300"
+            _hover={{ color: "blue.300" }}
+            onClick={(e) => e.stopPropagation()}
+          />
+        )}
+      </PopoverTrigger>
+      <Portal>
+        <PopoverContent
+          width="248px"
+          bg="gray.700"
+          fontSize={10}
+          // z-index must clear the sticky layer header (zIndex 11), same as
+          // palette/color region popovers
+          rootProps={{ style: { zIndex: 1600 } }}
+        >
+          <PopoverArrow bg="gray.700" />
+          <PopoverBody>
+            <VStack
+              spacing={1}
+              align="stretch"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Text fontWeight="bold">{variation.displayName}</Text>
+              {isPeriodic ? (
+                <PeriodicVariationControls
+                  variation={variation}
+                  {...controlProps}
+                />
+              ) : (
+                <AudioVariationControls
+                  variation={variation as AudioVariation}
+                  {...controlProps}
+                />
+              )}
+            </VStack>
+          </PopoverBody>
+        </PopoverContent>
+      </Portal>
+    </Popover>
+  );
+
+  // Gear trigger keeps its tooltip; a custom trigger (graph) does not.
+  if (children) return popover;
 
   return (
     <Tooltip
@@ -53,51 +117,7 @@ export const RegionSettingsPopover = observer(function RegionSettingsPopover({
       isDisabled={popoverOpen}
     >
       <Box as="span" display="inline-flex">
-        <Popover
-          placement="bottom"
-          isLazy
-          onOpen={() => setPopoverOpen(true)}
-          onClose={() => setPopoverOpen(false)}
-        >
-          <PopoverTrigger>
-            <IconButton
-              variant="unstyled"
-              size="xs"
-              height="14px"
-              minW="14px"
-              aria-label={`${variation.displayName} settings`}
-              icon={<TbSettings size={12} />}
-              color="gray.300"
-              _hover={{ color: "blue.300" }}
-              onClick={(e) => e.stopPropagation()}
-            />
-          </PopoverTrigger>
-          <Portal>
-            <PopoverContent width="248px" bg="gray.700" fontSize={10} zIndex={1600}>
-              <PopoverArrow bg="gray.700" />
-              <PopoverBody>
-                <VStack
-                  spacing={1}
-                  align="stretch"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <Text fontWeight="bold">{variation.displayName}</Text>
-                  {isPeriodic ? (
-                    <PeriodicVariationControls
-                      variation={variation}
-                      {...controlProps}
-                    />
-                  ) : (
-                    <AudioVariationControls
-                      variation={variation as AudioVariation}
-                      {...controlProps}
-                    />
-                  )}
-                </VStack>
-              </PopoverBody>
-            </PopoverContent>
-          </Portal>
-        </Popover>
+        {popover}
       </Box>
     </Tooltip>
   );
