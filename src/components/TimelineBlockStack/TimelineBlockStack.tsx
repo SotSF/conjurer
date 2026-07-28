@@ -18,6 +18,7 @@ import { PatternOrEffectBlock } from "@/src/components/TimelineBlockStack/Patter
 import { BlockDotRow } from "@/src/components/TimelineBlockStack/BlockDotRow";
 import { BlockAutomationLanes } from "@/src/components/TimelineBlockStack/BlockAutomationLanes";
 import { BlockOpacityEdgeLine } from "@/src/components/TimelineBlockStack/BlockOpacityEdgeLine";
+import { hoverHelpProps } from "@/src/utils/hoverHelp";
 
 type Props = {
   patternBlock: Block;
@@ -147,6 +148,11 @@ export const TimelineBlockStack = observer(function TimelineBlockStack({
         // popover to render just outside the block's own width
         overflow="visible"
         onClick={(e: ReactMouseEvent) => e.stopPropagation()}
+        {...hoverHelpProps(
+          uiStore,
+          patternBlock.pattern.name,
+          "Pattern block — drag to move in time. Click to select; Shift+click to multi-select.",
+        )}
       >
         <TimelineBlockBound block={patternBlock} bound="left" />
         <TimelineBlockBound block={patternBlock} bound="right" />

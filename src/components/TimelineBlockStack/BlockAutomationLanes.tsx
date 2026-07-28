@@ -38,6 +38,7 @@ import { CurveRangeControl } from "@/src/components/ParameterVariations/CurveRan
 import { RegionSettingsPopover } from "@/src/components/ParameterVariations/RegionSettingsPopover";
 import { CurveVariation } from "@/src/types/Variations/CurveVariation";
 import { PeriodicVariation } from "@/src/types/Variations/PeriodicVariation";
+import { hoverHelpProps } from "@/src/utils/hoverHelp";
 import { AudioVariation } from "@/src/types/Variations/AudioVariation";
 import {
   allowedInsertTypes,
@@ -284,6 +285,7 @@ const LaneNameHeader = observer(function LaneNameHeader({
   armedType: InsertType | null;
   setArmedType: (t: InsertType | null) => void;
 }) {
+  const { uiStore } = useStore();
   const headerBg = selected ? "#2a3a52" : "#1c2533";
   const nameColor = selected ? "#ffd89a" : "#f6ad55";
 
@@ -302,6 +304,11 @@ const LaneNameHeader = observer(function LaneNameHeader({
         e.stopPropagation();
         onSelect();
       }}
+      {...hoverHelpProps(
+        uiStore,
+        `${label} lane`,
+        "Automation lane — click regions to edit curves. Drag across the lane to select a time span.",
+      )}
     >
       <HStack flex="1" minW={0} spacing={0} align="center">
         {/* equal-width segments so repeats are spaced across the block; the
@@ -372,6 +379,11 @@ const LaneNameHeader = observer(function LaneNameHeader({
             onClick={action(() => {
               block.toggleParamLane(uniformName);
             })}
+            {...hoverHelpProps(
+              uiStore,
+              "Collapse lane",
+              "Hide this automation lane. Re-arm the parameter to show it again.",
+            )}
           >
             <TbChevronUp size={13} />
           </Box>

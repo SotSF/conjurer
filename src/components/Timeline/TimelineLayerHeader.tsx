@@ -26,6 +26,7 @@ import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
 import { MdDragIndicator, MdExpandMore, MdChevronRight } from "react-icons/md";
 import { FaTrashAlt } from "react-icons/fa";
 import type { DraggableProvidedDragHandleProps } from "@hello-pangea/dnd";
+import { hoverHelpProps } from "@/src/utils/hoverHelp";
 
 type Props = {
   index: number;
@@ -39,7 +40,7 @@ export const TimelineLayerHeader = observer(function TimelineLayerHeader({
   dragHandleProps,
 }: Props) {
   const store = useStore();
-  const { selectedLayer } = store;
+  const { selectedLayer, uiStore } = store;
 
   const bgColor = selectedLayer === layer ? "gray.300" : "gray.400";
 
@@ -95,6 +96,11 @@ export const TimelineLayerHeader = observer(function TimelineLayerHeader({
             alignItems="center"
             aria-label="Drag to reorder layer"
             title="Drag to reorder layer"
+            {...hoverHelpProps(
+              uiStore,
+              "Reorder layer",
+              "Drag to change layer stacking order. Top layers render above lower ones.",
+            )}
           >
             <MdDragIndicator size={16} />
           </Box>
@@ -122,10 +128,20 @@ export const TimelineLayerHeader = observer(function TimelineLayerHeader({
             layer.collapsed = !layer.collapsed;
             e.stopPropagation();
           })}
+          {...hoverHelpProps(
+            uiStore,
+            layer.collapsed ? "Expand layer" : "Collapse layer",
+            "Hide or show this layer's blocks and automation lanes.",
+          )}
         />
 
         <Editable
           flexGrow={1}
+          {...hoverHelpProps(
+            uiStore,
+            "Layer name",
+            "Click to rename this layer.",
+          )}
           // collapsed: let this shrink below its content size (flex items
           // default to min-width:auto) so the name can clip to an ellipsis.
           // Expanded: leave it be, so a long name is free to wrap and overflow
@@ -172,6 +188,11 @@ export const TimelineLayerHeader = observer(function TimelineLayerHeader({
             layer.visible = !layer.visible;
             e.stopPropagation();
           })}
+          {...hoverHelpProps(
+            uiStore,
+            "Layer visibility",
+            "Hide this layer from the render without deleting its blocks.",
+          )}
         />
 
         <IconButton
@@ -191,6 +212,13 @@ export const TimelineLayerHeader = observer(function TimelineLayerHeader({
             e.stopPropagation();
             confirmDelete.onOpen();
           }}
+          {...hoverHelpProps(
+            uiStore,
+            "Delete layer",
+            canDelete
+              ? "Remove this layer and all of its blocks."
+              : "You need at least one layer.",
+          )}
         />
       </HStack>
 

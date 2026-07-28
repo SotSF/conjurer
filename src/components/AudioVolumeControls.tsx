@@ -12,6 +12,7 @@ import { useStore } from "@/src/types/StoreContext";
 import { action } from "mobx";
 import { useState } from "react";
 import { ControlGroup } from "@/src/components/ControlGroup";
+import { hoverHelpProps } from "@/src/utils/hoverHelp";
 
 function volumeIcon(muted: boolean, volume: number) {
   if (muted || volume === 0) return <FaVolumeMute size={17} />;
@@ -21,7 +22,7 @@ function volumeIcon(muted: boolean, volume: number) {
 
 export const AudioVolumeControls = observer(function AudioVolumeControls() {
   const store = useStore();
-  const { audioStore } = store;
+  const { audioStore, uiStore } = store;
   const [showTooltip, setShowTooltip] = useState(false);
 
   return (
@@ -35,6 +36,11 @@ export const AudioVolumeControls = observer(function AudioVolumeControls() {
         icon={volumeIcon(audioStore.audioMuted, audioStore.audioVolume)}
         color={audioStore.audioMuted ? "orange.300" : undefined}
         onClick={action(() => audioStore.toggleAudioMuted())}
+        {...hoverHelpProps(
+          uiStore,
+          "Mute audio",
+          "Mute or unmute the experience soundtrack.",
+        )}
       />
       <Slider
         aria-label="Audio volume"
@@ -46,8 +52,17 @@ export const AudioVolumeControls = observer(function AudioVolumeControls() {
         value={audioStore.audioVolume}
         onChange={action((value) => (audioStore.audioVolume = value))}
         width="120px"
-        onMouseEnter={() => setShowTooltip(true)}
-        onMouseLeave={() => setShowTooltip(false)}
+        onMouseEnter={action(() => {
+          setShowTooltip(true);
+          uiStore.setHoverHelp({
+            title: "Audio volume",
+            description: "Loudness of the experience soundtrack.",
+          });
+        })}
+        onMouseLeave={action(() => {
+          setShowTooltip(false);
+          uiStore.clearHoverHelp();
+        })}
       >
         <SliderTrack>
           <SliderFilledTrack />

@@ -11,6 +11,12 @@ const INITIAL_RENDER_TARGET_SIZE = 512;
 
 export type DisplayMode = "canopy" | "canopySpace" | "cartesianSpace" | "none";
 
+/** Ableton-style status-bar help for the control currently under the pointer. */
+export type HoverHelp = {
+  title: string;
+  description?: string;
+};
+
 export class UIStore {
   horizontalLayout = true;
   showingPerformance = false;
@@ -29,6 +35,15 @@ export class UIStore {
   showingLoadBeatMapModal = false;
   showingLatencyModal = false;
   capturingThumbnail = false;
+
+  // transient: Ableton-style hover help shown in the status info bar.
+  // A stack so nested controls (block → param dot) restore the outer tip on leave.
+  // Not persisted.
+  hoverHelpStack: HoverHelp[] = [];
+
+  get hoverHelp(): HoverHelp | null {
+    return this.hoverHelpStack.at(-1) ?? null;
+  }
 
   // transient: the id of a just-created layer whose name field should open in
   // edit mode (and focus) when its header mounts. Cleared once consumed.
@@ -164,6 +179,19 @@ export class UIStore {
 
   zoomOut = (anchorClientX?: number) =>
     this.zoomBy(1 / ZOOM_FACTOR, anchorClientX);
+
+  setHoverHelp = (help: HoverHelp) => {
+    this.hoverHelpStack = [...this.hoverHelpStack, help];
+  };
+
+  clearHoverHelp = () => {
+    if (this.hoverHelpStack.length === 0) return;
+    this.hoverHelpStack = this.hoverHelpStack.slice(0, -1);
+  };
+
+  clearAllHoverHelp = () => {
+    this.hoverHelpStack = [];
+  };
 
   toggleLayout = () => {
     this.horizontalLayout = !this.horizontalLayout;

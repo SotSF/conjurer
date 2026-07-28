@@ -6,6 +6,7 @@ import { action } from "mobx";
 import { observer } from "mobx-react-lite";
 import { useCallback, useRef, useState } from "react";
 import Draggable, { DraggableData, DraggableEvent } from "react-draggable";
+import { hoverHelpProps } from "@/src/utils/hoverHelp";
 
 const LINE_COLOR = "#3182ce";
 
@@ -109,6 +110,13 @@ const FadeHandle = function FadeHandle({
         cursor="col-resize"
         title={side === "in" ? "Drag fade-in" : "Drag fade-out"}
         onClick={(e) => e.stopPropagation()}
+        {...hoverHelpProps(
+          uiStore,
+          side === "in" ? "Fade in" : "Fade out",
+          side === "in"
+            ? "Drag to adjust where this block fades in from transparent."
+            : "Drag to adjust where this block fades out to transparent.",
+        )}
       />
     </Draggable>
   );

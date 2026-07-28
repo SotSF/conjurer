@@ -15,6 +15,7 @@ import { BeatGridOverlay } from "@/src/components/BeatGridOverlay";
 import { BEAT_GRID_UI_ENABLED } from "@/src/utils/featureFlags";
 import { TIMELINE_HEADER_WIDTH } from "@/src/types/UIStore";
 import { MAX_TIME } from "@/src/utils/time";
+import { hoverHelpProps } from "@/src/utils/hoverHelp";
 
 // Matches TimerAndWaveform's sticky header height so the layer stack can fill
 // the remaining timeline viewport (playhead + empty-space seeking).
@@ -112,6 +113,11 @@ export const TimelineLayerStack = observer(function TimelineLayerStack() {
               // open the new layer's name field for immediate naming
               store.uiStore.layerIdToNameOnMount = layer.id;
             })}
+            {...hoverHelpProps(
+              uiStore,
+              "Add layer",
+              "Create a new timeline layer for stacking patterns.",
+            )}
           >
             Add layer
           </Button>

@@ -34,6 +34,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { hoverHelpProps } from "@/src/utils/hoverHelp";
 
 const BASE_EXCLUDED = ["u_time", "u_texture"];
 const ARMED_COLOR = "#63b3ed"; // blue.300 — param armed to a timeline lane
@@ -106,11 +107,13 @@ export const BlockDevicePanel = observer(function BlockDevicePanel() {
       <HStack position="absolute" top="2px" right="4px" zIndex={1} spacing={0}>
         <PanelIconButton
           label="Scroll timeline to this block"
+          helpDescription="Jump the timeline so this block is visible."
           icon={<MdMyLocation />}
           onClick={action(() => uiStore.scrollToTime(block.startTime))}
         />
         <PanelIconButton
           label="Close device panel"
+          helpDescription="Hide the device panel. Selecting a block will reopen it."
           icon={<MdClose />}
           onClick={action(() => {
             uiStore.showDevicePanel = false;
@@ -216,7 +219,9 @@ const ParamCell = function ParamCell({
   uniformName: string;
   isEffect: boolean;
 }) {
+  const { uiStore } = useStore();
   const param = block.pattern.params[uniformName];
+  const armed = block.lanedParams.has(uniformName);
   return (
     <HStack
       height={`${CELL_HEIGHT}px`}
@@ -231,6 +236,13 @@ const ParamCell = function ParamCell({
         e.stopPropagation();
         block.toggleParamLane(uniformName);
       })}
+      {...hoverHelpProps(
+        uiStore,
+        param.name,
+        armed
+          ? "Disarm — hide this parameter's automation lane on the timeline."
+          : "Arm — open this parameter's automation lane on the timeline.",
+      )}
     >
       <Text
         fontSize="10.5px"
@@ -387,6 +399,7 @@ const PatternUnit = function PatternUnit({ block }: { block: Block }) {
         </Text>
         <PanelIconButton
           label="Toggle all lanes"
+          helpDescription="Arm or disarm automation lanes for every parameter in this unit."
           icon={<MdViewStream />}
           onClick={action((e) => {
             e.stopPropagation();
@@ -405,13 +418,16 @@ const PatternUnit = function PatternUnit({ block }: { block: Block }) {
 
 const PanelIconButton = function PanelIconButton({
   label,
+  helpDescription,
   icon,
   onClick,
 }: {
   label: string;
+  helpDescription?: string;
   icon: ReactElement;
   onClick: (e: ReactMouseEvent) => void;
 }) {
+  const { uiStore } = useStore();
   return (
     <Tooltip label={label} openDelay={0} hasArrow fontSize="xs">
       <IconButton
@@ -424,6 +440,7 @@ const PanelIconButton = function PanelIconButton({
         color="#63b3ed"
         flexShrink={0}
         onClick={onClick}
+        {...hoverHelpProps(uiStore, label, helpDescription)}
       />
     </Tooltip>
   );
@@ -438,6 +455,7 @@ const EffectUnit = function EffectUnit({
   effectBlock: Block;
   dragHandleProps: any;
 }) {
+  const { uiStore } = useStore();
   const uniformNames = Object.keys(effectBlock.pattern.params).filter(
     (name) => !BASE_EXCLUDED.includes(name) && name !== "u_opacity",
   );
@@ -460,6 +478,11 @@ const EffectUnit = function EffectUnit({
               cursor="grab"
               color="#718096"
               flexShrink={0}
+              {...hoverHelpProps(
+                uiStore,
+                "Reorder effect",
+                "Drag to change this effect's position in the chain.",
+              )}
             >
               ⠿
             </Box>
@@ -471,6 +494,7 @@ const EffectUnit = function EffectUnit({
         <HStack spacing={0} flexShrink={0}>
           <PanelIconButton
             label="Toggle all lanes"
+            helpDescription="Arm or disarm automation lanes for every parameter on this effect."
             icon={<MdViewStream />}
             onClick={action((e) => {
               e.stopPropagation();
@@ -485,6 +509,11 @@ const EffectUnit = function EffectUnit({
               flexShrink={0}
               _hover={{ color: "#fc8181" }}
               onClick={action(() => parentBlock.removeEffectBlock(effectBlock))}
+              {...hoverHelpProps(
+                uiStore,
+                "Remove effect",
+                "Detach this effect from the pattern's effect chain.",
+              )}
             >
               ✕
             </Text>
@@ -497,6 +526,7 @@ const EffectUnit = function EffectUnit({
 };
 
 const AddEffectUnit = function AddEffectUnit({ block }: { block: Block }) {
+  const { uiStore } = useStore();
   return (
     <Menu placement="top">
       <MenuButton
@@ -511,6 +541,11 @@ const AddEffectUnit = function AddEffectUnit({ block }: { block: Block }) {
         color="#718096"
         fontSize="20px"
         fontWeight={400}
+        {...hoverHelpProps(
+          uiStore,
+          "Add effect",
+          "Append an effect to this pattern's processing chain.",
+        )}
       >
         ＋
       </MenuButton>

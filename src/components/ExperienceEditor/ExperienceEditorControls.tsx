@@ -13,6 +13,7 @@ import { ControlGroup } from "@/src/components/ControlGroup";
 import { ZoomControls } from "@/src/components/ZoomControls";
 import { BeatMapControls } from "@/src/components/BeatMapControls";
 import { FaShareAlt } from "react-icons/fa";
+import { hoverHelpProps } from "@/src/utils/hoverHelp";
 
 export const ExperienceEditorControls = observer(
   function ExperienceEditorControls() {
@@ -49,6 +50,11 @@ export const ExperienceEditorControls = observer(
               : undefined
           }
           onClick={action(() => uiStore.toggleWaveformOverlay())}
+          {...hoverHelpProps(
+            uiStore,
+            "Waveform overlay",
+            "Draw the audio waveform over the timeline for visual alignment.",
+          )}
         />
         <IconButton
           aria-label="Keep playhead centered"
@@ -67,6 +73,11 @@ export const ExperienceEditorControls = observer(
             () =>
               (uiStore.keepingPlayHeadCentered =
                 !uiStore.keepingPlayHeadCentered),
+          )}
+          {...hoverHelpProps(
+            uiStore,
+            "Follow playhead (center)",
+            "Keep the playhead centered in the timeline while playing.",
           )}
         />
         <IconButton
@@ -87,6 +98,11 @@ export const ExperienceEditorControls = observer(
               (uiStore.keepingPlayHeadVisible =
                 !uiStore.keepingPlayHeadVisible),
           )}
+          {...hoverHelpProps(
+            uiStore,
+            "Follow playhead (edge)",
+            "Scroll the timeline just enough to keep the playhead in view.",
+          )}
         />
         <IconButton
           aria-label="Copy link to experience"
@@ -94,6 +110,11 @@ export const ExperienceEditorControls = observer(
           height={6}
           icon={<FaShareAlt size={17} />}
           onClick={store.copyLinkToExperience}
+          {...hoverHelpProps(
+            uiStore,
+            "Copy link",
+            "Copy a shareable link to this experience to the clipboard.",
+          )}
         />
         <BeatMapControls />
       </HStack>

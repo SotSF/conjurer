@@ -15,6 +15,7 @@ import { useState } from "react";
 
 export const IntensitySlider = observer(function IntensitySlider() {
   const store = useStore();
+  const { uiStore } = store;
   const [showTooltip, setShowTooltip] = useState(false);
 
   return (
@@ -42,8 +43,18 @@ export const IntensitySlider = observer(function IntensitySlider() {
         step={0.01}
         colorScheme="teal"
         onChange={action((v) => (store.globalIntensity = v))}
-        onMouseEnter={() => setShowTooltip(true)}
-        onMouseLeave={() => setShowTooltip(false)}
+        onMouseEnter={action(() => {
+          setShowTooltip(true);
+          uiStore.setHoverHelp({
+            title: "Output intensity",
+            description:
+              "Master brightness for the rendered canopy output.",
+          });
+        })}
+        onMouseLeave={action(() => {
+          setShowTooltip(false);
+          uiStore.clearHoverHelp();
+        })}
       >
         <SliderTrack>
           <SliderFilledTrack />

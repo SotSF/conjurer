@@ -17,6 +17,8 @@ import {
 import { Block } from "@/src/types/Block";
 import { NumberParamInput } from "@/src/components/NumberParamInput";
 import { observer } from "mobx-react-lite";
+import { useStore } from "@/src/types/StoreContext";
+import { hoverHelpProps } from "@/src/utils/hoverHelp";
 
 type PatternTimingModalProps = {
   block: Block;
@@ -25,6 +27,7 @@ type PatternTimingModalProps = {
 export const PatternTimingModal = observer(function PatternTimingModal({
   block,
 }: PatternTimingModalProps) {
+  const { uiStore } = useStore();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [startTime, setStartTime] = useState(block.startTime.toString());
   const [endTime, setEndTime] = useState(block.endTime.toString());
@@ -55,6 +58,11 @@ export const PatternTimingModal = observer(function PatternTimingModal({
         height={6}
         icon={<ImClock size={15} />}
         onClick={onOpen}
+        {...hoverHelpProps(
+          uiStore,
+          "Pattern timing",
+          "Set exact start time, end time, or duration for this block.",
+        )}
       />
 
       <Modal isOpen={isOpen} onClose={onClose} isCentered>

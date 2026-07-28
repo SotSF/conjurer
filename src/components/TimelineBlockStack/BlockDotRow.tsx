@@ -8,6 +8,7 @@ import { action } from "mobx";
 import { observer } from "mobx-react-lite";
 import { MdViewStream } from "react-icons/md";
 import { MouseEvent as ReactMouseEvent, useState } from "react";
+import { hoverHelpProps } from "@/src/utils/hoverHelp";
 
 // params that are machinery rather than user-facing controls
 const BASE_EXCLUDED = ["u_time", "u_texture"];
@@ -202,6 +203,7 @@ const DotList = function DotList({
   patternSignals: Signal[];
   effectSignals: Signal[];
 }) {
+  const { uiStore } = useStore();
   return (
     // pt gives the lane-on focus ring room so it isn't clipped by the header
     // above; no overflow clip here since narrow blocks collapse to a badge
@@ -232,6 +234,11 @@ const DotList = function DotList({
             e.stopPropagation();
             block.toggleAllLanes();
           })}
+          {...hoverHelpProps(
+            uiStore,
+            "Toggle all lanes",
+            "Arm or disarm automation lanes for every parameter on this block.",
+          )}
         >
           <MdViewStream size={13} />
         </Box>
@@ -263,6 +270,7 @@ const DotList = function DotList({
 };
 
 const Dot = function Dot({ signal }: { signal: Signal }) {
+  const { uiStore } = useStore();
   const { authored, laneOn, isOpacity, fading, isEffect } = signal;
 
   const fill = isOpacity
@@ -290,6 +298,9 @@ const Dot = function Dot({ signal }: { signal: Signal }) {
   });
 
   const size = laneOn ? "10px" : "9px";
+  const laneHelp = laneOn
+    ? "Click to hide this parameter's automation lane."
+    : "Click to open this parameter's automation lane on the timeline.";
   return (
     <Tooltip
       label={signal.label}
@@ -310,6 +321,7 @@ const Dot = function Dot({ signal }: { signal: Signal }) {
         transform={isEffect ? "rotate(45deg)" : undefined}
         boxShadow={laneOn ? `0 0 0 2px ${ringColor}` : undefined}
         cursor="pointer"
+        {...hoverHelpProps(uiStore, signal.label, laneHelp)}
       />
     </Tooltip>
   );
