@@ -32,6 +32,7 @@ import {
   useEffect,
   useState,
 } from "react";
+import { TbChevronUp } from "react-icons/tb";
 import { AddRegionMenu } from "@/src/components/ParameterVariations/AddRegionMenu";
 import { CurveRangeControl } from "@/src/components/ParameterVariations/CurveRangeControl";
 import { RegionSettingsPopover } from "@/src/components/ParameterVariations/RegionSettingsPopover";
@@ -337,25 +338,45 @@ const LaneNameHeader = observer(function LaneNameHeader({
           </HStack>
         ))}
       </HStack>
-      {insertTypes.length > 0 && (
-        <Box
-          position="sticky"
-          right={0}
-          flexShrink={0}
-          display="flex"
-          alignItems="center"
-          color="#a0aec0"
-          pl={1}
-          bg={headerBg}
-          onClick={(e) => e.stopPropagation()}
-        >
+      <HStack
+        position="sticky"
+        right={0}
+        flexShrink={0}
+        spacing={1.5}
+        align="center"
+        color="#a0aec0"
+        pl={1}
+        bg={headerBg}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {insertTypes.length > 0 && (
           <AddRegionMenu
             types={insertTypes}
             armedType={armedType}
             setArmedType={setArmedType}
           />
-        </Box>
-      )}
+        )}
+        <Tooltip
+          label="Collapse lane"
+          openDelay={0}
+          hasArrow
+          placement="top"
+          fontSize="xs"
+        >
+          <Box
+            as="span"
+            display="inline-flex"
+            cursor="pointer"
+            color="#a0aec0"
+            _hover={{ color: "#63b3ed" }}
+            onClick={action(() => {
+              block.toggleParamLane(uniformName);
+            })}
+          >
+            <TbChevronUp size={13} />
+          </Box>
+        </Tooltip>
+      </HStack>
     </HStack>
   );
 });

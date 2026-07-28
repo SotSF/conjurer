@@ -7,6 +7,7 @@ import {
   Droppable,
   OnDragEndResponder,
 } from "@hello-pangea/dnd";
+import { useRef } from "react";
 import { useStore } from "@/src/types/StoreContext";
 import { PlayHead } from "@/src/components/PlayHead";
 import { TimelineLayer } from "@/src/components/Timeline/TimelineLayer";
@@ -15,8 +16,14 @@ import { BEAT_GRID_UI_ENABLED } from "@/src/utils/featureFlags";
 import { TIMELINE_HEADER_WIDTH } from "@/src/types/UIStore";
 import { MAX_TIME } from "@/src/utils/time";
 
+// Matches TimerAndWaveform's sticky header height so the layer stack can fill
+// the remaining timeline viewport (playhead + empty-space seeking).
+const TIMER_WAVEFORM_HEIGHT = 80;
+
 export const TimelineLayerStack = observer(function TimelineLayerStack() {
   const store = useStore();
+  const { audioStore, uiStore } = store;
+  const stackRef = useRef<HTMLDivElement>(null);
 
   const onDragEnd: OnDragEndResponder = action((result) => {
     if (!result.destination) return;
@@ -25,6 +32,20 @@ export const TimelineLayerStack = observer(function TimelineLayerStack() {
       store.layers[result.source.index],
       result.destination.index,
     );
+  });
+
+  // Seek from clicks in empty space below/beside layers (the Add-layer row
+  // spacer and the flex-grow filler). Layer content boxes still handle their
+  // own seeks; this covers everything the playhead paints that isn't a layer.
+  const seekFromClientX = action((clientX: number) => {
+    const stackLeft = stackRef.current?.getBoundingClientRect().left ?? 0;
+    audioStore.setTimeWithCursor(
+      Math.max(
+        0,
+        uiStore.xToTime(clientX - stackLeft - TIMELINE_HEADER_WIDTH),
+      ),
+    );
+    store.deselectAll();
   });
 
   // Read the observable array here in the observer's own render body (not inside
@@ -36,7 +57,16 @@ export const TimelineLayerStack = observer(function TimelineLayerStack() {
   ));
 
   return (
-    <VStack position="relative" alignItems="flex-start" spacing={0}>
+    <VStack
+      ref={stackRef}
+      position="relative"
+      alignItems="flex-start"
+      spacing={0}
+      // Fill the timeline below the sticky waveform so the playhead and seek
+      // hit-target extend into empty space when layers are short. When layers
+      // are taller, content height wins and the playhead stretches with it.
+      minHeight={`calc(100% - ${TIMER_WAVEFORM_HEIGHT}px)`}
+    >
       <PlayHead />
       {BEAT_GRID_UI_ENABLED && <BeatGridOverlay />}
       <DragDropContext onDragEnd={onDragEnd}>
@@ -60,7 +90,7 @@ export const TimelineLayerStack = observer(function TimelineLayerStack() {
           containing block scrolls out of view and the button drifts off after
           ~one screen; the spacer keeps the containing block full-width so the
           button stays pinned across the whole horizontal scroll. */}
-      <HStack spacing={0}>
+      <HStack spacing={0} flexShrink={0}>
         <Box
           position="sticky"
           left={0}
@@ -87,8 +117,30 @@ export const TimelineLayerStack = observer(function TimelineLayerStack() {
           </Button>
         </Box>
         {/* spacer so the row is as wide as a layer's content, giving the sticky
-            button room to stay pinned across the full horizontal scroll */}
-        <Box width={store.uiStore.timeToXPixels(MAX_TIME)} flexShrink={0} />
+            button room to stay pinned across the full horizontal scroll.
+            Also seeks — clicking beside Add layer should move the playhead. */}
+        <Box
+          width={uiStore.timeToXPixels(MAX_TIME)}
+          flexShrink={0}
+          alignSelf="stretch"
+          onClick={(e) => seekFromClientX(e.clientX)}
+        />
+      </HStack>
+      {/* Fills leftover viewport height below the last layer / Add-layer row so
+          clicks in the empty gray area seek like the timeline content does. */}
+      <HStack spacing={0} flex="1 0 auto" alignSelf="stretch" minHeight={0}>
+        <Box
+          width={`${TIMELINE_HEADER_WIDTH}px`}
+          flexShrink={0}
+          alignSelf="stretch"
+          onClick={(e) => seekFromClientX(e.clientX)}
+        />
+        <Box
+          width={uiStore.timeToXPixels(MAX_TIME)}
+          flexShrink={0}
+          alignSelf="stretch"
+          onClick={(e) => seekFromClientX(e.clientX)}
+        />
       </HStack>
     </VStack>
   );

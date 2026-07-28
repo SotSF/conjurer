@@ -5,6 +5,7 @@ import styles from "@/styles/TimeMarker.module.css";
 import classNames from "classnames";
 import { useEffect, useRef } from "react";
 import { useDebouncedCallback } from "use-debounce";
+import { TIMELINE_HEADER_WIDTH } from "@/src/types/UIStore";
 
 export const PlayHead = observer(function PlayHead() {
   const store = useStore();
@@ -67,6 +68,7 @@ export const PlayHead = observer(function PlayHead() {
       id="playhead"
       position="absolute"
       top={0}
+      bottom={0}
       left={uiStore.timeToXPixels(audioStore.lastCursor.position)}
       className={classNames(styles.marker, {
         [styles.playing]: audioState === "playing",
@@ -76,13 +78,16 @@ export const PlayHead = observer(function PlayHead() {
       zIndex={10}
       pointerEvents="none"
     >
+      {/* Height comes from the parent stack (top/bottom: 0), which grows with
+          layers and stretches to fill the timeline viewport — no per-frame
+          measurement needed. */}
       <Box
         position="absolute"
-        top="0"
-        left="150"
+        top={0}
+        bottom={0}
+        left={`${TIMELINE_HEADER_WIDTH}px`}
         bgColor="red"
         width="1px"
-        height="200vh"
       />
     </Box>
   );
