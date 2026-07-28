@@ -10,6 +10,8 @@ import {
 import { useState } from "react";
 import { TbPlus } from "react-icons/tb";
 import { InsertType } from "@/src/utils/regionConvert";
+import { useStore } from "@/src/types/StoreContext";
+import { hoverHelpProps } from "@/src/utils/hoverHelp";
 
 const LABEL: Record<InsertType, string> = {
   curve: "Curve",
@@ -17,6 +19,14 @@ const LABEL: Record<InsertType, string> = {
   audio: "Audio",
   palette: "Palette",
   color: "Color",
+};
+
+const HELP: Record<InsertType, string> = {
+  curve: "Draw a freehand value curve over time.",
+  lfo: "Modulate with a looping oscillator (sine, triangle, etc.).",
+  audio: "Drive the parameter from the soundtrack's audio analysis.",
+  palette: "Animate through a color palette over time.",
+  color: "Interpolate between colors over time.",
 };
 
 type Props = {
@@ -39,6 +49,7 @@ export const AddRegionMenu = ({
   setArmedType,
   onOpenChange,
 }: Props) => {
+  const { uiStore } = useStore();
   // track open state to suppress the tooltip while the menu is up (chakra keeps
   // a tooltip open while its trigger holds focus, which the open menu does)
   const [menuOpen, setMenuOpen] = useState(false);
@@ -62,6 +73,11 @@ export const AddRegionMenu = ({
             e.stopPropagation();
             setArmedType(null);
           }}
+          {...hoverHelpProps(
+            uiStore,
+            `Placing ${LABEL[armedType]}`,
+            "Click or drag on the lane to place the region. Click ＋ again or press Esc to cancel.",
+          )}
         >
           <TbPlus size={13} />
         </Box>
@@ -77,7 +93,15 @@ export const AddRegionMenu = ({
       fontSize="xs"
       isDisabled={menuOpen}
     >
-      <Box as="span" display="inline-flex">
+      <Box
+        as="span"
+        display="inline-flex"
+        {...hoverHelpProps(
+          uiStore,
+          "Add region",
+          "Insert a new automation region. Pick a type, then click or drag on the lane to place it.",
+        )}
+      >
         <Menu
           placement="bottom-end"
           isLazy
@@ -111,6 +135,7 @@ export const AddRegionMenu = ({
                     e.stopPropagation();
                     setArmedType(t);
                   }}
+                  {...hoverHelpProps(uiStore, LABEL[t], HELP[t])}
                 >
                   {LABEL[t]}
                 </MenuItem>

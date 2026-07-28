@@ -17,6 +17,8 @@ import {
 import { action } from "mobx";
 import { useState } from "react";
 import { TbSettings } from "react-icons/tb";
+import { useStore } from "@/src/types/StoreContext";
+import { hoverHelpProps } from "@/src/utils/hoverHelp";
 
 type Props = {
   block: Block;
@@ -37,6 +39,7 @@ export const CurveRangeControl = function CurveRangeControl({
   uniformName,
   variation,
 }: Props) {
+  const { uiStore } = useStore();
   const param = block.pattern.params[uniformName];
   const [nodeMin, nodeMax] = variation.computeDomain();
   // The range the values currently occupy — the source of the next remap.
@@ -62,7 +65,15 @@ export const CurveRangeControl = function CurveRangeControl({
       fontSize="xs"
       isDisabled={popoverOpen}
     >
-      <Box as="span" display="inline-flex">
+      <Box
+        as="span"
+        display="inline-flex"
+        {...hoverHelpProps(
+          uiStore,
+          "Curve value range",
+          "Set the min/max output range for this curve. Editing remaps existing points proportionally.",
+        )}
+      >
         <Popover
           placement="bottom"
           isLazy

@@ -411,11 +411,12 @@ const RegionBar = observer(function RegionBar({
   setHeaderRegionId: (id: string | null) => void;
   onSelect: () => void;
 }) {
+  const { uiStore } = useStore();
   const variations = block.parameterVariations[uniformName] ?? [];
 
   // opacity in auto mode has no regions — its bar is a single AUTO tab that
   // materializes into an editable curve
-  if (isOpacity && !block.hasManualOpacity)
+  if (isOpacity && !block.hasManualOpacity) {
     return (
       <HStack
         position="relative"
@@ -432,6 +433,11 @@ const RegionBar = observer(function RegionBar({
           e.stopPropagation();
           onSelect();
         }}
+        {...hoverHelpProps(
+          uiStore,
+          "Auto opacity",
+          "Opacity is crossfading automatically with neighboring blocks. Customize to edit it as a curve.",
+        )}
       >
         <Text
           position="sticky"
@@ -457,11 +463,17 @@ const RegionBar = observer(function RegionBar({
             e.stopPropagation();
             block.materializeAutoOpacity();
           })}
+          {...hoverHelpProps(
+            uiStore,
+            "Customize opacity",
+            "Convert auto crossfade into an editable opacity curve region.",
+          )}
         >
           Customize
         </Button>
       </HStack>
     );
+  }
 
   if (variations.length === 0) return null;
 
@@ -559,7 +571,18 @@ const RegionTab = observer(function RegionTab({
   };
 
   const dragHandle = multiple ? (
-    <Box {...dragHandleProps} cursor="grab" color="#8a97a8" fontSize="10px" flexShrink={0}>
+    <Box
+      {...dragHandleProps}
+      cursor="grab"
+      color="#8a97a8"
+      fontSize="10px"
+      flexShrink={0}
+      {...hoverHelpProps(
+        uiStore,
+        "Reorder region",
+        "Drag to change this region's order along the lane.",
+      )}
+    >
       ⠿
     </Box>
   ) : null;
@@ -584,7 +607,16 @@ const RegionTab = observer(function RegionTab({
       : (["curve", "lfo", "audio"] as RegionType[]).filter((t) => t !== current);
   const typeLabel =
     convertTargets.length === 0 ? (
-      typeLabelText
+      <Box
+        as="span"
+        {...hoverHelpProps(
+          uiStore,
+          `${label} region`,
+          "Automation region of this type spanning part of the parameter lane.",
+        )}
+      >
+        {typeLabelText}
+      </Box>
     ) : (
       <Tooltip
         label="Convert region type"
@@ -594,7 +626,15 @@ const RegionTab = observer(function RegionTab({
         fontSize="xs"
         isDisabled={convertOpen}
       >
-        <Box as="span" display="inline-flex">
+        <Box
+          as="span"
+          display="inline-flex"
+          {...hoverHelpProps(
+            uiStore,
+            "Convert region type",
+            "Change this region between Curve, LFO, and Audio while keeping its timing.",
+          )}
+        >
           <Menu
             isLazy
             placement="bottom-start"
@@ -677,6 +717,11 @@ const RegionTab = observer(function RegionTab({
             e.stopPropagation();
             block.resetVariationToDefault(uniformName, variation);
           })}
+          {...hoverHelpProps(
+            uiStore,
+            "Reset region",
+            "Restore this region to a flat default value, clearing authored modulation.",
+          )}
         >
           ↺
         </Box>
@@ -697,6 +742,11 @@ const RegionTab = observer(function RegionTab({
               e.stopPropagation();
               store.deleteVariation(block, uniformName, variation);
             })}
+            {...hoverHelpProps(
+              uiStore,
+              "Delete region",
+              "Remove this region from the lane. Neighboring regions keep their timing.",
+            )}
           >
             ✕
           </Box>

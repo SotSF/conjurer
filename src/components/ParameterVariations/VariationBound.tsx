@@ -6,6 +6,7 @@ import { useStore } from "@/src/types/StoreContext";
 import { Block } from "@/src/types/Block";
 import { action } from "mobx";
 import { VARIATION_BOUND_WIDTH } from "@/src/utils/layout";
+import { hoverHelpProps } from "@/src/utils/hoverHelp";
 
 type ParameterProps = {
   uniformName: string;
@@ -67,6 +68,11 @@ export const VariationBound = memo(function VariationBound({
         cursor="col-resize"
         borderRadius="5px"
         onDoubleClick={handleDoubleClick}
+        {...hoverHelpProps(
+          uiStore,
+          "Resize region",
+          "Drag to change this region's duration. Double-click to expand to the maximum available space.",
+        )}
       />
     </Draggable>
   );

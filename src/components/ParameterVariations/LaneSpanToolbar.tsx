@@ -6,6 +6,7 @@ import { TbCopy, TbRepeat, TbX } from "react-icons/tb";
 import { Block } from "@/src/types/Block";
 import { useStore } from "@/src/types/StoreContext";
 import { allowedInsertTypes, InsertType } from "@/src/utils/regionConvert";
+import { hoverHelpProps } from "@/src/utils/hoverHelp";
 
 const TYPE_LABEL: Record<InsertType, string> = {
   curve: "Curve",
@@ -50,6 +51,7 @@ export const LaneSpanToolbar = observer(function LaneSpanToolbar({
 
   const iconButton = (
     label: string,
+    description: string,
     icon: React.ReactElement,
     onClick: () => void,
   ) => (
@@ -61,6 +63,7 @@ export const LaneSpanToolbar = observer(function LaneSpanToolbar({
         color="#c3cdda"
         _hover={{ color: "#63b3ed" }}
         onClick={onClick}
+        {...hoverHelpProps(uiStore, label, description)}
       >
         {icon}
       </Box>
@@ -83,6 +86,11 @@ export const LaneSpanToolbar = observer(function LaneSpanToolbar({
         // the toolbar is an action bar, not part of the lane's drag surface
         onPointerDown={(e) => e.stopPropagation()}
         onClick={(e) => e.stopPropagation()}
+        {...hoverHelpProps(
+          uiStore,
+          "Lane span",
+          "Actions for the selected time range on this automation lane.",
+        )}
       >
         <Text fontFamily="mono" fontSize="9px" color="gray.400">
           {`${parseFloat(duration.toFixed(2))}s`}
@@ -106,21 +114,31 @@ export const LaneSpanToolbar = observer(function LaneSpanToolbar({
               color="#c3cdda"
               _hover={{ bg: "whiteAlpha.200", color: "#63b3ed" }}
               onClick={action(() => store.replaceLaneSpanWithType(type))}
+              {...hoverHelpProps(
+                uiStore,
+                `Replace with ${TYPE_LABEL[type]}`,
+                `Overwrite the selected span with a new ${TYPE_LABEL[type]} region.`,
+              )}
             >
               {TYPE_LABEL[type]}
             </Button>
           </Tooltip>
         ))}
-        {iconButton("Copy span", <TbCopy size={12} />, () =>
-          store.copyLaneSpanToSystemClipboard(),
+        {iconButton(
+          "Copy span",
+          "Copy the selected span to the clipboard (⌘C also works).",
+          <TbCopy size={12} />,
+          () => store.copyLaneSpanToSystemClipboard(),
         )}
         {iconButton(
-          "Repeat span after itself",
+          "Repeat span",
+          "Duplicate the selection immediately after itself.",
           <TbRepeat size={12} />,
           action(() => store.duplicateLaneSpan()),
         )}
         {iconButton(
           "Clear selection",
+          "Deselect the lane span without changing the regions.",
           <TbX size={12} />,
           action(() => store.clearLaneSpan()),
         )}

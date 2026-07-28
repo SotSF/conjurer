@@ -3,6 +3,7 @@ import { Block } from "@/src/types/Block";
 import { useStore } from "@/src/types/StoreContext";
 import { runInAction } from "mobx";
 import { observer } from "mobx-react-lite";
+import { hoverHelpProps } from "@/src/utils/hoverHelp";
 
 // Cumulative lane time at the boundary AFTER region `index` (i.e. the seam
 // between region `index` and `index + 1`).
@@ -83,6 +84,11 @@ export const RegionBoundary = observer(function RegionBoundary({
       role="group"
       onPointerDown={onPointerDown}
       _hover={{ "& > div": { opacity: 1, background: "#8fcbf5" } }}
+      {...hoverHelpProps(
+        uiStore,
+        "Region boundary",
+        "Drag to retime the seam between neighboring regions. Hold ⌃ for freehand (no beat snap).",
+      )}
     >
       {/* the visible seam line, faint until hovered */}
       <Box

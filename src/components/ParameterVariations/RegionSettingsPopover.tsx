@@ -19,6 +19,8 @@ import {
 } from "@chakra-ui/react";
 import { ReactElement, useState } from "react";
 import { TbSettings } from "react-icons/tb";
+import { useStore } from "@/src/types/StoreContext";
+import { hoverHelpProps } from "@/src/utils/hoverHelp";
 
 type Props = {
   block: Block;
@@ -41,12 +43,24 @@ export const RegionSettingsPopover = function RegionSettingsPopover({
   variation,
   children,
 }: Props) {
+  const { uiStore } = useStore();
   const isPeriodic = variation instanceof PeriodicVariation;
   const isAudio = variation instanceof AudioVariation;
   const [popoverOpen, setPopoverOpen] = useState(false);
   if (!isPeriodic && !isAudio) return null;
 
   const controlProps = { block, uniformName };
+  const settingsHelp = isPeriodic
+    ? {
+        title: "LFO settings",
+        description:
+          "Adjust waveform, rate, amplitude, and other oscillator parameters.",
+      }
+    : {
+        title: "Audio settings",
+        description:
+          "Configure how soundtrack analysis drives this parameter.",
+      };
 
   const popover = (
     <Popover
@@ -117,7 +131,15 @@ export const RegionSettingsPopover = function RegionSettingsPopover({
       fontSize="xs"
       isDisabled={popoverOpen}
     >
-      <Box as="span" display="inline-flex">
+      <Box
+        as="span"
+        display="inline-flex"
+        {...hoverHelpProps(
+          uiStore,
+          settingsHelp.title,
+          settingsHelp.description,
+        )}
+      >
         {popover}
       </Box>
     </Tooltip>
