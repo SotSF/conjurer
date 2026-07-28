@@ -29,6 +29,18 @@ import {
   DEFAULT_BRIGHTNESS_LIMITER_RELEASE_SEC,
   DEFAULT_BRIGHTNESS_LIMIT_THRESHOLD,
 } from "@/src/utils/brightnessLimiter";
+import {
+  laneDuration,
+  laneValueAt,
+  MINIMUM_SPAN_DURATION,
+  normalizeLaneSpan,
+} from "@/src/utils/laneSpan";
+import {
+  allowedInsertTypes,
+  InsertType,
+  makeRegionOfType,
+  regionTypeOf,
+} from "@/src/utils/regionConvert";
 
 export type BlockSelection = { type: "block"; block: Block };
 
@@ -47,6 +59,27 @@ export type BlockOrVariation = BlockSelection | VariationSelection;
 export type ParameterSelection = {
   block: Block;
   uniformName: string;
+};
+
+/**
+ * A time span selected inside one parameter lane, in lane-local seconds. May
+ * cover part of a Curve region, several regions, or a whole lane, but is always
+ * ONE continuous chunk of ONE lane — there are no disjoint selections. Kept
+ * apart from selectedBlocksOrVariations because it is a sub-region selection:
+ * it is narrower than any block or whole region, so it takes precedence for
+ * copy/duplicate/delete.
+ */
+export type LaneSpanSelection = {
+  block: Block;
+  uniformName: string;
+  startTime: number;
+  endTime: number;
+};
+
+/** Clipboard payload for a copied lane span. */
+type LaneSpanClipboard = {
+  laneSpan: true;
+  regions: any[];
 };
 
 type InitializationState = "uninitialized" | "initializing" | "initialized";
@@ -167,6 +200,16 @@ export class Store {
 
   selectedBlocksOrVariations: Set<BlockOrVariation> = new Set();
   selectedParameter: ParameterSelection | null = null;
+  laneSpan: LaneSpanSelection | null = null;
+  // Lane-local time of the last curve node clicked — the anchor a Shift+click
+  // extends a span from. Lives on the store, not in the region's editor, so the
+  // two clicks can land in different regions of the same lane.
+  laneSpanAnchor: { block: Block; uniformName: string; time: number } | null =
+    null;
+  // Set while a Curve node is selected in a lane's editor, which owns Backspace
+  // to delete that node. Without this the global delete would also remove the
+  // block underneath in the same keystroke.
+  curveNodeSelected = false;
 
   get singleBlockSelection(): Block | null {
     const blockSelections = Array.from(this.selectedBlocksOrVariations).filter(
@@ -332,6 +375,12 @@ export class Store {
   selectBlock = (block: Block) => {
     this.selectedBlocksOrVariations = new Set([{ type: "block", block }]);
     this.uiStore.showDevicePanel = true;
+    // a span belonging to some other block is no longer what the user means
+    if (
+      this.laneSpan &&
+      (this.laneSpan.block.parentBlock ?? this.laneSpan.block) !== block
+    )
+      this.clearLaneSpan();
     // drop a param selection that doesn't belong to this pattern block
     if (
       this.selectedParameter &&
@@ -350,6 +399,11 @@ export class Store {
   // Select a param lane (header / region bar). Ensures its pattern block is
   // selected so the device panel and block chrome stay in sync.
   selectParameter = (block: Block, uniformName: string) => {
+    if (
+      this.laneSpan &&
+      (this.laneSpan.block !== block || this.laneSpan.uniformName !== uniformName)
+    )
+      this.clearLaneSpan();
     this.selectedParameter = { block, uniformName };
     const patternBlock = block.parentBlock ?? block;
     const alreadySelected = Array.from(this.selectedBlocksOrVariations).some(
@@ -435,13 +489,165 @@ export class Store {
   };
 
   deselectAll = () => {
+    this.clearLaneSpan();
     if (this.selectedBlocksOrVariations.size === 0 && !this.selectedParameter)
       return;
     this.selectedBlocksOrVariations = new Set();
     this.selectedParameter = null;
   };
 
+  // ============================ lane span selection =========================
+
+  // Select lane-local [startTime, endTime] of one param lane. The raw span is
+  // normalized first (clamped, and grown to swallow any indivisible region it
+  // touches); a span too narrow to be real just clears the selection.
+  selectLaneSpan = (
+    block: Block,
+    uniformName: string,
+    startTime: number,
+    endTime: number,
+  ) => {
+    const span = normalizeLaneSpan(block, uniformName, startTime, endTime);
+    if (!span) {
+      this.clearLaneSpan();
+      return;
+    }
+    this.laneSpan = { block, uniformName, ...span };
+    // Mark the lane active (header chrome, value readout, and the paste target
+    // when nothing is spanned) without going through selectParameter — a span
+    // is an in-lane edit and shouldn't drag the block selection or the device
+    // panel along with it.
+    this.selectedParameter = { block, uniformName };
+    const patternBlock = block.parentBlock ?? block;
+    if (patternBlock.layer) this._selectedLayer = patternBlock.layer;
+  };
+
+  clearLaneSpan = () => {
+    this.laneSpan = null;
+    this.laneSpanAnchor = null;
+  };
+
+  setLaneSpanAnchor = (block: Block, uniformName: string, time: number) => {
+    this.laneSpanAnchor = { block, uniformName, time };
+  };
+
+  // Extend from the anchor to `time`, if the anchor belongs to this lane.
+  // Returns whether a span was made, so the caller can fall back to its normal
+  // click behavior.
+  extendLaneSpanToTime = (
+    block: Block,
+    uniformName: string,
+    time: number,
+  ): boolean => {
+    const anchor = this.laneSpanAnchor;
+    if (
+      !anchor ||
+      anchor.block !== block ||
+      anchor.uniformName !== uniformName
+    )
+      return false;
+    this.selectLaneSpan(block, uniformName, anchor.time, time);
+    return this.laneSpan !== null;
+  };
+
+  private serializeLaneSpan = (): LaneSpanClipboard | null => {
+    const span = this.laneSpan;
+    if (!span) return null;
+    const regions = span.block.extractSpan(
+      span.uniformName,
+      span.startTime,
+      span.endTime,
+    );
+    if (!regions.length) return null;
+    return {
+      laneSpan: true,
+      regions: regions.map((region) => region.serialize()),
+    };
+  };
+
+  // Drop `regions` into the lane at `startTime`, keeping their own total
+  // duration (a paste never stretches or squashes the copied shape). Trailing
+  // content is trimmed when the paste would run past the end of the lane.
+  private spliceRegionsIntoLane = (
+    block: Block,
+    uniformName: string,
+    startTime: number,
+    regions: Variation[],
+  ) => {
+    const total = laneDuration(block, uniformName);
+    const start = Math.max(0, Math.min(total - MINIMUM_SPAN_DURATION, startTime));
+    const available = total - start;
+    if (available < MINIMUM_SPAN_DURATION) return;
+
+    // trim to fit the remaining lane, dropping regions that fall off the end
+    const fitted: Variation[] = [];
+    let used = 0;
+    for (const region of regions) {
+      const room = available - used;
+      if (room <= 1e-9) break;
+      fitted.push(
+        region.duration <= room + 1e-9
+          ? region
+          : block.sliceRegion(region, 0, room),
+      );
+      used += Math.min(region.duration, room);
+    }
+    if (!fitted.length) return;
+
+    block.spliceSpan(uniformName, start, start + used, () => fitted);
+    this.selectLaneSpan(block, uniformName, start, start + used);
+  };
+
+  /** Copy the selected span without a keyboard event (the toolbar button). */
+  copyLaneSpanToSystemClipboard = () => {
+    const data = this.serializeLaneSpan();
+    if (data) navigator.clipboard.writeText(JSON.stringify(data));
+  };
+
+  /** Replace the selected span with a freshly-built region of `type`. */
+  replaceLaneSpanWithType = (type: InsertType) => {
+    const span = this.laneSpan;
+    if (!span) return;
+    const { block, uniformName, startTime, endTime } = span;
+    const param = block.pattern.params[uniformName];
+    const seamValue = laneValueAt(block, uniformName, startTime);
+    block.spliceSpan(uniformName, startTime, endTime, (duration) => [
+      makeRegionOfType(type, duration, seamValue, param, this),
+    ]);
+    this.selectLaneSpan(block, uniformName, startTime, endTime);
+  };
+
+  // Erase the automation inside the span, conserving its time: the window is
+  // replaced by a fresh default region (a flat Curve on a numeric lane) rather
+  // than closing up, since the lane is always exactly block-width.
+  deleteLaneSpan = () => {
+    const span = this.laneSpan;
+    if (!span) return;
+    const [defaultType] = allowedInsertTypes(
+      span.block.pattern.params[span.uniformName],
+    );
+    if (!defaultType) return;
+    this.replaceLaneSpanWithType(defaultType);
+  };
+
+  /** Repeat the selected span immediately after itself, and follow it there. */
+  duplicateLaneSpan = () => {
+    const span = this.laneSpan;
+    if (!span) return;
+    const { block, uniformName, startTime, endTime } = span;
+    const regions = block.extractSpan(uniformName, startTime, endTime);
+    if (!regions.length) return;
+    this.spliceRegionsIntoLane(block, uniformName, endTime, regions);
+  };
+
   deleteSelected = () => {
+    // a span is the narrower selection, so it absorbs the delete rather than
+    // letting it fall through to the block underneath
+    if (this.laneSpan) {
+      this.deleteLaneSpan();
+      return;
+    }
+    if (this.curveNodeSelected) return; // the curve editor handles this key
     if (this.selectedBlocksOrVariations.size === 0) return;
 
     let blockRemoved = false;
@@ -503,6 +709,14 @@ export class Store {
   };
 
   copyToClipboard = (clipboardData: DataTransfer) => {
+    // a lane span is the more specific selection, so it wins over any block or
+    // whole region that is also selected
+    const laneSpanData = this.serializeLaneSpan();
+    if (laneSpanData) {
+      clipboardData.setData("text/plain", JSON.stringify(laneSpanData));
+      return;
+    }
+
     if (this.selectedBlocksOrVariations.size === 0) return;
 
     clipboardData.setData(
@@ -517,12 +731,47 @@ export class Store {
     );
   };
 
+  // Paste a copied lane span into the selected lane: at the selected span's
+  // start, else at the playhead. It overwrites forward by the copied duration
+  // rather than shifting later regions along — the lane is always exactly
+  // block-width, so there is nowhere for displaced time to go.
+  private pasteLaneSpan = (data: LaneSpanClipboard) => {
+    const target = this.laneSpan ?? this.selectedParameter;
+    if (!target) return;
+    const { block, uniformName } = target;
+
+    const regions = data.regions.map((region) =>
+      deserializeVariation(this, region),
+    );
+    if (!regions.length) return;
+
+    // don't drop scalar automation onto a palette/color lane (or vice versa)
+    const allowed = allowedInsertTypes(block.pattern.params[uniformName]);
+    const pastedTypes = regions.map((region) => regionTypeOf(region));
+    const compatible = pastedTypes.every((type) =>
+      type === "other"
+        ? allowed.includes("palette") || allowed.includes("color")
+        : allowed.includes(type),
+    );
+    if (!compatible) return;
+
+    const startTime =
+      this.laneSpan?.startTime ??
+      Math.max(0, this.audioStore.globalTime - block.startTime);
+    this.spliceRegionsIntoLane(block, uniformName, startTime, regions);
+  };
+
   // TODO: better generalize for multiple layers
   pasteFromClipboard = (clipboardData: DataTransfer) => {
-    const blocksOrVariationsData = JSON.parse(
-      clipboardData.getData("text/plain"),
-    ) as any[];
-    if (!blocksOrVariationsData || !blocksOrVariationsData.length) return;
+    const pastedData = JSON.parse(clipboardData.getData("text/plain"));
+    if (pastedData?.laneSpan) {
+      this.pasteLaneSpan(pastedData as LaneSpanClipboard);
+      return;
+    }
+
+    const blocksOrVariationsData = pastedData as any[];
+    if (!Array.isArray(blocksOrVariationsData) || !blocksOrVariationsData.length)
+      return;
 
     const firstBlockOrVariation = blocksOrVariationsData[0];
     // check if we are pasting blocks
@@ -572,6 +821,10 @@ export class Store {
 
   // TODO: better generalize for multiple layers
   duplicateSelected = () => {
+    if (this.laneSpan) {
+      this.duplicateLaneSpan();
+      return;
+    }
     if (this.selectedBlocksOrVariations.size === 0) return;
 
     const selectedBlocks = Array.from(this.selectedBlocksOrVariations)

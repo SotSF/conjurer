@@ -17,7 +17,6 @@ import {
   Tooltip,
   VStack,
 } from "@chakra-ui/react";
-import { observer } from "mobx-react-lite";
 import { ReactElement, useState } from "react";
 import { TbSettings } from "react-icons/tb";
 
@@ -34,7 +33,9 @@ type Props = {
 // Settings popover for a generator region (LFO / Audio). Reuses the existing
 // PeriodicVariationControls / AudioVariationControls. Can be triggered from the
 // region-bar gear or by wrapping the region graph (click opens settings).
-export const RegionSettingsPopover = observer(function RegionSettingsPopover({
+// Not an observer: Variation fields aren't MobX observables; parents that own
+// the region list re-render after triggerVariationReactions.
+export const RegionSettingsPopover = function RegionSettingsPopover({
   block,
   uniformName,
   variation,
@@ -121,4 +122,4 @@ export const RegionSettingsPopover = observer(function RegionSettingsPopover({
       </Box>
     </Tooltip>
   );
-});
+};

@@ -2,9 +2,12 @@ import { Variation } from "@/src/types/Variations/Variation";
 import { CurveVariation } from "@/src/types/Variations/CurveVariation";
 import { PeriodicVariation } from "@/src/types/Variations/PeriodicVariation";
 import { AudioVariation } from "@/src/types/Variations/AudioVariation";
+import { LinearVariation4 } from "@/src/types/Variations/LinearVariation4";
+import { PaletteVariation } from "@/src/params/palette/variation/PaletteVariation";
 import { fitCurveNodes } from "@/src/utils/migrateVariations";
 import { isVector4 } from "@/src/utils/object";
 import { isPalette } from "@/src/params/palette/Palette";
+import { Vector4 } from "three";
 import type { Store } from "@/src/types/Store";
 import type { PatternParam } from "@/src/params/shared/patternParam";
 
@@ -22,6 +25,52 @@ export const allowedInsertTypes = (param?: PatternParam): InsertType[] => {
   if (isVector4(val)) return ["color"];
   if (typeof val === "number") return ["curve", "lfo", "audio"];
   return [];
+};
+
+/**
+ * Build a fresh region of `type` to drop into a lane. `seamValue` is the lane's
+ * current value where the region lands (from `laneValueAt`), so a new Curve
+ * starts flat at the value it replaces — the seam stays continuous. Generators
+ * seed from the param's declared range instead, since they sweep it.
+ */
+export const makeRegionOfType = (
+  type: InsertType,
+  duration: number,
+  seamValue: unknown,
+  param: PatternParam | undefined,
+  store: Store,
+): Variation => {
+  if (type === "palette") {
+    const palette = isPalette(seamValue) ? seamValue : param?.value;
+    return new PaletteVariation(duration, palette as never);
+  }
+  if (type === "color") {
+    const color = isVector4(seamValue)
+      ? seamValue
+      : isVector4(param?.value)
+        ? param!.value
+        : new Vector4(1, 1, 1, 1);
+    return new LinearVariation4(duration, color, color);
+  }
+
+  const lo = typeof param?.min === "number" ? param.min : 0;
+  const hi = typeof param?.max === "number" ? param.max : 1;
+  if (type === "lfo")
+    return new PeriodicVariation(
+      duration,
+      "sine",
+      (hi - lo) / 2,
+      Math.min(1, duration),
+      0,
+      (hi + lo) / 2,
+    );
+  if (type === "audio")
+    return new AudioVariation(duration, hi - lo || 1, lo, 0, store);
+
+  return CurveVariation.flat(
+    duration,
+    typeof seamValue === "number" ? seamValue : lo,
+  );
 };
 
 /** The region mode of a variation, or "other" for non-scalar (color) types. */

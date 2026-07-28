@@ -56,7 +56,6 @@ export const AddRegionMenu = ({
         <Box
           as="span"
           display="flex"
-          alignItems="center"
           cursor="pointer"
           color="#8fcbf5"
           onClick={(e) => {
@@ -78,7 +77,7 @@ export const AddRegionMenu = ({
       fontSize="xs"
       isDisabled={menuOpen}
     >
-      <Box as="span" display="inline-flex" alignItems="center">
+      <Box as="span" display="inline-flex">
         <Menu
           placement="bottom-end"
           isLazy
@@ -94,7 +93,6 @@ export const AddRegionMenu = ({
           <MenuButton
             as="span"
             display="flex"
-            alignItems="center"
             cursor="pointer"
             _hover={{ color: "#63b3ed" }}
             onClick={(e) => e.stopPropagation()}

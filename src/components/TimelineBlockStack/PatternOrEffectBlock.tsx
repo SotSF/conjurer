@@ -1,6 +1,5 @@
 import { Block } from "@/src/types/Block";
 import { Box, Heading, HStack } from "@chakra-ui/react";
-import { observer } from "mobx-react-lite";
 import { MouseEvent as ReactMouseEvent } from "react";
 import { MdDragIndicator } from "react-icons/md";
 import { PatternTimingModal } from "@/src/components/TimelineBlockStack/PatternTimingModal";
@@ -15,7 +14,9 @@ type Props = {
 // The pattern block's timeline header: a draggable name pinned to the left of
 // the visible timeline (stays in view when the block is scrolled wider than the
 // viewport) and the timing control at the block's right edge.
-export const PatternOrEffectBlock = observer(function PatternOrEffectBlock({
+// Not an observer: selection comes in as a prop from TimelineBlockStack, and
+// pattern (name) is excluded from Block's MobX tree.
+export const PatternOrEffectBlock = function PatternOrEffectBlock({
   block,
   handleBlockClick,
   isSelected,
@@ -61,4 +62,4 @@ export const PatternOrEffectBlock = observer(function PatternOrEffectBlock({
       </Box>
     </HStack>
   );
-});
+};

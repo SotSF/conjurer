@@ -15,6 +15,7 @@ import { Block } from "@/src/types/Block";
 import { CurveVariation, CurveNode } from "@/src/types/Variations/CurveVariation";
 import { VARIATION_BOUND_WIDTH } from "@/src/utils/layout";
 import { sampleCurveGeometry } from "@/src/utils/curveGeometry";
+import { useStore } from "@/src/types/StoreContext";
 
 // Trim a number to a short, human-editable string (no trailing-zero noise).
 const fmtNum = (n: number) =>
@@ -32,6 +33,14 @@ type EnvelopeGraphProps = {
   width: number;
   domain: [number, number];
   block: Block;
+  /** Lane-local time this region starts at, for mapping node times to the lane. */
+  laneStartTime: number;
+  /**
+   * The lane's selected time span (lane-local), passed down rather than read
+   * from the store because this component is deliberately not an observer — its
+   * curve model is mutated in place, so it must re-render with its parent.
+   */
+  laneSpan: { startTime: number; endTime: number } | null;
 };
 
 /**
@@ -49,6 +58,10 @@ type EnvelopeGraphProps = {
  * the opposite one across the segment's midline (symmetric shapes);
  * Alt-double-click resets a segment to straight. Mutations go through the model
  * and trigger MobX reactions so the render loop and lane redraw stay in sync.
+ *
+ * Node and segment clicks also drive the lane's TIME SPAN selection: clicking a
+ * node anchors it, Shift+clicking another node spans between them (across
+ * region boundaries), and clicking a segment spans its two nodes.
  */
 export const EnvelopeGraph = function EnvelopeGraph({
   uniformName,
@@ -56,7 +69,10 @@ export const EnvelopeGraph = function EnvelopeGraph({
   width,
   domain,
   block,
+  laneStartTime,
+  laneSpan,
 }: EnvelopeGraphProps) {
+  const store = useStore();
   const [orange, nodeFill, selectedFill] = useToken("colors", [
     "orange.400",
     "gray.800",
@@ -124,6 +140,33 @@ export const EnvelopeGraph = function EnvelopeGraph({
 
   const onNodePointerDown = (e: React.PointerEvent, id: string) => {
     e.stopPropagation();
+    const node = variation.nodes.find((n) => n.id === id);
+
+    // Shift+click extends the span from the previously clicked node instead of
+    // starting a drag. (Shift still axis-locks a drag already in progress,
+    // since that is read live from the move event.)
+    if (e.shiftKey && node) {
+      const extended = runInAction(() =>
+        store.extendLaneSpanToTime(
+          block,
+          uniformName,
+          laneStartTime + node.time,
+        ),
+      );
+      if (extended) {
+        setSelectedId(null);
+        setSelectedSegment(null);
+        setEditingId(null);
+        return;
+      }
+    }
+
+    if (node)
+      runInAction(() => {
+        store.clearLaneSpan();
+        store.setLaneSpanAnchor(block, uniformName, laneStartTime + node.time);
+      });
+
     setSelectedId(id);
     setSelectedSegment(null);
     // a plain click/drag closes any open editor; a double-click re-opens it
@@ -257,6 +300,10 @@ export const EnvelopeGraph = function EnvelopeGraph({
   // two handles. With Alt held it ALSO starts a symmetric (mirrored) bend on the
   // nearer handle immediately, so you can Alt-drag a bend in one motion without
   // first clicking to select.
+  //
+  // Selecting a segment also selects its time span, so one click on a line gives
+  // you the stretch between its two nodes to copy/duplicate/replace. A drag
+  // started here is picked up by the lane instead, which overwrites the span.
   const onSvgPointerDown = (e: React.PointerEvent) => {
     if (!svgRef.current) return;
     const { px } = localPoint(e.clientX, e.clientY);
@@ -264,6 +311,21 @@ export const EnvelopeGraph = function EnvelopeGraph({
     setSelectedSegment(seg >= 0 ? seg : null);
     setSelectedId(null);
     setEditingId(null);
+    if (seg >= 0 && !e.altKey) {
+      const a = variation.nodes[seg];
+      const b = variation.nodes[seg + 1];
+      // a step (two nodes at the same time) has no span to select
+      if (a && b && b.time - a.time > 1e-9)
+        runInAction(() => {
+          store.selectLaneSpan(
+            block,
+            uniformName,
+            laneStartTime + a.time,
+            laneStartTime + b.time,
+          );
+          store.setLaneSpanAnchor(block, uniformName, laneStartTime + a.time);
+        });
+    }
     if (seg >= 0 && e.altKey) {
       const ns = variation.nodes;
       const a = ns[seg];
@@ -310,6 +372,18 @@ export const EnvelopeGraph = function EnvelopeGraph({
     setSelectedSegment(null);
   };
 
+  // Let the global delete know this editor owns Backspace right now.
+  useEffect(() => {
+    if (!selectedId) return;
+    runInAction(() => {
+      store.curveNodeSelected = true;
+    });
+    return () =>
+      runInAction(() => {
+        store.curveNodeSelected = false;
+      });
+  }, [selectedId, store]);
+
   useEffect(() => {
     if (!selectedId) return;
     const onKey = (e: KeyboardEvent) => {
@@ -342,6 +416,25 @@ export const EnvelopeGraph = function EnvelopeGraph({
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [selectedId, selectedSegment, editingId]);
+
+  // A span selected anywhere in the lane supersedes this region's node pick, and
+  // its segment pick too unless that segment is exactly what the span covers
+  // (the segment-click case, where the handles should stay visible).
+  useEffect(() => {
+    if (!laneSpan) return;
+    const a = selectedSegment != null ? variation.nodes[selectedSegment] : null;
+    const b =
+      selectedSegment != null ? variation.nodes[selectedSegment + 1] : null;
+    const spansSelectedSegment =
+      !!a &&
+      !!b &&
+      Math.abs(laneStartTime + a.time - laneSpan.startTime) < 1e-6 &&
+      Math.abs(laneStartTime + b.time - laneSpan.endTime) < 1e-6;
+    if (!spansSelectedSegment) setSelectedSegment(null);
+    setSelectedId(null);
+    setEditingId(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [laneSpan?.startTime, laneSpan?.endTime]);
 
   // With a node selected but its editor closed, "e" or Enter opens the editor.
   useEffect(() => {
@@ -423,6 +516,10 @@ export const EnvelopeGraph = function EnvelopeGraph({
         )}
         {nodes.map((node) => {
           const selected = node.id === selectedId;
+          const inSpan =
+            !!laneSpan &&
+            laneStartTime + node.time >= laneSpan.startTime - 1e-6 &&
+            laneStartTime + node.time <= laneSpan.endTime + 1e-6;
           return (
             <circle
               key={node.id}
@@ -430,7 +527,7 @@ export const EnvelopeGraph = function EnvelopeGraph({
               cy={yOfValue(node.value)}
               r={selected ? NODE_RADIUS + 1.5 : NODE_RADIUS}
               fill={selected ? selectedFill : nodeFill}
-              stroke={selected ? "#ffffff" : orange}
+              stroke={selected ? "#ffffff" : inSpan ? "#f6e05e" : orange}
               strokeWidth={2}
               style={{ cursor: "pointer" }}
               onPointerDown={(e) => onNodePointerDown(e, node.id)}

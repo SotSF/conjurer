@@ -15,7 +15,6 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { action } from "mobx";
-import { observer } from "mobx-react-lite";
 import { useState } from "react";
 import { TbSettings } from "react-icons/tb";
 
@@ -31,7 +30,9 @@ type Props = {
 // (shape preserved, value at time t follows the range) via remapRange. The
 // starting values come from the explicit range if set, else the param's declared
 // min/max, else the current node extent.
-export const CurveRangeControl = observer(function CurveRangeControl({
+// Not an observer: CurveVariation fields aren't MobX observables; the parent
+// RegionBar re-renders after triggerVariationReactions replaces the array.
+export const CurveRangeControl = function CurveRangeControl({
   block,
   uniformName,
   variation,
@@ -121,4 +122,4 @@ export const CurveRangeControl = observer(function CurveRangeControl({
       </Box>
     </Tooltip>
   );
-});
+};

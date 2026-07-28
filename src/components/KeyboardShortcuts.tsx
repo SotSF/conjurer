@@ -26,16 +26,26 @@ export const KeyboardShortcuts = memo(function KeyboardShortcuts() {
         <Kbd>cmd</Kbd>+<Kbd>a</Kbd>: select all blocks
       </Text>
       <Text userSelect="none">
-        <Kbd>cmd</Kbd>+<Kbd>c</Kbd>: copy block(s)/variation(s)
+        <Kbd>cmd</Kbd>+<Kbd>c</Kbd>: copy block(s)/variation(s)/lane span
       </Text>
       <Text userSelect="none">
-        <Kbd>cmd</Kbd>+<Kbd>v</Kbd>: paste block(s)/variation(s)
+        <Kbd>cmd</Kbd>+<Kbd>v</Kbd>: paste block(s)/variation(s)/lane span
       </Text>
       <Text userSelect="none">
-        <Kbd>cmd</Kbd>+<Kbd>d</Kbd>: duplicate selected block(s)/variation(s)
+        <Kbd>cmd</Kbd>+<Kbd>d</Kbd>: duplicate selected block(s)/variation(s)/lane
+        span
       </Text>
       <Text userSelect="none">
-        <Kbd>delete</Kbd>: delete selected block(s)/variation(s)
+        <Kbd>delete</Kbd>: delete selected block(s)/variation(s), or erase a lane
+        span
+      </Text>
+      <Text userSelect="none">
+        drag across an automation lane: select a time span (
+        <Kbd>ctrl</Kbd> for freehand)
+      </Text>
+      <Text userSelect="none">
+        <Kbd>shift</Kbd>+click a curve node: extend the span from the last node
+        clicked
       </Text>
       {/* <Text>cmd+z: undo</Text> */}
       {/* <Text>cmd+shift+z: redo</Text> */}

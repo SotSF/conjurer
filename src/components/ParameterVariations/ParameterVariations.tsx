@@ -1,6 +1,12 @@
 import { Box, HStack, Text } from "@chakra-ui/react";
 import { VariationGraph } from "@/src/components/VariationGraph/VariationGraph";
-import { MouseEvent as ReactMouseEvent, useEffect, useState } from "react";
+import {
+  MouseEvent as ReactMouseEvent,
+  PointerEvent as ReactPointerEvent,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { Block } from "@/src/types/Block";
 import { runInAction } from "mobx";
 import { spanRegionsToBlock } from "@/src/utils/migrateVariations";
@@ -8,8 +14,15 @@ import { observer } from "mobx-react-lite";
 import { useStore } from "@/src/types/StoreContext";
 import { RegionBoundary } from "@/src/components/ParameterVariations/RegionBoundary";
 import { RegionInsertOverlay } from "@/src/components/ParameterVariations/RegionInsertOverlay";
+import { LaneSpanToolbar } from "@/src/components/ParameterVariations/LaneSpanToolbar";
 import { InsertType } from "@/src/utils/regionConvert";
 import { CurveVariation } from "@/src/types/Variations/CurveVariation";
+import { laneRegions, laneSnapTargets } from "@/src/utils/laneSpan";
+
+// pointer travel (px) that turns a click on the lane into a span drag
+const SPAN_DRAG_THRESHOLD_PX = 4;
+// how close (px) a span edge must come to a node/seam to snap onto it
+const SPAN_SNAP_PX = 6;
 
 type ParameterVariationsProps = {
   uniformName: string;
@@ -37,7 +50,7 @@ export const ParameterVariations = observer(function ParameterVariations({
   onInserted,
 }: ParameterVariationsProps) {
   const store = useStore();
-  const { uiStore } = store;
+  const { uiStore, beatMapStore } = store;
   const spanDuration = laneDuration ?? block.duration;
   const width = uiStore.timeToX(block.duration);
   const variations = block.parameterVariations[uniformName] ?? [];
@@ -82,6 +95,113 @@ export const ParameterVariations = observer(function ParameterVariations({
 
   const multipleRegions = variations.length > 1;
 
+  // ===== time-span selection =====
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  const laneSpan =
+    store.laneSpan?.block === block &&
+    store.laneSpan?.uniformName === uniformName
+      ? store.laneSpan
+      : null;
+
+  // Pull a span edge onto the nearest node/seam, then the beat grid. Snapping to
+  // curve nodes is what makes it practical to grab exactly one hump of a curve.
+  const snapSpanTime = (time: number, freehand: boolean) => {
+    if (freehand) return time;
+    const x = uiStore.timeToX(time);
+    let nearest: number | null = null;
+    let nearestDistance = SPAN_SNAP_PX;
+    for (const target of laneSnapTargets(block, uniformName)) {
+      const distance = Math.abs(uiStore.timeToX(target) - x);
+      if (distance < nearestDistance) {
+        nearestDistance = distance;
+        nearest = target;
+      }
+    }
+    if (nearest != null) return nearest;
+    if (!uiStore.snappingToBeatGrid) return time;
+    return (
+      beatMapStore.beatMap.nearestBeatTime(block.startTime + time) -
+      block.startTime
+    );
+  };
+
+  // Drag across the lane to select a time span — the same gesture that paints a
+  // new region. Only pointer-downs that reach the lane get here (curve nodes,
+  // handles, region seams and the insert overlay all stop propagation first),
+  // and it only becomes a selection once the pointer has actually travelled, so
+  // a plain click still falls through to the curve's own segment pick.
+  const onLanePointerDown = (e: ReactPointerEvent<HTMLDivElement>) => {
+    if (armedType || e.button !== 0) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const startClientX = e.clientX;
+    const x0 = e.clientX - rect.left;
+    let dragged = false;
+
+    const move = (ev: PointerEvent) => {
+      if (
+        !dragged &&
+        Math.abs(ev.clientX - startClientX) < SPAN_DRAG_THRESHOLD_PX
+      )
+        return;
+      dragged = true;
+      const x1 = ev.clientX - rect.left;
+      runInAction(() =>
+        store.selectLaneSpan(
+          block,
+          uniformName,
+          snapSpanTime(uiStore.xToTime(Math.min(x0, x1)), ev.ctrlKey),
+          snapSpanTime(uiStore.xToTime(Math.max(x0, x1)), ev.ctrlKey),
+        ),
+      );
+    };
+
+    const up = (ev: PointerEvent) => {
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", up);
+      if (dragged) {
+        // a drag is not a click: swallow the click that follows it so it can't
+        // also open an LFO/Audio settings popover or re-pick a curve segment
+        const swallowClick = (click: MouseEvent) => {
+          click.stopPropagation();
+          click.preventDefault();
+        };
+        window.addEventListener("click", swallowClick, {
+          capture: true,
+          once: true,
+        });
+        // a drag released outside the window never produces that click, so
+        // don't leave the guard armed to eat an unrelated one later
+        window.setTimeout(
+          () =>
+            window.removeEventListener("click", swallowClick, {
+              capture: true,
+            }),
+          0,
+        );
+        return;
+      }
+      // clicking an indivisible region selects the whole thing; Curve regions
+      // handle their own node/segment clicks
+      const time = uiStore.xToTime(ev.clientX - rect.left);
+      const region = laneRegions(block, uniformName).find(
+        (r) => time < r.endTime,
+      );
+      if (region && !(region.variation instanceof CurveVariation))
+        runInAction(() =>
+          store.selectLaneSpan(
+            block,
+            uniformName,
+            region.startTime,
+            region.endTime,
+          ),
+        );
+    };
+
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", up);
+  };
+
   // Hover value cursor: a vertical line + readout that follows the mouse to any
   // x (not quantized to samples) and reports the param's value there via each
   // region's valueAtTime — works across all region types (curve/LFO/audio/...).
@@ -115,15 +235,17 @@ export const ParameterVariations = observer(function ParameterVariations({
   return (
     // make variation graphs extend over the block border
     <Box
+      ref={containerRef}
       position="relative"
       mx="-2px"
+      onPointerDown={onLanePointerDown}
       onMouseMove={(e: ReactMouseEvent<HTMLDivElement>) =>
         setCursorX(e.clientX - e.currentTarget.getBoundingClientRect().left)
       }
       onMouseLeave={() => setCursorX(null)}
     >
       <HStack width="100%" justify="start" spacing={0}>
-        {variations.map((variation) => {
+        {laneRegions(block, uniformName).map(({ variation, startTime }) => {
           // Each region occupies a slot proportional to its duration. Wrap the
           // graph in a fixed-width, non-shrinking slot so regions tile to the
           // full lane width and align with the region tabs / RegionBoundary
@@ -142,6 +264,8 @@ export const ParameterVariations = observer(function ParameterVariations({
                 width={slotWidth}
                 domain={domain}
                 block={block}
+                laneStartTime={startTime}
+                laneSpan={laneSpan}
               />
             </Box>
           );
@@ -161,6 +285,33 @@ export const ParameterVariations = observer(function ParameterVariations({
               index={i}
             />
           ))}
+
+      {/* the selected time span: a highlighted window over the lane, plus the
+          floating toolbar that acts on it */}
+      {laneSpan && (
+        <>
+          <Box
+            position="absolute"
+            top={0}
+            bottom={0}
+            left={`${uiStore.timeToX(laneSpan.startTime)}px`}
+            width={`${Math.max(
+              2,
+              uiStore.timeToX(laneSpan.endTime - laneSpan.startTime),
+            )}px`}
+            bg="#63b3ed26"
+            borderLeft="1.5px solid #63b3ed"
+            borderRight="1.5px solid #63b3ed"
+            pointerEvents="none"
+            zIndex={5}
+          />
+          <LaneSpanToolbar
+            block={block}
+            uniformName={uniformName}
+            laneRef={containerRef}
+          />
+        </>
+      )}
 
       {/* armed insert layer: paint/click the lane to place the new region */}
       {armedType && (

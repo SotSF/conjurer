@@ -1,17 +1,9 @@
 import { Box } from "@chakra-ui/react";
 import { useRef, useState } from "react";
 import { Block } from "@/src/types/Block";
-import { Variation } from "@/src/types/Variations/Variation";
-import { CurveVariation } from "@/src/types/Variations/CurveVariation";
-import { PeriodicVariation } from "@/src/types/Variations/PeriodicVariation";
-import { AudioVariation } from "@/src/types/Variations/AudioVariation";
-import { LinearVariation4 } from "@/src/types/Variations/LinearVariation4";
-import { PaletteVariation } from "@/src/params/palette/variation/PaletteVariation";
-import { isPalette } from "@/src/params/palette/Palette";
-import { isVector4 } from "@/src/utils/object";
-import { Vector4 } from "three";
 import { useStore } from "@/src/types/StoreContext";
-import { InsertType } from "@/src/utils/regionConvert";
+import { InsertType, makeRegionOfType } from "@/src/utils/regionConvert";
+import { laneValueAt } from "@/src/utils/laneSpan";
 import { runInAction } from "mobx";
 import { observer } from "mobx-react-lite";
 
@@ -59,48 +51,14 @@ export const RegionInsertOverlay = observer(function RegionInsertOverlay({
     return beatMapStore.beatMap.nearestBeatTime(block.startTime + t) - block.startTime;
   };
 
-  // The lane's raw value at local time t (number / Palette / Vector4).
-  const laneValueAt = (t: number): unknown => {
-    const vs = block.parameterVariations[uniformName] ?? [];
-    let acc = 0;
-    for (const v of vs) {
-      if (t < acc + v.duration) return v.valueAtTime(t - acc, block.startTime + t);
-      acc += v.duration;
-    }
-    return param?.value;
-  };
-
-  const makeRegion = (duration: number, startT: number): Variation => {
-    const seam = laneValueAt(startT);
-    if (regionType === "palette") {
-      const pal = isPalette(seam) ? seam : param?.value;
-      return new PaletteVariation(duration, pal as never);
-    }
-    if (regionType === "color") {
-      const v4 = isVector4(seam)
-        ? seam
-        : isVector4(param?.value)
-          ? param!.value
-          : new Vector4(1, 1, 1, 1);
-      return new LinearVariation4(duration, v4, v4);
-    }
-    const lo = typeof param?.min === "number" ? param.min : 0;
-    const hi = typeof param?.max === "number" ? param.max : 1;
-    if (regionType === "lfo")
-      return new PeriodicVariation(
-        duration,
-        "sine",
-        (hi - lo) / 2,
-        Math.min(1, duration),
-        0,
-        (hi + lo) / 2,
-      );
-    if (regionType === "audio")
-      return new AudioVariation(duration, hi - lo || 1, lo, 0, store);
-    // curve: flat at the lane's value where it's dropped (continuous seam)
-    const seamNum = typeof seam === "number" ? seam : lo;
-    return CurveVariation.flat(duration, seamNum);
-  };
+  const makeRegion = (duration: number, startT: number) =>
+    makeRegionOfType(
+      regionType,
+      duration,
+      laneValueAt(block, uniformName, startT),
+      param,
+      store,
+    );
 
   const onPointerDown = (e: React.PointerEvent) => {
     e.stopPropagation();

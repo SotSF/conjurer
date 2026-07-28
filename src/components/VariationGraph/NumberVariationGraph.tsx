@@ -18,6 +18,11 @@ type NumberVariationGraphProps = {
   width: number;
   domain: [number, number];
   block: Block;
+  // Lane context for time-span selection. Absent when a graph is rendered
+  // outside an automation lane (the param controls / VJ panel), where there is
+  // no lane to select a span in.
+  laneStartTime?: number;
+  laneSpan?: { startTime: number; endTime: number } | null;
 };
 
 export const NumberVariationGraph = function NumberVariationGraph({
@@ -26,6 +31,8 @@ export const NumberVariationGraph = function NumberVariationGraph({
   width,
   domain,
   block,
+  laneStartTime = 0,
+  laneSpan = null,
 }: NumberVariationGraphProps) {
   const orange = useToken("colors", "orange.400");
 
@@ -43,6 +50,8 @@ export const NumberVariationGraph = function NumberVariationGraph({
         width={width}
         domain={domain}
         block={block}
+        laneStartTime={laneStartTime}
+        laneSpan={laneSpan}
       />
     );
 

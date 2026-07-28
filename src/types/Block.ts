@@ -200,7 +200,7 @@ export class Block {
 
   // The [a,b] local slice of a region, rebased to its own frame. Curves cut
   // faithfully (De Casteljau); generators just take the sub-duration.
-  private sliceRegion = (v: Variation, a: number, b: number): Variation => {
+  sliceRegion = (v: Variation, a: number, b: number): Variation => {
     const c = v.clone();
     if (c instanceof CurveVariation) {
       c.resizeEnd(b);
@@ -243,16 +243,17 @@ export class Block {
     this.triggerVariationReactions(uniformName);
   };
 
-  // Insert a new region spanning lane-local [startT, endT], carving that span
-  // out of whatever region(s) it overlaps (they shrink; a fully-overlapped
-  // interior region is removed; a Curve split in the middle yields two copies).
-  // `makeRegion(duration)` builds the region to drop in. Adjacent Curves that
-  // become neighbors are auto-merged.
-  insertRegion = (
+  // Replace lane-local [startT, endT] with the region(s) `build` returns,
+  // carving that span out of whatever it overlaps (they shrink; a fully-
+  // overlapped interior region is removed; a Curve split in the middle yields
+  // two copies). Adjacent Curves that become neighbors are auto-merged. The
+  // built regions must sum to the span duration; any float drift is absorbed by
+  // the last one so the lane total never moves.
+  spliceSpan = (
     uniformName: string,
     startT: number,
     endT: number,
-    makeRegion: (duration: number) => Variation,
+    build: (duration: number) => Variation[],
   ) => {
     const vs = this.parameterVariations[uniformName];
     if (!vs || vs.length === 0) return;
@@ -264,10 +265,18 @@ export class Block {
     let acc = 0;
     let inserted = false;
     const insert = () => {
-      if (!inserted) {
-        out.push(makeRegion(e - s));
-        inserted = true;
+      if (inserted) return;
+      inserted = true;
+      const built = build(e - s).filter((v) => v.duration > 0);
+      if (built.length === 0) return;
+      const drift =
+        e - s - built.reduce((sum, v) => sum + v.duration, 0);
+      const last = built[built.length - 1];
+      if (Math.abs(drift) > 1e-9) {
+        if (last instanceof CurveVariation) last.resizeEnd(last.duration + drift);
+        else last.duration += drift;
       }
+      out.push(...built);
     };
     for (const v of vs) {
       const vStart = acc;
@@ -292,6 +301,42 @@ export class Block {
 
     this.parameterVariations[uniformName] = this.mergeAdjacentCurves(out);
     this.triggerVariationReactions(uniformName);
+  };
+
+  // Insert a single new region spanning lane-local [startT, endT].
+  insertRegion = (
+    uniformName: string,
+    startT: number,
+    endT: number,
+    makeRegion: (duration: number) => Variation,
+  ) => this.spliceSpan(uniformName, startT, endT, (d) => [makeRegion(d)]);
+
+  // Copy out lane-local [startT, endT] as standalone regions: clones of every
+  // region it touches, each cut down to the overlapping part. The durations sum
+  // to the span, so the result can be spliced back in anywhere.
+  extractSpan = (
+    uniformName: string,
+    startT: number,
+    endT: number,
+  ): Variation[] => {
+    const vs = this.parameterVariations[uniformName];
+    if (!vs || vs.length === 0) return [];
+    const out: Variation[] = [];
+    let acc = 0;
+    for (const v of vs) {
+      const vStart = acc;
+      const vEnd = acc + v.duration;
+      acc = vEnd;
+      if (vEnd <= startT + 1e-9 || vStart >= endT - 1e-9) continue;
+      const a = Math.max(0, startT - vStart);
+      const b = Math.min(v.duration, endT - vStart);
+      out.push(
+        a <= 1e-9 && b >= v.duration - 1e-9
+          ? v.clone()
+          : this.sliceRegion(v, a, b),
+      );
+    }
+    return out;
   };
 
   // Remove a region and conserve the lane: the left neighbor extends right to
