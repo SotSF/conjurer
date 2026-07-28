@@ -9,6 +9,10 @@ export const TIMELINE_HEADER_WIDTH = 150;
 
 const INITIAL_RENDER_TARGET_SIZE = 512;
 
+// Scroll position is rounded to this many pixels before it reaches observers, so
+// scrolling doesn't re-render every block continuously. See setTimelineViewport.
+const VIEWPORT_QUANTUM = 400;
+
 export type DisplayMode = "canopy" | "canopySpace" | "cartesianSpace";
 
 const DISPLAY_MODES: DisplayMode[] = [
@@ -113,8 +117,47 @@ export class UIStore {
   canTimelineZoom = this.store.context === "experienceEditor";
   pixelsPerSecond = INITIAL_PIXELS_PER_SECOND; // the zoom of the timeline
 
+  // The timeline's horizontal scroll window, in CSS pixels of content, tracked so
+  // blocks far off screen can skip rendering their expensive interiors. Quantized
+  // to VIEWPORT_QUANTUM steps: an exact value would invalidate every block on
+  // every scroll event, trading zoom jank for scroll jank.
+  timelineScrollLeft = 0;
+  timelineViewportWidth = 0;
+
+  setTimelineViewport = (scrollLeft: number, viewportWidth: number) => {
+    const quantized =
+      Math.floor(scrollLeft / VIEWPORT_QUANTUM) * VIEWPORT_QUANTUM;
+    if (quantized !== this.timelineScrollLeft)
+      this.timelineScrollLeft = quantized;
+    if (viewportWidth !== this.timelineViewportWidth)
+      this.timelineViewportWidth = viewportWidth;
+  };
+
+  /**
+   * Whether a time span is close enough to the visible window to be worth
+   * rendering in full. Padded by a screenful either side so scrolling reveals
+   * already-mounted content rather than mounting it under the cursor.
+   */
+  isTimeSpanNearView = (startTime: number, endTime: number) => {
+    // before the first measurement, assume everything is in view
+    if (this.timelineViewportWidth === 0) return true;
+    const margin = this.timelineViewportWidth;
+    const left = this.timelineScrollLeft - TIMELINE_HEADER_WIDTH - margin;
+    const right =
+      this.timelineScrollLeft -
+      TIMELINE_HEADER_WIDTH +
+      this.timelineViewportWidth +
+      margin;
+    return (
+      endTime * this.pixelsPerSecond >= left &&
+      startTime * this.pixelsPerSecond <= right
+    );
+  };
+
   constructor(readonly store: Store) {
-    makeAutoObservable(this);
+    // _persistTimeout is bookkeeping for the debounced save, not UI state —
+    // making it observable would invalidate observers on every zoom.
+    makeAutoObservable(this, { _persistTimeout: false });
   }
 
   initialize = (viewerMode = false) => {
@@ -162,7 +205,7 @@ export class UIStore {
     );
 
     this.pixelsPerSecond = newPps;
-    this.saveToLocalStorage();
+    this.saveToLocalStorageSoon();
 
     const centerTime = block.startTime + block.duration / 2;
     const newScrollLeft = Math.max(0, centerTime * newPps - visibleWidth / 2);
@@ -223,7 +266,7 @@ export class UIStore {
       this.pixelsPerSecond = newPps;
     }
 
-    this.saveToLocalStorage();
+    this.saveToLocalStorageSoon();
   };
 
   /**
@@ -340,8 +383,25 @@ export class UIStore {
     }
   };
 
+  // Zoom persistence is coalesced: a zoom gesture changes pixelsPerSecond many
+  // times in a row, and each save is a synchronous JSON.stringify + localStorage
+  // write on the main thread. Only the final zoom level matters, so defer it.
+  _persistTimeout: ReturnType<typeof setTimeout> | null = null;
+  saveToLocalStorageSoon = () => {
+    if (typeof window === "undefined") return;
+    if (this._persistTimeout !== null) clearTimeout(this._persistTimeout);
+    this._persistTimeout = setTimeout(() => {
+      this._persistTimeout = null;
+      this.saveToLocalStorage();
+    }, 300);
+  };
+
   saveToLocalStorage = () => {
     if (typeof window === "undefined") return;
+    if (this._persistTimeout !== null) {
+      clearTimeout(this._persistTimeout);
+      this._persistTimeout = null;
+    }
     localStorage.setItem(
       "uiStore",
       JSON.stringify({

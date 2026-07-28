@@ -23,6 +23,12 @@ import { BlockAutomationLanes } from "@/src/components/TimelineBlockStack/BlockA
 import { BlockOpacityEdgeLine } from "@/src/components/TimelineBlockStack/BlockOpacityEdgeLine";
 import { hoverHelpProps } from "@/src/utils/hoverHelp";
 
+// Narrower than this (in CSS pixels) a block's automation lanes can't be read or
+// interacted with, so they aren't rendered. See the render site below. Tuned so
+// lanes still appear at moderate zoom on short (~1s) blocks, and drop out only
+// when zoomed far enough out that a lane would be a few pixels of noise.
+const MIN_WIDTH_FOR_AUTOMATION_LANES = 64;
+
 type Props = {
   patternBlock: Block;
 };
@@ -116,6 +122,13 @@ export const TimelineBlockStack = observer(function TimelineBlockStack({
     [store, patternBlock, selectedBlocksOrVariations],
   );
 
+  // block width in CSS pixels at the current zoom, for level-of-detail choices
+  const renderedWidth = uiStore.timeToX(patternBlock.duration);
+  const lanesNearView = uiStore.isTimeSpanNearView(
+    patternBlock.startTime,
+    patternBlock.endTime,
+  );
+
   // cache this value, see https://mobx.js.org/computeds-with-args.html
   const isSelected = computed(
     () =>
@@ -175,7 +188,20 @@ export const TimelineBlockStack = observer(function TimelineBlockStack({
             and the automation lanes for armed params */}
         <BlockDotRow block={patternBlock} isSelected={isSelected} />
         <BlockOpacityEdgeLine block={patternBlock} />
-        <BlockAutomationLanes block={patternBlock} />
+        {/* Level of detail, on two axes:
+            - Width: below a few dozen pixels a lane's curve, region tabs and
+              labels are neither readable nor clickable, but they still cost a
+              full render every time the zoom changes. Zoomed far out that is
+              every block in the experience at once.
+            - Proximity to the view: without this, crossing the width threshold
+              while zooming mounts every armed lane in the experience in a single
+              frame — measured at ~30,000 nodes and a 23 SECOND stall on an
+              experience with 556 armed lanes. Bounding it to roughly what's on
+              screen keeps the mount cost proportional to the viewport instead of
+              to the whole timeline. */}
+        {renderedWidth >= MIN_WIDTH_FOR_AUTOMATION_LANES && lanesNearView && (
+          <BlockAutomationLanes block={patternBlock} />
+        )}
       </Card>
     </Draggable>
   );
