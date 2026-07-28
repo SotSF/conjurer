@@ -15,6 +15,7 @@ import { useStore } from "@/src/types/StoreContext";
 import { RegionBoundary } from "@/src/components/ParameterVariations/RegionBoundary";
 import { RegionInsertOverlay } from "@/src/components/ParameterVariations/RegionInsertOverlay";
 import { LaneSpanToolbar } from "@/src/components/ParameterVariations/LaneSpanToolbar";
+import { useLaneTimeScale } from "@/src/components/ParameterVariations/LaneTimeScaleContext";
 import { InsertType } from "@/src/utils/regionConvert";
 import { CurveVariation } from "@/src/types/Variations/CurveVariation";
 import { laneRegions, laneSnapTargets } from "@/src/utils/laneSpan";
@@ -23,6 +24,9 @@ import { laneRegions, laneSnapTargets } from "@/src/utils/laneSpan";
 const SPAN_DRAG_THRESHOLD_PX = 4;
 // how close (px) a span edge must come to a node/seam to snap onto it
 const SPAN_SNAP_PX = 6;
+// default EnvelopeGraph height; detail panel passes a taller value
+const DEFAULT_GRAPH_HEIGHT = 50;
+const GRAPH_PADDING = 6;
 
 type ParameterVariationsProps = {
   uniformName: string;
@@ -35,6 +39,8 @@ type ParameterVariationsProps = {
   // while set, the insert overlay captures paint/click on the lane.
   armedType?: InsertType | null;
   onInserted?: () => void;
+  /** SVG / chart height for curve editors (taller in the detail panel). */
+  graphHeight?: number;
 };
 
 // The parameter's curve(s) across the block, plus the region-manipulation layers
@@ -48,11 +54,13 @@ export const ParameterVariations = observer(function ParameterVariations({
   laneDuration,
   armedType = null,
   onInserted,
+  graphHeight = DEFAULT_GRAPH_HEIGHT,
 }: ParameterVariationsProps) {
   const store = useStore();
   const { uiStore, beatMapStore } = store;
+  const scale = useLaneTimeScale();
   const spanDuration = laneDuration ?? block.duration;
-  const width = uiStore.timeToX(block.duration);
+  const width = scale.timeToX(spanDuration);
   const variations = block.parameterVariations[uniformName] ?? [];
 
   const domain: [number, number] = [0, 1];
@@ -108,11 +116,11 @@ export const ParameterVariations = observer(function ParameterVariations({
   // curve nodes is what makes it practical to grab exactly one hump of a curve.
   const snapSpanTime = (time: number, freehand: boolean) => {
     if (freehand) return time;
-    const x = uiStore.timeToX(time);
+    const x = scale.timeToX(time);
     let nearest: number | null = null;
     let nearestDistance = SPAN_SNAP_PX;
     for (const target of laneSnapTargets(block, uniformName)) {
-      const distance = Math.abs(uiStore.timeToX(target) - x);
+      const distance = Math.abs(scale.timeToX(target) - x);
       if (distance < nearestDistance) {
         nearestDistance = distance;
         nearest = target;
@@ -150,8 +158,8 @@ export const ParameterVariations = observer(function ParameterVariations({
         store.selectLaneSpan(
           block,
           uniformName,
-          snapSpanTime(uiStore.xToTime(Math.min(x0, x1)), ev.ctrlKey),
-          snapSpanTime(uiStore.xToTime(Math.max(x0, x1)), ev.ctrlKey),
+          snapSpanTime(scale.xToTime(Math.min(x0, x1)), ev.ctrlKey),
+          snapSpanTime(scale.xToTime(Math.max(x0, x1)), ev.ctrlKey),
         ),
       );
     };
@@ -183,7 +191,7 @@ export const ParameterVariations = observer(function ParameterVariations({
       }
       // clicking an indivisible region selects the whole thing; Curve regions
       // handle their own node/segment clicks
-      const time = uiStore.xToTime(ev.clientX - rect.left);
+      const time = scale.xToTime(ev.clientX - rect.left);
       const region = laneRegions(block, uniformName).find(
         (r) => time < r.endTime,
       );
@@ -208,7 +216,7 @@ export const ParameterVariations = observer(function ParameterVariations({
   const [cursorX, setCursorX] = useState<number | null>(null);
   let cursorValue: number | null = null;
   if (cursorX != null && variations.length) {
-    const time = uiStore.xToTime(cursorX);
+    const time = scale.xToTime(cursorX);
     let acc = 0;
     for (let i = 0; i < variations.length; i++) {
       const v = variations[i];
@@ -221,14 +229,19 @@ export const ParameterVariations = observer(function ParameterVariations({
       acc += v.duration;
     }
   }
-  // dot y within the graph (its svg is 50px tall inside a 4px py box, 6px pad)
+  // dot y within the graph (svg height + padding mapped to value domain)
   const span = domain[1] - domain[0] || 1;
+  const drawable = graphHeight - 2 * GRAPH_PADDING;
   const dotTop =
     cursorValue == null
       ? 0
       : Math.max(
-          10,
-          Math.min(48, 10 + (1 - (cursorValue - domain[0]) / span) * 38),
+          GRAPH_PADDING,
+          Math.min(
+            graphHeight - GRAPH_PADDING,
+            GRAPH_PADDING +
+              (1 - (cursorValue - domain[0]) / span) * drawable,
+          ),
         );
   const labelNearRight = cursorX != null && cursorX > width - 44;
 
@@ -255,7 +268,7 @@ export const ParameterVariations = observer(function ParameterVariations({
           const slotWidth =
             variation.duration < 0
               ? width
-              : (variation.duration / block.duration) * width;
+              : (variation.duration / spanDuration) * width;
           return (
             <Box key={variation.id} width={`${slotWidth}px`} flexShrink={0} minW={0}>
               <VariationGraph
@@ -266,6 +279,7 @@ export const ParameterVariations = observer(function ParameterVariations({
                 block={block}
                 laneStartTime={startTime}
                 laneSpan={laneSpan}
+                graphHeight={graphHeight}
               />
             </Box>
           );
@@ -294,10 +308,10 @@ export const ParameterVariations = observer(function ParameterVariations({
             position="absolute"
             top={0}
             bottom={0}
-            left={`${uiStore.timeToX(laneSpan.startTime)}px`}
+            left={`${scale.timeToX(laneSpan.startTime)}px`}
             width={`${Math.max(
               2,
-              uiStore.timeToX(laneSpan.endTime - laneSpan.startTime),
+              scale.timeToX(laneSpan.endTime - laneSpan.startTime),
             )}px`}
             bg="#63b3ed26"
             borderLeft="1.5px solid #63b3ed"

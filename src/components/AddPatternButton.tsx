@@ -4,6 +4,7 @@ import { action } from "mobx";
 import { AiOutlinePlus } from "react-icons/ai";
 import { observer } from "mobx-react-lite";
 import { DEVICE_PANEL_HEIGHT } from "@/src/components/ExperienceEditor/BlockDevicePanel";
+import { PARAMETER_DETAIL_PANEL_HEIGHT } from "@/src/components/ExperienceEditor/ParameterDetailPanel";
 import { STATUS_INFO_BAR_HEIGHT } from "@/src/components/ExperienceEditor/StatusInfoBar";
 import { hoverHelpProps } from "@/src/utils/hoverHelp";
 
@@ -11,15 +12,24 @@ export const AddPatternButton = observer(function AddPatternButton() {
   const store = useStore();
   const { uiStore } = store;
 
-  // when a block is selected the device panel occupies the bottom of the
-  // screen, so lift the button above it (and always above the status info bar)
+  // Lift above whichever bottom arrangement panel is open (detail swaps in
+  // for the device panel), and always above the status info bar.
+  const detailPanelOpen =
+    store.context !== "viewer" &&
+    uiStore.showParameterDetailPanel &&
+    store.selectedParameter != null;
   const devicePanelOpen =
     store.context !== "viewer" &&
-    store.uiStore.showDevicePanel &&
+    uiStore.showDevicePanel &&
+    !detailPanelOpen &&
     store.selectedBlocksOrVariations.size > 0;
 
-  const bottomOffset =
-    STATUS_INFO_BAR_HEIGHT + (devicePanelOpen ? DEVICE_PANEL_HEIGHT : 0);
+  const bottomPanelHeight = detailPanelOpen
+    ? PARAMETER_DETAIL_PANEL_HEIGHT
+    : devicePanelOpen
+      ? DEVICE_PANEL_HEIGHT
+      : 0;
+  const bottomOffset = STATUS_INFO_BAR_HEIGHT + bottomPanelHeight;
 
   return (
     <Box position="absolute" bottom={bottomOffset} right={0} m={6}>

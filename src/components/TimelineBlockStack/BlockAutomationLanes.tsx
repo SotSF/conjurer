@@ -32,10 +32,11 @@ import {
   useEffect,
   useState,
 } from "react";
-import { TbChevronUp } from "react-icons/tb";
+import { TbArrowsMaximize, TbChevronUp } from "react-icons/tb";
 import { AddRegionMenu } from "@/src/components/ParameterVariations/AddRegionMenu";
 import { CurveRangeControl } from "@/src/components/ParameterVariations/CurveRangeControl";
 import { RegionSettingsPopover } from "@/src/components/ParameterVariations/RegionSettingsPopover";
+import { useLaneTimeScale } from "@/src/components/ParameterVariations/LaneTimeScaleContext";
 import { CurveVariation } from "@/src/types/Variations/CurveVariation";
 import { PeriodicVariation } from "@/src/types/Variations/PeriodicVariation";
 import { hoverHelpProps } from "@/src/utils/hoverHelp";
@@ -152,12 +153,18 @@ export const BlockAutomationLanes = observer(function BlockAutomationLanes({
 
 const AutomationLane = observer(function AutomationLane({
   lane,
+  graphHeight,
+  embedded = false,
 }: {
   lane: Lane;
+  /** Taller curve editor for the parameter detail panel. */
+  graphHeight?: number;
+  /** When true, omit timeline sticky offsets and the collapse control. */
+  embedded?: boolean;
 }) {
   const { ownerBlock, uniformName, label, isOpacity } = lane;
   const store = useStore();
-  const { uiStore } = store;
+  const scale = useLaneTimeScale();
   // the region under the cursor, mapped from mouse X, so hovering anywhere in
   // the lane lifts that region's header to front
   const [curveRegionId, setCurveRegionId] = useState<string | null>(null);
@@ -197,7 +204,7 @@ const AutomationLane = observer(function AutomationLane({
     const variations = ownerBlock.parameterVariations[uniformName];
     if (!variations || variations.length === 0) return;
     const rect = e.currentTarget.getBoundingClientRect();
-    const time = uiStore.xToTime(e.clientX - rect.left);
+    const time = scale.xToTime(e.clientX - rect.left);
     let acc = 0;
     for (const variation of variations) {
       if (time < acc + variation.duration) {
@@ -215,7 +222,7 @@ const AutomationLane = observer(function AutomationLane({
       position="relative"
       width="100%"
       role="group"
-      borderTopWidth="1px"
+      borderTopWidth={embedded ? 0 : "1px"}
       borderColor="#2a3444"
       onMouseMove={onMouseMove}
       onMouseLeave={() => setCurveRegionId(null)}
@@ -232,6 +239,7 @@ const AutomationLane = observer(function AutomationLane({
         insertTypes={insertTypes}
         armedType={armedType}
         setArmedType={setArmedType}
+        embedded={embedded}
       />
       <RegionBar
         block={ownerBlock}
@@ -240,6 +248,8 @@ const AutomationLane = observer(function AutomationLane({
         hoveredRegionId={hoveredRegionId}
         setHeaderRegionId={setHeaderRegionId}
         onSelect={selectThisParameter}
+        laneDuration={lane.laneDuration}
+        embedded={embedded}
       />
 
       {isOpacity ? (
@@ -247,6 +257,7 @@ const AutomationLane = observer(function AutomationLane({
           block={ownerBlock}
           armedType={armedType}
           onInserted={() => setArmedType(null)}
+          graphHeight={graphHeight}
         />
       ) : (
         <ParameterVariations
@@ -255,11 +266,16 @@ const AutomationLane = observer(function AutomationLane({
           laneDuration={lane.laneDuration}
           armedType={armedType}
           onInserted={() => setArmedType(null)}
+          graphHeight={graphHeight}
         />
       )}
     </Box>
   );
 });
+
+/** Shared lane editor used by the timeline and the parameter detail panel. */
+export { AutomationLane };
+export type { Lane };
 
 // Param name row above the region bar. The visual parent of the lane — stronger
 // than the region tabs below. Repeats across wide blocks and hosts the
@@ -275,6 +291,7 @@ const LaneNameHeader = observer(function LaneNameHeader({
   insertTypes,
   armedType,
   setArmedType,
+  embedded = false,
 }: {
   block: Block;
   uniformName: string;
@@ -284,10 +301,13 @@ const LaneNameHeader = observer(function LaneNameHeader({
   insertTypes: InsertType[];
   armedType: InsertType | null;
   setArmedType: (t: InsertType | null) => void;
+  embedded?: boolean;
 }) {
-  const { uiStore } = useStore();
+  const store = useStore();
+  const { uiStore } = store;
   const headerBg = selected ? "#2a3a52" : "#1c2533";
   const nameColor = selected ? "#ffd89a" : "#f6ad55";
+  const stickyLeft = embedded ? undefined : `${TIMELINE_HEADER_WIDTH}px`;
 
   return (
     <HStack
@@ -313,37 +333,39 @@ const LaneNameHeader = observer(function LaneNameHeader({
       <HStack flex="1" minW={0} spacing={0} align="center">
         {/* equal-width segments so repeats are spaced across the block; the
             first stays sticky (+ value when selected) while scrolling */}
-        {Array.from({ length: block.headerRepetitions }).map((_, i) => (
-          <HStack
-            key={i}
-            flexGrow={1}
-            minW={0}
-            spacing={1.5}
-            align="baseline"
-            justify="flex-start"
-            {...(i === 0
-              ? {
-                  position: "sticky" as const,
-                  left: `${TIMELINE_HEADER_WIDTH}px`,
-                  zIndex: 1,
-                  bg: headerBg,
-                }
-              : {})}
-          >
-            <Text
-              fontSize="12px"
-              fontWeight={700}
-              color={nameColor}
-              whiteSpace="nowrap"
-              letterSpacing="0.01em"
+        {Array.from({ length: embedded ? 1 : block.headerRepetitions }).map(
+          (_, i) => (
+            <HStack
+              key={i}
+              flexGrow={1}
+              minW={0}
+              spacing={1.5}
+              align="baseline"
+              justify="flex-start"
+              {...(i === 0 && stickyLeft
+                ? {
+                    position: "sticky" as const,
+                    left: stickyLeft,
+                    zIndex: 1,
+                    bg: headerBg,
+                  }
+                : {})}
             >
-              {label}
-            </Text>
-            {selected && i === 0 && (
-              <LaneValueReadout block={block} uniformName={uniformName} />
-            )}
-          </HStack>
-        ))}
+              <Text
+                fontSize="12px"
+                fontWeight={700}
+                color={nameColor}
+                whiteSpace="nowrap"
+                letterSpacing="0.01em"
+              >
+                {label}
+              </Text>
+              {selected && i === 0 && (
+                <LaneValueReadout block={block} uniformName={uniformName} />
+              )}
+            </HStack>
+          ),
+        )}
       </HStack>
       <HStack
         position="sticky"
@@ -363,31 +385,60 @@ const LaneNameHeader = observer(function LaneNameHeader({
             setArmedType={setArmedType}
           />
         )}
-        <Tooltip
-          label="Collapse lane"
-          openDelay={0}
-          hasArrow
-          placement="top"
-          fontSize="xs"
-        >
-          <Box
-            as="span"
-            display="inline-flex"
-            cursor="pointer"
-            color="#a0aec0"
-            _hover={{ color: "#63b3ed" }}
-            onClick={action(() => {
-              block.toggleParamLane(uniformName);
-            })}
-            {...hoverHelpProps(
-              uiStore,
-              "Collapse lane",
-              "Hide this automation lane. Re-arm the parameter to show it again.",
-            )}
+        {!embedded && (
+          <Tooltip
+            label="Open detail panel"
+            openDelay={0}
+            hasArrow
+            placement="top"
+            fontSize="xs"
           >
-            <TbChevronUp size={13} />
-          </Box>
-        </Tooltip>
+            <Box
+              as="span"
+              display="inline-flex"
+              cursor="pointer"
+              color="#a0aec0"
+              _hover={{ color: "#63b3ed" }}
+              onClick={action(() => {
+                store.openParameterDetail(block, uniformName);
+              })}
+              {...hoverHelpProps(
+                uiStore,
+                "Open detail panel",
+                "Edit this parameter in a zoomed panel spanning the full block.",
+              )}
+            >
+              <TbArrowsMaximize size={13} />
+            </Box>
+          </Tooltip>
+        )}
+        {!embedded && (
+          <Tooltip
+            label="Collapse lane"
+            openDelay={0}
+            hasArrow
+            placement="top"
+            fontSize="xs"
+          >
+            <Box
+              as="span"
+              display="inline-flex"
+              cursor="pointer"
+              color="#a0aec0"
+              _hover={{ color: "#63b3ed" }}
+              onClick={action(() => {
+                block.toggleParamLane(uniformName);
+              })}
+              {...hoverHelpProps(
+                uiStore,
+                "Collapse lane",
+                "Hide this automation lane. Re-arm the parameter to show it again.",
+              )}
+            >
+              <TbChevronUp size={13} />
+            </Box>
+          </Tooltip>
+        )}
       </HStack>
     </HStack>
   );
@@ -403,6 +454,8 @@ const RegionBar = observer(function RegionBar({
   hoveredRegionId,
   setHeaderRegionId,
   onSelect,
+  laneDuration,
+  embedded = false,
 }: {
   block: Block;
   uniformName: string;
@@ -410,6 +463,8 @@ const RegionBar = observer(function RegionBar({
   hoveredRegionId: string | null;
   setHeaderRegionId: (id: string | null) => void;
   onSelect: () => void;
+  laneDuration: number;
+  embedded?: boolean;
 }) {
   const { uiStore } = useStore();
   const variations = block.parameterVariations[uniformName] ?? [];
@@ -440,8 +495,8 @@ const RegionBar = observer(function RegionBar({
         )}
       >
         <Text
-          position="sticky"
-          left={`${TIMELINE_HEADER_WIDTH}px`}
+          position={embedded ? undefined : "sticky"}
+          left={embedded ? undefined : `${TIMELINE_HEADER_WIDTH}px`}
           fontSize="8px"
           fontWeight={600}
           letterSpacing="0.04em"
@@ -516,7 +571,7 @@ const RegionBar = observer(function RegionBar({
                   <Box
                     ref={prov.innerRef}
                     {...prov.draggableProps}
-                    width={`${(variation.duration / block.duration) * 100}%`}
+                    width={`${(variation.duration / laneDuration) * 100}%`}
                     minW={0}
                     position="relative"
                     zIndex={variation.id === hoveredRegionId ? 20 : undefined}
@@ -558,8 +613,9 @@ const RegionTab = observer(function RegionTab({
 }) {
   const store = useStore();
   const { uiStore } = store;
+  const scale = useLaneTimeScale();
   const { label, color, bg } = regionTypeStyle(variation);
-  const narrow = uiStore.timeToX(variation.duration) < NARROW_TAB_PX;
+  const narrow = scale.timeToX(variation.duration) < NARROW_TAB_PX;
   // suppress the convert tooltip while its menu is open (trigger keeps focus)
   const [convertOpen, setConvertOpen] = useState(false);
 
@@ -848,12 +904,14 @@ const OpacityLaneBody = observer(function OpacityLaneBody({
   block,
   armedType,
   onInserted,
+  graphHeight,
 }: {
   block: Block;
   armedType: InsertType | null;
   onInserted: () => void;
+  graphHeight?: number;
 }) {
-  const { uiStore } = useStore();
+  const scale = useLaneTimeScale();
 
   if (block.hasManualOpacity)
     return (
@@ -862,10 +920,11 @@ const OpacityLaneBody = observer(function OpacityLaneBody({
         block={block}
         armedType={armedType}
         onInserted={onInserted}
+        graphHeight={graphHeight}
       />
     );
 
-  const width = uiStore.timeToX(block.duration);
+  const width = scale.timeToX(block.duration);
   return <OpacityAutoCurve block={block} width={width} />;
 });
 

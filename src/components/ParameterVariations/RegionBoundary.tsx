@@ -1,6 +1,7 @@
 import { Box } from "@chakra-ui/react";
 import { Block } from "@/src/types/Block";
 import { useStore } from "@/src/types/StoreContext";
+import { useLaneTimeScale } from "@/src/components/ParameterVariations/LaneTimeScaleContext";
 import { runInAction } from "mobx";
 import { observer } from "mobx-react-lite";
 import { hoverHelpProps } from "@/src/utils/hoverHelp";
@@ -29,7 +30,8 @@ export const RegionBoundary = observer(function RegionBoundary({
   index,
 }: Props) {
   const { uiStore, beatMapStore } = useStore();
-  const x = uiStore.timeToX(boundaryTime(block, uniformName, index));
+  const scale = useLaneTimeScale();
+  const x = scale.timeToX(boundaryTime(block, uniformName, index));
 
   const onPointerDown = (e: React.PointerEvent) => {
     e.stopPropagation();
@@ -46,7 +48,7 @@ export const RegionBoundary = observer(function RegionBoundary({
     document.head.appendChild(cursorStyle);
 
     const move = (ev: PointerEvent) => {
-      let target = origBoundary + uiStore.xToTime(ev.clientX - startX);
+      let target = origBoundary + scale.xToTime(ev.clientX - startX);
       if (!ev.ctrlKey && uiStore.snappingToBeatGrid) {
         const nearest = beatMapStore.beatMap.nearestBeatTime(
           block.startTime + target,

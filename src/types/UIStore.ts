@@ -96,6 +96,10 @@ export class UIStore {
   // keeps the block selected, and selecting a block re-opens it
   showDevicePanel = true;
 
+  // Ableton-style parameter detail (clip) view — zoomed lane editor for the
+  // selected parameter, fit to the panel width over the full block duration
+  showParameterDetailPanel = false;
+
   canTimelineZoom = this.store.context === "experienceEditor";
   pixelsPerSecond = INITIAL_PIXELS_PER_SECOND; // the zoom of the timeline
 

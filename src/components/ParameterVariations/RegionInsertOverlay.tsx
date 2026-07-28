@@ -2,6 +2,7 @@ import { Box } from "@chakra-ui/react";
 import { useRef, useState } from "react";
 import { Block } from "@/src/types/Block";
 import { useStore } from "@/src/types/StoreContext";
+import { useLaneTimeScale } from "@/src/components/ParameterVariations/LaneTimeScaleContext";
 import { InsertType, makeRegionOfType } from "@/src/utils/regionConvert";
 import { laneValueAt } from "@/src/utils/laneSpan";
 import { runInAction } from "mobx";
@@ -39,10 +40,11 @@ export const RegionInsertOverlay = observer(function RegionInsertOverlay({
 }: Props) {
   const store = useStore();
   const { uiStore, beatMapStore } = store;
+  const scale = useLaneTimeScale();
   const ref = useRef<HTMLDivElement>(null);
   const [span, setSpan] = useState<{ x0: number; x1: number } | null>(null);
 
-  const laneWidth = uiStore.timeToX(laneDuration);
+  const laneWidth = scale.timeToX(laneDuration);
   const param = block.pattern.params[uniformName];
   const defaultWidthSec = Math.min(1, laneDuration / 4);
 
@@ -75,11 +77,11 @@ export const RegionInsertOverlay = observer(function RegionInsertOverlay({
       const x1 = ev.clientX - rect.left;
       const sPx = Math.min(x0, x1);
       const ePx = Math.max(x0, x1);
-      let sT = snap(uiStore.xToTime(sPx), ev.ctrlKey);
+      let sT = snap(scale.xToTime(sPx), ev.ctrlKey);
       let eT =
         ePx - sPx < 4
           ? snap(sT + defaultWidthSec, ev.ctrlKey) // click → default width
-          : snap(uiStore.xToTime(ePx), ev.ctrlKey);
+          : snap(scale.xToTime(ePx), ev.ctrlKey);
       if (eT <= sT) eT = sT + defaultWidthSec;
       setSpan(null);
       runInAction(() =>

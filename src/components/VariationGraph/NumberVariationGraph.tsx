@@ -23,6 +23,7 @@ type NumberVariationGraphProps = {
   // no lane to select a span in.
   laneStartTime?: number;
   laneSpan?: { startTime: number; endTime: number } | null;
+  graphHeight?: number;
 };
 
 export const NumberVariationGraph = function NumberVariationGraph({
@@ -33,6 +34,7 @@ export const NumberVariationGraph = function NumberVariationGraph({
   block,
   laneStartTime = 0,
   laneSpan = null,
+  graphHeight = 50,
 }: NumberVariationGraphProps) {
   const orange = useToken("colors", "orange.400");
 
@@ -52,6 +54,7 @@ export const NumberVariationGraph = function NumberVariationGraph({
         block={block}
         laneStartTime={laneStartTime}
         laneSpan={laneSpan}
+        height={graphHeight}
       />
     );
 
@@ -89,7 +92,7 @@ export const NumberVariationGraph = function NumberVariationGraph({
     >
       <LineChart
         width={width - VARIATION_BOUND_WIDTH}
-        height={50}
+        height={graphHeight}
         data={data}
         margin={{ top: 0, left: 0, right: 0, bottom: 0 }}
       >

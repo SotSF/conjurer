@@ -5,6 +5,7 @@ import { observer } from "mobx-react-lite";
 import { TbCopy, TbRepeat, TbX } from "react-icons/tb";
 import { Block } from "@/src/types/Block";
 import { useStore } from "@/src/types/StoreContext";
+import { useLaneTimeScale } from "@/src/components/ParameterVariations/LaneTimeScaleContext";
 import { allowedInsertTypes, InsertType } from "@/src/utils/regionConvert";
 import { hoverHelpProps } from "@/src/utils/hoverHelp";
 
@@ -39,12 +40,13 @@ export const LaneSpanToolbar = observer(function LaneSpanToolbar({
 }: Props) {
   const store = useStore();
   const { uiStore } = store;
+  const scale = useLaneTimeScale();
   const span = store.laneSpan;
   const rect = laneRef.current?.getBoundingClientRect();
   if (!span || !rect) return null;
 
   const duration = span.endTime - span.startTime;
-  const left = rect.left + uiStore.timeToX(span.startTime);
+  const left = rect.left + scale.timeToX(span.startTime);
   const top = rect.top - TOOLBAR_HEIGHT - GAP;
 
   const insertTypes = allowedInsertTypes(block.pattern.params[uniformName]);

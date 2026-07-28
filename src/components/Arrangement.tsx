@@ -5,13 +5,20 @@ import { action } from "mobx";
 import { observer } from "mobx-react-lite";
 import { ExperienceEditorControls } from "@/src/components/ExperienceEditor/ExperienceEditorControls";
 import { BlockDevicePanel } from "@/src/components/ExperienceEditor/BlockDevicePanel";
+import { ParameterDetailPanel } from "@/src/components/ExperienceEditor/ParameterDetailPanel";
 import { StatusInfoBar } from "@/src/components/ExperienceEditor/StatusInfoBar";
 
 export const Arrangement = observer(function Arrangement() {
   const store = useStore();
 
+  const showDetailPanel =
+    store.context !== "viewer" &&
+    store.uiStore.showParameterDetailPanel &&
+    store.selectedParameter != null;
   const showDevicePanel =
-    store.context !== "viewer" && store.uiStore.showDevicePanel;
+    store.context !== "viewer" &&
+    store.uiStore.showDevicePanel &&
+    !showDetailPanel;
   // device + status rows are auto-height; the timeline shrinks to make room
   return (
     <Grid
@@ -31,7 +38,13 @@ export const Arrangement = observer(function Arrangement() {
       <GridItem area="timeline" bgColor="gray.400">
         <Timeline />
       </GridItem>
-      <GridItem area="device">{showDevicePanel && <BlockDevicePanel />}</GridItem>
+      <GridItem area="device">
+        {showDetailPanel ? (
+          <ParameterDetailPanel />
+        ) : (
+          showDevicePanel && <BlockDevicePanel />
+        )}
+      </GridItem>
       <GridItem area="status">
         <StatusInfoBar />
       </GridItem>

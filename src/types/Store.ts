@@ -388,6 +388,7 @@ export class Store {
         this.selectedParameter.block) !== block
     ) {
       this.selectedParameter = null;
+      this.uiStore.showParameterDetailPanel = false;
     }
   };
 
@@ -412,6 +413,14 @@ export class Store {
     );
     if (!alreadySelected) this.selectBlock(patternBlock);
     if (patternBlock.layer) this._selectedLayer = patternBlock.layer;
+  };
+
+  // Open the zoomed parameter detail panel for a lane (arms the lane if needed).
+  openParameterDetail = (block: Block, uniformName: string) => {
+    if (!block.lanedParams.has(uniformName)) block.toggleParamLane(uniformName);
+    this.selectParameter(block, uniformName);
+    this.uiStore.showParameterDetailPanel = true;
+    this.uiStore.showDevicePanel = true;
   };
 
   selectVariation = (
@@ -494,6 +503,7 @@ export class Store {
       return;
     this.selectedBlocksOrVariations = new Set();
     this.selectedParameter = null;
+    this.uiStore.showParameterDetailPanel = false;
   };
 
   // ============================ lane span selection =========================

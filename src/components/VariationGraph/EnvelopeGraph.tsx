@@ -21,7 +21,7 @@ import { useStore } from "@/src/types/StoreContext";
 const fmtNum = (n: number) =>
   Number.isFinite(n) ? parseFloat(n.toFixed(4)).toString() : "0";
 
-const HEIGHT = 50;
+const DEFAULT_HEIGHT = 50;
 const PADDING = 6;
 const NODE_RADIUS = 4;
 // how close (px) a dragged value must get to a magnet target to snap
@@ -41,6 +41,8 @@ type EnvelopeGraphProps = {
    * curve model is mutated in place, so it must re-render with its parent.
    */
   laneSpan: { startTime: number; endTime: number } | null;
+  /** SVG height in px; taller in the parameter detail panel. */
+  height?: number;
 };
 
 /**
@@ -71,6 +73,7 @@ export const EnvelopeGraph = function EnvelopeGraph({
   block,
   laneStartTime,
   laneSpan,
+  height = DEFAULT_HEIGHT,
 }: EnvelopeGraphProps) {
   const store = useStore();
   const [orange, nodeFill, selectedFill] = useToken("colors", [
@@ -113,7 +116,7 @@ export const EnvelopeGraph = function EnvelopeGraph({
 
   const xOfTime = (t: number) => (duration > 0 ? (t / duration) * innerWidth : 0);
   const yOfValue = (v: number) =>
-    PADDING + (1 - (v - domainMin) / valueSpan) * (HEIGHT - 2 * PADDING);
+    PADDING + (1 - (v - domainMin) / valueSpan) * (height - 2 * PADDING);
   const timeOfX = (px: number) =>
     duration > 0
       ? Math.max(0, Math.min(duration, (px / innerWidth) * duration))
@@ -123,7 +126,7 @@ export const EnvelopeGraph = function EnvelopeGraph({
       domainMin,
       Math.min(
         domainMax,
-        domainMin + (1 - (py - PADDING) / (HEIGHT - 2 * PADDING)) * valueSpan,
+        domainMin + (1 - (py - PADDING) / (height - 2 * PADDING)) * valueSpan,
       ),
     );
 
@@ -495,7 +498,7 @@ export const EnvelopeGraph = function EnvelopeGraph({
       <svg
         ref={svgRef}
         width={innerWidth}
-        height={HEIGHT}
+        height={height}
         style={{ display: "block", touchAction: "none" }}
         onPointerDown={onSvgPointerDown}
         onDoubleClick={onDoubleClick}

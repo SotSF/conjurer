@@ -14,6 +14,7 @@ type VariationGraphProps = {
   block: Block;
   laneStartTime: number;
   laneSpan: { startTime: number; endTime: number } | null;
+  graphHeight?: number;
 };
 
 export const VariationGraph = function VariationGraph({
@@ -24,6 +25,7 @@ export const VariationGraph = function VariationGraph({
   block,
   laneStartTime,
   laneSpan,
+  graphHeight,
 }: VariationGraphProps) {
   const props = { uniformName, width, block };
   return variation instanceof LinearVariation4 ? (
@@ -37,6 +39,7 @@ export const VariationGraph = function VariationGraph({
       domain={domain}
       laneStartTime={laneStartTime}
       laneSpan={laneSpan}
+      graphHeight={graphHeight}
     />
   );
 };
