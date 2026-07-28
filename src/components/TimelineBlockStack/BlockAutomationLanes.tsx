@@ -35,7 +35,6 @@ import {
 import { AddRegionMenu } from "@/src/components/ParameterVariations/AddRegionMenu";
 import { CurveRangeControl } from "@/src/components/ParameterVariations/CurveRangeControl";
 import { RegionSettingsPopover } from "@/src/components/ParameterVariations/RegionSettingsPopover";
-import { HeaderRepeat } from "@/src/components/TimelineBlockStack/HeaderRepeat";
 import { CurveVariation } from "@/src/types/Variations/CurveVariation";
 import { PeriodicVariation } from "@/src/types/Variations/PeriodicVariation";
 import { AudioVariation } from "@/src/types/Variations/AudioVariation";
@@ -137,8 +136,6 @@ export const BlockAutomationLanes = observer(function BlockAutomationLanes({
       width="100%"
       align="stretch"
       py={1}
-      borderLeftWidth="2px"
-      borderColor="blue.500"
       bg="#12161f"
     >
       {lanes.map((lane) => (
@@ -157,7 +154,8 @@ const AutomationLane = observer(function AutomationLane({
   lane: Lane;
 }) {
   const { ownerBlock, uniformName, label, isOpacity } = lane;
-  const { uiStore } = useStore();
+  const store = useStore();
+  const { uiStore } = store;
   // the region under the cursor, mapped from mouse X, so hovering anywhere in
   // the lane lifts that region's header to front
   const [curveRegionId, setCurveRegionId] = useState<string | null>(null);
@@ -166,6 +164,13 @@ const AutomationLane = observer(function AutomationLane({
   // get covered when the cursor crosses into the neighbor's X)
   const [headerRegionId, setHeaderRegionId] = useState<string | null>(null);
   const hoveredRegionId = headerRegionId ?? curveRegionId;
+
+  const selected =
+    store.selectedParameter?.block === ownerBlock &&
+    store.selectedParameter?.uniformName === uniformName;
+  const selectThisParameter = action(() => {
+    store.selectParameter(ownerBlock, uniformName);
+  });
 
   // Region insert: the name-row ＋ arms a one-shot insert of a chosen type
   // (gated to the param's sensible types); the insert overlay in the lane body
@@ -220,6 +225,8 @@ const AutomationLane = observer(function AutomationLane({
         block={ownerBlock}
         uniformName={uniformName}
         label={label}
+        selected={selected}
+        onSelect={selectThisParameter}
         insertTypes={insertTypes}
         armedType={armedType}
         setArmedType={setArmedType}
@@ -230,6 +237,7 @@ const AutomationLane = observer(function AutomationLane({
         isOpacity={isOpacity}
         hoveredRegionId={hoveredRegionId}
         setHeaderRegionId={setHeaderRegionId}
+        onSelect={selectThisParameter}
       />
 
       {isOpacity ? (
@@ -253,11 +261,15 @@ const AutomationLane = observer(function AutomationLane({
 
 // Param name row above the region bar. The visual parent of the lane — stronger
 // than the region tabs below. Repeats across wide blocks and hosts the
-// lane-level ＋ so it never overlays editable curve points.
+// lane-level ＋ so it never overlays editable curve points. Click selects this
+// parameter (and its block); the live value readout only mounts when selected
+// so playhead updates don't thrash every lane.
 const LaneNameHeader = observer(function LaneNameHeader({
   block,
   uniformName,
   label,
+  selected,
+  onSelect,
   insertTypes,
   armedType,
   setArmedType,
@@ -265,36 +277,65 @@ const LaneNameHeader = observer(function LaneNameHeader({
   block: Block;
   uniformName: string;
   label: string;
+  selected: boolean;
+  onSelect: () => void;
   insertTypes: InsertType[];
   armedType: InsertType | null;
   setArmedType: (t: InsertType | null) => void;
 }) {
+  const headerBg = selected ? "#2a3a52" : "#1c2533";
+  const nameColor = selected ? "#ffd89a" : "#f6ad55";
+
   return (
     <HStack
       height={`${LANE_NAME_HEIGHT}px`}
       width="100%"
       spacing={0}
       px="6px"
-      bg="#1c2533"
+      bg={headerBg}
       borderBottomWidth="1px"
       borderColor="#3a4658"
       align="center"
+      cursor="pointer"
+      onClick={(e) => {
+        e.stopPropagation();
+        onSelect();
+      }}
     >
-      <HStack flex="1" minW={0} justify="space-evenly" spacing={0}>
-        <HeaderRepeat times={block.headerRepetitions}>
-          <HStack spacing={1.5} align="baseline">
+      <HStack flex="1" minW={0} spacing={0} align="center">
+        {/* equal-width segments so repeats are spaced across the block; the
+            first stays sticky (+ value when selected) while scrolling */}
+        {Array.from({ length: block.headerRepetitions }).map((_, i) => (
+          <HStack
+            key={i}
+            flexGrow={1}
+            minW={0}
+            spacing={1.5}
+            align="baseline"
+            justify="flex-start"
+            {...(i === 0
+              ? {
+                  position: "sticky" as const,
+                  left: `${TIMELINE_HEADER_WIDTH}px`,
+                  zIndex: 1,
+                  bg: headerBg,
+                }
+              : {})}
+          >
             <Text
               fontSize="12px"
               fontWeight={700}
-              color="#f6ad55"
+              color={nameColor}
               whiteSpace="nowrap"
               letterSpacing="0.01em"
             >
               {label}
             </Text>
-            <LaneValueReadout block={block} uniformName={uniformName} />
+            {selected && i === 0 && (
+              <LaneValueReadout block={block} uniformName={uniformName} />
+            )}
           </HStack>
-        </HeaderRepeat>
+        ))}
       </HStack>
       {insertTypes.length > 0 && (
         <Box
@@ -305,7 +346,8 @@ const LaneNameHeader = observer(function LaneNameHeader({
           alignItems="center"
           color="#a0aec0"
           pl={1}
-          bg="#1c2533"
+          bg={headerBg}
+          onClick={(e) => e.stopPropagation()}
         >
           <AddRegionMenu
             types={insertTypes}
@@ -327,12 +369,14 @@ const RegionBar = observer(function RegionBar({
   isOpacity,
   hoveredRegionId,
   setHeaderRegionId,
+  onSelect,
 }: {
   block: Block;
   uniformName: string;
   isOpacity: boolean;
   hoveredRegionId: string | null;
   setHeaderRegionId: (id: string | null) => void;
+  onSelect: () => void;
 }) {
   const variations = block.parameterVariations[uniformName] ?? [];
 
@@ -350,6 +394,11 @@ const RegionBar = observer(function RegionBar({
         borderColor="#3a5a78"
         bg="#141820"
         align="center"
+        cursor="pointer"
+        onClick={(e) => {
+          e.stopPropagation();
+          onSelect();
+        }}
       >
         <Text
           position="sticky"
@@ -405,6 +454,11 @@ const RegionBar = observer(function RegionBar({
             spacing={0}
             align="stretch"
             bg="#141820"
+            cursor="pointer"
+            onClick={(e) => {
+              e.stopPropagation();
+              onSelect();
+            }}
           >
             {variations.map((variation, index) => (
               <Draggable

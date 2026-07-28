@@ -41,6 +41,14 @@ export type VariationSelection = {
 
 export type BlockOrVariation = BlockSelection | VariationSelection;
 
+// A param lane selected via its header / region bar. Separate from
+// selectedBlocksOrVariations so it can coexist with (and require) a block
+// selection — used for header chrome and the live value readout.
+export type ParameterSelection = {
+  block: Block;
+  uniformName: string;
+};
+
 type InitializationState = "uninitialized" | "initializing" | "initialized";
 
 export class Store {
@@ -137,6 +145,8 @@ export class Store {
         (selection) => selection.block.layer !== layer,
       ),
     );
+    if (this.selectedParameter?.block.layer === layer)
+      this.selectedParameter = null;
 
     this.layers.splice(index, 1);
 
@@ -156,6 +166,7 @@ export class Store {
   };
 
   selectedBlocksOrVariations: Set<BlockOrVariation> = new Set();
+  selectedParameter: ParameterSelection | null = null;
 
   get singleBlockSelection(): Block | null {
     const blockSelections = Array.from(this.selectedBlocksOrVariations).filter(
@@ -321,11 +332,32 @@ export class Store {
   selectBlock = (block: Block) => {
     this.selectedBlocksOrVariations = new Set([{ type: "block", block }]);
     this.uiStore.showDevicePanel = true;
+    // drop a param selection that doesn't belong to this pattern block
+    if (
+      this.selectedParameter &&
+      (this.selectedParameter.block.parentBlock ??
+        this.selectedParameter.block) !== block
+    ) {
+      this.selectedParameter = null;
+    }
   };
 
   addBlockToSelection = (block: Block) => {
     this.selectedBlocksOrVariations.add({ type: "block", block });
     this.uiStore.showDevicePanel = true;
+  };
+
+  // Select a param lane (header / region bar). Ensures its pattern block is
+  // selected so the device panel and block chrome stay in sync.
+  selectParameter = (block: Block, uniformName: string) => {
+    this.selectedParameter = { block, uniformName };
+    const patternBlock = block.parentBlock ?? block;
+    const alreadySelected = Array.from(this.selectedBlocksOrVariations).some(
+      (selection) =>
+        selection.type === "block" && selection.block === patternBlock,
+    );
+    if (!alreadySelected) this.selectBlock(patternBlock);
+    if (patternBlock.layer) this._selectedLayer = patternBlock.layer;
   };
 
   selectVariation = (
@@ -341,6 +373,7 @@ export class Store {
         variation,
       },
     ]);
+    this.selectedParameter = { block, uniformName };
     if (block.layer) this._selectedLayer = block.layer;
   };
 
@@ -366,6 +399,13 @@ export class Store {
         this.selectedBlocksOrVariations.delete(selectedBlockOrVariation);
       }
     });
+    if (
+      this.selectedParameter &&
+      (this.selectedParameter.block.parentBlock ??
+        this.selectedParameter.block) === block
+    ) {
+      this.selectedParameter = null;
+    }
   };
 
   deselectVariation = (
@@ -395,8 +435,10 @@ export class Store {
   };
 
   deselectAll = () => {
-    if (this.selectedBlocksOrVariations.size === 0) return;
+    if (this.selectedBlocksOrVariations.size === 0 && !this.selectedParameter)
+      return;
     this.selectedBlocksOrVariations = new Set();
+    this.selectedParameter = null;
   };
 
   deleteSelected = () => {
@@ -421,6 +463,7 @@ export class Store {
     if (blockRemoved) {
       // when deleting a variation, we select the next variation, so we don't want to deselect everything
       this.selectedBlocksOrVariations = new Set();
+      this.selectedParameter = null;
     }
   };
 

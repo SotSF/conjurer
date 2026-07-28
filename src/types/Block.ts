@@ -127,8 +127,12 @@ export class Block {
   // toggles whether the given param's automation lane is shown beneath this
   // block in the timeline
   toggleParamLane = (uniformName: string) => {
-    if (this.lanedParams.has(uniformName)) this.lanedParams.delete(uniformName);
-    else this.armParamLane(uniformName);
+    if (this.lanedParams.has(uniformName)) {
+      this.lanedParams.delete(uniformName);
+      const selected = this.store.selectedParameter;
+      if (selected?.block === this && selected.uniformName === uniformName)
+        this.store.selectedParameter = null;
+    } else this.armParamLane(uniformName);
     this.persistLanes();
   };
 
@@ -152,6 +156,14 @@ export class Block {
     for (const uniformName of uniformNames) {
       if (on) this.armParamLane(uniformName);
       else this.lanedParams.delete(uniformName);
+    }
+    if (!on) {
+      const selected = this.store.selectedParameter;
+      if (
+        selected?.block === this &&
+        uniformNames.includes(selected.uniformName)
+      )
+        this.store.selectedParameter = null;
     }
     this.persistLanes();
   };
@@ -561,8 +573,9 @@ export class Block {
   };
 
   recomputeHeaderRepetitions = (width: number) => {
-    // average screen width is 1280px, so repeat header and additional time for each multiple of this
-    this.headerRepetitions = Math.floor(width / 1280) + 1;
+    // repeat the param-name header about every 280px so wide blocks stay labeled
+    // across their span (left-aligned within each segment)
+    this.headerRepetitions = Math.floor(width / 400) + 1;
 
     this.effectBlocks.forEach((effect) =>
       effect.recomputeHeaderRepetitions(width),
