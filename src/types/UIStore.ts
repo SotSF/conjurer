@@ -130,9 +130,44 @@ export class UIStore {
   };
 
   /**
+   * Zoom and scroll so the given block fills the timeline content viewport
+   * (with a little padding) and is centered. Clamped to min/max zoom — long
+   * blocks may still overflow at minimum zoom.
+   */
+  fitBlockInView = (block: { startTime: number; duration: number }) => {
+    if (!this.canTimelineZoom) return;
+    const timeline = document.getElementById("timeline");
+    if (!timeline) return;
+
+    const visibleWidth = Math.max(
+      1,
+      timeline.clientWidth - TIMELINE_HEADER_WIDTH,
+    );
+    const padding = Math.min(64, visibleWidth * 0.08);
+    const usableWidth = Math.max(1, visibleWidth - padding * 2);
+    const duration = Math.max(block.duration, 0.01);
+    const newPps = Math.min(
+      MAX_PIXELS_PER_SECOND,
+      Math.max(MIN_PIXELS_PER_SECOND, usableWidth / duration),
+    );
+
+    this.pixelsPerSecond = newPps;
+    this.saveToLocalStorage();
+
+    const centerTime = block.startTime + block.duration / 2;
+    const newScrollLeft = Math.max(0, centerTime * newPps - visibleWidth / 2);
+    timeline.scrollLeft = newScrollLeft;
+    // Re-apply after layout so scrollLeft isn't clamped to the pre-zoom width.
+    requestAnimationFrame(() => {
+      timeline.scrollLeft = newScrollLeft;
+    });
+  };
+
+  /**
    * Set an absolute zoom level (pixels per second).
    * @param anchorClientX optional mouse X to keep that time fixed in the viewport;
-   *   when omitted, anchors to the viewport center
+   *   when omitted (or outside the timeline, e.g. toolbar zoom buttons), anchors
+   *   to the center of the visible timeline content
    */
   setZoom = (pixelsPerSecond: number, anchorClientX?: number) => {
     if (!this.canTimelineZoom) return;
@@ -147,10 +182,16 @@ export class UIStore {
     const timeline = document.getElementById("timeline");
     if (timeline) {
       const rect = timeline.getBoundingClientRect();
-      const offsetX =
-        anchorClientX !== undefined
-          ? anchorClientX - rect.left
-          : rect.width / 2;
+      // Only mouse-anchor when the pointer is actually over the timeline.
+      // Toolbar buttons / keyboard shortcuts leave the mouse outside, so fall
+      // back to the center of the scrollable content (past the sticky header).
+      const mouseInTimeline =
+        anchorClientX !== undefined &&
+        anchorClientX >= rect.left &&
+        anchorClientX <= rect.right;
+      const offsetX = mouseInTimeline
+        ? anchorClientX - rect.left
+        : TIMELINE_HEADER_WIDTH + (rect.width - TIMELINE_HEADER_WIDTH) / 2;
       const contentX = timeline.scrollLeft + offsetX;
       const anchorTime = Math.max(
         0,
@@ -158,8 +199,16 @@ export class UIStore {
       );
 
       this.pixelsPerSecond = newPps;
-      timeline.scrollLeft =
+      const newScrollLeft =
         TIMELINE_HEADER_WIDTH + anchorTime * newPps - offsetX;
+      timeline.scrollLeft = newScrollLeft;
+      // Re-apply after MobX→React lays out the new content width. Setting
+      // scrollLeft before scrollWidth grows gets clamped to the old max, which
+      // makes toolbar/keyboard zoom appear to jump left instead of staying
+      // centered.
+      requestAnimationFrame(() => {
+        timeline.scrollLeft = newScrollLeft;
+      });
     } else {
       this.pixelsPerSecond = newPps;
     }
@@ -171,7 +220,7 @@ export class UIStore {
    * Multiplicatively zoom the timeline.
    * @param factor >1 zooms in, <1 zooms out
    * @param anchorClientX optional mouse X to keep that time fixed in the viewport;
-   *   when omitted, anchors to the viewport center
+   *   when omitted (or outside the timeline), anchors to the content center
    */
   zoomBy = (factor: number, anchorClientX?: number) => {
     if (factor === 1) return;

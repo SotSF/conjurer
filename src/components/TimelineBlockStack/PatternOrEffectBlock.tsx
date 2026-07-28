@@ -1,10 +1,14 @@
 import { Block } from "@/src/types/Block";
-import { Box, Heading, HStack } from "@chakra-ui/react";
+import { Box, Heading, HStack, IconButton } from "@chakra-ui/react";
+import { action } from "mobx";
 import { observer } from "mobx-react-lite";
 import { MouseEvent as ReactMouseEvent } from "react";
+import { FaSearch } from "react-icons/fa";
 import { MdDragIndicator } from "react-icons/md";
 import { PatternTimingModal } from "@/src/components/TimelineBlockStack/PatternTimingModal";
 import { TIMELINE_HEADER_WIDTH } from "@/src/types/UIStore";
+import { useStore } from "@/src/types/StoreContext";
+import { hoverHelpProps } from "@/src/utils/hoverHelp";
 
 type Props = {
   block: Block;
@@ -21,8 +25,8 @@ export const blockHeaderLabel = (block: Block): string => {
 };
 
 // The pattern block's timeline header: a draggable name pinned to the left of
-// the visible timeline (stays in view when the block is scrolled wider than the
-// viewport) and the timing control at the block's right edge.
+// the visible timeline and zoom/timing controls pinned to the right, so both
+// stay on-screen when the block is wider than the viewport.
 // Observer so effect add/remove/reorder refreshes the label (pattern.name itself
 // is excluded from Block's MobX tree and arrives via the parent re-render).
 export const PatternOrEffectBlock = observer(function PatternOrEffectBlock({
@@ -30,6 +34,7 @@ export const PatternOrEffectBlock = observer(function PatternOrEffectBlock({
   handleBlockClick,
   isSelected,
 }: Props) {
+  const { uiStore } = useStore();
   const color = isSelected ? "blue.500" : "white";
   const label = blockHeaderLabel(block);
   return (
@@ -45,7 +50,7 @@ export const PatternOrEffectBlock = observer(function PatternOrEffectBlock({
       onClick={handleBlockClick}
     >
       {/* the name track is flex:1 and position:relative, so the sticky name is
-          constrained to it and can never slide over the timing control */}
+          constrained to it and can never slide over the controls' layout slot */}
       <Box flex="1" minW={0} position="relative">
         <HStack
           position="sticky"
@@ -55,7 +60,7 @@ export const PatternOrEffectBlock = observer(function PatternOrEffectBlock({
           // fit-content (not auto) so the sticky element is narrower than its
           // track and therefore has room to slide/pin as the card scrolls;
           // capped at the track width so it still truncates and never reaches
-          // the timing control
+          // the controls' layout slot at the block's right edge
           width="fit-content"
           maxW="100%"
         >
@@ -63,9 +68,9 @@ export const PatternOrEffectBlock = observer(function PatternOrEffectBlock({
             <MdDragIndicator size={18} />
           </Box>
           {/* Narrow blocks: isTruncated + minW=0 let the label ellipsize inside
-              the capped sticky track instead of overflowing into the timing
-              control. Native title keeps the full "pattern · effects" string
-              available on hover when the visible text is clipped. */}
+              the capped sticky track instead of overflowing into the controls.
+              Native title keeps the full "pattern · effects" string available
+              on hover when the visible text is clipped. */}
           <Heading
             size="sm"
             fontSize="13px"
@@ -79,9 +84,40 @@ export const PatternOrEffectBlock = observer(function PatternOrEffectBlock({
           </Heading>
         </HStack>
       </Box>
-      <Box flexShrink={0} pr={1}>
+      {/* Sticky to the timeline viewport's right edge so zoom/timing stay
+          reachable on wide blocks; slides left over the header as you scroll. */}
+      <HStack
+        flexShrink={0}
+        spacing={0}
+        pr={1}
+        pl={1}
+        position="sticky"
+        right={0}
+        zIndex={2}
+        alignSelf="stretch"
+        bg="gray.700"
+      >
+        {uiStore.canTimelineZoom && (
+          <IconButton
+            variant="ghost"
+            size="xs"
+            aria-label="Zoom to block"
+            title="Zoom to block"
+            height={6}
+            icon={<FaSearch size={12} />}
+            onClick={action((e: ReactMouseEvent) => {
+              e.stopPropagation();
+              uiStore.fitBlockInView(block);
+            })}
+            {...hoverHelpProps(
+              uiStore,
+              "Zoom to block",
+              "Fit this block in the timeline viewport.",
+            )}
+          />
+        )}
         <PatternTimingModal block={block} />
-      </Box>
+      </HStack>
     </HStack>
   );
 });
