@@ -19,6 +19,7 @@ import { useState } from "react";
 import { TbSettings } from "react-icons/tb";
 import { useStore } from "@/src/types/StoreContext";
 import { hoverHelpProps } from "@/src/utils/hoverHelp";
+import { nonSelectableUiProps } from "@/src/utils/nonSelectableUi";
 
 type Props = {
   block: Block;
@@ -104,6 +105,7 @@ export const CurveRangeControl = function CurveRangeControl({
           bg="gray.700"
           fontSize={10}
           zIndex={1600}
+          {...nonSelectableUiProps}
         >
           <PopoverArrow bg="gray.700" />
           <PopoverBody>

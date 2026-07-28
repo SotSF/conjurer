@@ -18,7 +18,7 @@ export type HoverHelp = {
 };
 
 export class UIStore {
-  horizontalLayout = true;
+  horizontalLayout = false;
   showingPerformance = false;
   showingWaveformOverlay = false;
   showingBeatGridOverlay = false;
@@ -320,7 +320,8 @@ export class UIStore {
     const data = localStorage.getItem("uiStore");
     if (data) {
       const localStorageUiSettings = JSON.parse(data);
-      this.horizontalLayout = !!localStorageUiSettings.horizontalLayout;
+      // Key renamed from horizontalLayout so prior prefs reset to vertical (default).
+      this.horizontalLayout = !!localStorageUiSettings.horizontalAppLayout;
       this.showingPerformance = !!localStorageUiSettings.showingPerformance;
       this.displayMode = localStorageUiSettings.displayMode || "canopy";
       this.playgroundDisplayMode =
@@ -340,7 +341,7 @@ export class UIStore {
     localStorage.setItem(
       "uiStore",
       JSON.stringify({
-        horizontalLayout: this.horizontalLayout,
+        horizontalAppLayout: this.horizontalLayout,
         showingPerformance: this.showingPerformance,
         displayMode: this.displayMode,
         playgroundDisplayMode: this.playgroundDisplayMode,

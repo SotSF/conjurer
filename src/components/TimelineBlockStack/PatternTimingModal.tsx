@@ -19,6 +19,7 @@ import { NumberParamInput } from "@/src/components/NumberParamInput";
 import { observer } from "mobx-react-lite";
 import { useStore } from "@/src/types/StoreContext";
 import { hoverHelpProps } from "@/src/utils/hoverHelp";
+import { nonSelectableUiProps } from "@/src/utils/nonSelectableUi";
 
 type PatternTimingModalProps = {
   block: Block;
@@ -67,7 +68,7 @@ export const PatternTimingModal = observer(function PatternTimingModal({
 
       <Modal isOpen={isOpen} onClose={onClose} isCentered>
         <ModalOverlay />
-        <ModalContent>
+        <ModalContent {...nonSelectableUiProps}>
           <ModalHeader>Adjust Pattern Timing</ModalHeader>
           <ModalCloseButton />
           <ModalBody>

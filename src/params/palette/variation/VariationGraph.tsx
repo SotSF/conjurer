@@ -12,6 +12,7 @@ import { PaletteVariation } from "./PaletteVariation";
 import { Palette } from "../Palette";
 import { PaletteEditor } from "../editor/PaletteEditor";
 import { vector3ToRgbaString } from "@/src/utils/color";
+import { nonSelectableUiProps } from "@/src/utils/nonSelectableUi";
 
 type PaletteVariationGraphProps = {
   uniformName: string;
@@ -97,6 +98,7 @@ export const PaletteVariationGraph = function PaletteVariationGraph({
           // not the content box, to clear the sticky layer header (zIndex 11)
           rootProps={{ style: { zIndex: 1500 } }}
           onClick={(e) => e.stopPropagation()}
+          {...nonSelectableUiProps}
         >
           <PopoverArrow bg="#12151c" />
           <PopoverBody>

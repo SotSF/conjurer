@@ -21,6 +21,7 @@ import { ReactElement, useState } from "react";
 import { TbSettings } from "react-icons/tb";
 import { useStore } from "@/src/types/StoreContext";
 import { hoverHelpProps } from "@/src/utils/hoverHelp";
+import { nonSelectableUiProps } from "@/src/utils/nonSelectableUi";
 
 type Props = {
   block: Block;
@@ -92,6 +93,7 @@ export const RegionSettingsPopover = function RegionSettingsPopover({
           // z-index must clear the sticky layer header (zIndex 11), same as
           // palette/color region popovers
           rootProps={{ style: { zIndex: 1600 } }}
+          {...nonSelectableUiProps}
         >
           <PopoverArrow bg="gray.700" />
           <PopoverBody>

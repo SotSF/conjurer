@@ -7,6 +7,7 @@ import { ExperienceEditorControls } from "@/src/components/ExperienceEditor/Expe
 import { BlockDevicePanel } from "@/src/components/ExperienceEditor/BlockDevicePanel";
 import { ParameterDetailPanel } from "@/src/components/ExperienceEditor/ParameterDetailPanel";
 import { StatusInfoBar } from "@/src/components/ExperienceEditor/StatusInfoBar";
+import { nonSelectableUiProps } from "@/src/utils/nonSelectableUi";
 
 export const Arrangement = observer(function Arrangement() {
   const store = useStore();
@@ -31,6 +32,7 @@ export const Arrangement = observer(function Arrangement() {
       gridTemplateColumns="minmax(0,1fr)"
       gridTemplateRows="auto minmax(0,1fr) auto auto"
       onMouseLeave={action(() => store.uiStore.clearAllHoverHelp())}
+      {...nonSelectableUiProps}
     >
       <GridItem area="controls">
         {store.context !== "viewer" && <ExperienceEditorControls />}

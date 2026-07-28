@@ -6,6 +6,7 @@ import { TbCopy, TbRepeat, TbX } from "react-icons/tb";
 import { Block } from "@/src/types/Block";
 import { useStore } from "@/src/types/StoreContext";
 import { useLaneTimeScale } from "@/src/components/ParameterVariations/LaneTimeScaleContext";
+import { nonSelectableUiProps } from "@/src/utils/nonSelectableUi";
 import { allowedInsertTypes, InsertType } from "@/src/utils/regionConvert";
 import { hoverHelpProps } from "@/src/utils/hoverHelp";
 
@@ -88,6 +89,7 @@ export const LaneSpanToolbar = observer(function LaneSpanToolbar({
         // the toolbar is an action bar, not part of the lane's drag surface
         onPointerDown={(e) => e.stopPropagation()}
         onClick={(e) => e.stopPropagation()}
+        {...nonSelectableUiProps}
         {...hoverHelpProps(
           uiStore,
           "Lane span",

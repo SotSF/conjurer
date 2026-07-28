@@ -81,6 +81,7 @@ export const EnvelopeGraph = function EnvelopeGraph({
     "gray.800",
     "yellow.300",
   ]);
+  const rootRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef<SVGSVGElement>(null);
   const draggingId = useRef<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -108,6 +109,13 @@ export const EnvelopeGraph = function EnvelopeGraph({
   // true while a node is being dragged — the numeric editor hides so it doesn't
   // sit under the cursor / thrash as values stream in.
   const [dragging, setDragging] = useState(false);
+  // While dragging nodes/handles, lock browser pan/zoom on the SVG so a
+  // trackpad/touch gesture can't steal the drag. Idle, leave touch-action alone
+  // so horizontal timeline scrolling still works when the pointer is over the
+  // curve (permanent touch-action:none was eating those pans).
+  const [gestureLock, setGestureLock] = useState(false);
+  const gestureLockRef = useRef(false);
+  gestureLockRef.current = gestureLock;
 
   const innerWidth = Math.max(1, width - VARIATION_BOUND_WIDTH);
   const { nodes, duration } = variation;
@@ -140,6 +148,37 @@ export const EnvelopeGraph = function EnvelopeGraph({
       fn();
       block.triggerVariationReactions(uniformName);
     });
+
+  // Timeline scrollport is an ancestor when this graph is in a block lane.
+  // Forward non-zoom wheel deltas there explicitly: the SVG UA stylesheet uses
+  // overflow:hidden, which can become the wheel scroll target and swallow pans
+  // that should move #timeline (same reason variationGraph.css forces recharts
+  // surfaces to overflow:visible).
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+    const onWheel = (e: WheelEvent) => {
+      if (e.ctrlKey || e.metaKey) return; // ctrl/meta+wheel → timeline zoom
+      if (gestureLockRef.current) {
+        e.preventDefault();
+        return;
+      }
+      const timeline = root.closest("#timeline");
+      if (!(timeline instanceof HTMLElement)) return;
+      if (
+        timeline.scrollWidth <= timeline.clientWidth &&
+        timeline.scrollHeight <= timeline.clientHeight
+      )
+        return;
+      // deltaMode: 0 = pixels (trackpad), 1 = lines, 2 = pages
+      const scale =
+        e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? timeline.clientHeight : 1;
+      e.preventDefault();
+      timeline.scrollBy({ left: e.deltaX * scale, top: e.deltaY * scale });
+    };
+    root.addEventListener("wheel", onWheel, { passive: false });
+    return () => root.removeEventListener("wheel", onWheel);
+  }, []);
 
   const onNodePointerDown = (e: React.PointerEvent, id: string) => {
     e.stopPropagation();
@@ -176,6 +215,7 @@ export const EnvelopeGraph = function EnvelopeGraph({
     setEditingId(null);
     draggingId.current = id;
     setDragging(true);
+    setGestureLock(true);
     // Force the 4-directional move cursor everywhere for the whole drag — a
     // global !important rule, so it beats the node's own pointer cursor while
     // the pointer is still over the dot.
@@ -243,6 +283,7 @@ export const EnvelopeGraph = function EnvelopeGraph({
     const up = () => {
       draggingId.current = null;
       setDragging(false);
+      setGestureLock(false);
       setSnapValue(null);
       cursorStyle.remove();
       window.removeEventListener("pointermove", move);
@@ -267,6 +308,7 @@ export const EnvelopeGraph = function EnvelopeGraph({
   // opposite handle through the segment's midpoint (its offset negated), so the
   // two pivot symmetrically — a symmetric ease-in-out between the endpoints.
   const beginHandleDrag = (segIndex: number, side: "out" | "in") => {
+    setGestureLock(true);
     const cursorStyle = document.createElement("style");
     cursorStyle.textContent = "*{cursor:move !important;}";
     document.head.appendChild(cursorStyle);
@@ -291,6 +333,7 @@ export const EnvelopeGraph = function EnvelopeGraph({
       });
     };
     const up = () => {
+      setGestureLock(false);
       cursorStyle.remove();
       window.removeEventListener("pointermove", move);
       window.removeEventListener("pointerup", up);
@@ -494,12 +537,24 @@ export const EnvelopeGraph = function EnvelopeGraph({
   const selectedNode = selectedIdx >= 0 ? nodes[selectedIdx] : null;
 
   return (
-    <Box position="relative" py={1} bgColor="gray.600" _hover={{ bgColor: "gray.500" }}>
+    <Box
+      ref={rootRef}
+      position="relative"
+      py={1}
+      bgColor="gray.600"
+      _hover={{ bgColor: "gray.500" }}
+    >
       <svg
         ref={svgRef}
         width={innerWidth}
         height={height}
-        style={{ display: "block", touchAction: "none" }}
+        style={{
+          display: "block",
+          // Match recharts/spline: don't let the SVG UA overflow:hidden become
+          // a wheel scrollport that traps timeline pans.
+          overflow: "visible",
+          touchAction: gestureLock ? "none" : "auto",
+        }}
         onPointerDown={onSvgPointerDown}
         onDoubleClick={onDoubleClick}
       >
