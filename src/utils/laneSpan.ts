@@ -1,6 +1,8 @@
 import type { Block } from "@/src/types/Block";
 import type { Variation } from "@/src/types/Variations/Variation";
 import { CurveVariation } from "@/src/types/Variations/CurveVariation";
+import { PeriodicVariation } from "@/src/types/Variations/PeriodicVariation";
+import { AudioVariation } from "@/src/types/Variations/AudioVariation";
 import { MINIMUM_VARIATION_DURATION } from "@/src/utils/time";
 
 // A span narrower than this is treated as a stray click, not a selection. It
@@ -58,15 +60,18 @@ export const laneValueAt = (
   return region.variation.valueAtTime(local, block.startTime + t);
 };
 
+/** Scalar regions (curve / LFO / audio) can be partially selected and sliced. */
+export const isPartiallySelectable = (v: Variation) =>
+  v instanceof CurveVariation ||
+  v instanceof PeriodicVariation ||
+  v instanceof AudioVariation;
+
 /**
  * Clamp a raw span to the lane and make it selectable.
  *
- * Only Curve regions support a partial selection — their shape can be cut and
- * re-joined faithfully. Every other region type (LFO, audio, palette, color) is
- * a generator with no interior structure to slice, so a span that touches one
- * swallows it whole. That keeps "select part of an LFO" from silently meaning
- * "resample the LFO", at the cost of a span that sometimes grows past where the
- * pointer was released.
+ * Curve / LFO / audio regions support partial selection. Discrete regions
+ * (palette, color) have no meaningful interior to slice, so a span that
+ * touches one swallows it whole.
  *
  * Returns null when the result is too narrow to be a real selection.
  */
@@ -84,7 +89,7 @@ export const normalizeLaneSpan = (
   let endTime = Math.max(0, Math.min(total, Math.max(rawStart, rawEnd)));
 
   for (const region of regions) {
-    if (region.variation instanceof CurveVariation) continue;
+    if (isPartiallySelectable(region.variation)) continue;
     // any overlap with an indivisible region pulls in the whole thing
     if (region.endTime <= startTime + 1e-9) continue;
     if (region.startTime >= endTime - 1e-9) continue;

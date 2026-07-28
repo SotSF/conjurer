@@ -509,8 +509,8 @@ export class Store {
   // ============================ lane span selection =========================
 
   // Select lane-local [startTime, endTime] of one param lane. The raw span is
-  // normalized first (clamped, and grown to swallow any indivisible region it
-  // touches); a span too narrow to be real just clears the selection.
+  // normalized first (clamped, and grown to swallow any discrete indivisible
+  // region it touches); a span too narrow to be real just clears the selection.
   selectLaneSpan = (
     block: Block,
     uniformName: string,

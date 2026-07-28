@@ -189,8 +189,8 @@ export const ParameterVariations = observer(function ParameterVariations({
         );
         return;
       }
-      // clicking an indivisible region selects the whole thing; Curve regions
-      // handle their own node/segment clicks
+      // click selects the whole region; Curve regions handle their own
+      // node/segment clicks for partial picks (drag still spans any type)
       const time = scale.xToTime(ev.clientX - rect.left);
       const region = laneRegions(block, uniformName).find(
         (r) => time < r.endTime,

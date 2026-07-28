@@ -16,6 +16,7 @@ import { LinearVariation4 } from "@/src/types/Variations/LinearVariation4";
 import { isPalette } from "@/src/params/palette/Palette";
 import { PaletteVariation } from "@/src/params/palette/variation/PaletteVariation";
 import { CurveVariation } from "@/src/types/Variations/CurveVariation";
+import { PeriodicVariation } from "@/src/types/Variations/PeriodicVariation";
 import { generateId } from "@/src/utils/id";
 import {
   loadBlockLanes,
@@ -199,12 +200,16 @@ export class Block {
   // region durations summing to the lane span, so time is conserved on every op.
 
   // The [a,b] local slice of a region, rebased to its own frame. Curves cut
-  // faithfully (De Casteljau); generators just take the sub-duration.
+  // faithfully (De Casteljau); LFOs advance phase so the wave stays continuous;
+  // other generators just take the sub-duration.
   sliceRegion = (v: Variation, a: number, b: number): Variation => {
     const c = v.clone();
     if (c instanceof CurveVariation) {
       c.resizeEnd(b);
       c.shiftStart(a);
+    } else if (c instanceof PeriodicVariation) {
+      c.shiftStart(a);
+      c.duration = Math.max(MINIMUM_VARIATION_DURATION, b - a);
     } else {
       c.duration = Math.max(MINIMUM_VARIATION_DURATION, b - a);
     }
@@ -239,7 +244,10 @@ export class Block {
     if (left instanceof CurveVariation) left.resizeEnd(left.duration + delta);
     else left.duration += delta;
     if (right instanceof CurveVariation) right.shiftStart(delta);
-    else right.duration -= delta;
+    else if (right instanceof PeriodicVariation) {
+      right.shiftStart(delta);
+      right.duration -= delta;
+    } else right.duration -= delta;
     this.triggerVariationReactions(uniformName);
   };
 
@@ -363,7 +371,10 @@ export class Block {
     } else {
       const right = out[0];
       if (right instanceof CurveVariation) right.shiftStart(-removedDur);
-      else right.duration += removedDur;
+      else if (right instanceof PeriodicVariation) {
+        right.shiftStart(-removedDur);
+        right.duration += removedDur;
+      } else right.duration += removedDur;
     }
     this.parameterVariations[uniformName] = this.mergeAdjacentCurves(out);
     this.triggerVariationReactions(uniformName);
