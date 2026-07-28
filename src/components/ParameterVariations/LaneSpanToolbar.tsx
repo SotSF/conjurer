@@ -2,7 +2,7 @@ import { Box, Button, HStack, Portal, Text, Tooltip } from "@chakra-ui/react";
 import { RefObject } from "react";
 import { action } from "mobx";
 import { observer } from "mobx-react-lite";
-import { TbCopy, TbRepeat, TbX } from "react-icons/tb";
+import { TbCopy, TbRepeat, TbTrash } from "react-icons/tb";
 import { Block } from "@/src/types/Block";
 import { useStore } from "@/src/types/StoreContext";
 import { useLaneTimeScale } from "@/src/components/ParameterVariations/LaneTimeScaleContext";
@@ -141,10 +141,10 @@ export const LaneSpanToolbar = observer(function LaneSpanToolbar({
           action(() => store.duplicateLaneSpan()),
         )}
         {iconButton(
-          "Clear selection",
-          "Deselect the lane span without changing the regions.",
-          <TbX size={12} />,
-          action(() => store.clearLaneSpan()),
+          "Delete span",
+          "Erase the automation in the selected span, replacing it with a default region.",
+          <TbTrash size={12} />,
+          action(() => store.deleteLaneSpan()),
         )}
       </HStack>
     </Portal>

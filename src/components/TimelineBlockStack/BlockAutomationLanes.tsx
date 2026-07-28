@@ -32,7 +32,7 @@ import {
   useEffect,
   useState,
 } from "react";
-import { TbArrowsMaximize, TbChevronUp } from "react-icons/tb";
+import { TbArrowsMaximize, TbChevronUp, TbTrash } from "react-icons/tb";
 import { AddRegionMenu } from "@/src/components/ParameterVariations/AddRegionMenu";
 import { CurveRangeControl } from "@/src/components/ParameterVariations/CurveRangeControl";
 import { RegionSettingsPopover } from "@/src/components/ParameterVariations/RegionSettingsPopover";
@@ -804,7 +804,7 @@ const RegionTab = observer(function RegionTab({
               "Remove this region from the lane. Neighboring regions keep their timing.",
             )}
           >
-            ✕
+            <TbTrash size={12} />
           </Box>
         </Tooltip>
       )}

@@ -19,6 +19,7 @@ import {
   Tooltip,
 } from "@chakra-ui/react";
 import { MdMyLocation, MdViewStream, MdClose } from "react-icons/md";
+import { TbTrash } from "react-icons/tb";
 import {
   DragDropContext,
   Draggable,
@@ -515,7 +516,7 @@ const EffectUnit = function EffectUnit({
                 "Detach this effect from the pattern's effect chain.",
               )}
             >
-              ✕
+              <TbTrash size={12} />
             </Text>
           </Tooltip>
         </HStack>
