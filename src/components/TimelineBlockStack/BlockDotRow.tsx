@@ -21,7 +21,7 @@ const DEFAULT_BORDER = "#4a5568"; // gray.600
 
 // approximate horizontal footprint of one dot (dot + gap), for deciding when
 // the row is too wide for the block and must collapse to a badge
-const DOT_FOOTPRINT = 13;
+const DOT_FOOTPRINT = 19;
 const ROW_PADDING = 20;
 
 type Signal = {
@@ -29,6 +29,8 @@ type Signal = {
   block: Block;
   uniformName: string;
   label: string;
+  // first letter of the param name, shown inside the dot for at-a-glance ID
+  letter: string;
   authored: boolean;
   laneOn: boolean;
   // opacity is special: it can be auto-crossfading without being authored
@@ -38,6 +40,8 @@ type Signal = {
   isPalette: boolean;
   isEffect: boolean;
 };
+
+const paramLetter = (name: string) => name.charAt(0).toUpperCase();
 
 const gatherSignals = (block: Block) => {
   const autoFading = !!block.layer?.autoOpacityVariations(block);
@@ -55,6 +59,7 @@ const gatherSignals = (block: Block) => {
         block,
         uniformName,
         label: patternParam.name,
+        letter: paramLetter(patternParam.name),
         authored,
         laneOn: block.lanedParams.has(uniformName),
         isOpacity,
@@ -74,6 +79,7 @@ const gatherSignals = (block: Block) => {
         block: effectBlock,
         uniformName,
         label: `${effectBlock.pattern.name} · ${patternParam.name}`,
+        letter: paramLetter(patternParam.name),
         authored: isParamAuthored(effectBlock, uniformName),
         laneOn: effectBlock.lanedParams.has(uniformName),
         isOpacity: false,
@@ -246,7 +252,7 @@ const DotList = function DotList({
       <Box
         flexShrink={0}
         width="1px"
-        height="11px"
+        height="14px"
         bg={DEFAULT_BORDER}
         mx="1px"
       />
@@ -257,7 +263,7 @@ const DotList = function DotList({
         <Box
           flexShrink={0}
           width="1px"
-          height="11px"
+          height="14px"
           bg={DEFAULT_BORDER}
           mx="1px"
         />
@@ -271,7 +277,7 @@ const DotList = function DotList({
 
 const Dot = function Dot({ signal }: { signal: Signal }) {
   const { uiStore } = useStore();
-  const { authored, laneOn, isOpacity, fading, isEffect } = signal;
+  const { authored, laneOn, isOpacity, fading, isEffect, letter } = signal;
 
   const fill = isOpacity
     ? authored
@@ -297,7 +303,7 @@ const Dot = function Dot({ signal }: { signal: Signal }) {
     signal.block.toggleParamLane(signal.uniformName);
   });
 
-  const size = laneOn ? "10px" : "9px";
+  const size = laneOn ? "15px" : "14px";
   const laneHelp = laneOn
     ? "Click to hide this parameter's automation lane."
     : "Click to open this parameter's automation lane on the timeline.";
@@ -315,14 +321,30 @@ const Dot = function Dot({ signal }: { signal: Signal }) {
         onClick={onClick}
         width={size}
         height={size}
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
         bg={fill}
         border={filled ? undefined : `1px solid ${DEFAULT_BORDER}`}
         borderRadius={isEffect ? "2px" : "50%"}
         transform={isEffect ? "rotate(45deg)" : undefined}
         boxShadow={laneOn ? `0 0 0 2px ${ringColor}` : undefined}
         cursor="pointer"
+        userSelect="none"
         {...hoverHelpProps(uiStore, signal.label, laneHelp)}
-      />
+      >
+        <Text
+          as="span"
+          fontSize="8px"
+          fontWeight={700}
+          lineHeight={1}
+          color={filled ? "white" : "#a0aec0"}
+          // diamonds rotate the shell; keep the letter upright
+          transform={isEffect ? "rotate(-45deg)" : undefined}
+        >
+          {letter}
+        </Text>
+      </Box>
     </Tooltip>
   );
 };
