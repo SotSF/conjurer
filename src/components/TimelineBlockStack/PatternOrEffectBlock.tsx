@@ -1,5 +1,6 @@
 import { Block } from "@/src/types/Block";
 import { Box, Heading, HStack } from "@chakra-ui/react";
+import { observer } from "mobx-react-lite";
 import { MouseEvent as ReactMouseEvent } from "react";
 import { MdDragIndicator } from "react-icons/md";
 import { PatternTimingModal } from "@/src/components/TimelineBlockStack/PatternTimingModal";
@@ -11,17 +12,26 @@ type Props = {
   isSelected: boolean;
 };
 
+/** Pattern name, then each effect in chain order — e.g. "Cloud · Kaleidoscope". */
+export const blockHeaderLabel = (block: Block): string => {
+  const effectNames = block.effectBlocks.map((effect) => effect.pattern.name);
+  return effectNames.length > 0
+    ? [block.pattern.name, ...effectNames].join(" · ")
+    : block.pattern.name;
+};
+
 // The pattern block's timeline header: a draggable name pinned to the left of
 // the visible timeline (stays in view when the block is scrolled wider than the
 // viewport) and the timing control at the block's right edge.
-// Not an observer: selection comes in as a prop from TimelineBlockStack, and
-// pattern (name) is excluded from Block's MobX tree.
-export const PatternOrEffectBlock = function PatternOrEffectBlock({
+// Observer so effect add/remove/reorder refreshes the label (pattern.name itself
+// is excluded from Block's MobX tree and arrives via the parent re-render).
+export const PatternOrEffectBlock = observer(function PatternOrEffectBlock({
   block,
   handleBlockClick,
   isSelected,
 }: Props) {
   const color = isSelected ? "blue.500" : "white";
+  const label = blockHeaderLabel(block);
   return (
     <HStack
       position="relative"
@@ -52,8 +62,20 @@ export const PatternOrEffectBlock = function PatternOrEffectBlock({
           <Box flexShrink={0} display="flex">
             <MdDragIndicator size={18} />
           </Box>
-          <Heading size="sm" fontSize="13px" userSelect="none" isTruncated color={color}>
-            {block.pattern.name}
+          {/* Narrow blocks: isTruncated + minW=0 let the label ellipsize inside
+              the capped sticky track instead of overflowing into the timing
+              control. Native title keeps the full "pattern · effects" string
+              available on hover when the visible text is clipped. */}
+          <Heading
+            size="sm"
+            fontSize="13px"
+            userSelect="none"
+            isTruncated
+            minW={0}
+            color={color}
+            title={label}
+          >
+            {label}
           </Heading>
         </HStack>
       </Box>
@@ -62,4 +84,4 @@ export const PatternOrEffectBlock = function PatternOrEffectBlock({
       </Box>
     </HStack>
   );
-};
+});

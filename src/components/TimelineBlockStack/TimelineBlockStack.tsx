@@ -14,7 +14,10 @@ import {
 import Draggable from "react-draggable";
 import { DraggableData } from "react-draggable";
 import { DraggableEvent } from "react-draggable";
-import { PatternOrEffectBlock } from "@/src/components/TimelineBlockStack/PatternOrEffectBlock";
+import {
+  PatternOrEffectBlock,
+  blockHeaderLabel,
+} from "@/src/components/TimelineBlockStack/PatternOrEffectBlock";
 import { BlockDotRow } from "@/src/components/TimelineBlockStack/BlockDotRow";
 import { BlockAutomationLanes } from "@/src/components/TimelineBlockStack/BlockAutomationLanes";
 import { BlockOpacityEdgeLine } from "@/src/components/TimelineBlockStack/BlockOpacityEdgeLine";
@@ -150,7 +153,7 @@ export const TimelineBlockStack = observer(function TimelineBlockStack({
         onClick={(e: ReactMouseEvent) => e.stopPropagation()}
         {...hoverHelpProps(
           uiStore,
-          patternBlock.pattern.name,
+          blockHeaderLabel(patternBlock),
           "Pattern block — drag to move in time. Click to select; Shift+click to multi-select.",
         )}
       >
