@@ -13,6 +13,7 @@ import { isTextureParam } from "@/src/params/shared/patternParam";
 import { isVector4 } from "@/src/utils/object";
 import { paramValueAtTime } from "@/src/utils/paramValueAtTime";
 import { DEFAULT_VARIATION_DURATION } from "@/src/utils/time";
+import { Texture } from "three";
 
 /**
  * Overwrites a playground pool block's params with single flat values sampled
@@ -51,7 +52,7 @@ function applySnapshotParams(
           tgtP.value,
         ),
       ];
-    } else if (isTextureParam(tgtP)) {
+    } else if (isTextureParam(tgtP) && value instanceof Texture) {
       tgtP.value = value;
     } else if (typeof value === "number") {
       tgtP.value = value;
