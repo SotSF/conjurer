@@ -222,14 +222,13 @@ const AutomationLane = observer(function AutomationLane({
       position="relative"
       width="100%"
       role="group"
-      borderTopWidth={embedded ? 0 : "1px"}
-      borderColor="#2a3444"
       onMouseMove={onMouseMove}
       onMouseLeave={() => setCurveRegionId(null)}
     >
       {/* permanent chrome between params: repeating name + region map/controls.
-          Lives in layout (not over the curve) so nodes stay clickable and each
-          lane has a clear top edge for reading max/min proximity. */}
+          Lives in layout (not over the curve) so nodes stay clickable. A strong
+          top border on the name row separates lanes; type accents sit under the
+          region bar so the name stays visually joined to its own charts. */}
       <LaneNameHeader
         block={ownerBlock}
         uniformName={uniformName}
@@ -278,10 +277,11 @@ export { AutomationLane };
 export type { Lane };
 
 // Param name row above the region bar. The visual parent of the lane — stronger
-// than the region tabs below. Repeats across wide blocks and hosts the
-// lane-level ＋ so it never overlays editable curve points. Click selects this
-// parameter (and its block); the live value readout only mounts when selected
-// so playhead updates don't thrash every lane.
+// than the region tabs below. A top border (not bottom) separates this lane from
+// the previous one so the name reads with its own region bar/charts. Repeats
+// across wide blocks and hosts the lane-level ＋ so it never overlays editable
+// curve points. Click selects this parameter (and its block); the live value
+// readout only mounts when selected so playhead updates don't thrash every lane.
 const LaneNameHeader = observer(function LaneNameHeader({
   block,
   uniformName,
@@ -316,7 +316,9 @@ const LaneNameHeader = observer(function LaneNameHeader({
       spacing={0}
       px="6px"
       bg={headerBg}
-      borderBottomWidth="1px"
+      // strong top edge so this header reads with its own region bar/charts
+      // below, not the previous lane's curves above
+      borderTopWidth={embedded ? 0 : "1px"}
       borderColor="#3a4658"
       align="center"
       cursor="pointer"
@@ -479,7 +481,7 @@ const RegionBar = observer(function RegionBar({
         width="100%"
         spacing={0}
         px="8px"
-        borderTopWidth="1px"
+        borderBottomWidth="1px"
         borderColor="#3a5a78"
         bg="#141820"
         align="center"
@@ -813,27 +815,27 @@ const RegionTab = observer(function RegionTab({
 
   // narrow: the tab is just a colored segment, but its full header renders as an
   // overflow to the right (opaque, so the next tab covers it unless this one is
-  // hovered, which lifts it via the wrapper's z-index). top:-1px so the header's
-  // top border lines up with the bar's, not 1px below the tab's own border.
+  // hovered, which lifts it via the wrapper's z-index). Type accent sits on the
+  // bottom so the param name above stays visually joined to this bar.
   if (narrow)
     return (
       <Box
         position="relative"
         height="100%"
-        borderTopWidth="1px"
+        borderBottomWidth="1px"
         borderColor={color}
         bg={bg}
       >
         <HStack
           position="absolute"
-          top="-1px"
+          top={0}
           left={0}
           height={`${REGION_BAR_HEIGHT}px`}
           width="max-content"
           spacing="5px"
           px="6px"
           bg={bg}
-          borderTopWidth="1px"
+          borderBottomWidth="1px"
           borderColor={color}
           {...headerHover}
         >
@@ -852,7 +854,7 @@ const RegionTab = observer(function RegionTab({
       height="100%"
       spacing={0}
       px="6px"
-      borderTopWidth="1px"
+      borderBottomWidth="1px"
       borderColor={color}
       bg={bg}
       align="center"
