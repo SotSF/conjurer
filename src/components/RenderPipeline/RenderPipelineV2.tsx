@@ -8,7 +8,10 @@ import {
 import { observer } from "mobx-react-lite";
 import { WebGLRenderTarget } from "three";
 import { BlockStackNode } from "./BlockStackNode";
+import { BlockNode } from "./BlockNode";
 import { LayerV2 } from "@/src/types/Layer/LayerV2";
+import blackFragmentShader from "@/src/shaders/black.frag";
+import defaultVertexShader from "@/src/shaders/default.vert";
 
 type Props = {
   renderTargetZ: WebGLRenderTarget;
@@ -120,7 +123,18 @@ const MergeNodes = observer(function MergeNodes({
   // identity, which passes that input through to the destination
   const blackTarget = useRenderTarget();
 
-  if (inputs.length === 0) return null;
+  // with no inputs, write opaque black so the canopy samples (0,0,0,1)
+  // instead of an uncleared transparent target
+  if (inputs.length === 0) {
+    return (
+      <BlockNode
+        priority={basePriority}
+        vertexShader={defaultVertexShader}
+        fragmentShader={blackFragmentShader}
+        renderTargetOut={destinationTarget}
+      />
+    );
+  }
 
   if (inputs.length === 1) {
     return (
