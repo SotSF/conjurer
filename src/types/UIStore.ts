@@ -304,7 +304,6 @@ export class UIStore {
   setViewerModeDefaults = () => {
     this.showingPerformance = false;
     this.displayMode = "canopy";
-    this.playgroundDisplayMode = "none";
     this.renderTargetSize = INITIAL_RENDER_TARGET_SIZE;
   };
 
