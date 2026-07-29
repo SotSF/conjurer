@@ -64,15 +64,29 @@ function randomizeParams(block: Block): void {
   }
 }
 
+type RandomizeBlockParametersOptions = {
+  /**
+   * When true (the default), also randomizes the parameters of every effect block
+   * currently applied to `block`. Pass false to randomize only `block` itself.
+   */
+  includeEffectBlocks?: boolean;
+};
+
 /**
- * Randomizes every parameter on a pattern block (and any effect blocks currently
- * applied to it) in place, keeping `parameterVariations` in sync the same way each
- * param type's own control does (see {@link setBlockNumberParameterValue},
- * `ColorParameterControl`, `Palette.randomize`).
+ * Randomizes every parameter on a block in place, keeping `parameterVariations` in
+ * sync the same way each param type's own control does (see
+ * {@link setBlockNumberParameterValue}, `ColorParameterControl`,
+ * `Palette.randomize`).
+ *
+ * By default this also randomizes any effect blocks applied to `block`; pass
+ * `{ includeEffectBlocks: false }` to scope the randomization to `block` alone.
  */
-export function randomizeBlockParameters(block: Block): void {
+export function randomizeBlockParameters(
+  block: Block,
+  { includeEffectBlocks = true }: RandomizeBlockParametersOptions = {},
+): void {
   runInAction(() => {
     randomizeParams(block);
-    block.effectBlocks.forEach(randomizeParams);
+    if (includeEffectBlocks) block.effectBlocks.forEach(randomizeParams);
   });
 }

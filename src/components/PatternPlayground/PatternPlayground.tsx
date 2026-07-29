@@ -1,4 +1,11 @@
-import { Box, Button, HStack, useToast, VStack } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  HStack,
+  Tooltip,
+  useToast,
+  VStack,
+} from "@chakra-ui/react";
 import { PatternList } from "@/src/components/PatternPlayground/PatternList";
 import { PreviewCanvas } from "@/src/components/Canvas/PreviewCanvas";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -9,6 +16,7 @@ import { action, runInAction } from "mobx";
 import { SendDataButton } from "@/src/components/SendDataButton";
 import { VJDisplayModeButtons } from "@/src/components/VJPage/VJDisplayModeButtons";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
+import { randomizeBlockParameters } from "@/src/utils/randomizeBlockParameters";
 // import { RecordCanvasControls } from "@/src/components/PatternPlayground/RecordCanvasControls";
 
 export const PatternPlayground = observer(function PatternPlayground() {
@@ -25,12 +33,17 @@ export const PatternPlayground = observer(function PatternPlayground() {
     selectedPatternBlock,
   } = playgroundStore;
 
-  // Bumped whenever parameters are randomized, so both the pattern's and its applied
-  // effects' ParameterControls remount together and pick up the new values.
+  // Bumped whenever every block's parameters are randomized at once, so both the
+  // pattern's and its applied effects' ParameterControls remount together and pick up the
+  // new values. Randomizing a single block is handled within its own ParameterControls.
   // Combined with playgroundStore.controlsNonce (external loads, e.g. from timeline).
   const [randomizeNonce, setRandomizeNonce] = useState(0);
-  const onRandomize = useCallback(() => setRandomizeNonce((n) => n + 1), []);
   const controlsNonce = randomizeNonce + playgroundStore.controlsNonce;
+
+  const onRandomizeAll = useCallback(() => {
+    randomizeBlockParameters(selectedPatternBlock);
+    setRandomizeNonce((n) => n + 1);
+  }, [selectedPatternBlock]);
 
   const applyPatternEffects = useCallback(
     (patternIndex: number, effectIndices: number[]) => {
@@ -182,13 +195,21 @@ export const PatternPlayground = observer(function PatternPlayground() {
           <PanelResizeHandle />
           <Panel defaultSize={50}>
             <VStack key={playgroundStore.id} height="100%" width="100%">
-              <VStack mt={10}></VStack>
+              <HStack height={10} width="100%" justify="center" flexShrink={0}>
+                <Tooltip
+                  label="Randomize parameters for the pattern and every effect applied to it"
+                  openDelay={500}
+                >
+                  <Button size="xs" onClick={onRandomizeAll}>
+                    Randomize all
+                  </Button>
+                </Tooltip>
+              </HStack>
               <VStack width="100%" overflowY="auto">
                 <ParameterControls
                   key={selectedPatternBlock.id}
                   block={selectedPatternBlock}
                   randomizeNonce={controlsNonce}
-                  onRandomize={onRandomize}
                 />
                 {selectedEffectIndices.map((effectIndex, i) => (
                   <ParameterControls
