@@ -26,6 +26,9 @@ const PADDING = 6;
 const NODE_RADIUS = 4;
 // how close (px) a dragged value must get to a magnet target to snap
 const SNAP_PX = 6;
+// Pointer must travel this far before a node press becomes a drag — otherwise
+// a quick click still nudges the point from sub-pixel jitter / imperfect aim.
+const NODE_DRAG_THRESHOLD_PX = 4;
 
 type EnvelopeGraphProps = {
   uniformName: string;
@@ -48,10 +51,12 @@ type EnvelopeGraphProps = {
 /**
  * Interactive SVG editor for a Curve region of the continuous-parameter lane.
  * Renders the cubic-Bézier value line + breakpoint nodes and supports the core
- * node gestures: click to select, drag to move (endpoints move in value only;
- * interior nodes clamp in time between their neighbors; Shift axis-locks the
- * drag, values snap to neighbor values / the range bounds unless Ctrl is held,
- * and Esc deselects), double-click to add a node at the click location,
+ * node gestures: click to select, drag to move once the pointer clears a small
+ * threshold (so a rapid click does not nudge the point; endpoints move in
+ * value only; interior nodes clamp in time between their neighbors; Shift
+ * axis-locks the drag, values snap to neighbor values / the range bounds
+ * unless Ctrl is held, and Esc deselects), double-click to add a node at the
+ * click location,
  * Backspace/Delete or double-click a node to delete it. Select a node and press
  * "e" / Enter to open an inline editor to type an
  * exact value (and, for interior nodes, an exact time). Click a
@@ -213,23 +218,40 @@ export const EnvelopeGraph = function EnvelopeGraph({
     setSelectedSegment(null);
     // a plain click/drag closes any open editor
     setEditingId(null);
-    draggingId.current = id;
-    setDragging(true);
-    setGestureLock(true);
-    // Force the 4-directional move cursor everywhere for the whole drag — a
-    // global !important rule, so it beats the node's own pointer cursor while
-    // the pointer is still over the dot.
-    const cursorStyle = document.createElement("style");
-    cursorStyle.textContent = "*{cursor:move !important;}";
-    document.head.appendChild(cursorStyle);
-    // remember where the drag started, for Shift axis-lock
+    // remember where the press started; movement past the threshold promotes
+    // this into a drag (and until then the node stays put — click = select).
     const startNode = variation.nodes.find((n) => n.id === id);
     const startTime = startNode?.time ?? 0;
     const startValue = startNode?.value ?? 0;
     const startClientX = e.clientX;
     const startClientY = e.clientY;
+    let armed = false;
+    let cursorStyle: HTMLStyleElement | null = null;
+
+    const armDrag = () => {
+      if (armed) return;
+      armed = true;
+      draggingId.current = id;
+      setDragging(true);
+      setGestureLock(true);
+      // Force the 4-directional move cursor everywhere for the whole drag — a
+      // global !important rule, so it beats the node's own pointer cursor while
+      // the pointer is still over the dot.
+      cursorStyle = document.createElement("style");
+      cursorStyle.textContent = "*{cursor:move !important;}";
+      document.head.appendChild(cursorStyle);
+    };
+
     const move = (ev: PointerEvent) => {
-      if (draggingId.current !== id || !svgRef.current) return;
+      if (!svgRef.current) return;
+      if (!armed) {
+        const dx = ev.clientX - startClientX;
+        const dy = ev.clientY - startClientY;
+        if (dx * dx + dy * dy < NODE_DRAG_THRESHOLD_PX * NODE_DRAG_THRESHOLD_PX)
+          return;
+        armDrag();
+      }
+      if (draggingId.current !== id) return;
       const { px, py } = localPoint(ev.clientX, ev.clientY);
       const ns = variation.nodes;
       const idx = ns.findIndex((n) => n.id === id);
@@ -281,13 +303,14 @@ export const EnvelopeGraph = function EnvelopeGraph({
       commit(() => variation.setNode(id, t, v));
     };
     const up = () => {
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", up);
+      if (!armed) return; // click only — node was never moved
       draggingId.current = null;
       setDragging(false);
       setGestureLock(false);
       setSnapValue(null);
-      cursorStyle.remove();
-      window.removeEventListener("pointermove", move);
-      window.removeEventListener("pointerup", up);
+      cursorStyle?.remove();
       // Drop intermediate nodes from any 3+ stack created by landing on a step.
       commit(() => variation.collapseVerticalStacks());
       if (!variation.nodes.some((n) => n.id === id)) {
