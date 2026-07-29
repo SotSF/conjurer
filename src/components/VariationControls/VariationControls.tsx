@@ -29,18 +29,28 @@ type PeriodicVariationControlsProps = {
   onChange?: () => void;
 };
 
-const WAVE_TYPES: { type: PeriodicVariationType; label: string }[] = [
-  { type: "sine", label: "Sine" },
-  { type: "square", label: "Square" },
-  { type: "triangle", label: "Triangle" },
+// Wrapped into rows of three: five segments across the 160px param panel would
+// leave ~30px each, too narrow for labels like "Triangle".
+const WAVE_ROWS: { type: PeriodicVariationType; label: string }[][] = [
+  [
+    { type: "sine", label: "Sine" },
+    { type: "square", label: "Square" },
+    { type: "triangle", label: "Triangle" },
+  ],
+  [
+    { type: "sawUp", label: "Saw ↑" },
+    { type: "sawDown", label: "Saw ↓" },
+  ],
 ];
 
-// Small matching waveform glyphs, hand-drawn so all three share one stroke
+// Small matching waveform glyphs, hand-drawn so they all share one stroke
 // style (react-icons has no triangle-wave, and mixing weights looks off).
 const WAVE_PATHS: Record<PeriodicVariationType, string> = {
   sine: "M1 8 Q 3.5 1 6 8 T 11 8 T 16 8",
   square: "M1 13 V3 H6 V13 H11 V3 H16",
   triangle: "M1 13 L4.5 3 L8 13 L11.5 3 L15 13",
+  sawUp: "M1 13 L8 3 V13 L15 3 V13",
+  sawDown: "M1 3 L8 13 V3 L15 13 V3",
 };
 
 function WaveGlyph({ type }: { type: PeriodicVariationType }) {
@@ -188,27 +198,39 @@ export function PeriodicVariationControls({
   return (
     <VStack spacing={2} align="stretch" w="100%">
       <ControlSection label="Waveform" first>
-        <HStack spacing={0} w="100%">
-          {WAVE_TYPES.map(({ type, label }, i) => (
-            <SegmentButton
-              key={type}
-              active={periodicType === type}
-              first={i === 0}
-              last={i === WAVE_TYPES.length - 1}
-              ariaLabel={label}
-              onClick={() => {
-                setPeriodicType(type);
-                variation.periodicType = type;
-                block.triggerVariationReactions(uniformName);
-              }}
-            >
-              <VStack spacing={0}>
-                <WaveGlyph type={type} />
-                <Text fontSize="8px">{label}</Text>
-              </VStack>
-            </SegmentButton>
+        <VStack spacing={1} align="stretch" w="100%">
+          {WAVE_ROWS.map((row, rowIndex) => (
+            <HStack key={rowIndex} spacing={0} w="100%">
+              {row.map(({ type, label }, i) => (
+                <SegmentButton
+                  key={type}
+                  active={periodicType === type}
+                  first={i === 0}
+                  last={i === row.length - 1}
+                  ariaLabel={label}
+                  onClick={() => {
+                    setPeriodicType(type);
+                    variation.periodicType = type;
+                    block.triggerVariationReactions(uniformName);
+                  }}
+                >
+                  <VStack spacing={0}>
+                    <WaveGlyph type={type} />
+                    <Text fontSize="8px">{label}</Text>
+                  </VStack>
+                </SegmentButton>
+              ))}
+              {/* Keep a short row's segments as wide as those in the row above
+                  rather than stretching them across the full width. */}
+              {Array.from(
+                { length: WAVE_ROWS[0]!.length - row.length },
+                (_, spacerIndex) => (
+                  <Box key={`spacer-${spacerIndex}`} flex={1} />
+                ),
+              )}
+            </HStack>
           ))}
-        </HStack>
+        </VStack>
       </ControlSection>
 
       <ControlSection label="Range">
