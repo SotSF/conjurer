@@ -27,8 +27,10 @@ export const PatternPlayground = observer(function PatternPlayground() {
 
   // Bumped whenever parameters are randomized, so both the pattern's and its applied
   // effects' ParameterControls remount together and pick up the new values.
+  // Combined with playgroundStore.controlsNonce (external loads, e.g. from timeline).
   const [randomizeNonce, setRandomizeNonce] = useState(0);
   const onRandomize = useCallback(() => setRandomizeNonce((n) => n + 1), []);
+  const controlsNonce = randomizeNonce + playgroundStore.controlsNonce;
 
   const applyPatternEffects = useCallback(
     (patternIndex: number, effectIndices: number[]) => {
@@ -185,14 +187,14 @@ export const PatternPlayground = observer(function PatternPlayground() {
                 <ParameterControls
                   key={selectedPatternBlock.id}
                   block={selectedPatternBlock}
-                  randomizeNonce={randomizeNonce}
+                  randomizeNonce={controlsNonce}
                   onRandomize={onRandomize}
                 />
                 {selectedEffectIndices.map((effectIndex, i) => (
                   <ParameterControls
                     key={`${effectBlocks[effectIndex].id}-${i}`}
                     block={effectBlocks[effectIndex]}
-                    randomizeNonce={randomizeNonce}
+                    randomizeNonce={controlsNonce}
                   />
                 ))}
               </VStack>

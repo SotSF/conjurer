@@ -10,11 +10,14 @@ export const paramValueAtTime = (
   uniformName: string,
   globalTime: number,
 ): ParamType => {
+  // Effect blocks inherit the parent pattern's timespan; their own startTime/
+  // duration are placeholders and must not be used for clamping.
+  const timingBlock = block.parentBlock ?? block;
   const clamped = Math.max(
-    block.startTime,
-    Math.min(globalTime, block.endTime),
+    timingBlock.startTime,
+    Math.min(globalTime, timingBlock.endTime),
   );
-  const localTime = clamped - block.startTime;
+  const localTime = clamped - timingBlock.startTime;
 
   const variations = block.parameterVariations[uniformName];
   if (!variations || variations.length === 0)

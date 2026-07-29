@@ -3,12 +3,13 @@ import { Box, Heading, HStack, IconButton } from "@chakra-ui/react";
 import { action } from "mobx";
 import { observer } from "mobx-react-lite";
 import { MouseEvent as ReactMouseEvent } from "react";
-import { FaSearch } from "react-icons/fa";
+import { FaPencilAlt, FaSearch } from "react-icons/fa";
 import { MdDragIndicator } from "react-icons/md";
 import { PatternTimingModal } from "@/src/components/TimelineBlockStack/PatternTimingModal";
 import { TIMELINE_HEADER_WIDTH } from "@/src/types/UIStore";
 import { useStore } from "@/src/types/StoreContext";
 import { hoverHelpProps } from "@/src/utils/hoverHelp";
+import { loadBlockIntoPlayground } from "@/src/utils/loadBlockIntoPlayground";
 
 type Props = {
   block: Block;
@@ -34,7 +35,8 @@ export const PatternOrEffectBlock = observer(function PatternOrEffectBlock({
   handleBlockClick,
   isSelected,
 }: Props) {
-  const { uiStore } = useStore();
+  const store = useStore();
+  const { uiStore, playgroundStore } = store;
   const color = isSelected ? "blue.500" : "white";
   const label = blockHeaderLabel(block);
   return (
@@ -97,6 +99,25 @@ export const PatternOrEffectBlock = observer(function PatternOrEffectBlock({
         alignSelf="stretch"
         bg="gray.700"
       >
+        <IconButton
+          variant="ghost"
+          size="xs"
+          aria-label="Edit in playground"
+          title="Edit in playground"
+          height={6}
+          icon={<FaPencilAlt size={11} />}
+          onClick={action((e: ReactMouseEvent) => {
+            e.stopPropagation();
+            if (!loadBlockIntoPlayground(playgroundStore, block)) return;
+            store.pause();
+            uiStore.patternDrawerOpen = true;
+          })}
+          {...hoverHelpProps(
+            uiStore,
+            "Edit in playground",
+            "Open the playground with this block's pattern, effects, and parameter values.",
+          )}
+        />
         {uiStore.canTimelineZoom && (
           <IconButton
             variant="ghost"
