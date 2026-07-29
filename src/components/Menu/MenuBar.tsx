@@ -26,7 +26,6 @@ import { FaFile, FaFolderOpen, FaRegClipboard, FaShareAlt } from "react-icons/fa
 import { FiSave } from "react-icons/fi";
 import { RxAlignCenterHorizontally } from "react-icons/rx";
 import { TbArrowBigRightLines } from "react-icons/tb";
-import { BsSoundwave } from "react-icons/bs";
 import { useStore } from "@/src/types/StoreContext";
 import { OpenExperienceModal } from "@/src/components/Menu/OpenExperienceModal";
 import { SaveExperienceModal } from "@/src/components/Menu/SaveExperienceModal";
@@ -301,13 +300,6 @@ export const MenuBar = observer(function MenuBar() {
               {store.context === "experienceEditor" && (
                 <>
                   <MenuDivider />
-                  <MenuItemOption
-                    icon={<BsSoundwave size={17} />}
-                    isChecked={uiStore.showingWaveformOverlay}
-                    onClick={uiStore.toggleWaveformOverlay}
-                  >
-                    Show audio waveform overlay
-                  </MenuItemOption>
                   <MenuItemOption
                     icon={<RxAlignCenterHorizontally size={17} />}
                     isChecked={uiStore.keepingPlayHeadCentered}
