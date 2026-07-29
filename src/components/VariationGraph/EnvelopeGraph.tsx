@@ -579,12 +579,34 @@ export const EnvelopeGraph = function EnvelopeGraph({
             pointerEvents="none"
           />
         )}
-        {nodes.map((node) => {
+        {nodes.map((node, nodeIndex) => {
           const selected = node.id === selectedId;
-          const inSpan =
-            !!laneSpan &&
-            laneStartTime + node.time >= laneSpan.startTime - 1e-6 &&
-            laneStartTime + node.time <= laneSpan.endTime + 1e-6;
+          // Span highlight mirrors extract/copy: inclusive in time, but at a
+          // stacked bound only the inward node counts (last at start, first at end).
+          let inSpan = false;
+          if (laneSpan) {
+            const absT = laneStartTime + node.time;
+            const eps = 1e-6;
+            if (
+              absT >= laneSpan.startTime - eps &&
+              absT <= laneSpan.endTime + eps
+            ) {
+              const atStart = Math.abs(absT - laneSpan.startTime) <= eps;
+              const atEnd = Math.abs(absT - laneSpan.endTime) <= eps;
+              if (!atStart && !atEnd) {
+                inSpan = true;
+              } else {
+                const prev = nodes[nodeIndex - 1];
+                const next = nodes[nodeIndex + 1];
+                const firstOfStack =
+                  !prev || Math.abs(prev.time - node.time) > eps;
+                const lastOfStack =
+                  !next || Math.abs(next.time - node.time) > eps;
+                inSpan =
+                  (atStart && lastOfStack) || (atEnd && firstOfStack);
+              }
+            }
+          }
           return (
             <circle
               key={node.id}

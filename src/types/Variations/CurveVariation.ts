@@ -479,6 +479,11 @@ export class CurveVariation extends Variation<number> {
    * De Casteljau split. Returns [left (spanning 0..t), right (spanning 0..dur-t)].
    * The split point becomes the last node of `left` and the first node of
    * `right`, each carrying the correct one-sided handle. Range carries to both.
+   *
+   * At a vertical stack (step) on the cut, each side keeps only its inward
+   * node — left the first of the stack, right the last — so a copy/extract of
+   * a span that lands on a step does not carry the outward half of the jump.
+   * Rejoining via `mergeAdjacent` restores the step from those two seam values.
    */
   splitAtTime = (t: number): [CurveVariation, CurveVariation] => {
     const dur = this.duration;
@@ -488,12 +493,20 @@ export class CurveVariation extends Variation<number> {
       work.addNodeAtTime(time);
     const dup = (n: CurveNode, dt: number) =>
       makeCurveNode(n.time + dt, n.value, { ...n.handleIn }, { ...n.handleOut });
-    const leftNodes = work.nodes
-      .filter((n) => n.time <= time + 1e-9)
-      .map((n) => dup(n, 0));
-    const rightNodes = work.nodes
-      .filter((n) => n.time >= time - 1e-9)
-      .map((n) => dup(n, -time));
+    const eps = 1e-9;
+    const atCut = work.nodes.filter((n) => Math.abs(n.time - time) <= eps);
+    // Inward at the cut: first of the stack for left, last for right. A single
+    // node (no step) is both, so both sides still share the seam point.
+    const leftSeam = atCut[0];
+    const rightSeam = atCut[atCut.length - 1];
+    const leftNodes = [
+      ...work.nodes.filter((n) => n.time < time - eps),
+      ...(leftSeam ? [leftSeam] : []),
+    ].map((n) => dup(n, 0));
+    const rightNodes = [
+      ...(rightSeam ? [rightSeam] : []),
+      ...work.nodes.filter((n) => n.time > time + eps),
+    ].map((n) => dup(n, -time));
     const left = new CurveVariation(
       time,
       leftNodes.length ? leftNodes : [makeCurveNode(0, this.firstValue)],
