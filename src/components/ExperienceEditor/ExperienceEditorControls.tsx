@@ -1,10 +1,5 @@
 import { observer } from "mobx-react-lite";
-import { HStack, IconButton } from "@chakra-ui/react";
-import { RxAlignCenterHorizontally } from "react-icons/rx";
-import { TbArrowBigRightLines } from "react-icons/tb";
-import { BsSoundwave } from "react-icons/bs";
-import { useStore } from "@/src/types/StoreContext";
-import { action } from "mobx";
+import { Flex, HStack } from "@chakra-ui/react";
 import { AudioSelector } from "@/src/components/AudioSelector";
 import { AudioVolumeControls } from "@/src/components/AudioVolumeControls";
 import { IntensitySlider } from "@/src/components/IntensitySlider";
@@ -12,112 +7,36 @@ import { BrightnessLimiterIndicator } from "@/src/components/BrightnessLimiterIn
 import { ControlGroup } from "@/src/components/ControlGroup";
 import { ZoomControls } from "@/src/components/ZoomControls";
 import { BeatMapControls } from "@/src/components/BeatMapControls";
-import { FaShareAlt } from "react-icons/fa";
-import { hoverHelpProps } from "@/src/utils/hoverHelp";
+import { RoleSelector } from "@/src/components/RoleSelector";
+import { LoginButton } from "@/src/components/LoginButton";
 
 export const ExperienceEditorControls = observer(
   function ExperienceEditorControls() {
-    const store = useStore();
-    const { uiStore } = store;
-
     return (
-      <HStack
-        height={10}
+      <Flex
+        w="100%"
         pl={2}
+        pr={2}
         py={2}
-        spacing={1}
-        overflowX="clip"
+        gap={2}
+        alignItems="flex-start"
         borderColor="black"
       >
-        <AudioSelector />
-        <AudioVolumeControls />
-        <ControlGroup>
-          <IntensitySlider />
-          <BrightnessLimiterIndicator />
-        </ControlGroup>
-        <ZoomControls />
-        <IconButton
-          aria-label="Show waveform overlay"
-          title="Show waveform overlay"
-          height={6}
-          icon={<BsSoundwave size={17} />}
-          bgColor={uiStore.showingWaveformOverlay ? "orange.700" : undefined}
-          _hover={
-            uiStore.showingWaveformOverlay
-              ? {
-                  bgColor: "orange.600",
-                }
-              : undefined
-          }
-          onClick={action(() => uiStore.toggleWaveformOverlay())}
-          {...hoverHelpProps(
-            uiStore,
-            "Waveform overlay",
-            "Draw the audio waveform over the timeline for visual alignment.",
-          )}
-        />
-        <IconButton
-          aria-label="Keep playhead centered"
-          title="Keep playhead centered"
-          height={6}
-          bgColor={uiStore.keepingPlayHeadCentered ? "orange.700" : undefined}
-          _hover={
-            uiStore.keepingPlayHeadCentered
-              ? {
-                  bgColor: "orange.600",
-                }
-              : undefined
-          }
-          icon={<RxAlignCenterHorizontally size={17} />}
-          onClick={action(
-            () =>
-              (uiStore.keepingPlayHeadCentered =
-                !uiStore.keepingPlayHeadCentered),
-          )}
-          {...hoverHelpProps(
-            uiStore,
-            "Follow playhead (center)",
-            "Keep the playhead centered in the timeline while playing.",
-          )}
-        />
-        <IconButton
-          aria-label="Keep playhead visible"
-          title="Keep playhead visible"
-          height={6}
-          bgColor={uiStore.keepingPlayHeadVisible ? "orange.700" : undefined}
-          _hover={
-            uiStore.keepingPlayHeadVisible
-              ? {
-                  bgColor: "orange.600",
-                }
-              : undefined
-          }
-          icon={<TbArrowBigRightLines size={17} />}
-          onClick={action(
-            () =>
-              (uiStore.keepingPlayHeadVisible =
-                !uiStore.keepingPlayHeadVisible),
-          )}
-          {...hoverHelpProps(
-            uiStore,
-            "Follow playhead (edge)",
-            "Scroll the timeline just enough to keep the playhead in view.",
-          )}
-        />
-        <IconButton
-          aria-label="Copy link to experience"
-          title="Copy link to experience"
-          height={6}
-          icon={<FaShareAlt size={17} />}
-          onClick={store.copyLinkToExperience}
-          {...hoverHelpProps(
-            uiStore,
-            "Copy link",
-            "Copy a shareable link to this experience to the clipboard.",
-          )}
-        />
-        <BeatMapControls />
-      </HStack>
+        <Flex flex={1} minW={0} flexWrap="wrap" alignItems="center" gap={1}>
+          <AudioSelector />
+          <AudioVolumeControls />
+          <ControlGroup>
+            <IntensitySlider />
+            <BrightnessLimiterIndicator />
+          </ControlGroup>
+          <ZoomControls />
+          <BeatMapControls />
+        </Flex>
+        <HStack spacing={1} flexShrink={0}>
+          <RoleSelector />
+          <LoginButton />
+        </HStack>
+      </Flex>
     );
   },
 );
