@@ -1,4 +1,4 @@
-import { Box, Button, HStack, Portal, Text, Tooltip } from "@chakra-ui/react";
+import { Box, Button, HStack, Portal, Tooltip } from "@chakra-ui/react";
 import { RefObject } from "react";
 import { action } from "mobx";
 import { observer } from "mobx-react-lite";
@@ -46,7 +46,6 @@ export const LaneSpanToolbar = observer(function LaneSpanToolbar({
   const rect = laneRef.current?.getBoundingClientRect();
   if (!span || !rect) return null;
 
-  const duration = span.endTime - span.startTime;
   const left = rect.left + scale.timeToX(span.startTime);
   const top = rect.top - TOOLBAR_HEIGHT - GAP;
 
@@ -96,9 +95,6 @@ export const LaneSpanToolbar = observer(function LaneSpanToolbar({
           "Actions for the selected time range on this automation lane.",
         )}
       >
-        <Text fontFamily="mono" fontSize="9px" color="gray.400">
-          {`${parseFloat(duration.toFixed(2))}s`}
-        </Text>
         {insertTypes.map((type) => (
           <Tooltip
             key={type}

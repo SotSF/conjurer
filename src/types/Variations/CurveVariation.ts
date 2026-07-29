@@ -216,17 +216,36 @@ export class CurveVariation extends Variation<number> {
   };
 
   /**
-   * Insert a breakpoint at `time` lying on the current curve. Uses a De
-   * Casteljau split so the curve shape is preserved exactly: the containing
-   * segment's endpoint handles are rewritten and the new node gets both handles.
+   * Insert a breakpoint at `time`. With no `value`, places it on the current
+   * curve via a De Casteljau split so the shape is preserved exactly (used by
+   * region splits). With an explicit `value` (e.g. a double-click placement),
+   * inserts at that (time, value) and rewrites the two new segments as straight
+   * lines through the click.
    */
-  addNodeAtTime = (time: number) => {
+  addNodeAtTime = (time: number, value?: number) => {
     const t = time < 0 ? 0 : time > this.duration ? this.duration : time;
     const { nodes } = this;
     for (let i = 0; i < nodes.length - 1; i++) {
       const a = nodes[i];
       const b = nodes[i + 1];
       if (a.time <= t && t < b.time && b.time - a.time > 0) {
+        if (value !== undefined) {
+          const v = value;
+          const leftDt = t - a.time;
+          const leftDv = v - a.value;
+          const rightDt = b.time - t;
+          const rightDv = b.value - v;
+          a.handleOut = straightOut(leftDt, leftDv);
+          b.handleIn = straightIn(rightDt, rightDv);
+          const node = makeCurveNode(
+            t,
+            v,
+            straightIn(leftDt, leftDv),
+            straightOut(rightDt, rightDv),
+          );
+          this.nodes = [...nodes, node].sort((x, y) => x.time - y.time);
+          return node;
+        }
         const [p0, p1, p2, p3] = this.segmentControlPoints(i);
         const s = solveBezierS(p0.t, p1.t, p2.t, p3.t, t);
         const q0 = lerpPt(p0, p1, s);
@@ -238,19 +257,21 @@ export class CurveVariation extends Variation<number> {
         // Rewrite the two endpoints' inner handles to the split's outer legs...
         a.handleOut = { dt: q0.t - a.time, dv: q0.v - a.value };
         b.handleIn = { dt: q2.t - b.time, dv: q2.v - b.value };
-        // ...and give the new node its two inner-leg handles.
+        // Pin time to the requested `t`: solveBezierS is approximate, so mid.t
+        // drifts by a few ulps — enough to miss splitAtTime's right-half filter
+        // (`>= t - 1e-9`) and drop the new start node from a left-cut slice.
         const node = makeCurveNode(
-          mid.t,
+          t,
           mid.v,
-          { dt: r0.t - mid.t, dv: r0.v - mid.v },
-          { dt: r1.t - mid.t, dv: r1.v - mid.v },
+          { dt: r0.t - t, dv: r0.v - mid.v },
+          { dt: r1.t - t, dv: r1.v - mid.v },
         );
         this.nodes = [...nodes, node].sort((x, y) => x.time - y.time);
         return node;
       }
     }
     // Fallback (e.g. click past the last positive segment): flat handles.
-    const node = makeCurveNode(t, this.valueAtTime(t));
+    const node = makeCurveNode(t, value ?? this.valueAtTime(t));
     this.nodes = [...nodes, node].sort((x, y) => x.time - y.time);
     return node;
   };

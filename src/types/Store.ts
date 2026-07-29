@@ -742,11 +742,18 @@ export class Store {
   };
 
   // Paste a copied lane span into the selected lane: at the selected span's
-  // start, else at the playhead. It overwrites forward by the copied duration
-  // rather than shifting later regions along — the lane is always exactly
-  // block-width, so there is nowhere for displaced time to go.
+  // start, else at a selected curve node's time, else at the playhead. It
+  // overwrites forward by the copied duration rather than shifting later
+  // regions along — the lane is always exactly block-width, so there is
+  // nowhere for displaced time to go.
   private pasteLaneSpan = (data: LaneSpanClipboard) => {
-    const target = this.laneSpan ?? this.selectedParameter;
+    const anchor = this.laneSpanAnchor;
+    const target =
+      this.laneSpan ??
+      (this.curveNodeSelected && anchor
+        ? { block: anchor.block, uniformName: anchor.uniformName }
+        : null) ??
+      this.selectedParameter;
     if (!target) return;
     const { block, uniformName } = target;
 
@@ -767,6 +774,12 @@ export class Store {
 
     const startTime =
       this.laneSpan?.startTime ??
+      (this.curveNodeSelected &&
+      anchor &&
+      anchor.block === block &&
+      anchor.uniformName === uniformName
+        ? anchor.time
+        : null) ??
       Math.max(0, this.audioStore.globalTime - block.startTime);
     this.spliceRegionsIntoLane(block, uniformName, startTime, regions);
   };

@@ -51,10 +51,10 @@ type EnvelopeGraphProps = {
  * node gestures: click to select, drag to move (endpoints move in value only;
  * interior nodes clamp in time between their neighbors; Shift axis-locks the
  * drag, values snap to neighbor values / the range bounds unless Ctrl is held,
- * and Esc deselects), double-click the line
- * to add a node on the curve, Backspace to delete the selected node.
- * Double-click a node (or select it and press "e" / Enter) to open an inline
- * editor to type an exact value (and, for interior nodes, an exact time). Click a
+ * and Esc deselects), double-click to add a node at the click location,
+ * Backspace/Delete or double-click a node to delete it. Select a node and press
+ * "e" / Enter to open an inline editor to type an
+ * exact value (and, for interior nodes, an exact time). Click a
  * segment to reveal its two Bézier handles and drag each in both axes (the
  * horizontal reach bows the curve — pen-tool style); Alt-drag a handle mirrors
  * the opposite one across the segment's midline (symmetric shapes);
@@ -86,7 +86,7 @@ export const EnvelopeGraph = function EnvelopeGraph({
   const draggingId = useRef<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [selectedSegment, setSelectedSegment] = useState<number | null>(null);
-  // node whose inline numeric editor is open (opened by double-clicking a node)
+  // node whose inline numeric editor is open (opened by "e" / Enter)
   const [editingId, setEditingId] = useState<string | null>(null);
   // (t, v) of the editing node when the editor opened / last navigated, so Esc
   // can abort the whole session (live edits have already moved the node).
@@ -95,7 +95,7 @@ export const EnvelopeGraph = function EnvelopeGraph({
   );
 
   // Open the numeric editor on a node: select it and snapshot its (t, v) so Esc
-  // can restore it. Used by node double-click and Shift+←/→ navigation.
+  // can restore it. Used by "e" / Enter and Shift+←/→ navigation.
   const openEditor = (id: string) => {
     const n = variation.nodes.find((nn) => nn.id === id);
     if (!n) return;
@@ -211,7 +211,7 @@ export const EnvelopeGraph = function EnvelopeGraph({
 
     setSelectedId(id);
     setSelectedSegment(null);
-    // a plain click/drag closes any open editor; a double-click re-opens it
+    // a plain click/drag closes any open editor
     setEditingId(null);
     draggingId.current = id;
     setDragging(true);
@@ -419,7 +419,7 @@ export const EnvelopeGraph = function EnvelopeGraph({
     if (onNode) return;
     let addedId = "";
     commit(() => {
-      addedId = variation.addNodeAtTime(timeOfX(px)).id;
+      addedId = variation.addNodeAtTime(timeOfX(px), valueOfY(py)).id;
     });
     setSelectedId(addedId);
     setSelectedSegment(null);
@@ -598,7 +598,10 @@ export const EnvelopeGraph = function EnvelopeGraph({
               onPointerDown={(e) => onNodePointerDown(e, node.id)}
               onDoubleClick={(e) => {
                 e.stopPropagation();
-                openEditor(node.id);
+                commit(() => variation.removeNode(node.id));
+                setSelectedId(null);
+                setSelectedSegment(null);
+                setEditingId(null);
               }}
             />
           );
@@ -654,7 +657,7 @@ export const EnvelopeGraph = function EnvelopeGraph({
   );
 };
 
-// Compact numeric editor for the selected node (opened by double-click): stacked
+// Compact numeric editor for the selected node (opened by "e" / Enter): stacked
 // value (v) and, for interior nodes, local-time (t) fields, plus a delete button
 // for interior nodes. Floats beside the node (right, or left near the right
 // edge). The panel is focused on open, so keys work at the "modal open" scope:
