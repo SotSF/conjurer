@@ -1,8 +1,18 @@
-import { Box, Button, HStack, Portal, Tooltip } from "@chakra-ui/react";
-import { RefObject } from "react";
+import {
+  Box,
+  Button,
+  HStack,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
+  Portal,
+  Tooltip,
+} from "@chakra-ui/react";
+import { RefObject, useState } from "react";
 import { action } from "mobx";
 import { observer } from "mobx-react-lite";
-import { TbCopy, TbRepeat, TbTrash } from "react-icons/tb";
+import { TbChevronDown, TbCopy, TbRepeat, TbTrash } from "react-icons/tb";
 import { Block } from "@/src/types/Block";
 import { useStore } from "@/src/types/StoreContext";
 import { useLaneTimeScale } from "@/src/components/ParameterVariations/LaneTimeScaleContext";
@@ -16,6 +26,14 @@ const TYPE_LABEL: Record<InsertType, string> = {
   audio: "Audio",
   palette: "Palette",
   color: "Color",
+};
+
+const TYPE_HELP: Record<InsertType, string> = {
+  curve: "Overwrite the selected span with a new Curve region.",
+  lfo: "Overwrite the selected span with a new LFO region.",
+  audio: "Overwrite the selected span with a new Audio region.",
+  palette: "Overwrite the selected span with a new Palette region.",
+  color: "Overwrite the selected span with a new Color region.",
 };
 
 const TOOLBAR_HEIGHT = 22;
@@ -44,6 +62,7 @@ export const LaneSpanToolbar = observer(function LaneSpanToolbar({
   const scale = useLaneTimeScale();
   const span = store.laneSpan;
   const rect = laneRef.current?.getBoundingClientRect();
+  const [menuOpen, setMenuOpen] = useState(false);
   if (!span || !rect) return null;
 
   const left = rect.left + scale.timeToX(span.startTime);
@@ -95,35 +114,71 @@ export const LaneSpanToolbar = observer(function LaneSpanToolbar({
           "Actions for the selected time range on this automation lane.",
         )}
       >
-        {insertTypes.map((type) => (
+        {insertTypes.length > 0 && (
           <Tooltip
-            key={type}
-            label={`Replace span with a new ${TYPE_LABEL[type]} region`}
+            label="Replace span with a new region type"
             openDelay={0}
             hasArrow
             placement="top"
             fontSize="xs"
+            isDisabled={menuOpen}
           >
-            <Button
-              size="xs"
-              height="16px"
-              minW="auto"
-              px="5px"
-              fontSize="9px"
-              variant="ghost"
-              color="#c3cdda"
-              _hover={{ bg: "whiteAlpha.200", color: "#63b3ed" }}
-              onClick={action(() => store.replaceLaneSpanWithType(type))}
+            <Box
+              as="span"
+              display="inline-flex"
               {...hoverHelpProps(
                 uiStore,
-                `Replace with ${TYPE_LABEL[type]}`,
-                `Overwrite the selected span with a new ${TYPE_LABEL[type]} region.`,
+                "Replace with…",
+                "Overwrite the selected span with a fresh region of the chosen type.",
               )}
             >
-              {TYPE_LABEL[type]}
-            </Button>
+              <Menu
+                placement="bottom-start"
+                isLazy
+                onOpen={() => setMenuOpen(true)}
+                onClose={() => setMenuOpen(false)}
+              >
+                <MenuButton
+                  as={Button}
+                  size="xs"
+                  height="16px"
+                  minW="auto"
+                  px="5px"
+                  fontSize="9px"
+                  variant="ghost"
+                  color="#c3cdda"
+                  rightIcon={<TbChevronDown size={10} />}
+                  _hover={{ bg: "whiteAlpha.200", color: "#63b3ed" }}
+                  _active={{ bg: "whiteAlpha.200", color: "#63b3ed" }}
+                >
+                  Replace
+                </MenuButton>
+                <Portal>
+                  <MenuList minW="110px" bg="gray.700" py={1} zIndex={1600}>
+                    {insertTypes.map((type) => (
+                      <MenuItem
+                        key={type}
+                        fontSize={11}
+                        bg="gray.700"
+                        _hover={{ bg: "gray.600" }}
+                        onClick={action(() =>
+                          store.replaceLaneSpanWithType(type),
+                        )}
+                        {...hoverHelpProps(
+                          uiStore,
+                          TYPE_LABEL[type],
+                          TYPE_HELP[type],
+                        )}
+                      >
+                        {TYPE_LABEL[type]}
+                      </MenuItem>
+                    ))}
+                  </MenuList>
+                </Portal>
+              </Menu>
+            </Box>
           </Tooltip>
-        ))}
+        )}
         {iconButton(
           "Copy span",
           "Copy the selected span to the clipboard (⌘C also works).",

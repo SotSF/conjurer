@@ -18,8 +18,8 @@ import { useStore } from "@/src/types/StoreContext";
 import { hoverHelpProps } from "@/src/utils/hoverHelp";
 
 /** Bottom panel height — tall enough for a blown-up envelope editor. */
-export const PARAMETER_DETAIL_PANEL_HEIGHT = 260;
-const DETAIL_GRAPH_HEIGHT = 180;
+export const PARAMETER_DETAIL_PANEL_HEIGHT = 520;
+const DETAIL_GRAPH_HEIGHT = 360;
 
 /**
  * Ableton-style clip/detail view for one parameter: the same lane editor as the
