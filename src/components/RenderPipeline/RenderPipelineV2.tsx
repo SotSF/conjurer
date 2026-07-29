@@ -32,9 +32,9 @@ export const RenderPipelineV2 = observer(function RenderPipeline({
 
   // as in v1, only visible layers currently containing an active block
   // contribute to the output
-  const mergeInputs = layerTargets.filter(
-    (_, i) => layers[i].visible && layers[i].activeBlocks.length > 0,
-  );
+  const mergeInputs = layerTargets
+    .filter((_, i) => layers[i].visible && layers[i].activeBlocks.length > 0)
+    .map((target) => ({ target }));
 
   return (
     <>
@@ -83,21 +83,32 @@ const LayerNode = observer(function LayerNode({
       ))}
       <MergeNodes
         basePriority={basePriority + LAYER_MERGE_OFFSET}
-        inputs={renderTargets.slice(1, blocks.length + 1)}
+        inputs={blocks.map((block, i) => ({
+          target: renderTargets[i + 1],
+          // opacity is applied here, after the block's entire effect chain
+          getOpacity: () =>
+            block.currentMergeOpacity(block.store.audioStore.globalTime),
+        }))}
         destinationTarget={destinationTarget}
       />
     </>
   );
 });
 
+type MergeInput = {
+  target: WebGLRenderTarget;
+  // per-frame opacity of this input's contribution (defaults to fully opaque)
+  getOpacity?: () => number;
+};
+
 type MergeNodesProps = {
   basePriority: number;
-  inputs: WebGLRenderTarget[];
+  inputs: MergeInput[];
   destinationTarget: WebGLRenderTarget;
 };
 
 // Folds any number of input targets into the destination through a chain of
-// pairwise additive merges: ((in0 + in1) + in2) + …
+// pairwise additive merges: ((op0*in0 + op1*in1) + op2*in2) + …
 const MergeNodes = observer(function MergeNodes({
   basePriority,
   inputs,
@@ -115,25 +126,30 @@ const MergeNodes = observer(function MergeNodes({
     return (
       <MergeNode
         priority={basePriority}
-        renderTargetIn1={inputs[0]}
+        renderTargetIn1={inputs[0].target}
         renderTargetIn2={blackTarget}
         renderTargetOut={destinationTarget}
+        getOpacityIn1={inputs[0].getOpacity}
       />
     );
   }
 
   const scratch = [scratchA, scratchB];
   // merge k folds inputs[k + 1] into the running total; the scratch targets
-  // alternate so a merge never reads the target it writes
+  // alternate so a merge never reads the target it writes. Opacity is applied
+  // as each input enters the chain; the running total is always carried at
+  // full opacity.
   return inputs.slice(1).map((input, k) => (
     <MergeNode
       key={k}
       priority={basePriority + k}
-      renderTargetIn1={k === 0 ? inputs[0] : scratch[(k - 1) % 2]}
-      renderTargetIn2={input}
+      renderTargetIn1={k === 0 ? inputs[0].target : scratch[(k - 1) % 2]}
+      renderTargetIn2={input.target}
       renderTargetOut={
         k === inputs.length - 2 ? destinationTarget : scratch[k % 2]
       }
+      getOpacityIn1={k === 0 ? inputs[0].getOpacity : undefined}
+      getOpacityIn2={input.getOpacity}
     />
   ));
 });

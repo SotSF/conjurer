@@ -98,6 +98,17 @@ export class PeriodicVariation extends Variation<number> {
     return data;
   };
 
+  /**
+   * Shift the wave as if local t=0 moved later by `dt` seconds — so a mid-cut
+   * remnant (or a left-boundary drag) keeps the same continuous waveform.
+   * Sine/square store phase in radians; triangle stores it as a time offset.
+   */
+  shiftStart = (dt: number) => {
+    if (this.periodicType === "triangle") this.phase += dt;
+    else if (this.period > 1e-12)
+      this.phase += (dt / this.period) * 2 * Math.PI;
+  };
+
   clone = () =>
     new PeriodicVariation(
       this.duration,

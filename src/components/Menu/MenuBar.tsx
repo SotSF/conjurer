@@ -22,8 +22,10 @@ import {
   VStack,
   useDisclosure,
 } from "@chakra-ui/react";
-import { FaFile, FaFolderOpen, FaRegClipboard } from "react-icons/fa";
+import { FaFile, FaFolderOpen, FaRegClipboard, FaShareAlt } from "react-icons/fa";
 import { FiSave } from "react-icons/fi";
+import { RxAlignCenterHorizontally } from "react-icons/rx";
+import { TbArrowBigRightLines } from "react-icons/tb";
 import { useStore } from "@/src/types/StoreContext";
 import { OpenExperienceModal } from "@/src/components/Menu/OpenExperienceModal";
 import { SaveExperienceModal } from "@/src/components/Menu/SaveExperienceModal";
@@ -53,16 +55,7 @@ export const MenuBar = observer(function MenuBar() {
   if (!store.experienceName) return null;
 
   return (
-    <VStack
-      p={2}
-      position="absolute"
-      top={0}
-      left={0}
-      alignItems="flex-start"
-      zIndex={2}
-      spacing={1}
-      mx={2}
-    >
+    <VStack alignItems="flex-start" spacing={1}>
       <Modal
         isOpen={isKeyboardShortcutsOpen}
         onClose={onCloseKeyboardShortcuts}
@@ -238,6 +231,12 @@ export const MenuBar = observer(function MenuBar() {
                   >
                     Copy experience JSON to clipboard
                   </MenuItem>
+                  <MenuItem
+                    icon={<FaShareAlt size={17} />}
+                    onClick={store.copyLinkToExperience}
+                  >
+                    Copy link to experience
+                  </MenuItem>
                 </MenuList>
               </Portal>
             </Menu>
@@ -245,7 +244,7 @@ export const MenuBar = observer(function MenuBar() {
         )}
 
         {/* Experience editor and playlist editor both get View, Tools, Navigate, and Help menus */}
-        <Menu>
+        <Menu closeOnSelect={false}>
           <MenuButton
             as={Button}
             px={1}
@@ -261,23 +260,6 @@ export const MenuBar = observer(function MenuBar() {
           </MenuButton>
           <Portal>
             <MenuList zIndex="dropdown">
-              {store.context === "experienceEditor" && (
-                <>
-                  <MenuOptionGroup
-                    defaultValue={uiStore.renderTargetSize.toString()}
-                    title="App orientation"
-                    type="radio"
-                    value={uiStore.horizontalLayout ? "horizontal" : "vertical"}
-                    onChange={uiStore.toggleLayout}
-                  >
-                    <MenuItemOption value="horizontal">
-                      Horizontal
-                    </MenuItemOption>
-                    <MenuItemOption value="vertical">Vertical</MenuItemOption>
-                  </MenuOptionGroup>
-                  <MenuDivider />
-                </>
-              )}
               <MenuOptionGroup
                 defaultValue={uiStore.renderTargetSize.toString()}
                 title="Render size (resolution)"
@@ -315,6 +297,31 @@ export const MenuBar = observer(function MenuBar() {
               >
                 Show performance overlay
               </MenuItemOption>
+              {store.context === "experienceEditor" && (
+                <>
+                  <MenuDivider />
+                  <MenuItemOption
+                    icon={<RxAlignCenterHorizontally size={17} />}
+                    isChecked={uiStore.keepingPlayHeadCentered}
+                    onClick={action(() => {
+                      uiStore.keepingPlayHeadCentered =
+                        !uiStore.keepingPlayHeadCentered;
+                    })}
+                  >
+                    Keep playhead centered
+                  </MenuItemOption>
+                  <MenuItemOption
+                    icon={<TbArrowBigRightLines size={17} />}
+                    isChecked={uiStore.keepingPlayHeadVisible}
+                    onClick={action(() => {
+                      uiStore.keepingPlayHeadVisible =
+                        !uiStore.keepingPlayHeadVisible;
+                    })}
+                  >
+                    Keep playhead visible
+                  </MenuItemOption>
+                </>
+              )}
             </MenuList>
           </Portal>
         </Menu>

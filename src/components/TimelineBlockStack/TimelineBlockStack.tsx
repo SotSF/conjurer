@@ -14,8 +14,14 @@ import {
 import Draggable from "react-draggable";
 import { DraggableData } from "react-draggable";
 import { DraggableEvent } from "react-draggable";
-import { PatternOrEffectBlock } from "@/src/components/TimelineBlockStack/PatternOrEffectBlock";
-import { AddEffectButton } from "@/src/components/TimelineBlockStack/AddEffectButton";
+import {
+  PatternOrEffectBlock,
+  blockHeaderLabel,
+} from "@/src/components/TimelineBlockStack/PatternOrEffectBlock";
+import { BlockDotRow } from "@/src/components/TimelineBlockStack/BlockDotRow";
+import { BlockAutomationLanes } from "@/src/components/TimelineBlockStack/BlockAutomationLanes";
+import { BlockOpacityEdgeLine } from "@/src/components/TimelineBlockStack/BlockOpacityEdgeLine";
+import { hoverHelpProps } from "@/src/utils/hoverHelp";
 
 type Props = {
   patternBlock: Block;
@@ -120,12 +126,15 @@ export const TimelineBlockStack = observer(function TimelineBlockStack({
       ),
   ).get();
 
+  const locked = patternBlock.locked;
+
   return (
     <Draggable
       nodeRef={dragNodeRef}
       handle=".handle"
       axis="x"
       bounds="parent"
+      disabled={locked}
       onDrag={handleDrag}
       onStop={handleDragStop}
       position={position}
@@ -141,7 +150,17 @@ export const TimelineBlockStack = observer(function TimelineBlockStack({
         borderColor={isSelected ? "blue.500" : "white"}
         borderWidth={3}
         alignItems="center"
+        // allow the automation-lane gutter labels and the narrow-block dot-row
+        // popover to render just outside the block's own width
+        overflow="visible"
         onClick={(e: ReactMouseEvent) => e.stopPropagation()}
+        {...hoverHelpProps(
+          uiStore,
+          blockHeaderLabel(patternBlock),
+          locked
+            ? "Pattern block — locked in time. Unlock via the lock icon to drag."
+            : "Pattern block — drag to move in time. Click to select; Shift+click to multi-select.",
+        )}
       >
         <TimelineBlockBound block={patternBlock} bound="left" />
         <TimelineBlockBound block={patternBlock} bound="right" />
@@ -151,20 +170,12 @@ export const TimelineBlockStack = observer(function TimelineBlockStack({
           handleBlockClick={handleBlockClick}
           isSelected={isSelected}
         />
-        {patternBlock.showDetails && (
-          <>
-            {patternBlock.effectBlocks.map((effectBlock, index) => (
-              <PatternOrEffectBlock
-                key={effectBlock.id}
-                block={effectBlock}
-                effectIndex={index}
-                handleBlockClick={handleBlockClick}
-                isSelected={isSelected}
-              />
-            ))}
-            <AddEffectButton block={patternBlock} isSelected={isSelected} />
-          </>
-        )}
+        {/* params and the effect chain now live in the bottom device panel;
+            the block itself carries the glanceable dot-row, opacity edge-line,
+            and the automation lanes for armed params */}
+        <BlockDotRow block={patternBlock} isSelected={isSelected} />
+        <BlockOpacityEdgeLine block={patternBlock} />
+        <BlockAutomationLanes block={patternBlock} />
       </Card>
     </Draggable>
   );

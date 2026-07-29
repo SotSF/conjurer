@@ -2,12 +2,14 @@ import { observer } from "mobx-react-lite";
 import { Box, HStack, Text, Tooltip, useDisclosure } from "@chakra-ui/react";
 import { useStore } from "@/src/types/StoreContext";
 import { BrightnessLimiterModal } from "@/src/components/BrightnessLimiterModal";
+import { hoverHelpProps } from "@/src/utils/hoverHelp";
 
 const METER_WIDTH = 56;
 
 export const BrightnessLimiterIndicator = observer(
   function BrightnessLimiterIndicator() {
     const store = useStore();
+    const { uiStore } = store;
     const { isOpen, onOpen, onClose } = useDisclosure();
 
     const reduction = store.brightnessLimiterEnabled
@@ -41,6 +43,11 @@ export const BrightnessLimiterIndicator = observer(
             _hover={{ bg: "whiteAlpha.100" }}
             onClick={onOpen}
             aria-label="Open brightness limiter settings"
+            {...hoverHelpProps(
+              uiStore,
+              "Brightness limiter",
+              "Gain reduction meter — click to configure the output brightness limiter.",
+            )}
           >
             <Text
               fontSize="0.65em"

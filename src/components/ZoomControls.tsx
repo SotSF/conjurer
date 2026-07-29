@@ -17,6 +17,7 @@ import {
   MAX_PIXELS_PER_SECOND,
   MIN_PIXELS_PER_SECOND,
 } from "@/src/types/UIStore";
+import { hoverHelpProps } from "@/src/utils/hoverHelp";
 
 const LOG_MIN = Math.log(MIN_PIXELS_PER_SECOND);
 const LOG_MAX = Math.log(MAX_PIXELS_PER_SECOND);
@@ -47,6 +48,7 @@ export const ZoomControls = observer(function ZoomControls() {
         icon={<FaMinus size={12} />}
         onClick={action(() => uiStore.zoomOut())}
         isDisabled={uiStore.pixelsPerSecond <= MIN_PIXELS_PER_SECOND}
+        {...hoverHelpProps(uiStore, "Zoom out", "Show more time on screen.")}
       />
       <Slider
         aria-label="Timeline zoom"
@@ -58,8 +60,18 @@ export const ZoomControls = observer(function ZoomControls() {
         step={0.01}
         value={ppsToSlider(uiStore.pixelsPerSecond)}
         onChange={action((t) => uiStore.setZoom(sliderToPps(t)))}
-        onMouseEnter={() => setShowTooltip(true)}
-        onMouseLeave={() => setShowTooltip(false)}
+        onMouseEnter={action(() => {
+          setShowTooltip(true);
+          uiStore.setHoverHelp({
+            title: "Timeline zoom",
+            description:
+              "Zoom the timeline horizontally. Shortcut: ⌃+scroll, or ⌃+/-.",
+          });
+        })}
+        onMouseLeave={action(() => {
+          setShowTooltip(false);
+          uiStore.clearHoverHelp();
+        })}
       >
         <SliderTrack>
           <SliderFilledTrack />
@@ -85,6 +97,7 @@ export const ZoomControls = observer(function ZoomControls() {
         icon={<FaPlus size={12} />}
         onClick={action(() => uiStore.zoomIn())}
         isDisabled={uiStore.pixelsPerSecond >= MAX_PIXELS_PER_SECOND}
+        {...hoverHelpProps(uiStore, "Zoom in", "Show finer time resolution.")}
       />
     </ControlGroup>
   );

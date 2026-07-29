@@ -10,12 +10,13 @@ import { FaPlay, FaPause, FaStepForward, FaStepBackward } from "react-icons/fa";
 import { useStore } from "@/src/types/StoreContext";
 import { action } from "mobx";
 import { MdForward10, MdReplay10 } from "react-icons/md";
+import { hoverHelpProps } from "@/src/utils/hoverHelp";
 
 const PLAYBACK_RATES = [1, 0.5, 0.25] as const;
 
 export const TimerControls = observer(function TimerControls() {
   const store = useStore();
-  const { audioStore, playlistStore } = store;
+  const { audioStore, playlistStore, uiStore } = store;
   const playing = audioStore.audioState === "playing";
   const showSkipButtons = store.context === "experienceEditor";
 
@@ -40,6 +41,15 @@ export const TimerControls = observer(function TimerControls() {
             bgColor="gray.600"
             icon={<FaStepBackward size={12} />}
             onClick={() => playlistStore.playPreviousExperience()}
+            {...hoverHelpProps(
+              uiStore,
+              store.context === "playlistEditor"
+                ? "Previous experience"
+                : "Go to start",
+              store.context === "playlistEditor"
+                ? "Jump to the previous experience in the playlist."
+                : "Seek the playhead back to the beginning.",
+            )}
           />
           <IconButton
             borderStyle="solid"
@@ -51,6 +61,11 @@ export const TimerControls = observer(function TimerControls() {
             bgColor="gray.600"
             icon={playing ? <FaPause size={12} /> : <FaPlay size={12} />}
             onClick={action(store.togglePlaying)}
+            {...hoverHelpProps(
+              uiStore,
+              playing ? "Pause" : "Play",
+              "Toggle playback. Shortcut: Space.",
+            )}
           />
           <IconButton
             borderStyle="solid"
@@ -65,6 +80,15 @@ export const TimerControls = observer(function TimerControls() {
             bgColor="gray.600"
             icon={<FaStepForward size={12} />}
             onClick={() => playlistStore.playNextExperience()}
+            {...hoverHelpProps(
+              uiStore,
+              store.context === "playlistEditor"
+                ? "Next experience"
+                : "Go to end",
+              store.context === "playlistEditor"
+                ? "Jump to the next experience in the playlist."
+                : "Seek the playhead to the end of the timeline.",
+            )}
           />
         </ButtonGroup>
       </HStack>
@@ -81,6 +105,11 @@ export const TimerControls = observer(function TimerControls() {
               bgColor="gray.600"
               icon={<MdReplay10 size={17} />}
               onClick={action(() => audioStore.skip(-10))}
+              {...hoverHelpProps(
+                uiStore,
+                "Skip back 10s",
+                "Jump the playhead backward by ten seconds.",
+              )}
             />
             <IconButton
               borderStyle="solid"
@@ -92,6 +121,11 @@ export const TimerControls = observer(function TimerControls() {
               bgColor="gray.600"
               icon={<MdForward10 size={17} />}
               onClick={action(() => audioStore.skip(10))}
+              {...hoverHelpProps(
+                uiStore,
+                "Skip forward 10s",
+                "Jump the playhead forward by ten seconds.",
+              )}
             />
           </ButtonGroup>
           <Select
@@ -109,6 +143,11 @@ export const TimerControls = observer(function TimerControls() {
             onChange={action((e) => {
               audioStore.playbackRate = Number(e.target.value);
             })}
+            {...hoverHelpProps(
+              uiStore,
+              "Playback speed",
+              "Slow down playback for precise timing work.",
+            )}
           >
             {PLAYBACK_RATES.map((rate) => (
               <option key={rate} value={rate}>

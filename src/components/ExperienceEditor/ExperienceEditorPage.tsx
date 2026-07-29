@@ -13,7 +13,7 @@ import { LoadingOverlay } from "@/src/components/LoadingOverlay";
 
 export const ExperienceEditorPage = observer(function ExperienceEditorPage() {
   const store = useStore();
-  const { uiStore, experienceStore, initializationState } = store;
+  const { experienceStore, initializationState } = store;
   const { loadingExperienceName } = experienceStore;
 
   const router = useRouter();
@@ -54,10 +54,7 @@ export const ExperienceEditorPage = observer(function ExperienceEditorPage() {
 
   return (
     <Box position="relative" w="100vw" h="100vh">
-      <PanelGroup
-        autoSaveId="experienceEditor"
-        direction={uiStore.horizontalLayout ? "vertical" : "horizontal"}
-      >
+      <PanelGroup autoSaveId="experienceEditor" direction="horizontal">
         <Panel defaultSize={45}>
           <Display />
         </Panel>

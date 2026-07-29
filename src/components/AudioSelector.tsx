@@ -6,6 +6,7 @@ import { action } from "mobx";
 import { UploadAudioModal } from "@/src/components/UploadAudioModal";
 import { trpc } from "@/src/utils/trpc";
 import { NO_SONG, Song } from "@/src/types/Song";
+import { hoverHelpProps } from "@/src/utils/hoverHelp";
 
 export const AudioSelector = observer(function AudioSelector() {
   const store = useStore();
@@ -32,6 +33,11 @@ export const AudioSelector = observer(function AudioSelector() {
             (song) => song.filename === e.target.value,
           )!;
         })}
+        {...hoverHelpProps(
+          uiStore,
+          "Soundtrack",
+          "Choose the audio track that plays with this experience.",
+        )}
       >
         {songsWithNoSongOption.map((song) => (
           <option key={song.filename} value={song.filename}>
@@ -46,6 +52,11 @@ export const AudioSelector = observer(function AudioSelector() {
         height={6}
         icon={<AiOutlineCloudUpload size={17} />}
         onClick={action(() => (uiStore.showingUploadAudioModal = true))}
+        {...hoverHelpProps(
+          uiStore,
+          "Upload audio",
+          "Upload a new soundtrack file to use in experiences.",
+        )}
       />
     </>
   );

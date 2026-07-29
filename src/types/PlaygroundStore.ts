@@ -14,6 +14,10 @@ export class PlaygroundStore {
   patternBlocks: Block[];
   effectBlocks: Block[];
 
+  // Bumped when params are loaded from outside the playground UI (e.g. a
+  // timeline block) so ParameterControls remount and pick up new local state.
+  controlsNonce = 0;
+
   _selectedPatternIndex = 0;
   get selectedPatternIndex() {
     return this._selectedPatternIndex;
