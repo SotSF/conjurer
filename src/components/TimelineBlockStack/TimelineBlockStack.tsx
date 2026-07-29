@@ -126,12 +126,15 @@ export const TimelineBlockStack = observer(function TimelineBlockStack({
       ),
   ).get();
 
+  const locked = patternBlock.locked;
+
   return (
     <Draggable
       nodeRef={dragNodeRef}
       handle=".handle"
       axis="x"
       bounds="parent"
+      disabled={locked}
       onDrag={handleDrag}
       onStop={handleDragStop}
       position={position}
@@ -154,7 +157,9 @@ export const TimelineBlockStack = observer(function TimelineBlockStack({
         {...hoverHelpProps(
           uiStore,
           blockHeaderLabel(patternBlock),
-          "Pattern block — drag to move in time. Click to select; Shift+click to multi-select.",
+          locked
+            ? "Pattern block — locked in time. Unlock via the lock icon to drag."
+            : "Pattern block — drag to move in time. Click to select; Shift+click to multi-select.",
         )}
       >
         <TimelineBlockBound block={patternBlock} bound="left" />

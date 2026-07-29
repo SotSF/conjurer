@@ -31,6 +31,8 @@ export type SerializedBlock = {
   parameterVariations: { [key: string]: any[] | undefined };
   startTime: number;
   duration: number;
+  // when true, the block cannot be dragged in time on the timeline
+  locked?: boolean;
   effectBlocks: SerializedBlock[];
 };
 
@@ -44,6 +46,9 @@ export class Block {
 
   startTime: number = 0; // global time that block starts playing at in seconds
   duration: number = 5; // duration that block plays for in seconds
+
+  // when true, the block cannot be dragged in time (prevents accidental moves)
+  locked = false;
 
   headerRepetitions: number = 1; // number of times to repeat the headers in this block
 
@@ -94,6 +99,10 @@ export class Block {
 
   toggleShowDetails = () => {
     this.showDetails = !this.showDetails;
+  };
+
+  toggleLocked = () => {
+    this.locked = !this.locked;
   };
 
   // arms a param's automation lane. Seeds a full-block default region when the
@@ -759,6 +768,7 @@ export class Block {
     const newBlock = new Block(this.store, this.pattern.clone());
     newBlock.startTime = this.startTime;
     newBlock.duration = this.duration;
+    newBlock.locked = this.locked;
     newBlock.layer = this.layer;
 
     newBlock.parameterVariations = { ...this.parameterVariations };
@@ -825,6 +835,7 @@ export class Block {
     pattern: this.pattern.serialize(options?.includeParams),
     startTime: this.startTime,
     duration: this.duration,
+    locked: this.locked || undefined,
     parameterVariations: this.serializeParameterVariations(),
     effectBlocks: this.effectBlocks.map((effectBlock) =>
       effectBlock.serialize(options),
@@ -845,6 +856,7 @@ export class Block {
       startTime: data.startTime,
       duration: data.duration,
     });
+    block.locked = !!data.locked;
     block.parentBlock = parentBlock ?? null;
 
     for (const parameter of Object.keys(data.parameterVariations)) {

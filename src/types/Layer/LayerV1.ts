@@ -248,7 +248,7 @@ export class LayerV1 implements Layer {
   };
 
   attemptMoveBlock = (block: Block, desiredTime: number, relative = false) => {
-    if (block.layer != this) return;
+    if (block.layer != this || block.locked) return;
 
     // prevent block overlaps for now by snapping to nearest valid start time
     const validTimeDelta = this.nearestValidStartTimeDelta(

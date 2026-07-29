@@ -13,7 +13,6 @@ import { useRef, useState, useEffect } from "react";
 import { runInAction } from "mobx";
 import { Block } from "@/src/types/Block";
 import { CurveVariation, CurveNode } from "@/src/types/Variations/CurveVariation";
-import { VARIATION_BOUND_WIDTH } from "@/src/utils/layout";
 import { sampleCurveGeometry } from "@/src/utils/curveGeometry";
 import { useStore } from "@/src/types/StoreContext";
 
@@ -122,7 +121,8 @@ export const EnvelopeGraph = function EnvelopeGraph({
   const gestureLockRef = useRef(false);
   gestureLockRef.current = gestureLock;
 
-  const innerWidth = Math.max(1, width - VARIATION_BOUND_WIDTH);
+  // Full region slot — matches the lane time scale / selection overlay.
+  const innerWidth = Math.max(1, width);
   const { nodes, duration } = variation;
   const [domainMin, domainMax] = domain;
   const valueSpan = domainMax - domainMin || 1;

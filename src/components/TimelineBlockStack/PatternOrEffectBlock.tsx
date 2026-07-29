@@ -3,7 +3,7 @@ import { Box, Heading, HStack, IconButton } from "@chakra-ui/react";
 import { action } from "mobx";
 import { observer } from "mobx-react-lite";
 import { MouseEvent as ReactMouseEvent } from "react";
-import { FaPencilAlt, FaSearch } from "react-icons/fa";
+import { FaLock, FaPencilAlt, FaSearch, FaUnlock } from "react-icons/fa";
 import { MdDragIndicator } from "react-icons/md";
 import { PatternTimingModal } from "@/src/components/TimelineBlockStack/PatternTimingModal";
 import { TIMELINE_HEADER_WIDTH } from "@/src/types/UIStore";
@@ -39,13 +39,14 @@ export const PatternOrEffectBlock = observer(function PatternOrEffectBlock({
   const { uiStore, playgroundStore } = store;
   const color = isSelected ? "blue.500" : "white";
   const label = blockHeaderLabel(block);
+  const locked = block.locked;
   return (
     <HStack
       position="relative"
       width="100%"
       minH="26px"
-      className="handle"
-      cursor="grab"
+      className={locked ? undefined : "handle"}
+      cursor={locked ? "default" : "grab"}
       spacing={0}
       color={color}
       role="button"
@@ -138,6 +139,26 @@ export const PatternOrEffectBlock = observer(function PatternOrEffectBlock({
           />
         )}
         <PatternTimingModal block={block} />
+        <IconButton
+          variant="ghost"
+          size="xs"
+          aria-label={locked ? "Unlock block" : "Lock block"}
+          title={locked ? "Unlock block" : "Lock block"}
+          height={6}
+          color={locked ? "yellow.300" : undefined}
+          icon={locked ? <FaLock size={11} /> : <FaUnlock size={11} />}
+          onClick={action((e: ReactMouseEvent) => {
+            e.stopPropagation();
+            block.toggleLocked();
+          })}
+          {...hoverHelpProps(
+            uiStore,
+            locked ? "Unlock block" : "Lock block",
+            locked
+              ? "Allow dragging this block in time on the timeline."
+              : "Prevent accidental dragging — lock this block's position in time.",
+          )}
+        />
       </HStack>
     </HStack>
   );

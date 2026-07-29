@@ -253,7 +253,7 @@ export class LayerV2 implements Layer {
   };
 
   attemptMoveBlock = (block: Block, desiredTime: number, relative = false) => {
-    if (block.layer != this) return;
+    if (block.layer != this || block.locked) return;
     block.startTime = relative ? desiredTime + block.startTime : desiredTime;
   };
 

@@ -2,7 +2,6 @@ import { Box, useToken } from "@chakra-ui/react";
 import { LineChart, Line, YAxis } from "recharts";
 import { Variation } from "@/src/types/Variations/Variation";
 import { Block } from "@/src/types/Block";
-import { VARIATION_BOUND_WIDTH } from "@/src/utils/layout";
 import { SplineVariation } from "@/src/types/Variations/SplineVariation";
 import { SplineVariationGraph } from "@/src/components/VariationGraph/SplineVariationGraph";
 import { CurveVariation } from "@/src/types/Variations/CurveVariation";
@@ -91,7 +90,7 @@ export const NumberVariationGraph = function NumberVariationGraph({
       }
     >
       <LineChart
-        width={width - VARIATION_BOUND_WIDTH}
+        width={width}
         height={graphHeight}
         data={data}
         margin={{ top: 0, left: 0, right: 0, bottom: 0 }}

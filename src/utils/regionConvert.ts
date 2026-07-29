@@ -10,6 +10,7 @@ import { isPalette } from "@/src/params/palette/Palette";
 import { Vector4 } from "three";
 import type { Store } from "@/src/types/Store";
 import type { PatternParam } from "@/src/params/shared/patternParam";
+import { DEFAULT_PERIOD } from "@/src/utils/time";
 
 // Scalar region modes — the only ones that are inter-convertible.
 export type RegionType = "curve" | "lfo" | "audio";
@@ -60,7 +61,7 @@ export const makeRegionOfType = (
       duration,
       "sine",
       (hi - lo) / 2,
-      Math.min(1, duration),
+      Math.min(DEFAULT_PERIOD, duration) || DEFAULT_PERIOD,
       0,
       (hi + lo) / 2,
     );
@@ -125,7 +126,8 @@ export const convertRegion = (
     for (let i = 0; i <= N; i++) sum += at((i / N) * dur);
     const mean = sum / (N + 1);
     const amplitude = (hi - lo) / 2 || 0.5;
-    const period = Math.min(dur, 1) || 1; // one cycle for short regions, else 1s
+    // one cycle for short regions, else DEFAULT_PERIOD
+    const period = Math.min(dur, DEFAULT_PERIOD) || DEFAULT_PERIOD;
     return new PeriodicVariation(dur, "sine", amplitude, period, 0, mean);
   }
 
