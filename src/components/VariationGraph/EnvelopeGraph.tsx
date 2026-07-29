@@ -288,6 +288,13 @@ export const EnvelopeGraph = function EnvelopeGraph({
       cursorStyle.remove();
       window.removeEventListener("pointermove", move);
       window.removeEventListener("pointerup", up);
+      // Drop intermediate nodes from any 3+ stack created by landing on a step.
+      commit(() => variation.collapseVerticalStacks());
+      if (!variation.nodes.some((n) => n.id === id)) {
+        setSelectedId(null);
+        setSelectedSegment(null);
+        setEditingId(null);
+      }
     };
     window.addEventListener("pointermove", move);
     window.addEventListener("pointerup", up);
@@ -613,9 +620,18 @@ export const EnvelopeGraph = function EnvelopeGraph({
           originX={svgRef.current?.getBoundingClientRect().left ?? 0}
           originY={svgRef.current?.getBoundingClientRect().top ?? 0}
           innerWidth={innerWidth}
-          onCommit={(t, v) =>
-            commit(() => variation.setNode(selectedNode.id, t, v))
-          }
+          onCommit={(t, v) => {
+            const id = selectedNode.id;
+            commit(() => {
+              variation.setNode(id, t, v);
+              variation.collapseVerticalStacks();
+            });
+            if (!variation.nodes.some((n) => n.id === id)) {
+              setSelectedId(null);
+              setSelectedSegment(null);
+              setEditingId(null);
+            }
+          }}
           onDelete={() => {
             commit(() => variation.removeNode(selectedNode.id));
             setSelectedId(null);

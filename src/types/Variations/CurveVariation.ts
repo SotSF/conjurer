@@ -259,6 +259,64 @@ export class CurveVariation extends Variation<number> {
   removeNode = (id: string) => {
     if (this.nodes.length <= 2) return;
     this.nodes = this.nodes.filter((n) => n.id !== id);
+    this.collapseVerticalStacks();
+  };
+
+  /**
+   * At each shared time, more than two coincident nodes are redundant — a step
+   * only needs its extremes. Collapse every run of 3+ equal-time nodes down to
+   * the bottommost and topmost values (or a single node if they all match),
+   * preserving step direction and the group's outer handles.
+   */
+  collapseVerticalStacks = () => {
+    const { nodes } = this;
+    if (nodes.length < 3) return;
+    const timeEps = 1e-9;
+    const valueEps = 1e-9;
+    const next: CurveNode[] = [];
+    let i = 0;
+    while (i < nodes.length) {
+      let j = i + 1;
+      while (
+        j < nodes.length &&
+        Math.abs(nodes[j].time - nodes[i].time) <= timeEps
+      )
+        j++;
+      const group = nodes.slice(i, j);
+      if (group.length <= 2) {
+        next.push(...group);
+      } else {
+        let minN = group[0];
+        let maxN = group[0];
+        for (const n of group) {
+          if (n.value < minN.value) minN = n;
+          if (n.value > maxN.value) maxN = n;
+        }
+        const t = group[0].time;
+        if (Math.abs(minN.value - maxN.value) <= valueEps) {
+          // Flat stack — one node carries the left handle in and right handle out.
+          minN.time = t;
+          minN.handleIn = { ...group[0].handleIn };
+          minN.handleOut = { ...group[group.length - 1].handleOut };
+          next.push(minN);
+        } else {
+          // Keep extremes; order follows the original first→last step direction.
+          const goingUp =
+            group[group.length - 1].value >= group[0].value;
+          const first = goingUp ? minN : maxN;
+          const second = goingUp ? maxN : minN;
+          first.time = t;
+          second.time = t;
+          first.handleIn = { ...group[0].handleIn };
+          first.handleOut = noHandle();
+          second.handleIn = noHandle();
+          second.handleOut = { ...group[group.length - 1].handleOut };
+          next.push(first, second);
+        }
+      }
+      i = j;
+    }
+    if (next.length !== nodes.length) this.nodes = next;
   };
 
   /**
@@ -311,7 +369,8 @@ export class CurveVariation extends Variation<number> {
   /**
    * Set one side of a node's Bézier handle to an absolute (dt, dv) offset (the
    * two-handle drag). `dt` is clamped to keep the handle inside its segment and
-   * pointing the right way, so X(s) stays monotonic (single-valued).
+   * pointing the right way; the opposite handle is trimmed if needed so the
+   * control points stay time-ordered (X(s) monotonic).
    */
   setNodeHandle = (id: string, side: "in" | "out", dt: number, dv: number) => {
     const idx = this.nodes.findIndex((n) => n.id === id);
@@ -320,35 +379,67 @@ export class CurveVariation extends Variation<number> {
     if (side === "out") {
       const next = this.nodes[idx + 1];
       const gap = next ? next.time - node.time : 0;
-      node.handleOut = { dt: gap > 0 ? Math.min(Math.max(dt, 0), gap) : 0, dv };
+      // Step boundary: no horizontal reach — a vertical jump.
+      if (gap <= 0) {
+        node.handleOut = noHandle();
+        return;
+      }
+      const outDt = Math.min(Math.max(dt, 0), gap);
+      node.handleOut = { dt: outDt, dv };
+      // Keep P1.t <= P2.t: shrink the opposite handle rather than the one
+      // being dragged, so the user's drag wins.
+      if (next && next.handleIn.dt < outDt - gap) {
+        next.handleIn = { dt: outDt - gap, dv: next.handleIn.dv };
+      }
     } else {
       const prev = this.nodes[idx - 1];
       const gap = prev ? node.time - prev.time : 0;
-      node.handleIn = { dt: gap > 0 ? Math.max(Math.min(dt, 0), -gap) : 0, dv };
+      if (gap <= 0) {
+        node.handleIn = noHandle();
+        return;
+      }
+      const inDt = Math.max(Math.min(dt, 0), -gap);
+      node.handleIn = { dt: inDt, dv };
+      if (prev && prev.handleOut.dt > gap + inDt) {
+        prev.handleOut = { dt: gap + inDt, dv: prev.handleOut.dv };
+      }
     }
   };
 
   /**
-   * Keep segment [i, i+1]'s handle control points inside the segment in time
-   * (0 ≤ out.dt ≤ gap, −gap ≤ in.dt ≤ 0). With both control points in range,
-   * X(time) is monotonic, so the curve can't loop back on itself. Called after a
-   * node move, which can shrink a curved segment until a fixed-offset handle
-   * pokes past the segment end (the cause of the self-intersecting loop).
+   * Keep segment [i, i+1]'s handles from making X(s) non-monotonic. Each handle
+   * stays inside the segment (0 ≤ out.dt ≤ gap, −gap ≤ in.dt ≤ 0) AND the
+   * control points stay time-ordered (out.dt − in.dt ≤ gap). Independent
+   * per-handle clamps alone still allow out.dt=gap & in.dt=−gap, which draws as
+   * a self-intersecting loop — the usual glitch when a curved segment collapses
+   * toward a vertical step. Called after a node move.
    */
   private clampSegmentHandles = (i: number) => {
     const a = this.nodes[i];
     const b = this.nodes[i + 1];
     if (!a || !b) return;
     const gap = b.time - a.time;
-    if (gap <= 0) return; // step boundary
-    a.handleOut = {
-      dt: Math.min(Math.max(a.handleOut.dt, 0), gap),
-      dv: a.handleOut.dv,
-    };
-    b.handleIn = {
-      dt: Math.max(Math.min(b.handleIn.dt, 0), -gap),
-      dv: b.handleIn.dv,
-    };
+    // Vertically aligned nodes = hard step: force vertical (zero-reach) handles
+    // so the jump is straight up/down and reopening the gap doesn't revive a loop.
+    if (gap <= 0) {
+      a.handleOut = noHandle();
+      b.handleIn = noHandle();
+      return;
+    }
+    let outDt = Math.min(Math.max(a.handleOut.dt, 0), gap);
+    let outDv = a.handleOut.dv;
+    let inDt = Math.max(Math.min(b.handleIn.dt, 0), -gap);
+    let inDv = b.handleIn.dv;
+    const reach = outDt - inDt; // outDt >= 0, inDt <= 0
+    if (reach > gap) {
+      const scale = gap / reach;
+      outDt *= scale;
+      outDv *= scale;
+      inDt *= scale;
+      inDv *= scale;
+    }
+    a.handleOut = { dt: outDt, dv: outDv };
+    b.handleIn = { dt: inDt, dv: inDv };
   };
 
   /** Reset the segment between node `index` and the next node to a straight line. */
@@ -511,6 +602,7 @@ export class CurveVariation extends Variation<number> {
     const cv = new CurveVariation(L + right.duration, merged);
     cv.rangeMin = left.rangeMin ?? right.rangeMin;
     cv.rangeMax = left.rangeMax ?? right.rangeMax;
+    cv.collapseVerticalStacks();
     return cv;
   };
 

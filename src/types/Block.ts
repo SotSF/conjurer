@@ -217,7 +217,8 @@ export class Block {
   };
 
   // Fold runs of adjacent Curve regions into single Curves (structural merge —
-  // preserves steps/corners at the seam). Used after remove/insert.
+  // preserves steps/corners at the seam). Used after remove/insert. Also
+  // collapses any 3+ coincident-time stacks left by paste/duplicate/delete.
   private mergeAdjacentCurves = (regions: Variation[]): Variation[] => {
     const out: Variation[] = [];
     for (const r of regions) {
@@ -225,6 +226,9 @@ export class Block {
       if (prev instanceof CurveVariation && r instanceof CurveVariation)
         out[out.length - 1] = CurveVariation.mergeAdjacent(prev, r);
       else out.push(r);
+    }
+    for (const r of out) {
+      if (r instanceof CurveVariation) r.collapseVerticalStacks();
     }
     return out;
   };
@@ -557,13 +561,16 @@ export class Block {
     const variations = this.parameterVariations[uniformName];
     if (!variations) return;
 
+    const clone = variation.clone();
+    if (clone instanceof CurveVariation) clone.collapseVerticalStacks();
+
     if (insertAtEnd) {
-      variations.push(variation.clone());
+      variations.push(clone);
       return;
     }
 
     const index = variations.indexOf(variation);
-    if (index > -1) variations.splice(index, 0, variation.clone());
+    if (index > -1) variations.splice(index, 0, clone);
   };
 
   // Note: not very performant due to looping through variations
