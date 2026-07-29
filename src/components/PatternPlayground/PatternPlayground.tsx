@@ -1,4 +1,4 @@
-import { Box, Button, HStack, VStack } from "@chakra-ui/react";
+import { Box, Button, HStack, useToast, VStack } from "@chakra-ui/react";
 import { PatternList } from "@/src/components/PatternPlayground/PatternList";
 import { PreviewCanvas } from "@/src/components/Canvas/PreviewCanvas";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -6,13 +6,14 @@ import { ParameterControls } from "@/src/components/PatternPlayground/ParameterC
 import { observer } from "mobx-react-lite";
 import { useStore } from "@/src/types/StoreContext";
 import { action, runInAction } from "mobx";
-import { DisplayModeButtons } from "@/src/components/PatternPlayground/DisplayModeButtons";
 import { SendDataButton } from "@/src/components/SendDataButton";
+import { VJDisplayModeButtons } from "@/src/components/VJPage/VJDisplayModeButtons";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 // import { RecordCanvasControls } from "@/src/components/PatternPlayground/RecordCanvasControls";
 
 export const PatternPlayground = observer(function PatternPlayground() {
   const store = useStore();
+  const toast = useToast();
   const { uiStore, playgroundStore, userStore, context } = store;
   const {
     patternBlocks,
@@ -113,13 +114,37 @@ export const PatternPlayground = observer(function PatternPlayground() {
                     justify="center"
                     top={0}
                     width="100%"
+                    zIndex={10}
                   >
-                    <DisplayModeButtons />
+                    <VJDisplayModeButtons
+                      displayMode={uiStore.playgroundDisplayMode}
+                      onChange={action((mode) => {
+                        uiStore.playgroundDisplayMode = mode;
+                      })}
+                    />
                     {/* <RecordCanvasControls /> */}
                     {context === "vj" && <SendDataButton />}
+                    <Button
+                      size="xs"
+                      variant="ghost"
+                      onClick={() => {
+                        void navigator.clipboard.writeText(
+                          JSON.stringify([selectedPatternBlock.serialize()]),
+                        );
+                        toast({
+                          title: "Block stack copied",
+                          description:
+                            "Paste into the experience timeline with ⌘V",
+                          status: "success",
+                          duration: 2500,
+                        });
+                      }}
+                    >
+                      Copy
+                    </Button>
                     {context === "experienceEditor" && (
                       <Button
-                        size="sm"
+                        size="xs"
                         colorScheme="teal"
                         onClick={action(() => {
                           store.selectedLayer.insertCloneOfBlock(
