@@ -9,7 +9,18 @@ export const TIMELINE_HEADER_WIDTH = 150;
 
 const INITIAL_RENDER_TARGET_SIZE = 512;
 
-export type DisplayMode = "canopy" | "canopySpace" | "cartesianSpace" | "none";
+export type DisplayMode = "canopy" | "canopySpace" | "cartesianSpace";
+
+const DISPLAY_MODES: DisplayMode[] = [
+  "canopy",
+  "canopySpace",
+  "cartesianSpace",
+];
+
+const sanitizeDisplayMode = (mode: unknown): DisplayMode =>
+  DISPLAY_MODES.includes(mode as DisplayMode)
+    ? (mode as DisplayMode)
+    : "canopy";
 
 /** Ableton-style status-bar help for the control currently under the pointer. */
 export type HoverHelp = {
@@ -313,9 +324,12 @@ export class UIStore {
     if (data) {
       const localStorageUiSettings = JSON.parse(data);
       this.showingPerformance = !!localStorageUiSettings.showingPerformance;
-      this.displayMode = localStorageUiSettings.displayMode || "canopy";
-      this.playgroundDisplayMode =
-        localStorageUiSettings.playgroundDisplayMode || "canopy";
+      this.displayMode = sanitizeDisplayMode(
+        localStorageUiSettings.displayMode,
+      );
+      this.playgroundDisplayMode = sanitizeDisplayMode(
+        localStorageUiSettings.playgroundDisplayMode,
+      );
       this.renderTargetSize =
         localStorageUiSettings.renderTargetSize || INITIAL_RENDER_TARGET_SIZE;
       this._emceeOutputControlsMinimized =

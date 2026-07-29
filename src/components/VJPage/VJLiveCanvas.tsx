@@ -20,8 +20,7 @@ import { runInAction } from "mobx";
 export type VJDisplayMode =
   | "canopy"
   | "canopySpace"
-  | "cartesianSpace"
-  | "none";
+  | "cartesianSpace";
 
 type PushRequest = {
   id: number;

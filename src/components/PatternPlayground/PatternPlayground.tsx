@@ -160,9 +160,7 @@ export const PatternPlayground = observer(function PatternPlayground() {
                     )}
                   </HStack>
                   <Box height="100%" pt={10}>
-                    {uiStore.playgroundDisplayMode !== "none" && (
-                      <PreviewCanvas block={selectedPatternBlock} />
-                    )}
+                    <PreviewCanvas block={selectedPatternBlock} />
                   </Box>
                 </Box>
               </Panel>
