@@ -135,13 +135,22 @@ export class UIStore {
 
   /**
    * Whether a time span is close enough to the visible window to be worth
-   * rendering in full. Padded by a screenful either side so scrolling reveals
-   * already-mounted content rather than mounting it under the cursor.
+   * rendering in full. Padded by `marginViewports` screenfuls either side so
+   * scrolling reveals already-mounted content rather than mounting it under the
+   * cursor.
+   *
+   * Callers deliberately use different margins: a block unmounts on a wider
+   * margin than its automation lanes drop out on. That ordering matters — see
+   * BLOCK_MOUNT_MARGIN_VIEWPORTS.
    */
-  isTimeSpanNearView = (startTime: number, endTime: number) => {
+  isTimeSpanNearView = (
+    startTime: number,
+    endTime: number,
+    marginViewports = 1,
+  ) => {
     // before the first measurement, assume everything is in view
     if (this.timelineViewportWidth === 0) return true;
-    const margin = this.timelineViewportWidth;
+    const margin = this.timelineViewportWidth * marginViewports;
     const left = this.timelineScrollLeft - TIMELINE_HEADER_WIDTH - margin;
     const right =
       this.timelineScrollLeft -

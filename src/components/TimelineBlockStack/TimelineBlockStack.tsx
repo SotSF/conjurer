@@ -44,7 +44,7 @@ export const TimelineBlockStack = observer(function TimelineBlockStack({
     if (!dragNodeRef.current) return;
 
     // Anytime the TimelineBlockStack is resized,
-    new ResizeObserver(
+    const observer = new ResizeObserver(
       action(() => {
         // report the block's height so the layer can size its lanes
         patternBlock.layer?.reportBlockHeight(
@@ -57,7 +57,21 @@ export const TimelineBlockStack = observer(function TimelineBlockStack({
           dragNodeRef.current?.clientWidth ?? 0,
         );
       }),
-    ).observe(dragNodeRef.current);
+    );
+    observer.observe(dragNodeRef.current);
+    const layer = patternBlock.layer;
+    return () => {
+      // Without this the observer outlives the effect: the deps include
+      // patternBlock.layer, so moving a block between layers left the old
+      // observer attached and firing forever. Now that blocks unmount when they
+      // scroll out of view, an uncleaned observer would leak on every scroll.
+      observer.disconnect();
+      // The height measured above described this block *with* its automation
+      // lanes open. Once it unmounts that number is stale and often many times
+      // too big, and because a layer is as tall as its tallest block, keeping it
+      // pinned the layer at its tallest-ever height for the rest of the session.
+      layer?.forgetBlockHeight(patternBlock);
+    };
   }, [dragNodeRef, patternBlock.layer, patternBlock]);
 
   const lastMouseDown = useRef(0);
@@ -129,6 +143,15 @@ export const TimelineBlockStack = observer(function TimelineBlockStack({
     patternBlock.endTime,
   );
 
+  // The block's zoom-dependent geometry. Passing these through Chakra props
+  // makes emotion serialize and inject a NEW CSS class for every card on every
+  // zoom change; a plain inline style bypasses that entirely.
+  const geometry = {
+    top: `${patternBlock.layer?.blockTopOffset(patternBlock) ?? 0}px`,
+    left: uiStore.timeToXPixels(patternBlock.startTime),
+    width: uiStore.timeToXPixels(patternBlock.duration),
+  };
+
   // cache this value, see https://mobx.js.org/computeds-with-args.html
   const isSelected = computed(
     () =>
@@ -156,9 +179,10 @@ export const TimelineBlockStack = observer(function TimelineBlockStack({
       <Card
         ref={dragNodeRef}
         position="absolute"
-        top={`${patternBlock.layer?.blockTopOffset(patternBlock) ?? 0}px`}
-        left={uiStore.timeToXPixels(patternBlock.startTime)}
-        width={uiStore.timeToXPixels(patternBlock.duration)}
+        // NB: a plain inline style, deliberately not Chakra props — see the
+        // comment where `geometry` is built. react-draggable merges this with
+        // its own transform, so both survive.
+        style={geometry}
         border="solid"
         borderColor={isSelected ? "blue.500" : "white"}
         borderWidth={3}

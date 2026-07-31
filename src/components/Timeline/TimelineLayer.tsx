@@ -9,6 +9,20 @@ import { Draggable } from "@hello-pangea/dnd";
 import { TimelineLayerHeader } from "@/src/components/Timeline/TimelineLayerHeader";
 import { TimelineBlockStack } from "@/src/components/TimelineBlockStack/TimelineBlockStack";
 
+// How far outside the visible window (in screenfuls) a block stays mounted.
+//
+// This is deliberately WIDER than the one-screenful margin its automation lanes
+// use, and the ordering is load-bearing rather than just conservative overscan.
+// A layer's height is *measured*, not modelled: each block reports its rendered
+// height via a ResizeObserver and a lane is as tall as its tallest block. If a
+// block unmounted at the same boundary its lanes drop out at, it would never get
+// to report its now-much-shorter laneless height, so the layer would stay stuck
+// at its tall-with-lanes height forever after you scrolled past armed lanes
+// once. With a wider margin a block spends a full screenful of scrolling mounted
+// but laneless, reports that height, and only then unmounts — so the height left
+// behind in the map is the correct laneless one.
+const BLOCK_MOUNT_MARGIN_VIEWPORTS = 2;
+
 type TimelineLayerProps = {
   index: number;
   layer: Layer;
@@ -39,6 +53,13 @@ export const TimelineLayer = observer(function TimelineLayer({
     ? null
     : layer
         .getAllBlocks()
+        .filter((block) =>
+          uiStore.isTimeSpanNearView(
+            block.startTime,
+            block.endTime,
+            BLOCK_MOUNT_MARGIN_VIEWPORTS,
+          ),
+        )
         .map((block) => (
           <TimelineBlockStack key={block.id} patternBlock={block} />
         ));

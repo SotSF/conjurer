@@ -214,6 +214,16 @@ export class LayerV2 implements Layer {
     this.blockHeights.set(block.id, heightPx);
   };
 
+  // Called when a block unmounts (it scrolled far enough out of view to be
+  // worth not rendering). Its last measurement was taken while it was showing
+  // automation lanes and can be many times the height it would have now, so
+  // keeping it would leave the layer permanently as tall as the tallest block
+  // you had ever scrolled past with lanes armed. Dropping it lets the modelled
+  // default stand in until the block mounts and measures itself again.
+  forgetBlockHeight = (block: Block) => {
+    this.blockHeights.delete(block.id);
+  };
+
   insertCloneOfBlock = (block: Block) => {
     const newBlock = block.clone();
     newBlock.setTiming({
