@@ -10,6 +10,7 @@ import { CloudsMask } from "@/src/effects/CloudsMask";
 import { ConstructMask } from "@/src/effects/ConstructMask";
 import { BrightnessAdjust } from "./BrightnessAdjust";
 import { Kaleidoscope } from "@/src/effects/Kaleidoscope";
+import { Mirror } from "@/src/effects/Mirror";
 import { ShapeMask } from "@/src/effects/ShapeMask";
 import { Threshold } from "@/src/effects/Threshold";
 import { ColorRemap } from "@/src/effects/ColorRemap";
@@ -28,6 +29,7 @@ const effectFactories: Array<() => Pattern> = [
   CloudsMask,
   ConstructMask,
   Kaleidoscope,
+  Mirror,
 ];
 
 // Deprecated effects can no longer be added, but remain registered so that
