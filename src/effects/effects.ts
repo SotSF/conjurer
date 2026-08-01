@@ -19,6 +19,7 @@ import { HueSaturate } from "@/src/effects/HueSaturate";
 import { ShapeMask } from "@/src/effects/ShapeMask";
 import { Threshold } from "@/src/effects/Threshold";
 import { ColorRemap } from "@/src/effects/ColorRemap";
+import { Trails } from "@/src/effects/Trails";
 
 const effectFactories: Array<() => Pattern> = [
   ShapeMask,
@@ -40,6 +41,7 @@ const effectFactories: Array<() => Pattern> = [
   Kaleidoscope,
   Mirror,
   RadialRepeat,
+  Trails,
 ];
 
 // Deprecated effects can no longer be added, but remain registered so that
