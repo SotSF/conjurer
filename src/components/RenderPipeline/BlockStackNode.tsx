@@ -63,6 +63,7 @@ export const BlockStackNode = observer(function BlockStackNode({
   return (
     <>
       <pattern.Component
+        pattern={pattern}
         priority={basePriority + 1}
         shaderMaterialKey={parentBlock?.id}
         renderTargetOut={evenNumberOfEffects ? renderTargetOut : renderTargetIn}
@@ -71,13 +72,12 @@ export const BlockStackNode = observer(function BlockStackNode({
         const isEven = i % 2 === 0;
         // we want XNOR logical operation here, equivalent to strict equal for booleans
         const swap = evenNumberOfEffects === isEven;
+        const pattern = effect.pattern;
         return (
-          <BlockNode
+          <pattern.Component
             key={effect.id}
+            pattern={pattern}
             priority={basePriority + i + 2}
-            uniforms={effect.pattern.params}
-            vertexShader={effect.pattern.vertexShader}
-            fragmentShader={effect.pattern.fragmentShader}
             renderTargetIn={swap ? renderTargetOut : renderTargetIn}
             renderTargetOut={swap ? renderTargetIn : renderTargetOut}
           />
