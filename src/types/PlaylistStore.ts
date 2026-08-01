@@ -1,7 +1,7 @@
 import { makeAutoObservable, runInAction } from "mobx";
 import { Playlist } from "@/src/types/Playlist";
-import { MAX_TIME } from "@/src/utils/time";
 import { areEqual } from "@/src/utils/array";
+import { scrollPlayheadIntoView } from "@/src/utils/scrollPlayheadIntoView";
 import type { Store } from "@/src/types/Store";
 
 export class PlaylistStore {
@@ -64,6 +64,7 @@ export class PlaylistStore {
   playPreviousExperience = async () => {
     if (this.store.context === "experienceEditor") {
       this.store.audioStore.setTimeWithCursor(0);
+      scrollPlayheadIntoView();
       return;
     }
 
@@ -76,7 +77,8 @@ export class PlaylistStore {
 
   playNextExperience = async () => {
     if (this.store.context === "experienceEditor") {
-      this.store.audioStore.setTimeWithCursor(MAX_TIME);
+      this.store.audioStore.goToEnd();
+      scrollPlayheadIntoView();
       return;
     }
 

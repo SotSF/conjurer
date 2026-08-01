@@ -3,7 +3,6 @@ import { Block } from "@/src/types/Block";
 import { memo, useEffect, useRef } from "react";
 import { SplineVariation } from "@/src/types/Variations/SplineVariation";
 import { useVariationClick } from "@/src/hooks/variationClick";
-import { VARIATION_BOUND_WIDTH } from "@/src/utils/layout";
 
 type SplineVariationGraphProps = {
   uniformName: string;
@@ -34,11 +33,7 @@ export const SplineVariationGraph = memo(function SplineVariationGraph({
       const CanvasSpliner = (await import("CanvasSpliner")).CanvasSpliner;
 
       const HEIGHT = 58;
-      const spliner = new CanvasSpliner(
-        id,
-        width - VARIATION_BOUND_WIDTH,
-        HEIGHT,
-      );
+      const spliner = new CanvasSpliner(id, width, HEIGHT);
       for (let i = 0; i < variation.points.length; i++) {
         const { x, y } = variation.points[i];
         const xLocked = i === 0 || i === variation.points.length - 1;

@@ -13,7 +13,7 @@ import { LoadingOverlay } from "@/src/components/LoadingOverlay";
 
 export const ExperienceEditorPage = observer(function ExperienceEditorPage() {
   const store = useStore();
-  const { uiStore, experienceStore, initializationState } = store;
+  const { experienceStore, initializationState } = store;
   const { loadingExperienceName } = experienceStore;
 
   const router = useRouter();
@@ -31,7 +31,9 @@ export const ExperienceEditorPage = observer(function ExperienceEditorPage() {
     router.query.experienceName,
   ]);
 
-  // Listen for url changes and load any new experience by name
+  // Listen for url changes and load any new experience by name.
+  // Only URL changes should trigger a load — omit store.experienceName from
+  // deps so renaming on save does not reload the stale URL name.
   useEffect(() => {
     if (
       initializationState !== "initialized" ||
@@ -41,21 +43,18 @@ export const ExperienceEditorPage = observer(function ExperienceEditorPage() {
     )
       return;
     experienceStore.load(router.query.experienceName as string);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- store.experienceName intentionally omitted
   }, [
     store,
     experienceStore,
     initializationState,
     loadingExperienceName,
-    store.experienceName,
     router.query.experienceName,
   ]);
 
   return (
     <Box position="relative" w="100vw" h="100vh">
-      <PanelGroup
-        autoSaveId="experienceEditor"
-        direction={uiStore.horizontalLayout ? "vertical" : "horizontal"}
-      >
+      <PanelGroup autoSaveId="experienceEditor" direction="horizontal">
         <Panel defaultSize={45}>
           <Display />
         </Panel>

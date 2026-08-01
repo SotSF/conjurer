@@ -13,24 +13,20 @@ import { EmceeOutputControlsToggle } from "@/src/components/PlaylistEditor/Emcee
 
 export const Display = observer(function Display() {
   const store = useStore();
-  const { uiStore, viewerMode } = store;
+  const { viewerMode } = store;
 
   const [containerElement, setContainerElement] =
     useState<HTMLDivElement | null>(null);
 
   return (
-    <Box
-      // trigger a re-instantiation of the canvas when the layout changes
-      key={`canopy-${uiStore.horizontalLayout ? "horizontal" : "vertical"}`}
-      overflow="auto"
-      position="relative"
-      height="100%"
-    >
+    <Box overflow="auto" position="relative" height="100%">
       <Box transition="all 100ms">
         {viewerMode && <ExperienceHeading />}
         {!viewerMode && (
           <>
-            <MenuBar />
+            <Box position="absolute" top={0} left={0} zIndex={2} p={2} mx={2}>
+              <MenuBar />
+            </Box>
             <Heading
               className={styles.fadeOut}
               position="absolute"
@@ -43,17 +39,19 @@ export const Display = observer(function Display() {
             >
               Conjurer
             </Heading>
-            <HStack
-              p={2}
-              position="absolute"
-              top={0}
-              right={0}
-              zIndex={1}
-              alignItems="end"
-            >
-              <RoleSelector />
-              <LoginButton />
-            </HStack>
+            {store.context !== "experienceEditor" && (
+              <HStack
+                p={2}
+                position="absolute"
+                top={0}
+                right={0}
+                zIndex={1}
+                alignItems="end"
+              >
+                <RoleSelector />
+                <LoginButton />
+              </HStack>
+            )}
           </>
         )}
         <DisplayControls canvasContainer={containerElement} />

@@ -22,8 +22,10 @@ import {
   VStack,
   useDisclosure,
 } from "@chakra-ui/react";
-import { FaFile, FaFolderOpen, FaRegClipboard } from "react-icons/fa";
+import { FaFile, FaFolderOpen, FaRegClipboard, FaShareAlt } from "react-icons/fa";
 import { FiSave } from "react-icons/fi";
+import { RxAlignCenterHorizontally } from "react-icons/rx";
+import { TbArrowBigRightLines } from "react-icons/tb";
 import { useStore } from "@/src/types/StoreContext";
 import { OpenExperienceModal } from "@/src/components/Menu/OpenExperienceModal";
 import { SaveExperienceModal } from "@/src/components/Menu/SaveExperienceModal";
@@ -33,7 +35,7 @@ import { DisplayMode } from "@/src/types/UIStore";
 import { action } from "mobx";
 import { LatencyModal } from "@/src/components/LatencyModal/LatencyModal";
 import { ExperienceThumbnail } from "@/src/components/ExperienceThumbnail";
-import { ExperienceStatusIndicator } from "../ExperienceStatusIndicator";
+import { ExperienceStatusToggle } from "@/src/components/ExperienceStatusToggle";
 import { useRouter } from "next/router";
 
 export const MenuBar = observer(function MenuBar() {
@@ -53,16 +55,7 @@ export const MenuBar = observer(function MenuBar() {
   if (!store.experienceName) return null;
 
   return (
-    <VStack
-      p={2}
-      position="absolute"
-      top={0}
-      left={0}
-      alignItems="flex-start"
-      zIndex={2}
-      spacing={1}
-      mx={2}
-    >
+    <VStack alignItems="flex-start" spacing={1}>
       <Modal
         isOpen={isKeyboardShortcutsOpen}
         onClose={onCloseKeyboardShortcuts}
@@ -238,14 +231,20 @@ export const MenuBar = observer(function MenuBar() {
                   >
                     Copy experience JSON to clipboard
                   </MenuItem>
+                  <MenuItem
+                    icon={<FaShareAlt size={17} />}
+                    onClick={store.copyLinkToExperience}
+                  >
+                    Copy link to experience
+                  </MenuItem>
                 </MenuList>
               </Portal>
             </Menu>
           </>
         )}
 
-        {/* Experience editor and playlist editor both get View, Tools, and Help menus */}
-        <Menu>
+        {/* Experience editor and playlist editor both get View, Tools, Navigate, and Help menus */}
+        <Menu closeOnSelect={false}>
           <MenuButton
             as={Button}
             px={1}
@@ -261,23 +260,6 @@ export const MenuBar = observer(function MenuBar() {
           </MenuButton>
           <Portal>
             <MenuList zIndex="dropdown">
-              {store.context === "experienceEditor" && (
-                <>
-                  <MenuOptionGroup
-                    defaultValue={uiStore.renderTargetSize.toString()}
-                    title="App orientation"
-                    type="radio"
-                    value={uiStore.horizontalLayout ? "horizontal" : "vertical"}
-                    onChange={uiStore.toggleLayout}
-                  >
-                    <MenuItemOption value="horizontal">
-                      Horizontal
-                    </MenuItemOption>
-                    <MenuItemOption value="vertical">Vertical</MenuItemOption>
-                  </MenuOptionGroup>
-                  <MenuDivider />
-                </>
-              )}
               <MenuOptionGroup
                 defaultValue={uiStore.renderTargetSize.toString()}
                 title="Render size (resolution)"
@@ -315,47 +297,94 @@ export const MenuBar = observer(function MenuBar() {
               >
                 Show performance overlay
               </MenuItemOption>
+              {store.context === "experienceEditor" && (
+                <>
+                  <MenuDivider />
+                  <MenuItemOption
+                    icon={<RxAlignCenterHorizontally size={17} />}
+                    isChecked={uiStore.keepingPlayHeadCentered}
+                    onClick={action(() => {
+                      uiStore.keepingPlayHeadCentered =
+                        !uiStore.keepingPlayHeadCentered;
+                    })}
+                  >
+                    Keep playhead centered
+                  </MenuItemOption>
+                  <MenuItemOption
+                    icon={<TbArrowBigRightLines size={17} />}
+                    isChecked={uiStore.keepingPlayHeadVisible}
+                    onClick={action(() => {
+                      uiStore.keepingPlayHeadVisible =
+                        !uiStore.keepingPlayHeadVisible;
+                    })}
+                  >
+                    Keep playhead visible
+                  </MenuItemOption>
+                </>
+              )}
             </MenuList>
           </Portal>
         </Menu>
-        {process.env.NEXT_PUBLIC_NODE_ENV !== "production" && (
-          <Menu closeOnSelect={false}>
-            <MenuButton
-              as={Button}
-              px={1}
-              py={0}
-              variant="ghost"
-              size="sm"
-              transition="all 0.2s"
-              borderRadius="md"
-              _hover={{ bg: "gray.500" }}
-              _focus={{ boxShadow: "outline" }}
-            >
-              Tools
-            </MenuButton>
-            <Portal>
-              <MenuList zIndex="dropdown">
-                <MenuItemOption
-                  isChecked={store.sendingData}
-                  onClick={store.toggleSendingData}
-                >
-                  Transmit data to canopy
-                </MenuItemOption>
-                <MenuDivider />
-                <MenuItem
-                  onClick={action(() => (uiStore.showingLatencyModal = true))}
-                >
-                  Set audio latency ({(audioStore.audioLatency * 1000).toFixed()}
-                  ms)
-                </MenuItem>
-                <MenuDivider />
-                <MenuItem as="a" href="/admin" target="_blank">
-                  Admin
-                </MenuItem>
-              </MenuList>
-            </Portal>
-          </Menu>
-        )}
+        <Menu closeOnSelect={false}>
+          <MenuButton
+            as={Button}
+            px={1}
+            py={0}
+            variant="ghost"
+            size="sm"
+            transition="all 0.2s"
+            borderRadius="md"
+            _hover={{ bg: "gray.500" }}
+            _focus={{ boxShadow: "outline" }}
+          >
+            Tools
+          </MenuButton>
+          <Portal>
+            <MenuList zIndex="dropdown">
+              <MenuItemOption
+                isChecked={store.sendingData}
+                onClick={store.toggleSendingData}
+                isDisabled={
+                  process.env.NEXT_PUBLIC_NODE_ENV === "production"
+                }
+              >
+                Transmit data to canopy
+              </MenuItemOption>
+              <MenuDivider />
+              <MenuItem
+                onClick={action(() => (uiStore.showingLatencyModal = true))}
+              >
+                Set audio latency ({(audioStore.audioLatency * 1000).toFixed()}
+                ms)
+              </MenuItem>
+            </MenuList>
+          </Portal>
+        </Menu>
+        <Menu>
+          <MenuButton
+            as={Button}
+            px={1}
+            py={0}
+            variant="ghost"
+            size="sm"
+            transition="all 0.2s"
+            borderRadius="md"
+            _hover={{ bg: "gray.500" }}
+            _focus={{ boxShadow: "outline" }}
+          >
+            Navigate
+          </MenuButton>
+          <Portal>
+            <MenuList zIndex="dropdown">
+              <MenuItem as="a" href="/playground" target="_blank">
+                Playground
+              </MenuItem>
+              <MenuItem as="a" href="/admin" target="_blank">
+                Admin
+              </MenuItem>
+            </MenuList>
+          </Portal>
+        </Menu>
         <Menu>
           <MenuButton
             as={Button}
@@ -396,24 +425,13 @@ export const MenuBar = observer(function MenuBar() {
               </MenuItem>
             </MenuList>
           </Portal>
-          <Button
-            as={Button}
-            px={1}
-            py={0}
-            variant="ghost"
-            size="xs"
-            fontSize="xs"
-            transition="all 0.2s"
-            borderRadius="md"
-            _hover={{ bg: "gray.500" }}
-            _focus={{ boxShadow: "outline" }}
-          >
-            <ExperienceStatusIndicator
-              experienceStatus={store.experienceStatus}
-              withLabel
-            />
-          </Button>
         </Menu>
+        <ExperienceStatusToggle
+          experienceId={store.experienceId}
+          experienceUserId={store.experienceUser?.id ?? -1}
+          status={store.experienceStatus}
+          withLabel
+        />
       </HStack>
     </VStack>
   );

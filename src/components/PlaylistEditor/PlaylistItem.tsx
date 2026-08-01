@@ -10,7 +10,7 @@ import { Experience } from "@/src/types/Experience";
 import { useSavePlaylist } from "@/src/hooks/playlist";
 import { Playlist } from "@/src/types/Playlist";
 import { ExperienceThumbnail } from "@/src/components/ExperienceThumbnail";
-import { ExperienceStatusIndicator } from "../ExperienceStatusIndicator";
+import { ExperienceStatusToggle } from "../ExperienceStatusToggle";
 import { PlaylistItemPlayPauseButton } from "@/src/components/PlaylistEditor/PlaylistItemPlayPauseButton";
 import { Draggable } from "@hello-pangea/dnd";
 import { MdDragIndicator } from "react-icons/md";
@@ -18,7 +18,7 @@ import { MdDragIndicator } from "react-icons/md";
 type PlaylistItemControlsProps = {
   playlist: Playlist;
   experience: Experience;
-  user: { username: string };
+  user: { id: number; username: string };
   index: number;
   editable?: boolean;
 };
@@ -117,18 +117,20 @@ export const PlaylistItem = observer(function PlaylistItem({
             </HStack>
           </Td>
 
-          <Td>
-            <HStack {...textProps} justify="center">
-              <ExperienceStatusIndicator experienceStatus={experience.status} />
-            </HStack>
+          <Td onClick={(event) => event.stopPropagation()}>
+            <ExperienceStatusToggle
+              experienceId={experience.id}
+              experienceUserId={user.id}
+              status={experience.status}
+            />
           </Td>
 
           <Td>
-            <Text {...textProps}>{experience.song.artist}</Text>
+            <Text {...textProps}>{experience.song?.artist}</Text>
           </Td>
 
           <Td>
-            <Text {...textProps}>{experience.song.name}</Text>
+            <Text {...textProps}>{experience.song?.name}</Text>
           </Td>
 
           <Td px={0}>

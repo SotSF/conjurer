@@ -1,7 +1,12 @@
 import { Variation } from "@/src/types/Variations/Variation";
 import type { Store } from "@/src/types/Store";
 
-export type PeriodicVariationType = "sine" | "square" | "triangle";
+export type PeriodicVariationType =
+  | "sine"
+  | "square"
+  | "triangle"
+  | "sawUp"
+  | "sawDown";
 
 export class PeriodicVariation extends Variation<number> {
   displayName = "Periodic";
@@ -74,6 +79,22 @@ export class PeriodicVariation extends Variation<number> {
           this.amplitude +
           this.offset
         );
+      case "sawUp":
+      case "sawDown": {
+        // Ramps across one period then jumps back to where it started: sawUp
+        // goes min -> max, sawDown goes max -> min. Direction lives in the
+        // type rather than in the sign of the amplitude, so min/max stay
+        // ordered (a negative amplitude would invert them and hand
+        // computeDomain a backwards range). Phase is in radians here (as for
+        // sine/square), so a phase of 2*PI advances the ramp by one period.
+        const cyclePosition =
+          (((time / this.period + this.phase / (2 * Math.PI)) % 1) + 1) % 1;
+        const ramp =
+          this.periodicType === "sawUp"
+            ? 2 * cyclePosition - 1
+            : 1 - 2 * cyclePosition;
+        return ramp * this.amplitude + this.offset;
+      }
       default:
         return 0;
     }
@@ -96,6 +117,18 @@ export class PeriodicVariation extends Variation<number> {
       });
     }
     return data;
+  };
+
+  /**
+   * Shift the wave as if local t=0 moved later by `dt` seconds — so a mid-cut
+   * remnant (or a left-boundary drag) keeps the same continuous waveform.
+   * Sine/square/saws store phase in radians; triangle stores it as a time
+   * offset.
+   */
+  shiftStart = (dt: number) => {
+    if (this.periodicType === "triangle") this.phase += dt;
+    else if (this.period > 1e-12)
+      this.phase += (dt / this.period) * 2 * Math.PI;
   };
 
   clone = () =>

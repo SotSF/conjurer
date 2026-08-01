@@ -15,7 +15,7 @@ export type SerializedPattern = {
   params?: SerializedParams;
 };
 
-export const BASE_UNIFORMS = ["u_time", "u_texture"];
+export const BASE_UNIFORMS = ["u_time", "u_texture", "u_opacity"];
 
 type PatternComponent = React.FC<{
   priority: number;
@@ -51,6 +51,13 @@ export class Pattern<T extends ParamMap = ParamMap> {
       u_texture: {
         name: "Input Texture",
         value: null,
+      },
+      u_opacity: {
+        name: "Opacity",
+        value: 1,
+        min: 0,
+        max: 1,
+        step: 0.01,
       },
       ...parameters,
     };

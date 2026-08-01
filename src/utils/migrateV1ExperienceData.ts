@@ -15,6 +15,11 @@ import { generateId } from "@/src/utils/id";
  * `layer.opacityBlock`, present in some older v1 rows, is intentionally
  * dropped: the feature was removed in #282 and the renderer has ignored the
  * data since.
+ *
+ * "Brightness Adjust" effects are folded into the block's opacity channel
+ * (`parameterVariations.u_opacity`), which the v2 pipeline applies after the
+ * block's entire effect chain. Identity envelopes (flat 1) are dropped
+ * entirely so those blocks get the auto-derived crossfade behavior.
  */
 
 // Largest block overlap attributable to v1 editor rounding artifacts. The
@@ -28,6 +33,46 @@ export const migrateV1ExperienceData = (data: any) => ({
   layers: (data.layers ?? []).map(migrateV1Layer),
 });
 
+const isBrightnessAdjust = (effectBlock: any) =>
+  (typeof effectBlock.pattern === "string"
+    ? effectBlock.pattern
+    : effectBlock.pattern?.name) === "Brightness Adjust";
+
+const migrateBrightnessAdjust = (block: any) => {
+  const effectBlocks = block.effectBlocks ?? [];
+  const brightnessAdjusts = effectBlocks.filter(isBrightnessAdjust);
+  if (brightnessAdjusts.length === 0) return block;
+
+  if (brightnessAdjusts.length > 1)
+    console.warn(
+      "Migrating v1 block: multiple Brightness Adjust effects found; keeping only the last one's envelope as the block opacity",
+    );
+
+  const lastBrightnessAdjust = brightnessAdjusts[brightnessAdjusts.length - 1];
+  const variations =
+    lastBrightnessAdjust.parameterVariations?.u_intensity ?? [];
+
+  const migrated = {
+    ...block,
+    effectBlocks: effectBlocks.filter(
+      (effectBlock: any) => !isBrightnessAdjust(effectBlock),
+    ),
+  };
+
+  // an identity envelope pinned the block at full brightness; dropping it
+  // (rather than materializing flat 1) leaves the block in auto-opacity mode
+  const isIdentity = variations.every(
+    (variation: any) => variation.type === "flat" && variation.value === 1,
+  );
+  if (!isIdentity && variations.length > 0) {
+    migrated.parameterVariations = {
+      ...block.parameterVariations,
+      u_opacity: variations,
+    };
+  }
+  return migrated;
+};
+
 const migrateV1Layer = (layer: any) => {
   const blocks = [...(layer.patternBlocks ?? [])].sort(
     (a, b) => a.startTime - b.startTime,
@@ -35,7 +80,7 @@ const migrateV1Layer = (layer: any) => {
 
   const blockMap: Record<string, any> = {};
   blocks.forEach((originalBlock, i) => {
-    const block = { ...originalBlock };
+    const block = migrateBrightnessAdjust({ ...originalBlock });
 
     // the oldest v1 data predates block ids; ids double as BlockMap keys, so
     // they must exist and be unique

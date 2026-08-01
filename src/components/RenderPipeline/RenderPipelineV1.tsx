@@ -4,7 +4,10 @@ import { useRenderTarget } from "@/src/hooks/renderTarget";
 import { observer } from "mobx-react-lite";
 import { WebGLRenderTarget } from "three";
 import { BlockStackNode } from "./BlockStackNode";
+import { BlockNode } from "./BlockNode";
 import { LayerV1 } from "@/src/types/Layer/LayerV1";
+import blackFragmentShader from "@/src/shaders/black.frag";
+import defaultVertexShader from "@/src/shaders/default.vert";
 
 type Props = {
   renderTargetZ: WebGLRenderTarget;
@@ -45,6 +48,19 @@ export const RenderPipelineV1 = observer(function RenderPipeline({
 
   That is a pretty terrible explanation. I'll improve it soon/never.
   */
+  if (activeLayers.length === 0) {
+    // write opaque black so the canopy samples (0,0,0,1) instead of an
+    // uncleared transparent target
+    return (
+      <BlockNode
+        priority={0}
+        vertexShader={defaultVertexShader}
+        fragmentShader={blackFragmentShader}
+        renderTargetOut={renderTargetZ}
+      />
+    );
+  }
+
   if (activeLayers.length === 1) {
     return (
       <BlockStackNode

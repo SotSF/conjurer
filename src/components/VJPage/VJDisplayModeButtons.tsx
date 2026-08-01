@@ -14,7 +14,6 @@ const displayModeOptions = [
   { value: "canopy" as const, label: "Canopy" },
   { value: "cartesianSpace" as const, label: "Cartesian space" },
   { value: "canopySpace" as const, label: "Canopy space" },
-  { value: "none" as const, label: "Don't render" },
 ] as const;
 
 type Props = {
@@ -47,7 +46,7 @@ export const VJDisplayModeButtons = memo(function VJDisplayModeButtons({
         {selectedLabel}
       </MenuButton>
       <Portal>
-        <MenuList zIndex="dropdown">
+        <MenuList zIndex="popover">
           {displayModeOptions.map((opt) => (
             <MenuItem key={opt.value} onClick={() => onChange(opt.value)}>
               {opt.label}

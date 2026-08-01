@@ -7,6 +7,7 @@ import { PiArrowsInLineHorizontalBold } from "react-icons/pi";
 import { LoadBeatMapModal } from "@/src/components/LoadBeatMapModal";
 import { RiFolderMusicLine } from "react-icons/ri";
 import { BEAT_GRID_UI_ENABLED } from "@/src/utils/featureFlags";
+import { hoverHelpProps } from "@/src/utils/hoverHelp";
 
 export const BeatMapControls = observer(function BeatMapControls() {
   const store = useStore();
@@ -22,6 +23,11 @@ export const BeatMapControls = observer(function BeatMapControls() {
         height={6}
         icon={<RiFolderMusicLine size={17} />}
         onClick={action(() => (uiStore.showingLoadBeatMapModal = true))}
+        {...hoverHelpProps(
+          uiStore,
+          "Load beat map",
+          "Open a beat map for this track to enable grid snapping.",
+        )}
       />
       <IconButton
         aria-label="Show beat grid overlay"
@@ -37,6 +43,11 @@ export const BeatMapControls = observer(function BeatMapControls() {
             : undefined
         }
         onClick={action(() => uiStore.toggleBeatGridOverlay())}
+        {...hoverHelpProps(
+          uiStore,
+          "Beat grid overlay",
+          "Show beat lines over the timeline.",
+        )}
       />
       <LoadBeatMapModal />
       <IconButton
@@ -53,6 +64,11 @@ export const BeatMapControls = observer(function BeatMapControls() {
             : undefined
         }
         onClick={action(() => uiStore.toggleSnappingToBeatGrid())}
+        {...hoverHelpProps(
+          uiStore,
+          "Snap to beat grid",
+          "Snap block moves and edits to the nearest beat.",
+        )}
       />
     </>
   );

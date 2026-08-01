@@ -6,7 +6,7 @@ import {
   TbVectorSpline,
   TbEaseInOutControlPoints,
 } from "react-icons/tb";
-import { MdTrendingFlat } from "react-icons/md";
+import { MdShowChart, MdTrendingFlat } from "react-icons/md";
 import { PiWaveform } from "react-icons/pi";
 import { Block } from "@/src/types/Block";
 import { PatternParam } from "@/src/params/shared/patternParam";
@@ -22,6 +22,7 @@ import {
 import { useStore } from "@/src/types/StoreContext";
 import { EasingVariation } from "@/src/types/Variations/EasingVariation";
 import { AudioVariation } from "@/src/types/Variations/AudioVariation";
+import { migrateSequenceToRegions } from "@/src/utils/migrateVariations";
 
 type NumberNewVariationButtonsProps = {
   block: Block;
@@ -37,6 +38,24 @@ export const NumberNewVariationButtons = memo(function NumberNewVariationButtons
 
   return (
     <>
+      <IconButton
+        size="xs"
+        aria-label="Preview migration"
+        title="Preview migration — convert this param's variations to full-block regions (Curve + LFO/Audio), in-memory, not saved"
+        height={6}
+        icon={<MdShowChart size={17} />}
+        onClick={action(() => {
+          const existing = block.parameterVariations[uniformName] ?? [];
+          const param = block.pattern.params[uniformName];
+          const defaultValue = typeof param?.value === "number" ? param.value : 0;
+          block.parameterVariations[uniformName] = migrateSequenceToRegions(
+            existing,
+            block.duration,
+            defaultValue,
+          );
+          block.triggerVariationReactions(uniformName);
+        })}
+      />
       <IconButton
         size="xs"
         aria-label="Flat"

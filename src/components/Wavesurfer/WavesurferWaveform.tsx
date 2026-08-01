@@ -12,6 +12,7 @@ import { debounce } from "lodash";
 import { NO_SONG } from "@/src/types/Song";
 import { INITIAL_PIXELS_PER_SECOND } from "@/src/utils/time";
 import { getTimelineLabelIntervals } from "@/src/utils/timelineZoom";
+import { scrollPlayheadIntoView } from "@/src/utils/scrollPlayheadIntoView";
 import { MinimapViewfinder } from "@/src/components/Wavesurfer/MinimapViewfinder";
 
 const DEFAULT_MINIMAP_HEIGHT = 20;
@@ -30,17 +31,6 @@ const setTimelineLabelIntervals = (
     getTimelineLabelIntervals(pps),
   );
 };
-
-const scrollIntoView = debounce(
-  () =>
-    document.getElementById("playhead")?.scrollIntoView({
-      behavior: "smooth",
-      block: "nearest",
-      inline: "center",
-    }),
-  20,
-  { leading: false, trailing: true },
-);
 
 const WavesurferWaveform = observer(function WavesurferWaveform() {
   const store = useStore();
@@ -87,7 +77,7 @@ const WavesurferWaveform = observer(function WavesurferWaveform() {
       audioStore.setTimeWithCursor(
         Math.max(0, audioStore.wavesurfer!.getCurrentTime()),
       );
-      scrollIntoView();
+      scrollPlayheadIntoView();
     });
     runInAction(() => {
       audioStore.timelinePlugin = timelinePlugin;
@@ -302,7 +292,7 @@ const WavesurferWaveform = observer(function WavesurferWaveform() {
         borderColor="black"
         borderBottomStyle="solid"
         bgColor="gray.600"
-        width={`calc(${uiStore.horizontalLayout ? "100vw" : "60vw"} - 150px)`}
+        width="calc(60vw - 150px)"
         height={`${DEFAULT_MINIMAP_HEIGHT}px`}
         zIndex={100}
         overflow="hidden"

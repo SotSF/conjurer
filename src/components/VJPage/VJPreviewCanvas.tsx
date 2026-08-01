@@ -17,8 +17,7 @@ import { CartesianSpaceView } from "@/src/components/Canvas/CartesianSpaceView";
 export type VJDisplayMode =
   | "canopy"
   | "canopySpace"
-  | "cartesianSpace"
-  | "none";
+  | "cartesianSpace";
 
 type Props = {
   block: Block;

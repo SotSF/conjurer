@@ -248,7 +248,7 @@ export class LayerV1 implements Layer {
   };
 
   attemptMoveBlock = (block: Block, desiredTime: number, relative = false) => {
-    if (block.layer != this) return;
+    if (block.layer != this || block.locked) return;
 
     // prevent block overlaps for now by snapping to nearest valid start time
     const validTimeDelta = this.nearestValidStartTimeDelta(
@@ -312,6 +312,10 @@ export class LayerV1 implements Layer {
 
   // v1 layers never contain overlapping blocks, so everything is in lane 0
   blockTopOffset = () => 0;
+
+  // v1 layers never contain overlapping blocks, so there is never a crossfade
+  autoBlockOpacityAt = () => 1;
+  autoOpacityVariations = () => null;
 
   serialize = () => ({
     id: this.id,
