@@ -303,18 +303,8 @@ export class LayerV1 implements Layer {
   blockHeights = new Map<string, number>();
 
   reportBlockHeight = (block: Block, heightPx: number) => {
+    if (this.blockHeights.get(block.id) === heightPx) return;
     this.blockHeights.set(block.id, heightPx);
-    this.recomputeHeight();
-  };
-
-  // see the Layer interface: a measurement is only meaningful while the block is
-  // actually rendering
-  forgetBlockHeight = (block: Block) => {
-    if (!this.blockHeights.delete(block.id)) return;
-    this.recomputeHeight();
-  };
-
-  private recomputeHeight = () => {
     let maxHeight = 0;
     for (const height of this.blockHeights.values())
       maxHeight = Math.max(maxHeight, height);

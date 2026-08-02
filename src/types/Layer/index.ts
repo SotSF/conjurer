@@ -34,10 +34,6 @@ export type Layer = {
   resizeBlockRightBound(block: Block, delta: number): void;
   // blocks report their rendered height so the layer can size itself
   reportBlockHeight(block: Block, heightPx: number): void;
-  // ...and drop that measurement when they stop rendering, since a block that
-  // has scrolled out of view is no longer showing its automation lanes and the
-  // tall height it last reported no longer describes anything
-  forgetBlockHeight(block: Block): void;
   // the opacity the render pipeline applies to a block's final output when
   // the block has no manually-authored opacity variations (auto crossfade)
   autoBlockOpacityAt(block: Block, globalTime: number): number;

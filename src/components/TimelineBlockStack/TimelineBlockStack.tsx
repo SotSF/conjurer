@@ -54,19 +54,10 @@ export const TimelineBlockStack = observer(function TimelineBlockStack({
       ),
     );
     observer.observe(dragNodeRef.current);
-    const layer = patternBlock.layer;
-    return () => {
-      // Without this the observer outlives the effect: the deps include
-      // patternBlock.layer, so moving a block between layers left the old
-      // observer attached and firing forever. Now that blocks unmount when they
-      // scroll out of view, an uncleaned observer would leak on every scroll.
-      observer.disconnect();
-      // The height measured above described this block *with* its automation
-      // lanes open. Once it unmounts that number is stale and often many times
-      // too big, and because a layer is as tall as its tallest block, keeping it
-      // pinned the layer at its tallest-ever height for the rest of the session.
-      layer?.forgetBlockHeight(patternBlock);
-    };
+    // Without this the observer outlives the effect: the deps include
+    // patternBlock.layer, so a block moved between layers left its old observer
+    // attached and firing forever (328 observers existed for 154 blocks).
+    return () => observer.disconnect();
   }, [dragNodeRef, patternBlock.layer, patternBlock]);
 
   const lastMouseDown = useRef(0);
