@@ -43,20 +43,15 @@ export const TimelineBlockStack = observer(function TimelineBlockStack({
   useEffect(() => {
     if (!dragNodeRef.current) return;
 
-    // Anytime the TimelineBlockStack is resized,
+    // Anytime the TimelineBlockStack is resized, report the block's height so
+    // the layer can size its lanes.
     const observer = new ResizeObserver(
-      action(() => {
-        // report the block's height so the layer can size its lanes
+      action(() =>
         patternBlock.layer?.reportBlockHeight(
           patternBlock,
           dragNodeRef.current?.offsetHeight ?? 0,
-        );
-
-        // recompute the number of header repetitions
-        patternBlock.recomputeHeaderRepetitions(
-          dragNodeRef.current?.clientWidth ?? 0,
-        );
-      }),
+        ),
+      ),
     );
     observer.observe(dragNodeRef.current);
     const layer = patternBlock.layer;
@@ -190,6 +185,13 @@ export const TimelineBlockStack = observer(function TimelineBlockStack({
         // allow the automation-lane gutter labels and the narrow-block dot-row
         // popover to render just outside the block's own width
         overflow="visible"
+        // react-draggable's transform gives every block its own stacking context,
+        // so the narrow-block dot-row popover's z-index can only rank within its
+        // own card — it can't rise above a sibling block unless the CARD itself
+        // does. Bump the card above default-stacked siblings while hovered or
+        // selected (the same condition that expands the popover).
+        zIndex={isSelected ? 5 : undefined}
+        _hover={{ zIndex: 5 }}
         onClick={(e: ReactMouseEvent) => e.stopPropagation()}
         {...hoverHelpProps(
           uiStore,

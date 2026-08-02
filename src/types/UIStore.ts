@@ -2,7 +2,7 @@ import { INITIAL_PIXELS_PER_SECOND } from "@/src/utils/time";
 import { makeAutoObservable } from "mobx";
 import type { Store } from "@/src/types/Store";
 
-export const MAX_PIXELS_PER_SECOND = 160;
+export const MAX_PIXELS_PER_SECOND = 800;
 export const MIN_PIXELS_PER_SECOND = 4;
 export const ZOOM_FACTOR = 1.25;
 export const TIMELINE_HEADER_WIDTH = 150;
