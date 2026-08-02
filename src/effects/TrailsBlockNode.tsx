@@ -1,7 +1,7 @@
 import { PatternComponent } from "@/src/types/pattern/PatternBlockNode";
 import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
-import { useRenderTarget } from "@/src/hooks/renderTarget";
+import { useLocalRenderTarget } from "@/src/hooks/localRenderTarget";
 
 export const TrailsBlockNode: PatternComponent = ({
   pattern,
@@ -20,8 +20,8 @@ export const TrailsBlockNode: PatternComponent = ({
     uniforms.u_texture.value = renderTargetIn.texture;
   }
 
-  const renderTargetA = useRenderTarget();
-  const renderTargetB = useRenderTarget();
+  const renderTargetA = useLocalRenderTarget(renderTargetOut.width);
+  const renderTargetB = useLocalRenderTarget(renderTargetOut.width);
 
   const newUniforms = useRef({
     u_lastframetex: { value: renderTargetA.texture },
