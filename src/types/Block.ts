@@ -24,11 +24,6 @@ import {
 } from "@/src/utils/laneStatePersistence";
 import type { Store } from "@/src/types/Store";
 
-// Upper bound on repeated param-name headers within one block's lane, so the
-// timeline's DOM size stops growing with the zoom level. See
-// recomputeHeaderRepetitions.
-const MAX_HEADER_REPETITIONS = 4;
-
 export type SerializedBlock = {
   id: string;
   // for backwards compatibility, pattern may be just the name of the pattern (string)
@@ -55,7 +50,6 @@ export class Block {
   // when true, the block cannot be dragged in time (prevents accidental moves)
   locked = false;
 
-  headerRepetitions: number = 1; // number of times to repeat the headers in this block
 
   // UI state: whether the timeline shows this block's parameters/effects or
   // just its header. Expanded by default; the header caret can collapse it.
@@ -647,26 +641,6 @@ export class Block {
 
     // create a new array so that mobx can detect the change
     this.parameterVariations[uniformName] = [...variations];
-  };
-
-  recomputeHeaderRepetitions = (width: number) => {
-    // repeat the param-name header about every 280px so wide blocks stay labeled
-    // across their span (left-aligned within each segment)
-    //
-    // Capped, because this count is proportional to the block's PIXEL width and
-    // therefore to the zoom level: a 22s block with 25 open lanes went from 75
-    // header instances at 37px/s to 500 at 347px/s, which is most of why the
-    // timeline's DOM nearly doubled when zooming in. The first repetition is
-    // position:sticky (see LaneNameHeader), so the label is always on screen
-    // regardless — the extra copies are decorative spacing, not legibility.
-    this.headerRepetitions = Math.min(
-      MAX_HEADER_REPETITIONS,
-      Math.floor(width / 400) + 1,
-    );
-
-    this.effectBlocks.forEach((effect) =>
-      effect.recomputeHeaderRepetitions(width),
-    );
   };
 
   reorderEffectBlock = (block: Block, delta: number) => {
