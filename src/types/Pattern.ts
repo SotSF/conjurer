@@ -7,7 +7,10 @@ import {
 import { isPaletteParam } from "@/src/params/palette/isPaletteParam";
 import { isPalette } from "@/src/params/palette/Palette";
 import { makeVertexShader, Varying } from "@/src/shaders/vertexShader";
-import { PatternBlockNode, PatternComponent } from "./pattern/PatternBlockNode";
+import {
+  StatelessPatternComponent,
+  PatternComponent,
+} from "./pattern/PatternComponent";
 
 export type SerializedPattern = {
   name: string;
@@ -28,7 +31,7 @@ export class Pattern<T extends ParamMap = ParamMap> {
     src: string,
     parameters: T = {} as T,
     vertexShaderVaryings: Varying[] = ["v_uv"],
-    Component: PatternComponent = PatternBlockNode,
+    Component: PatternComponent = StatelessPatternComponent,
   ) {
     this.name = name;
     this.fragmentShader = src;

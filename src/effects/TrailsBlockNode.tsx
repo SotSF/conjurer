@@ -1,4 +1,4 @@
-import { PatternComponent } from "@/src/types/pattern/PatternBlockNode";
+import { PatternComponent } from "@/src/types/pattern/PatternComponent";
 import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { useLocalRenderTarget } from "@/src/hooks/localRenderTarget";

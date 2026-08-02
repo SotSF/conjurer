@@ -12,7 +12,7 @@ export type PatternComponent = React.FC<{
   shaderMaterialKey?: string;
 }>;
 
-export const PatternBlockNode: PatternComponent = ({
+export const StatelessPatternComponent: PatternComponent = ({
   pattern,
   priority,
   renderTargetIn,
