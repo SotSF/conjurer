@@ -282,7 +282,7 @@ const Divider = function Divider() {
   return (
     <Box
       flexShrink={0}
-      width="1px"
+      width="2px"
       height="14px"
       bg={DEFAULT_BORDER}
       mx="1px"
