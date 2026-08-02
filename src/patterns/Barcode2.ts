@@ -77,6 +77,7 @@ export const Barcode2 = () =>
       min: -50,
       max: 50,
     },
+    // 1 means no mirroring; 2 and up fold the canopy into that many wedges
     u_mirrorCount: {
       name: "Mirror Count",
       value: 8,

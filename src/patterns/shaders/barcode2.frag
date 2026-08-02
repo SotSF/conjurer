@@ -34,8 +34,18 @@ uniform float u_angle;
 // #define u_mirrorCount 2.
 // #define u_angle 0.
 
+// Decorrelates the lit/unlit draw from the color draw. Any value that shifts
+// the hash input works; this one just needs to stay away from the seed range.
+#define LIT_OFFSET 17.0
+
 // Same fold as the Mirror effect: remap UV into a mirrored kaleidoscope wedge.
+// A count of 1 means no mirroring, so return p untouched rather than folding —
+// the atan/cos/sin round trip below is only an identity in exact arithmetic, and
+// rounding it would shift cell boundaries. The 1.5 cutoff matches the
+// round-to-nearest that picks n, so a count rounding to 1 is off and 2 folds.
 vec2 mirrorFold(vec2 p) {
+    if (u_mirrorCount < 1.5) return p;
+
     float axis = u_angle * PI + 0.5 * PI;
     p = rotate2DCentered(p, -axis);
 
@@ -83,8 +93,12 @@ void main() {
     vec2 ipos = floor(vec2(mod(st.x, u_bars), mod(st.y, u_bars)));  // integer
     vec2 fpos = fract(st);  // fraction
 
-    float intensityA = step(1. - u_bar_likelihood, rand(ipos + seedA));
-    float intensityB = step(1. - u_bar_likelihood, rand(ipos + seedB));
+    // Draw lit/unlit from a different offset than the color below. Sharing one
+    // draw would mean a bar is lit exactly when its palette lookup is high, so
+    // only the top u_bar_likelihood slice of the gradient could ever be seen.
+    // Barcode gets this separation for free by seeding intensity with timeCell.
+    float intensityA = step(1. - u_bar_likelihood, rand(ipos + seedA + LIT_OFFSET));
+    float intensityB = step(1. - u_bar_likelihood, rand(ipos + seedB + LIT_OFFSET));
     float intensity = mix(intensityA, intensityB, seedT);
     intensity *= 1. - u_bar_fade_factor * abs((fpos.x - 0.5) * 2.0);
 
