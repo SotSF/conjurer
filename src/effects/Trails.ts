@@ -1,6 +1,6 @@
 import { Pattern } from "@/src/types/Pattern";
 import trailsFrag from "./shaders/trails.frag";
-import { TrailsBlockNode } from "@/src/effects/TrailsBlockNode";
+import { TrailsComponent } from "@/src/effects/TrailsComponent";
 
 export { trailsFrag };
 export const Trails = () =>
@@ -16,5 +16,5 @@ export const Trails = () =>
       },
     },
     ["v_normalized_uv"],
-    TrailsBlockNode,
+    TrailsComponent,
   );

@@ -3,7 +3,7 @@ import { useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { useLocalRenderTarget } from "@/src/hooks/localRenderTarget";
 
-export const TrailsBlockNode: PatternComponent = ({
+export const TrailsComponent: PatternComponent = ({
   pattern,
   priority,
   renderTargetIn,
