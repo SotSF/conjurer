@@ -45,3 +45,6 @@ local.sql
 
 # robots
 .claude/worktrees
+
+# jetbrains IDEs
+.idea

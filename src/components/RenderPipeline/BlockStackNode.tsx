@@ -8,6 +8,7 @@ import { BlockNode } from "@/src/components/RenderPipeline/BlockNode";
 import { useStore } from "@/src/types/StoreContext";
 import { Block } from "@/src/types/Block";
 import { observer } from "mobx-react-lite";
+import { Pattern } from "@/src/types/Pattern";
 
 // This enables `#include <conjurer_common>`
 (ShaderChunk as any).conjurer_common = conjurerCommon;
@@ -19,6 +20,10 @@ type BlockStackNodeProps = {
   renderTargetIn: WebGLRenderTarget;
   renderTargetOut: WebGLRenderTarget;
 };
+
+const defaultPattern = new Pattern("default", blackFragmentShader);
+
+defaultPattern.fragmentShader = defaultVertexShader;
 
 export const BlockStackNode = observer(function BlockStackNode({
   autorun,
@@ -53,29 +58,26 @@ export const BlockStackNode = observer(function BlockStackNode({
 
   const numberEffects = parentBlock?.effectBlocks.length ?? 0;
   const evenNumberOfEffects = numberEffects % 2 === 0;
+  const pattern = parentBlock?.pattern ?? defaultPattern;
+
   return (
     <>
-      <BlockNode
+      <pattern.Component
+        pattern={pattern}
         priority={basePriority + 1}
         shaderMaterialKey={parentBlock?.id}
-        uniforms={parentBlock?.pattern.params}
-        vertexShader={parentBlock?.pattern.vertexShader ?? defaultVertexShader}
-        fragmentShader={
-          parentBlock?.pattern.fragmentShader ?? blackFragmentShader
-        }
         renderTargetOut={evenNumberOfEffects ? renderTargetOut : renderTargetIn}
       />
       {parentBlock?.effectBlocks.map((effect, i) => {
         const isEven = i % 2 === 0;
         // we want XNOR logical operation here, equivalent to strict equal for booleans
         const swap = evenNumberOfEffects === isEven;
+        const pattern = effect.pattern;
         return (
-          <BlockNode
+          <pattern.Component
             key={effect.id}
+            pattern={pattern}
             priority={basePriority + i + 2}
-            uniforms={effect.pattern.params}
-            vertexShader={effect.pattern.vertexShader}
-            fragmentShader={effect.pattern.fragmentShader}
             renderTargetIn={swap ? renderTargetOut : renderTargetIn}
             renderTargetOut={swap ? renderTargetIn : renderTargetOut}
           />

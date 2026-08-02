@@ -7,6 +7,10 @@ import {
 import { isPaletteParam } from "@/src/params/palette/isPaletteParam";
 import { isPalette } from "@/src/params/palette/Palette";
 import { makeVertexShader, Varying } from "@/src/shaders/vertexShader";
+import {
+  StatelessPatternComponent,
+  PatternComponent,
+} from "./pattern/PatternComponent";
 
 export type SerializedPattern = {
   name: string;
@@ -20,12 +24,14 @@ export class Pattern<T extends ParamMap = ParamMap> {
   fragmentShader: string;
   vertexShader: string;
   params: StandardParams & T;
+  Component: PatternComponent;
 
   constructor(
     name: string,
     src: string,
     parameters: T = {} as T,
     vertexShaderVaryings: Varying[] = ["v_uv"],
+    Component: PatternComponent = StatelessPatternComponent,
   ) {
     this.name = name;
     this.fragmentShader = src;
@@ -49,6 +55,8 @@ export class Pattern<T extends ParamMap = ParamMap> {
       },
       ...parameters,
     };
+
+    this.Component = Component;
   }
 
   clone = () => {
@@ -70,6 +78,7 @@ export class Pattern<T extends ParamMap = ParamMap> {
       clonedParams,
     );
     pattern.vertexShader = this.vertexShader;
+    pattern.Component = this.Component;
     return pattern;
   };
 
