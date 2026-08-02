@@ -1,4 +1,4 @@
-import { Button, Heading, VStack } from "@chakra-ui/react";
+import { Button, Heading, Tooltip, VStack } from "@chakra-ui/react";
 import { memo, useState } from "react";
 import { Block } from "@/src/types/Block";
 import { PatternParam } from "@/src/params/shared/patternParam";
@@ -8,26 +8,26 @@ import { randomizeBlockParameters } from "@/src/utils/randomizeBlockParameters";
 
 type ParameterControlsProps = {
   block: Block;
-  // Bumped whenever parameters are randomized (including from a sibling ParameterControls,
-  // e.g. randomizing a pattern also randomizes its applied effects), to remount each
-  // ParameterControl below — they hold local input state that doesn't otherwise react to
-  // param values changing out from under them.
+  // Bumped whenever every block's parameters are randomized at once (see the "Randomize
+  // all" button in PatternPlayground), to remount each ParameterControl below — they hold
+  // local input state that doesn't otherwise react to param values changing out from
+  // under them. Randomizing this block alone bumps a local nonce instead, leaving sibling
+  // blocks' controls untouched.
   randomizeNonce?: number;
-  onRandomize?: () => void;
 };
 
 export const ParameterControls = memo(function ParameterControls({
   block,
   randomizeNonce = 0,
-  onRandomize,
 }: ParameterControlsProps) {
   const [showControls, toggleControls] = useState(true);
+  const [blockRandomizeNonce, setBlockRandomizeNonce] = useState(0);
 
   const isEffect = block.parentBlock !== null;
 
   const onRandomizeClick = () => {
-    randomizeBlockParameters(block);
-    onRandomize?.();
+    randomizeBlockParameters(block, { includeEffectBlocks: false });
+    setBlockRandomizeNonce((n) => n + 1);
   };
 
   return (
@@ -47,18 +47,21 @@ export const ParameterControls = memo(function ParameterControls({
         >
           {showControls ? <BsArrowsCollapse /> : <BsArrowsExpand />}
         </Button>
-        {!isEffect && (
+        <Tooltip
+          label={`Randomize only this ${isEffect ? "effect" : "pattern"}'s parameters`}
+          openDelay={500}
+        >
           <Button size="xs" ml={2} onClick={onRandomizeClick}>
             Randomize
           </Button>
-        )}
+        </Tooltip>
       </Heading>
 
       {showControls &&
         Object.entries<PatternParam>(block.pattern.params).map(
           ([uniformName, patternParam]) => (
             <ParameterControl
-              key={`${uniformName}-${randomizeNonce}`}
+              key={`${uniformName}-${randomizeNonce}-${blockRandomizeNonce}`}
               block={block}
               uniformName={uniformName}
               patternParam={patternParam}
