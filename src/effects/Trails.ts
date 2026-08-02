@@ -10,7 +10,7 @@ export const Trails = () =>
     {
       u_amount: {
         name: "Amount",
-        value: 1,
+        value: 0.7,
         min: 0,
         max: 1,
       },
