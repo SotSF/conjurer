@@ -7,7 +7,7 @@ import { Box, HStack, Text, Tooltip } from "@chakra-ui/react";
 import { action } from "mobx";
 import { observer } from "mobx-react-lite";
 import { MdViewStream } from "react-icons/md";
-import { MouseEvent as ReactMouseEvent, useState } from "react";
+import { Fragment, MouseEvent as ReactMouseEvent, useState } from "react";
 import { hoverHelpProps } from "@/src/utils/hoverHelp";
 
 // params that are machinery rather than user-facing controls
@@ -69,35 +69,40 @@ const gatherSignals = (block: Block) => {
       };
     });
 
-  const effectSignals: Signal[] = block.effectBlocks.flatMap((effectBlock) =>
-    Object.entries(effectBlock.pattern.params)
-      .filter(
-        ([uniformName]) =>
-          !BASE_EXCLUDED.includes(uniformName) && uniformName !== "u_opacity",
-      )
-      .map(([uniformName, patternParam]) => ({
-        block: effectBlock,
-        uniformName,
-        label: `${effectBlock.pattern.name} · ${patternParam.name}`,
-        letter: paramLetter(patternParam.name),
-        authored: isParamAuthored(effectBlock, uniformName),
-        laneOn: effectBlock.lanedParams.has(uniformName),
-        isOpacity: false,
-        fading: false,
-        isPalette: isPalette(patternParam.value),
-        isEffect: true,
-      })),
-  );
+  // one group per effect, in signal order, so each effect's params can sit in
+  // their own pipe-separated cluster
+  const effectGroups: Signal[][] = block.effectBlocks
+    .map((effectBlock) =>
+      Object.entries(effectBlock.pattern.params)
+        .filter(
+          ([uniformName]) =>
+            !BASE_EXCLUDED.includes(uniformName) && uniformName !== "u_opacity",
+        )
+        .map(([uniformName, patternParam]) => ({
+          block: effectBlock,
+          uniformName,
+          label: `${effectBlock.pattern.name} · ${patternParam.name}`,
+          letter: paramLetter(patternParam.name),
+          authored: isParamAuthored(effectBlock, uniformName),
+          laneOn: effectBlock.lanedParams.has(uniformName),
+          isOpacity: false,
+          fading: false,
+          isPalette: isPalette(patternParam.value),
+          isEffect: true,
+        })),
+    )
+    .filter((group) => group.length > 0);
 
-  return { patternSignals, effectSignals };
+  return { patternSignals, effectGroups };
 };
 
 // A glanceable row of per-parameter signals shown beneath a collapsed block's
 // header. Each dot reflects whether its param is authored / at default /
 // crossfading and whether its automation lane is open; clicking a dot toggles
-// that lane. Effect params appear after a divider as diamonds so they never
-// blur into the pattern's own dots. When the block is too narrow to fit the
-// row, it collapses to a summary badge that pops the full row on hover/select.
+// that lane. Each effect's params appear as diamonds in their own divider-
+// separated group, so they never blur into the pattern's own dots or into each
+// other's. When the block is too narrow to fit the row, it collapses to a
+// summary badge that pops the full row on hover/select.
 export const BlockDotRow = observer(function BlockDotRow({
   block,
   isSelected,
@@ -108,14 +113,16 @@ export const BlockDotRow = observer(function BlockDotRow({
   const { uiStore } = useStore();
   const [hovered, setHovered] = useState(false);
 
-  const { patternSignals, effectSignals } = gatherSignals(block);
+  const { patternSignals, effectGroups } = gatherSignals(block);
+  const effectSignals = effectGroups.flat();
   const signalCount = patternSignals.length + effectSignals.length;
   if (signalCount === 0) return null;
 
   const blockWidth = uiStore.timeToX(block.duration);
   const neededWidth =
     signalCount * DOT_FOOTPRINT +
-    (effectSignals.length > 0 ? DOT_FOOTPRINT : 0) +
+    // each effect group is preceded by its own divider
+    effectGroups.length * DOT_FOOTPRINT +
     ROW_PADDING;
   const narrow = blockWidth < neededWidth;
 
@@ -134,7 +141,7 @@ export const BlockDotRow = observer(function BlockDotRow({
           <DotList
             block={block}
             patternSignals={patternSignals}
-            effectSignals={effectSignals}
+            effectGroups={effectGroups}
           />
         </Box>
       </Box>
@@ -192,7 +199,7 @@ export const BlockDotRow = observer(function BlockDotRow({
           <DotList
             block={block}
             patternSignals={patternSignals}
-            effectSignals={effectSignals}
+            effectGroups={effectGroups}
           />
         </Box>
       )}
@@ -203,11 +210,11 @@ export const BlockDotRow = observer(function BlockDotRow({
 const DotList = function DotList({
   block,
   patternSignals,
-  effectSignals,
+  effectGroups,
 }: {
   block: Block;
   patternSignals: Signal[];
-  effectSignals: Signal[];
+  effectGroups: Signal[][];
 }) {
   const { uiStore } = useStore();
   return (
@@ -222,7 +229,7 @@ const DotList = function DotList({
       align="center"
     >
       <Tooltip
-        label="Toggle all lanes"
+        label="Toggle all lanes (⌥ to close all)"
         openDelay={0}
         hasArrow
         placement="top"
@@ -238,40 +245,48 @@ const DotList = function DotList({
           _hover={{ color: "#cbd5e0" }}
           onClick={action((e: ReactMouseEvent) => {
             e.stopPropagation();
-            block.toggleAllLanes();
+            // option/alt-click skips the toggle and always closes everything
+            block.toggleAllLanes(e.altKey);
           })}
           {...hoverHelpProps(
             uiStore,
             "Toggle all lanes",
-            "Arm or disarm automation lanes for every parameter on this block.",
+            "Arm or disarm automation lanes for every parameter on this block. Hold option to close every lane regardless of current state.",
           )}
         >
           <MdViewStream size={13} />
         </Box>
       </Tooltip>
-      <Box
-        flexShrink={0}
-        width="1px"
-        height="14px"
-        bg={DEFAULT_BORDER}
-        mx="1px"
-      />
+      <Divider />
       {patternSignals.map((signal) => (
         <Dot key={signal.uniformName} signal={signal} />
       ))}
-      {effectSignals.length > 0 && (
-        <Box
-          flexShrink={0}
-          width="1px"
-          height="14px"
-          bg={DEFAULT_BORDER}
-          mx="1px"
-        />
-      )}
-      {effectSignals.map((signal) => (
-        <Dot key={`${signal.block.id}:${signal.uniformName}`} signal={signal} />
+      {effectGroups.map((group) => (
+        <Fragment key={group[0].block.id}>
+          <Divider />
+          {group.map((signal) => (
+            <Dot
+              key={`${signal.block.id}:${signal.uniformName}`}
+              signal={signal}
+            />
+          ))}
+        </Fragment>
       ))}
     </HStack>
+  );
+};
+
+// thin vertical rule separating the toggle-all button, the pattern's params,
+// and each effect's params from one another
+const Divider = function Divider() {
+  return (
+    <Box
+      flexShrink={0}
+      width="2px"
+      height="14px"
+      bg={DEFAULT_BORDER}
+      mx="1px"
+    />
   );
 };
 

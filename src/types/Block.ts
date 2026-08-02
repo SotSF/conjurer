@@ -410,14 +410,16 @@ export class Block {
   };
 
   // arms every lanable param across this block and its effect chain, or clears
-  // them all if they are already all armed
-  toggleAllLanes = () => {
+  // them all if they are already all armed. forceClose skips the toggle and
+  // always clears, so a single gesture can close everything.
+  toggleAllLanes = (forceClose = false) => {
     const blocks = [this, ...this.effectBlocks];
     const allArmed = blocks.every((block) =>
       block.lanableParamNames.every((name) => block.lanedParams.has(name)),
     );
+    const arm = forceClose ? false : !allArmed;
     blocks.forEach((block) =>
-      block.setParamLanes(block.lanableParamNames, !allArmed),
+      block.setParamLanes(block.lanableParamNames, arm),
     );
   };
 
