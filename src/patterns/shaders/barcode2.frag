@@ -35,7 +35,13 @@ uniform float u_angle;
 // #define u_angle 0.
 
 // Same fold as the Mirror effect: remap UV into a mirrored kaleidoscope wedge.
+// A count of 1 means no mirroring, so return p untouched rather than folding —
+// the atan/cos/sin round trip below is only an identity in exact arithmetic, and
+// rounding it would shift cell boundaries. The 1.5 cutoff matches the
+// round-to-nearest that picks n, so a count rounding to 1 is off and 2 folds.
 vec2 mirrorFold(vec2 p) {
+    if (u_mirrorCount < 1.5) return p;
+
     float axis = u_angle * PI + 0.5 * PI;
     p = rotate2DCentered(p, -axis);
 
