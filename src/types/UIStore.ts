@@ -38,6 +38,7 @@ export class UIStore {
   showingBeatGridOverlay = false;
   snappingToBeatGrid = false;
   showingOpenExperienceModal = false;
+  showingAutosavesModal = false;
   showingUserPickerModal = false;
   showingSaveExperienceModal = false;
   showingUploadAudioModal = false;

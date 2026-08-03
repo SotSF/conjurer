@@ -14,8 +14,22 @@ export class ExperienceStore {
     this._loadingExperienceName = value;
   }
 
+  /** Last document snapshot that was autosaved or loaded; used for dirty checks. */
+  lastAutosaveSnapshot: string | null = null;
+
   constructor(readonly store: Store) {
     makeAutoObservable(this);
+  }
+
+  /**
+   * Stable key for local autosave history. Prefers experience id when present
+   * so renames keep the same bucket; falls back to name for unsaved drafts.
+   */
+  get autosaveExperienceKey(): string {
+    if (this.store.experienceId != null) {
+      return `id:${this.store.experienceId}`;
+    }
+    return `name:${this.store.experienceName || "untitled"}`;
   }
 
   // Open an experience in the experience editor by experience name
@@ -35,6 +49,7 @@ export class ExperienceStore {
     runInAction(() => {
       this.store.hasSaved = false;
       this.store.experienceLastSavedAt = Date.now();
+      this.captureAutosaveSnapshot();
     });
   };
 
@@ -53,6 +68,7 @@ export class ExperienceStore {
 
     this.store.hasSaved = false;
     this.store.experienceLastSavedAt = 0;
+    this.captureAutosaveSnapshot();
   };
 
   load = async (experienceName: string) => {
@@ -73,6 +89,46 @@ export class ExperienceStore {
     });
     if (!experience) this.loadEmptyExperience();
     else this.loadExperience(experience);
+  };
+
+  /**
+   * Snapshot of document state for autosave comparison / restore. Does not
+   * require authentication (unlike serialize()) so local drafts still work.
+   */
+  getAutosaveSnapshot = (): string => {
+    const experience: Experience = {
+      id: this.store.experienceId,
+      name: this.store.experienceName,
+      user: this.store.userStore.me ??
+        this.store.experienceUser ?? { id: -1, username: "" },
+      song: this.store.audioStore.selectedSong,
+      status: this.store.experienceStatus,
+      version: this.store.experienceVersion,
+      data: { layers: this.store.layers.map((l) => l.serialize()) },
+      thumbnailURL: this.store.experienceThumbnailURL,
+    };
+    return JSON.stringify(experience, (_, val) =>
+      // round numbers to 6 decimal places, which saves space and is probably enough precision
+      val?.toFixed ? Number(val.toFixed(6)) : val,
+    );
+  };
+
+  captureAutosaveSnapshot = () => {
+    this.lastAutosaveSnapshot = this.getAutosaveSnapshot();
+  };
+
+  isDirtyRelativeToAutosaveSnapshot = (): boolean => {
+    if (this.lastAutosaveSnapshot == null) return true;
+    return this.getAutosaveSnapshot() !== this.lastAutosaveSnapshot;
+  };
+
+  loadFromAutosaveSnapshot = (snapshot: string) => {
+    const experience = JSON.parse(snapshot) as Experience;
+    this.store.deserialize(experience);
+    runInAction(() => {
+      this.store.hasSaved = false;
+      this.lastAutosaveSnapshot = snapshot;
+    });
   };
 
   stringifyExperience = (pretty: boolean = false): string =>

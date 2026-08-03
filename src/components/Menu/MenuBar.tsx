@@ -29,6 +29,7 @@ import { TbArrowBigRightLines } from "react-icons/tb";
 import { useStore } from "@/src/types/StoreContext";
 import { OpenExperienceModal } from "@/src/components/Menu/OpenExperienceModal";
 import { SaveExperienceModal } from "@/src/components/Menu/SaveExperienceModal";
+import { AutosavesModal } from "@/src/components/Menu/AutosavesModal";
 import { KeyboardShortcuts } from "@/src/components/KeyboardShortcuts";
 import { useSaveExperience } from "@/src/hooks/experience";
 import { DisplayMode } from "@/src/types/UIStore";
@@ -37,6 +38,7 @@ import { LatencyModal } from "@/src/components/LatencyModal/LatencyModal";
 import { ExperienceThumbnail } from "@/src/components/ExperienceThumbnail";
 import { ExperienceStatusToggle } from "@/src/components/ExperienceStatusToggle";
 import { useRouter } from "next/router";
+import { MdHistory } from "react-icons/md";
 
 export const MenuBar = observer(function MenuBar() {
   const store = useStore();
@@ -81,6 +83,7 @@ export const MenuBar = observer(function MenuBar() {
         </ModalContent>
       </Modal>
       <LatencyModal />
+      {store.context === "experienceEditor" && <AutosavesModal />}
       <HStack>
         {store.context === "experienceEditor" && store.canEditExperience ? (
           <ExperienceThumbnail
@@ -203,6 +206,15 @@ export const MenuBar = observer(function MenuBar() {
                         onClick={uiStore.attemptShowSaveExperienceModal}
                       >
                         Save as...
+                      </MenuItem>
+                      <MenuDivider />
+                      <MenuItem
+                        icon={<MdHistory size={17} />}
+                        onClick={action(
+                          () => (uiStore.showingAutosavesModal = true),
+                        )}
+                      >
+                        Autosaves...
                       </MenuItem>
                     </>
                   )}

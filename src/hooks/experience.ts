@@ -4,6 +4,7 @@ import { trpc } from "@/src/utils/trpc";
 import { useToast } from "@chakra-ui/react";
 import { runInAction } from "mobx";
 import { useRouter } from "next/router";
+import { migrateAutosaves } from "@/src/utils/autosavePersistence";
 
 export const useSaveExperience = () => {
   const store = useStore();
@@ -38,6 +39,8 @@ export const useSaveExperience = () => {
       return;
     }
 
+    const previousAutosaveKey = store.experienceStore.autosaveExperienceKey;
+
     const savePayload = {
       usingLocalData,
       ...store.serialize(),
@@ -68,7 +71,17 @@ export const useSaveExperience = () => {
       store.experienceLastSavedAt = Date.now();
       store.experienceId = savedId;
       store.experienceName = savePayload.name;
+      store.experienceStore.captureAutosaveSnapshot();
     });
+
+    const nextAutosaveKey = store.experienceStore.autosaveExperienceKey;
+    if (previousAutosaveKey !== nextAutosaveKey) {
+      void migrateAutosaves(previousAutosaveKey, nextAutosaveKey).catch(
+        (error) => {
+          console.error("Failed to migrate autosaves", error);
+        },
+      );
+    }
 
     if (
       store.context === "experienceEditor" &&

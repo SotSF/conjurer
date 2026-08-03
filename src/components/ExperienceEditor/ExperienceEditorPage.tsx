@@ -10,6 +10,7 @@ import { PatternDrawer } from "@/src/components/PatternDrawer";
 import { useRouter } from "next/router";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { LoadingOverlay } from "@/src/components/LoadingOverlay";
+import { useExperienceAutosave } from "@/src/hooks/useExperienceAutosave";
 
 export const ExperienceEditorPage = observer(function ExperienceEditorPage() {
   const store = useStore();
@@ -17,6 +18,7 @@ export const ExperienceEditorPage = observer(function ExperienceEditorPage() {
   const { loadingExperienceName } = experienceStore;
 
   const router = useRouter();
+  useExperienceAutosave();
 
   // Initialize the store with the experience name from the URL
   useEffect(() => {
