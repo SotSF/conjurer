@@ -15,7 +15,6 @@ import { RadialRepeat } from "@/src/effects/RadialRepeat";
 import { Twist } from "@/src/effects/Twist";
 import { Breathe } from "@/src/effects/Breathe";
 import { InvertColor } from "@/src/effects/InvertColor";
-import { HueSaturate } from "@/src/effects/HueSaturate";
 import { ShapeMask } from "@/src/effects/ShapeMask";
 import { Threshold } from "@/src/effects/Threshold";
 import { ColorRemap } from "@/src/effects/ColorRemap";
@@ -30,7 +29,6 @@ const effectFactories: Array<() => Pattern> = [
   ColorTint,
   ColorRemap,
   InvertColor,
-  HueSaturate,
   CartesianProjection,
   Rotate,
   Twist,
