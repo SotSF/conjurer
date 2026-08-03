@@ -303,6 +303,7 @@ export class LayerV1 implements Layer {
   blockHeights = new Map<string, number>();
 
   reportBlockHeight = (block: Block, heightPx: number) => {
+    if (this.blockHeights.get(block.id) === heightPx) return;
     this.blockHeights.set(block.id, heightPx);
     let maxHeight = 0;
     for (const height of this.blockHeights.values())

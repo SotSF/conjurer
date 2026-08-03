@@ -1,7 +1,7 @@
 import { Block } from "@/src/types/Block";
 import { useStore } from "@/src/types/StoreContext";
 import { TimelineBlockBound } from "@/src/components/TimelineBlockStack/TimelineBlockBound";
-import { Card } from "@chakra-ui/react";
+import { Box, Card } from "@chakra-ui/react";
 import { action, computed } from "mobx";
 import { observer } from "mobx-react-lite";
 import {
@@ -23,6 +23,12 @@ import { BlockAutomationLanes } from "@/src/components/TimelineBlockStack/BlockA
 import { BlockOpacityEdgeLine } from "@/src/components/TimelineBlockStack/BlockOpacityEdgeLine";
 import { hoverHelpProps } from "@/src/utils/hoverHelp";
 
+// Narrower than this (in CSS pixels) a block's automation lanes can't be read or
+// interacted with, so they aren't rendered. See the render site below. Tuned so
+// lanes still appear at moderate zoom on short (~1s) blocks, and drop out only
+// when zoomed far enough out that a lane would be a few pixels of noise.
+const MIN_WIDTH_FOR_AUTOMATION_LANES = 64;
+
 type Props = {
   patternBlock: Block;
 };
@@ -38,7 +44,7 @@ export const TimelineBlockStack = observer(function TimelineBlockStack({
     if (!dragNodeRef.current) return;
 
     // Anytime the TimelineBlockStack is resized,
-    new ResizeObserver(
+    const observer = new ResizeObserver(
       action(() => {
         // report the block's height so the layer can size its lanes
         patternBlock.layer?.reportBlockHeight(
@@ -51,7 +57,12 @@ export const TimelineBlockStack = observer(function TimelineBlockStack({
           dragNodeRef.current?.clientWidth ?? 0,
         );
       }),
-    ).observe(dragNodeRef.current);
+    );
+    observer.observe(dragNodeRef.current);
+    // Without this the observer outlives the effect: the deps include
+    // patternBlock.layer, so a block moved between layers left its old observer
+    // attached and firing forever (328 observers existed for 154 blocks).
+    return () => observer.disconnect();
   }, [dragNodeRef, patternBlock.layer, patternBlock]);
 
   const lastMouseDown = useRef(0);
@@ -116,6 +127,61 @@ export const TimelineBlockStack = observer(function TimelineBlockStack({
     [store, patternBlock, selectedBlocksOrVariations],
   );
 
+  // block width in CSS pixels at the current zoom, for level-of-detail choices
+  const renderedWidth = uiStore.timeToX(patternBlock.duration);
+  const lanesNearView = uiStore.isTimeSpanNearView(
+    patternBlock.startTime,
+    patternBlock.endTime,
+  );
+
+  const hasArmedLanes =
+    patternBlock.lanedParams.size > 0 ||
+    patternBlock.effectBlocks.some((effect) => effect.lanedParams.size > 0);
+  // Level of detail on two axes — see the render site below for why each matters.
+  const showLaneContents =
+    renderedWidth >= MIN_WIDTH_FOR_AUTOMATION_LANES && lanesNearView;
+
+  // Height of the automation-lane section, remembered from the last time it was
+  // actually rendered, so the space can be held open when its contents are not.
+  //
+  // A lane's height doesn't depend on the zoom — it's a name row, a region bar
+  // and a fixed-height body, all vertical constants — so a single measurement
+  // stays valid for as long as the same params are armed. That's what makes
+  // remembering it viable, and it avoids having to model each body type's height
+  // from constants that live inside those components.
+  const [reservedLanesHeight, setReservedLanesHeight] = useState(0);
+  const lanesObserver = useRef<ResizeObserver | null>(null);
+  // A callback ref rather than a useEffect keyed on the render conditions: the
+  // section appears when EITHER a lane gets armed or the contents become visible
+  // again, and an effect that misses one of those never attaches its observer at
+  // all (that bug left the reserved height stuck at 0). This runs whenever the
+  // node itself appears or disappears, which is exactly the condition that
+  // matters.
+  const measureLanes = useCallback((node: HTMLDivElement | null) => {
+    lanesObserver.current?.disconnect();
+    lanesObserver.current = null;
+    if (!node) return;
+    const observer = new ResizeObserver(() => {
+      const measured = node.offsetHeight;
+      // guard the update: without it this re-render re-fires the observer
+      if (measured > 0)
+        setReservedLanesHeight((current) =>
+          current === measured ? current : measured,
+        );
+    });
+    observer.observe(node);
+    lanesObserver.current = observer;
+  }, []);
+
+  // The block's zoom-dependent geometry. Passing these through Chakra props
+  // makes emotion serialize and inject a NEW CSS class for every card on every
+  // zoom change; a plain inline style bypasses that entirely.
+  const geometry = {
+    top: `${patternBlock.layer?.blockTopOffset(patternBlock) ?? 0}px`,
+    left: uiStore.timeToXPixels(patternBlock.startTime),
+    width: uiStore.timeToXPixels(patternBlock.duration),
+  };
+
   // cache this value, see https://mobx.js.org/computeds-with-args.html
   const isSelected = computed(
     () =>
@@ -143,9 +209,10 @@ export const TimelineBlockStack = observer(function TimelineBlockStack({
       <Card
         ref={dragNodeRef}
         position="absolute"
-        top={`${patternBlock.layer?.blockTopOffset(patternBlock) ?? 0}px`}
-        left={uiStore.timeToXPixels(patternBlock.startTime)}
-        width={uiStore.timeToXPixels(patternBlock.duration)}
+        // NB: a plain inline style, deliberately not Chakra props — see the
+        // comment where `geometry` is built. react-draggable merges this with
+        // its own transform, so both survive.
+        style={geometry}
         border="solid"
         borderColor={isSelected ? "blue.500" : "white"}
         borderWidth={3}
@@ -153,6 +220,13 @@ export const TimelineBlockStack = observer(function TimelineBlockStack({
         // allow the automation-lane gutter labels and the narrow-block dot-row
         // popover to render just outside the block's own width
         overflow="visible"
+        // react-draggable's transform gives every block its own stacking context,
+        // so the narrow-block dot-row popover's z-index can only rank within its
+        // own card — it can't rise above a sibling block unless the CARD itself
+        // does. Bump the card above default-stacked siblings while hovered or
+        // selected (the same condition that expands the popover).
+        zIndex={isSelected ? 5 : undefined}
+        _hover={{ zIndex: 5 }}
         onClick={(e: ReactMouseEvent) => e.stopPropagation()}
         {...hoverHelpProps(
           uiStore,
@@ -175,7 +249,31 @@ export const TimelineBlockStack = observer(function TimelineBlockStack({
             and the automation lanes for armed params */}
         <BlockDotRow block={patternBlock} isSelected={isSelected} />
         <BlockOpacityEdgeLine block={patternBlock} />
-        <BlockAutomationLanes block={patternBlock} />
+        {/* Armed lanes always take up their space; only their CONTENTS come and
+            go. Reserving the height means neither zooming nor scrolling ever
+            changes the block's height, so the timeline doesn't jump vertically
+            while you do either — arming a lane is an explicit choice and zoom
+            shouldn't quietly undo it.
+
+            The contents are skipped on two axes:
+            - Width: below a few dozen pixels a lane's curve, region tabs and
+              labels are neither readable nor clickable, but they still cost a
+              full render every time the zoom changes. Zoomed far out that is
+              every block in the experience at once.
+            - Proximity to the view: without this, crossing the width threshold
+              while zooming renders every armed lane in the experience in a
+              single frame — measured at ~30,000 nodes and a 23 SECOND stall on
+              an experience with 556 armed lanes. Bounding it to roughly what's
+              on screen keeps that cost proportional to the viewport instead of
+              to the whole timeline. */}
+        {hasArmedLanes &&
+          (showLaneContents ? (
+            <Box ref={measureLanes} width="100%">
+              <BlockAutomationLanes block={patternBlock} />
+            </Box>
+          ) : (
+            <Box width="100%" height={`${reservedLanesHeight}px`} />
+          ))}
       </Card>
     </Draggable>
   );

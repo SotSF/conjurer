@@ -3,6 +3,7 @@ import { Box } from "@chakra-ui/react";
 import { useStore } from "@/src/types/StoreContext";
 import { useState } from "react";
 import { useWheelZooming } from "@/src/hooks/wheelZooming";
+import { useTimelineViewportTracking } from "@/src/hooks/timelineViewport";
 import { TimerAndWaveform } from "@/src/components/Timeline/TimerAndWaveform";
 import { TimelineLayerStack } from "@/src/components/Timeline/TimelineLayerStack";
 
@@ -11,6 +12,7 @@ export const Timeline = observer(function Timeline() {
   const [timelineEl, setTimelineEl] = useState<HTMLDivElement | null>(null);
 
   useWheelZooming(timelineEl);
+  useTimelineViewportTracking(timelineEl);
 
   return (
     <Box

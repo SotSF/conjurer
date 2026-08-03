@@ -1,6 +1,12 @@
 /** Label/tick density for Wavesurfer's TimelinePlugin, tuned to pixels-per-second. */
 export function getTimelineLabelIntervals(pixelsPerSecond: number) {
   // Aim for roughly readable spacing (~40–100px between notches)
+  if (pixelsPerSecond >= 400)
+    return {
+      timeInterval: 0.1,
+      secondaryLabelInterval: 0.5,
+      primaryLabelInterval: 1,
+    };
   if (pixelsPerSecond >= 100)
     return {
       timeInterval: 0.25,

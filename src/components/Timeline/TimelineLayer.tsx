@@ -35,6 +35,11 @@ export const TimelineLayer = observer(function TimelineLayer({
   const contentWidth = uiStore.timeToXPixels(MAX_TIME);
   // when collapsed the row shrinks to its header and the blocks are hidden from
   // the timeline (the layer still renders to the canopy — that's `visible`)
+  // Every block stays mounted. Unmounting off-screen blocks was tried and
+  // reverted: it made zoom only ~14% cheaper on a dense viewport, but scrolling
+  // then had to build blocks on the scroll frame — a sustained scroll into dense
+  // content went from a 183ms worst frame to 5,887ms. Blocks that are mounted
+  // but off screen cost nothing to scroll past, because nothing re-renders.
   const blockStacks = collapsed
     ? null
     : layer
