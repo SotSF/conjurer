@@ -50,6 +50,7 @@ export class Block {
   // when true, the block cannot be dragged in time (prevents accidental moves)
   locked = false;
 
+  headerRepetitions: number = 1; // number of times to repeat the headers in this block
 
   // UI state: whether the timeline shows this block's parameters/effects or
   // just its header. Expanded by default; the header caret can collapse it.
@@ -641,6 +642,16 @@ export class Block {
 
     // create a new array so that mobx can detect the change
     this.parameterVariations[uniformName] = [...variations];
+  };
+
+  recomputeHeaderRepetitions = (width: number) => {
+    // repeat the param-name header about every 280px so wide blocks stay labeled
+    // across their span (left-aligned within each segment)
+    this.headerRepetitions = Math.floor(width / 400) + 1;
+
+    this.effectBlocks.forEach((effect) =>
+      effect.recomputeHeaderRepetitions(width),
+    );
   };
 
   reorderEffectBlock = (block: Block, delta: number) => {

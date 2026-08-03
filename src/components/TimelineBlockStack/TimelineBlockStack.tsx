@@ -43,15 +43,20 @@ export const TimelineBlockStack = observer(function TimelineBlockStack({
   useEffect(() => {
     if (!dragNodeRef.current) return;
 
-    // Anytime the TimelineBlockStack is resized, report the block's height so
-    // the layer can size its lanes.
+    // Anytime the TimelineBlockStack is resized,
     const observer = new ResizeObserver(
-      action(() =>
+      action(() => {
+        // report the block's height so the layer can size its lanes
         patternBlock.layer?.reportBlockHeight(
           patternBlock,
           dragNodeRef.current?.offsetHeight ?? 0,
-        ),
-      ),
+        );
+
+        // recompute the number of header repetitions
+        patternBlock.recomputeHeaderRepetitions(
+          dragNodeRef.current?.clientWidth ?? 0,
+        );
+      }),
     );
     observer.observe(dragNodeRef.current);
     // Without this the observer outlives the effect: the deps include

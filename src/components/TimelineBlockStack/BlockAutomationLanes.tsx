@@ -333,50 +333,41 @@ const LaneNameHeader = observer(function LaneNameHeader({
       )}
     >
       <HStack flex="1" minW={0} spacing={0} align="center">
-        {/* A single shrink-to-fit label that stays pinned to the left edge of
-            the view for as long as any part of the block is on screen.
-
-            Two things had to be true for that to work, and neither was:
-
-            1. It must be able to SLIDE. A sticky box can only be offset within
-               the slack of its containing block, so a label that fills its
-               container cannot move at all. This used to render
-               `block.headerRepetitions` equal-width `flexGrow` segments with
-               only the first one sticky, which gave the label (N-1)/N of the
-               block to slide through and then pushed it out — it clipped behind
-               the layer-header column and vanished while the block was still in
-               view. Sizing to content instead gives it the whole block.
-
-            2. There must be only one of it. The repeat count was proportional
-               to pixel width and therefore to zoom: a 22s block with 25 open
-               lanes rendered 75 header instances at 37px/s and 500 at 347px/s,
-               a big part of why the timeline's DOM grew as you zoomed IN. */}
-        <HStack
-          flexShrink={0}
-          spacing={1.5}
-          align="baseline"
-          {...(stickyLeft
-            ? {
-                position: "sticky" as const,
-                left: stickyLeft,
-                zIndex: 1,
-                bg: headerBg,
-              }
-            : {})}
-        >
-          <Text
-            fontSize="12px"
-            fontWeight={700}
-            color={nameColor}
-            whiteSpace="nowrap"
-            letterSpacing="0.01em"
-          >
-            {label}
-          </Text>
-          {selected && (
-            <LaneValueReadout block={block} uniformName={uniformName} />
-          )}
-        </HStack>
+        {/* equal-width segments so repeats are spaced across the block; the
+            first stays sticky (+ value when selected) while scrolling */}
+        {Array.from({ length: embedded ? 1 : block.headerRepetitions }).map(
+          (_, i) => (
+            <HStack
+              key={i}
+              flexGrow={1}
+              minW={0}
+              spacing={1.5}
+              align="baseline"
+              justify="flex-start"
+              {...(i === 0 && stickyLeft
+                ? {
+                    position: "sticky" as const,
+                    left: stickyLeft,
+                    zIndex: 1,
+                    bg: headerBg,
+                  }
+                : {})}
+            >
+              <Text
+                fontSize="12px"
+                fontWeight={700}
+                color={nameColor}
+                whiteSpace="nowrap"
+                letterSpacing="0.01em"
+              >
+                {label}
+              </Text>
+              {selected && i === 0 && (
+                <LaneValueReadout block={block} uniformName={uniformName} />
+              )}
+            </HStack>
+          ),
+        )}
       </HStack>
       <HStack
         position="sticky"
