@@ -8,6 +8,7 @@ varying vec2 v_uv;
 uniform float u_time;
 
 uniform float u_timeFactor;
+uniform float u_timeOffset;
 uniform float u_colorShift;
 uniform float u_seed;
 uniform float u_steps;
@@ -164,7 +165,7 @@ float cnoise(vec4 P) {
 void main() {
   vec2 uv = v_uv;
   vec2 pos = vec2(uv * u_period);
-  float t = u_time * u_timeFactor;
+  float t = u_time * u_timeFactor + u_timeOffset;
 
   float n = cnoise(vec4(pos, t, u_seed));
   vec3 col = n > 0. ? palette(n + t * u_colorShift, u_palette) : vec3(0.);

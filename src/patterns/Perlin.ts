@@ -13,6 +13,12 @@ export const Perlin = () =>
       name: "Time Factor",
       value: 0.5,
     },
+    u_timeOffset: {
+      name: "Time Offset",
+      value: 0,
+      min: -5,
+      max: 5,
+    },
     u_colorShift: {
       name: "Color Shift",
       value: 0.5,
