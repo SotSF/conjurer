@@ -1,7 +1,7 @@
 import { Block } from "@/src/types/Block";
 import { useStore } from "@/src/types/StoreContext";
 import { TimelineBlockBound } from "@/src/components/TimelineBlockStack/TimelineBlockBound";
-import { Card } from "@chakra-ui/react";
+import { Box, Card } from "@chakra-ui/react";
 import { action, computed } from "mobx";
 import { observer } from "mobx-react-lite";
 import {
@@ -134,6 +134,45 @@ export const TimelineBlockStack = observer(function TimelineBlockStack({
     patternBlock.endTime,
   );
 
+  const hasArmedLanes =
+    patternBlock.lanedParams.size > 0 ||
+    patternBlock.effectBlocks.some((effect) => effect.lanedParams.size > 0);
+  // Level of detail on two axes — see the render site below for why each matters.
+  const showLaneContents =
+    renderedWidth >= MIN_WIDTH_FOR_AUTOMATION_LANES && lanesNearView;
+
+  // Height of the automation-lane section, remembered from the last time it was
+  // actually rendered, so the space can be held open when its contents are not.
+  //
+  // A lane's height doesn't depend on the zoom — it's a name row, a region bar
+  // and a fixed-height body, all vertical constants — so a single measurement
+  // stays valid for as long as the same params are armed. That's what makes
+  // remembering it viable, and it avoids having to model each body type's height
+  // from constants that live inside those components.
+  const [reservedLanesHeight, setReservedLanesHeight] = useState(0);
+  const lanesObserver = useRef<ResizeObserver | null>(null);
+  // A callback ref rather than a useEffect keyed on the render conditions: the
+  // section appears when EITHER a lane gets armed or the contents become visible
+  // again, and an effect that misses one of those never attaches its observer at
+  // all (that bug left the reserved height stuck at 0). This runs whenever the
+  // node itself appears or disappears, which is exactly the condition that
+  // matters.
+  const measureLanes = useCallback((node: HTMLDivElement | null) => {
+    lanesObserver.current?.disconnect();
+    lanesObserver.current = null;
+    if (!node) return;
+    const observer = new ResizeObserver(() => {
+      const measured = node.offsetHeight;
+      // guard the update: without it this re-render re-fires the observer
+      if (measured > 0)
+        setReservedLanesHeight((current) =>
+          current === measured ? current : measured,
+        );
+    });
+    observer.observe(node);
+    lanesObserver.current = observer;
+  }, []);
+
   // The block's zoom-dependent geometry. Passing these through Chakra props
   // makes emotion serialize and inject a NEW CSS class for every card on every
   // zoom change; a plain inline style bypasses that entirely.
@@ -210,20 +249,31 @@ export const TimelineBlockStack = observer(function TimelineBlockStack({
             and the automation lanes for armed params */}
         <BlockDotRow block={patternBlock} isSelected={isSelected} />
         <BlockOpacityEdgeLine block={patternBlock} />
-        {/* Level of detail, on two axes:
+        {/* Armed lanes always take up their space; only their CONTENTS come and
+            go. Reserving the height means neither zooming nor scrolling ever
+            changes the block's height, so the timeline doesn't jump vertically
+            while you do either — arming a lane is an explicit choice and zoom
+            shouldn't quietly undo it.
+
+            The contents are skipped on two axes:
             - Width: below a few dozen pixels a lane's curve, region tabs and
               labels are neither readable nor clickable, but they still cost a
               full render every time the zoom changes. Zoomed far out that is
               every block in the experience at once.
             - Proximity to the view: without this, crossing the width threshold
-              while zooming mounts every armed lane in the experience in a single
-              frame — measured at ~30,000 nodes and a 23 SECOND stall on an
-              experience with 556 armed lanes. Bounding it to roughly what's on
-              screen keeps the mount cost proportional to the viewport instead of
+              while zooming renders every armed lane in the experience in a
+              single frame — measured at ~30,000 nodes and a 23 SECOND stall on
+              an experience with 556 armed lanes. Bounding it to roughly what's
+              on screen keeps that cost proportional to the viewport instead of
               to the whole timeline. */}
-        {renderedWidth >= MIN_WIDTH_FOR_AUTOMATION_LANES && lanesNearView && (
-          <BlockAutomationLanes block={patternBlock} />
-        )}
+        {hasArmedLanes &&
+          (showLaneContents ? (
+            <Box ref={measureLanes} width="100%">
+              <BlockAutomationLanes block={patternBlock} />
+            </Box>
+          ) : (
+            <Box width="100%" height={`${reservedLanesHeight}px`} />
+          ))}
       </Card>
     </Draggable>
   );
