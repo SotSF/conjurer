@@ -19,6 +19,7 @@ import { ShapeMask } from "@/src/effects/ShapeMask";
 import { Threshold } from "@/src/effects/Threshold";
 import { ColorRemap } from "@/src/effects/ColorRemap";
 import { Trails } from "@/src/effects/Trails";
+import { VideoFeedback } from "@/src/effects/VideoFeedback";
 
 const effectFactories: Array<() => Pattern> = [
   ShapeMask,
@@ -40,6 +41,7 @@ const effectFactories: Array<() => Pattern> = [
   Mirror,
   RadialRepeat,
   Trails,
+  VideoFeedback,
 ];
 
 // Deprecated effects can no longer be added, but remain registered so that
