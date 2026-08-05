@@ -62,8 +62,16 @@ export const ParameterVariations = observer(function ParameterVariations({
   const spanDuration = laneDuration ?? block.duration;
   const width = scale.timeToX(spanDuration);
   const variations = block.parameterVariations[uniformName] ?? [];
+  const param = block.pattern.params[uniformName];
 
-  const domain: [number, number] = [0, 1];
+  // Baseline the vertical axis on the param's declared min/max (e.g. Count
+  // 1…20). Fall back to [0, 1] when the param has no bounds — same default the
+  // rest of the editor uses for unit-range values. Then expand to fit any
+  // authored node extents that sit outside those bounds.
+  const domain: [number, number] = [
+    typeof param?.min === "number" ? param.min : 0,
+    typeof param?.max === "number" ? param.max : 1,
+  ];
   for (const variation of variations) {
     const [min, max] = variation.computeDomain();
     domain[0] = Math.min(domain[0], min);
@@ -71,7 +79,7 @@ export const ParameterVariations = observer(function ParameterVariations({
   }
   // A Curve region may pin an explicit value range for the lane's vertical axis
   // (Min/Max control). When present it governs the axis — don't force-include the
-  // default [0,1] — and lets nodes/handles be dragged into the headroom.
+  // param/default baseline — and lets nodes/handles be dragged into the headroom.
   const rangedCurves = variations.filter(
     (v): v is CurveVariation =>
       v instanceof CurveVariation && v.hasExplicitRange,
