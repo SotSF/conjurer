@@ -29,7 +29,7 @@ export const RegionBoundary = observer(function RegionBoundary({
   uniformName,
   index,
 }: Props) {
-  const { uiStore, beatMapStore } = useStore();
+  const { uiStore, beatGridStore } = useStore();
   const scale = useLaneTimeScale();
   const x = scale.timeToX(boundaryTime(block, uniformName, index));
 
@@ -48,13 +48,12 @@ export const RegionBoundary = observer(function RegionBoundary({
     document.head.appendChild(cursorStyle);
 
     const move = (ev: PointerEvent) => {
-      let target = origBoundary + scale.xToTime(ev.clientX - startX);
-      if (!ev.ctrlKey && uiStore.snappingToBeatGrid) {
-        const nearest = beatMapStore.beatMap.nearestBeatTime(
-          block.startTime + target,
-        );
-        target = nearest - block.startTime;
-      }
+      const dragged = origBoundary + scale.xToTime(ev.clientX - startX);
+      const target =
+        beatGridStore.snapTime(block.startTime + dragged, {
+          freehand: ev.ctrlKey,
+          pixelsPerSecond: scale.timeToX(1),
+        }) - block.startTime;
       runInAction(() => {
         const cur = block.parameterVariations[uniformName];
         if (!cur) return;
@@ -74,6 +73,8 @@ export const RegionBoundary = observer(function RegionBoundary({
     window.addEventListener("pointerup", up);
   };
 
+  // One shared hit target per seam (not a per-region end handle). Sits above
+  // the lane graphs so curve endpoint nodes at the same x don't steal the drag.
   return (
     <Box
       position="absolute"
@@ -81,9 +82,10 @@ export const RegionBoundary = observer(function RegionBoundary({
       bottom={0}
       left={`${x - 3}px`}
       width="6px"
-      zIndex={4}
+      zIndex={5}
       cursor="col-resize"
-      role="group"
+      role="separator"
+      aria-orientation="vertical"
       onPointerDown={onPointerDown}
       _hover={{ "& > div": { opacity: 1, background: "#8fcbf5" } }}
       {...hoverHelpProps(
@@ -102,6 +104,7 @@ export const RegionBoundary = observer(function RegionBoundary({
         background="#4a5568"
         opacity={0.55}
         transition="opacity 0.12s, background 0.12s"
+        pointerEvents="none"
       />
     </Box>
   );

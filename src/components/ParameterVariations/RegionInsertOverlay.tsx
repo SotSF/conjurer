@@ -39,7 +39,7 @@ export const RegionInsertOverlay = observer(function RegionInsertOverlay({
   onInserted,
 }: Props) {
   const store = useStore();
-  const { uiStore, beatMapStore } = store;
+  const { beatGridStore } = store;
   const scale = useLaneTimeScale();
   const ref = useRef<HTMLDivElement>(null);
   const [span, setSpan] = useState<{ x0: number; x1: number } | null>(null);
@@ -48,10 +48,11 @@ export const RegionInsertOverlay = observer(function RegionInsertOverlay({
   const param = block.pattern.params[uniformName];
   const defaultWidthSec = Math.min(1, laneDuration / 4);
 
-  const snap = (t: number, ctrl: boolean) => {
-    if (ctrl || !uiStore.snappingToBeatGrid) return t;
-    return beatMapStore.beatMap.nearestBeatTime(block.startTime + t) - block.startTime;
-  };
+  const snap = (t: number, ctrl: boolean) =>
+    beatGridStore.snapTime(block.startTime + t, {
+      freehand: ctrl,
+      pixelsPerSecond: scale.timeToX(1),
+    }) - block.startTime;
 
   const makeRegion = (duration: number, startT: number) =>
     makeRegionOfType(
