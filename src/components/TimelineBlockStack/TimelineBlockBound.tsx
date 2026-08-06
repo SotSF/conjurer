@@ -17,6 +17,7 @@ export const TimelineBlockBound = observer(function TimelineBlockBound({
 }: TimelineBlockProps) {
   const store = useStore();
   const { uiStore, beatGridStore } = store;
+  const locked = block.locked;
 
   const dragNodeRef = useRef(null);
   const [dragging, setDragging] = useState(false);
@@ -28,6 +29,7 @@ export const TimelineBlockBound = observer(function TimelineBlockBound({
   );
 
   const changeBound = (delta: number) => {
+    if (locked) return;
     if (bound === "left") block.layer?.resizeBlockLeftBound(block, delta);
     else if (bound === "right")
       block.layer?.resizeBlockRightBound(block, delta);
@@ -45,6 +47,7 @@ export const TimelineBlockBound = observer(function TimelineBlockBound({
     <Draggable
       nodeRef={dragNodeRef}
       axis="x"
+      disabled={locked}
       onStart={() => setDragging(true)}
       onDrag={handleDrag}
       onStop={handleStop}
@@ -58,7 +61,7 @@ export const TimelineBlockBound = observer(function TimelineBlockBound({
         zIndex={2}
         width="5px"
         height="100%"
-        cursor="col-resize"
+        cursor={locked ? "default" : "col-resize"}
         borderRadius="5px"
         bgColor={dragging ? "gray.100" : "none"}
         onDoubleClick={() => {

@@ -227,7 +227,7 @@ export const TimelineBlockStack = observer(function TimelineBlockStack({
           uiStore,
           blockHeaderLabel(patternBlock),
           locked
-            ? "Pattern block — locked in time. Unlock via the lock icon to drag."
+            ? "Pattern block — locked in time. Unlock via the lock icon to drag or resize."
             : "Pattern block — drag to move in time. Click to select; Shift+click to multi-select.",
         )}
       >
