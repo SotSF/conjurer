@@ -42,7 +42,9 @@ yarn-error.log*
 output.png
 public/cloud-assets
 local.db
+local.db.incoming
 local.sql
+
 
 # robots
 .claude/worktrees

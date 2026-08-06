@@ -53,7 +53,7 @@ TURSO_AUTH_TOKEN=******************************
 ```
 
 5. Run the app normally (`yarn dev`) and now you can click "using local data" to toggle to prod data.
-6. (Optionally) replace the local database with a copy of the prod database by running `yarn db:prod:download`.
+6. (Optionally) replace the local database with a copy of the prod database by running `yarn downloadProdDatabase`.
 
 ### General info / tips
 
@@ -109,9 +109,17 @@ graph
 
 ### Scripts
 
-#### `yarn db:prod:download`
+#### `yarn downloadProdDatabase`
 
-Replaces the local database (`local.db`) with all the data from the production Turso database.
+Replaces the local database (`local.db`) with all the data from the production Turso database, then prints a short data summary.
+
+#### `yarn downloadProdAudio`
+
+Downloads all cloud audio into `public/cloud-assets/audio`, skipping files already present locally.
+
+#### `yarn downloadProdDatabaseAndAudio`
+
+Runs `downloadProdDatabase` and `downloadProdAudio`, then verifies every song in the local DB has a matching audio file under `public/cloud-assets/audio`.
 
 #### `yarn generatePattern PatternName`
 
