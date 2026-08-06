@@ -16,7 +16,7 @@ export const TimelineBlockBound = observer(function TimelineBlockBound({
   bound,
 }: TimelineBlockProps) {
   const store = useStore();
-  const { uiStore, beatMapStore } = store;
+  const { uiStore, beatGridStore } = store;
 
   const dragNodeRef = useRef(null);
   const [dragging, setDragging] = useState(false);
@@ -33,16 +33,10 @@ export const TimelineBlockBound = observer(function TimelineBlockBound({
       block.layer?.resizeBlockRightBound(block, delta);
   };
   const handleStop = action(() => {
-    let deltaTime = uiStore.xToTime(position.x);
-    if (uiStore.snappingToBeatGrid) {
-      const originalBoundTime =
-        bound === "left" ? block.startTime : block.endTime;
-      const hoveredTime = uiStore.xToTime(position.x) + originalBoundTime;
-      const nearestBeatTime = beatMapStore.beatMap.nearestBeatTime(hoveredTime);
-      deltaTime = nearestBeatTime - originalBoundTime;
-    }
-
-    changeBound(deltaTime);
+    const boundTime = bound === "left" ? block.startTime : block.endTime;
+    changeBound(
+      beatGridStore.snapDelta(boundTime, uiStore.xToTime(position.x)),
+    );
     setPosition({ x: 0, y: 0 });
     setDragging(false);
   });

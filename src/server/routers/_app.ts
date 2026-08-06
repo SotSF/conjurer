@@ -1,6 +1,5 @@
 import { experienceRouter } from "@/src/server/routers/experienceRouter";
 import { router } from "../trpc";
-import { beatMapRouter } from "@/src/server/routers/beatMapRouter";
 import { userRouter } from "@/src/server/routers/userRouter";
 import { songRouter } from "@/src/server/routers/songRouter";
 import { playlistRouter } from "@/src/server/routers/playlistRouter";
@@ -11,7 +10,6 @@ export const appRouter = router({
   song: songRouter,
   experience: experienceRouter,
   playlist: playlistRouter,
-  beatMap: beatMapRouter,
   vjPreset: vjPresetRouter,
 });
 

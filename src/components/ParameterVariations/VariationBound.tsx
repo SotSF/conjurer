@@ -20,7 +20,7 @@ export const VariationBound = memo(function VariationBound({
   variation,
 }: ParameterProps) {
   const store = useStore();
-  const { uiStore, beatMapStore } = store;
+  const { uiStore, beatGridStore } = store;
 
   const dragNodeRef = useRef(null);
   const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -30,16 +30,14 @@ export const VariationBound = memo(function VariationBound({
     [],
   );
   const handleStop = action(() => {
-    let deltaTime = uiStore.xToTime(position.x);
-    if (uiStore.snappingToBeatGrid) {
-      const variationEndTime = block.getVariationGlobalEndTime(
-        uniformName,
-        variation,
-      );
-      const hoveredTime = uiStore.xToTime(position.x) + variationEndTime;
-      const nearestBeatTime = beatMapStore.beatMap.nearestBeatTime(hoveredTime);
-      deltaTime = nearestBeatTime - variationEndTime;
-    }
+    const variationEndTime = block.getVariationGlobalEndTime(
+      uniformName,
+      variation,
+    );
+    const deltaTime = beatGridStore.snapDelta(
+      variationEndTime,
+      uiStore.xToTime(position.x),
+    );
 
     block.applyVariationDurationDelta(uniformName, variation, deltaTime);
     setPosition({ x: 0, y: 0 });

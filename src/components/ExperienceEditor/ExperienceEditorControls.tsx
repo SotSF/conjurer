@@ -6,7 +6,7 @@ import { IntensitySlider } from "@/src/components/IntensitySlider";
 import { BrightnessLimiterIndicator } from "@/src/components/BrightnessLimiterIndicator";
 import { ControlGroup } from "@/src/components/ControlGroup";
 import { ZoomControls } from "@/src/components/ZoomControls";
-import { BeatMapControls } from "@/src/components/BeatMapControls";
+import { TempoControls } from "@/src/components/BeatGrid/TempoControls";
 import { RoleSelector } from "@/src/components/RoleSelector";
 import { LoginButton } from "@/src/components/LoginButton";
 import { BsSoundwave } from "react-icons/bs";
@@ -57,7 +57,7 @@ export const ExperienceEditorControls = observer(
               "Draw the audio waveform over the timeline for visual alignment.",
             )}
           />
-          <BeatMapControls />
+          <TempoControls />
         </Flex>
         <HStack spacing={1} flexShrink={0}>
           <RoleSelector />

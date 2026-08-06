@@ -37,7 +37,7 @@ export const TimelineBlockStack = observer(function TimelineBlockStack({
   patternBlock,
 }: Props) {
   const store = useStore();
-  const { selectedBlocksOrVariations, uiStore, beatMapStore } = store;
+  const { selectedBlocksOrVariations, uiStore, beatGridStore } = store;
 
   const dragNodeRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
@@ -73,18 +73,13 @@ export const TimelineBlockStack = observer(function TimelineBlockStack({
       // rango voice commands (which are not trusted) should not trigger dragging
       if (!e.isTrusted) return;
 
-      if (!uiStore.snappingToBeatGrid) {
-        setPosition({ x: data.x, y: 0 });
-        return;
-      }
-
-      const hoveredTime = uiStore.xToTime(data.x) + patternBlock.startTime;
-      const nearestBeatTime = beatMapStore.beatMap.nearestBeatTime(hoveredTime);
-      const deltaTime = nearestBeatTime - patternBlock.startTime;
-      const deltaPosition = uiStore.timeToX(deltaTime);
-      setPosition({ x: deltaPosition, y: 0 });
+      const deltaTime = beatGridStore.snapDelta(
+        patternBlock.startTime,
+        uiStore.xToTime(data.x),
+      );
+      setPosition({ x: uiStore.timeToX(deltaTime), y: 0 });
     },
-    [uiStore, beatMapStore, patternBlock],
+    [uiStore, beatGridStore, patternBlock],
   );
   // handle moving a block to a new start time
   const handleDragStop = action((e: DraggableEvent, data: DraggableData) => {

@@ -238,7 +238,15 @@ const WavesurferWaveform = observer(function WavesurferWaveform() {
             }
             wavesurfer.seekTo(0);
             const audioBuffer = wavesurfer.getDecodedData();
-            if (audioBuffer) audioStore.computePeaks(audioBuffer);
+            if (audioBuffer) {
+              audioStore.computePeaks(audioBuffer);
+              // Detect the beat grid the first time anyone opens this song;
+              // the result is stored on the song, so nobody waits for it twice.
+              void store.beatGridStore.analyzeAudioBuffer(
+                audioBuffer,
+                audioStore.selectedSong,
+              );
+            }
             if (
               audioStore.audioState === "starting" ||
               audioStore.audioState === "playing"

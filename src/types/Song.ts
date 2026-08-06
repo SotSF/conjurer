@@ -7,6 +7,7 @@ export const NO_SONG = {
   name: "No song selected",
   artist: "",
   filename: "",
+  beatGrid: null,
   createdAt: "",
   updatedAt: "",
 } as const satisfies Song;

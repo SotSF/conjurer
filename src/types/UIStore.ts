@@ -35,8 +35,6 @@ export type HoverHelp = {
 export class UIStore {
   showingPerformance = false;
   showingWaveformOverlay = false;
-  showingBeatGridOverlay = false;
-  snappingToBeatGrid = false;
   showingOpenExperienceModal = false;
   showingAutosavesModal = false;
   showingUserPickerModal = false;
@@ -46,8 +44,6 @@ export class UIStore {
   showingMarkerEditorModal = false;
   showingPlaylistAddExperienceModal = false;
   showingPortalNarrativeModal = true;
-  showingSaveBeatMapModal = false;
-  showingLoadBeatMapModal = false;
   showingLatencyModal = false;
   capturingThumbnail = false;
 
@@ -310,14 +306,6 @@ export class UIStore {
 
   toggleWaveformOverlay = () => {
     this.showingWaveformOverlay = !this.showingWaveformOverlay;
-  };
-
-  toggleBeatGridOverlay = () => {
-    this.showingBeatGridOverlay = !this.showingBeatGridOverlay;
-  };
-
-  toggleSnappingToBeatGrid = () => {
-    this.snappingToBeatGrid = !this.snappingToBeatGrid;
   };
 
   // TODO: can be removed when authentication is implemented

@@ -31,8 +31,17 @@ export class AudioStore {
     if (songChanged) {
       this.audioReady = false;
       this.wavesurfer = null;
+      this.store.beatGridStore.loadForSong(song);
     }
   }
+
+  /**
+   * Keep the in-memory song row in step with a freshly saved grid, so
+   * reselecting the song doesn't look like it has never been analyzed.
+   */
+  patchSelectedSongBeatGrid = (beatGrid: Song["beatGrid"]) => {
+    this._selectedSong = { ...this._selectedSong, beatGrid };
+  };
 
   private _audioVolume = 1;
   get audioVolume() {
