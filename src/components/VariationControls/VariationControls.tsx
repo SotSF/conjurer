@@ -169,6 +169,20 @@ export function PeriodicVariationControls({
     setMax(variation.max.toString());
   };
 
+  const applyPeriod = (nextPeriod: number) => {
+    const clamped = Math.max(MIN_PERIOD_FROM_TAP_SEC, nextPeriod);
+    variation.period = clamped;
+    setPeriod(clamped.toString());
+    if (matchPeriodAndDuration) variation.duration = clamped;
+    block.triggerVariationReactions(uniformName);
+  };
+
+  // ×2 / ÷2 scale frequency (inverse of period), matching tempo octave buttons.
+  const scaleFrequency = (factor: number) => {
+    if (!variation.period) return;
+    applyPeriod(variation.period / factor);
+  };
+
   const onTapPeriodTempo = () => {
     const nowSec = performance.now() / 1000;
     const times = periodTapTimesRef.current;
@@ -188,11 +202,7 @@ export function PeriodicVariationControls({
     }
     const avgSec =
       intervals.reduce((sum, dt) => sum + dt, 0) / intervals.length;
-    const nextPeriod = Math.max(MIN_PERIOD_FROM_TAP_SEC, avgSec);
-    variation.period = nextPeriod;
-    setPeriod(nextPeriod.toString());
-    if (matchPeriodAndDuration) variation.duration = nextPeriod;
-    block.triggerVariationReactions(uniformName);
+    applyPeriod(avgSec);
   };
 
   return (
@@ -308,20 +318,52 @@ export function PeriodicVariationControls({
       </ControlSection>
 
       <ControlSection label="Timing">
-        <HStack spacing={3} w="100%" align="center">
-          <Box flex={1}>
-            <NumberParamInput
-              name="Period"
-              onChange={(valueString, valueNumber) => {
-                // do not allow setting period to 0
-                if (valueNumber) variation.period = valueNumber;
-                setPeriod(valueString);
-                if (matchPeriodAndDuration) variation.duration = valueNumber;
-                block.triggerVariationReactions(uniformName);
-              }}
-              value={period}
-            />
-          </Box>
+        <NumberParamInput
+          name="Period"
+          onChange={(valueString, valueNumber) => {
+            // do not allow setting period to 0
+            if (valueNumber) variation.period = valueNumber;
+            setPeriod(valueString);
+            if (matchPeriodAndDuration) variation.duration = valueNumber;
+            block.triggerVariationReactions(uniformName);
+          }}
+          value={period}
+        />
+        <HStack spacing={1} w="100%" justify="end">
+          <Tooltip
+            label="Double frequency (halve period)"
+            openDelay={0}
+            hasArrow
+            placement="top"
+            fontSize="xs"
+          >
+            <Button
+              size="xs"
+              variant="outline"
+              flex={1}
+              onClick={() => scaleFrequency(2)}
+              aria-label="Double frequency"
+            >
+              ×2
+            </Button>
+          </Tooltip>
+          <Tooltip
+            label="Halve frequency (double period)"
+            openDelay={0}
+            hasArrow
+            placement="top"
+            fontSize="xs"
+          >
+            <Button
+              size="xs"
+              variant="outline"
+              flex={1}
+              onClick={() => scaleFrequency(0.5)}
+              aria-label="Halve frequency"
+            >
+              ÷2
+            </Button>
+          </Tooltip>
           <Tooltip
             label="Tap in rhythm to set the period — the period becomes the average time between your taps (resets after 2s idle)"
             openDelay={0}
@@ -333,7 +375,7 @@ export function PeriodicVariationControls({
               size="xs"
               variant="outline"
               leftIcon={<TbClick size={12} />}
-              flexShrink={0}
+              flex={1}
               onClick={onTapPeriodTempo}
               aria-label="Tap to set period"
             >
