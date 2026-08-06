@@ -173,21 +173,22 @@ export const TempoPanel = observer(function TempoPanel() {
         </Button>
       </HStack>
 
+      <Button
+        size="xs"
+        width="100%"
+        onClick={action(() =>
+          beatGridStore.setGrid(
+            grid.withDownbeatAtTime(audioStore.globalTime),
+          ),
+        )}
+      >
+        Set downbeat here
+      </Button>
+
       <HStack>
         <Button
           size="xs"
-          flexGrow={1}
-          onClick={action(() =>
-            beatGridStore.setGrid(
-              grid.withDownbeatAtTime(audioStore.globalTime),
-            ),
-          )}
-        >
-          Set downbeat here
-        </Button>
-        <Button
-          size="xs"
-          flexGrow={1}
+          flex={1}
           bgColor={beatGridStore.showGrid ? "orange.700" : undefined}
           color={beatGridStore.showGrid ? "white" : undefined}
           onClick={action(() => beatGridStore.toggleGrid())}
@@ -196,7 +197,7 @@ export const TempoPanel = observer(function TempoPanel() {
         </Button>
         <Button
           size="xs"
-          flexGrow={1}
+          flex={1}
           bgColor={beatGridStore.showAnchors ? "orange.700" : undefined}
           color={beatGridStore.showAnchors ? "white" : undefined}
           onClick={action(() => beatGridStore.toggleAnchors())}
@@ -205,7 +206,7 @@ export const TempoPanel = observer(function TempoPanel() {
         </Button>
         <Button
           size="xs"
-          flexGrow={1}
+          flex={1}
           bgColor={beatGridStore.metronomeEnabled ? "orange.700" : undefined}
           color={beatGridStore.metronomeEnabled ? "white" : undefined}
           onClick={action(() => beatGridStore.toggleMetronome())}
