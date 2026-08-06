@@ -12,7 +12,7 @@ import {
 import { memo, useEffect, useState } from "react";
 import { Block } from "@/src/types/Block";
 import { PatternParam } from "@/src/params/shared/patternParam";
-import { FlatVariation } from "@/src/types/Variations/FlatVariation";
+import { CurveVariation } from "@/src/types/Variations/CurveVariation";
 import { DEFAULT_VARIATION_DURATION } from "@/src/utils/time";
 import { runInAction } from "mobx";
 import { VJParameterControlName } from "@/src/components/VJPage/VJParameterControlName";
@@ -52,7 +52,7 @@ export const VJBooleanParameterControl = memo(
         if (!block.parameterVariations[uniformName])
           block.parameterVariations[uniformName] = [];
 
-        block.parameterVariations[uniformName]![0] = new FlatVariation(
+        block.parameterVariations[uniformName]![0] = CurveVariation.flat(
           DEFAULT_VARIATION_DURATION,
           inputNumber,
         );

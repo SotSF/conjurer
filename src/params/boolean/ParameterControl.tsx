@@ -11,7 +11,7 @@ import {
 import { memo, useState } from "react";
 import { Block } from "@/src/types/Block";
 import { ParamType, PatternParam } from "@/src/params/shared/patternParam";
-import { FlatVariation } from "@/src/types/Variations/FlatVariation";
+import { CurveVariation } from "@/src/types/Variations/CurveVariation";
 import { DEFAULT_VARIATION_DURATION } from "@/src/utils/time";
 import { runInAction } from "mobx";
 import { ParameterControlName } from "@/src/components/PatternPlayground/ParameterControlName";
@@ -42,7 +42,7 @@ export const BooleanParameterControl = memo(function BooleanParameterControl({
       if (!block.parameterVariations[uniformName])
         block.parameterVariations[uniformName] = [];
 
-      block.parameterVariations[uniformName]![0] = new FlatVariation(
+      block.parameterVariations[uniformName]![0] = CurveVariation.flat(
         DEFAULT_VARIATION_DURATION,
         inputNumber,
       );

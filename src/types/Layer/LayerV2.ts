@@ -7,7 +7,8 @@ import { Layer } from ".";
 import { BlockMap } from "../BlockMap";
 import { Variation } from "@/src/types/Variations/Variation";
 import { EasingVariation } from "@/src/types/Variations/EasingVariation";
-import { FlatVariation } from "@/src/types/Variations/FlatVariation";
+import { CurveVariation } from "@/src/types/Variations/CurveVariation";
+import { migrateSequenceToRegions } from "@/src/utils/migrateVariations";
 
 // used for a block's lane until its actual rendered height is reported
 const UNMEASURED_BLOCK_HEIGHT = 50;
@@ -195,7 +196,9 @@ export class LayerV2 implements Layer {
           new EasingVariation(fadeInEnd - block.startTime, "easeOutSine", 0, 1),
         );
       if (fadeOutStart > fadeInEnd)
-        variations.push(new FlatVariation(fadeOutStart - fadeInEnd, 1));
+        variations.push(
+          CurveVariation.flat(fadeOutStart - fadeInEnd, 1),
+        );
       if (block.endTime > fadeOutStart)
         variations.push(
           new EasingVariation(block.endTime - fadeOutStart, "easeInSine", 1, 0),
@@ -273,6 +276,21 @@ export class LayerV2 implements Layer {
       startTime: this.store.audioStore.globalTime,
       duration: DEFAULT_BLOCK_DURATION,
     });
+    // Playground params may be short constant regions; fold legacy flats into
+    // editable Curves and span every numeric lane to the inserted block length.
+    const convert = (b: Block, laneDuration: number) => {
+      for (const uniformName of Object.keys(b.parameterVariations ?? {})) {
+        const param = b.pattern.params[uniformName];
+        if (!param || typeof param.value !== "number") continue;
+        b.parameterVariations[uniformName] = migrateSequenceToRegions(
+          b.parameterVariations[uniformName],
+          laneDuration,
+          param.value,
+        );
+      }
+      b.effectBlocks.forEach((effect) => convert(effect, laneDuration));
+    };
+    convert(newBlock, newBlock.duration);
     this.addBlock(newBlock);
   };
 

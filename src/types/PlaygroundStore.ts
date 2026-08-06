@@ -4,7 +4,7 @@ import { Block } from "@/src/types/Block";
 import type { Store } from "@/src/types/Store";
 import { sendConjurerStateUpdate } from "@/src/websocket/conjurerApiWebsocket";
 import { makeAutoObservable, runInAction } from "mobx";
-import { FlatVariation } from "./Variations/FlatVariation";
+import { CurveVariation } from "./Variations/CurveVariation";
 import { DEFAULT_BLOCK_DURATION } from "../utils/time";
 import { generateId } from "@/src/utils/id";
 
@@ -116,13 +116,8 @@ export class PlaygroundStore {
     for (const { name, value } of newParams) {
       const variations = this.selectedPatternBlock.parameterVariations;
       if (params[name]) params[name].value = value;
-      if (!variations[name] || variations[name].length == 0) {
-        variations[name] = [new FlatVariation(DEFAULT_BLOCK_DURATION, value)];
-        continue;
-      }
-      if (variations[name][0] instanceof FlatVariation) {
-        variations[name][0].value = value;
-      }
+      // Flat constant → editable curve region (same as ParameterControl flat mode).
+      variations[name] = [CurveVariation.flat(DEFAULT_BLOCK_DURATION, value)];
       // TODO: handle non-numeric params
       // TODO: handle effect params
     }

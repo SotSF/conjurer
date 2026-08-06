@@ -6,7 +6,7 @@ import { ParamType, isTextureParam } from "@/src/params/shared/patternParam";
 import { isPaletteParam } from "@/src/params/palette/isPaletteParam";
 import { isVector4Param } from "@/src/params/vector4/isVector4Param";
 import { isPalette, Palette } from "@/src/params/palette/Palette";
-import { FlatVariation } from "@/src/types/Variations/FlatVariation";
+import { CurveVariation } from "@/src/types/Variations/CurveVariation";
 import { LinearVariation4 } from "@/src/types/Variations/LinearVariation4";
 import { PaletteVariation } from "@/src/params/palette/variation/PaletteVariation";
 import { isVector4 } from "@/src/utils/object";
@@ -14,8 +14,9 @@ import { defaultPatternEffectMap } from "@/src/utils/patternsEffects";
 import { DEFAULT_VARIATION_DURATION } from "@/src/utils/time";
 
 /**
- * Restores a block's pattern params and flat default variations from the
- * factory defaults in {@link defaultPatternEffectMap}.
+ * Restores a block's pattern params and default variations from the factory
+ * defaults in {@link defaultPatternEffectMap}. Numeric params get a flat
+ * {@link CurveVariation} so they land as editable curve regions on insert.
  */
 export function resetBlockParamsToDefaults(block: Block): void {
   const defaultPattern = defaultPatternEffectMap[block.pattern.name];
@@ -54,7 +55,7 @@ export function resetBlockParamsToDefaults(block: Block): void {
 
       if (typeof value === "number") {
         block.parameterVariations[uniformName] = [
-          new FlatVariation(DEFAULT_VARIATION_DURATION, value),
+          CurveVariation.flat(DEFAULT_VARIATION_DURATION, value),
         ];
       } else if (isVector4(value)) {
         block.parameterVariations[uniformName] = [

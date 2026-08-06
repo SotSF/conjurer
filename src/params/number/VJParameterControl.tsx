@@ -24,7 +24,7 @@ import { FaTimes } from "react-icons/fa";
 import { setBlockNumberParameterValue } from "@/src/utils/setBlockNumberParameterValue";
 import { TbWaveSine } from "react-icons/tb";
 import { PeriodicVariationControls } from "@/src/components/VariationControls/VariationControls";
-import { FlatVariation } from "@/src/types/Variations/FlatVariation";
+import { CurveVariation } from "@/src/types/Variations/CurveVariation";
 import { PeriodicVariation } from "@/src/types/Variations/PeriodicVariation";
 import { NumberVariationGraph } from "@/src/components/VariationGraph/NumberVariationGraph";
 import { observer } from "mobx-react-lite";
@@ -93,7 +93,7 @@ export const VJNumberParameterControl = observer(
           block.parameterVariations[uniformName] = [];
 
         if (newVariationMode === "flat")
-          block.parameterVariations[uniformName]![0] = new FlatVariation(
+          block.parameterVariations[uniformName]![0] = CurveVariation.flat(
             DEFAULT_VARIATION_DURATION,
             patternParam.value,
           );

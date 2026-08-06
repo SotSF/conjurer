@@ -3,7 +3,7 @@ import { runInAction } from "mobx";
 import { Block } from "@/src/types/Block";
 import type { PlaygroundStore } from "@/src/types/PlaygroundStore";
 import { BASE_UNIFORMS } from "@/src/types/Pattern";
-import { FlatVariation } from "@/src/types/Variations/FlatVariation";
+import { CurveVariation } from "@/src/types/Variations/CurveVariation";
 import { LinearVariation4 } from "@/src/types/Variations/LinearVariation4";
 import { PaletteVariation } from "@/src/params/palette/variation/PaletteVariation";
 import { isPalette, Palette } from "@/src/params/palette/Palette";
@@ -17,7 +17,8 @@ import { Texture } from "three";
 
 /**
  * Overwrites a playground pool block's params with single flat values sampled
- * from `source` at `globalTime` (no automation / periodic chains).
+ * from `source` at `globalTime` (no automation / periodic chains). Numerics
+ * become flat {@link CurveVariation}s so re-insert stays on the region model.
  */
 function applySnapshotParams(
   source: Block,
@@ -57,7 +58,7 @@ function applySnapshotParams(
     } else if (typeof value === "number") {
       tgtP.value = value;
       target.parameterVariations[uniformName] = [
-        new FlatVariation(DEFAULT_VARIATION_DURATION, value),
+        CurveVariation.flat(DEFAULT_VARIATION_DURATION, value),
       ];
     }
   }

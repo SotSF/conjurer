@@ -8,7 +8,6 @@ import {
 } from "@/src/utils/time";
 import { deserializeVariation } from "@/src/types/Variations/variations";
 import type { Layer } from "@/src/types/Layer";
-import { FlatVariation } from "@/src/types/Variations/FlatVariation";
 import { EasingVariation } from "@/src/types/Variations/EasingVariation";
 import { defaultPatternEffectMap } from "@/src/utils/patternsEffects";
 import { isVector4 } from "@/src/utils/object";
@@ -520,7 +519,7 @@ export class Block {
     const variations = this.parameterVariations[uniformName];
     if (!variations) {
       this.parameterVariations[uniformName] = [
-        new FlatVariation(time, parameter.value),
+        CurveVariation.flat(time, parameter.value),
       ];
     } else {
       const totalVariationDuration = variations.reduce(
@@ -531,7 +530,7 @@ export class Block {
       if (time < totalVariationDuration || time > this.duration) return;
 
       variations.push(
-        new FlatVariation(time - totalVariationDuration, parameter.value),
+        CurveVariation.flat(time - totalVariationDuration, parameter.value),
       );
       this.triggerVariationReactions(uniformName);
     }
@@ -652,7 +651,10 @@ export class Block {
   materializeAutoOpacity = () => {
     const derived = this.layer?.autoOpacityVariations(this);
     this.parameterVariations["u_opacity"] = derived ?? [
-      new FlatVariation(Math.min(this.duration, DEFAULT_VARIATION_DURATION), 1),
+      CurveVariation.flat(
+        Math.min(this.duration, DEFAULT_VARIATION_DURATION),
+        1,
+      ),
     ];
   };
 
@@ -743,7 +745,7 @@ export class Block {
       );
     }
 
-    // check for any parameters without variations and insert a flat variation
+    // check for any parameters without variations and insert a flat curve region
     const parameterNames = Object.keys(
       defaultPatternEffectMap[this.pattern.name]?.params ?? {},
     );
@@ -762,7 +764,7 @@ export class Block {
       const parameterValue = this.pattern.params[parameter].value;
       if (typeof parameterValue === "number") {
         serialized[parameter] = [
-          new FlatVariation(variationDuration, parameterValue).serialize(),
+          CurveVariation.flat(variationDuration, parameterValue).serialize(),
         ];
       } else if (isVector4(parameterValue)) {
         serialized[parameter] = [

@@ -16,7 +16,7 @@ import {
 import { useState } from "react";
 import { Block } from "@/src/types/Block";
 import { PatternParam } from "@/src/params/shared/patternParam";
-import { FlatVariation } from "@/src/types/Variations/FlatVariation";
+import { CurveVariation } from "@/src/types/Variations/CurveVariation";
 import { DEFAULT_PERIOD, DEFAULT_VARIATION_DURATION } from "@/src/utils/time";
 import { runInAction } from "mobx";
 import { ParameterControlName } from "@/src/components/PatternPlayground/ParameterControlName";
@@ -69,7 +69,7 @@ export const NumberParameterControl = observer(function NumberParameterControl({
       if (!block.parameterVariations[uniformName])
         block.parameterVariations[uniformName] = [];
 
-      block.parameterVariations[uniformName]![0] = new FlatVariation(
+      block.parameterVariations[uniformName]![0] = CurveVariation.flat(
         DEFAULT_VARIATION_DURATION,
         inputNumber,
       );
@@ -86,7 +86,7 @@ export const NumberParameterControl = observer(function NumberParameterControl({
         block.parameterVariations[uniformName] = [];
 
       if (newVariationMode === "flat")
-        block.parameterVariations[uniformName]![0] = new FlatVariation(
+        block.parameterVariations[uniformName]![0] = CurveVariation.flat(
           DEFAULT_VARIATION_DURATION,
           patternParam.value,
         );

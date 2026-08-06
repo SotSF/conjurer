@@ -2,7 +2,7 @@ import { runInAction } from "mobx";
 
 import { Block } from "@/src/types/Block";
 import { BASE_UNIFORMS } from "@/src/types/Pattern";
-import { FlatVariation } from "@/src/types/Variations/FlatVariation";
+import { CurveVariation } from "@/src/types/Variations/CurveVariation";
 import { LinearVariation4 } from "@/src/types/Variations/LinearVariation4";
 import { PaletteVariation } from "@/src/params/palette/variation/PaletteVariation";
 import { DEFAULT_VARIATION_DURATION } from "@/src/utils/time";
@@ -30,10 +30,14 @@ function randomSteppedNumber(min: number, max: number, step: number): number {
   return Math.min(max, Math.max(min, Number(snapped.toFixed(precision))));
 }
 
-function setFlatVariation(block: Block, uniformName: string, value: number) {
+function setFlatCurveVariation(
+  block: Block,
+  uniformName: string,
+  value: number,
+) {
   if (!block.parameterVariations[uniformName])
     block.parameterVariations[uniformName] = [];
-  block.parameterVariations[uniformName]![0] = new FlatVariation(
+  block.parameterVariations[uniformName]![0] = CurveVariation.flat(
     DEFAULT_VARIATION_DURATION,
     value,
   );
@@ -46,7 +50,7 @@ function randomizeParams(block: Block): void {
     if (isBooleanParam(param)) {
       const value = Math.random() < 0.5 ? 0 : 1;
       param.value = value;
-      setFlatVariation(block, uniformName, value);
+      setFlatCurveVariation(block, uniformName, value);
     } else if (isNumberParam(param)) {
       const min = typeof param.min === "number" ? param.min : 0;
       const max = typeof param.max === "number" ? param.max : 1;
@@ -56,7 +60,7 @@ function randomizeParams(block: Block): void {
           : DEFAULT_STEP;
       const value = randomSteppedNumber(min, max, step);
       param.value = value;
-      setFlatVariation(block, uniformName, value);
+      setFlatCurveVariation(block, uniformName, value);
     } else if (isVector4Param(param)) {
       param.value.set(Math.random(), Math.random(), Math.random(), 1);
 

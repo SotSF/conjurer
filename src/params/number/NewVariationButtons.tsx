@@ -11,7 +11,7 @@ import { PiWaveform } from "react-icons/pi";
 import { Block } from "@/src/types/Block";
 import { PatternParam } from "@/src/params/shared/patternParam";
 import { action } from "mobx";
-import { FlatVariation } from "@/src/types/Variations/FlatVariation";
+import { CurveVariation } from "@/src/types/Variations/CurveVariation";
 import { LinearVariation } from "@/src/types/Variations/LinearVariation";
 import { PeriodicVariation } from "@/src/types/Variations/PeriodicVariation";
 import { DEFAULT_VARIATION_DURATION } from "@/src/utils/time";
@@ -68,7 +68,7 @@ export const NumberNewVariationButtons = memo(function NumberNewVariationButtons
             store.addVariation(
               block,
               uniformName,
-              new FlatVariation(DEFAULT_VARIATION_DURATION, lastValue),
+              CurveVariation.flat(DEFAULT_VARIATION_DURATION, lastValue),
             );
             return;
           }
@@ -76,7 +76,7 @@ export const NumberNewVariationButtons = memo(function NumberNewVariationButtons
           store.addVariation(
             block,
             uniformName,
-            new FlatVariation(DEFAULT_VARIATION_DURATION, 1),
+            CurveVariation.flat(DEFAULT_VARIATION_DURATION, 1),
           );
         })}
       />
