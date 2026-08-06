@@ -162,7 +162,10 @@ export const BeatGridOverlay = observer(function BeatGridOverlay() {
       left={0}
       width={uiStore.timeToXPixels(MAX_TIME)}
       pointerEvents="none"
-      zIndex={1}
+      // Above hovered/selected blocks (zIndex 5) so the grid stays visible as an
+      // alignment reference; below the playhead (10). pointerEvents:none so it
+      // never steals clicks from the timeline.
+      zIndex={6}
     >
       {/* Zero-width so it never affects layout, but sticky so it tracks the
           scroll port; the canvas inside is absolutely positioned and sized to
