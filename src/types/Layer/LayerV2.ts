@@ -311,6 +311,8 @@ export class LayerV2 implements Layer {
   };
 
   resizeBlockLeftBound = (block: Block, delta: number) => {
+    if (block.layer != this || block.locked) return;
+
     const desiredStartTime = block.startTime + delta;
 
     // do not allow changing start of this block past end of self
@@ -328,6 +330,8 @@ export class LayerV2 implements Layer {
   };
 
   resizeBlockRightBound = (block: Block, delta: number) => {
+    if (block.layer != this || block.locked) return;
+
     const desiredEndTime = block.endTime + delta;
 
     // do not allow changing end of block past start of self

@@ -1,4 +1,5 @@
 import type { ExperienceStatus } from "../types/Experience";
+import type { SerializedBeatGrid } from "../types/BeatGrid";
 import { relations, sql } from "drizzle-orm";
 import {
   index,
@@ -62,6 +63,11 @@ export const songs = sqliteTable(
     name: text("name").notNull(),
     artist: text("artist").notNull().default(""),
     filename: text("filename").notNull(),
+    /**
+     * Tempo map for the track, shared by every experience that uses it. Null
+     * until the first client to open the song analyzes it.
+     */
+    beatGrid: text("beat_grid", { mode: "json" }).$type<SerializedBeatGrid>(),
     ...timestamps,
   },
   (table) => ({

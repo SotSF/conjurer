@@ -57,7 +57,7 @@ export const ParameterVariations = observer(function ParameterVariations({
   graphHeight = DEFAULT_GRAPH_HEIGHT,
 }: ParameterVariationsProps) {
   const store = useStore();
-  const { uiStore, beatMapStore } = store;
+  const { beatGridStore } = store;
   const scale = useLaneTimeScale();
   const spanDuration = laneDuration ?? block.duration;
   const width = scale.timeToX(spanDuration);
@@ -135,10 +135,10 @@ export const ParameterVariations = observer(function ParameterVariations({
       }
     }
     if (nearest != null) return nearest;
-    if (!uiStore.snappingToBeatGrid) return time;
     return (
-      beatMapStore.beatMap.nearestBeatTime(block.startTime + time) -
-      block.startTime
+      beatGridStore.snapTime(block.startTime + time, {
+        pixelsPerSecond: scale.timeToX(1),
+      }) - block.startTime
     );
   };
 

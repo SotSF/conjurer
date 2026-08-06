@@ -7,7 +7,7 @@ import { ExperienceStore } from "@/src/types/ExperienceStore";
 import { Layer } from "@/src/types/Layer";
 import { deserializeVariation } from "@/src/types/Variations/variations";
 import { PlaylistStore } from "@/src/types/PlaylistStore";
-import { BeatMapStore } from "@/src/types/BeatMapStore";
+import { BeatGridStore } from "@/src/types/BeatGridStore";
 import { setupVoiceCommandWebsocket } from "@/src/websocket/voiceCommandWebsocket";
 import { PlaygroundStore } from "@/src/types/PlaygroundStore";
 import {
@@ -86,7 +86,7 @@ type InitializationState = "uninitialized" | "initializing" | "initialized";
 
 export class Store {
   audioStore = new AudioStore(this);
-  beatMapStore = new BeatMapStore(this);
+  beatGridStore = new BeatGridStore(this);
   uiStore = new UIStore(this);
   experienceStore = new ExperienceStore(this);
   playlistStore = new PlaylistStore(this);
@@ -341,6 +341,7 @@ export class Store {
     if (this.context === "vj") this.playgroundStore.initialize();
     this.uiStore.initialize(this.viewerMode);
     this.audioStore.initialize();
+    this.beatGridStore.initialize();
 
     // load experience from path parameter if provided (e.g. /experience/my-experience)
     if (initialExperienceName)

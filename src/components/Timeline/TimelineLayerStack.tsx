@@ -11,8 +11,7 @@ import { useRef } from "react";
 import { useStore } from "@/src/types/StoreContext";
 import { PlayHead } from "@/src/components/PlayHead";
 import { TimelineLayer } from "@/src/components/Timeline/TimelineLayer";
-import { BeatGridOverlay } from "@/src/components/BeatGridOverlay";
-import { BEAT_GRID_UI_ENABLED } from "@/src/utils/featureFlags";
+import { BeatGridOverlay } from "@/src/components/BeatGrid/BeatGridOverlay";
 import { TIMELINE_HEADER_WIDTH } from "@/src/types/UIStore";
 import { MAX_TIME } from "@/src/utils/time";
 import { hoverHelpProps } from "@/src/utils/hoverHelp";
@@ -69,7 +68,7 @@ export const TimelineLayerStack = observer(function TimelineLayerStack() {
       minHeight={`calc(100% - ${TIMER_WAVEFORM_HEIGHT}px)`}
     >
       <PlayHead />
-      {BEAT_GRID_UI_ENABLED && <BeatGridOverlay />}
+      <BeatGridOverlay />
       <DragDropContext onDragEnd={onDragEnd}>
         <Droppable droppableId="timeline-layers">
           {(provided) => (

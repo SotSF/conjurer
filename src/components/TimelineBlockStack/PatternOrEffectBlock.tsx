@@ -155,8 +155,8 @@ export const PatternOrEffectBlock = observer(function PatternOrEffectBlock({
             uiStore,
             locked ? "Unlock block" : "Lock block",
             locked
-              ? "Allow dragging this block in time on the timeline."
-              : "Prevent accidental dragging — lock this block's position in time.",
+              ? "Allow dragging and resizing this block in time on the timeline."
+              : "Prevent accidental dragging and resizing — lock this block's position in time.",
           )}
         />
       </HStack>

@@ -14,6 +14,7 @@ import { INITIAL_PIXELS_PER_SECOND } from "@/src/utils/time";
 import { getTimelineLabelIntervals } from "@/src/utils/timelineZoom";
 import { scrollPlayheadIntoView } from "@/src/utils/scrollPlayheadIntoView";
 import { MinimapViewfinder } from "@/src/components/Wavesurfer/MinimapViewfinder";
+import { TIMELINE_HEADER_WIDTH } from "@/src/types/UIStore";
 
 const DEFAULT_MINIMAP_HEIGHT = 20;
 const WAVESURFER_ZOOM_DEBOUNCE_MS = 80;
@@ -238,7 +239,15 @@ const WavesurferWaveform = observer(function WavesurferWaveform() {
             }
             wavesurfer.seekTo(0);
             const audioBuffer = wavesurfer.getDecodedData();
-            if (audioBuffer) audioStore.computePeaks(audioBuffer);
+            if (audioBuffer) {
+              audioStore.computePeaks(audioBuffer);
+              // Detect the beat grid the first time anyone opens this song;
+              // the result is stored on the song, so nobody waits for it twice.
+              void store.beatGridStore.analyzeAudioBuffer(
+                audioBuffer,
+                audioStore.selectedSong,
+              );
+            }
             if (
               audioStore.audioState === "starting" ||
               audioStore.audioState === "playing"
@@ -281,18 +290,26 @@ const WavesurferWaveform = observer(function WavesurferWaveform() {
     </>
   );
 
+  // Sticky minimap spans the timeline's visible viewport (minus the timer
+  // header), not the full scrollable content width. timelineViewportWidth is
+  // kept in sync via ResizeObserver, so panel/window resizes update it.
+  const minimapWidth = Math.max(
+    0,
+    uiStore.timelineViewportWidth - TIMELINE_HEADER_WIDTH,
+  );
+
   return uiStore.canTimelineZoom ? (
     <Box width="100%" height={20} bgColor="gray.500">
       <Box
         position="sticky"
         top={0}
-        left="150px"
+        left={`${TIMELINE_HEADER_WIDTH}px`}
         boxSizing="border-box"
         borderBottom={1}
         borderColor="black"
         borderBottomStyle="solid"
         bgColor="gray.600"
-        width="calc(60vw - 150px)"
+        width={`${minimapWidth}px`}
         height={`${DEFAULT_MINIMAP_HEIGHT}px`}
         zIndex={100}
         overflow="hidden"

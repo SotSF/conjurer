@@ -245,6 +245,9 @@ export class Block {
   // Move the boundary between region `index` and `index+1` by `deltaTime`
   // (positive = later). One region grows exactly as the other shrinks, so the
   // lane total never changes. Clamped so both stay above the minimum width.
+  // Durations are assigned after geometry updates so a Curve early-return inside
+  // resizeEnd/shiftStart can never leave the two sides desynced (overstuffed
+  // lane / visual overlap).
   moveBoundary = (uniformName: string, index: number, deltaTime: number) => {
     const vs = this.parameterVariations[uniformName];
     if (!vs || index < 0 || index + 1 >= vs.length) return;
@@ -254,13 +257,13 @@ export class Block {
     const maxShrink = left.duration - MINIMUM_VARIATION_DURATION; // left can give
     const delta = Math.max(-maxShrink, Math.min(maxGrow, deltaTime));
     if (Math.abs(delta) < 1e-9) return;
-    if (left instanceof CurveVariation) left.resizeEnd(left.duration + delta);
-    else left.duration += delta;
+    const leftTarget = left.duration + delta;
+    const rightTarget = right.duration - delta;
+    if (left instanceof CurveVariation) left.resizeEnd(leftTarget);
     if (right instanceof CurveVariation) right.shiftStart(delta);
-    else if (right instanceof PeriodicVariation) {
-      right.shiftStart(delta);
-      right.duration -= delta;
-    } else right.duration -= delta;
+    else if (right instanceof PeriodicVariation) right.shiftStart(delta);
+    left.duration = leftTarget;
+    right.duration = rightTarget;
     this.triggerVariationReactions(uniformName);
   };
 
@@ -582,60 +585,6 @@ export class Block {
 
     const index = variations.indexOf(variation);
     if (index > -1) variations.splice(index, 0, clone);
-  };
-
-  // Note: not very performant due to looping through variations
-  getVariationGlobalEndTime = (uniformName: string, variation: Variation) => {
-    const variations = this.parameterVariations[uniformName];
-    if (!variations) return this.startTime;
-
-    const index = variations.indexOf(variation);
-    if (index < 0) return this.startTime;
-
-    return variations
-      .slice(0, index + 1)
-      .reduce((total, variation) => total + variation.duration, 0);
-  };
-
-  applyVariationDurationDelta = (
-    uniformName: string,
-    variation: Variation,
-    delta: number,
-  ) => {
-    const variations = this.parameterVariations[uniformName];
-    if (!variations) return;
-
-    const index = variations.indexOf(variation);
-    if (index < 0) return;
-
-    if (variation.duration + delta < MINIMUM_VARIATION_DURATION) return;
-
-    variation.duration += delta;
-    this.triggerVariationReactions(uniformName);
-  };
-
-  applyMaxVariationDurationDelta = (
-    uniformName: string,
-    variation: Variation,
-  ) => {
-    const variations = this.parameterVariations[uniformName];
-    if (!variations) return;
-
-    const index = variations.indexOf(variation);
-    if (index < 0) return;
-
-    const totalVariationDuration = variations.reduce(
-      (total, variation) => total + variation.duration,
-      0,
-    );
-
-    // use the parent block's duration if this is an effect block
-    const duration = this.parentBlock?.duration ?? this.duration;
-    if (totalVariationDuration < duration) {
-      const maxVariationDurationDelta = duration - totalVariationDuration;
-      variation.duration += Math.min(maxVariationDurationDelta, 120);
-      this.triggerVariationReactions(uniformName);
-    }
   };
 
   triggerVariationReactions = (uniformName: string) => {

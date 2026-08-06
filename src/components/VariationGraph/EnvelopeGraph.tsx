@@ -15,6 +15,7 @@ import { Block } from "@/src/types/Block";
 import { CurveVariation, CurveNode } from "@/src/types/Variations/CurveVariation";
 import { sampleCurveGeometry } from "@/src/utils/curveGeometry";
 import { useStore } from "@/src/types/StoreContext";
+import { useLaneTimeScale } from "@/src/components/ParameterVariations/LaneTimeScaleContext";
 
 // Trim a number to a short, human-editable string (no trailing-zero noise).
 const fmtNum = (n: number) =>
@@ -53,9 +54,9 @@ type EnvelopeGraphProps = {
  * node gestures: click to select, drag to move once the pointer clears a small
  * threshold (so a rapid click does not nudge the point; endpoints move in
  * value only; interior nodes clamp in time between their neighbors; Shift
- * axis-locks the drag, values snap to neighbor values / the range bounds
- * unless Ctrl is held, and Esc deselects), double-click to add a node at the
- * click location,
+ * axis-locks the drag, values snap to neighbor values / the range bounds and
+ * time snaps to the beat grid unless Ctrl is held, and Esc deselects),
+ * double-click to add a node at the click location (also beat-snapped),
  * Backspace/Delete or double-click a node to delete it. Select a node and press
  * "e" / Enter to open an inline editor to type an
  * exact value (and, for interior nodes, an exact time). Click a
@@ -80,6 +81,8 @@ export const EnvelopeGraph = function EnvelopeGraph({
   height = DEFAULT_HEIGHT,
 }: EnvelopeGraphProps) {
   const store = useStore();
+  const { beatGridStore } = store;
+  const scale = useLaneTimeScale();
   const [orange, nodeFill, selectedFill] = useToken("colors", [
     "orange.400",
     "gray.800",
@@ -153,6 +156,16 @@ export const EnvelopeGraph = function EnvelopeGraph({
       fn();
       block.triggerVariationReactions(uniformName);
     });
+
+  // Region-local → song time → beat snap → region-local. Same path as region
+  // seams / lane spans; Ctrl (or snap disabled) returns `t` unchanged.
+  const snapRegionTime = (t: number, freehand: boolean) =>
+    beatGridStore.snapTime(block.startTime + laneStartTime + t, {
+      freehand,
+      pixelsPerSecond: scale.timeToX(1),
+    }) -
+    block.startTime -
+    laneStartTime;
 
   // Timeline scrollport is an ancestor when this graph is in a block lane.
   // Forward non-zoom wheel deltas there explicitly: the SVG UA stylesheet uses
@@ -265,6 +278,8 @@ export const EnvelopeGraph = function EnvelopeGraph({
           : Math.max(ns[idx - 1].time, Math.min(ns[idx + 1].time, timeOfX(px)));
       let v = valueOfY(py);
       let valueLocked = false;
+      // Endpoints are pinned in time; Shift+vertical also locks time.
+      let timeLocked = isFirst || isLast;
 
       // Shift = lock the drag to its dominant axis: horizontal keeps the value,
       // vertical keeps the time.
@@ -277,7 +292,17 @@ export const EnvelopeGraph = function EnvelopeGraph({
           valueLocked = true;
         } else if (!isFirst && !isLast) {
           t = startTime;
+          timeLocked = true;
         }
+      }
+
+      // Beat-grid time snap for interior nodes. Re-clamp to neighbors afterward
+      // so a snap can't leap past the previous/next point. Ctrl frees it.
+      if (!timeLocked) {
+        t = Math.max(
+          ns[idx - 1].time,
+          Math.min(ns[idx + 1].time, snapRegionTime(t, ev.ctrlKey)),
+        );
       }
 
       // Value-snap magnet: pull the value onto a neighbor's value or the axis
@@ -441,8 +466,9 @@ export const EnvelopeGraph = function EnvelopeGraph({
     );
     if (onNode) return;
     let addedId = "";
+    const t = snapRegionTime(timeOfX(px), e.ctrlKey);
     commit(() => {
-      addedId = variation.addNodeAtTime(timeOfX(px), valueOfY(py)).id;
+      addedId = variation.addNodeAtTime(t, valueOfY(py)).id;
     });
     setSelectedId(addedId);
     setSelectedSegment(null);
