@@ -103,7 +103,8 @@ export const LaneSpanToolbar = observer(function LaneSpanToolbar({
         bg="gray.800"
         borderRadius="sm"
         boxShadow="md"
-        zIndex={1500}
+        // Above sticky timeline chrome (headers ~11–18), below modals (1400)
+        zIndex="dropdown"
         // the toolbar is an action bar, not part of the lane's drag surface
         onPointerDown={(e) => e.stopPropagation()}
         onClick={(e) => e.stopPropagation()}
@@ -154,7 +155,7 @@ export const LaneSpanToolbar = observer(function LaneSpanToolbar({
                   Replace
                 </MenuButton>
                 <Portal>
-                  <MenuList minW="110px" bg="gray.700" py={1} zIndex={1600}>
+                  <MenuList minW="110px" bg="gray.700" py={1} zIndex="dropdown">
                     {insertTypes.map((type) => (
                       <MenuItem
                         key={type}
