@@ -210,9 +210,10 @@ function buildCbrConversionScript(
   const lines: string[] = [
     "#!/usr/bin/env bash",
     "# Convert VBR audio to 256k CBR and replace the originals.",
-    "# Requires: curl, ffmpeg, and (for S3) AWS CLI credentials with put access.",
+    "# Requires: curl, ffmpeg, yarn (S3 uploads use Cognito like the web app).",
     "# Wavesurfer desyncs on VBR — prefer constant bitrate 256k/320k.",
     "# Run from the conjurer repo root so relative local paths resolve.",
+    "# .m4a/.aac are converted to .mp3 under a new name (DB update is manual).",
     "set -euo pipefail",
     "",
     'REPO_ROOT="$(pwd)"',
@@ -232,22 +233,25 @@ function buildCbrConversionScript(
       "convert_local() {",
       '  local filename="$1"',
       '  local src="$LOCAL_AUDIO_DIR/$filename"',
-      '  local tmp="$WORKDIR/cbr-$filename"',
-      '  echo "=== Converting (local): $filename ==="',
+      '  local out_filename="$filename"',
+      '  case "$filename" in',
+      "    *.m4a|*.M4A|*.aac|*.AAC)",
+      '      out_filename="${filename%.*}.mp3"',
+      "      ;;",
+      "  esac",
+      '  local dst="$LOCAL_AUDIO_DIR/$out_filename"',
+      '  local tmp="$WORKDIR/cbr-$out_filename"',
+      '  echo "=== Converting (local): $filename -> $out_filename ==="',
       '  if [[ ! -f "$src" ]]; then',
       '    echo "Missing local file: $src" >&2',
       "    return 1",
       "  fi",
-      '  case "$filename" in',
-      "    *.m4a|*.M4A|*.aac|*.AAC)",
-      '      ffmpeg -y -i "$src" -c:a aac -b:a 256k -map a "$tmp"',
-      "      ;;",
-      "    *)",
-      '      ffmpeg -y -i "$src" -c:a libmp3lame -b:a 256k -map a "$tmp"',
-      "      ;;",
-      "  esac",
-      '  mv "$tmp" "$src"',
-      '  echo "Replaced $src"',
+      '  ffmpeg -y -i "$src" -c:a libmp3lame -b:a 256k -map a "$tmp"',
+      '  mv "$tmp" "$dst"',
+      '  echo "Wrote $dst"',
+      '  if [[ "$out_filename" != "$filename" ]]; then',
+      '    echo "NOTE: DB filename still points at $filename — update it to $out_filename (old file left in place)"',
+      "  fi",
       "}",
       "",
     );
@@ -256,41 +260,58 @@ function buildCbrConversionScript(
       lines.push(`convert_local ${shellEscape(song.filename)}`);
     }
   } else {
-    const bucketUri = `s3://${ASSET_BUCKET_NAME}/${AUDIO_ASSET_PREFIX}`;
-    const s3Base = `https://${ASSET_BUCKET_NAME}.s3.${ASSET_BUCKET_REGION}.amazonaws.com/${AUDIO_ASSET_PREFIX}`;
+    const s3HttpsBase =
+      `https://${ASSET_BUCKET_NAME}.s3.${ASSET_BUCKET_REGION}.amazonaws.com/${AUDIO_ASSET_PREFIX}`.replace(
+        /\/$/,
+        "",
+      );
 
     lines.push(
-      `BUCKET_URI=${shellEscape(bucketUri)}`,
+      "# Uploads use the app Cognito identity pool (no AWS CLI profile required).",
+      `S3_HTTPS_BASE=${shellEscape(s3HttpsBase)}`,
+      'LOCAL_AUDIO_DIR="$REPO_ROOT/public/cloud-assets/audio"',
+      "",
+      "upload_to_s3() {",
+      '  local filename="$1"',
+      '  local local_path="$2"',
+      '  yarn ts-node --project tsconfig.script.json \\',
+      '    src/scripts/uploadLocalAudioToS3.ts "$filename" "$local_path"',
+      "}",
       "",
       "convert_and_replace() {",
       '  local filename="$1"',
-      '  local url="$2"',
       '  local original="$WORKDIR/original-$filename"',
-      '  local converted="$WORKDIR/cbr-$filename"',
-      '  echo "=== Converting (S3): $filename ==="',
-      '  curl -fsSL "$url" -o "$original"',
+      '  local out_filename="$filename"',
       '  case "$filename" in',
       "    *.m4a|*.M4A|*.aac|*.AAC)",
-      '      ffmpeg -y -i "$original" -c:a aac -b:a 256k -map a "$converted"',
-      '      content_type="audio/mp4"',
-      "      ;;",
-      "    *)",
-      '      ffmpeg -y -i "$original" -c:a libmp3lame -b:a 256k -map a "$converted"',
-      '      content_type="audio/mpeg"',
+      '      out_filename="${filename%.*}.mp3"',
       "      ;;",
       "  esac",
-      '  aws s3 cp "$converted" "$BUCKET_URI$filename" --content-type "$content_type"',
+      '  local converted="$WORKDIR/cbr-$out_filename"',
+      '  echo "=== Converting (S3): $filename -> $out_filename ==="',
+      '  if [[ -f "$LOCAL_AUDIO_DIR/$filename" ]]; then',
+      '    cp "$LOCAL_AUDIO_DIR/$filename" "$original"',
+      "  else",
+      "    local encoded",
+      '    encoded="$(node -e \'console.log(encodeURIComponent(process.argv[1]))\' "$filename")"',
+      '    curl -fsSL "$S3_HTTPS_BASE/$encoded" -o "$original"',
+      "  fi",
+      '  ffmpeg -y -i "$original" -c:a libmp3lame -b:a 256k -map a "$converted"',
+      '  upload_to_s3 "$out_filename" "$converted"',
+      '  if [[ -d "$LOCAL_AUDIO_DIR" ]]; then',
+      '    cp "$converted" "$LOCAL_AUDIO_DIR/$out_filename"',
+      "  fi",
       '  rm -f "$original" "$converted"',
-      '  echo "Uploaded $BUCKET_URI$filename"',
+      '  echo "Uploaded $out_filename"',
+      '  if [[ "$out_filename" != "$filename" ]]; then',
+      '    echo "NOTE: DB filename still points at $filename — update it to $out_filename (old object left in place)"',
+      "  fi",
       "}",
       "",
     );
 
     for (const song of vbrSongs) {
-      const url = `${s3Base}${song.filename}`;
-      lines.push(
-        `convert_and_replace ${shellEscape(song.filename)} ${shellEscape(url)}`,
-      );
+      lines.push(`convert_and_replace ${shellEscape(song.filename)}`);
     }
   }
 
