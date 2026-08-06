@@ -12,7 +12,6 @@ import {
   Select,
 } from "@chakra-ui/react";
 import { action } from "mobx";
-import { RxColumns } from "react-icons/rx";
 import { PiArrowsInLineHorizontalBold } from "react-icons/pi";
 import { useStore } from "@/src/types/StoreContext";
 import { GRID_DIVISIONS, GridDivisionId } from "@/src/types/BeatGrid";
@@ -87,21 +86,6 @@ export const TempoControls = observer(function TempoControls() {
       </Select>
 
       <IconButton
-        aria-label="Show beat grid"
-        title="Show beat grid"
-        height={6}
-        icon={<RxColumns size={17} />}
-        bgColor={beatGridStore.showGrid ? "orange.700" : undefined}
-        _hover={beatGridStore.showGrid ? { bgColor: "orange.600" } : undefined}
-        onClick={action(() => beatGridStore.toggleGrid())}
-        {...hoverHelpProps(
-          uiStore,
-          "Beat grid",
-          "Draw beat and bar lines over the timeline.",
-        )}
-      />
-
-      <IconButton
         aria-label="Snap to grid"
         title="Snap to grid"
         height={6}
@@ -115,6 +99,7 @@ export const TempoControls = observer(function TempoControls() {
           "Pull block and region edits onto the nearest grid line. Hold ⌃ to bypass.",
         )}
       />
+
     </HStack>
   );
 });

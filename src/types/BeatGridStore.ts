@@ -32,7 +32,7 @@ export class BeatGridStore {
   grid: BeatGrid = BeatGrid.constant(DEFAULT_BPM, 0);
 
   snapEnabled = true;
-  showGrid = true;
+  showGrid = false;
   divisionId: GridDivisionId = "1/4";
   /**
    * Transient by design: a click track left on across sessions is a nasty
@@ -197,7 +197,7 @@ export class BeatGridStore {
     try {
       const settings = JSON.parse(data);
       this.snapEnabled = settings.snapEnabled ?? true;
-      this.showGrid = settings.showGrid ?? true;
+      this.showGrid = settings.showGrid ?? false;
       this.divisionId = settings.divisionId ?? "1/4";
     } catch {
       // corrupt settings shouldn't stop the editor from loading

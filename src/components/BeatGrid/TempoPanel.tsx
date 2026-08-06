@@ -188,6 +188,15 @@ export const TempoPanel = observer(function TempoPanel() {
         <Button
           size="xs"
           flexGrow={1}
+          bgColor={beatGridStore.showGrid ? "orange.700" : undefined}
+          color={beatGridStore.showGrid ? "white" : undefined}
+          onClick={action(() => beatGridStore.toggleGrid())}
+        >
+          Show grid
+        </Button>
+        <Button
+          size="xs"
+          flexGrow={1}
           bgColor={beatGridStore.metronomeEnabled ? "orange.700" : undefined}
           color={beatGridStore.metronomeEnabled ? "white" : undefined}
           onClick={action(() => beatGridStore.toggleMetronome())}
