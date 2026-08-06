@@ -16,6 +16,11 @@ import { CurveVariation, CurveNode } from "@/src/types/Variations/CurveVariation
 import { sampleCurveGeometry } from "@/src/utils/curveGeometry";
 import { useStore } from "@/src/types/StoreContext";
 import { useLaneTimeScale } from "@/src/components/ParameterVariations/LaneTimeScaleContext";
+import {
+  DEFAULT_PARAM_STEP,
+  resolveParamStep,
+  snapValueToStep,
+} from "@/src/utils/paramStep";
 
 // Trim a number to a short, human-editable string (no trailing-zero noise).
 const fmtNum = (n: number) =>
@@ -54,9 +59,12 @@ type EnvelopeGraphProps = {
  * node gestures: click to select, drag to move once the pointer clears a small
  * threshold (so a rapid click does not nudge the point; endpoints move in
  * value only; interior nodes clamp in time between their neighbors; Shift
- * axis-locks the drag, values snap to neighbor values / the range bounds and
- * time snaps to the beat grid unless Ctrl is held, and Esc deselects),
- * double-click to add a node at the click location (also beat-snapped),
+ * axis-locks the drag, mouse-placed values always quantize to the param's
+ * step size (independent of the beat-grid snap toggle), then soft-snap to
+ * neighbor values / the range bounds; time snaps to the beat grid unless Ctrl
+ * is held, and Esc deselects),
+ * double-click to add a node at the click location (beat-snapped in time,
+ * step-snapped in value),
  * Backspace/Delete or double-click a node to delete it. Select a node and press
  * "e" / Enter to open an inline editor to type an
  * exact value (and, for interior nodes, an exact time). Click a
@@ -129,6 +137,20 @@ export const EnvelopeGraph = function EnvelopeGraph({
   const { nodes, duration } = variation;
   const [domainMin, domainMax] = domain;
   const valueSpan = domainMax - domainMin || 1;
+  const param = block.pattern.params[uniformName];
+  const valueStep = resolveParamStep(block, uniformName);
+  // Prefer the param's declared bounds for step clamping so a visually expanded
+  // domain (from an off-step authored node) can't pull snaps off-grid.
+  const stepMin = typeof param?.min === "number" ? param.min : domainMin;
+  const stepMax = typeof param?.max === "number" ? param.max : domainMax;
+  // Refs so pointermove closures always see the latest step/bounds even if a
+  // MobX reaction re-renders mid-drag.
+  const valueStepRef = useRef(valueStep);
+  const stepMinRef = useRef(stepMin);
+  const stepMaxRef = useRef(stepMax);
+  valueStepRef.current = valueStep;
+  stepMinRef.current = stepMin;
+  stepMaxRef.current = stepMax;
 
   const xOfTime = (t: number) => (duration > 0 ? (t / duration) * innerWidth : 0);
   const yOfValue = (v: number) =>
@@ -145,10 +167,26 @@ export const EnvelopeGraph = function EnvelopeGraph({
         domainMin + (1 - (py - PADDING) / (height - 2 * PADDING)) * valueSpan,
       ),
     );
+  // Pixel → value quantized to the param step. Used for node place/move only
+  // (not Bézier handles). Independent of beat-grid snap.
+  const steppedValueOfY = (py: number) =>
+    snapValueToStep(
+      valueOfY(py),
+      valueStepRef.current,
+      stepMinRef.current,
+      stepMaxRef.current,
+    );
 
+  // Map client coords into the SVG's user space (width/height attributes). The
+  // element can be CSS-scaled vs its attributes; without this, Y→value drifts.
   const localPoint = (clientX: number, clientY: number) => {
     const rect = svgRef.current!.getBoundingClientRect();
-    return { px: clientX - rect.left, py: clientY - rect.top };
+    const sx = rect.width > 0 ? innerWidth / rect.width : 1;
+    const sy = rect.height > 0 ? height / rect.height : 1;
+    return {
+      px: (clientX - rect.left) * sx,
+      py: (clientY - rect.top) * sy,
+    };
   };
 
   const commit = (fn: () => void) =>
@@ -276,7 +314,7 @@ export const EnvelopeGraph = function EnvelopeGraph({
         : isLast
           ? variation.duration
           : Math.max(ns[idx - 1].time, Math.min(ns[idx + 1].time, timeOfX(px)));
-      let v = valueOfY(py);
+      let v = steppedValueOfY(py);
       let valueLocked = false;
       // Endpoints are pinned in time; Shift+vertical also locks time.
       let timeLocked = isFirst || isLast;
@@ -305,24 +343,37 @@ export const EnvelopeGraph = function EnvelopeGraph({
         );
       }
 
-      // Value-snap magnet: pull the value onto a neighbor's value or the axis
-      // bounds when within SNAP_PX. Ctrl frees it; a locked value never snaps.
+      // Value-snap magnet: pull toward a neighbor / axis bound when within
+      // SNAP_PX of the cursor. Only on-step candidates are considered so the
+      // magnet can't introduce fractional values on integer params. Ctrl frees
+      // it; a locked value never magnets. Step quantize is re-applied below.
+      const step = valueStepRef.current;
+      const sMin = stepMinRef.current;
+      const sMax = stepMaxRef.current;
       let snap: number | null = null;
       if (!ev.ctrlKey && !valueLocked) {
-        const candidates: number[] = [domainMin, domainMax];
+        const candidates: number[] = [sMin, sMax];
         if (ns[idx - 1]) candidates.push(ns[idx - 1].value);
         if (ns[idx + 1]) candidates.push(ns[idx + 1].value);
-        const yv = yOfValue(v);
         let bestDist = SNAP_PX;
         for (const c of candidates) {
-          const d = Math.abs(yOfValue(c) - yv);
+          const aligned = snapValueToStep(c, step, sMin, sMax);
+          // Skip candidates that can't land on the step grid (e.g. off-step
+          // typed values when step is 1 — matching them would break the grid).
+          if (Math.abs(aligned - c) > step * 1e-6) continue;
+          const d = Math.abs(yOfValue(aligned) - py);
           if (d < bestDist) {
             bestDist = d;
-            snap = c;
+            snap = aligned;
           }
         }
         if (snap != null) v = snap;
       }
+
+      // Final step quantize — always wins for mouse moves (even after magnet).
+      // Skip when Shift locked the value (time-only drag) so an intentionally
+      // typed off-step node isn't rewritten just by nudging it in time.
+      if (!valueLocked) v = snapValueToStep(v, step, sMin, sMax);
 
       setSnapValue(snap);
       commit(() => variation.setNode(id, t, v));
@@ -468,7 +519,7 @@ export const EnvelopeGraph = function EnvelopeGraph({
     let addedId = "";
     const t = snapRegionTime(timeOfX(px), e.ctrlKey);
     commit(() => {
-      addedId = variation.addNodeAtTime(t, valueOfY(py)).id;
+      addedId = variation.addNodeAtTime(t, steppedValueOfY(py)).id;
     });
     setSelectedId(addedId);
     setSelectedSegment(null);
@@ -689,6 +740,7 @@ export const EnvelopeGraph = function EnvelopeGraph({
           duration={duration}
           prevTime={nodes[selectedIdx - 1]?.time ?? 0}
           nextTime={nodes[selectedIdx + 1]?.time ?? duration}
+          valueStep={valueStep}
           x={xOfTime(selectedNode.time)}
           y={yOfValue(selectedNode.value)}
           originX={svgRef.current?.getBoundingClientRect().left ?? 0}
@@ -745,6 +797,7 @@ function NodeNumericEditor({
   duration,
   prevTime,
   nextTime,
+  valueStep,
   x,
   y,
   originX,
@@ -761,6 +814,7 @@ function NodeNumericEditor({
   duration: number;
   prevTime: number;
   nextTime: number;
+  valueStep: number;
   x: number;
   y: number;
   originX: number;
@@ -798,12 +852,13 @@ function NodeNumericEditor({
   const tMax = Math.min(nextTime, duration);
   const clampT = (t: number) => Math.max(tMin, Math.min(tMax, t));
 
-  const VALUE_STEP = 0.1;
+  const VALUE_STEP = valueStep > 0 ? valueStep : DEFAULT_PARAM_STEP;
   const TIME_STEP = 0.1;
 
   // Live-apply as a field changes (typing / field arrow-nudge) so the node moves
-  // in real time — no Enter needed. Value is unclamped (out-of-range values just
-  // expand the axis); time clamps into [tMin, tMax].
+  // in real time — no Enter needed. Value is unclamped (out-of-range / off-step
+  // typed values are allowed — step snap is only for mouse place/drag); time
+  // clamps into [tMin, tMax].
   const applyV = (raw: string) => {
     const v = parseFloat(raw);
     if (Number.isFinite(v)) onCommit(node.time, v);
@@ -846,11 +901,14 @@ function NodeNumericEditor({
         e.currentTarget.blur();
       } else if (e.key === "ArrowUp" || e.key === "ArrowDown") {
         e.preventDefault();
-        // read the live DOM value so holding the arrow accumulates correctly
+        // read the live DOM value so holding the arrow accumulates correctly.
+        // Shift = 10× finer only when the step is already small; for step 1,
+        // keep whole-number nudges (a 0.1 fine nudge would just snap back).
         const base = Number.isFinite(parseFloat(e.currentTarget.value))
           ? parseFloat(e.currentTarget.value)
           : 0;
-        let next = base + (e.key === "ArrowUp" ? 1 : -1) * step * (e.shiftKey ? 0.1 : 1);
+        const fine = e.shiftKey && step <= 0.1 ? 0.1 : 1;
+        let next = base + (e.key === "ArrowUp" ? 1 : -1) * step * fine;
         if (clamp) next = clamp(next);
         const s = fmtNum(next);
         setStr(s);
@@ -882,8 +940,10 @@ function NodeNumericEditor({
     e.preventDefault();
     e.stopPropagation();
     if (e.key === "ArrowUp" || e.key === "ArrowDown") {
-      const dv = (e.key === "ArrowUp" ? 1 : -1) * VALUE_STEP * (e.shiftKey ? 0.1 : 1);
-      onCommit(node.time, node.value + dv);
+      // Shift = 10× finer only for small steps; integer params stay on integers.
+      const fine = e.shiftKey && VALUE_STEP <= 0.1 ? 0.1 : 1;
+      const dv = (e.key === "ArrowUp" ? 1 : -1) * VALUE_STEP * fine;
+      onCommit(node.time, snapValueToStep(node.value + dv, VALUE_STEP));
     } else {
       if (e.shiftKey) {
         onNavigate(e.key === "ArrowRight" ? 1 : -1);
@@ -960,7 +1020,13 @@ function NodeNumericEditor({
           }}
           onFocus={() => onFieldFocus(vFocused)}
           onBlur={() => onFieldBlur(vFocused, commitV)}
-          onKeyDown={fieldKeyHandler(setVStr, applyV, commitV, VALUE_STEP)}
+          onKeyDown={fieldKeyHandler(
+            setVStr,
+            applyV,
+            commitV,
+            VALUE_STEP,
+            (n) => snapValueToStep(n, VALUE_STEP),
+          )}
         />
       </HStack>
       {!timeFixed && (

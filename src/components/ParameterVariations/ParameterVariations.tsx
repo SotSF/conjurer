@@ -19,6 +19,11 @@ import { useLaneTimeScale } from "@/src/components/ParameterVariations/LaneTimeS
 import { InsertType } from "@/src/utils/regionConvert";
 import { CurveVariation } from "@/src/types/Variations/CurveVariation";
 import { laneRegions, laneSnapTargets } from "@/src/utils/laneSpan";
+import {
+  paramHasExplicitStep,
+  resolveParamStep,
+  snapValueToStep,
+} from "@/src/utils/paramStep";
 
 // pointer travel (px) that turns a click on the lane into a span drag
 const SPAN_DRAG_THRESHOLD_PX = 4;
@@ -221,6 +226,11 @@ export const ParameterVariations = observer(function ParameterVariations({
   // Hover value cursor: a vertical line + readout that follows the mouse to any
   // x (not quantized to samples) and reports the param's value there via each
   // region's valueAtTime — works across all region types (curve/LFO/audio/...).
+  // Params with an explicit step (Segments, Bars, …) snap the *displayed*
+  // cursor onto that grid so the UI never suggests off-step placements. The
+  // underlying curve / shader sample is left continuous.
+  const snapHover = paramHasExplicitStep(block, uniformName);
+  const valueStep = resolveParamStep(block, uniformName);
   const [cursorX, setCursorX] = useState<number | null>(null);
   let cursorValue: number | null = null;
   if (cursorX != null && variations.length) {
@@ -231,7 +241,15 @@ export const ParameterVariations = observer(function ParameterVariations({
       if (time < acc + v.duration || i === variations.length - 1) {
         const local = Math.max(0, Math.min(v.duration, time - acc));
         const value = v.valueAtTime(local, block.startTime + time);
-        if (typeof value === "number") cursorValue = value;
+        if (typeof value === "number")
+          cursorValue = snapHover
+            ? snapValueToStep(
+                value,
+                valueStep,
+                typeof param?.min === "number" ? param.min : undefined,
+                typeof param?.max === "number" ? param.max : undefined,
+              )
+            : value;
         break;
       }
       acc += v.duration;
