@@ -96,7 +96,7 @@ export const TempoControls = observer(function TempoControls() {
         {...hoverHelpProps(
           uiStore,
           "Snap to grid",
-          "Pull block and region edits onto the nearest grid line. Hold ⌃ to bypass.",
+          "Pull blocks, regions, and curve points onto the nearest grid line. Hold ⌃ to bypass.",
         )}
       />
 
