@@ -31,7 +31,7 @@ export const BeatGridOverlay = observer(function BeatGridOverlay() {
   const containerRef = useRef<HTMLDivElement>(null);
 
   const { pixelsPerSecond } = uiStore;
-  const { grid, showGrid, divisionBeats } = beatGridStore;
+  const { grid, showGrid, showAnchors, divisionBeats } = beatGridStore;
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -117,7 +117,7 @@ export const BeatGridOverlay = observer(function BeatGridOverlay() {
 
       // Anchors are the handles the tempo map pivots around, so they get their
       // own mark — without one, a multi-tempo grid is impossible to reason about.
-      if (!grid.isConstant) {
+      if (showAnchors && !grid.isConstant) {
         context.strokeStyle = ANCHOR_STYLE;
         context.lineWidth = 2;
         for (const anchor of grid.anchors) {
@@ -151,7 +151,7 @@ export const BeatGridOverlay = observer(function BeatGridOverlay() {
       window.removeEventListener("resize", schedule);
       resizeObserver.disconnect();
     };
-  }, [pixelsPerSecond, grid, showGrid, divisionBeats]);
+  }, [pixelsPerSecond, grid, showGrid, showAnchors, divisionBeats]);
 
   return (
     <Box

@@ -32,7 +32,12 @@ export class BeatGridStore {
   grid: BeatGrid = BeatGrid.constant(DEFAULT_BPM, 0);
 
   snapEnabled = true;
-  showGrid = false;
+  showGrid = true;
+  /**
+   * Thick orange marks at tempo-map anchors. Off by default — useful when
+   * editing a multi-tempo grid, noisy otherwise.
+   */
+  showAnchors = false;
   divisionId: GridDivisionId = "1/4";
   /**
    * Transient by design: a click track left on across sessions is a nasty
@@ -96,6 +101,11 @@ export class BeatGridStore {
 
   toggleGrid = () => {
     this.showGrid = !this.showGrid;
+    this.saveToLocalStorage();
+  };
+
+  toggleAnchors = () => {
+    this.showAnchors = !this.showAnchors;
     this.saveToLocalStorage();
   };
 
@@ -197,7 +207,8 @@ export class BeatGridStore {
     try {
       const settings = JSON.parse(data);
       this.snapEnabled = settings.snapEnabled ?? true;
-      this.showGrid = settings.showGrid ?? false;
+      this.showGrid = settings.showGrid ?? true;
+      this.showAnchors = settings.showAnchors ?? false;
       this.divisionId = settings.divisionId ?? "1/4";
     } catch {
       // corrupt settings shouldn't stop the editor from loading
@@ -211,6 +222,7 @@ export class BeatGridStore {
       JSON.stringify({
         snapEnabled: this.snapEnabled,
         showGrid: this.showGrid,
+        showAnchors: this.showAnchors,
         divisionId: this.divisionId,
       }),
     );
