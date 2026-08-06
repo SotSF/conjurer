@@ -31,10 +31,11 @@ export default function Admin() {
           py={8}
           px={4}
         >
-          <Box maxW="48rem" mx="auto" w="full" pb={8}>
+          <Box maxW="64rem" mx="auto" w="full" pb={8}>
             <Heading mb={2}>Admin</Heading>
             <Text mb={8} color="gray.400" fontSize="sm">
-              Internal tools for inspecting song assets.{" "}
+              Scan audio assets for variable bitrate and generate CBR conversion
+              scripts.{" "}
               <Link href="/" color="blue.300">
                 Back to Conjurer
               </Link>
