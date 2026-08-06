@@ -174,6 +174,15 @@ export class CurveVariation extends Variation<number> {
       const b = nodes[i + 1];
       if (a.time <= time && time < b.time) {
         const [p0, p1, p2, p3] = this.segmentControlPoints(i);
+        // A segment whose four control values are equal IS that constant, so
+        // return it exactly. evalCubic evaluates the Bernstein basis directly,
+        // and t^3 + 3t^2*s + 3t*s^2 + s^3 does not sum to exactly 1 in floating
+        // point, so a flat region otherwise yields value +/- 1 ulp for ~32% of
+        // times. That is invisible on a float uniform, but int uniforms are
+        // uploaded with gl.uniform1i, which TRUNCATES: 3.9999999999999996
+        // reaches the shader as 3. It flipped Log Spirals between 4 and 3 arms
+        // every few frames (u_spiralCount / u_colorIterations are `uniform int`).
+        if (p0.v === p1.v && p1.v === p2.v && p2.v === p3.v) return p0.v;
         return bezierValueAtX(
           p0.t,
           p0.v,
