@@ -11,7 +11,24 @@ import { isNumberParam } from "@/src/params/number/isNumberParam";
 import { isVector4Param } from "@/src/params/vector4/isVector4Param";
 import { isPaletteParam } from "@/src/params/palette/isPaletteParam";
 
-const round2 = (value: number) => Math.round(value * 100) / 100;
+/** Matches the default step used by number/boolean parameter controls. */
+const DEFAULT_STEP = 0.01;
+
+/**
+ * Picks a uniformly random value in `[min, max]` on the param's step grid.
+ */
+function randomSteppedNumber(min: number, max: number, step: number): number {
+  if (!(step > 0) || !(max > min)) {
+    return min;
+  }
+  const nSteps = Math.max(0, Math.round((max - min) / step));
+  const index = Math.floor(Math.random() * (nSteps + 1));
+  const raw = min + index * step;
+  // Kill float drift (e.g. 0.1 + 0.2) the same way UI/MIDI snapping does.
+  const snapped = Math.round(raw / step) * step;
+  const precision = Math.max(0, Math.ceil(-Math.log10(step)));
+  return Math.min(max, Math.max(min, Number(snapped.toFixed(precision))));
+}
 
 function setFlatVariation(block: Block, uniformName: string, value: number) {
   if (!block.parameterVariations[uniformName])
@@ -33,7 +50,11 @@ function randomizeParams(block: Block): void {
     } else if (isNumberParam(param)) {
       const min = typeof param.min === "number" ? param.min : 0;
       const max = typeof param.max === "number" ? param.max : 1;
-      const value = round2(min + Math.random() * (max - min));
+      const step =
+        typeof param.step === "number" && param.step > 0
+          ? param.step
+          : DEFAULT_STEP;
+      const value = randomSteppedNumber(min, max, step);
       param.value = value;
       setFlatVariation(block, uniformName, value);
     } else if (isVector4Param(param)) {

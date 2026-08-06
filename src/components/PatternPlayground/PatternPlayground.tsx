@@ -17,6 +17,7 @@ import { SendDataButton } from "@/src/components/SendDataButton";
 import { VJDisplayModeButtons } from "@/src/components/VJPage/VJDisplayModeButtons";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { randomizeBlockParameters } from "@/src/utils/randomizeBlockParameters";
+import { resetBlockParamsToDefaults } from "@/src/utils/resetBlockParamsToDefaults";
 // import { RecordCanvasControls } from "@/src/components/PatternPlayground/RecordCanvasControls";
 
 export const PatternPlayground = observer(function PatternPlayground() {
@@ -33,17 +34,27 @@ export const PatternPlayground = observer(function PatternPlayground() {
     selectedPatternBlock,
   } = playgroundStore;
 
-  // Bumped whenever every block's parameters are randomized at once, so both the
+  // Bumped whenever every block's parameters are randomized or reset at once, so both the
   // pattern's and its applied effects' ParameterControls remount together and pick up the
-  // new values. Randomizing a single block is handled within its own ParameterControls.
+  // new values. Changing a single block is handled within its own ParameterControls.
   // Combined with playgroundStore.controlsNonce (external loads, e.g. from timeline).
   const [randomizeNonce, setRandomizeNonce] = useState(0);
   const controlsNonce = randomizeNonce + playgroundStore.controlsNonce;
 
+  const bumpControlsNonce = useCallback(() => {
+    setRandomizeNonce((n) => n + 1);
+  }, []);
+
   const onRandomizeAll = useCallback(() => {
     randomizeBlockParameters(selectedPatternBlock);
-    setRandomizeNonce((n) => n + 1);
-  }, [selectedPatternBlock]);
+    bumpControlsNonce();
+  }, [selectedPatternBlock, bumpControlsNonce]);
+
+  const onResetAllDefaults = useCallback(() => {
+    resetBlockParamsToDefaults(selectedPatternBlock);
+    selectedPatternBlock.effectBlocks.forEach(resetBlockParamsToDefaults);
+    bumpControlsNonce();
+  }, [selectedPatternBlock, bumpControlsNonce]);
 
   const applyPatternEffects = useCallback(
     (patternIndex: number, effectIndices: number[]) => {
@@ -200,6 +211,14 @@ export const PatternPlayground = observer(function PatternPlayground() {
                 >
                   <Button size="xs" onClick={onRandomizeAll}>
                     Randomize all
+                  </Button>
+                </Tooltip>
+                <Tooltip
+                  label="Reset parameters for the pattern and every effect applied to it to defaults"
+                  openDelay={500}
+                >
+                  <Button size="xs" onClick={onResetAllDefaults}>
+                    Reset all
                   </Button>
                 </Tooltip>
               </HStack>
