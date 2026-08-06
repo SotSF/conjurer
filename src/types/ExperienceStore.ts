@@ -53,11 +53,11 @@ export class ExperienceStore {
     });
   };
 
-  loadEmptyExperience = () => {
+  loadEmptyExperience = (name: string = "untitled") => {
     this.store.deserialize({
       id: undefined,
       user: this.store.userStore.me ?? { id: -1, username: "" },
-      name: "untitled",
+      name,
       song: NO_SONG,
       status: "inprogress",
       version: EXPERIENCE_VERSION,
@@ -73,13 +73,18 @@ export class ExperienceStore {
 
   load = async (experienceName: string) => {
     this.loadingExperienceName = experienceName;
-    const experience = await trpcClient.experience.getExperience.query({
-      experienceName,
-      usingLocalData: this.store.usingLocalData,
-    });
-    if (!experience) this.loadEmptyExperience();
-    else this.loadExperience(experience);
-    this.loadingExperienceName = null;
+    try {
+      const experience = await trpcClient.experience.getExperience.query({
+        experienceName,
+        usingLocalData: this.store.usingLocalData,
+      });
+      // Keep the requested name when missing so the URL-driven load effect does
+      // not see a mismatch (untitled vs URL) and refetch forever.
+      if (!experience) this.loadEmptyExperience(experienceName);
+      else this.loadExperience(experience);
+    } finally {
+      this.loadingExperienceName = null;
+    }
   };
 
   loadById = async (experienceId: number) => {
