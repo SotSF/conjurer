@@ -5,6 +5,7 @@ import { useStore } from "@/src/types/StoreContext";
 import { KeyboardControls } from "@/src/components/KeyboardControls";
 import { TimerAndWaveform } from "@/src/components/Timeline/TimerAndWaveform";
 import PortalNarrativeModal from "@/src/components/PortalNarrativeModal";
+import { useRouter } from "next/router";
 
 type Props = {
   portalNarrative?: boolean;
@@ -14,12 +15,16 @@ export const ViewerPage = memo(function ViewerPage({
   portalNarrative = false,
 }: Props) {
   const store = useStore();
+  const router = useRouter();
   const didInitialize = useRef(false);
   useEffect(() => {
-    if (didInitialize.current) return;
+    if (didInitialize.current || !router.isReady) return;
     didInitialize.current = true;
-    store.initializeClientSide();
-  }, [store]);
+    const experienceName = router.query.experience;
+    void store.initializeClientSide(
+      typeof experienceName === "string" ? experienceName : undefined,
+    );
+  }, [store, router.isReady, router.query.experience]);
 
   return (
     <Box position="relative" w="100vw" h="100vh">
