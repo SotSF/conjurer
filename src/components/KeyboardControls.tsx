@@ -48,6 +48,12 @@ export const KeyboardControls = observer(function KeyboardControls({
       } else if (e.key === "ArrowRight") {
         audioStore.skipForward();
         e.preventDefault();
+      } else if (e.key === "Home") {
+        audioStore.goToBeginning();
+        e.preventDefault();
+      } else if (e.key === "End") {
+        audioStore.goToEnd();
+        e.preventDefault();
       } else if (editMode && e.key === "o" && (e.ctrlKey || e.metaKey)) {
         uiStore.attemptShowOpenExperienceModal();
         e.preventDefault();
