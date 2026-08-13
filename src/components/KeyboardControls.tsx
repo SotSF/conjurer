@@ -4,6 +4,7 @@ import { action } from "mobx";
 import { observer } from "mobx-react-lite";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
+import { scrollPlayheadIntoView } from "@/src/utils/scrollPlayheadIntoView";
 
 type Props = {
   editMode?: boolean;
@@ -50,9 +51,11 @@ export const KeyboardControls = observer(function KeyboardControls({
         e.preventDefault();
       } else if (e.key === "Home") {
         audioStore.goToBeginning();
+        scrollPlayheadIntoView();
         e.preventDefault();
       } else if (e.key === "End") {
         audioStore.goToEnd();
+        scrollPlayheadIntoView();
         e.preventDefault();
       } else if (editMode && e.key === "o" && (e.ctrlKey || e.metaKey)) {
         uiStore.attemptShowOpenExperienceModal();
