@@ -13,6 +13,7 @@ uniform float u_radius;
 uniform float u_theta_min;
 uniform float u_theta_max;
 uniform float u_inverse;
+uniform float u_mask_twist;
 
 // // For debugging
 // #define u_inner_radius 0.0
@@ -20,12 +21,18 @@ uniform float u_inverse;
 // #define u_theta_min 0.0
 // #define u_theta_max 360.0
 // #define u_inverse 0.0
+// #define u_mask_twist 0.0
 
 void main() {
     vec2 st = v_uv;
     st = cartesianToCanopyProjection(st);
     // In canopy coordinates: st.y is the radial distance (0 = apex, 1 = outer
     // edge) and st.x is the angle around the center, normalized to 0..1.
+
+    // Twist the MASK's own angular coordinate, proportional to radius --
+    // distinct from the Twist pattern, which resamples the image itself.
+    // Default 0 is a no-op (fract of an already-wrapped value).
+    st.x = fract(st.x + u_mask_twist * st.y);
 
     // Radial band: keep pixels between the inner and outer radius. The default
     // inner radius of 0 keeps the full inner disc, matching legacy behavior
