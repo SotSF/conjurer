@@ -58,6 +58,7 @@ export class AudioVariation extends Variation<number> {
     duration: this.duration,
     factor: this.factor,
     offset: this.offset,
+    smoothing: this.smoothing,
   });
 
   static deserialize = (store: Store, data: any) =>
