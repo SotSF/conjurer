@@ -47,7 +47,11 @@ const gatherSignals = (block: Block) => {
   const autoFading = !!block.layer?.autoOpacityVariations(block);
 
   const patternSignals: Signal[] = Object.entries(block.pattern.params)
-    .filter(([uniformName]) => !BASE_EXCLUDED.includes(uniformName))
+    .filter(
+      ([uniformName]) =>
+        !BASE_EXCLUDED.includes(uniformName) &&
+        (uniformName !== "u_opacity" || block.opacityApplies),
+    )
     .map(([uniformName, patternParam]) => {
       const isOpacity = uniformName === "u_opacity";
       // opacity is special: the pipeline writes the live crossfade value back
@@ -168,18 +172,20 @@ export const BlockDotRow = observer(function BlockDotRow({
       onMouseLeave={() => setHovered(false)}
     >
       <HStack spacing="3px" px={2} pb={1} justify="center">
-        <Box
-          as="span"
-          width="7px"
-          height="7px"
-          borderRadius="50%"
-          bg={opacityFill}
-          border={
-            opacityFill === "transparent"
-              ? `1px solid ${DEFAULT_BORDER}`
-              : undefined
-          }
-        />
+        {block.opacityApplies && (
+          <Box
+            as="span"
+            width="7px"
+            height="7px"
+            borderRadius="50%"
+            bg={opacityFill}
+            border={
+              opacityFill === "transparent"
+                ? `1px solid ${DEFAULT_BORDER}`
+                : undefined
+            }
+          />
+        )}
         <Text as="span" fontSize="9px" fontWeight={600} color={AUTHORED_COLOR}>
           {authoredCount}●
         </Text>

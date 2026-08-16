@@ -155,14 +155,24 @@ export class Block {
     saveBlockLanes(this.store.experienceName, this.id, [...this.lanedParams]);
   };
 
+  /**
+   * Whether anything consumes this block's opacity.
+   *
+   * Opacity is applied by the merge shader where a block's output is combined
+   * with its siblings'. An effect never reaches a merge — it is one pass inside
+   * a pattern block's chain, or inside a layer or global effect chain — so its
+   * opacity would be authored into a void.
+   */
+  get opacityApplies(): boolean {
+    return !this.parentBlock && !this.inEffectChain;
+  }
+
   // uniform names on this block that can be given an automation lane: excludes
   // machinery uniforms and opacity on effects (applied per pattern). Palettes
   // are included — their lane shows discrete color regions over time.
   get lanableParamNames(): string[] {
     const excluded = new Set(["u_time", "u_texture"]);
-    // opacity is applied per pattern block when its output is merged; an effect
-    // has no merge of its own
-    if (this.parentBlock || this.inEffectChain) excluded.add("u_opacity");
+    if (!this.opacityApplies) excluded.add("u_opacity");
     return Object.keys(this.pattern.params).filter(
       (name) => !excluded.has(name),
     );
