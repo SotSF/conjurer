@@ -153,7 +153,9 @@ const MergeThroughPopulatedChain = observer(function MergeThroughPopulatedChain(
   const chainSource = useRenderTarget();
   const chainScratch = useRenderTarget();
 
-  const activeEffects = chain.activeBlocks;
+  // chain blocks never overlap, so at most one is in the signal path
+  const activeBlock = chain.activeBlocks[0] ?? null;
+  const activeEffects = activeBlock?.effectBlocks ?? [];
   const chainActive = activeEffects.length > 0;
 
   return (
@@ -163,10 +165,11 @@ const MergeThroughPopulatedChain = observer(function MergeThroughPopulatedChain(
         inputs={inputs}
         destinationTarget={chainActive ? chainSource : destinationTarget}
       />
-      {chainActive && (
+      {chainActive && activeBlock && (
         <EffectChainNode
           basePriority={chainPriority + 1}
           parameterPriority={chainPriority}
+          parameterBlock={activeBlock}
           effectBlocks={activeEffects}
           sourceTarget={chainSource}
           scratchTarget={chainScratch}

@@ -9,11 +9,13 @@ type EffectChainNodeProps = {
   // priority of the first effect's render pass; effect i renders at
   // basePriority + i
   basePriority: number;
-  // when set, this node drives each effect block's uniforms at that priority,
+  // when set, this node drives parameterBlock's uniforms at that priority,
   // which must come before basePriority. Chains hanging off a pattern block
   // leave this unset: the pattern block already updates its effects' params
   // along with its own.
   parameterPriority?: number;
+  // the chain block these effects belong to, whose timeline they run on
+  parameterBlock?: Block;
   effectBlocks: Block[];
   // holds the chain's input; read by the first effect and by nothing after it
   sourceTarget: WebGLRenderTarget;
@@ -38,6 +40,7 @@ type EffectChainNodeProps = {
 export const EffectChainNode = observer(function EffectChainNode({
   basePriority,
   parameterPriority,
+  parameterBlock,
   effectBlocks,
   sourceTarget,
   scratchTarget,
@@ -53,10 +56,10 @@ export const EffectChainNode = observer(function EffectChainNode({
 
   return (
     <>
-      {parameterPriority !== undefined && (
+      {parameterPriority !== undefined && parameterBlock && (
         <EffectChainParameterNode
           priority={parameterPriority}
-          effectBlocks={effectBlocks}
+          block={parameterBlock}
         />
       )}
       {effectBlocks.map((effectBlock, i) => {
@@ -77,14 +80,15 @@ export const EffectChainNode = observer(function EffectChainNode({
 
 type EffectChainParameterNodeProps = {
   priority: number;
-  effectBlocks: Block[];
+  block: Block;
 };
 
-// Drives the uniforms of a chain whose blocks each run on their own timeline,
-// ahead of the passes that consume them.
+// Drives a chain block's uniforms ahead of the passes that consume them. The
+// block's own update recurses into its effects, so they all run on its
+// timeline — the same relationship a pattern block has with its effects.
 const EffectChainParameterNode = observer(function EffectChainParameterNode({
   priority,
-  effectBlocks,
+  block,
 }: EffectChainParameterNodeProps) {
   const { audioStore } = useStore();
 
@@ -93,8 +97,7 @@ const EffectChainParameterNode = observer(function EffectChainParameterNode({
     // observableRequiresReaction is enabled, but it's fine. We don't want this
     // function to react to it - it runs every frame already.
     const { globalTime } = audioStore;
-    for (const effectBlock of effectBlocks)
-      effectBlock.updateParameters(globalTime - effectBlock.startTime);
+    block.updateParameters(globalTime - block.startTime);
   }, priority);
 
   return null;

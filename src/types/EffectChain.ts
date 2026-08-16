@@ -6,16 +6,20 @@ import type { Pattern } from "@/src/types/Pattern";
 import type { Variation } from "@/src/types/Variations/Variation";
 import { generateId } from "@/src/utils/id";
 import { DEFAULT_BLOCK_DURATION } from "@/src/utils/time";
-import { defaultEffectMap } from "@/src/effects/effects";
+import { EffectChainSource } from "@/src/patterns/EffectChainSource";
 
 // used for a block's lane until its actual rendered height is reported
 const UNMEASURED_BLOCK_HEIGHT = 50;
 
 /**
- * An ordered chain of effect blocks applied to already-composited output —
- * either one layer's merged blocks or the entire layer stack. Position in
- * `blocks` is signal order; each block's start time and duration decide when it
- * is in the signal path at all.
+ * The effects applied to already-composited output — either one layer's merged
+ * blocks or the entire layer stack.
+ *
+ * A chain holds blocks the way a layer does, and each block holds a stack of
+ * effects the way a pattern block does: the block owns the time bounds, and the
+ * effects inside it share those bounds and run in the order they are stacked.
+ * Blocks never overlap, so the chain's own ordering is purely chronological and
+ * carries no signal meaning.
  *
  * It implements Layer so that the timeline's block components (drag, resize,
  * selection, automation lanes) drive chain blocks through the same code paths
@@ -179,21 +183,33 @@ export class EffectChain implements Layer {
     this.visible = !this.visible;
   };
 
-  // Append an effect to the end of the chain, playing from the playhead.
+  /**
+   * Starts a new chain block at the playhead holding this effect.
+   *
+   * Effects live inside a chain block rather than alongside it, so this is how
+   * a chain gains a block; further effects are stacked onto an existing one
+   * through Block.addCloneOfEffect.
+   */
   addCloneOfEffect = (effect: Pattern) => {
-    const block = new Block(this.store, effect.clone());
-    block.setTiming({
-      startTime: this.store.audioStore.globalTime,
-      duration: DEFAULT_BLOCK_DURATION,
-    });
+    const { startTime, duration } = this.getNextValidStartAndDuration(
+      this.store.audioStore.globalTime,
+      DEFAULT_BLOCK_DURATION,
+    );
+    const block = new Block(this.store, EffectChainSource());
+    block.setTiming({ startTime, duration });
     this.addBlock(block);
+    block.addCloneOfEffect(effect);
     return block;
   };
 
+  // kept in start time order, which is the only order a chain block has: its
+  // effects carry the signal order, and blocks never overlap
   addBlock = (block: Block) => {
     block.layer = this;
     block.inEffectChain = true;
-    this.blocks.push(block);
+    const index = this.blocks.findIndex((b) => b.startTime > block.startTime);
+    if (index === -1) this.blocks.push(block);
+    else this.blocks.splice(index, 0, block);
   };
 
   removeBlock = (block: Block) => {
@@ -204,28 +220,14 @@ export class EffectChain implements Layer {
     block.inEffectChain = false;
   };
 
-  // Move a block `delta` positions along the chain, changing the order its
-  // effect is applied in.
-  reorderBlock = (block: Block, delta: number) => {
-    const index = this.blocks.indexOf(block);
-    if (index < 0) return;
-
-    const newIndex = index + delta;
-    if (newIndex < 0 || newIndex >= this.blocks.length) return;
-
-    this.blocks.splice(index, 1);
-    this.blocks.splice(newIndex, 0, block);
-  };
-
-  // Only effects belong in a chain, so a pattern block dropped here is ignored.
   insertCloneOfBlock = (block: Block) => {
-    if (!defaultEffectMap[block.pattern.name]) return;
     const clone = block.clone();
     clone.regenerateId();
-    clone.setTiming({
-      startTime: this.store.audioStore.globalTime,
-      duration: block.duration,
-    });
+    const { startTime, duration } = this.getNextValidStartAndDuration(
+      this.store.audioStore.globalTime,
+      block.duration,
+    );
+    clone.setTiming({ startTime, duration });
     this.addBlock(clone);
   };
 
@@ -233,13 +235,48 @@ export class EffectChain implements Layer {
     return this.blocks.slice();
   }
 
+  // The first gap at or after fromTime that no block occupies. Chain blocks
+  // apply in series to the same composited input, so overlapping them would
+  // leave their order to something the timeline cannot show.
   getNextValidStartAndDuration(fromTime: number, maxDuration: number) {
-    return { startTime: fromTime, duration: maxDuration };
+    let startTime = fromTime;
+    for (const block of this.blocks) {
+      if (block.endTime <= startTime) continue;
+      if (block.startTime >= startTime + maxDuration) break;
+      startTime = block.endTime;
+    }
+    const next = this.blocks.find((b) => b.startTime >= startTime);
+    const available = next ? next.startTime - startTime : Infinity;
+    return { startTime, duration: Math.min(maxDuration, available) };
   }
+
+  // the blocks either side of the given one in time, which bound its move and
+  // resize range
+  private neighborsOf = (block: Block) => {
+    let previous: Block | null = null;
+    let next: Block | null = null;
+    for (const other of this.blocks) {
+      if (other === block) continue;
+      if (other.startTime < block.startTime) {
+        if (!previous || other.startTime > previous.startTime) previous = other;
+      } else if (!next || other.startTime < next.startTime) next = other;
+    }
+    return { previous, next };
+  };
 
   attemptMoveBlock = (block: Block, desiredTime: number, relative = false) => {
     if (block.layer != this || block.locked) return;
-    block.startTime = relative ? desiredTime + block.startTime : desiredTime;
+
+    const desiredStartTime = relative ? block.startTime + desiredTime : desiredTime;
+    const { previous, next } = this.neighborsOf(block);
+    const lowerBound = previous?.endTime ?? 0;
+    const upperBound = (next?.startTime ?? Infinity) - block.duration;
+    if (upperBound < lowerBound) return;
+
+    block.startTime = Math.min(Math.max(desiredStartTime, lowerBound), upperBound);
+    // start time decides position in the chain's ordering
+    this.blocks.splice(this.blocks.indexOf(block), 1);
+    this.addBlock(block);
   };
 
   resizeBlockLeftBound = (block: Block, delta: number) => {
@@ -248,14 +285,10 @@ export class EffectChain implements Layer {
     const desiredStartTime = block.startTime + delta;
     if (desiredStartTime >= block.endTime) return;
 
-    if (desiredStartTime < 0) {
-      block.duration = block.endTime;
-      block.startTime = 0;
-      return;
-    }
-
-    block.startTime += delta;
-    block.duration -= delta;
+    const lowerBound = this.neighborsOf(block).previous?.endTime ?? 0;
+    const startTime = Math.max(desiredStartTime, lowerBound);
+    block.duration = block.endTime - startTime;
+    block.startTime = startTime;
   };
 
   resizeBlockRightBound = (block: Block, delta: number) => {
@@ -264,7 +297,8 @@ export class EffectChain implements Layer {
     const desiredEndTime = block.endTime + delta;
     if (desiredEndTime <= block.startTime) return;
 
-    block.duration += delta;
+    const upperBound = this.neighborsOf(block).next?.startTime ?? Infinity;
+    block.duration = Math.min(desiredEndTime, upperBound) - block.startTime;
   };
 
   // Chain blocks are applied in series rather than summed, so there is no

@@ -76,11 +76,11 @@ const paletteToGradient = (palette: Palette): string => {
 
 // 4a device panel — a fixed-height bottom panel (Ableton Device View) showing
 // the selected block's chain: a source and its effects as left-to-right units
-// in signal order. For a pattern block the source is the pattern; for a block in
-// a layer's or the experience's effect chain it is that chain's composited
-// input, and the units are the whole chain. It is the roster + effect-chain
-// home; motion is still authored on the timeline lanes. Arming a param (◉)
-// opens its lane in the timeline (drives block.lanedParams).
+// in signal order. For a pattern block the source is the pattern; for a chain
+// block it is the composited input the chain is handed. Either way the units
+// after it are that block's own effects. It is the roster + effect-chain home;
+// motion is still authored on the timeline lanes. Arming a param (◉) opens its
+// lane in the timeline (drives block.lanedParams).
 export const BlockDevicePanel = observer(function BlockDevicePanel() {
   const store = useStore();
   const block = selectedPatternBlock(store);
@@ -91,26 +91,18 @@ export const BlockDevicePanel = observer(function BlockDevicePanel() {
   // Read the observable array in the component's own (tracked) render so the
   // observer re-renders on add/remove/reorder — reading it only inside the
   // Droppable render-prop below would happen outside this component's tracking.
-  const effectBlocks = chain ? [...chain.blocks] : [...block.effectBlocks];
+  const effectBlocks = [...block.effectBlocks];
   const reorderable = effectBlocks.length >= 2;
   const { uiStore } = store;
-
-  const reorderEffect = (effectBlock: Block, delta: number) =>
-    chain
-      ? chain.reorderBlock(effectBlock, delta)
-      : block.reorderEffectBlock(effectBlock, delta);
-  const removeEffect = (effectBlock: Block) =>
-    chain
-      ? chain.removeBlock(effectBlock)
-      : block.removeEffectBlock(effectBlock);
-  const addEffect = (effect: Pattern) =>
-    chain ? chain.addCloneOfEffect(effect) : block.addCloneOfEffect(effect);
 
   const onDragEnd: OnDragEndResponder = action((result) => {
     if (!result.destination) return;
     const effectBlock = effectBlocks[result.source.index];
     if (!effectBlock) return;
-    reorderEffect(effectBlock, result.destination.index - result.source.index);
+    block.reorderEffectBlock(
+      effectBlock,
+      result.destination.index - result.source.index,
+    );
   });
 
   return (
@@ -153,7 +145,7 @@ export const BlockDevicePanel = observer(function BlockDevicePanel() {
             )}
             <Connector />
             <Droppable
-              droppableId={`device-${chain?.id ?? block.id}`}
+              droppableId={`device-${block.id}`}
               direction="horizontal"
             >
               {(provided) => (
@@ -180,8 +172,7 @@ export const BlockDevicePanel = observer(function BlockDevicePanel() {
                           {index > 0 && <Connector />}
                           <EffectUnit
                             effectBlock={effectBlock}
-                            onRemove={() => removeEffect(effectBlock)}
-                            isSelected={chain ? effectBlock === block : false}
+                            onRemove={() => block.removeEffectBlock(effectBlock)}
                             dragHandleProps={
                               reorderable ? prov.dragHandleProps : undefined
                             }
@@ -195,7 +186,7 @@ export const BlockDevicePanel = observer(function BlockDevicePanel() {
               )}
             </Droppable>
             <AddEffectUnit
-              onAddEffect={addEffect}
+              onAddEffect={(effect) => block.addCloneOfEffect(effect)}
               helpDescription={
                 chain
                   ? "Append an effect to this chain, applied to its composited input."
@@ -483,12 +474,10 @@ const PanelIconButton = function PanelIconButton({
 const EffectUnit = function EffectUnit({
   effectBlock,
   onRemove,
-  isSelected,
   dragHandleProps,
 }: {
   effectBlock: Block;
   onRemove: () => void;
-  isSelected: boolean;
   dragHandleProps: any;
 }) {
   const { uiStore } = useStore();
@@ -501,7 +490,7 @@ const EffectUnit = function EffectUnit({
       display="flex"
       flexDirection="column"
       bg="#1b212b"
-      border={`1px solid ${isSelected ? "#3182ce" : "#2f3a48"}`}
+      border="1px solid #2f3a48"
       borderRadius="4px"
       px={1.5}
       py={1}
