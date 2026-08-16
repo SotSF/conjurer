@@ -117,18 +117,38 @@ type MergeThroughEffectChainProps = {
 };
 
 // Merges its inputs and then runs them through a post-composite effect chain.
-// With no effect in the signal path the merge writes the destination directly,
-// so an experience without effect chains renders in exactly as many passes as it
-// would without them.
+// An empty chain merges straight to the destination from here, which keeps the
+// chain's render targets unallocated for the layers — and the experiences —
+// that hold no effects at all.
 const MergeThroughEffectChain = observer(function MergeThroughEffectChain({
+  chain,
+  ...props
+}: MergeThroughEffectChainProps) {
+  if (chain.blocks.length === 0)
+    return (
+      <MergeNodes
+        basePriority={props.mergePriority}
+        inputs={props.inputs}
+        destinationTarget={props.destinationTarget}
+      />
+    );
+
+  return <MergeThroughPopulatedChain chain={chain} {...props} />;
+});
+
+// Merges its inputs through a chain that holds effects, of which any number may
+// be outside their time window at the playhead. With none of them in the signal
+// path the merge writes the destination directly, so a chain costs extra passes
+// only while it is actually doing something.
+const MergeThroughPopulatedChain = observer(function MergeThroughPopulatedChain({
   mergePriority,
   chainPriority,
   chain,
   inputs,
   destinationTarget,
 }: MergeThroughEffectChainProps) {
-  // Held by this component rather than the chain-active branch below so that
-  // the targets survive effects coming in and out of the signal path as the
+  // Keyed to the chain rather than to the effects in the signal path, so that
+  // the targets are allocated once and survive effects coming and going as the
   // playhead moves.
   const chainSource = useRenderTarget();
   const chainScratch = useRenderTarget();
