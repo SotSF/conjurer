@@ -67,7 +67,8 @@ export class EffectChain implements Layer {
     const { globalTime } = this.store.audioStore;
     const active = this.visible
       ? this.blocks.filter(
-          (block) => block.startTime <= globalTime && globalTime < block.endTime,
+          (block) =>
+            block.startTime <= globalTime && globalTime < block.endTime,
         )
       : [];
 

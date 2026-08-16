@@ -140,6 +140,10 @@ export class Store {
     return this._selectedLayer;
   }
   set selectedLayer(value: Layer) {
+    // Effect chains are Layers so the timeline can drive their blocks, but they
+    // hold effects only — selecting one as the layer to add patterns to would
+    // silently drop them.
+    if (value instanceof EffectChain) return;
     if (this._selectedLayer === value) return;
     this._selectedLayer = value;
   }
@@ -699,7 +703,7 @@ export class Store {
 
   addVariation = (block: Block, uniformName: string, variation: Variation) => {
     block.addVariation(uniformName, variation);
-    if (block.layer) this._selectedLayer = block.layer;
+    if (block.layer) this.selectedLayer = block.layer;
     this.selectVariation(block, uniformName, variation);
   };
 

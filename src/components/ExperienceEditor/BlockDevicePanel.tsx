@@ -1,4 +1,6 @@
 import { Block } from "@/src/types/Block";
+import { EffectChain } from "@/src/types/EffectChain";
+import type { Pattern } from "@/src/types/Pattern";
 import { isPalette, Palette } from "@/src/params/palette/Palette";
 import { playgroundEffects } from "@/src/effects/effects";
 import { paramValueAtTime } from "@/src/utils/paramValueAtTime";
@@ -55,6 +57,13 @@ const selectedPatternBlock = (
   return null;
 };
 
+// The chain a block belongs to when it processes composited output rather than
+// living on a pattern block; null for ordinary pattern blocks.
+const owningEffectChain = (block: Block): EffectChain | null =>
+  block.inEffectChain && block.layer instanceof EffectChain
+    ? block.layer
+    : null;
+
 const paletteToGradient = (palette: Palette): string => {
   const stops = [0, 0.2, 0.4, 0.6, 0.8, 1].map((t) => {
     const c = palette.colorAt(t);
@@ -66,30 +75,42 @@ const paletteToGradient = (palette: Palette): string => {
 };
 
 // 4a device panel — a fixed-height bottom panel (Ableton Device View) showing
-// the selected pattern block's chain: the pattern and its effects as
-// left-to-right units in signal order. It is the roster + effect-chain home;
-// motion is still authored on the timeline lanes. Arming a param (◉) opens its
-// lane in the timeline (drives block.lanedParams).
+// the selected block's chain: a source and its effects as left-to-right units
+// in signal order. For a pattern block the source is the pattern; for a block in
+// a layer's or the experience's effect chain it is that chain's composited
+// input, and the units are the whole chain. It is the roster + effect-chain
+// home; motion is still authored on the timeline lanes. Arming a param (◉)
+// opens its lane in the timeline (drives block.lanedParams).
 export const BlockDevicePanel = observer(function BlockDevicePanel() {
   const store = useStore();
   const block = selectedPatternBlock(store);
   if (!block) return null;
 
+  const chain = owningEffectChain(block);
+
   // Read the observable array in the component's own (tracked) render so the
   // observer re-renders on add/remove/reorder — reading it only inside the
   // Droppable render-prop below would happen outside this component's tracking.
-  const effectBlocks = [...block.effectBlocks];
+  const effectBlocks = chain ? [...chain.blocks] : [...block.effectBlocks];
   const reorderable = effectBlocks.length >= 2;
   const { uiStore } = store;
 
+  const reorderEffect = (effectBlock: Block, delta: number) =>
+    chain
+      ? chain.reorderBlock(effectBlock, delta)
+      : block.reorderEffectBlock(effectBlock, delta);
+  const removeEffect = (effectBlock: Block) =>
+    chain
+      ? chain.removeBlock(effectBlock)
+      : block.removeEffectBlock(effectBlock);
+  const addEffect = (effect: Pattern) =>
+    chain ? chain.addCloneOfEffect(effect) : block.addCloneOfEffect(effect);
+
   const onDragEnd: OnDragEndResponder = action((result) => {
     if (!result.destination) return;
-    const effectBlock = block.effectBlocks[result.source.index];
+    const effectBlock = effectBlocks[result.source.index];
     if (!effectBlock) return;
-    block.reorderEffectBlock(
-      effectBlock,
-      result.destination.index - result.source.index,
-    );
+    reorderEffect(effectBlock, result.destination.index - result.source.index);
   });
 
   return (
@@ -125,10 +146,14 @@ export const BlockDevicePanel = observer(function BlockDevicePanel() {
       <Box flex="1" minH={0} overflowX="auto" overflowY="hidden">
         <DragDropContext onDragEnd={onDragEnd}>
           <HStack align="stretch" spacing={0} minW="min-content" height="100%">
-            <PatternUnit block={block} />
+            {chain ? (
+              <ChainSourceUnit chain={chain} />
+            ) : (
+              <PatternUnit block={block} />
+            )}
             <Connector />
             <Droppable
-              droppableId={`device-${block.id}`}
+              droppableId={`device-${chain?.id ?? block.id}`}
               direction="horizontal"
             >
               {(provided) => (
@@ -154,8 +179,9 @@ export const BlockDevicePanel = observer(function BlockDevicePanel() {
                         >
                           {index > 0 && <Connector />}
                           <EffectUnit
-                            parentBlock={block}
                             effectBlock={effectBlock}
+                            onRemove={() => removeEffect(effectBlock)}
+                            isSelected={chain ? effectBlock === block : false}
                             dragHandleProps={
                               reorderable ? prov.dragHandleProps : undefined
                             }
@@ -168,7 +194,14 @@ export const BlockDevicePanel = observer(function BlockDevicePanel() {
                 </HStack>
               )}
             </Droppable>
-            <AddEffectUnit block={block} />
+            <AddEffectUnit
+              onAddEffect={addEffect}
+              helpDescription={
+                chain
+                  ? "Append an effect to this chain, applied to its composited input."
+                  : "Append an effect to this pattern's processing chain."
+              }
+            />
           </HStack>
         </DragDropContext>
       </Box>
@@ -448,12 +481,14 @@ const PanelIconButton = function PanelIconButton({
 };
 
 const EffectUnit = function EffectUnit({
-  parentBlock,
   effectBlock,
+  onRemove,
+  isSelected,
   dragHandleProps,
 }: {
-  parentBlock: Block;
   effectBlock: Block;
+  onRemove: () => void;
+  isSelected: boolean;
   dragHandleProps: any;
 }) {
   const { uiStore } = useStore();
@@ -466,7 +501,7 @@ const EffectUnit = function EffectUnit({
       display="flex"
       flexDirection="column"
       bg="#1b212b"
-      border="1px solid #2f3a48"
+      border={`1px solid ${isSelected ? "#3182ce" : "#2f3a48"}`}
       borderRadius="4px"
       px={1.5}
       py={1}
@@ -509,11 +544,11 @@ const EffectUnit = function EffectUnit({
               cursor="pointer"
               flexShrink={0}
               _hover={{ color: "#fc8181" }}
-              onClick={action(() => parentBlock.removeEffectBlock(effectBlock))}
+              onClick={action(onRemove)}
               {...hoverHelpProps(
                 uiStore,
                 "Remove effect",
-                "Detach this effect from the pattern's effect chain.",
+                "Detach this effect from the chain.",
               )}
             >
               <TbTrash size={12} />
@@ -526,7 +561,43 @@ const EffectUnit = function EffectUnit({
   );
 };
 
-const AddEffectUnit = function AddEffectUnit({ block }: { block: Block }) {
+// Stands in for the pattern at the head of a post-composite chain: what the
+// chain processes is the output of a layer or of the whole layer stack.
+const ChainSourceUnit = function ChainSourceUnit({
+  chain,
+}: {
+  chain: EffectChain;
+}) {
+  return (
+    <Box
+      flexShrink={0}
+      display="flex"
+      flexDirection="column"
+      justifyContent="center"
+      bg="#1e2635"
+      border="1px solid #3a4658"
+      borderRadius="4px"
+      px={2}
+      py={1}
+      maxW="140px"
+    >
+      <Text fontSize="11px" fontWeight={600} color="#63b3ed" noOfLines={1}>
+        {chain.name}
+      </Text>
+      <Text fontSize="9.5px" color="#718096" noOfLines={2}>
+        composited input
+      </Text>
+    </Box>
+  );
+};
+
+const AddEffectUnit = function AddEffectUnit({
+  onAddEffect,
+  helpDescription,
+}: {
+  onAddEffect: (effect: Pattern) => void;
+  helpDescription: string;
+}) {
   const { uiStore } = useStore();
   return (
     <Menu placement="top">
@@ -542,11 +613,7 @@ const AddEffectUnit = function AddEffectUnit({ block }: { block: Block }) {
         color="#718096"
         fontSize="20px"
         fontWeight={400}
-        {...hoverHelpProps(
-          uiStore,
-          "Add effect",
-          "Append an effect to this pattern's processing chain.",
-        )}
+        {...hoverHelpProps(uiStore, "Add effect", helpDescription)}
       >
         ＋
       </MenuButton>
@@ -559,7 +626,7 @@ const AddEffectUnit = function AddEffectUnit({ block }: { block: Block }) {
           {playgroundEffects.map((effect) => (
             <MenuItem
               key={effect.name}
-              onClick={action(() => block.addCloneOfEffect(effect))}
+              onClick={action(() => onAddEffect(effect))}
             >
               {effect.name}
             </MenuItem>

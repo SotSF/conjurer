@@ -8,6 +8,8 @@ import { useRef } from "react";
 import { Draggable } from "@hello-pangea/dnd";
 import { TimelineLayerHeader } from "@/src/components/Timeline/TimelineLayerHeader";
 import { TimelineBlockStack } from "@/src/components/TimelineBlockStack/TimelineBlockStack";
+import { TimelineEffectChainStrip } from "@/src/components/Timeline/TimelineEffectChainStrip";
+import { LayerV2 } from "@/src/types/Layer/LayerV2";
 
 type TimelineLayerProps = {
   index: number;
@@ -47,6 +49,13 @@ export const TimelineLayer = observer(function TimelineLayer({
         .map((block) => (
           <TimelineBlockStack key={block.id} patternBlock={block} />
         ));
+  const effectChainStrip =
+    collapsed || !(layer instanceof LayerV2) ? null : (
+      <TimelineEffectChainStrip
+        chain={layer.effectChain}
+        topOffset={layer.blockLanesHeight}
+      />
+    );
 
   return (
     <Draggable
@@ -97,6 +106,7 @@ export const TimelineLayer = observer(function TimelineLayer({
             })}
           >
             {blockStacks}
+            {effectChainStrip}
           </Box>
         </HStack>
       )}
