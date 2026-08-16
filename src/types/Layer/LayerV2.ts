@@ -5,6 +5,7 @@ import { makeAutoObservable, runInAction } from "mobx";
 import { generateId } from "@/src/utils/id";
 import { Layer } from ".";
 import { BlockMap } from "../BlockMap";
+import { EffectChain } from "@/src/types/EffectChain";
 import { Variation } from "@/src/types/Variations/Variation";
 import { EasingVariation } from "@/src/types/Variations/EasingVariation";
 import { CurveVariation } from "@/src/types/Variations/CurveVariation";
@@ -29,6 +30,10 @@ export class LayerV2 implements Layer {
 
   blockMap = new BlockMap();
 
+  // effects applied to this layer's merged output, after all of its blocks have
+  // been composited together
+  effectChain: EffectChain;
+
   _lastComputedWindowStartTime: number = -1;
   _maxConcurrentBlocks: number | null = null;
   _activeBlocks: Block[] = [];
@@ -39,6 +44,7 @@ export class LayerV2 implements Layer {
   _heightFlushHandle: number | null = null;
 
   constructor(readonly store: Store) {
+    this.effectChain = new EffectChain(store, "Layer effects");
     makeAutoObservable(this, {
       store: false,
       _lastComputedWindowStartTime: false,
@@ -123,9 +129,15 @@ export class LayerV2 implements Layer {
     return heights;
   }
 
+  // Height of the block lanes alone. The effect chain strip sits directly below
+  // them, so this is where it starts.
+  get blockLanesHeight() {
+    return this.laneHeights.reduce((sum, laneHeight) => sum + laneHeight, 0);
+  }
+
   get height() {
     if (this.collapsed) return COLLAPSED_LAYER_HEIGHT;
-    return this.laneHeights.reduce((sum, laneHeight) => sum + laneHeight, 0);
+    return this.blockLanesHeight + this.effectChain.height;
   }
 
   blockTopOffset = (block: Block) => {
@@ -300,6 +312,10 @@ export class LayerV2 implements Layer {
   };
 
   removeBlock = (block: Block) => {
+    if (block.inEffectChain) {
+      this.effectChain.removeBlock(block);
+      return;
+    }
     this.blockMap.removeBlock(block);
     block.layer = null;
   };
@@ -362,6 +378,7 @@ export class LayerV2 implements Layer {
     id: this.id,
     name: this.name,
     blockMap: this.blockMap.serialize(),
+    effectChain: this.effectChain.serialize(),
   });
 
   static deserialize = (store: Store, data: any) => {
@@ -370,6 +387,11 @@ export class LayerV2 implements Layer {
     layer.name = data.name ?? "";
 
     layer.blockMap = BlockMap.deserialize(store, layer, data.blockMap);
+    layer.effectChain = EffectChain.deserialize(
+      store,
+      "Layer effects",
+      data.effectChain,
+    );
     return layer;
   };
 }

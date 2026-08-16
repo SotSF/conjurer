@@ -43,6 +43,11 @@ export class Block {
   parentBlock: Block | null = null; // if this is an effect block, this is the pattern block that it is applied to
   effectBlocks: Block[] = [];
 
+  // true while this block is an entry in a layer's or the experience's effect
+  // chain (see EffectChain), where it processes composited output rather than
+  // producing its own
+  inEffectChain = false;
+
   startTime: number = 0; // global time that block starts playing at in seconds
   duration: number = 5; // duration that block plays for in seconds
 
@@ -155,7 +160,9 @@ export class Block {
   // are included — their lane shows discrete color regions over time.
   get lanableParamNames(): string[] {
     const excluded = new Set(["u_time", "u_texture"]);
-    if (this.parentBlock) excluded.add("u_opacity");
+    // opacity is applied per pattern block when its output is merged; an effect
+    // has no merge of its own
+    if (this.parentBlock || this.inEffectChain) excluded.add("u_opacity");
     return Object.keys(this.pattern.params).filter(
       (name) => !excluded.has(name),
     );
@@ -723,6 +730,7 @@ export class Block {
     newBlock.duration = this.duration;
     newBlock.locked = this.locked;
     newBlock.layer = this.layer;
+    newBlock.inEffectChain = this.inEffectChain;
 
     newBlock.parameterVariations = { ...this.parameterVariations };
     Object.entries(newBlock.parameterVariations).forEach(([key, value]) => {

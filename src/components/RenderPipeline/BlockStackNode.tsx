@@ -2,9 +2,8 @@ import defaultVertexShader from "@/src/shaders/default.vert";
 import blackFragmentShader from "@/src/shaders/black.frag";
 import conjurerCommon from "@/src/shaders/conjurer_common.frag";
 import { WebGLRenderTarget, ShaderChunk } from "three";
-import { useFrame, useThree } from "@react-three/fiber";
-import { useEffect } from "react";
-import { BlockNode } from "@/src/components/RenderPipeline/BlockNode";
+import { useFrame } from "@react-three/fiber";
+import { EffectChainNode } from "@/src/components/RenderPipeline/EffectChainNode";
 import { useStore } from "@/src/types/StoreContext";
 import { Block } from "@/src/types/Block";
 import { observer } from "mobx-react-lite";
@@ -20,6 +19,10 @@ type BlockStackNodeProps = {
   renderTargetIn: WebGLRenderTarget;
   renderTargetOut: WebGLRenderTarget;
 };
+
+// stable identity so a block stack without a block doesn't hand the effect
+// chain a new array every render
+const emptyEffectBlocks: Block[] = [];
 
 const defaultPattern = new Pattern("default", blackFragmentShader);
 
@@ -52,12 +55,13 @@ export const BlockStackNode = observer(function BlockStackNode({
     parentBlock.updateParameters(globalTime - startTime);
   }, basePriority);
 
-  // re-render this BlockStackNode if the number of effects changes
-  const invalidate = useThree(({ invalidate }) => invalidate);
-  useEffect(invalidate, [parentBlock?.effectBlocks.length, invalidate]);
-
-  const numberEffects = parentBlock?.effectBlocks.length ?? 0;
-  const evenNumberOfEffects = numberEffects % 2 === 0;
+  const effectBlocks = parentBlock?.effectBlocks ?? emptyEffectBlocks;
+  // The chain alternates its output from the back forwards and must finish in
+  // renderTargetOut, so with an odd number of effects the first one writes
+  // renderTargetOut — meaning the pattern has to go to renderTargetIn.
+  const evenNumberOfEffects = effectBlocks.length % 2 === 0;
+  const patternTarget = evenNumberOfEffects ? renderTargetOut : renderTargetIn;
+  const scratchTarget = evenNumberOfEffects ? renderTargetIn : renderTargetOut;
   const pattern = parentBlock?.pattern ?? defaultPattern;
 
   return (
@@ -66,23 +70,15 @@ export const BlockStackNode = observer(function BlockStackNode({
         pattern={pattern}
         priority={basePriority + 1}
         shaderMaterialKey={parentBlock?.id}
-        renderTargetOut={evenNumberOfEffects ? renderTargetOut : renderTargetIn}
+        renderTargetOut={patternTarget}
       />
-      {parentBlock?.effectBlocks.map((effect, i) => {
-        const isEven = i % 2 === 0;
-        // we want XNOR logical operation here, equivalent to strict equal for booleans
-        const swap = evenNumberOfEffects === isEven;
-        const pattern = effect.pattern;
-        return (
-          <pattern.Component
-            key={effect.id}
-            pattern={pattern}
-            priority={basePriority + i + 2}
-            renderTargetIn={swap ? renderTargetOut : renderTargetIn}
-            renderTargetOut={swap ? renderTargetIn : renderTargetOut}
-          />
-        );
-      })}
+      <EffectChainNode
+        basePriority={basePriority + 2}
+        effectBlocks={effectBlocks}
+        sourceTarget={patternTarget}
+        scratchTarget={scratchTarget}
+        destinationTarget={renderTargetOut}
+      />
     </>
   );
 });

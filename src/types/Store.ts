@@ -20,6 +20,7 @@ import { Context, Role } from "@/src/types/context";
 import "@/src/utils/mobx";
 import { UserStore } from "@/src/types/UserStore";
 import { LayerV2 } from "./Layer/LayerV2";
+import { EffectChain } from "@/src/types/EffectChain";
 import { migrateV1ExperienceData } from "@/src/utils/migrateV1ExperienceData";
 import { migrateSequenceToRegions } from "@/src/utils/migrateVariations";
 import { User } from "@/src/types/User";
@@ -94,6 +95,10 @@ export class Store {
   userStore = new UserStore(this);
 
   layers: Layer[] = [];
+
+  // effects applied to the whole rendered frame, after every layer has been
+  // merged together
+  globalEffectChain: EffectChain = new EffectChain(this, "Global effects");
 
   sendingData = false;
   viewerMode = false;
@@ -173,12 +178,17 @@ export class Store {
     const index = this.layers.indexOf(layer);
     if (index === -1) return;
 
+    // a block of the layer's effect chain points at the chain, not the layer
+    const belongsToLayer = (block: Block) =>
+      block.layer === layer ||
+      (layer instanceof LayerV2 && block.layer === layer.effectChain);
+
     this.selectedBlocksOrVariations = new Set(
       Array.from(this.selectedBlocksOrVariations).filter(
-        (selection) => selection.block.layer !== layer,
+        (selection) => !belongsToLayer(selection.block),
       ),
     );
-    if (this.selectedParameter?.block.layer === layer)
+    if (this.selectedParameter && belongsToLayer(this.selectedParameter.block))
       this.selectedParameter = null;
 
     this.layers.splice(index, 1);
@@ -668,6 +678,9 @@ export class Store {
       if (blockOrVariation.type === "block") {
         // TODO: better generalize for multiple layers
         this.layers.forEach((l) => l.removeBlock(blockOrVariation.block));
+        // effect chains are not in this.layers, so a block in one is removed
+        // through its own back-reference
+        blockOrVariation.block.layer?.removeBlock(blockOrVariation.block);
         blockRemoved = true;
       } else if (blockOrVariation.type === "variation")
         this.deleteVariation(
@@ -930,7 +943,10 @@ export class Store {
       song: this.audioStore.selectedSong,
       status: this.experienceStatus,
       version: this.experienceVersion,
-      data: { layers: this.layers.map((l) => l.serialize()) },
+      data: {
+        layers: this.layers.map((l) => l.serialize()),
+        globalEffectChain: this.globalEffectChain.serialize(),
+      },
       thumbnailURL: this.experienceThumbnailURL,
     };
   };
@@ -951,6 +967,11 @@ export class Store {
         : experience.data;
     this.experienceVersion = EXPERIENCE_VERSION;
     this.layers = data.layers.map((l: any) => LayerV2.deserialize(this, l));
+    this.globalEffectChain = EffectChain.deserialize(
+      this,
+      "Global effects",
+      data.globalEffectChain,
+    );
 
     // Select first layer
     this.selectedLayer = this.layers[0];
@@ -984,7 +1005,11 @@ export class Store {
       // PARENT pattern block's timeline, so span them to the parent's duration.
       (block.effectBlocks ?? []).forEach((eff) => convert(eff, laneDuration));
     };
-    for (const layer of this.layers)
+    for (const layer of this.layers) {
       layer.getAllBlocks().forEach((b) => convert(b, b.duration));
+      if (layer instanceof LayerV2)
+        layer.effectChain.blocks.forEach((b) => convert(b, b.duration));
+    }
+    this.globalEffectChain.blocks.forEach((b) => convert(b, b.duration));
   };
 }

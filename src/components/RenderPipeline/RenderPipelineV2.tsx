@@ -9,7 +9,9 @@ import { observer } from "mobx-react-lite";
 import { WebGLRenderTarget } from "three";
 import { BlockStackNode } from "./BlockStackNode";
 import { BlockNode } from "./BlockNode";
+import { EffectChainNode } from "./EffectChainNode";
 import { LayerV2 } from "@/src/types/Layer/LayerV2";
+import { EffectChain } from "@/src/types/EffectChain";
 import blackFragmentShader from "@/src/shaders/black.frag";
 import defaultVertexShader from "@/src/shaders/default.vert";
 
@@ -18,13 +20,17 @@ type Props = {
 };
 
 // useFrame priorities run in ascending order, so these bands define the frame
-// schedule: every block stack of a layer renders before the layer's internal
-// merge chain, and every layer renders before the cross-layer merge chain.
+// schedule: within a layer, every block stack renders, then the layer's internal
+// merge chain folds them together, then the layer's effect chain processes that
+// merged output. Every layer completes before the cross-layer merge, which is
+// followed by the experience's global effect chain writing the final frame.
 // Each layer's band accommodates up to 50 concurrent blocks (at 100 priorities
 // per block stack) before colliding with its merge chain.
 const LAYER_PRIORITY_BAND = 10_000;
 const LAYER_MERGE_OFFSET = 5_000;
+const LAYER_EFFECT_CHAIN_OFFSET = 6_000;
 const CROSS_LAYER_MERGE_PRIORITY = 1_000_000;
+const GLOBAL_EFFECT_CHAIN_PRIORITY = 1_100_000;
 
 export const RenderPipelineV2 = observer(function RenderPipeline({
   renderTargetZ,
@@ -51,8 +57,10 @@ export const RenderPipelineV2 = observer(function RenderPipeline({
           />
         ) : null,
       )}
-      <MergeNodes
-        basePriority={CROSS_LAYER_MERGE_PRIORITY}
+      <MergeThroughEffectChain
+        mergePriority={CROSS_LAYER_MERGE_PRIORITY}
+        chainPriority={GLOBAL_EFFECT_CHAIN_PRIORITY}
+        chain={store.globalEffectChain}
         inputs={mergeInputs}
         destinationTarget={renderTargetZ}
       />
@@ -84,8 +92,10 @@ const LayerNode = observer(function LayerNode({
           renderTargetOut={renderTargets[i + 1]}
         />
       ))}
-      <MergeNodes
-        basePriority={basePriority + LAYER_MERGE_OFFSET}
+      <MergeThroughEffectChain
+        mergePriority={basePriority + LAYER_MERGE_OFFSET}
+        chainPriority={basePriority + LAYER_EFFECT_CHAIN_OFFSET}
+        chain={layer.effectChain}
         inputs={blocks.map((block, i) => ({
           target: renderTargets[i + 1],
           // opacity is applied here, after the block's entire effect chain
@@ -94,6 +104,55 @@ const LayerNode = observer(function LayerNode({
         }))}
         destinationTarget={destinationTarget}
       />
+    </>
+  );
+});
+
+type MergeThroughEffectChainProps = {
+  mergePriority: number;
+  chainPriority: number;
+  chain: EffectChain;
+  inputs: MergeInput[];
+  destinationTarget: WebGLRenderTarget;
+};
+
+// Merges its inputs and then runs them through a post-composite effect chain.
+// With no effect in the signal path the merge writes the destination directly,
+// so an experience without effect chains renders in exactly as many passes as it
+// would without them.
+const MergeThroughEffectChain = observer(function MergeThroughEffectChain({
+  mergePriority,
+  chainPriority,
+  chain,
+  inputs,
+  destinationTarget,
+}: MergeThroughEffectChainProps) {
+  // Held by this component rather than the chain-active branch below so that
+  // the targets survive effects coming in and out of the signal path as the
+  // playhead moves.
+  const chainSource = useRenderTarget();
+  const chainScratch = useRenderTarget();
+
+  const activeEffects = chain.activeBlocks;
+  const chainActive = activeEffects.length > 0;
+
+  return (
+    <>
+      <MergeNodes
+        basePriority={mergePriority}
+        inputs={inputs}
+        destinationTarget={chainActive ? chainSource : destinationTarget}
+      />
+      {chainActive && (
+        <EffectChainNode
+          basePriority={chainPriority + 1}
+          parameterPriority={chainPriority}
+          effectBlocks={activeEffects}
+          sourceTarget={chainSource}
+          scratchTarget={chainScratch}
+          destinationTarget={destinationTarget}
+        />
+      )}
     </>
   );
 });
