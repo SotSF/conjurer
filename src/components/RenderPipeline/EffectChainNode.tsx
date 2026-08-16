@@ -15,9 +15,11 @@ type EffectChainNodeProps = {
   // along with its own.
   parameterPriority?: number;
   effectBlocks: Block[];
-  // holds the chain's input; only ever read
+  // holds the chain's input; read by the first effect and by nothing after it
   sourceTarget: WebGLRenderTarget;
-  // the chain ping-pongs between this and destinationTarget
+  // the chain ping-pongs between this and destinationTarget. May be the source
+  // target itself when the caller has no third target to spare: the first
+  // effect consumes the source before anything writes the scratch.
   scratchTarget: WebGLRenderTarget;
   // receives the last effect's output
   destinationTarget: WebGLRenderTarget;

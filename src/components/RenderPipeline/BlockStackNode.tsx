@@ -61,7 +61,6 @@ export const BlockStackNode = observer(function BlockStackNode({
   // renderTargetOut — meaning the pattern has to go to renderTargetIn.
   const evenNumberOfEffects = effectBlocks.length % 2 === 0;
   const patternTarget = evenNumberOfEffects ? renderTargetOut : renderTargetIn;
-  const scratchTarget = evenNumberOfEffects ? renderTargetIn : renderTargetOut;
   const pattern = parentBlock?.pattern ?? defaultPattern;
 
   return (
@@ -72,11 +71,14 @@ export const BlockStackNode = observer(function BlockStackNode({
         shaderMaterialKey={parentBlock?.id}
         renderTargetOut={patternTarget}
       />
+      {/* With an odd number of effects the pattern is in renderTargetIn, which
+          the first effect consumes — from then on it is free to serve as the
+          chain's scratch. */}
       <EffectChainNode
         basePriority={basePriority + 2}
         effectBlocks={effectBlocks}
         sourceTarget={patternTarget}
-        scratchTarget={scratchTarget}
+        scratchTarget={renderTargetIn}
         destinationTarget={renderTargetOut}
       />
     </>
