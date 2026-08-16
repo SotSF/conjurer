@@ -5,6 +5,7 @@ import { makeAutoObservable } from "mobx";
 import { generateId } from "@/src/utils/id";
 import { Layer } from ".";
 import { Block } from "@/src/types/Block";
+import { EffectChain } from "@/src/types/EffectChain";
 
 export type ActivePatternsWindow = {
   startTime: number;
@@ -20,16 +21,24 @@ export class LayerV1 implements Layer {
   // interface compliance; collapse is a V2/editor feature (see Layer.collapsed)
   collapsed = false;
 
+  effectChain: EffectChain;
+
   patternBlocks: Block[] = [];
   _lastComputedCurrentBlock: Block | null = null;
 
   constructor(readonly store: Store) {
+    this.effectChain = new EffectChain(store, "Layer effects");
     makeAutoObservable(this, {
       store: false,
 
       // don't make this observable, since it's just a cache
       _lastComputedCurrentBlock: false,
     });
+  }
+
+  // a v1 layer stacks nothing beneath its blocks, so its whole row is theirs
+  get blockLanesHeight() {
+    return this.height;
   }
 
   // returns the block that the global time is inside of, or null if none

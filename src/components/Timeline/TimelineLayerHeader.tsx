@@ -32,7 +32,6 @@ import {
 import { FaTrashAlt } from "react-icons/fa";
 import type { DraggableProvidedDragHandleProps } from "@hello-pangea/dnd";
 import { hoverHelpProps } from "@/src/utils/hoverHelp";
-import { LayerV2 } from "@/src/types/Layer/LayerV2";
 import { AddChainEffectMenu } from "@/src/components/Timeline/AddChainEffectMenu";
 
 type Props = {
@@ -58,7 +57,7 @@ export const TimelineLayerHeader = observer(function TimelineLayerHeader({
   const blockCount = layer.getAllBlocks().length;
   const collapsed = layer.collapsed;
 
-  const effectChain = layer instanceof LayerV2 ? layer.effectChain : null;
+  const { effectChain } = layer;
 
   const confirmDelete = useDisclosure();
 

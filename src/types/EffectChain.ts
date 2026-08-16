@@ -29,6 +29,8 @@ export class EffectChain implements Layer {
   visible = true;
   // satisfies Layer; a chain strip has no collapsed state of its own
   collapsed = false;
+  // a chain is the end of the line: its own blocks carry no further chain
+  effectChain = null;
 
   blocks: Block[] = [];
 
@@ -124,6 +126,11 @@ export class EffectChain implements Layer {
   // chain lays out exactly as it would without the feature.
   get height() {
     return this.laneHeights.reduce((sum, laneHeight) => sum + laneHeight, 0);
+  }
+
+  // a chain's blocks are all the vertical space it has
+  get blockLanesHeight() {
+    return this.height;
   }
 
   blockTopOffset = (block: Block) => {

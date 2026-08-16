@@ -185,7 +185,7 @@ export class Store {
     // a block of the layer's effect chain points at the chain, not the layer
     const belongsToLayer = (block: Block) =>
       block.layer === layer ||
-      (layer instanceof LayerV2 && block.layer === layer.effectChain);
+      (!!layer.effectChain && block.layer === layer.effectChain);
 
     this.selectedBlocksOrVariations = new Set(
       Array.from(this.selectedBlocksOrVariations).filter(
@@ -1011,8 +1011,7 @@ export class Store {
     };
     for (const layer of this.layers) {
       layer.getAllBlocks().forEach((b) => convert(b, b.duration));
-      if (layer instanceof LayerV2)
-        layer.effectChain.blocks.forEach((b) => convert(b, b.duration));
+      layer.effectChain?.blocks.forEach((b) => convert(b, b.duration));
     }
     this.globalEffectChain.blocks.forEach((b) => convert(b, b.duration));
   };
