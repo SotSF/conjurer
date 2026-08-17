@@ -5,7 +5,10 @@ import { Block } from "@/src/types/Block";
 import type { Pattern } from "@/src/types/Pattern";
 import type { Variation } from "@/src/types/Variations/Variation";
 import { generateId } from "@/src/utils/id";
-import { DEFAULT_BLOCK_DURATION } from "@/src/utils/time";
+import {
+  DEFAULT_BLOCK_DURATION,
+  MINIMUM_VARIATION_DURATION,
+} from "@/src/utils/time";
 import { EffectChainSource } from "@/src/patterns/EffectChainSource";
 
 // used for a block's lane until its actual rendered height is reported
@@ -238,14 +241,24 @@ export class EffectChain implements Layer {
   // The first gap at or after fromTime that no block occupies. Chain blocks
   // apply in series to the same composited input, so overlapping them would
   // leave their order to something the timeline cannot show.
+  /**
+   * Where a block added at fromTime goes, and how long it can be.
+   *
+   * A gap too short for the requested duration shortens the block instead of
+   * moving it: a short block at the playhead is far closer to what was asked
+   * for than a full-length one somewhere the playhead isn't. The start moves
+   * only when the playhead has no room at all — inside a block, or in a gap too
+   * small to hold one.
+   */
   getNextValidStartAndDuration(fromTime: number, maxDuration: number) {
     let startTime = fromTime;
     for (const block of this.blocks) {
       if (block.endTime <= startTime) continue;
-      if (block.startTime >= startTime + maxDuration) break;
+      if (block.startTime - startTime >= MINIMUM_VARIATION_DURATION) break;
       startTime = block.endTime;
     }
-    const next = this.blocks.find((b) => b.startTime >= startTime);
+
+    const next = this.blocks.find((b) => b.startTime > startTime);
     const available = next ? next.startTime - startTime : Infinity;
     return { startTime, duration: Math.min(maxDuration, available) };
   }
