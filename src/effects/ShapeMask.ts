@@ -44,6 +44,16 @@ export const ShapeMask = () =>
         value: 0,
         step: 1,
       },
+      // Twists the mask's own angular coordinate (proportional to radius),
+      // independent of the Twist pattern -- that one distorts the sampled
+      // image itself, this only distorts where the mask boundary falls.
+      // 0 = no twist, matching legacy behavior for existing experiences.
+      u_mask_twist: {
+        name: "Twist",
+        value: 0,
+        min: -2,
+        max: 2,
+      },
     },
     ["v_uv", "v_normalized_uv"],
   );

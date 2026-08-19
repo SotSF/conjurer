@@ -96,6 +96,7 @@ export const LoginButton = observer(function LoginButton() {
               {!isPending &&
                 (users ?? [])
                   .filter((user) => user.username !== userStore.username)
+                  .sort((a, b) => a.username.localeCompare(b.username))
                   .map((user) => (
                     <Button
                       key={user.id}
