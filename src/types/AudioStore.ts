@@ -196,6 +196,11 @@ export class AudioStore {
     this.wavesurfer.seekTo(validTime / duration);
   };
 
+  /** Jump to the beginning of the audio track. Mirrors goToEnd(). */
+  goToBeginning = () => {
+    this.setTimeWithCursor(0);
+  };
+
   /** Jump to the end of the loaded song (not the full timeline length). */
   goToEnd = () => {
     const duration = this.wavesurfer?.getDuration() ?? 0;

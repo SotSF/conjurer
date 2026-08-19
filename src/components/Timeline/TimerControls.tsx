@@ -87,7 +87,7 @@ export const TimerControls = observer(function TimerControls() {
                 : "Go to end",
               store.context === "playlistEditor"
                 ? "Jump to the next experience in the playlist."
-                : "Seek the playhead to the end of the timeline.",
+                : "Seek the playhead to the end of the audio track.",
             )}
           />
         </ButtonGroup>
