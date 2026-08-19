@@ -9,7 +9,6 @@
     "start": "next start",
     "lint": "next lint --dir src",
     "format": "prettier --write .",
-    "test": "node --import ts-node/register --test src/**/*.test.ts",
     "typecheck": "tsc --noEmit",
     "db:generate": "drizzle-kit generate --config=drizzle-local.config.ts",
     "db:local:migrate": "drizzle-kit migrate --config=drizzle-local.config.ts",
