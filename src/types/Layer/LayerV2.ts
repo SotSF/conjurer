@@ -1,8 +1,9 @@
 import type { Store } from "@/src/types/Store";
 import { Block } from "@/src/types/Block";
 import { DEFAULT_BLOCK_DURATION } from "@/src/utils/time";
-import { makeAutoObservable, runInAction } from "mobx";
+import { makeAutoObservable } from "mobx";
 import { generateId } from "@/src/utils/id";
+import { BlockHeightReporter } from "@/src/utils/BlockHeightReporter";
 import { Layer } from ".";
 import { BlockMap } from "../BlockMap";
 import { EffectTrack } from "@/src/types/EffectTrack";
@@ -27,7 +28,7 @@ export class LayerV2 implements Layer {
 
   // rendered block heights in px, reported from the DOM as blocks
   // mount/resize (see reportBlockHeight)
-  blockHeights = new Map<string, number>();
+  blockHeights = new BlockHeightReporter();
 
   blockMap = new BlockMap();
 
@@ -39,20 +40,14 @@ export class LayerV2 implements Layer {
   _maxConcurrentBlocks: number | null = null;
   _activeBlocks: Block[] = [];
 
-  // Buffered height reports, applied together once per frame. Deliberately not
-  // observable — this is bookkeeping for the flush, not state anything renders.
-  _pendingHeights = new Map<string, number>();
-  _heightFlushHandle: number | null = null;
-
   constructor(readonly store: Store) {
     this.effectTrack = new EffectTrack(store, "Layer effects", this);
     makeAutoObservable(this, {
       store: false,
+      blockHeights: false,
       _lastComputedWindowStartTime: false,
       _maxConcurrentBlocks: false,
       _activeBlocks: false,
-      _pendingHeights: false,
-      _heightFlushHandle: false,
     });
   }
 
@@ -124,7 +119,7 @@ export class LayerV2 implements Layer {
     for (const [blockId, lane] of this.blockLanes) {
       heights[lane] = Math.max(
         heights[lane],
-        this.blockHeights.get(blockId) ?? UNMEASURED_BLOCK_HEIGHT,
+        this.blockHeights.heights.get(blockId) ?? UNMEASURED_BLOCK_HEIGHT,
       );
     }
     return heights;
@@ -235,51 +230,8 @@ export class LayerV2 implements Layer {
     return 1;
   };
 
-  /**
-   * Record a block's rendered height, batching a frame's worth of reports into
-   * a single observable write.
-   *
-   * Every block reads blockTopOffset, which reads laneHeights, which reads the
-   * whole blockHeights map — so writing one entry re-renders every mounted
-   * block in the layer. One write per report is therefore quadratic in the
-   * number of blocks changing size at once, which is exactly what happens when
-   * a zoom or a lane toggle resizes many blocks in the same frame. Measured on
-   * a scroll that resized 84 blocks: 12,262 TimelineBlockStack renders before
-   * batching, 934 after.
-   */
-  reportBlockHeight = (block: Block, heightPx: number) => {
-    // Ignore reports that wouldn't change anything. Without this the flush is
-    // self-sustaining: applying a batch re-renders the layer's blocks, which
-    // fires their ResizeObservers, which re-report the identical heights and
-    // schedule another flush — burning a full layer re-render every frame
-    // forever. (Measured: idle frame time doubled, 8.4ms -> 16.7ms.)
-    if (
-      this.blockHeights.get(block.id) === heightPx &&
-      !this._pendingHeights.has(block.id)
-    )
-      return;
-
-    this._pendingHeights.set(block.id, heightPx);
-    if (this._heightFlushHandle !== null) return;
-    if (typeof window === "undefined") {
-      this.flushBlockHeights();
-      return;
-    }
-    this._heightFlushHandle = window.requestAnimationFrame(() =>
-      this.flushBlockHeights(),
-    );
-  };
-
-  private flushBlockHeights = () => {
-    this._heightFlushHandle = null;
-    if (this._pendingHeights.size === 0) return;
-    const pending = this._pendingHeights;
-    this._pendingHeights = new Map();
-    runInAction(() => {
-      for (const [blockId, heightPx] of pending)
-        this.blockHeights.set(blockId, heightPx);
-    });
-  };
+  reportBlockHeight = (block: Block, heightPx: number) =>
+    this.blockHeights.report(block.id, heightPx);
 
   insertCloneOfBlock = (block: Block) => {
     const newBlock = block.clone();

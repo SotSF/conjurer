@@ -1,5 +1,6 @@
-import { makeAutoObservable, runInAction } from "mobx";
+import { makeAutoObservable } from "mobx";
 import type { Store } from "@/src/types/Store";
+import { BlockHeightReporter } from "@/src/utils/BlockHeightReporter";
 import type { Layer } from "@/src/types/Layer";
 import type { TrackContract } from "@/src/types/Track";
 import { Block } from "@/src/types/Block";
@@ -40,14 +41,9 @@ export class EffectTrack implements TrackContract {
 
   // rendered block heights in px, reported from the DOM as blocks
   // mount/resize (see reportBlockHeight)
-  blockHeights = new Map<string, number>();
+  blockHeights = new BlockHeightReporter();
 
   _activeBlocks: Block[] = [];
-
-  // Buffered height reports, applied together once per frame. Deliberately not
-  // observable — this is bookkeeping for the flush, not state anything renders.
-  _pendingHeights = new Map<string, number>();
-  _heightFlushHandle: number | null = null;
 
   constructor(
     readonly store: Store,
@@ -60,9 +56,8 @@ export class EffectTrack implements TrackContract {
     makeAutoObservable(this, {
       store: false,
       layer: false,
+      blockHeights: false,
       _activeBlocks: false,
-      _pendingHeights: false,
-      _heightFlushHandle: false,
     });
   }
 
@@ -93,90 +88,24 @@ export class EffectTrack implements TrackContract {
     return active;
   }
 
-  // Overlapping blocks are displayed stacked in "lanes" within the track strip.
-  // Greedy interval partitioning: in start time order, each block goes into the
-  // first lane whose previous block has ended.
-  get blockLanes(): Map<string, number> {
-    const sorted = this.blocks
-      .slice()
-      .sort((a, b) => a.startTime - b.startTime || a.id.localeCompare(b.id));
-    const laneEndTimes: number[] = [];
-    const lanes = new Map<string, number>();
-    for (const block of sorted) {
-      let lane = laneEndTimes.findIndex((end) => end <= block.startTime);
-      if (lane === -1) {
-        lane = laneEndTimes.length;
-        laneEndTimes.push(0);
-      }
-      laneEndTimes[lane] = block.endTime;
-      lanes.set(block.id, lane);
-    }
-    return lanes;
-  }
-
-  // each lane is exactly as tall as its tallest block
-  get laneHeights(): number[] {
-    let laneCount = 0;
-    for (const lane of this.blockLanes.values())
-      laneCount = Math.max(laneCount, lane + 1);
-
-    const heights = Array(laneCount).fill(UNMEASURED_BLOCK_HEIGHT);
-    for (const [blockId, lane] of this.blockLanes) {
-      heights[lane] = Math.max(
-        heights[lane],
-        this.blockHeights.get(blockId) ?? UNMEASURED_BLOCK_HEIGHT,
-      );
-    }
-    return heights;
-  }
-
-  // An empty track takes up no vertical space at all, so a layer with no
-  // effects lays out exactly as it would without the feature.
+  // Blocks never overlap, so the track is a single lane exactly as tall as its
+  // tallest block. An empty track takes up no vertical space at all, so a
+  // layer with no effects lays out exactly as it would without the feature.
   get height() {
-    return this.laneHeights.reduce((sum, laneHeight) => sum + laneHeight, 0);
+    let height = 0;
+    for (const block of this.blocks)
+      height = Math.max(
+        height,
+        this.blockHeights.heights.get(block.id) ?? UNMEASURED_BLOCK_HEIGHT,
+      );
+    return height;
   }
 
-  blockTopOffset = (block: Block) => {
-    const lane = this.blockLanes.get(block.id) ?? 0;
-    // Blocks in the first lane are always at the top, so return before reading
-    // laneHeights: touching it would subscribe them to every block's measured
-    // height and re-render them whenever any block in the track resizes.
-    if (lane === 0) return 0;
-    return this.laneHeights
-      .slice(0, lane)
-      .reduce((sum, laneHeight) => sum + laneHeight, 0);
-  };
+  // every block sits at the top of the track's single lane
+  blockTopOffset = () => 0;
 
-  // See LayerV2.reportBlockHeight for why a frame's worth of reports is batched
-  // into a single observable write.
-  reportBlockHeight = (block: Block, heightPx: number) => {
-    if (
-      this.blockHeights.get(block.id) === heightPx &&
-      !this._pendingHeights.has(block.id)
-    )
-      return;
-
-    this._pendingHeights.set(block.id, heightPx);
-    if (this._heightFlushHandle !== null) return;
-    if (typeof window === "undefined") {
-      this.flushBlockHeights();
-      return;
-    }
-    this._heightFlushHandle = window.requestAnimationFrame(() =>
-      this.flushBlockHeights(),
-    );
-  };
-
-  private flushBlockHeights = () => {
-    this._heightFlushHandle = null;
-    if (this._pendingHeights.size === 0) return;
-    const pending = this._pendingHeights;
-    this._pendingHeights = new Map();
-    runInAction(() => {
-      for (const [blockId, heightPx] of pending)
-        this.blockHeights.set(blockId, heightPx);
-    });
-  };
+  reportBlockHeight = (block: Block, heightPx: number) =>
+    this.blockHeights.report(block.id, heightPx);
 
   toggleVisible = () => {
     this.visible = !this.visible;
