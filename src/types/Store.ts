@@ -22,6 +22,7 @@ import "@/src/utils/mobx";
 import { UserStore } from "@/src/types/UserStore";
 import { LayerV2 } from "./Layer/LayerV2";
 import { EffectTrack } from "@/src/types/EffectTrack";
+import { EFFECT_CHAIN_SOURCE_NAME } from "@/src/patterns/EffectChainSource";
 import { migrateV1ExperienceData } from "@/src/utils/migrateV1ExperienceData";
 import { migrateSequenceToRegions } from "@/src/utils/migrateVariations";
 import { User } from "@/src/types/User";
@@ -699,10 +700,8 @@ export class Store {
       this.selectedBlocksOrVariations,
     )) {
       if (blockOrVariation.type === "block") {
-        // TODO: better generalize for multiple layers
-        this.layers.forEach((l) => l.removeBlock(blockOrVariation.block));
-        // effect chains are not in this.layers, so a block in one is removed
-        // through its own back-reference
+        // every block's owning track — a layer or an effect track — is its
+        // layer back-reference
         blockOrVariation.block.layer?.removeBlock(blockOrVariation.block);
         blockRemoved = true;
       } else if (blockOrVariation.type === "variation")
@@ -821,8 +820,23 @@ export class Store {
     this.spliceRegionsIntoLane(block, uniformName, startTime, regions);
   };
 
-  // TODO: better generalize for multiple layers
-  pasteFromClipboard = (clipboardData: DataTransfer) => {
+  // The track a pasted block belongs on, given what is selected: effect chain
+  // blocks go to the effect side of the selected track, pattern blocks to the
+  // selected layer. Null when there is no valid destination — a pattern block
+  // while the global effect track is selected.
+  private pasteTargetFor = (block: Block): Track | null => {
+    const track = this.selectedTrack;
+    if (block.pattern.name === EFFECT_CHAIN_SOURCE_NAME)
+      return track.kind === "effectTrack" ? track : track.effectTrack;
+    // the global effect track belongs to no layer, so there is no layer to
+    // paste a pattern block into
+    if (track.kind === "effectTrack" && track.layer === null) return null;
+    return this.selectedLayer;
+  };
+
+  // Pastes blocks or variations. Returns a message for the user when part of
+  // the paste is refused.
+  pasteFromClipboard = (clipboardData: DataTransfer): string | undefined => {
     const pastedData = JSON.parse(clipboardData.getData("text/plain"));
     if (pastedData?.laneSpan) {
       this.pasteLaneSpan(pastedData as LaneSpanClipboard);
@@ -839,24 +853,29 @@ export class Store {
     const firstBlockOrVariation = blocksOrVariationsData[0];
     // check if we are pasting blocks
     if (firstBlockOrVariation.pattern) {
-      const layerToPasteInto = this.selectedLayer;
-      if (!layerToPasteInto) return;
-
       const blocksToPaste = blocksOrVariationsData.map((b: any) =>
         Block.deserialize(this, b),
       );
       blocksToPaste.forEach((block) => block.regenerateId());
       this.selectedBlocksOrVariations = new Set();
+      let refused = false;
       for (const blockToPaste of blocksToPaste) {
-        const nextGap = layerToPasteInto.getNextValidStartAndDuration(
+        const target = this.pasteTargetFor(blockToPaste);
+        if (!target) {
+          refused = true;
+          continue;
+        }
+        const nextGap = target.getNextValidStartAndDuration(
           this.audioStore.globalTime,
           blockToPaste.duration,
         );
         blockToPaste.setTiming(nextGap);
-        layerToPasteInto.addBlock(blockToPaste);
+        target.addBlock(blockToPaste);
         this.addBlockToSelection(blockToPaste);
       }
-      return;
+      return refused
+        ? "Select a layer to paste a pattern block into"
+        : undefined;
     }
 
     // otherwise, these are variations
@@ -894,18 +913,22 @@ export class Store {
       .filter((blockOrVariation) => blockOrVariation.type === "block")
       .map((blockOrVariation) => blockOrVariation.block);
     if (selectedBlocks.length > 0) {
-      const layerToPasteInto = this.selectedLayer;
-      if (!layerToPasteInto) return;
-
       this.selectedBlocksOrVariations = new Set();
       for (const selectedBlock of selectedBlocks) {
+        // an effect chain block duplicates in place — the copy lands on its
+        // own track, in the first gap after the original. Pattern blocks land
+        // on the selected layer.
+        const target = selectedBlock.isEffectChainBlock
+          ? selectedBlock.layer
+          : this.selectedLayer;
+        if (!target) continue;
         const newBlock = selectedBlock.clone();
-        const nextGap = layerToPasteInto.getNextValidStartAndDuration(
+        const nextGap = target.getNextValidStartAndDuration(
           selectedBlock.endTime,
           selectedBlock.duration,
         );
         newBlock.setTiming(nextGap);
-        layerToPasteInto.addBlock(newBlock);
+        target.addBlock(newBlock);
         this.addBlockToSelection(newBlock);
       }
       return;

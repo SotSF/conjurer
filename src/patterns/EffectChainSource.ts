@@ -9,4 +9,9 @@ import { Pattern } from "@/src/types/Pattern";
  * so a chain block is an ordinary Block, with a name to show on the timeline
  * and an entry in the pattern registry for serialization to round-trip.
  */
-export const EffectChainSource = () => new Pattern("Effects", "", {});
+// The name doubles as the marker identifying a serialized effect chain block,
+// e.g. on the clipboard, where ownership (the usual identity) is absent.
+export const EFFECT_CHAIN_SOURCE_NAME = "Effects";
+
+export const EffectChainSource = () =>
+  new Pattern(EFFECT_CHAIN_SOURCE_NAME, "", {});

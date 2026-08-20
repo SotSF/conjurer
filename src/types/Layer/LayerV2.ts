@@ -263,10 +263,6 @@ export class LayerV2 implements Layer {
   };
 
   removeBlock = (block: Block) => {
-    if (block.isEffectChainBlock) {
-      this.effectTrack.removeBlock(block);
-      return;
-    }
     this.blockMap.removeBlock(block);
     block.layer = null;
   };
