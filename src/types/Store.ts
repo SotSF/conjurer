@@ -994,8 +994,7 @@ export class Store {
       version: this.experienceVersion,
       data: {
         layers: this.layers.map((l) => l.serialize()),
-        // stored under the key existing saved experiences use
-        globalEffectChain: this.globalEffectTrack.serialize(),
+        globalEffectTrack: this.globalEffectTrack.serialize(),
       },
       thumbnailURL: this.experienceThumbnailURL,
     };
@@ -1020,7 +1019,7 @@ export class Store {
     this.globalEffectTrack = EffectTrack.deserialize(
       this,
       "Global effects",
-      data.globalEffectChain,
+      data.globalEffectTrack,
     );
 
     // Select first layer

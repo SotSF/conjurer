@@ -325,8 +325,7 @@ export class LayerV2 implements Layer {
     id: this.id,
     name: this.name,
     blockMap: this.blockMap.serialize(),
-    // stored under the key existing saved experiences use
-    effectChain: this.effectTrack.serialize(),
+    effectTrack: this.effectTrack.serialize(),
   });
 
   static deserialize = (store: Store, data: any) => {
@@ -338,7 +337,7 @@ export class LayerV2 implements Layer {
     layer.effectTrack = EffectTrack.deserialize(
       store,
       "Layer effects",
-      data.effectChain,
+      data.effectTrack,
       layer,
     );
     return layer;
