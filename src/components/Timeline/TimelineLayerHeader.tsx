@@ -23,16 +23,12 @@ import { Layer } from "@/src/types/Layer";
 import { action, runInAction } from "mobx";
 import { useEffect } from "react";
 import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
-import {
-  MdDragIndicator,
-  MdExpandMore,
-  MdChevronRight,
-  MdBlurOn,
-} from "react-icons/md";
+import { MdDragIndicator, MdExpandMore, MdChevronRight } from "react-icons/md";
 import { FaTrashAlt } from "react-icons/fa";
 import type { DraggableProvidedDragHandleProps } from "@hello-pangea/dnd";
 import { hoverHelpProps } from "@/src/utils/hoverHelp";
 import { AddTrackEffectMenu } from "@/src/components/Timeline/AddTrackEffectMenu";
+import { TrackBypassButton } from "@/src/components/Timeline/TrackBypassButton";
 
 type Props = {
   index: number;
@@ -240,27 +236,11 @@ export const TimelineLayerHeader = observer(function TimelineLayerHeader({
           )}
 
           {effectTrack && effectTrack.blocks.length > 0 && (
-            <IconButton
-              minW="20px"
-              w="20px"
-              h="20px"
-              variant="unstyled"
-              color={effectTrack.visible ? "blue.600" : "gray.500"}
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-              aria-label="Bypass layer effects"
-              title="Bypass layer effects"
-              icon={<MdBlurOn size={15} />}
-              onClick={action((e) => {
-                effectTrack.toggleVisible();
-                e.stopPropagation();
-              })}
-              {...hoverHelpProps(
-                uiStore,
-                "Layer effect track",
-                "Take this layer's effect track out of the signal path without deleting it.",
-              )}
+            <TrackBypassButton
+              track={effectTrack}
+              label="Bypass layer effects"
+              helpTitle="Layer effect track"
+              helpDescription="Take this layer's effect track out of the signal path without deleting it."
             />
           )}
 

@@ -1,13 +1,12 @@
-import { Box, HStack, IconButton, Text } from "@chakra-ui/react";
+import { Box, HStack, Text } from "@chakra-ui/react";
 import { action } from "mobx";
 import { observer } from "mobx-react-lite";
 import { useRef } from "react";
-import { MdBlurOn } from "react-icons/md";
 import { useStore } from "@/src/types/StoreContext";
 import { TIMELINE_HEADER_WIDTH } from "@/src/types/UIStore";
 import { MAX_TIME } from "@/src/utils/time";
-import { hoverHelpProps } from "@/src/utils/hoverHelp";
 import { AddTrackEffectMenu } from "@/src/components/Timeline/AddTrackEffectMenu";
+import { TrackBypassButton } from "@/src/components/Timeline/TrackBypassButton";
 import { TimelineBlockStack } from "@/src/components/TimelineBlockStack/TimelineBlockStack";
 
 // Tall enough for the row's header controls when the track is empty.
@@ -70,24 +69,11 @@ export const GlobalEffectRow = observer(function GlobalEffectRow() {
             helpDescription="Append an effect applied to the entire frame, after every layer is merged together."
           />
           {blocks.length > 0 && (
-            <IconButton
-              minW="20px"
-              w="20px"
-              h="20px"
-              variant="unstyled"
-              color={track.visible ? "blue.600" : "gray.600"}
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-              aria-label="Bypass global effects"
-              title="Bypass global effects"
-              icon={<MdBlurOn size={15} />}
-              onClick={action(() => track.toggleVisible())}
-              {...hoverHelpProps(
-                uiStore,
-                "Global effect track",
-                "Take the global effect track out of the signal path without deleting it.",
-              )}
+            <TrackBypassButton
+              track={track}
+              label="Bypass global effects"
+              helpTitle="Global effect track"
+              helpDescription="Take the global effect track out of the signal path without deleting it."
             />
           )}
         </HStack>
