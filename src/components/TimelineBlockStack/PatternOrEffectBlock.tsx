@@ -40,12 +40,9 @@ export const PatternOrEffectBlock = observer(function PatternOrEffectBlock({
   const color = isSelected ? "blue.500" : "white";
   const label = blockHeaderLabel(block);
   const locked = block.locked;
-  // The playground is keyed by pattern, so a block whose pattern has no
-  // playground counterpart — an effect chain block, whose source is the chain's
-  // composited input — has nothing to open.
-  const editableInPlayground = playgroundStore.patternBlocks.some(
-    (playgroundBlock) => playgroundBlock.pattern.name === block.pattern.name,
-  );
+  // An effect chain block's source is its track's composited input, which the
+  // playground cannot stand in for, so there is nothing to open.
+  const editableInPlayground = !block.isEffectChainBlock;
   return (
     <HStack
       position="relative"
