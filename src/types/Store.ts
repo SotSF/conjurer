@@ -140,10 +140,6 @@ export class Store {
     return this._selectedLayer;
   }
   set selectedLayer(value: Layer) {
-    // Effect chains are Layers so the timeline can drive their blocks, but they
-    // hold effects only — selecting one as the layer to add patterns to would
-    // silently drop them.
-    if (value instanceof EffectTrack) return;
     if (this._selectedLayer === value) return;
     this._selectedLayer = value;
   }
@@ -198,7 +194,8 @@ export class Store {
     this.layers.splice(index, 1);
 
     if (this._selectedLayer === layer)
-      this._selectedLayer = this.layers[Math.min(index, this.layers.length - 1)];
+      this._selectedLayer =
+        this.layers[Math.min(index, this.layers.length - 1)];
   };
 
   // Move a layer to a new position. Layer order is additive render-priority
@@ -417,7 +414,8 @@ export class Store {
   selectParameter = (block: Block, uniformName: string) => {
     if (
       this.laneSpan &&
-      (this.laneSpan.block !== block || this.laneSpan.uniformName !== uniformName)
+      (this.laneSpan.block !== block ||
+        this.laneSpan.uniformName !== uniformName)
     )
       this.clearLaneSpan();
     this.selectedParameter = { block, uniformName };
@@ -427,7 +425,8 @@ export class Store {
         selection.type === "block" && selection.block === patternBlock,
     );
     if (!alreadySelected) this.selectBlock(patternBlock);
-    if (patternBlock.layer) this._selectedLayer = patternBlock.layer;
+    if (patternBlock.layer?.kind === "layer")
+      this._selectedLayer = patternBlock.layer;
   };
 
   // Open the zoomed parameter detail panel for a lane (arms the lane if needed).
@@ -452,7 +451,7 @@ export class Store {
       },
     ]);
     this.selectedParameter = { block, uniformName };
-    if (block.layer) this._selectedLayer = block.layer;
+    if (block.layer?.kind === "layer") this._selectedLayer = block.layer;
   };
 
   addVariationToSelection = (
@@ -544,7 +543,8 @@ export class Store {
     // panel along with it.
     this.selectedParameter = { block, uniformName };
     const patternBlock = block.parentBlock ?? block;
-    if (patternBlock.layer) this._selectedLayer = patternBlock.layer;
+    if (patternBlock.layer?.kind === "layer")
+      this._selectedLayer = patternBlock.layer;
   };
 
   clearLaneSpan = () => {
@@ -565,11 +565,7 @@ export class Store {
     time: number,
   ): boolean => {
     const anchor = this.laneSpanAnchor;
-    if (
-      !anchor ||
-      anchor.block !== block ||
-      anchor.uniformName !== uniformName
-    )
+    if (!anchor || anchor.block !== block || anchor.uniformName !== uniformName)
       return false;
     this.selectLaneSpan(block, uniformName, anchor.time, time);
     return this.laneSpan !== null;
@@ -600,7 +596,10 @@ export class Store {
     regions: Variation[],
   ) => {
     const total = laneDuration(block, uniformName);
-    const start = Math.max(0, Math.min(total - MINIMUM_SPAN_DURATION, startTime));
+    const start = Math.max(
+      0,
+      Math.min(total - MINIMUM_SPAN_DURATION, startTime),
+    );
     const available = total - start;
     if (available < MINIMUM_SPAN_DURATION) return;
 
@@ -703,7 +702,7 @@ export class Store {
 
   addVariation = (block: Block, uniformName: string, variation: Variation) => {
     block.addVariation(uniformName, variation);
-    if (block.layer) this.selectedLayer = block.layer;
+    if (block.layer?.kind === "layer") this.selectedLayer = block.layer;
     this.selectVariation(block, uniformName, variation);
   };
 
@@ -714,7 +713,7 @@ export class Store {
     insertAtEnd = false,
   ) => {
     block.duplicateVariation(uniformName, variation, insertAtEnd);
-    if (block.layer) this._selectedLayer = block.layer;
+    if (block.layer?.kind === "layer") this._selectedLayer = block.layer;
     this.selectVariation(block, uniformName, variation);
   };
 
@@ -811,7 +810,10 @@ export class Store {
     }
 
     const blocksOrVariationsData = pastedData as any[];
-    if (!Array.isArray(blocksOrVariationsData) || !blocksOrVariationsData.length)
+    if (
+      !Array.isArray(blocksOrVariationsData) ||
+      !blocksOrVariationsData.length
+    )
       return;
 
     const firstBlockOrVariation = blocksOrVariationsData[0];

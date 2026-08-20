@@ -140,45 +140,47 @@ const MergeThroughEffectTrack = observer(function MergeThroughEffectTrack({
 // be outside their time window at the playhead. With none of them in the signal
 // path the merge writes the destination directly, so a track costs extra passes
 // only while it is actually doing something.
-const MergeThroughPopulatedTrack = observer(function MergeThroughPopulatedTrack({
-  mergePriority,
-  trackPriority,
-  track,
-  inputs,
-  destinationTarget,
-}: MergeThroughEffectTrackProps) {
-  // Keyed to the track rather than to the effects in the signal path, so that
-  // the targets are allocated once and survive effects coming and going as the
-  // playhead moves.
-  const trackSource = useRenderTarget();
-  const trackScratch = useRenderTarget();
+const MergeThroughPopulatedTrack = observer(
+  function MergeThroughPopulatedTrack({
+    mergePriority,
+    trackPriority,
+    track,
+    inputs,
+    destinationTarget,
+  }: MergeThroughEffectTrackProps) {
+    // Keyed to the track rather than to the effects in the signal path, so that
+    // the targets are allocated once and survive effects coming and going as the
+    // playhead moves.
+    const trackSource = useRenderTarget();
+    const trackScratch = useRenderTarget();
 
-  // effect chain blocks never overlap, so at most one is in the signal path
-  const activeBlock = track.activeBlocks[0] ?? null;
-  const activeEffects = activeBlock?.effectBlocks ?? [];
-  const trackActive = activeEffects.length > 0;
+    // effect chain blocks never overlap, so at most one is in the signal path
+    const activeBlock = track.activeBlocks[0] ?? null;
+    const activeEffects = activeBlock?.effectBlocks ?? [];
+    const trackActive = activeEffects.length > 0;
 
-  return (
-    <>
-      <MergeNodes
-        basePriority={mergePriority}
-        inputs={inputs}
-        destinationTarget={trackActive ? trackSource : destinationTarget}
-      />
-      {trackActive && activeBlock && (
-        <EffectChainNode
-          basePriority={trackPriority + 1}
-          parameterPriority={trackPriority}
-          parameterBlock={activeBlock}
-          effectBlocks={activeEffects}
-          sourceTarget={trackSource}
-          scratchTarget={trackScratch}
-          destinationTarget={destinationTarget}
+    return (
+      <>
+        <MergeNodes
+          basePriority={mergePriority}
+          inputs={inputs}
+          destinationTarget={trackActive ? trackSource : destinationTarget}
         />
-      )}
-    </>
-  );
-});
+        {trackActive && activeBlock && (
+          <EffectChainNode
+            basePriority={trackPriority + 1}
+            parameterPriority={trackPriority}
+            parameterBlock={activeBlock}
+            effectBlocks={activeEffects}
+            sourceTarget={trackSource}
+            scratchTarget={trackScratch}
+            destinationTarget={destinationTarget}
+          />
+        )}
+      </>
+    );
+  },
+);
 
 type MergeInput = {
   target: WebGLRenderTarget;
@@ -235,17 +237,19 @@ const MergeNodes = observer(function MergeNodes({
   // alternate so a merge never reads the target it writes. Opacity is applied
   // as each input enters the chain; the running total is always carried at
   // full opacity.
-  return inputs.slice(1).map((input, k) => (
-    <MergeNode
-      key={k}
-      priority={basePriority + k}
-      renderTargetIn1={k === 0 ? inputs[0].target : scratch[(k - 1) % 2]}
-      renderTargetIn2={input.target}
-      renderTargetOut={
-        k === inputs.length - 2 ? destinationTarget : scratch[k % 2]
-      }
-      getOpacityIn1={k === 0 ? inputs[0].getOpacity : undefined}
-      getOpacityIn2={input.getOpacity}
-    />
-  ));
+  return inputs
+    .slice(1)
+    .map((input, k) => (
+      <MergeNode
+        key={k}
+        priority={basePriority + k}
+        renderTargetIn1={k === 0 ? inputs[0].target : scratch[(k - 1) % 2]}
+        renderTargetIn2={input.target}
+        renderTargetOut={
+          k === inputs.length - 2 ? destinationTarget : scratch[k % 2]
+        }
+        getOpacityIn1={k === 0 ? inputs[0].getOpacity : undefined}
+        getOpacityIn2={input.getOpacity}
+      />
+    ));
 });

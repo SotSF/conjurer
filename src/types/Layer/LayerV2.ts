@@ -45,7 +45,7 @@ export class LayerV2 implements Layer {
   _heightFlushHandle: number | null = null;
 
   constructor(readonly store: Store) {
-    this.effectTrack = new EffectTrack(store, "Layer effects");
+    this.effectTrack = new EffectTrack(store, "Layer effects", this);
     makeAutoObservable(this, {
       store: false,
       _lastComputedWindowStartTime: false,
@@ -209,9 +209,7 @@ export class LayerV2 implements Layer {
           new EasingVariation(fadeInEnd - block.startTime, "easeOutSine", 0, 1),
         );
       if (fadeOutStart > fadeInEnd)
-        variations.push(
-          CurveVariation.flat(fadeOutStart - fadeInEnd, 1),
-        );
+        variations.push(CurveVariation.flat(fadeOutStart - fadeInEnd, 1));
       if (block.endTime > fadeOutStart)
         variations.push(
           new EasingVariation(block.endTime - fadeOutStart, "easeInSine", 1, 0),
@@ -313,7 +311,7 @@ export class LayerV2 implements Layer {
   };
 
   removeBlock = (block: Block) => {
-    if (block.isEffectTrackBlock) {
+    if (block.isEffectChainBlock) {
       this.effectTrack.removeBlock(block);
       return;
     }
@@ -393,6 +391,7 @@ export class LayerV2 implements Layer {
       store,
       "Layer effects",
       data.effectChain,
+      layer,
     );
     return layer;
   };

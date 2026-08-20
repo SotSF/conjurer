@@ -5,7 +5,6 @@ import { makeAutoObservable } from "mobx";
 import { generateId } from "@/src/utils/id";
 import { Layer } from ".";
 import { Block } from "@/src/types/Block";
-import { EffectTrack } from "@/src/types/EffectTrack";
 
 export type ActivePatternsWindow = {
   startTime: number;
@@ -22,13 +21,14 @@ export class LayerV1 implements Layer {
   // interface compliance; collapse is a V2/editor feature (see Layer.collapsed)
   collapsed = false;
 
-  effectTrack: EffectTrack;
+  // v1 experiences predate effect tracks (and the v1 pipeline is never
+  // instantiated), so there is no track to carry
+  effectTrack = null;
 
   patternBlocks: Block[] = [];
   _lastComputedCurrentBlock: Block | null = null;
 
   constructor(readonly store: Store) {
-    this.effectTrack = new EffectTrack(store, "Layer effects");
     makeAutoObservable(this, {
       store: false,
 

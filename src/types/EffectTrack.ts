@@ -1,6 +1,7 @@
 import { makeAutoObservable, runInAction } from "mobx";
 import type { Store } from "@/src/types/Store";
 import type { Layer } from "@/src/types/Layer";
+import type { TrackContract } from "@/src/types/Track";
 import { Block } from "@/src/types/Block";
 import type { Pattern } from "@/src/types/Pattern";
 import type { Variation } from "@/src/types/Variations/Variation";
@@ -24,21 +25,16 @@ const UNMEASURED_BLOCK_HEIGHT = 50;
  * Blocks never overlap, so the track's own ordering is purely chronological and
  * carries no signal meaning.
  *
- * It implements Layer so that the timeline's block components (drag, resize,
- * selection, automation lanes) drive effect chain blocks through the same code
- * paths they use for pattern blocks. A track is never in `store.layers`, so it
- * never composites as a layer.
+ * It implements TrackContract, which is what lets the timeline's block
+ * components (drag, resize, selection, automation lanes) drive effect chain
+ * blocks through the same code paths they use for pattern blocks.
  */
-export class EffectTrack implements Layer {
+export class EffectTrack implements TrackContract {
   readonly kind = "effectTrack";
   id = generateId();
   name: string;
   // editor-only bypass: false takes the whole track out of the signal path
   visible = true;
-  // satisfies Layer; a track strip has no collapsed state of its own
-  collapsed = false;
-  // a track is the end of the line: its own blocks carry no further track
-  effectTrack = null;
 
   blocks: Block[] = [];
 
@@ -56,10 +52,14 @@ export class EffectTrack implements Layer {
   constructor(
     readonly store: Store,
     name: string,
+    // the layer whose composited output this track processes; null for the
+    // global track, which processes the whole merged frame
+    readonly layer: Layer | null = null,
   ) {
     this.name = name;
     makeAutoObservable(this, {
       store: false,
+      layer: false,
       _activeBlocks: false,
       _pendingHeights: false,
       _heightFlushHandle: false,
@@ -134,11 +134,6 @@ export class EffectTrack implements Layer {
   // effects lays out exactly as it would without the feature.
   get height() {
     return this.laneHeights.reduce((sum, laneHeight) => sum + laneHeight, 0);
-  }
-
-  // a track's blocks are all the vertical space it has
-  get blockLanesHeight() {
-    return this.height;
   }
 
   blockTopOffset = (block: Block) => {
@@ -279,13 +274,18 @@ export class EffectTrack implements Layer {
   attemptMoveBlock = (block: Block, desiredTime: number, relative = false) => {
     if (block.layer != this || block.locked) return;
 
-    const desiredStartTime = relative ? block.startTime + desiredTime : desiredTime;
+    const desiredStartTime = relative
+      ? block.startTime + desiredTime
+      : desiredTime;
     const { previous, next } = this.neighborsOf(block);
     const lowerBound = previous?.endTime ?? 0;
     const upperBound = (next?.startTime ?? Infinity) - block.duration;
     if (upperBound < lowerBound) return;
 
-    block.startTime = Math.min(Math.max(desiredStartTime, lowerBound), upperBound);
+    block.startTime = Math.min(
+      Math.max(desiredStartTime, lowerBound),
+      upperBound,
+    );
     // start time decides position in the track's ordering
     this.blocks.splice(this.blocks.indexOf(block), 1);
     this.addBlock(block);
@@ -323,8 +323,13 @@ export class EffectTrack implements Layer {
     blocks: this.blocks.map((block) => block.serialize()),
   });
 
-  static deserialize = (store: Store, name: string, data: any) => {
-    const track = new EffectTrack(store, name);
+  static deserialize = (
+    store: Store,
+    name: string,
+    data: any,
+    layer: Layer | null = null,
+  ) => {
+    const track = new EffectTrack(store, name, layer);
     if (data?.id) track.id = data.id;
     for (const blockData of data?.blocks ?? [])
       track.addBlock(Block.deserialize(store, blockData));

@@ -170,7 +170,9 @@ export const BlockDevicePanel = observer(function BlockDevicePanel() {
                           {index > 0 && <Connector />}
                           <EffectUnit
                             effectBlock={effectBlock}
-                            onRemove={() => block.removeEffectBlock(effectBlock)}
+                            onRemove={() =>
+                              block.removeEffectBlock(effectBlock)
+                            }
                             dragHandleProps={
                               reorderable ? prov.dragHandleProps : undefined
                             }
