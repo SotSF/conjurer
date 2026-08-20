@@ -116,8 +116,7 @@ export const TimelineBlockStack = observer(function TimelineBlockStack({
         store.selectBlock(patternBlock);
       }
 
-      if (patternBlock.layer?.kind === "layer")
-        store.selectedLayer = patternBlock.layer;
+      if (patternBlock.layer) store.selectedTrack = patternBlock.layer;
       e.stopPropagation();
     },
     [store, patternBlock, selectedBlocksOrVariations],

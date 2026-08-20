@@ -113,6 +113,7 @@ export const GlobalEffectRow = observer(function GlobalEffectRow() {
             ),
           );
           store.deselectAll();
+          store.selectedTrack = track;
         })}
       >
         {blocks.map((block) => (

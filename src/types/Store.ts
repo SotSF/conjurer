@@ -5,6 +5,7 @@ import { AudioStore } from "@/src/types/AudioStore";
 import { Variation } from "@/src/types/Variations/Variation";
 import { ExperienceStore } from "@/src/types/ExperienceStore";
 import { Layer } from "@/src/types/Layer";
+import type { Track } from "@/src/types/Track";
 import { deserializeVariation } from "@/src/types/Variations/variations";
 import { PlaylistStore } from "@/src/types/PlaylistStore";
 import { BeatGridStore } from "@/src/types/BeatGridStore";
@@ -135,13 +136,29 @@ export class Store {
     localStorage.setItem("usingLocalData", String(value));
   }
 
-  private _selectedLayer: Layer = this.layers[0]; // a layer is always selected
-  get selectedLayer() {
-    return this._selectedLayer;
+  // The timeline row being worked in: a layer, a layer's effect track, or the
+  // global effect track. This is the one stored selection pointer; the selected
+  // layer is derived from it.
+  private _selectedTrack: Track = this.layers[0]; // a track is always selected
+  get selectedTrack(): Track {
+    return this._selectedTrack;
+  }
+  set selectedTrack(value: Track) {
+    if (this._selectedTrack === value) return;
+    this._selectedTrack = value;
+  }
+
+  // The selected track when it is a layer, else the layer whose effect track
+  // is selected. The global effect track has no owning layer, so the first
+  // layer stands in — operations that must not silently target it check
+  // selectedTrack instead.
+  get selectedLayer(): Layer {
+    const track = this._selectedTrack;
+    if (!track || track.kind === "layer") return track as Layer;
+    return track.layer ?? this.layers[0];
   }
   set selectedLayer(value: Layer) {
-    if (this._selectedLayer === value) return;
-    this._selectedLayer = value;
+    this.selectedTrack = value;
   }
 
   // ================================ layers ==================================
@@ -162,7 +179,7 @@ export class Store {
         ? this.layers.length
         : Math.max(0, Math.min(options.index, this.layers.length));
     this.layers.splice(index, 0, layer);
-    if (options.select ?? true) this._selectedLayer = layer;
+    if (options.select ?? true) this._selectedTrack = layer;
     return layer;
   };
 
@@ -193,8 +210,13 @@ export class Store {
 
     this.layers.splice(index, 1);
 
-    if (this._selectedLayer === layer)
-      this._selectedLayer =
+    // reselect a neighbor when the removed layer or its effect track was the
+    // working row
+    if (
+      this._selectedTrack === layer ||
+      this._selectedTrack === layer.effectTrack
+    )
+      this._selectedTrack =
         this.layers[Math.min(index, this.layers.length - 1)];
   };
 
@@ -425,8 +447,7 @@ export class Store {
         selection.type === "block" && selection.block === patternBlock,
     );
     if (!alreadySelected) this.selectBlock(patternBlock);
-    if (patternBlock.layer?.kind === "layer")
-      this._selectedLayer = patternBlock.layer;
+    if (patternBlock.layer) this.selectedTrack = patternBlock.layer;
   };
 
   // Open the zoomed parameter detail panel for a lane (arms the lane if needed).
@@ -451,7 +472,7 @@ export class Store {
       },
     ]);
     this.selectedParameter = { block, uniformName };
-    if (block.layer?.kind === "layer") this._selectedLayer = block.layer;
+    if (block.layer) this.selectedTrack = block.layer;
   };
 
   addVariationToSelection = (
@@ -543,8 +564,7 @@ export class Store {
     // panel along with it.
     this.selectedParameter = { block, uniformName };
     const patternBlock = block.parentBlock ?? block;
-    if (patternBlock.layer?.kind === "layer")
-      this._selectedLayer = patternBlock.layer;
+    if (patternBlock.layer) this.selectedTrack = patternBlock.layer;
   };
 
   clearLaneSpan = () => {
@@ -702,7 +722,7 @@ export class Store {
 
   addVariation = (block: Block, uniformName: string, variation: Variation) => {
     block.addVariation(uniformName, variation);
-    if (block.layer?.kind === "layer") this.selectedLayer = block.layer;
+    if (block.layer) this.selectedTrack = block.layer;
     this.selectVariation(block, uniformName, variation);
   };
 
@@ -713,7 +733,7 @@ export class Store {
     insertAtEnd = false,
   ) => {
     block.duplicateVariation(uniformName, variation, insertAtEnd);
-    if (block.layer?.kind === "layer") this._selectedLayer = block.layer;
+    if (block.layer) this.selectedTrack = block.layer;
     this.selectVariation(block, uniformName, variation);
   };
 
