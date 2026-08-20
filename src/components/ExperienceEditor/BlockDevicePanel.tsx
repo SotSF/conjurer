@@ -1,5 +1,5 @@
 import { Block } from "@/src/types/Block";
-import { EffectChain } from "@/src/types/EffectChain";
+import { EffectTrack } from "@/src/types/EffectTrack";
 import type { Pattern } from "@/src/types/Pattern";
 import { isPalette, Palette } from "@/src/params/palette/Palette";
 import { playgroundEffects } from "@/src/effects/effects";
@@ -57,10 +57,10 @@ const selectedPatternBlock = (
   return null;
 };
 
-// The chain a block belongs to when it processes composited output rather than
-// living on a pattern block; null for ordinary pattern blocks.
-const owningEffectChain = (block: Block): EffectChain | null =>
-  block.layer instanceof EffectChain ? block.layer : null;
+// The effect track a block belongs to when it processes composited output
+// rather than living on a pattern block; null for ordinary pattern blocks.
+const owningEffectTrack = (block: Block): EffectTrack | null =>
+  block.layer instanceof EffectTrack ? block.layer : null;
 
 const paletteToGradient = (palette: Palette): string => {
   const stops = [0, 0.2, 0.4, 0.6, 0.8, 1].map((t) => {
@@ -84,7 +84,7 @@ export const BlockDevicePanel = observer(function BlockDevicePanel() {
   const block = selectedPatternBlock(store);
   if (!block) return null;
 
-  const chain = owningEffectChain(block);
+  const track = owningEffectTrack(block);
 
   // Read the observable array in the component's own (tracked) render so the
   // observer re-renders on add/remove/reorder — reading it only inside the
@@ -136,8 +136,8 @@ export const BlockDevicePanel = observer(function BlockDevicePanel() {
       <Box flex="1" minH={0} overflowX="auto" overflowY="hidden">
         <DragDropContext onDragEnd={onDragEnd}>
           <HStack align="stretch" spacing={0} minW="min-content" height="100%">
-            {chain ? (
-              <ChainSourceUnit chain={chain} />
+            {track ? (
+              <TrackSourceUnit track={track} />
             ) : (
               <PatternUnit block={block} />
             )}
@@ -186,8 +186,8 @@ export const BlockDevicePanel = observer(function BlockDevicePanel() {
             <AddEffectUnit
               onAddEffect={(effect) => block.addCloneOfEffect(effect)}
               helpDescription={
-                chain
-                  ? "Append an effect to this chain, applied to its composited input."
+                track
+                  ? "Append an effect to this block's chain, applied to its composited input."
                   : "Append an effect to this pattern's processing chain."
               }
             />
@@ -548,12 +548,12 @@ const EffectUnit = function EffectUnit({
   );
 };
 
-// Stands in for the pattern at the head of a post-composite chain: what the
-// chain processes is the output of a layer or of the whole layer stack.
-const ChainSourceUnit = function ChainSourceUnit({
-  chain,
+// Stands in for the pattern at the head of an effect chain block's chain: what
+// it processes is the output of a layer or of the whole layer stack.
+const TrackSourceUnit = function TrackSourceUnit({
+  track,
 }: {
-  chain: EffectChain;
+  track: EffectTrack;
 }) {
   return (
     <Box
@@ -569,7 +569,7 @@ const ChainSourceUnit = function ChainSourceUnit({
       maxW="140px"
     >
       <Text fontSize="11px" fontWeight={600} color="#63b3ed" noOfLines={1}>
-        {chain.name}
+        {track.name}
       </Text>
       <Text fontSize="9.5px" color="#718096" noOfLines={2}>
         composited input

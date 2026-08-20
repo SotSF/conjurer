@@ -75,7 +75,7 @@ export class Block {
   // track, holding the effects applied to composited output between its start
   // and end time. Identity comes from ownership: a block is an effect chain
   // block exactly when an effect track holds it.
-  get isEffectChainBlock() {
+  get isEffectTrackBlock() {
     return !this.parentBlock && this._layer?.kind === "effectTrack";
   }
 
@@ -167,7 +167,7 @@ export class Block {
    * opacity would be authored into a void.
    */
   get opacityApplies(): boolean {
-    return !this.parentBlock && !this.isEffectChainBlock;
+    return !this.parentBlock && !this.isEffectTrackBlock;
   }
 
   // uniform names on this block that can be given an automation lane: excludes

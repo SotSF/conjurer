@@ -1,6 +1,6 @@
 import type { Store } from "@/src/types/Store";
 import { Block } from "@/src/types/Block";
-import type { EffectChain } from "@/src/types/EffectChain";
+import type { EffectTrack } from "@/src/types/EffectTrack";
 import type { Variation } from "@/src/types/Variations/Variation";
 
 export type ActivePatternsWindow = {
@@ -21,11 +21,11 @@ export type Layer = {
   // controls whether the layer renders to the canopy. Not serialized.
   collapsed: boolean;
   height: number;
-  // height of the blocks alone, without the effect chain strip beneath them
+  // height of the blocks alone, without the effect track strip beneath them
   blockLanesHeight: number;
   // effects applied to everything the layer composites. Null only on an effect
-  // chain itself, which is what makes a chain a leaf rather than a nesting point.
-  effectChain: EffectChain | null;
+  // track itself, which is what makes a track a leaf rather than a nesting point.
+  effectTrack: EffectTrack | null;
   store: Store;
 
   insertCloneOfBlock(block: Block): void;

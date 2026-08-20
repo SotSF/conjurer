@@ -32,7 +32,7 @@ import {
 import { FaTrashAlt } from "react-icons/fa";
 import type { DraggableProvidedDragHandleProps } from "@hello-pangea/dnd";
 import { hoverHelpProps } from "@/src/utils/hoverHelp";
-import { AddChainEffectMenu } from "@/src/components/Timeline/AddChainEffectMenu";
+import { AddTrackEffectMenu } from "@/src/components/Timeline/AddTrackEffectMenu";
 
 type Props = {
   index: number;
@@ -57,7 +57,7 @@ export const TimelineLayerHeader = observer(function TimelineLayerHeader({
   const blockCount = layer.getAllBlocks().length;
   const collapsed = layer.collapsed;
 
-  const { effectChain } = layer;
+  const { effectTrack } = layer;
 
   const confirmDelete = useDisclosure();
 
@@ -231,21 +231,21 @@ export const TimelineLayerHeader = observer(function TimelineLayerHeader({
             )}
           />
 
-          {effectChain && (
-            <AddChainEffectMenu
-              chain={effectChain}
+          {effectTrack && (
+            <AddTrackEffectMenu
+              track={effectTrack}
               helpTitle="Add layer effect"
               helpDescription="Append an effect applied to everything this layer renders, after its blocks are merged together."
             />
           )}
 
-          {effectChain && effectChain.blocks.length > 0 && (
+          {effectTrack && effectTrack.blocks.length > 0 && (
             <IconButton
               minW="20px"
               w="20px"
               h="20px"
               variant="unstyled"
-              color={effectChain.visible ? "blue.600" : "gray.500"}
+              color={effectTrack.visible ? "blue.600" : "gray.500"}
               display="flex"
               alignItems="center"
               justifyContent="center"
@@ -253,13 +253,13 @@ export const TimelineLayerHeader = observer(function TimelineLayerHeader({
               title="Bypass layer effects"
               icon={<MdBlurOn size={15} />}
               onClick={action((e) => {
-                effectChain.toggleVisible();
+                effectTrack.toggleVisible();
                 e.stopPropagation();
               })}
               {...hoverHelpProps(
                 uiStore,
-                "Layer effect chain",
-                "Take this layer's effect chain out of the signal path without deleting it.",
+                "Layer effect track",
+                "Take this layer's effect track out of the signal path without deleting it.",
               )}
             />
           )}

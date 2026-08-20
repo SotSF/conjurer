@@ -7,14 +7,14 @@ import { useStore } from "@/src/types/StoreContext";
 import { TIMELINE_HEADER_WIDTH } from "@/src/types/UIStore";
 import { MAX_TIME } from "@/src/utils/time";
 import { hoverHelpProps } from "@/src/utils/hoverHelp";
-import { AddChainEffectMenu } from "@/src/components/Timeline/AddChainEffectMenu";
+import { AddTrackEffectMenu } from "@/src/components/Timeline/AddTrackEffectMenu";
 import { TimelineBlockStack } from "@/src/components/TimelineBlockStack/TimelineBlockStack";
 
-// Tall enough for the row's header controls when the chain is empty.
+// Tall enough for the row's header controls when the track is empty.
 const EMPTY_ROW_HEIGHT = 26;
 
 /**
- * The experience's global effect chain, pinned below the layer stack: these
+ * The experience's global effect track, pinned below the layer stack: these
  * effects process the merged output of every layer, which is why the row sits
  * downstream of them all.
  *
@@ -24,11 +24,11 @@ const EMPTY_ROW_HEIGHT = 26;
  */
 export const GlobalEffectRow = observer(function GlobalEffectRow() {
   const store = useStore();
-  const { audioStore, uiStore, globalEffectChain: chain } = store;
+  const { audioStore, uiStore, globalEffectTrack: track } = store;
 
   const contentRef = useRef<HTMLDivElement>(null);
-  const blocks = chain.blocks;
-  const height = Math.max(chain.height, EMPTY_ROW_HEIGHT);
+  const blocks = track.blocks;
+  const height = Math.max(track.height, EMPTY_ROW_HEIGHT);
 
   return (
     <HStack
@@ -64,8 +64,8 @@ export const GlobalEffectRow = observer(function GlobalEffectRow() {
           <Text fontSize={11} fontWeight="bold" color="black" noOfLines={1}>
             Global FX
           </Text>
-          <AddChainEffectMenu
-            chain={chain}
+          <AddTrackEffectMenu
+            track={track}
             helpTitle="Add global effect"
             helpDescription="Append an effect applied to the entire frame, after every layer is merged together."
           />
@@ -75,18 +75,18 @@ export const GlobalEffectRow = observer(function GlobalEffectRow() {
               w="20px"
               h="20px"
               variant="unstyled"
-              color={chain.visible ? "blue.600" : "gray.600"}
+              color={track.visible ? "blue.600" : "gray.600"}
               display="flex"
               alignItems="center"
               justifyContent="center"
               aria-label="Bypass global effects"
               title="Bypass global effects"
               icon={<MdBlurOn size={15} />}
-              onClick={action(() => chain.toggleVisible())}
+              onClick={action(() => track.toggleVisible())}
               {...hoverHelpProps(
                 uiStore,
-                "Global effect chain",
-                "Take the global effect chain out of the signal path without deleting it.",
+                "Global effect track",
+                "Take the global effect track out of the signal path without deleting it.",
               )}
             />
           )}
@@ -102,7 +102,7 @@ export const GlobalEffectRow = observer(function GlobalEffectRow() {
         bgColor="gray.500"
         borderTopWidth={1}
         borderColor="black"
-        opacity={chain.visible ? 1 : 0.4}
+        opacity={track.visible ? 1 : 0.4}
         onClick={action((e) => {
           audioStore.setTimeWithCursor(
             Math.max(

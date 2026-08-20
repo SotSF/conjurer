@@ -5,7 +5,7 @@ import { makeAutoObservable, runInAction } from "mobx";
 import { generateId } from "@/src/utils/id";
 import { Layer } from ".";
 import { BlockMap } from "../BlockMap";
-import { EffectChain } from "@/src/types/EffectChain";
+import { EffectTrack } from "@/src/types/EffectTrack";
 import { Variation } from "@/src/types/Variations/Variation";
 import { EasingVariation } from "@/src/types/Variations/EasingVariation";
 import { CurveVariation } from "@/src/types/Variations/CurveVariation";
@@ -33,7 +33,7 @@ export class LayerV2 implements Layer {
 
   // effects applied to this layer's merged output, after all of its blocks have
   // been composited together
-  effectChain: EffectChain;
+  effectTrack: EffectTrack;
 
   _lastComputedWindowStartTime: number = -1;
   _maxConcurrentBlocks: number | null = null;
@@ -45,7 +45,7 @@ export class LayerV2 implements Layer {
   _heightFlushHandle: number | null = null;
 
   constructor(readonly store: Store) {
-    this.effectChain = new EffectChain(store, "Layer effects");
+    this.effectTrack = new EffectTrack(store, "Layer effects");
     makeAutoObservable(this, {
       store: false,
       _lastComputedWindowStartTime: false,
@@ -130,7 +130,7 @@ export class LayerV2 implements Layer {
     return heights;
   }
 
-  // Height of the block lanes alone. The effect chain strip sits directly below
+  // Height of the block lanes alone. The effect track strip sits directly below
   // them, so this is where it starts.
   get blockLanesHeight() {
     return this.laneHeights.reduce((sum, laneHeight) => sum + laneHeight, 0);
@@ -138,7 +138,7 @@ export class LayerV2 implements Layer {
 
   get height() {
     if (this.collapsed) return COLLAPSED_LAYER_HEIGHT;
-    return this.blockLanesHeight + this.effectChain.height;
+    return this.blockLanesHeight + this.effectTrack.height;
   }
 
   blockTopOffset = (block: Block) => {
@@ -313,8 +313,8 @@ export class LayerV2 implements Layer {
   };
 
   removeBlock = (block: Block) => {
-    if (block.isEffectChainBlock) {
-      this.effectChain.removeBlock(block);
+    if (block.isEffectTrackBlock) {
+      this.effectTrack.removeBlock(block);
       return;
     }
     this.blockMap.removeBlock(block);
@@ -379,7 +379,8 @@ export class LayerV2 implements Layer {
     id: this.id,
     name: this.name,
     blockMap: this.blockMap.serialize(),
-    effectChain: this.effectChain.serialize(),
+    // stored under the key existing saved experiences use
+    effectChain: this.effectTrack.serialize(),
   });
 
   static deserialize = (store: Store, data: any) => {
@@ -388,7 +389,7 @@ export class LayerV2 implements Layer {
     layer.name = data.name ?? "";
 
     layer.blockMap = BlockMap.deserialize(store, layer, data.blockMap);
-    layer.effectChain = EffectChain.deserialize(
+    layer.effectTrack = EffectTrack.deserialize(
       store,
       "Layer effects",
       data.effectChain,

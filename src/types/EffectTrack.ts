@@ -15,30 +15,30 @@ import { EffectChainSource } from "@/src/patterns/EffectChainSource";
 const UNMEASURED_BLOCK_HEIGHT = 50;
 
 /**
- * The effects applied to already-composited output — either one layer's merged
- * blocks or the entire layer stack.
+ * A timeline track holding the effects applied to already-composited output —
+ * either one layer's merged blocks or the entire layer stack.
  *
- * A chain holds blocks the way a layer does, and each block holds a stack of
- * effects the way a pattern block does: the block owns the time bounds, and the
+ * A track holds effect chain blocks the way a layer holds pattern blocks, and
+ * each block holds a chain of effects: the block owns the time bounds, and the
  * effects inside it share those bounds and run in the order they are stacked.
- * Blocks never overlap, so the chain's own ordering is purely chronological and
+ * Blocks never overlap, so the track's own ordering is purely chronological and
  * carries no signal meaning.
  *
  * It implements Layer so that the timeline's block components (drag, resize,
- * selection, automation lanes) drive chain blocks through the same code paths
- * they use for pattern blocks. A chain is never in `store.layers`, so it never
- * composites as a layer.
+ * selection, automation lanes) drive effect chain blocks through the same code
+ * paths they use for pattern blocks. A track is never in `store.layers`, so it
+ * never composites as a layer.
  */
-export class EffectChain implements Layer {
+export class EffectTrack implements Layer {
   readonly kind = "effectTrack";
   id = generateId();
   name: string;
-  // editor-only bypass: false takes the whole chain out of the signal path
+  // editor-only bypass: false takes the whole track out of the signal path
   visible = true;
-  // satisfies Layer; a chain strip has no collapsed state of its own
+  // satisfies Layer; a track strip has no collapsed state of its own
   collapsed = false;
-  // a chain is the end of the line: its own blocks carry no further chain
-  effectChain = null;
+  // a track is the end of the line: its own blocks carry no further track
+  effectTrack = null;
 
   blocks: Block[] = [];
 
@@ -67,7 +67,7 @@ export class EffectChain implements Layer {
   }
 
   /**
-   * The blocks in the signal path at the playhead, in chain order.
+   * The blocks in the signal path at the playhead, in track order.
    *
    * The array identity is held stable while the membership is unchanged, so the
    * render pipeline's observers see an unchanged computed value and don't
@@ -93,7 +93,7 @@ export class EffectChain implements Layer {
     return active;
   }
 
-  // Overlapping blocks are displayed stacked in "lanes" within the chain strip.
+  // Overlapping blocks are displayed stacked in "lanes" within the track strip.
   // Greedy interval partitioning: in start time order, each block goes into the
   // first lane whose previous block has ended.
   get blockLanes(): Map<string, number> {
@@ -130,13 +130,13 @@ export class EffectChain implements Layer {
     return heights;
   }
 
-  // An empty chain takes up no vertical space at all, so a layer with no effect
-  // chain lays out exactly as it would without the feature.
+  // An empty track takes up no vertical space at all, so a layer with no
+  // effects lays out exactly as it would without the feature.
   get height() {
     return this.laneHeights.reduce((sum, laneHeight) => sum + laneHeight, 0);
   }
 
-  // a chain's blocks are all the vertical space it has
+  // a track's blocks are all the vertical space it has
   get blockLanesHeight() {
     return this.height;
   }
@@ -145,7 +145,7 @@ export class EffectChain implements Layer {
     const lane = this.blockLanes.get(block.id) ?? 0;
     // Blocks in the first lane are always at the top, so return before reading
     // laneHeights: touching it would subscribe them to every block's measured
-    // height and re-render them whenever any block in the chain resizes.
+    // height and re-render them whenever any block in the track resizes.
     if (lane === 0) return 0;
     return this.laneHeights
       .slice(0, lane)
@@ -188,10 +188,10 @@ export class EffectChain implements Layer {
   };
 
   /**
-   * Starts a new chain block at the playhead holding this effect.
+   * Starts a new effect chain block at the playhead holding this effect.
    *
    * Effects live inside a chain block rather than alongside it, so this is how
-   * a chain gains a block; further effects are stacked onto an existing one
+   * a track gains a block; further effects are stacked onto an existing one
    * through Block.addCloneOfEffect.
    */
   addCloneOfEffect = (effect: Pattern) => {
@@ -206,8 +206,8 @@ export class EffectChain implements Layer {
     return block;
   };
 
-  // kept in start time order, which is the only order a chain block has: its
-  // effects carry the signal order, and blocks never overlap
+  // kept in start time order, which is the only order an effect chain block
+  // has: its effects carry the signal order, and blocks never overlap
   addBlock = (block: Block) => {
     block.layer = this;
     const index = this.blocks.findIndex((b) => b.startTime > block.startTime);
@@ -237,9 +237,9 @@ export class EffectChain implements Layer {
     return this.blocks.slice();
   }
 
-  // The first gap at or after fromTime that no block occupies. Chain blocks
-  // apply in series to the same composited input, so overlapping them would
-  // leave their order to something the timeline cannot show.
+  // The first gap at or after fromTime that no block occupies. Effect chain
+  // blocks apply in series to the same composited input, so overlapping them
+  // would leave their order to something the timeline cannot show.
   /**
    * Where a block added at fromTime goes, and how long it can be.
    *
@@ -286,7 +286,7 @@ export class EffectChain implements Layer {
     if (upperBound < lowerBound) return;
 
     block.startTime = Math.min(Math.max(desiredStartTime, lowerBound), upperBound);
-    // start time decides position in the chain's ordering
+    // start time decides position in the track's ordering
     this.blocks.splice(this.blocks.indexOf(block), 1);
     this.addBlock(block);
   };
@@ -313,8 +313,8 @@ export class EffectChain implements Layer {
     block.duration = Math.min(desiredEndTime, upperBound) - block.startTime;
   };
 
-  // Chain blocks are applied in series rather than summed, so there is no
-  // crossfade between them to derive.
+  // Effect chain blocks are applied in series rather than summed, so there is
+  // no crossfade between them to derive.
   autoBlockOpacityAt = () => 1;
   autoOpacityVariations = (): Variation<number>[] | null => null;
 
@@ -324,10 +324,10 @@ export class EffectChain implements Layer {
   });
 
   static deserialize = (store: Store, name: string, data: any) => {
-    const chain = new EffectChain(store, name);
-    if (data?.id) chain.id = data.id;
+    const track = new EffectTrack(store, name);
+    if (data?.id) track.id = data.id;
     for (const blockData of data?.blocks ?? [])
-      chain.addBlock(Block.deserialize(store, blockData));
-    return chain;
+      track.addBlock(Block.deserialize(store, blockData));
+    return track;
   };
 }

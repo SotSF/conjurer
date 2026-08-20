@@ -11,7 +11,7 @@ import { BlockStackNode } from "./BlockStackNode";
 import { BlockNode } from "./BlockNode";
 import { EffectChainNode } from "./EffectChainNode";
 import { LayerV2 } from "@/src/types/Layer/LayerV2";
-import { EffectChain } from "@/src/types/EffectChain";
+import { EffectTrack } from "@/src/types/EffectTrack";
 import blackFragmentShader from "@/src/shaders/black.frag";
 import defaultVertexShader from "@/src/shaders/default.vert";
 
@@ -21,16 +21,16 @@ type Props = {
 
 // useFrame priorities run in ascending order, so these bands define the frame
 // schedule: within a layer, every block stack renders, then the layer's internal
-// merge chain folds them together, then the layer's effect chain processes that
+// merge chain folds them together, then the layer's effect track processes that
 // merged output. Every layer completes before the cross-layer merge, which is
-// followed by the experience's global effect chain writing the final frame.
+// followed by the experience's global effect track writing the final frame.
 // Each layer's band accommodates up to 50 concurrent blocks (at 100 priorities
 // per block stack) before colliding with its merge chain.
 const LAYER_PRIORITY_BAND = 10_000;
 const LAYER_MERGE_OFFSET = 5_000;
-const LAYER_EFFECT_CHAIN_OFFSET = 6_000;
+const LAYER_EFFECT_TRACK_OFFSET = 6_000;
 const CROSS_LAYER_MERGE_PRIORITY = 1_000_000;
-const GLOBAL_EFFECT_CHAIN_PRIORITY = 1_100_000;
+const GLOBAL_EFFECT_TRACK_PRIORITY = 1_100_000;
 
 export const RenderPipelineV2 = observer(function RenderPipeline({
   renderTargetZ,
@@ -57,10 +57,10 @@ export const RenderPipelineV2 = observer(function RenderPipeline({
           />
         ) : null,
       )}
-      <MergeThroughEffectChain
+      <MergeThroughEffectTrack
         mergePriority={CROSS_LAYER_MERGE_PRIORITY}
-        chainPriority={GLOBAL_EFFECT_CHAIN_PRIORITY}
-        chain={store.globalEffectChain}
+        trackPriority={GLOBAL_EFFECT_TRACK_PRIORITY}
+        track={store.globalEffectTrack}
         inputs={mergeInputs}
         destinationTarget={renderTargetZ}
       />
@@ -92,10 +92,10 @@ const LayerNode = observer(function LayerNode({
           renderTargetOut={renderTargets[i + 1]}
         />
       ))}
-      <MergeThroughEffectChain
+      <MergeThroughEffectTrack
         mergePriority={basePriority + LAYER_MERGE_OFFSET}
-        chainPriority={basePriority + LAYER_EFFECT_CHAIN_OFFSET}
-        chain={layer.effectChain}
+        trackPriority={basePriority + LAYER_EFFECT_TRACK_OFFSET}
+        track={layer.effectTrack}
         inputs={blocks.map((block, i) => ({
           target: renderTargets[i + 1],
           // opacity is applied here, after the block's entire effect chain
@@ -108,23 +108,23 @@ const LayerNode = observer(function LayerNode({
   );
 });
 
-type MergeThroughEffectChainProps = {
+type MergeThroughEffectTrackProps = {
   mergePriority: number;
-  chainPriority: number;
-  chain: EffectChain;
+  trackPriority: number;
+  track: EffectTrack;
   inputs: MergeInput[];
   destinationTarget: WebGLRenderTarget;
 };
 
-// Merges its inputs and then runs them through a post-composite effect chain.
-// An empty chain merges straight to the destination from here, which keeps the
-// chain's render targets unallocated for the layers — and the experiences —
+// Merges its inputs and then runs them through a post-composite effect track.
+// An empty track merges straight to the destination from here, which keeps the
+// track's render targets unallocated for the layers — and the experiences —
 // that hold no effects at all.
-const MergeThroughEffectChain = observer(function MergeThroughEffectChain({
-  chain,
+const MergeThroughEffectTrack = observer(function MergeThroughEffectTrack({
+  track,
   ...props
-}: MergeThroughEffectChainProps) {
-  if (chain.blocks.length === 0)
+}: MergeThroughEffectTrackProps) {
+  if (track.blocks.length === 0)
     return (
       <MergeNodes
         basePriority={props.mergePriority}
@@ -133,46 +133,46 @@ const MergeThroughEffectChain = observer(function MergeThroughEffectChain({
       />
     );
 
-  return <MergeThroughPopulatedChain chain={chain} {...props} />;
+  return <MergeThroughPopulatedTrack track={track} {...props} />;
 });
 
-// Merges its inputs through a chain that holds effects, of which any number may
+// Merges its inputs through a track that holds effects, of which any number may
 // be outside their time window at the playhead. With none of them in the signal
-// path the merge writes the destination directly, so a chain costs extra passes
+// path the merge writes the destination directly, so a track costs extra passes
 // only while it is actually doing something.
-const MergeThroughPopulatedChain = observer(function MergeThroughPopulatedChain({
+const MergeThroughPopulatedTrack = observer(function MergeThroughPopulatedTrack({
   mergePriority,
-  chainPriority,
-  chain,
+  trackPriority,
+  track,
   inputs,
   destinationTarget,
-}: MergeThroughEffectChainProps) {
-  // Keyed to the chain rather than to the effects in the signal path, so that
+}: MergeThroughEffectTrackProps) {
+  // Keyed to the track rather than to the effects in the signal path, so that
   // the targets are allocated once and survive effects coming and going as the
   // playhead moves.
-  const chainSource = useRenderTarget();
-  const chainScratch = useRenderTarget();
+  const trackSource = useRenderTarget();
+  const trackScratch = useRenderTarget();
 
-  // chain blocks never overlap, so at most one is in the signal path
-  const activeBlock = chain.activeBlocks[0] ?? null;
+  // effect chain blocks never overlap, so at most one is in the signal path
+  const activeBlock = track.activeBlocks[0] ?? null;
   const activeEffects = activeBlock?.effectBlocks ?? [];
-  const chainActive = activeEffects.length > 0;
+  const trackActive = activeEffects.length > 0;
 
   return (
     <>
       <MergeNodes
         basePriority={mergePriority}
         inputs={inputs}
-        destinationTarget={chainActive ? chainSource : destinationTarget}
+        destinationTarget={trackActive ? trackSource : destinationTarget}
       />
-      {chainActive && activeBlock && (
+      {trackActive && activeBlock && (
         <EffectChainNode
-          basePriority={chainPriority + 1}
-          parameterPriority={chainPriority}
+          basePriority={trackPriority + 1}
+          parameterPriority={trackPriority}
           parameterBlock={activeBlock}
           effectBlocks={activeEffects}
-          sourceTarget={chainSource}
-          scratchTarget={chainScratch}
+          sourceTarget={trackSource}
+          scratchTarget={trackScratch}
           destinationTarget={destinationTarget}
         />
       )}

@@ -57,7 +57,7 @@ export const EffectChainNode = observer(function EffectChainNode({
   return (
     <>
       {parameterPriority !== undefined && parameterBlock && (
-        <EffectChainParameterNode
+        <EffectTrackParameterNode
           priority={parameterPriority}
           block={parameterBlock}
         />
@@ -78,7 +78,7 @@ export const EffectChainNode = observer(function EffectChainNode({
   );
 });
 
-type EffectChainParameterNodeProps = {
+type EffectTrackParameterNodeProps = {
   priority: number;
   block: Block;
 };
@@ -86,10 +86,10 @@ type EffectChainParameterNodeProps = {
 // Drives a chain block's uniforms ahead of the passes that consume them. The
 // block's own update recurses into its effects, so they all run on its
 // timeline — the same relationship a pattern block has with its effects.
-const EffectChainParameterNode = observer(function EffectChainParameterNode({
+const EffectTrackParameterNode = observer(function EffectTrackParameterNode({
   priority,
   block,
-}: EffectChainParameterNodeProps) {
+}: EffectTrackParameterNodeProps) {
   const { audioStore } = useStore();
 
   useFrame(() => {

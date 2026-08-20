@@ -20,7 +20,7 @@ import { Context, Role } from "@/src/types/context";
 import "@/src/utils/mobx";
 import { UserStore } from "@/src/types/UserStore";
 import { LayerV2 } from "./Layer/LayerV2";
-import { EffectChain } from "@/src/types/EffectChain";
+import { EffectTrack } from "@/src/types/EffectTrack";
 import { migrateV1ExperienceData } from "@/src/utils/migrateV1ExperienceData";
 import { migrateSequenceToRegions } from "@/src/utils/migrateVariations";
 import { User } from "@/src/types/User";
@@ -98,7 +98,7 @@ export class Store {
 
   // effects applied to the whole rendered frame, after every layer has been
   // merged together
-  globalEffectChain: EffectChain = new EffectChain(this, "Global effects");
+  globalEffectTrack: EffectTrack = new EffectTrack(this, "Global effects");
 
   sendingData = false;
   viewerMode = false;
@@ -143,7 +143,7 @@ export class Store {
     // Effect chains are Layers so the timeline can drive their blocks, but they
     // hold effects only — selecting one as the layer to add patterns to would
     // silently drop them.
-    if (value instanceof EffectChain) return;
+    if (value instanceof EffectTrack) return;
     if (this._selectedLayer === value) return;
     this._selectedLayer = value;
   }
@@ -185,7 +185,7 @@ export class Store {
     // a block of the layer's effect chain points at the chain, not the layer
     const belongsToLayer = (block: Block) =>
       block.layer === layer ||
-      (!!layer.effectChain && block.layer === layer.effectChain);
+      (!!layer.effectTrack && block.layer === layer.effectTrack);
 
     this.selectedBlocksOrVariations = new Set(
       Array.from(this.selectedBlocksOrVariations).filter(
@@ -949,7 +949,8 @@ export class Store {
       version: this.experienceVersion,
       data: {
         layers: this.layers.map((l) => l.serialize()),
-        globalEffectChain: this.globalEffectChain.serialize(),
+        // stored under the key existing saved experiences use
+        globalEffectChain: this.globalEffectTrack.serialize(),
       },
       thumbnailURL: this.experienceThumbnailURL,
     };
@@ -971,7 +972,7 @@ export class Store {
         : experience.data;
     this.experienceVersion = EXPERIENCE_VERSION;
     this.layers = data.layers.map((l: any) => LayerV2.deserialize(this, l));
-    this.globalEffectChain = EffectChain.deserialize(
+    this.globalEffectTrack = EffectTrack.deserialize(
       this,
       "Global effects",
       data.globalEffectChain,
@@ -1011,8 +1012,8 @@ export class Store {
     };
     for (const layer of this.layers) {
       layer.getAllBlocks().forEach((b) => convert(b, b.duration));
-      layer.effectChain?.blocks.forEach((b) => convert(b, b.duration));
+      layer.effectTrack?.blocks.forEach((b) => convert(b, b.duration));
     }
-    this.globalEffectChain.blocks.forEach((b) => convert(b, b.duration));
+    this.globalEffectTrack.blocks.forEach((b) => convert(b, b.duration));
   };
 }

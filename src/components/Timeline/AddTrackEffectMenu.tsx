@@ -9,21 +9,21 @@ import {
 import { action } from "mobx";
 import { MdAutoFixHigh } from "react-icons/md";
 import { playgroundEffects } from "@/src/effects/effects";
-import { EffectChain } from "@/src/types/EffectChain";
+import { EffectTrack } from "@/src/types/EffectTrack";
 import { useStore } from "@/src/types/StoreContext";
 import { hoverHelpProps } from "@/src/utils/hoverHelp";
 
 type Props = {
-  chain: EffectChain;
+  track: EffectTrack;
   helpTitle: string;
   helpDescription: string;
 };
 
-// Appends an effect from the registry to a post-composite effect chain. The
+// Appends an effect from the registry to a post-composite effect track. The
 // effect lands on the timeline at the playhead, where it can be moved and
 // resized like any other block.
-export const AddChainEffectMenu = function AddChainEffectMenu({
-  chain,
+export const AddTrackEffectMenu = function AddTrackEffectMenu({
+  track,
   helpTitle,
   helpDescription,
 }: Props) {
@@ -59,7 +59,7 @@ export const AddChainEffectMenu = function AddChainEffectMenu({
             <MenuItem
               key={effect.name}
               onClick={action(() => {
-                chain.addCloneOfEffect(effect);
+                track.addCloneOfEffect(effect);
               })}
             >
               {effect.name}
