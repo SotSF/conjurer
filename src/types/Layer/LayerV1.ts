@@ -14,6 +14,7 @@ export type ActivePatternsWindow = {
 };
 
 export class LayerV1 implements Layer {
+  readonly kind = "layer";
   id = generateId();
   name = "";
   height = 350;

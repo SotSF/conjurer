@@ -30,6 +30,7 @@ const UNMEASURED_BLOCK_HEIGHT = 50;
  * composites as a layer.
  */
 export class EffectChain implements Layer {
+  readonly kind = "effectTrack";
   id = generateId();
   name: string;
   // editor-only bypass: false takes the whole chain out of the signal path
@@ -209,7 +210,6 @@ export class EffectChain implements Layer {
   // effects carry the signal order, and blocks never overlap
   addBlock = (block: Block) => {
     block.layer = this;
-    block.inEffectChain = true;
     const index = this.blocks.findIndex((b) => b.startTime > block.startTime);
     if (index === -1) this.blocks.push(block);
     else this.blocks.splice(index, 0, block);
@@ -220,7 +220,6 @@ export class EffectChain implements Layer {
     if (index === -1) return;
     this.blocks.splice(index, 1);
     block.layer = null;
-    block.inEffectChain = false;
   };
 
   insertCloneOfBlock = (block: Block) => {

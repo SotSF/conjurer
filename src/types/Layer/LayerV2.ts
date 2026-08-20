@@ -18,6 +18,7 @@ const UNMEASURED_BLOCK_HEIGHT = 50;
 export const COLLAPSED_LAYER_HEIGHT = 48;
 
 export class LayerV2 implements Layer {
+  readonly kind = "layer";
   id = generateId();
   name = "";
   visible = true;
@@ -312,7 +313,7 @@ export class LayerV2 implements Layer {
   };
 
   removeBlock = (block: Block) => {
-    if (block.inEffectChain) {
+    if (block.isEffectChainBlock) {
       this.effectChain.removeBlock(block);
       return;
     }

@@ -60,9 +60,7 @@ const selectedPatternBlock = (
 // The chain a block belongs to when it processes composited output rather than
 // living on a pattern block; null for ordinary pattern blocks.
 const owningEffectChain = (block: Block): EffectChain | null =>
-  block.inEffectChain && block.layer instanceof EffectChain
-    ? block.layer
-    : null;
+  block.layer instanceof EffectChain ? block.layer : null;
 
 const paletteToGradient = (palette: Palette): string => {
   const stops = [0, 0.2, 0.4, 0.6, 0.8, 1].map((t) => {

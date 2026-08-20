@@ -43,11 +43,6 @@ export class Block {
   parentBlock: Block | null = null; // if this is an effect block, this is the pattern block that it is applied to
   effectBlocks: Block[] = [];
 
-  // true while this block is an entry in a layer's or the experience's effect
-  // chain (see EffectChain), where it processes composited output rather than
-  // producing its own
-  inEffectChain = false;
-
   startTime: number = 0; // global time that block starts playing at in seconds
   duration: number = 5; // duration that block plays for in seconds
 
@@ -74,6 +69,14 @@ export class Block {
   set layer(layer: Layer | null) {
     this._layer = layer;
     this.effectBlocks.forEach((effectBlock) => (effectBlock.layer = layer));
+  }
+
+  // An effect chain block is an entry in a layer's or the experience's effect
+  // track, holding the effects applied to composited output between its start
+  // and end time. Identity comes from ownership: a block is an effect chain
+  // block exactly when an effect track holds it.
+  get isEffectChainBlock() {
+    return !this.parentBlock && this._layer?.kind === "effectTrack";
   }
 
   get endTime() {
@@ -164,7 +167,7 @@ export class Block {
    * opacity would be authored into a void.
    */
   get opacityApplies(): boolean {
-    return !this.parentBlock && !this.inEffectChain;
+    return !this.parentBlock && !this.isEffectChainBlock;
   }
 
   // uniform names on this block that can be given an automation lane: excludes
@@ -740,7 +743,6 @@ export class Block {
     newBlock.duration = this.duration;
     newBlock.locked = this.locked;
     newBlock.layer = this.layer;
-    newBlock.inEffectChain = this.inEffectChain;
 
     newBlock.parameterVariations = { ...this.parameterVariations };
     Object.entries(newBlock.parameterVariations).forEach(([key, value]) => {

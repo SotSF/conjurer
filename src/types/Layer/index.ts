@@ -10,6 +10,9 @@ export type ActivePatternsWindow = {
 };
 
 export type Layer = {
+  // discriminates the two kinds of timeline row a block can belong to: a
+  // compositing layer's pattern blocks, or an effect track's chain blocks
+  kind: "layer" | "effectTrack";
   id: string;
   name: string;
   visible: boolean;
