@@ -7,7 +7,7 @@ import {
   MINIMUM_VARIATION_DURATION,
 } from "@/src/utils/time";
 import { deserializeVariation } from "@/src/types/Variations/variations";
-import type { Layer } from "@/src/types/Layer";
+import type { Track } from "@/src/types/Track";
 import { EasingVariation } from "@/src/types/Variations/EasingVariation";
 import { defaultPatternEffectMap } from "@/src/utils/patternsEffects";
 import { isVector4 } from "@/src/utils/object";
@@ -60,15 +60,23 @@ export class Block {
   // Not serialized.
   lanedParams: Set<string> = new Set();
 
-  private _layer: Layer | null = null; // the layer that this block is in
+  private _layer: Track | null = null; // the track that holds this block
 
   get layer() {
     return this._layer;
   }
 
-  set layer(layer: Layer | null) {
+  set layer(layer: Track | null) {
     this._layer = layer;
     this.effectBlocks.forEach((effectBlock) => (effectBlock.layer = layer));
+  }
+
+  // An effect chain block is an entry in a layer's or the experience's effect
+  // track, holding the effects applied to composited output between its start
+  // and end time. Identity comes from ownership: a block is an effect chain
+  // block exactly when an effect track holds it.
+  get isEffectChainBlock() {
+    return !this.parentBlock && this._layer?.kind === "effectTrack";
   }
 
   get endTime() {
@@ -150,12 +158,24 @@ export class Block {
     saveBlockLanes(this.store.experienceName, this.id, [...this.lanedParams]);
   };
 
+  /**
+   * Whether anything consumes this block's opacity.
+   *
+   * Opacity is applied by the merge shader where a block's output is combined
+   * with its siblings'. An effect never reaches a merge — it is one pass inside
+   * a pattern block's chain, or inside a layer or global effect chain — so its
+   * opacity would be authored into a void.
+   */
+  get opacityApplies(): boolean {
+    return !this.parentBlock && !this.isEffectChainBlock;
+  }
+
   // uniform names on this block that can be given an automation lane: excludes
   // machinery uniforms and opacity on effects (applied per pattern). Palettes
   // are included — their lane shows discrete color regions over time.
   get lanableParamNames(): string[] {
     const excluded = new Set(["u_time", "u_texture"]);
-    if (this.parentBlock) excluded.add("u_opacity");
+    if (!this.opacityApplies) excluded.add("u_opacity");
     return Object.keys(this.pattern.params).filter(
       (name) => !excluded.has(name),
     );
@@ -292,11 +312,11 @@ export class Block {
       inserted = true;
       const built = build(e - s).filter((v) => v.duration > 0);
       if (built.length === 0) return;
-      const drift =
-        e - s - built.reduce((sum, v) => sum + v.duration, 0);
+      const drift = e - s - built.reduce((sum, v) => sum + v.duration, 0);
       const last = built[built.length - 1];
       if (Math.abs(drift) > 1e-9) {
-        if (last instanceof CurveVariation) last.resizeEnd(last.duration + drift);
+        if (last instanceof CurveVariation)
+          last.resizeEnd(last.duration + drift);
         else last.duration += drift;
       }
       out.push(...built);

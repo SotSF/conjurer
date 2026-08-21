@@ -5,6 +5,7 @@ import { AudioStore } from "@/src/types/AudioStore";
 import { Variation } from "@/src/types/Variations/Variation";
 import { ExperienceStore } from "@/src/types/ExperienceStore";
 import { Layer } from "@/src/types/Layer";
+import type { Track } from "@/src/types/Track";
 import { deserializeVariation } from "@/src/types/Variations/variations";
 import { PlaylistStore } from "@/src/types/PlaylistStore";
 import { BeatGridStore } from "@/src/types/BeatGridStore";
@@ -20,6 +21,8 @@ import { Context, Role } from "@/src/types/context";
 import "@/src/utils/mobx";
 import { UserStore } from "@/src/types/UserStore";
 import { LayerV2 } from "./Layer/LayerV2";
+import { EffectTrack } from "@/src/types/EffectTrack";
+import { EFFECT_CHAIN_SOURCE_NAME } from "@/src/patterns/EffectChainSource";
 import { migrateV1ExperienceData } from "@/src/utils/migrateV1ExperienceData";
 import { migrateSequenceToRegions } from "@/src/utils/migrateVariations";
 import { User } from "@/src/types/User";
@@ -95,6 +98,10 @@ export class Store {
 
   layers: Layer[] = [];
 
+  // effects applied to the whole rendered frame, after every layer has been
+  // merged together
+  globalEffectTrack: EffectTrack = new EffectTrack(this, "Global effects");
+
   sendingData = false;
   viewerMode = false;
 
@@ -130,13 +137,29 @@ export class Store {
     localStorage.setItem("usingLocalData", String(value));
   }
 
-  private _selectedLayer: Layer = this.layers[0]; // a layer is always selected
-  get selectedLayer() {
-    return this._selectedLayer;
+  // The timeline row being worked in: a layer, a layer's effect track, or the
+  // global effect track. This is the one stored selection pointer; the selected
+  // layer is derived from it.
+  private _selectedTrack: Track = this.layers[0]; // a track is always selected
+  get selectedTrack(): Track {
+    return this._selectedTrack;
+  }
+  set selectedTrack(value: Track) {
+    if (this._selectedTrack === value) return;
+    this._selectedTrack = value;
+  }
+
+  // The selected track when it is a layer, else the layer whose effect track
+  // is selected. The global effect track has no owning layer, so the first
+  // layer stands in — operations that must not silently target it check
+  // selectedTrack instead.
+  get selectedLayer(): Layer {
+    const track = this._selectedTrack;
+    if (!track || track.kind === "layer") return track as Layer;
+    return track.layer ?? this.layers[0];
   }
   set selectedLayer(value: Layer) {
-    if (this._selectedLayer === value) return;
-    this._selectedLayer = value;
+    this.selectedTrack = value;
   }
 
   // ================================ layers ==================================
@@ -157,7 +180,7 @@ export class Store {
         ? this.layers.length
         : Math.max(0, Math.min(options.index, this.layers.length));
     this.layers.splice(index, 0, layer);
-    if (options.select ?? true) this._selectedLayer = layer;
+    if (options.select ?? true) this._selectedTrack = layer;
     return layer;
   };
 
@@ -173,18 +196,29 @@ export class Store {
     const index = this.layers.indexOf(layer);
     if (index === -1) return;
 
+    // a block of the layer's effect chain points at the chain, not the layer
+    const belongsToLayer = (block: Block) =>
+      block.layer === layer ||
+      (!!layer.effectTrack && block.layer === layer.effectTrack);
+
     this.selectedBlocksOrVariations = new Set(
       Array.from(this.selectedBlocksOrVariations).filter(
-        (selection) => selection.block.layer !== layer,
+        (selection) => !belongsToLayer(selection.block),
       ),
     );
-    if (this.selectedParameter?.block.layer === layer)
+    if (this.selectedParameter && belongsToLayer(this.selectedParameter.block))
       this.selectedParameter = null;
 
     this.layers.splice(index, 1);
 
-    if (this._selectedLayer === layer)
-      this._selectedLayer = this.layers[Math.min(index, this.layers.length - 1)];
+    // reselect a neighbor when the removed layer or its effect track was the
+    // working row
+    if (
+      this._selectedTrack === layer ||
+      this._selectedTrack === layer.effectTrack
+    )
+      this._selectedTrack =
+        this.layers[Math.min(index, this.layers.length - 1)];
   };
 
   // Move a layer to a new position. Layer order is additive render-priority
@@ -403,7 +437,8 @@ export class Store {
   selectParameter = (block: Block, uniformName: string) => {
     if (
       this.laneSpan &&
-      (this.laneSpan.block !== block || this.laneSpan.uniformName !== uniformName)
+      (this.laneSpan.block !== block ||
+        this.laneSpan.uniformName !== uniformName)
     )
       this.clearLaneSpan();
     this.selectedParameter = { block, uniformName };
@@ -413,7 +448,7 @@ export class Store {
         selection.type === "block" && selection.block === patternBlock,
     );
     if (!alreadySelected) this.selectBlock(patternBlock);
-    if (patternBlock.layer) this._selectedLayer = patternBlock.layer;
+    if (patternBlock.layer) this.selectedTrack = patternBlock.layer;
   };
 
   // Open the zoomed parameter detail panel for a lane (arms the lane if needed).
@@ -438,7 +473,7 @@ export class Store {
       },
     ]);
     this.selectedParameter = { block, uniformName };
-    if (block.layer) this._selectedLayer = block.layer;
+    if (block.layer) this.selectedTrack = block.layer;
   };
 
   addVariationToSelection = (
@@ -530,7 +565,7 @@ export class Store {
     // panel along with it.
     this.selectedParameter = { block, uniformName };
     const patternBlock = block.parentBlock ?? block;
-    if (patternBlock.layer) this._selectedLayer = patternBlock.layer;
+    if (patternBlock.layer) this.selectedTrack = patternBlock.layer;
   };
 
   clearLaneSpan = () => {
@@ -551,11 +586,7 @@ export class Store {
     time: number,
   ): boolean => {
     const anchor = this.laneSpanAnchor;
-    if (
-      !anchor ||
-      anchor.block !== block ||
-      anchor.uniformName !== uniformName
-    )
+    if (!anchor || anchor.block !== block || anchor.uniformName !== uniformName)
       return false;
     this.selectLaneSpan(block, uniformName, anchor.time, time);
     return this.laneSpan !== null;
@@ -586,7 +617,10 @@ export class Store {
     regions: Variation[],
   ) => {
     const total = laneDuration(block, uniformName);
-    const start = Math.max(0, Math.min(total - MINIMUM_SPAN_DURATION, startTime));
+    const start = Math.max(
+      0,
+      Math.min(total - MINIMUM_SPAN_DURATION, startTime),
+    );
     const available = total - start;
     if (available < MINIMUM_SPAN_DURATION) return;
 
@@ -666,8 +700,9 @@ export class Store {
       this.selectedBlocksOrVariations,
     )) {
       if (blockOrVariation.type === "block") {
-        // TODO: better generalize for multiple layers
-        this.layers.forEach((l) => l.removeBlock(blockOrVariation.block));
+        // every block's owning track — a layer or an effect track — is its
+        // layer back-reference
+        blockOrVariation.block.layer?.removeBlock(blockOrVariation.block);
         blockRemoved = true;
       } else if (blockOrVariation.type === "variation")
         this.deleteVariation(
@@ -686,7 +721,7 @@ export class Store {
 
   addVariation = (block: Block, uniformName: string, variation: Variation) => {
     block.addVariation(uniformName, variation);
-    if (block.layer) this._selectedLayer = block.layer;
+    if (block.layer) this.selectedTrack = block.layer;
     this.selectVariation(block, uniformName, variation);
   };
 
@@ -697,7 +732,7 @@ export class Store {
     insertAtEnd = false,
   ) => {
     block.duplicateVariation(uniformName, variation, insertAtEnd);
-    if (block.layer) this._selectedLayer = block.layer;
+    if (block.layer) this.selectedTrack = block.layer;
     this.selectVariation(block, uniformName, variation);
   };
 
@@ -785,8 +820,23 @@ export class Store {
     this.spliceRegionsIntoLane(block, uniformName, startTime, regions);
   };
 
-  // TODO: better generalize for multiple layers
-  pasteFromClipboard = (clipboardData: DataTransfer) => {
+  // The track a pasted block belongs on, given what is selected: effect chain
+  // blocks go to the effect side of the selected track, pattern blocks to the
+  // selected layer. Null when there is no valid destination — a pattern block
+  // while the global effect track is selected.
+  private pasteTargetFor = (block: Block): Track | null => {
+    const track = this.selectedTrack;
+    if (block.pattern.name === EFFECT_CHAIN_SOURCE_NAME)
+      return track.kind === "effectTrack" ? track : track.effectTrack;
+    // the global effect track belongs to no layer, so there is no layer to
+    // paste a pattern block into
+    if (track.kind === "effectTrack" && track.layer === null) return null;
+    return this.selectedLayer;
+  };
+
+  // Pastes blocks or variations. Returns a message for the user when part of
+  // the paste is refused.
+  pasteFromClipboard = (clipboardData: DataTransfer): string | undefined => {
     const pastedData = JSON.parse(clipboardData.getData("text/plain"));
     if (pastedData?.laneSpan) {
       this.pasteLaneSpan(pastedData as LaneSpanClipboard);
@@ -794,30 +844,38 @@ export class Store {
     }
 
     const blocksOrVariationsData = pastedData as any[];
-    if (!Array.isArray(blocksOrVariationsData) || !blocksOrVariationsData.length)
+    if (
+      !Array.isArray(blocksOrVariationsData) ||
+      !blocksOrVariationsData.length
+    )
       return;
 
     const firstBlockOrVariation = blocksOrVariationsData[0];
     // check if we are pasting blocks
     if (firstBlockOrVariation.pattern) {
-      const layerToPasteInto = this.selectedLayer;
-      if (!layerToPasteInto) return;
-
       const blocksToPaste = blocksOrVariationsData.map((b: any) =>
         Block.deserialize(this, b),
       );
       blocksToPaste.forEach((block) => block.regenerateId());
       this.selectedBlocksOrVariations = new Set();
+      let refused = false;
       for (const blockToPaste of blocksToPaste) {
-        const nextGap = layerToPasteInto.getNextValidStartAndDuration(
+        const target = this.pasteTargetFor(blockToPaste);
+        if (!target) {
+          refused = true;
+          continue;
+        }
+        const nextGap = target.getNextValidStartAndDuration(
           this.audioStore.globalTime,
           blockToPaste.duration,
         );
         blockToPaste.setTiming(nextGap);
-        layerToPasteInto.addBlock(blockToPaste);
+        target.addBlock(blockToPaste);
         this.addBlockToSelection(blockToPaste);
       }
-      return;
+      return refused
+        ? "Select a layer to paste a pattern block into"
+        : undefined;
     }
 
     // otherwise, these are variations
@@ -855,18 +913,22 @@ export class Store {
       .filter((blockOrVariation) => blockOrVariation.type === "block")
       .map((blockOrVariation) => blockOrVariation.block);
     if (selectedBlocks.length > 0) {
-      const layerToPasteInto = this.selectedLayer;
-      if (!layerToPasteInto) return;
-
       this.selectedBlocksOrVariations = new Set();
       for (const selectedBlock of selectedBlocks) {
+        // an effect chain block duplicates in place — the copy lands on its
+        // own track, in the first gap after the original. Pattern blocks land
+        // on the selected layer.
+        const target = selectedBlock.isEffectChainBlock
+          ? selectedBlock.layer
+          : this.selectedLayer;
+        if (!target) continue;
         const newBlock = selectedBlock.clone();
-        const nextGap = layerToPasteInto.getNextValidStartAndDuration(
+        const nextGap = target.getNextValidStartAndDuration(
           selectedBlock.endTime,
           selectedBlock.duration,
         );
         newBlock.setTiming(nextGap);
-        layerToPasteInto.addBlock(newBlock);
+        target.addBlock(newBlock);
         this.addBlockToSelection(newBlock);
       }
       return;
@@ -930,7 +992,10 @@ export class Store {
       song: this.audioStore.selectedSong,
       status: this.experienceStatus,
       version: this.experienceVersion,
-      data: { layers: this.layers.map((l) => l.serialize()) },
+      data: {
+        layers: this.layers.map((l) => l.serialize()),
+        globalEffectTrack: this.globalEffectTrack.serialize(),
+      },
       thumbnailURL: this.experienceThumbnailURL,
     };
   };
@@ -951,6 +1016,11 @@ export class Store {
         : experience.data;
     this.experienceVersion = EXPERIENCE_VERSION;
     this.layers = data.layers.map((l: any) => LayerV2.deserialize(this, l));
+    this.globalEffectTrack = EffectTrack.deserialize(
+      this,
+      "Global effects",
+      data.globalEffectTrack,
+    );
 
     // Select first layer
     this.selectedLayer = this.layers[0];
@@ -984,7 +1054,10 @@ export class Store {
       // PARENT pattern block's timeline, so span them to the parent's duration.
       (block.effectBlocks ?? []).forEach((eff) => convert(eff, laneDuration));
     };
-    for (const layer of this.layers)
+    for (const layer of this.layers) {
       layer.getAllBlocks().forEach((b) => convert(b, b.duration));
+      layer.effectTrack?.blocks.forEach((b) => convert(b, b.duration));
+    }
+    this.globalEffectTrack.blocks.forEach((b) => convert(b, b.duration));
   };
 }

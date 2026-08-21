@@ -27,6 +27,8 @@ import { MdDragIndicator, MdExpandMore, MdChevronRight } from "react-icons/md";
 import { FaTrashAlt } from "react-icons/fa";
 import type { DraggableProvidedDragHandleProps } from "@hello-pangea/dnd";
 import { hoverHelpProps } from "@/src/utils/hoverHelp";
+import { AddTrackEffectMenu } from "@/src/components/Timeline/AddTrackEffectMenu";
+import { TrackBypassButton } from "@/src/components/Timeline/TrackBypassButton";
 
 type Props = {
   index: number;
@@ -50,6 +52,8 @@ export const TimelineLayerHeader = observer(function TimelineLayerHeader({
   const displayName = layer.name || `Layer ${index + 1}`;
   const blockCount = layer.getAllBlocks().length;
   const collapsed = layer.collapsed;
+
+  const { effectTrack } = layer;
 
   const confirmDelete = useDisclosure();
 
@@ -222,6 +226,23 @@ export const TimelineLayerHeader = observer(function TimelineLayerHeader({
               "Hide this layer from the render without deleting its blocks.",
             )}
           />
+
+          {effectTrack && (
+            <AddTrackEffectMenu
+              track={effectTrack}
+              helpTitle="Add layer effect"
+              helpDescription="Append an effect applied to everything this layer renders, after its blocks are merged together."
+            />
+          )}
+
+          {effectTrack && effectTrack.blocks.length > 0 && (
+            <TrackBypassButton
+              track={effectTrack}
+              label="Bypass layer effects"
+              helpTitle="Layer effect track"
+              helpDescription="Take this layer's effect track out of the signal path without deleting it."
+            />
+          )}
 
           <IconButton
             minW="20px"

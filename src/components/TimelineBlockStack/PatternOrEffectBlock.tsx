@@ -40,6 +40,9 @@ export const PatternOrEffectBlock = observer(function PatternOrEffectBlock({
   const color = isSelected ? "blue.500" : "white";
   const label = blockHeaderLabel(block);
   const locked = block.locked;
+  // An effect chain block's source is its track's composited input, which the
+  // playground cannot stand in for, so there is nothing to open.
+  const editableInPlayground = !block.isEffectChainBlock;
   return (
     <HStack
       position="relative"
@@ -100,25 +103,27 @@ export const PatternOrEffectBlock = observer(function PatternOrEffectBlock({
         alignSelf="stretch"
         bg="gray.700"
       >
-        <IconButton
-          variant="ghost"
-          size="xs"
-          aria-label="Edit in playground"
-          title="Edit in playground"
-          height={6}
-          icon={<FaPencilAlt size={11} />}
-          onClick={action((e: ReactMouseEvent) => {
-            e.stopPropagation();
-            if (!loadBlockIntoPlayground(playgroundStore, block)) return;
-            store.pause();
-            uiStore.patternDrawerOpen = true;
-          })}
-          {...hoverHelpProps(
-            uiStore,
-            "Edit in playground",
-            "Open the playground with this block's pattern, effects, and parameter values.",
-          )}
-        />
+        {editableInPlayground && (
+          <IconButton
+            variant="ghost"
+            size="xs"
+            aria-label="Edit in playground"
+            title="Edit in playground"
+            height={6}
+            icon={<FaPencilAlt size={11} />}
+            onClick={action((e: ReactMouseEvent) => {
+              e.stopPropagation();
+              if (!loadBlockIntoPlayground(playgroundStore, block)) return;
+              store.pause();
+              uiStore.patternDrawerOpen = true;
+            })}
+            {...hoverHelpProps(
+              uiStore,
+              "Edit in playground",
+              "Open the playground with this block's pattern, effects, and parameter values.",
+            )}
+          />
+        )}
         {uiStore.canTimelineZoom && (
           <IconButton
             variant="ghost"

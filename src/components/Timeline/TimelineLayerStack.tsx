@@ -11,6 +11,7 @@ import { useRef } from "react";
 import { useStore } from "@/src/types/StoreContext";
 import { PlayHead } from "@/src/components/PlayHead";
 import { TimelineLayer } from "@/src/components/Timeline/TimelineLayer";
+import { GlobalEffectRow } from "@/src/components/Timeline/GlobalEffectRow";
 import { BeatGridOverlay } from "@/src/components/BeatGrid/BeatGridOverlay";
 import { TIMELINE_HEADER_WIDTH } from "@/src/types/UIStore";
 import { MAX_TIME } from "@/src/utils/time";
@@ -84,6 +85,7 @@ export const TimelineLayerStack = observer(function TimelineLayerStack() {
           )}
         </Droppable>
       </DragDropContext>
+      <GlobalEffectRow />
       {/* Row spanning the FULL scroll width (the sticky header gutter + a spacer
           matching a layer's content width), mirroring a layer row. A plain
           width="100%" only spans the viewport-wide VStack, so the sticky box's

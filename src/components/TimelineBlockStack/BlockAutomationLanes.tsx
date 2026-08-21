@@ -96,6 +96,9 @@ const gatherLanes = (block: Block): Lane[] => {
   const lanes: Lane[] = [];
   for (const [uniformName, param] of Object.entries(block.pattern.params)) {
     if (!block.lanedParams.has(uniformName)) continue;
+    // a lane persisted before the block moved into an effect chain, where
+    // nothing consumes opacity
+    if (uniformName === "u_opacity" && !block.opacityApplies) continue;
     lanes.push({
       ownerBlock: block,
       uniformName,

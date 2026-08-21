@@ -1,6 +1,5 @@
-import type { Store } from "@/src/types/Store";
-import { Block } from "@/src/types/Block";
-import type { Variation } from "@/src/types/Variations/Variation";
+import type { EffectTrack } from "@/src/types/EffectTrack";
+import type { TrackContract } from "@/src/types/Track";
 
 export type ActivePatternsWindow = {
   startTime: number;
@@ -8,41 +7,24 @@ export type ActivePatternsWindow = {
   patterns: string[];
 };
 
-export type Layer = {
-  id: string;
-  name: string;
+/**
+ * A compositing layer: the timeline track whose pattern blocks render to the
+ * canopy. On top of the track behavior every timeline row shares (see
+ * TrackContract), a layer carries the compositing concerns — visibility,
+ * collapse, its own effect track — and serializes as part of the experience.
+ */
+export type Layer = TrackContract & {
+  kind: "layer";
   visible: boolean;
   // editor-only: when true the layer's timeline row shrinks to just its header
   // (its blocks are hidden from the timeline). Distinct from `visible`, which
   // controls whether the layer renders to the canopy. Not serialized.
   collapsed: boolean;
   height: number;
-  store: Store;
-
-  insertCloneOfBlock(block: Block): void;
-  addBlock(block: Block): void;
-  removeBlock(block: Block): void;
-  attemptMoveBlock(block: Block, desiredTime: number, relative?: boolean): void;
-  getAllBlocks(): Block[];
-
-  getNextValidStartAndDuration(
-    fromTime: number,
-    maxDuration: number,
-  ): { startTime: number; duration: number };
-
-  resizeBlockLeftBound(block: Block, delta: number): void;
-  resizeBlockRightBound(block: Block, delta: number): void;
-  // blocks report their rendered height so the layer can size itself
-  reportBlockHeight(block: Block, heightPx: number): void;
-  // the opacity the render pipeline applies to a block's final output when
-  // the block has no manually-authored opacity variations (auto crossfade)
-  autoBlockOpacityAt(block: Block, globalTime: number): number;
-  // that same auto crossfade expressed as variations (null when the block has
-  // no overlaps and therefore no auto fade); used for display and for
-  // materializing into manually-editable variations
-  autoOpacityVariations(block: Block): Variation<number>[] | null;
-  // vertical pixel offset of the block within the layer's timeline row (blocks
-  // overlapping in time are displayed stacked in lanes)
-  blockTopOffset(block: Block): number;
+  // height of the blocks alone, without the effect track strip beneath them
+  blockLanesHeight: number;
+  // effects applied to everything the layer composites, or null when the layer
+  // version predates effect tracks
+  effectTrack: EffectTrack | null;
   serialize(): object;
 };

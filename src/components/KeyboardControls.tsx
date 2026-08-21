@@ -1,3 +1,4 @@
+import { useToast } from "@chakra-ui/react";
 import { useSaveExperience } from "@/src/hooks/experience";
 import { useStore } from "@/src/types/StoreContext";
 import { action } from "mobx";
@@ -18,6 +19,7 @@ export const KeyboardControls = observer(function KeyboardControls({
 
   const router = useRouter();
   const { saveExperience } = useSaveExperience();
+  const toast = useToast();
 
   useEffect(() => {
     const handleKeyDown = action((e: KeyboardEvent) => {
@@ -96,7 +98,8 @@ export const KeyboardControls = observer(function KeyboardControls({
       )
         return;
 
-      store.pasteFromClipboard(e.clipboardData);
+      const refusal = store.pasteFromClipboard(e.clipboardData);
+      if (refusal) toast({ title: refusal, status: "warning", duration: 3000 });
       e.preventDefault();
     };
     window.addEventListener("paste", handlePaste);
@@ -114,6 +117,7 @@ export const KeyboardControls = observer(function KeyboardControls({
     editMode,
     saveExperience,
     router,
+    toast,
   ]);
 
   return null;

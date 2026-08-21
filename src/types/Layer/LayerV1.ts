@@ -13,12 +13,17 @@ export type ActivePatternsWindow = {
 };
 
 export class LayerV1 implements Layer {
+  readonly kind = "layer";
   id = generateId();
   name = "";
   height = 350;
   visible = true;
   // interface compliance; collapse is a V2/editor feature (see Layer.collapsed)
   collapsed = false;
+
+  // v1 experiences predate effect tracks (and the v1 pipeline is never
+  // instantiated), so there is no track to carry
+  effectTrack = null;
 
   patternBlocks: Block[] = [];
   _lastComputedCurrentBlock: Block | null = null;
@@ -30,6 +35,11 @@ export class LayerV1 implements Layer {
       // don't make this observable, since it's just a cache
       _lastComputedCurrentBlock: false,
     });
+  }
+
+  // a v1 layer stacks nothing beneath its blocks, so its whole row is theirs
+  get blockLanesHeight() {
+    return this.height;
   }
 
   // returns the block that the global time is inside of, or null if none

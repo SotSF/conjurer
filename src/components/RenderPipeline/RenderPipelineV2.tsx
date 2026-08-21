@@ -9,7 +9,9 @@ import { observer } from "mobx-react-lite";
 import { WebGLRenderTarget } from "three";
 import { BlockStackNode } from "./BlockStackNode";
 import { BlockNode } from "./BlockNode";
+import { EffectChainNode } from "./EffectChainNode";
 import { LayerV2 } from "@/src/types/Layer/LayerV2";
+import { EffectTrack } from "@/src/types/EffectTrack";
 import blackFragmentShader from "@/src/shaders/black.frag";
 import defaultVertexShader from "@/src/shaders/default.vert";
 
@@ -18,13 +20,17 @@ type Props = {
 };
 
 // useFrame priorities run in ascending order, so these bands define the frame
-// schedule: every block stack of a layer renders before the layer's internal
-// merge chain, and every layer renders before the cross-layer merge chain.
+// schedule: within a layer, every block stack renders, then the layer's internal
+// merge chain folds them together, then the layer's effect track processes that
+// merged output. Every layer completes before the cross-layer merge, which is
+// followed by the experience's global effect track writing the final frame.
 // Each layer's band accommodates up to 50 concurrent blocks (at 100 priorities
 // per block stack) before colliding with its merge chain.
 const LAYER_PRIORITY_BAND = 10_000;
 const LAYER_MERGE_OFFSET = 5_000;
+const LAYER_EFFECT_TRACK_OFFSET = 6_000;
 const CROSS_LAYER_MERGE_PRIORITY = 1_000_000;
+const GLOBAL_EFFECT_TRACK_PRIORITY = 1_100_000;
 
 export const RenderPipelineV2 = observer(function RenderPipeline({
   renderTargetZ,
@@ -51,8 +57,10 @@ export const RenderPipelineV2 = observer(function RenderPipeline({
           />
         ) : null,
       )}
-      <MergeNodes
-        basePriority={CROSS_LAYER_MERGE_PRIORITY}
+      <MergeThroughEffectTrack
+        mergePriority={CROSS_LAYER_MERGE_PRIORITY}
+        trackPriority={GLOBAL_EFFECT_TRACK_PRIORITY}
+        track={store.globalEffectTrack}
         inputs={mergeInputs}
         destinationTarget={renderTargetZ}
       />
@@ -84,8 +92,10 @@ const LayerNode = observer(function LayerNode({
           renderTargetOut={renderTargets[i + 1]}
         />
       ))}
-      <MergeNodes
-        basePriority={basePriority + LAYER_MERGE_OFFSET}
+      <MergeThroughEffectTrack
+        mergePriority={basePriority + LAYER_MERGE_OFFSET}
+        trackPriority={basePriority + LAYER_EFFECT_TRACK_OFFSET}
+        track={layer.effectTrack}
         inputs={blocks.map((block, i) => ({
           target: renderTargets[i + 1],
           // opacity is applied here, after the block's entire effect chain
@@ -97,6 +107,80 @@ const LayerNode = observer(function LayerNode({
     </>
   );
 });
+
+type MergeThroughEffectTrackProps = {
+  mergePriority: number;
+  trackPriority: number;
+  track: EffectTrack;
+  inputs: MergeInput[];
+  destinationTarget: WebGLRenderTarget;
+};
+
+// Merges its inputs and then runs them through a post-composite effect track.
+// An empty track merges straight to the destination from here, which keeps the
+// track's render targets unallocated for the layers — and the experiences —
+// that hold no effects at all.
+const MergeThroughEffectTrack = observer(function MergeThroughEffectTrack({
+  track,
+  ...props
+}: MergeThroughEffectTrackProps) {
+  if (track.blocks.length === 0)
+    return (
+      <MergeNodes
+        basePriority={props.mergePriority}
+        inputs={props.inputs}
+        destinationTarget={props.destinationTarget}
+      />
+    );
+
+  return <MergeThroughPopulatedTrack track={track} {...props} />;
+});
+
+// Merges its inputs through a track that holds effects, of which any number may
+// be outside their time window at the playhead. With none of them in the signal
+// path the merge writes the destination directly, so a track costs extra passes
+// only while it is actually doing something.
+const MergeThroughPopulatedTrack = observer(
+  function MergeThroughPopulatedTrack({
+    mergePriority,
+    trackPriority,
+    track,
+    inputs,
+    destinationTarget,
+  }: MergeThroughEffectTrackProps) {
+    // Keyed to the track rather than to the effects in the signal path, so that
+    // the targets are allocated once and survive effects coming and going as the
+    // playhead moves.
+    const trackSource = useRenderTarget();
+    const trackScratch = useRenderTarget();
+
+    // effect chain blocks never overlap, so at most one is in the signal path
+    const activeBlock = track.activeBlocks[0] ?? null;
+    const activeEffects = activeBlock?.effectBlocks ?? [];
+    const trackActive = activeEffects.length > 0;
+
+    return (
+      <>
+        <MergeNodes
+          basePriority={mergePriority}
+          inputs={inputs}
+          destinationTarget={trackActive ? trackSource : destinationTarget}
+        />
+        {trackActive && activeBlock && (
+          <EffectChainNode
+            basePriority={trackPriority + 1}
+            parameterPriority={trackPriority}
+            parameterBlock={activeBlock}
+            effectBlocks={activeEffects}
+            sourceTarget={trackSource}
+            scratchTarget={trackScratch}
+            destinationTarget={destinationTarget}
+          />
+        )}
+      </>
+    );
+  },
+);
 
 type MergeInput = {
   target: WebGLRenderTarget;
@@ -153,17 +237,19 @@ const MergeNodes = observer(function MergeNodes({
   // alternate so a merge never reads the target it writes. Opacity is applied
   // as each input enters the chain; the running total is always carried at
   // full opacity.
-  return inputs.slice(1).map((input, k) => (
-    <MergeNode
-      key={k}
-      priority={basePriority + k}
-      renderTargetIn1={k === 0 ? inputs[0].target : scratch[(k - 1) % 2]}
-      renderTargetIn2={input.target}
-      renderTargetOut={
-        k === inputs.length - 2 ? destinationTarget : scratch[k % 2]
-      }
-      getOpacityIn1={k === 0 ? inputs[0].getOpacity : undefined}
-      getOpacityIn2={input.getOpacity}
-    />
-  ));
+  return inputs
+    .slice(1)
+    .map((input, k) => (
+      <MergeNode
+        key={k}
+        priority={basePriority + k}
+        renderTargetIn1={k === 0 ? inputs[0].target : scratch[(k - 1) % 2]}
+        renderTargetIn2={input.target}
+        renderTargetOut={
+          k === inputs.length - 2 ? destinationTarget : scratch[k % 2]
+        }
+        getOpacityIn1={k === 0 ? inputs[0].getOpacity : undefined}
+        getOpacityIn2={input.getOpacity}
+      />
+    ));
 });

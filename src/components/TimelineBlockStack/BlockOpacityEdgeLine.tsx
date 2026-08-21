@@ -22,6 +22,9 @@ export const BlockOpacityEdgeLine = observer(function BlockOpacityEdgeLine({
   const { uiStore } = useStore();
   const { fadeInEnd, fadeOutStart } = opacityFadeExtents(block);
 
+  // an effect's output is never merged, so it has no opacity to ramp
+  if (!block.opacityApplies) return null;
+
   // nothing to show when the block is at full opacity throughout
   if (fadeInEnd === null && fadeOutStart === null) return null;
 
