@@ -14,6 +14,7 @@ It is assumed that there is no internet at the event.
    - Once it is installed, run `nvm install 20`
    - If nvm and node 20 are already installed, simply run `nvm use 20`
    - Run `node -v` again to verify you are using node 20
+1. Install yarn with `corepack enable`
 1. Run `yarn` to install dependencies
 1. Run `yarn dev` to run conjurer locally
 1. Visit http://localhost:3000 to test it out
@@ -25,14 +26,14 @@ These steps can be skipped if you will have internet at the event.
 
 1. Run `yarn downloadProdDatabaseAndAudio` to replace the local database with all prod data and download prod audio into `public/cloud-assets`
    - This could take a little while depending on internet speed
-   - Refer to the Database access section of the README if you encounter Turso auth errors
-2. (Optional) Re-run `yarn downloadProdAudio` later if only audio changed; it skips files already present locally.
+   - Refer to the Database access section of the README if you encounter Turso database auth errors
+2. (Optional) Re-run `yarn downloadProdDatabase` later if audio hasn't changed.
 3. Run `yarn dev` to run conjurer locally if it is not already running
 4. Visit the app at http://localhost:3000
 5. Ensure that at the top of the app it says `using local data` in orange. If it says `using prod data` in green, click it to toggle to local data.
 6. Reload the page.
 7. Verify your setup by turning off your internet and make sure you can load and play experiences still.
-8. Download the latest (LightweaverBridge app)[https://github.com/SotSF/canopy-unity/releases/tag/lightweaver_bridge_macos_v0.0.6], and follow the instructions in the release notes.
+8. Download the latest (LightweaverBridge app)[https://github.com/SotSF/canopy-unity/releases/tag/lightweaver_bridge_macos_v0.0.6], and follow the instructions in the release notes to install it in the proper location.
 9. Terminate `yarn dev` and run `yarn canopy` to test the LightweaverBridge app. Click Tools->"Transmit data to canopy". Verify that the LightweaverBridge app shows data from Conjurer.
 
 You are good to go! From now on, you should not need internet access for any functionality. Whenever you open an experience or audio file, it will be loaded from the local database and `public/cloud-assets` directory respectively, and whenever you save an experience file, it will be saved locally.
