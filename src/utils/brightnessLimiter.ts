@@ -3,7 +3,7 @@
 export const DEFAULT_BRIGHTNESS_LIMITER_ENABLED = true;
 
 /** Target average Rec.709 luminance (0–1) of canopy LEDs. */
-export const DEFAULT_BRIGHTNESS_LIMIT_THRESHOLD = 0.5;
+export const DEFAULT_BRIGHTNESS_LIMIT_THRESHOLD = 0.75;
 
 /** Seconds for gain-reduction envelope to release toward unity. Attack is instant. */
 export const DEFAULT_BRIGHTNESS_LIMITER_RELEASE_SEC = 2;
@@ -20,7 +20,9 @@ export const averageCanopyLuminance = (pixels: Uint8Array): number => {
   let sum = 0;
   for (let i = 0; i < pixels.length; i += 4) {
     sum +=
-      (pixels[i]! * LUMA_R + pixels[i + 1]! * LUMA_G + pixels[i + 2]! * LUMA_B) /
+      (pixels[i]! * LUMA_R +
+        pixels[i + 1]! * LUMA_G +
+        pixels[i + 2]! * LUMA_B) /
       255;
   }
   return sum / pixelCount;
