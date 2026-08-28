@@ -48,7 +48,7 @@ export const IntensitySlider = observer(function IntensitySlider() {
           uiStore.setHoverHelp({
             title: "Output intensity",
             description:
-              "Master brightness for the rendered canopy output.",
+              "Master brightness for the rendered canopy output. Live operator control — not saved with the experience.",
           });
         })}
         onMouseLeave={action(() => {

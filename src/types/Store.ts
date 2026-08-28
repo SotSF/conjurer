@@ -113,14 +113,9 @@ export class Store {
     this._initializationState = value;
   }
 
-  _globalIntensity = 1;
-  get globalIntensity(): number {
-    return this._globalIntensity;
-  }
-  set globalIntensity(value: number) {
-    this._globalIntensity = value;
-    localStorage.setItem("globalIntensity", String(value));
-  }
+  // Master output gain. Operator/session control, like audio volume: not
+  // written into the experience, and not restored when one is loaded.
+  globalIntensity = 1;
 
   /** Current brightness-limiter envelope (1 = no reduction). Not persisted. */
   brightnessLimiterGain = 1;
@@ -366,10 +361,6 @@ export class Store {
       else if (this.context === "experienceEditor")
         this.role = "experienceCreator";
       else this.role = "vj";
-
-      // check for a global intensity in local storage
-      const globalIntensity = localStorage.getItem("globalIntensity");
-      if (globalIntensity) this.globalIntensity = Number(globalIntensity);
     });
 
     if (this.context === "vj") this.playgroundStore.initialize();
