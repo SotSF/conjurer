@@ -190,14 +190,14 @@ export const PatternPlayground = observer(function PatternPlayground() {
               </Panel>
               <PanelResizeHandle />
               <Panel defaultSize={50}>
-                <VStack p={2} overflowY="auto">
+                <Box height="100%" overflowX="hidden" overflowY="auto" p={2}>
                   <PatternList
                     selectedPatternBlock={selectedPatternBlock}
                     onSelectPatternBlock={onSelectPatternBlock}
                     selectedEffectIndices={selectedEffectIndices}
                     onSelectEffectBlock={onSelectEffectBlock}
                   />
-                </VStack>
+                </Box>
               </Panel>
             </PanelGroup>
           </Panel>

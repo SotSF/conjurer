@@ -19,7 +19,7 @@ export const PatternList = memo(function PatternList({
   onSelectEffectBlock,
 }: Props) {
   return (
-    <VStack height="100%" flexWrap="wrap" gap={1} spacing={0}>
+    <VStack width="100%" gap={1} spacing={0}>
       <Text fontSize="md" fontWeight="bold">
         Patterns
       </Text>
