@@ -18,7 +18,7 @@ import { PlaylistItem } from "@/src/components/PlaylistEditor/PlaylistItem";
 import { MdOutlinePlaylistAdd } from "react-icons/md";
 import { action, runInAction } from "mobx";
 import { AddExperienceModal } from "@/src/components/PlaylistEditor/AddExperienceModal";
-import { BiShuffle } from "react-icons/bi";
+import { BiPauseCircle, BiShuffle } from "react-icons/bi";
 import { ImLoop } from "react-icons/im";
 import { trpc } from "@/src/utils/trpc";
 import { PlaylistNameEditable } from "@/src/components/PlaylistEditor/PlaylistNameEditable";
@@ -100,6 +100,24 @@ export const PlaylistEditor = observer(function PlaylistEditor() {
           isEditable={isEditable}
         />
         <ButtonGroup isAttached size="xs" variant="outline">
+          <Button
+            aria-label="Autopause"
+            title="Pause when the current experience ends instead of playing the next one"
+            onClick={action(
+              () => (playlistStore.autoplay = !playlistStore.autoplay),
+            )}
+            leftIcon={<BiPauseCircle size={14} />}
+            bgColor={!playlistStore.autoplay ? "orange.600" : undefined}
+            _hover={
+              !playlistStore.autoplay
+                ? {
+                    bgColor: "orange.600",
+                  }
+                : undefined
+            }
+          >
+            Autopause
+          </Button>
           <Button
             onClick={action(
               () =>
