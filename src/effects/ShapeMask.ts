@@ -15,11 +15,27 @@ export const ShapeMask = () =>
         max: 1,
         step: 0.01,
       },
+      // 0 = hard inner edge, matching legacy behavior for existing experiences.
+      u_inner_fuzz: {
+        name: "Inner fuzz",
+        value: 0,
+        min: 0,
+        max: 1,
+        step: 0.01,
+      },
       // Data name kept as u_radius for backwards compatibility; displayed as
       // "Outer radius" now that an inner radius exists.
       u_radius: {
         name: "Outer radius",
         value: 0.5,
+        min: 0,
+        max: 1,
+        step: 0.01,
+      },
+      // 0 = hard outer edge, matching legacy behavior for existing experiences.
+      u_outer_fuzz: {
+        name: "Outer fuzz",
+        value: 0,
         min: 0,
         max: 1,
         step: 0.01,

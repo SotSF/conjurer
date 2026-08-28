@@ -9,7 +9,9 @@ varying vec2 v_normalized_uv;
 uniform sampler2D u_texture;
 
 uniform float u_inner_radius;
+uniform float u_inner_fuzz;
 uniform float u_radius;
+uniform float u_outer_fuzz;
 uniform float u_theta_min;
 uniform float u_theta_max;
 uniform float u_inverse;
@@ -17,7 +19,9 @@ uniform float u_mask_twist;
 
 // // For debugging
 // #define u_inner_radius 0.0
+// #define u_inner_fuzz 0.0
 // #define u_radius 0.5
+// #define u_outer_fuzz 0.0
 // #define u_theta_min 0.0
 // #define u_theta_max 360.0
 // #define u_inverse 0.0
@@ -36,8 +40,18 @@ void main() {
 
     // Radial band: keep pixels between the inner and outer radius. The default
     // inner radius of 0 keeps the full inner disc, matching legacy behavior
-    // (visible where st.y < u_radius).
-    float radial = step(u_inner_radius, st.y) * (1.0 - step(u_radius, st.y));
+    // (visible where st.y < u_radius). Fuzz of 0 is a hard step; a positive
+    // value fades between black and the corresponding radius on the black
+    // side of the edge (inward of inner, outward of outer).
+    float radialInner = step(u_inner_radius, st.y);
+    if (u_inner_fuzz > 0.0) {
+        radialInner = smoothstep(u_inner_radius - u_inner_fuzz, u_inner_radius, st.y);
+    }
+    float radialOuter = 1.0 - step(u_radius, st.y);
+    if (u_outer_fuzz > 0.0) {
+        radialOuter = 1.0 - smoothstep(u_radius, u_radius + u_outer_fuzz, st.y);
+    }
+    float radial = radialInner * radialOuter;
 
     // Angular arc: keep pixels between the min and max angle (in degrees). The
     // default range of 0..360 covers the full circle, matching legacy behavior.
