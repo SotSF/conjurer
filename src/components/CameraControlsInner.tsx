@@ -1,6 +1,7 @@
 import { OrbitControls, PerspectiveCamera } from "@react-three/drei";
 import { PerspectiveCamera as PerspectiveCameraThree, Vector3 } from "three";
-import { memo, useMemo, useRef } from "react";
+import { OrbitControls as OrbitControlsImpl } from "three-stdlib";
+import { memo, useCallback, useEffect, useMemo, useRef } from "react";
 import { useThree } from "@react-three/fiber";
 import { useTravelingCamera } from "@/src/hooks/travelingCamera";
 
@@ -23,11 +24,17 @@ export function canopyDefaultDistance(aspect: number): number {
   return CANOPY_DEFAULT_DISTANCE_SQUARE / clampedAspect;
 }
 
-type CameraControlsInnerProps = {};
+type CameraControlsInnerProps = {
+  /** When this value changes (and is non-zero), snap back to the default view. */
+  viewResetNonce?: number;
+};
 
-export const CameraControlsInner = memo(function CameraControlsInner({}: CameraControlsInnerProps) {
+export const CameraControlsInner = memo(function CameraControlsInner({
+  viewResetNonce,
+}: CameraControlsInnerProps) {
   const cameraRef = useRef<PerspectiveCameraThree>(null);
-  const { size } = useThree();
+  const controlsRef = useRef<OrbitControlsImpl>(null);
+  const { size, invalidate } = useThree();
   const initialPosition = useMemo(() => {
     const aspect = size.width / Math.max(size.height, 1);
     return new Vector3(0, 0, canopyDefaultDistance(aspect));
@@ -40,6 +47,27 @@ export const CameraControlsInner = memo(function CameraControlsInner({}: CameraC
   // shenanigans
   // useTravelingCamera(cameraRef, viewerMode);
 
+  const resetToDefaultView = useCallback(() => {
+    const camera = cameraRef.current;
+    const controls = controlsRef.current;
+    if (!camera || !controls) return;
+
+    const aspect = size.width / Math.max(size.height, 1);
+    camera.position.set(0, 0, canopyDefaultDistance(aspect));
+    camera.up.set(0, 1, 0);
+    camera.lookAt(0, 0, 0);
+    camera.updateProjectionMatrix();
+    controls.target.set(0, 0, 0);
+    controls.saveState();
+    controls.reset();
+    invalidate();
+  }, [invalidate, size.height, size.width]);
+
+  useEffect(() => {
+    if (!viewResetNonce) return;
+    resetToDefaultView();
+  }, [resetToDefaultView, viewResetNonce]);
+
   return (
     <>
       <PerspectiveCamera
@@ -50,6 +78,7 @@ export const CameraControlsInner = memo(function CameraControlsInner({}: CameraC
         far={200}
       />
       <OrbitControls
+        ref={controlsRef}
         camera={cameraRef.current ?? undefined}
         minDistance={CANOPY_MIN_ZOOM_DISTANCE}
         maxDistance={CANOPY_MAX_ZOOM_DISTANCE}

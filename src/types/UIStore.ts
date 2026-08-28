@@ -83,6 +83,10 @@ export class UIStore {
   keepingPlayHeadCentered = false;
   keepingPlayHeadVisible = false;
 
+  // Bumped by the display overlay to snap the canopy camera back to default.
+  // Not persisted.
+  canopyViewResetNonce = 0;
+
   private _displayMode: DisplayMode = "canopy";
   get displayMode() {
     return this._displayMode;

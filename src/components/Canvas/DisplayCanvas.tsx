@@ -28,7 +28,7 @@ export const DisplayCanvas = observer(function DisplayCanvas() {
     <Canvas key={experienceName} frameloop={DEBUG ? "demand" : "always"}>
       {DEBUG && <RenderOnTimeChange />}
       {showingPerformance && <Perf />}
-      <CameraControls />
+      <CameraControls viewResetNonce={uiStore.canopyViewResetNonce} />
       <RenderPipeline renderTargetZ={renderTarget} />
       {renderTarget && (
         <>
