@@ -239,6 +239,21 @@ export class Store {
   // to delete that node. Without this the global delete would also remove the
   // block underneath in the same keystroke.
   curveNodeSelected = false;
+  // EnvelopeGraph instance that currently owns a node or segment pick. A new
+  // pick always claims this so only one parameter/region can have a point or
+  // line segment selected at a time (Delete must not hit two editors).
+  curveSelectionOwner: string | null = null;
+
+  claimCurveSelection = (owner: string, nodeSelected = false) => {
+    this.curveSelectionOwner = owner;
+    this.curveNodeSelected = nodeSelected;
+  };
+
+  releaseCurveSelection = (owner: string) => {
+    if (this.curveSelectionOwner !== owner) return;
+    this.curveSelectionOwner = null;
+    this.curveNodeSelected = false;
+  };
 
   get singleBlockSelection(): Block | null {
     const blockSelections = Array.from(this.selectedBlocksOrVariations).filter(

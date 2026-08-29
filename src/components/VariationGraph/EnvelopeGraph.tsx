@@ -9,8 +9,8 @@ import {
   useToken,
 } from "@chakra-ui/react";
 import { TbTrash } from "react-icons/tb";
-import { useRef, useState, useEffect } from "react";
-import { runInAction } from "mobx";
+import { useRef, useState, useEffect, useId } from "react";
+import { reaction, runInAction } from "mobx";
 import { Block } from "@/src/types/Block";
 import { CurveVariation, CurveNode } from "@/src/types/Variations/CurveVariation";
 import { sampleCurveGeometry } from "@/src/utils/curveGeometry";
@@ -76,7 +76,9 @@ type EnvelopeGraphProps = {
  *
  * Node and segment clicks also drive the lane's TIME SPAN selection: clicking a
  * node anchors it, Shift+clicking another node spans between them (across
- * region boundaries), and clicking a segment spans its two nodes.
+ * region boundaries), and clicking a segment spans its two nodes. Only one
+ * graph at a time may have a node or segment picked — selecting in another
+ * parameter or region drops the previous pick.
  */
 export const EnvelopeGraph = function EnvelopeGraph({
   uniformName,
@@ -103,6 +105,19 @@ export const EnvelopeGraph = function EnvelopeGraph({
   const [selectedSegment, setSelectedSegment] = useState<number | null>(null);
   // node whose inline numeric editor is open (opened by "e" / Enter)
   const [editingId, setEditingId] = useState<string | null>(null);
+  // Stable per mounted editor so a pick in another graph can drop ours.
+  const instanceId = useId();
+  const clearPicks = () => {
+    setSelectedId(null);
+    setSelectedSegment(null);
+    setEditingId(null);
+  };
+  const claimPicks = (nodeSelected: boolean) => {
+    runInAction(() => store.claimCurveSelection(instanceId, nodeSelected));
+  };
+  const releasePicks = () => {
+    runInAction(() => store.releaseCurveSelection(instanceId));
+  };
   // (t, v) of the editing node when the editor opened / last navigated, so Esc
   // can abort the whole session (live edits have already moved the node).
   const editStart = useRef<{ id: string; time: number; value: number } | null>(
@@ -114,6 +129,7 @@ export const EnvelopeGraph = function EnvelopeGraph({
   const openEditor = (id: string) => {
     const n = variation.nodes.find((nn) => nn.id === id);
     if (!n) return;
+    claimPicks(true);
     setSelectedId(id);
     setSelectedSegment(null);
     setEditingId(id);
@@ -252,9 +268,8 @@ export const EnvelopeGraph = function EnvelopeGraph({
         ),
       );
       if (extended) {
-        setSelectedId(null);
-        setSelectedSegment(null);
-        setEditingId(null);
+        releasePicks();
+        clearPicks();
         return;
       }
     }
@@ -264,6 +279,7 @@ export const EnvelopeGraph = function EnvelopeGraph({
         store.clearLaneSpan();
         store.setLaneSpanAnchor(block, uniformName, laneStartTime + node.time);
       });
+    claimPicks(true);
 
     setSelectedId(id);
     setSelectedSegment(null);
@@ -390,9 +406,8 @@ export const EnvelopeGraph = function EnvelopeGraph({
       // Drop intermediate nodes from any 3+ stack created by landing on a step.
       commit(() => variation.collapseVerticalStacks());
       if (!variation.nodes.some((n) => n.id === id)) {
-        setSelectedId(null);
-        setSelectedSegment(null);
-        setEditingId(null);
+        releasePicks();
+        clearPicks();
       }
     };
     window.addEventListener("pointermove", move);
@@ -460,6 +475,8 @@ export const EnvelopeGraph = function EnvelopeGraph({
     if (!svgRef.current) return;
     const { px } = localPoint(e.clientX, e.clientY);
     const seg = segmentIndexAtX(px);
+    if (seg >= 0) claimPicks(false);
+    else releasePicks();
     setSelectedSegment(seg >= 0 ? seg : null);
     setSelectedId(null);
     setEditingId(null);
@@ -521,21 +538,29 @@ export const EnvelopeGraph = function EnvelopeGraph({
     commit(() => {
       addedId = variation.addNodeAtTime(t, steppedValueOfY(py)).id;
     });
+    claimPicks(true);
     setSelectedId(addedId);
     setSelectedSegment(null);
   };
 
-  // Let the global delete know this editor owns Backspace right now.
+  // Only one EnvelopeGraph may keep a node/segment pick. A claim from another
+  // instance drops ours; unmounting releases if we still own it.
   useEffect(() => {
-    if (!selectedId) return;
-    runInAction(() => {
-      store.curveNodeSelected = true;
-    });
-    return () =>
-      runInAction(() => {
-        store.curveNodeSelected = false;
-      });
-  }, [selectedId, store]);
+    const dispose = reaction(
+      () => store.curveSelectionOwner,
+      (owner) => {
+        if (owner !== instanceId) {
+          setSelectedId(null);
+          setSelectedSegment(null);
+          setEditingId(null);
+        }
+      },
+    );
+    return () => {
+      dispose();
+      runInAction(() => store.releaseCurveSelection(instanceId));
+    };
+  }, [store, instanceId]);
 
   useEffect(() => {
     if (!selectedId) return;
@@ -544,11 +569,11 @@ export const EnvelopeGraph = function EnvelopeGraph({
       const el = e.target as HTMLElement | null;
       if (el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable))
         return;
+      if (store.curveSelectionOwner !== instanceId) return;
       e.preventDefault();
       commit(() => variation.removeNode(selectedId));
-      setSelectedId(null);
-      setSelectedSegment(null);
-      setEditingId(null);
+      releasePicks();
+      clearPicks();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -563,8 +588,8 @@ export const EnvelopeGraph = function EnvelopeGraph({
       // while the numeric editor is open, Esc is its abort (handled in the
       // panel), not a deselect
       if (editingId != null) return;
-      setSelectedId(null);
-      setSelectedSegment(null);
+      releasePicks();
+      clearPicks();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -583,7 +608,15 @@ export const EnvelopeGraph = function EnvelopeGraph({
       !!b &&
       Math.abs(laneStartTime + a.time - laneSpan.startTime) < 1e-6 &&
       Math.abs(laneStartTime + b.time - laneSpan.endTime) < 1e-6;
-    if (!spansSelectedSegment) setSelectedSegment(null);
+    if (spansSelectedSegment) {
+      setSelectedId(null);
+      setEditingId(null);
+      return;
+    }
+    // Span is this lane's but not this segment — drop any leftover pick so a
+    // node in this region can't stay selected beside another region's span.
+    if (selectedId != null || selectedSegment != null) releasePicks();
+    setSelectedSegment(null);
     setSelectedId(null);
     setEditingId(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -721,9 +754,8 @@ export const EnvelopeGraph = function EnvelopeGraph({
               onDoubleClick={(e) => {
                 e.stopPropagation();
                 commit(() => variation.removeNode(node.id));
-                setSelectedId(null);
-                setSelectedSegment(null);
-                setEditingId(null);
+                releasePicks();
+                clearPicks();
               }}
             />
           );
@@ -753,16 +785,14 @@ export const EnvelopeGraph = function EnvelopeGraph({
               variation.collapseVerticalStacks();
             });
             if (!variation.nodes.some((n) => n.id === id)) {
-              setSelectedId(null);
-              setSelectedSegment(null);
-              setEditingId(null);
+              releasePicks();
+              clearPicks();
             }
           }}
           onDelete={() => {
             commit(() => variation.removeNode(selectedNode.id));
-            setSelectedId(null);
-            setSelectedSegment(null);
-            setEditingId(null);
+            releasePicks();
+            clearPicks();
           }}
           onNavigate={(dir) => {
             const target = nodes[selectedIdx + dir];
