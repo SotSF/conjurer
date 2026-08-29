@@ -65,3 +65,48 @@ Here are some issues we have run into in the past. Add to this list as problems 
 
 - (No longer relevant) **Conjurer opens but there is an error modal.** try logging in or opening a different experience. Because of the janky login situation, you may be in a funky state.
 - (No longer relevant) **The canopy is showing something different from Conjurer.** Make sure that in the unity app, the Conjurer node is in "polarized" mode.
+
+# Update another laptop over USB
+
+Use this if you are offline and need to copy a current Conjurer setup onto someone else's Mac. This is for the case that their clone is outdated, but their `node_modules` / `yarn.lock` already match yours, so you do **not** need to copy dependencies.
+
+This overwrites their code, `local.db`, and `public/cloud-assets`. Any experiences they created only on their machine will be gone unless you back up their folder first.
+
+### Copy onto the USB
+
+1. Quit Conjurer on your machine (`Ctrl+C` in the terminal running `yarn dev` / `yarn canopy`) so `local.db` is not mid-write.
+2. Plug in the USB stick. If you can format it, use APFS or Mac OS Extended (Journaled). exFAT is fine. Avoid FAT32.
+3. Check the volume name in Finder or with `ls /Volumes`, then run (replace `USBNAME` and the conjurer path):
+
+```bash
+rsync -av --progress \
+  --exclude 'node_modules' \
+  --exclude '.next' \
+  --exclude '.env.local' \
+  --exclude '.DS_Store' \
+  ~/projects/conjurer/ /Volumes/USBNAME/conjurer/
+```
+
+That copies the repo (including `.git`), `local.db`, and `public/cloud-assets`. It skips Turso credentials and the large folders they already have or can rebuild.
+
+### Copy onto their Mac
+
+1. Quit Conjurer on their machine.
+2. Rename their existing folder as a backup, then copy from the USB (replace paths as needed):
+
+```bash
+mv ~/projects/conjurer ~/projects/conjurer-old
+rsync -av --progress /Volumes/USBNAME/conjurer/ ~/projects/conjurer/
+```
+
+3. Start it the usual way:
+
+```bash
+cd ~/projects/conjurer
+nvm use
+yarn canopy
+```
+
+You should not need to run `yarn` (no internet, and dependencies are already installed). The first page load may be slow while `.next` rebuilds.
+
+4. Visit http://localhost:3000 and confirm it says `using local data` in orange. Reload once, then play an experience and check that audio works.
