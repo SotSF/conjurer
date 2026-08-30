@@ -132,16 +132,14 @@ void main() {
 		float s1 = s+zoffset;
 		// need closed form expression for this, now that we shift samples
 		float fade = pow(u_dist_fading,max(0.,float(r)-sampleShift));		
-		//t3 += fade;		
-		v+=fade;
-	       	//backCol2 -= fade;
-
-		// fade out samples as they approach the camera
-		if( r == 0.0 )
-			fade *= (1. - (sampleShift));
-		// fade in samples as they approach from the distance
-		if( r == u_visible_distance-1.0 )
+		// Crossfade the sample that is leaving the camera and the one
+		// entering from far away so the step wrap does not pulse v.
+		if (r < 0.5)
+			fade *= (1. - sampleShift);
+		if (r > u_visible_distance - 1.5)
 			fade *= sampleShift;
+		v+=fade;
+
 		v+=vec3(s1,s1*s1,s1*s1*s1*s1)*a*u_brightness/1000.*fade; // coloring based on distance
 		
 		backCol2 += mix(.4, 1., v2) * vec3(1.8 * t3 * t3 * t3, 1.4 * t3 * t3, t3) * fade;
